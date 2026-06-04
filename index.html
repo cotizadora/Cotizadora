@@ -305,6 +305,8 @@ function syncQuoteToForm(q){
   var ml=document.getElementById('ml');if(ml)ml.value=q.ejecutivoEmail||_lsGet('eq_exec_email')||'';
   updWspLink();
   var b=document.getElementById('sync-banner');if(b){b.classList.add('on');setTimeout(function(){b.classList.remove('on');},5000);}
+  // Regenerar propuesta inmediatamente tras sincronizar cotización
+  setTimeout(function(){if(typeof genMail==='function'){var mt=document.getElementById('mt');if(mt&&mt.value)genMail();}},100);
 }
 
 function goTo(id){
@@ -632,7 +634,7 @@ function pagMail(){
           '<div style="background:linear-gradient(135deg,#5a0e1a 0%,#9b1c2e 45%,#7a1425 100%);padding:24px 28px 20px;">'+
             '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
               '<div>'+
-                '<img src="logo-equifax.png" alt="Equifax" style="height:38px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+                '<img src="logo-equifax.png" alt="Equifax" style="height:54px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
                 '<div style="font-size:.58rem;letter-spacing:4px;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:5px;">Chile · Soluciones Empresariales</div>'+
               '</div>'+
               '<div style="text-align:right;">'+
@@ -795,7 +797,7 @@ function genMail(){
     '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:22px 26px 18px;border-radius:8px 8px 0 0;">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
         '<div>'+
-          '<img src="logo-equifax.png" alt="Equifax Chile" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+          '<img src="logo-equifax.png" alt="Equifax Chile" style="height:60px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
           '<div style="font-size:.57rem;letter-spacing:3px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-top:5px;">Chile · Soluciones Empresariales</div>'+
         '</div>'+
         '<div style="text-align:right;">'+
@@ -865,16 +867,33 @@ function genMail(){
   );
 
   document.getElementById('tpl-out').style.display='block';
-  document.getElementById('tpl-out').scrollIntoView({behavior:'smooth',block:'start'});
+  // NO scroll automático para no interrumpir al usuario mientras edita
+  // Solo hacer scroll la primera vez (cuando estaba oculto)
+  var st = document.getElementById('auto-gen-status');
+  if (st) {
+    var now = new Date();
+    var t = now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    st.style.color = '#2ecc71';
+    st.textContent = '✔ Propuesta actualizada · ' + t;
+  }
 }
 
-function toggleDest(skip){var df=document.getElementById('dest-fields');if(df)df.style.display=skip?'none':'flex';}
+function toggleDest(skip){
+  var df=document.getElementById('dest-fields');
+  if(df)df.style.display=skip?'none':'flex';
+  // Forzar regeneración inmediata al cambiar el checkbox
+  clearTimeout(_autoGenTimer);
+  var tipo=document.getElementById('mt');
+  if(tipo&&tipo.value) genMail();
+}
 function saveExecField(){
   var ma=document.getElementById('ma'),mf=document.getElementById('mf'),ml=document.getElementById('ml');
   if(ma&&ma.value.trim())_lsSet('eq_exec_name',ma.value.trim());
   if(mf)_lsSet('eq_exec_tel',mf.value.trim());
   if(ml)_lsSet('eq_exec_email',ml.value.trim());
   updWspLink();
+  // Regenerar propuesta con nuevos datos del asesor
+  if(typeof scheduleAutoGen==='function') scheduleAutoGen();
 }
 function updWspLink(){
   var mf=document.getElementById('mf'),row=document.getElementById('wsp-link-row'),lnk=document.getElementById('wsp-link');
@@ -976,7 +995,7 @@ function getCanvasPC(){
       // HEADER
       var hg=ctx.createLinearGradient(0,0,W,hHead);hg.addColorStop(0,'#5a0e1a');hg.addColorStop(.5,'#9b1c2e');hg.addColorStop(1,'#7a1425');
       ctx.fillStyle=hg;ctx.fillRect(0,y,W,hHead);
-      drawLogo(ctx,logo,P,y+Math.round((hHead-44)/2),44);
+      drawLogo(ctx,logo,P,y+Math.round((hHead-56)/2),56);
       ctx.font='8px Arial';ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillText('CHILE · SOLUCIONES EMPRESARIALES',P,y+hHead-10);
       // Badge
       ctx.font='bold 10px Arial';
@@ -1099,7 +1118,7 @@ function getCanvasWsp(){
       ctx.fillStyle=hg;ctx.fillRect(0,y,W,hh);
 
       // Logo grande
-      drawLogo(ctx,logo,P,y+Math.round((hh-64)/2),64);
+      drawLogo(ctx,logo,P,y+Math.round((hh-80)/2),80);
 
       // Badge tipo producto
       ctx.font='bold 24px Arial';
@@ -1296,38 +1315,79 @@ buildApp();
 loadExecutivo();
 preloadLogo(null);
 
-// ── AUTO-GENERACIÓN AL CAMBIAR CUALQUIER CAMPO ──────────────────
-// Se activa en la pestaña de plantillas para regenerar en tiempo real
+// ═══════════════════════════════════════════════════════════════
+// AUTO-GENERACIÓN REACTIVA COMPLETA
+// Escucha CUALQUIER cambio dentro del panel #p-mail mediante
+// delegación de eventos en el documento. Cubre:
+//   · input (texto, número)     · change (select, checkbox)
+//   · click (checkbox via label) · keyup (escritura)
+// ═══════════════════════════════════════════════════════════════
 var _autoGenTimer = null;
+
 function scheduleAutoGen() {
   clearTimeout(_autoGenTimer);
+  // Mostrar indicador de "procesando"
+  var st = document.getElementById('auto-gen-status');
+  if (st) { st.style.color = '#f0c040'; st.textContent = '⏳ Actualizando...'; }
   _autoGenTimer = setTimeout(function() {
-    // Solo si estamos en la pestaña mail y hay producto seleccionado
     var tipo = document.getElementById('mt');
-    if (tipo && tipo.value && document.getElementById('tpl-out')) {
-      genMail();
+    // Generar siempre que exista el panel mail, aunque no haya producto seleccionado aún
+    if (tipo) {
+      if (tipo.value) {
+        genMail();
+      } else {
+        // Sin producto: ocultar salida anterior
+        var out = document.getElementById('tpl-out');
+        if (out) out.style.display = 'none';
+        if (st) { st.style.color = '#888'; st.textContent = '← Selecciona un producto para generar'; }
+      }
     }
-  }, 400);
+  }, 280);
 }
-// Escuchar cambios en todos los campos relevantes de la pestaña mail
-document.addEventListener('input', function(e) {
-  var ids = ['mn','me','mr','ma','mf','ml','mu','mula','mc2'];
-  if (ids.indexOf(e.target.id) >= 0) scheduleAutoGen();
-});
-document.addEventListener('change', function(e) {
-  var ids = ['mt','mp'];
-  if (ids.indexOf(e.target.id) >= 0) scheduleAutoGen();
+
+// Delegación total: cualquier evento dentro del documento que
+// afecte al panel de plantillas dispara la regeneración.
+function _mailPanelActive() {
+  var panel = document.getElementById('p-mail');
+  return panel && panel.classList.contains('on');
+}
+
+// Captura input (texto/número), change (select/checkbox), click (label+checkbox)
+['input','change','click'].forEach(function(evName) {
+  document.addEventListener(evName, function(e) {
+    if (!_mailPanelActive()) return;
+    var t = e.target;
+    // Ignorar clics en botones de acción (copiar, generar imagen, etc.)
+    if (t.tagName === 'BUTTON' || t.tagName === 'A') return;
+    // Ignorar el botón de reset ejecutivo
+    if (t.classList && t.classList.contains('btn') && t.classList.contains('sec')) return;
+    scheduleAutoGen();
+  }, true); // useCapture=true para capturar antes del inline handler
 });
 
-// También auto-generar al entrar a la pestaña mail si hay cotización activa
+// También escuchar la UF global (afecta CLP calculado)
+var ufGlobal = document.getElementById('uf-global');
+if (ufGlobal) {
+  ufGlobal.addEventListener('input', function() {
+    if (_mailPanelActive()) scheduleAutoGen();
+  });
+}
+
+// ── OVERRIDE goTo — generar al entrar a la pestaña mail ─────────
 var _origGoTo = goTo;
 goTo = function(id) {
   _origGoTo(id);
   if (id === 'mail') {
     setTimeout(function() {
       var tipo = document.getElementById('mt');
-      if (tipo && tipo.value) genMail();
-    }, 200);
+      if (tipo && tipo.value) {
+        genMail();
+      } else {
+        // Sin producto aún: limpiar estado
+        var st = document.getElementById('auto-gen-status');
+        if (st) { st.style.color = '#888'; st.textContent = '← Selecciona un producto para generar'; }
+      }
+    }, 150);
   }
 };
 </script>
