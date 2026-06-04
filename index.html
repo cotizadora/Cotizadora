@@ -807,79 +807,92 @@ function genMail(){
   // ── HTML ENRIQUECIDO — Diseño corporativo completo ──
   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
   var saludoEmp=(!skip&&em)?'<p style="margin:0 0 2px;font-size:11px;color:#888;">'+em+'</p>':'';
+  // HTML 100% compatible Outlook/Gmail — usa tablas, sin degradados CSS, sin flex
+  var _listaItems = it.map(function(item){
+    return '<tr><td style="padding:5px 8px 5px 0;font-size:13px;color:#9b1c2e;font-weight:900;vertical-align:top;width:18px;">&#10003;</td>'+
+           '<td style="padding:5px 0;font-size:13px;color:#333;line-height:1.4;">'+item+'</td></tr>';
+  }).join('');
+
   sv('tpl-rich',
-    '<div style="font-family:Segoe UI,Arial,sans-serif;max-width:620px;margin:0 auto;">'+
-    // Encabezado corporativo
-    '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:22px 26px 18px;border-radius:8px 8px 0 0;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
-        '<div>'+
-          '<img src="logo-equifax.png" alt="Equifax Chile" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
-          '<div style="font-size:.57rem;letter-spacing:3px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-top:5px;">Chile · Soluciones Empresariales</div>'+
-        '</div>'+
-        '<div style="text-align:right;">'+
-          '<div style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:16px;font-size:.68rem;font-weight:700;letter-spacing:1px;display:inline-block;">'+pi.badge+'</div>'+
-          '<div style="font-size:.62rem;color:rgba(255,255,255,.35);margin-top:6px;">'+hoy()+'</div>'+
-        '</div>'+
-      '</div>'+
-    '</div>'+
-    // Empresa
-    (em?'<div style="background:#1a0d10;border-bottom:1px solid rgba(155,28,46,.2);padding:14px 26px;">'+saludoEmp+'<div style="font-size:1rem;font-weight:700;color:#f0f0f0;">'+(n&&!skip?n:'')+'</div></div>':'<div style="background:#1a0d10;border-bottom:1px solid rgba(155,28,46,.2);padding:12px 26px;"><p style="margin:0;font-size:13px;color:#ddd;">Estimado/a <strong>'+(skip?'Cliente':n)+'</strong>,</p><p style="margin:4px 0 0;font-size:12px;color:#aaa;">Le presento la siguiente propuesta comercial:</p></div>')+
-    // Producto + beneficios — fondo claro elegante con acento
-    '<div style="background:linear-gradient(180deg,#fafafa 0%,#f2f2f2 100%);border-left:1px solid #e0e0e0;border-right:1px solid #e0e0e0;padding:20px 26px 16px;">'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #9b1c2e;">'+
-        '<div style="width:4px;height:28px;background:linear-gradient(180deg,#9b1c2e,#c0263b);border-radius:2px;flex-shrink:0;"></div>'+
-        '<div>'+
-          '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:2px;">Producto cotizado</div>'+
-          '<div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;line-height:1.2;">'+pi.n+'</div>'+
-        '</div>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">'+
-      it.map(function(i){return'<div style="padding:6px 0;border-bottom:1px solid #ebebeb;font-size:12px;color:#333;display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;flex-shrink:0;font-size:11px;margin-top:1px;">✔</span><span style="line-height:1.4;">'+i+'</span></div>';}).join('')+
-      '</div>'+
-    '</div>'+
-    // Precio protagónico
-    '<div style="background:#9b1c2e;border-left:1px solid #7a1425;border-right:1px solid #7a1425;padding:20px 26px;">'+
-      '<table style="width:100%;border-collapse:collapse;">'+listaRow+
-        '<tr><td style="padding:4px 0;color:rgba(255,255,255,.65);font-size:11px;text-transform:uppercase;letter-spacing:1px;">Precio ofrecido</td>'+
-        '<td style="padding:4px 0;color:#f0c040;font-size:1.8rem;font-weight:900;text-align:right;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</td></tr>'+
-        (clp?'<tr><td style="padding:2px 0;color:rgba(255,255,255,.5);font-size:11px;">Aprox. en pesos c/IVA</td><td style="padding:2px 0;color:rgba(255,255,255,.85);font-size:.85rem;text-align:right;">'+fmtN(clp)+'</td></tr>':'')+
-        (hayDc?'<tr><td style="padding:2px 0;color:rgba(255,255,255,.5);font-size:11px;">Descuento aplicado</td><td style="padding:2px 0;color:#2ecc71;font-size:.9rem;font-weight:700;text-align:right;">−'+dc+'% sobre precio lista</td></tr>':'')+
-        '<tr><td style="padding:2px 0;color:rgba(255,255,255,.5);font-size:11px;">Plazo / Pago</td><td style="padding:2px 0;color:rgba(255,255,255,.8);font-size:.8rem;text-align:right;">'+pl+' meses · POSTPAGO 30 días</td></tr>'+
+    // Wrapper principal — tabla para Outlook
+    '<table width="620" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;border-collapse:collapse;">'+
+
+    // ── HEADER — fondo rojo sólido (sin degradado para Outlook) ──
+    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;padding:20px 24px 16px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
+        '<td style="vertical-align:top;">'+
+          '<div style="font-size:22px;font-weight:900;color:#ffffff;letter-spacing:1px;font-family:Arial,sans-serif;">EQUIFAX</div>'+
+          '<div style="font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-top:4px;font-family:Arial,sans-serif;">CHILE · SOLUCIONES EMPRESARIALES</div>'+
+        '</td>'+
+        '<td style="text-align:right;vertical-align:top;">'+
+          '<div style="display:inline-block;background-color:#000000;border:1px solid #c8960a;color:#f0c040;padding:5px 14px;font-size:11px;font-weight:700;letter-spacing:1px;font-family:Arial,sans-serif;">'+pi.badge+'</div>'+
+          '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:6px;font-family:Arial,sans-serif;">'+hoy()+'</div>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+
+    // ── SALUDO / EMPRESA ──
+    '<tr><td bgcolor="#1a0d10" style="background-color:#1a0d10;padding:14px 24px;border-bottom:2px solid #9b1c2e;">'+
+      (em
+        ? '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;font-family:Arial,sans-serif;margin-bottom:4px;">Propuesta para</div>'+
+          '<div style="font-size:18px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+em+'</div>'+
+          (n&&!skip?'<div style="font-size:13px;color:#cccccc;margin-top:4px;font-family:Arial,sans-serif;">A/A: '+n+'</div>':'')
+        : '<p style="margin:0;font-size:14px;color:#dddddd;font-family:Arial,sans-serif;">Estimado/a <strong>'+(skip?'Cliente':n)+'</strong>,</p>'+
+          '<p style="margin:6px 0 0;font-size:13px;color:#aaaaaa;font-family:Arial,sans-serif;">Le presento la siguiente propuesta comercial:</p>'
+      )+
+    '</td></tr>'+
+
+    // ── PRODUCTO + BENEFICIOS — fondo claro para mejor lectura ──
+    '<tr><td bgcolor="#f8f8f8" style="background-color:#f8f8f8;padding:20px 24px;border-left:3px solid #9b1c2e;">'+
+      '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:6px;font-family:Arial,sans-serif;">Producto cotizado</div>'+
+      '<div style="font-size:17px;font-weight:800;color:#1a1a1a;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #9b1c2e;font-family:Arial,sans-serif;">'+pi.n+'</div>'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
+        _listaItems+
       '</table>'+
-    '</div>'+
-    // Documentos requeridos — diseño elegante
-    '<div style="background:linear-gradient(90deg,#1a0a0e,#200d11);border-left:1px solid rgba(155,28,46,.4);border-right:1px solid rgba(155,28,46,.4);border-top:1px solid rgba(155,28,46,.25);padding:12px 26px;">'+
-      '<div style="display:flex;align-items:flex-start;gap:10px;">'+
-        '<div style="color:#f0c040;font-size:14px;flex-shrink:0;margin-top:1px;">📋</div>'+
-        '<div>'+
-          '<div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(240,192,64,.7);margin-bottom:4px;">Documentos para contratar</div>'+
-          '<div style="font-size:12px;color:rgba(255,255,255,.65);line-height:1.6;">Ficha de contratación · Cédula representante legal · Escritura con poderes de firma</div>'+
-        '</div>'+
-      '</div>'+
-    '</div>'+
-    // Ejecutivo — tarjeta corporativa oscura
-    '<div style="background:linear-gradient(135deg,#1a0a0e 0%,#200d11 100%);border:1px solid rgba(155,28,46,.35);border-top:2px solid #9b1c2e;border-radius:0 0 8px 8px;padding:18px 26px;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">'+
-        '<div style="display:flex;align-items:center;gap:14px;">'+
-          '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#9b1c2e,#6e1220);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0;">👤</div>'+
-          '<div>'+
-            '<div style="font-weight:700;color:#fff;font-size:14px;letter-spacing:.3px;">'+as2+'</div>'+
-            '<div style="font-size:11px;color:rgba(240,192,64,.8);margin-top:2px;letter-spacing:.5px;">Ejecutivo/a Comercial · Equifax Chile</div>'+
-            '<div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;">'+
-              (fo?'<a href="'+wspHref+'" style="color:#25d366;text-decoration:none;font-size:12px;display:flex;align-items:center;gap:4px;">📱 '+fo+'</a>':'')+
-              (ml?'<a href="mailto:'+ml+'" style="color:#3498db;text-decoration:none;font-size:12px;">✉ '+ml+'</a>':'')+
-            '</div>'+
-          '</div>'+
-        '</div>'+
-        '<div style="text-align:right;">'+
-          '<div style="background:rgba(155,28,46,.3);border:1px solid rgba(155,28,46,.5);border-radius:6px;padding:8px 14px;">'+
-            '<div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Fecha</div>'+
-            '<div style="font-size:12px;color:rgba(255,255,255,.8);">'+hoy()+'</div>'+
-            '<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:4px;">Valores en UF + IVA</div>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-    '</div></div>'
+    '</td></tr>'+
+
+    // ── PRECIO — fondo rojo sólido ──
+    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;padding:20px 24px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
+        (hayDc?'<tr><td style="font-size:11px;color:rgba(255,255,255,0.6);padding:2px 0;font-family:Arial,sans-serif;">Precio lista</td>'+
+        '<td style="font-size:11px;color:rgba(255,255,255,0.5);text-align:right;text-decoration:line-through;padding:2px 0;font-family:Arial,sans-serif;">'+ufL+' UF + IVA</td></tr>':'')+
+        '<tr><td style="font-size:11px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px;padding:4px 0;font-family:Arial,sans-serif;">Precio ofrecido</td>'+
+        '<td style="text-align:right;padding:4px 0;">'+
+          '<span style="font-size:28px;font-weight:900;color:#f0c040;font-family:Arial,sans-serif;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</span>'+
+        '</td></tr>'+
+        (clp?'<tr><td style="font-size:11px;color:rgba(255,255,255,0.6);padding:2px 0;font-family:Arial,sans-serif;">Aprox. mensual c/IVA</td>'+
+        '<td style="font-size:13px;color:#ffffff;text-align:right;font-weight:600;padding:2px 0;font-family:Arial,sans-serif;">'+fmtN(clp)+'</td></tr>':'')+
+        (hayDc?'<tr><td style="font-size:11px;color:rgba(255,255,255,0.6);padding:2px 0;font-family:Arial,sans-serif;">Descuento</td>'+
+        '<td style="font-size:13px;color:#2ecc71;text-align:right;font-weight:700;padding:2px 0;font-family:Arial,sans-serif;">−'+dc+'% sobre precio lista</td></tr>':'')+
+        '<tr><td style="font-size:11px;color:rgba(255,255,255,0.6);padding:4px 0;font-family:Arial,sans-serif;">Plazo / Modalidad</td>'+
+        '<td style="font-size:13px;color:#ffffff;text-align:right;padding:4px 0;font-family:Arial,sans-serif;">'+pl+' meses · POSTPAGO 30 días</td></tr>'+
+      '</table>'+
+    '</td></tr>'+
+
+    // ── DOCUMENTOS ──
+    '<tr><td bgcolor="#f0f0f0" style="background-color:#f0f0f0;padding:12px 24px;border-left:3px solid #c8960a;">'+
+      '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:4px;font-family:Arial,sans-serif;">Documentos para contratar</div>'+
+      '<div style="font-size:12px;color:#555;font-family:Arial,sans-serif;">Ficha de contratación &nbsp;·&nbsp; Cédula representante legal &nbsp;·&nbsp; Escritura con poderes de firma</div>'+
+    '</td></tr>'+
+
+    // ── FIRMA EJECUTIVO ──
+    '<tr><td bgcolor="#1a0d10" style="background-color:#1a0d10;padding:16px 24px;border-top:2px solid #9b1c2e;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
+        '<td style="vertical-align:top;">'+
+          '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;font-family:Arial,sans-serif;">Ejecutivo/a Comercial</div>'+
+          '<div style="font-size:15px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+as2+'</div>'+
+          '<div style="font-size:11px;color:#c8960a;margin-top:2px;font-family:Arial,sans-serif;">Equifax Chile</div>'+
+          (fo?'<div style="font-size:12px;color:#25d366;margin-top:6px;font-family:Arial,sans-serif;">Tel: '+fo+'</div>':'')+
+          (ml?'<div style="font-size:12px;color:#3498db;margin-top:2px;font-family:Arial,sans-serif;">'+ml+'</div>':'')+
+        '</td>'+
+        '<td style="text-align:right;vertical-align:bottom;">'+
+          '<div style="font-size:10px;color:#555;font-family:Arial,sans-serif;">'+hoy()+'</div>'+
+          '<div style="font-size:10px;color:#555;font-family:Arial,sans-serif;">Valores en UF + IVA</div>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+
+    '</table>'
   );
 
   document.getElementById('tpl-out').style.display='block';
