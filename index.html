@@ -203,14 +203,16 @@ footer{text-align:center;padding:12px;font-size:.63rem;color:#444;
   .f select,.f input{min-width:100%;}
   header{padding:10px 14px;}
 }
-/* Grid resultados — responsive */
-@media(max-width:860px){
-  #tpl-out > div[style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
+@media(max-width:900px){
+  #tpl-out>[style*="grid-template-columns:1fr 1fr 1fr"]{
+    grid-template-columns:1fr 1fr !important;
   }
 }
-/* tpl-body sin resize, scroll vertical */
-#tpl-out textarea { resize: vertical; }
+@media(max-width:600px){
+  #tpl-out>[style*="grid-template-columns:1fr 1fr 1fr"]{
+    grid-template-columns:1fr !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -335,7 +337,6 @@ function showRes(id,d){
   box.innerHTML=
     '<div class="res-head"><span>'+d.prod+'</span>'+
     '</div>'+
-    /* auto-save al calcular */
     '<div class="res-body">'+
       '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;">'+
         '<div><div class="res-big">'+ufV+' UF/mes</div><div style="font-size:.7rem;color:var(--wa);">precio venta</div></div>'+
@@ -364,8 +365,7 @@ function showRes(id,d){
       '</div>'+
     '</div>';
   box.classList.add('on');
-  // Auto-save silencioso
-  setTimeout(function(){saveQuote(qData);},80);
+  setTimeout(function(){saveQuote(qData);},60);
 }
 function updSl(id,ufL,v){
   v=parseFloat(v);document.getElementById('sln-'+id).value=v;
@@ -593,114 +593,98 @@ function pagMail(){
       '<div id="auto-gen-status" style="margin-top:8px;padding:6px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:5px;font-size:.72rem;color:#2ecc71;text-align:center;">✔ Propuesta actualizada automáticamente</div>'+
     '</div>'+
     '<div id="tpl-out" style="display:none;">'+
+      // ── ASUNTO ──
+      '<div style="background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:7px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">'+
+        '<div style="flex:1;min-width:0;"><span style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px;">📌 Asunto</span>'+
+        '<div id="tpl-asunto" style="color:var(--y);font-size:.8rem;line-height:1.4;word-break:break-word;"></div></div>'+
+        '<button class="btn sec" style="padding:3px 10px;font-size:.68rem;flex-shrink:0;" onclick="copAsunto()">📋 Copiar</button>'+
+      '</div>'+
       '<div id="tpl-toast2" class="toast"></div>'+
 
-      // ══ ASUNTO ══
-      '<div style="background:var(--g3);border:1px solid var(--g4);border-radius:7px;padding:8px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">'+
-        '<div style="flex:1;"><span style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px;">📌 Asunto del correo</span>'+
-        '<div id="tpl-asunto" style="color:var(--y);font-size:.82rem;line-height:1.4;"></div></div>'+
-        '<button class="btn sec" style="padding:4px 12px;font-size:.7rem;flex-shrink:0;" onclick="copAsunto()">📋 Copiar</button>'+
-      '</div>'+
+      // ── 3 COLUMNAS: WhatsApp | Correo | Vista previa ──
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:start;">'+
 
-      // ══ GRID 2 COLUMNAS: IZQUIERDA=TEXTOS / DERECHA=IMÁGENES ══
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">'+
-
-        // — COLUMNA IZQUIERDA: TEXTOS —
-        '<div style="display:flex;flex-direction:column;gap:10px;">'+
-
-          // SECCIÓN CORREO
-          '<div style="background:var(--g3);border:1px solid rgba(52,152,219,.3);border-radius:8px;overflow:hidden;">'+
-            '<div style="background:rgba(52,152,219,.12);padding:7px 12px;border-bottom:1px solid rgba(52,152,219,.25);display:flex;justify-content:space-between;align-items:center;">'+
-              '<span style="font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#3498db;">✉ Correo</span>'+
-              '<button class="btn sec" style="padding:3px 10px;font-size:.68rem;" onclick="copHTML();playClick()">📋 Copiar HTML</button>'+
+        // ── COL 1: WHATSAPP ──
+        '<div style="display:flex;flex-direction:column;gap:8px;">'+
+          '<div style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);border-radius:7px;overflow:hidden;">'+
+            '<div style="padding:7px 10px;border-bottom:1px solid rgba(37,211,102,.25);display:flex;justify-content:space-between;align-items:center;">'+
+              '<span style="font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#25d366;">💬 WhatsApp</span>'+
+              '<button class="btn sec" style="padding:3px 8px;font-size:.65rem;" onclick="copPlano();playClick()">📋 Copiar</button>'+
             '</div>'+
-            '<div id="tpl-rich" style="padding:14px;background:#fff;color:#111;font-family:Segoe UI,Arial,sans-serif;font-size:11px;line-height:1.5;max-height:320px;overflow-y:auto;"></div>'+
+            '<textarea id="tpl-body" readonly style="min-height:220px;max-height:360px;font-size:.7rem;padding:10px;background:#0d1a0f;color:#ccc;border:none;border-radius:0;resize:none;width:100%;font-family:monospace;line-height:1.5;"></textarea>'+
           '</div>'+
-
-          // SECCIÓN WHATSAPP
-          '<div style="background:var(--g3);border:1px solid rgba(37,211,102,.3);border-radius:8px;overflow:hidden;">'+
-            '<div style="background:rgba(37,211,102,.1);padding:7px 12px;border-bottom:1px solid rgba(37,211,102,.25);display:flex;justify-content:space-between;align-items:center;">'+
-              '<span style="font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#25d366;">💬 WhatsApp</span>'+
-              '<button class="btn sec" style="padding:3px 10px;font-size:.68rem;" onclick="copPlano();playClick()">📋 Copiar texto</button>'+
-            '</div>'+
-            '<textarea id="tpl-body" readonly style="min-height:140px;max-height:220px;border-radius:0;border:none;font-size:.72rem;padding:10px 12px;background:#111;color:#d0d0d0;resize:none;"></textarea>'+
-          '</div>'+
-
+          '<button class="bacc wsp" style="padding:10px 6px;" onmouseenter="playHover()" onclick="copImgWsp();playClick()">'+
+            '<span style="font-size:1.1rem;">📸</span>'+
+            '<span style="font-size:.72rem;font-weight:700;">Imagen WhatsApp</span>'+
+            '<small style="font-size:.62rem;">1080px vertical</small>'+
+          '</button>'+
         '</div>'+
 
-        // — COLUMNA DERECHA: VISTA PREVIA + ACCIONES —
-        '<div style="display:flex;flex-direction:column;gap:10px;">'+
-
-          // VISTA PREVIA TARJETA
-          '<div style="background:var(--g3);border:1px solid rgba(155,28,46,.3);border-radius:8px;overflow:hidden;">'+
-            '<div style="background:rgba(155,28,46,.15);padding:7px 12px;border-bottom:1px solid rgba(155,28,46,.25);">'+
-              '<span style="font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rl);">🖼 Vista previa</span>'+
+        // ── COL 2: CORREO ──
+        '<div style="display:flex;flex-direction:column;gap:8px;">'+
+          '<div style="background:rgba(52,152,219,.08);border:1px solid rgba(52,152,219,.3);border-radius:7px;overflow:hidden;">'+
+            '<div style="padding:7px 10px;border-bottom:1px solid rgba(52,152,219,.25);display:flex;justify-content:space-between;align-items:center;">'+
+              '<span style="font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#3498db;">✉ Correo</span>'+
+              '<button class="btn sec" style="padding:3px 8px;font-size:.65rem;" onclick="copHTML();playClick()">📋 Copiar HTML</button>'+
             '</div>'+
-            '<div style="padding:10px;overflow:auto;max-height:320px;">'+
-              '<div id="cot-card-pc" style="border-radius:8px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);min-width:300px;transform-origin:top left;" >'+
-                '<div style="background:linear-gradient(135deg,#5a0e1a 0%,#9b1c2e 45%,#7a1425 100%);padding:18px 20px 14px;">'+
+            '<div id="tpl-rich" style="padding:12px;background:#fff;color:#111;font-family:Segoe UI,Arial,sans-serif;font-size:11px;line-height:1.5;min-height:220px;max-height:360px;overflow-y:auto;"></div>'+
+          '</div>'+
+          '<button class="bacc email-btn" style="padding:10px 6px;" onmouseenter="playHover()" onclick="copImgPC();playClick()">'+
+            '<span style="font-size:1.1rem;">📧</span>'+
+            '<span style="font-size:.72rem;font-weight:700;">Imagen Correo</span>'+
+            '<small style="font-size:.62rem;">Gmail · Outlook PNG</small>'+
+          '</button>'+
+          '<button class="bacc" style="padding:8px 6px;" onmouseenter="playHover()" onclick="descImg();playClick()">'+
+            '<span style="font-size:.72rem;">⬇ Descargar PNG alta calidad</span>'+
+          '</button>'+
+        '</div>'+
+
+        // ── COL 3: VISTA PREVIA TARJETA ──
+        '<div style="display:flex;flex-direction:column;gap:8px;">'+
+          '<div style="background:var(--g3);border:1px solid rgba(155,28,46,.3);border-radius:7px;overflow:hidden;">'+
+            '<div style="background:rgba(155,28,46,.15);padding:7px 10px;border-bottom:1px solid rgba(155,28,46,.25);">'+
+              '<span style="font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rl);">🖼 Vista previa</span>'+
+            '</div>'+
+            '<div style="padding:8px;overflow:auto;max-height:400px;">'+
+              '<div id="cot-card-pc" style="border-radius:7px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);">'+
+                '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:14px 16px 10px;">'+
                   '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
                     '<div>'+
-                      '<img src="logo-equifax.png" alt="Equifax" style="height:42px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
-                      '<div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div>'+
+                      '<img src="logo-equifax.png" alt="Equifax" style="height:44px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+                      '<div style="font-size:.5rem;letter-spacing:3px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:3px;">Chile · Soluciones Empresariales</div>'+
                     '</div>'+
                     '<div style="text-align:right;">'+
-                      '<div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 10px;border-radius:16px;font-size:.62rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div>'+
-                      '<div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.35);margin-top:5px;"></div>'+
+                      '<div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:3px 8px;border-radius:12px;font-size:.58rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div>'+
+                      '<div id="cc-fecha" style="font-size:.55rem;color:rgba(255,255,255,.3);margin-top:4px;"></div>'+
                     '</div>'+
                   '</div>'+
                 '</div>'+
-                '<div style="background:#12060a;padding:12px 20px;border-bottom:1px solid rgba(155,28,46,.2);">'+
-                  '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Propuesta para</div>'+
-                  '<div id="cc-emp" style="font-size:1rem;font-weight:800;color:#fff;line-height:1.2;word-break:break-word;"></div>'+
-                  '<div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div>'+
+                '<div style="background:#12060a;padding:10px 16px;border-bottom:1px solid rgba(155,28,46,.2);">'+
+                  '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Propuesta para</div>'+
+                  '<div id="cc-emp" style="font-size:.9rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div>'+
+                  '<div id="cc-rut" style="font-size:.62rem;color:#666;margin-top:2px;"></div>'+
                 '</div>'+
-                '<div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.2);padding:12px 20px;"></div>'+
-                '<div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:14px 20px;">'+
-                  '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div>'+
-                  '<div id="cc-precio" style="font-size:2rem;font-weight:900;color:#f0c040;line-height:1;"></div>'+
-                  '<div id="cc-clp" style="font-size:.75rem;color:#888;margin-top:6px;"></div>'+
-                  '<div id="cc-dcto-block" style="margin-top:8px;"></div>'+
+                '<div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:10px 16px;font-size:.72rem;"></div>'+
+                '<div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:12px 16px;">'+
+                  '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Cargo fijo mensual</div>'+
+                  '<div id="cc-precio" style="font-size:1.6rem;font-weight:900;color:#f0c040;line-height:1;"></div>'+
+                  '<div id="cc-clp" style="font-size:.7rem;color:#888;margin-top:5px;"></div>'+
+                  '<div id="cc-dcto-block" style="margin-top:6px;"></div>'+
                 '</div>'+
-                '<div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.18);padding:10px 20px;display:flex;gap:20px;flex-wrap:wrap;">'+
-                  '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.85rem;font-weight:700;color:#fff;"></div></div>'+
-                  '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Pago</div><div style="font-size:.78rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
+                '<div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:8px 16px;display:flex;gap:16px;flex-wrap:wrap;">'+
+                  '<div><div style="font-size:.5rem;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:2px;">Contrato</div><div id="cc-plazo" style="font-size:.82rem;font-weight:700;color:#fff;"></div></div>'+
+                  '<div><div style="font-size:.5rem;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:2px;">Pago</div><div style="font-size:.75rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30d</div></div>'+
                 '</div>'+
-                '<div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
-                  '<div>'+
-                    '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a</div>'+
-                    '<div id="cc-asesor" style="font-size:.9rem;font-weight:700;color:#fff;"></div>'+
-                    '<div id="cc-contacto" style="font-size:.72rem;color:#3498db;margin-top:2px;"></div>'+
-                  '</div>'+
-                  '<div style="text-align:right;font-size:.58rem;color:#333;"><div>UF + IVA</div></div>'+
+                '<div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:1px solid #9b1c2e;padding:10px 16px;">'+
+                  '<div style="font-size:.5rem;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a</div>'+
+                  '<div id="cc-asesor" style="font-size:.85rem;font-weight:700;color:#fff;"></div>'+
+                  '<div id="cc-contacto" style="font-size:.68rem;color:#3498db;margin-top:2px;"></div>'+
                 '</div>'+
               '</div>'+
             '</div>'+
           '</div>'+
-
-          // ACCIONES DE IMAGEN
-          '<div style="background:var(--g3);border:1px solid var(--g4);border-radius:8px;overflow:hidden;">'+
-            '<div style="background:var(--g4);padding:7px 12px;border-bottom:1px solid var(--brd);">'+
-              '<span style="font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--wa);">📸 Exportar imágenes</span>'+
-            '</div>'+
-            '<div style="padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">'+
-              '<button class="bacc email-btn" style="padding:8px 6px;" onmouseenter="playHover()" onclick="copImgPC();playClick()">'+
-                '<span style="font-size:1.1rem;">📧</span>'+
-                '<span style="font-size:.72rem;">Imagen correo</span>'+
-                '<small style="font-size:.62rem;">Gmail · Outlook</small>'+
-              '</button>'+
-              '<button class="bacc wsp" style="padding:8px 6px;" onmouseenter="playHover()" onclick="copImgWsp();playClick()">'+
-                '<span style="font-size:1.1rem;">💬</span>'+
-                '<span style="font-size:.72rem;">Imagen WA</span>'+
-                '<small style="font-size:.62rem;">1080px vertical</small>'+
-              '</button>'+
-              '<button class="bacc" style="grid-column:1/-1;padding:6px;" onmouseenter="playHover()" onclick="descImg();playClick()">'+
-                '<span style="font-size:.72rem;">⬇ Descargar PNG alta calidad</span>'+
-              '</button>'+
-            '</div>'+
-          '</div>'+
-
         '</div>'+
+
       '</div>'+
     '</div>';
 }
@@ -803,7 +787,7 @@ function genMail(){
     '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:22px 26px 18px;border-radius:8px 8px 0 0;">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
         '<div>'+
-          '<img src="logo-equifax.png" alt="Equifax Chile" style="height:64px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+          '<img src="logo-equifax.png" alt="Equifax Chile" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
           '<div style="font-size:.57rem;letter-spacing:3px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-top:5px;">Chile · Soluciones Empresariales</div>'+
         '</div>'+
         '<div style="text-align:right;">'+
@@ -873,15 +857,15 @@ function genMail(){
   );
 
   document.getElementById('tpl-out').style.display='block';
-  var _st = document.getElementById('auto-gen-status');
-  if (_st) {
-    var _tt = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    _st.style.color='#2ecc71'; _st.textContent='✔ Actualizado · '+_tt;
+  var _st3 = document.getElementById('auto-gen-status');
+  if (_st3) {
+    var _tt3 = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    _st3.style.color='#2ecc71'; _st3.textContent='✔ Actualizado · '+_tt3;
   }
 }
 
-/* toggleDest moved to reactive block */
-/* saveExecField moved to reactive block */
+/* toggleDest → reactive block */
+/* saveExecField → reactive block */
 function updWspLink(){
   var mf=document.getElementById('mf'),row=document.getElementById('wsp-link-row'),lnk=document.getElementById('wsp-link');
   if(!mf||!row||!lnk)return;
@@ -1365,17 +1349,16 @@ loadExecutivo();
 preloadLogo(null);
 
 // ═══════════════════════════════════════════════════════════════
-// REACTIVIDAD TOTAL — delegación de eventos sin whitelist
-// Captura cualquier cambio dentro del panel #p-mail
+// REACTIVIDAD TOTAL — delegación sin whitelist de IDs
 // ═══════════════════════════════════════════════════════════════
 var _autoGenTimer = null;
 
-function _mailActive() {
+function _mailOn() {
   var p = document.getElementById('p-mail');
   return p && p.classList.contains('on');
 }
 
-function scheduleAutoGen(delay) {
+function scheduleAutoGen(ms) {
   clearTimeout(_autoGenTimer);
   var st = document.getElementById('auto-gen-status');
   if (st) { st.style.color='#f0c040'; st.textContent='⏳ Actualizando...'; }
@@ -1387,36 +1370,36 @@ function scheduleAutoGen(delay) {
     } else {
       var out = document.getElementById('tpl-out');
       if (out) out.style.display = 'none';
-      if (st) { st.style.color='#888'; st.textContent='← Selecciona un producto'; }
+      if (st) { st.style.color='#888'; st.textContent='← Selecciona un producto para generar'; }
     }
-  }, delay !== undefined ? delay : 280);
+  }, ms !== undefined ? ms : 280);
 }
 
-// Delegación total con capture=true — antes de handlers inline
+// Delegación total — captura cualquier cambio en el panel mail
 ['input','change','click'].forEach(function(ev) {
   document.addEventListener(ev, function(e) {
-    if (!_mailActive()) return;
+    if (!_mailOn()) return;
     var t = e.target;
-    if (t.tagName==='BUTTON'||t.tagName==='A'||t.tagName==='IMG') return;
-    scheduleAutoGen(ev==='click' ? 0 : 280);
+    if (t.tagName==='BUTTON' || t.tagName==='A' || t.tagName==='IMG') return;
+    scheduleAutoGen(ev === 'click' ? 10 : 280);
   }, true);
 });
 
-// UF global
-var _ufGl = document.getElementById('uf-global');
-if (_ufGl) _ufGl.addEventListener('input', function(){
-  if (_mailActive()) scheduleAutoGen(300);
+// UF global afecta precios en plantillas
+var _ufg = document.getElementById('uf-global');
+if (_ufg) _ufg.addEventListener('input', function() {
+  if (_mailOn()) scheduleAutoGen(300);
 });
 
-// toggleDest — regenerar inmediatamente
+// toggleDest reactivo
 function toggleDest(skip) {
   var df = document.getElementById('dest-fields');
   if (df) df.style.display = skip ? 'none' : 'flex';
   scheduleAutoGen(0);
 }
 
-// saveExecField — regenerar al cambiar asesor
-function saveExecField(){
+// saveExecField reactivo
+function saveExecField() {
   var ma=document.getElementById('ma'),mf=document.getElementById('mf'),ml=document.getElementById('ml');
   if(ma&&ma.value.trim())_lsSet('eq_exec_name',ma.value.trim());
   if(mf)_lsSet('eq_exec_tel',mf.value.trim());
@@ -1434,16 +1417,16 @@ goTo = function(id) {
       var tipo = document.getElementById('mt');
       var st = document.getElementById('auto-gen-status');
       if (tipo && tipo.value) { genMail(); }
-      else if (st) { st.style.color='#888'; st.textContent='← Selecciona un producto'; }
+      else if (st) { st.style.color='#888'; st.textContent='← Selecciona un producto para generar'; }
     }, 150);
   }
 };
 
-// syncQuoteToForm override — regenerar tras sincronizar
+// syncQuoteToForm override — regenerar al sincronizar cotización
 var _origSync = syncQuoteToForm;
 syncQuoteToForm = function(q) {
   _origSync(q);
-  setTimeout(function(){ if(_mailActive()) scheduleAutoGen(120); }, 130);
+  setTimeout(function() { if (_mailOn()) scheduleAutoGen(100); }, 120);
 };
 </script>
 </body>
