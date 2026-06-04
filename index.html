@@ -264,7 +264,7 @@ function saveQuote(obj){
   var tab=document.querySelector('.tab[data-id="mail"]');
   if(tab){tab.classList.add('has-quote');pulseMailTab();}
   playSound('save');
-  toast('✔ Cotización guardada — ve a ✉ Plantillas para generar el correo','ok');
+  toast('✔ Cotización guardada','ok');
 }
 function removeQuote(i){
   STATE.quotes.splice(i,1);
@@ -326,7 +326,7 @@ function showRes(id,d){
   var qStr=JSON.stringify(qData).replace(/'/g,"&#39;");
   box.innerHTML=
     '<div class="res-head"><span>'+d.prod+'</span>'+
-    '<button class="save-btn" onclick=\'saveQuote('+qStr+')\'>💾 Guardar cotización</button></div>'+
+    '</div>'+  /* auto-save: sin botón manual */
     '<div class="res-body">'+
       '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;">'+
         '<div><div class="res-big">'+ufV+' UF/mes</div><div style="font-size:.7rem;color:var(--wa);">precio venta</div></div>'+
@@ -355,6 +355,8 @@ function showRes(id,d){
       '</div>'+
     '</div>';
   box.classList.add('on');
+  // AUTO-SAVE: guardar cotización automáticamente al calcular
+  setTimeout(function(){ saveQuote(qData); }, 50);
 }
 function updSl(id,ufL,v){
   v=parseFloat(v);document.getElementById('sln-'+id).value=v;
@@ -602,11 +604,7 @@ function pagMail(){
           '<span>Correo HTML</span>'+
           '<small>Gmail · Outlook formato</small>'+
         '</button>'+
-        '<button class="bacc" onmouseenter="playHover()" onclick="genMail();playClick()">'+
-          '<span style="font-size:1.3rem;">🔄</span>'+
-          '<span>Regenerar</span>'+
-          '<small>Actualizar tarjeta</small>'+
-        '</button>'+
+
         '<button class="bacc email-btn" onmouseenter="playHover()" onclick="copImgPC();playClick()">'+
           '<span style="font-size:1.4rem;">📧</span>'+
           '<span>Imagen correo</span>'+
@@ -632,7 +630,7 @@ function pagMail(){
           '<div style="background:linear-gradient(135deg,#5a0e1a 0%,#9b1c2e 45%,#7a1425 100%);padding:24px 28px 20px;">'+
             '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
               '<div>'+
-                '<img src="logo-equifax.png" alt="Equifax" style="height:38px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+                '<img src="logo-equifax.png" alt="Equifax" style="height:58px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
                 '<div style="font-size:.58rem;letter-spacing:4px;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:5px;">Chile · Soluciones Empresariales</div>'+
               '</div>'+
               '<div style="text-align:right;">'+
@@ -865,7 +863,13 @@ function genMail(){
   );
 
   document.getElementById('tpl-out').style.display='block';
-  document.getElementById('tpl-out').scrollIntoView({behavior:'smooth',block:'start'});
+  // Solo scroll la primera vez (cuando estaba oculto antes)
+  var st2 = document.getElementById('auto-gen-status');
+  if (st2) {
+    var t2 = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    st2.style.color = '#2ecc71';
+    st2.textContent = '✔ Actualizado · ' + t2;
+  }
 }
 
 function toggleDest(skip){var df=document.getElementById('dest-fields');if(df)df.style.display=skip?'none':'flex';}
@@ -1358,39 +1362,85 @@ buildApp();
 loadExecutivo();
 preloadLogo(null);
 
-// ── AUTO-GENERACIÓN AL CAMBIAR CUALQUIER CAMPO ──────────────────
-// Se activa en la pestaña de plantillas para regenerar en tiempo real
+// ═══════════════════════════════════════════════════════════════
+// REACTIVIDAD TOTAL — delegación de eventos completa
+// Cubre: input, change, click (checkbox), keyup
+// Sin whitelist de IDs — cualquier cambio en el panel mail regenera
+// ═══════════════════════════════════════════════════════════════
 var _autoGenTimer = null;
-function scheduleAutoGen() {
-  clearTimeout(_autoGenTimer);
-  _autoGenTimer = setTimeout(function() {
-    // Solo si estamos en la pestaña mail y hay producto seleccionado
-    var tipo = document.getElementById('mt');
-    if (tipo && tipo.value && document.getElementById('tpl-out')) {
-      genMail();
-    }
-  }, 400);
+
+function _mailActive() {
+  var p = document.getElementById('p-mail');
+  return p && p.classList.contains('on');
 }
-// Escuchar cambios en todos los campos relevantes de la pestaña mail
-document.addEventListener('input', function(e) {
-  var ids = ['mn','me','mr','ma','mf','ml','mu','mula','mc2'];
-  if (ids.indexOf(e.target.id) >= 0) scheduleAutoGen();
-});
-document.addEventListener('change', function(e) {
-  var ids = ['mt','mp'];
-  if (ids.indexOf(e.target.id) >= 0) scheduleAutoGen();
+
+function scheduleAutoGen(delay) {
+  clearTimeout(_autoGenTimer);
+  var st = document.getElementById('auto-gen-status');
+  if (st) { st.style.color = '#f0c040'; st.textContent = '⏳ Actualizando...'; }
+  _autoGenTimer = setTimeout(function() {
+    var tipo = document.getElementById('mt');
+    if (!tipo) return;
+    if (tipo.value) {
+      genMail();
+    } else {
+      var out = document.getElementById('tpl-out');
+      if (out) out.style.display = 'none';
+      if (st) { st.style.color = '#888'; st.textContent = '← Selecciona un producto'; }
+    }
+  }, delay !== undefined ? delay : 250);
+}
+
+// Delegación total con useCapture para atrapar eventos antes de handlers inline
+['input', 'change', 'click'].forEach(function(ev) {
+  document.addEventListener(ev, function(e) {
+    if (!_mailActive()) return;
+    var t = e.target;
+    // Ignorar botones de acción (copiar imagen, etc.) y links
+    if (t.tagName === 'BUTTON' || t.tagName === 'A' || t.tagName === 'IMG') return;
+    scheduleAutoGen(ev === 'click' ? 0 : 250);
+  }, true);
 });
 
-// También auto-generar al entrar a la pestaña mail si hay cotización activa
+// UF global también actualiza si está en plantillas
+var _ufEl = document.getElementById('uf-global');
+if (_ufEl) _ufEl.addEventListener('input', function() {
+  if (_mailActive()) scheduleAutoGen(300);
+});
+
+// toggleDest — regenerar inmediatamente al cambiar checkbox
+function toggleDest(skip) {
+  var df = document.getElementById('dest-fields');
+  if (df) df.style.display = skip ? 'none' : 'flex';
+  scheduleAutoGen(0);
+}
+
+// saveExecField — regenerar al cambiar datos del asesor
+var _origSaveExec = typeof saveExecField === 'function' ? saveExecField : function(){};
+
+// Override goTo — generar al entrar a plantillas
 var _origGoTo = goTo;
 goTo = function(id) {
   _origGoTo(id);
   if (id === 'mail') {
     setTimeout(function() {
       var tipo = document.getElementById('mt');
-      if (tipo && tipo.value) genMail();
-    }, 200);
+      var st = document.getElementById('auto-gen-status');
+      if (tipo && tipo.value) {
+        genMail();
+      } else if (st) {
+        st.style.color = '#888';
+        st.textContent = '← Selecciona un producto';
+      }
+    }, 150);
   }
+};
+
+// syncQuoteToForm — regenerar tras sincronizar cotización
+var _origSync = syncQuoteToForm;
+syncQuoteToForm = function(q) {
+  _origSync(q);
+  setTimeout(function() { if (_mailActive()) scheduleAutoGen(100); }, 120);
 };
 </script>
 </body>
