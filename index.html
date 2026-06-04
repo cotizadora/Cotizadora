@@ -305,8 +305,6 @@ function syncQuoteToForm(q){
   var ml=document.getElementById('ml');if(ml)ml.value=q.ejecutivoEmail||_lsGet('eq_exec_email')||'';
   updWspLink();
   var b=document.getElementById('sync-banner');if(b){b.classList.add('on');setTimeout(function(){b.classList.remove('on');},5000);}
-  // Regenerar propuesta inmediatamente tras sincronizar cotización
-  setTimeout(function(){if(typeof genMail==='function'){var mt=document.getElementById('mt');if(mt&&mt.value)genMail();}},100);
 }
 
 function goTo(id){
@@ -634,7 +632,7 @@ function pagMail(){
           '<div style="background:linear-gradient(135deg,#5a0e1a 0%,#9b1c2e 45%,#7a1425 100%);padding:24px 28px 20px;">'+
             '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
               '<div>'+
-                '<img src="logo-equifax.png" alt="Equifax" style="height:54px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+                '<img src="logo-equifax.png" alt="Equifax" style="height:38px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
                 '<div style="font-size:.58rem;letter-spacing:4px;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:5px;">Chile · Soluciones Empresariales</div>'+
               '</div>'+
               '<div style="text-align:right;">'+
@@ -797,7 +795,7 @@ function genMail(){
     '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:22px 26px 18px;border-radius:8px 8px 0 0;">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
         '<div>'+
-          '<img src="logo-equifax.png" alt="Equifax Chile" style="height:60px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+          '<img src="logo-equifax.png" alt="Equifax Chile" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
           '<div style="font-size:.57rem;letter-spacing:3px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-top:5px;">Chile · Soluciones Empresariales</div>'+
         '</div>'+
         '<div style="text-align:right;">'+
@@ -867,33 +865,16 @@ function genMail(){
   );
 
   document.getElementById('tpl-out').style.display='block';
-  // NO scroll automático para no interrumpir al usuario mientras edita
-  // Solo hacer scroll la primera vez (cuando estaba oculto)
-  var st = document.getElementById('auto-gen-status');
-  if (st) {
-    var now = new Date();
-    var t = now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    st.style.color = '#2ecc71';
-    st.textContent = '✔ Propuesta actualizada · ' + t;
-  }
+  document.getElementById('tpl-out').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function toggleDest(skip){
-  var df=document.getElementById('dest-fields');
-  if(df)df.style.display=skip?'none':'flex';
-  // Forzar regeneración inmediata al cambiar el checkbox
-  clearTimeout(_autoGenTimer);
-  var tipo=document.getElementById('mt');
-  if(tipo&&tipo.value) genMail();
-}
+function toggleDest(skip){var df=document.getElementById('dest-fields');if(df)df.style.display=skip?'none':'flex';}
 function saveExecField(){
   var ma=document.getElementById('ma'),mf=document.getElementById('mf'),ml=document.getElementById('ml');
   if(ma&&ma.value.trim())_lsSet('eq_exec_name',ma.value.trim());
   if(mf)_lsSet('eq_exec_tel',mf.value.trim());
   if(ml)_lsSet('eq_exec_email',ml.value.trim());
   updWspLink();
-  // Regenerar propuesta con nuevos datos del asesor
-  if(typeof scheduleAutoGen==='function') scheduleAutoGen();
 }
 function updWspLink(){
   var mf=document.getElementById('mf'),row=document.getElementById('wsp-link-row'),lnk=document.getElementById('wsp-link');
@@ -971,245 +952,307 @@ function drawLogo(ctx,logoImg,x,y,h){
   ctx.drawImage(tc,x,y,w,h);
 }
 
-// ── IMAGEN PC (ancho 760px, diseño corporativo) ──
+// ── IMAGEN PC — layout dinámico sin superposiciones ──
 function getCanvasPC(){
   return new Promise(function(resolve){
     preloadLogo(function(logo){
-      if(!logo){toast('⚠ Logo no encontrado — coloca logo-equifax.png junto al index.html','err','tpl-toast2');return;}
+      if(!logo){toast('⚠ Logo no encontrado','err','tpl-toast2');return;}
       var d=getCardData();
       var pb=d.prodBlock,prodName=getProdName(pb),benef=getBenef(pb),dc=getDcPct(d.dctoBlock);
-      var W=600,P=30,sc=2;
-      var lh=20;
-      var hHead=88,hEmp=(d.emp?66:0),hProd=50+(benef.length*lh)+20;
-      var hPrec=90+(d.clpText&&d.clpText!=='—'?24:0)+(dc.pct?52:0);
-      var hCond=54,hExec=72;
-      var H=hHead+hEmp+hProd+hPrec+hCond+hExec+8;
+      var W=620,P=32,sc=2,lh=20;
+
+      // ── PRE-MEDICIÓN de texto para calcular alturas reales ──
+      var _cv0=document.createElement('canvas');
+      var _ctx0=_cv0.getContext('2d');
+
+      // Altura header aumentada para logo prominente
+      var hHead=110;
+
+      // Medir líneas del nombre de empresa (wrap a W-P*2)
+      function measureLines(text, font, maxW) {
+        _ctx0.font=font;
+        var words=text.split(' '), line='', lines=0;
+        words.forEach(function(w){
+          var t=line+w+' ';
+          if(_ctx0.measureText(t).width>maxW&&line){lines++;line=w+' ';}else line=t;
+        });
+        if(line.trim())lines++;
+        return Math.max(1,lines);
+      }
+
+      var empLines=d.emp?measureLines(d.emp,'bold 20px Arial',W-P*2):0;
+      var hEmp=d.emp?(32+empLines*26+16):0;
+
+      var prodLines=measureLines(prodName,'bold 16px Arial',W-P*2);
+      var hProd=14+16+(prodLines*22)+14+(Math.ceil(benef.length/2)*lh)+18;
+
+      var hPrec=12+18+20+56+(d.clpText&&d.clpText!=='—'?22:0)+(dc.pct?52:0)+8;
+      var hCond=56, hExec=72;
+      var H=hHead+hEmp+hProd+hPrec+hCond+hExec;
 
       var cv=document.createElement('canvas');cv.width=W*sc;cv.height=H*sc;
       var ctx=cv.getContext('2d');ctx.scale(sc,sc);
-
-      // Fondo general
       ctx.fillStyle='#0c0508';ctx.fillRect(0,0,W,H);
 
       var y=0;
-      // HEADER
-      var hg=ctx.createLinearGradient(0,0,W,hHead);hg.addColorStop(0,'#5a0e1a');hg.addColorStop(.5,'#9b1c2e');hg.addColorStop(1,'#7a1425');
+      // ── HEADER ─────────────────────────────────────────────
+      var hg=ctx.createLinearGradient(0,0,W,hHead);
+      hg.addColorStop(0,'#5a0e1a');hg.addColorStop(.5,'#9b1c2e');hg.addColorStop(1,'#7a1425');
       ctx.fillStyle=hg;ctx.fillRect(0,y,W,hHead);
-      drawLogo(ctx,logo,P,y+Math.round((hHead-56)/2),56);
-      ctx.font='8px Arial';ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillText('CHILE · SOLUCIONES EMPRESARIALES',P,y+hHead-10);
-      // Badge
+
+      // Logo GRANDE — centrado verticalmente en la mitad superior del header
+      var logoH=62;
+      drawLogo(ctx,logo,P,y+Math.round((hHead*0.55-logoH)/2)+4,logoH);
+
+      // Subtítulo bajo el logo
+      ctx.font='7.5px Arial';ctx.fillStyle='rgba(255,255,255,.38)';
+      ctx.fillText('CHILE · SOLUCIONES EMPRESARIALES',P,y+hHead-12);
+
+      // Badge — centrado verticalmente en header
       ctx.font='bold 10px Arial';
       var bw=ctx.measureText(d.badge).width+22;
-      rr(ctx,W-P-bw,y+18,bw,24,12,'rgba(0,0,0,.4)');
-      ctx.strokeStyle='rgba(240,192,64,.6)';ctx.lineWidth=1;
-      rr(ctx,W-P-bw,y+18,bw,24,12,null,'rgba(240,192,64,.6)');
-      ctx.fillStyle='#f0c040';ctx.fillText(d.badge,W-P-bw+11,y+18+16);
-      // Fecha
-      ctx.font='8px Arial';ctx.fillStyle='rgba(255,255,255,.3)';ctx.textAlign='right';
-      ctx.fillText(d.fecha,W-P,y+hHead-10);ctx.textAlign='left';
+      var badgeY=y+Math.round((hHead-26)/2);
+      rr(ctx,W-P-bw,badgeY,bw,26,13,'rgba(0,0,0,.45)');
+      ctx.strokeStyle='rgba(240,192,64,.65)';ctx.lineWidth=1;
+      rr(ctx,W-P-bw,badgeY,bw,26,13,null,'rgba(240,192,64,.65)');
+      ctx.fillStyle='#f0c040';ctx.fillText(d.badge,W-P-bw+11,badgeY+17);
+
+      // Fecha — abajo a la derecha
+      ctx.font='7px Arial';ctx.fillStyle='rgba(255,255,255,.28)';ctx.textAlign='right';
+      ctx.fillText(d.fecha,W-P,y+hHead-12);ctx.textAlign='left';
       y+=hHead;
 
-      // EMPRESA
+      // ── EMPRESA ────────────────────────────────────────────
       if(d.emp){
-        ctx.fillStyle='#12060a';ctx.fillRect(0,y,W,hEmp);
-        sepLine(ctx,0,y,W,.3);
-        ctx.font='9px Arial';ctx.fillStyle='#555';ctx.fillText('PROPUESTA PARA',P,y+16);
-        ctx.font='bold 22px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.emp,P,y+40);
-        if(d.rut){ctx.font='11px Arial';ctx.fillStyle='#666';ctx.fillText(d.rut,P,y+58);}
+        ctx.fillStyle='#120608';ctx.fillRect(0,y,W,hEmp);
+        sepLine(ctx,0,y,W,.35);
+        var ey=y+14;
+        ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('PROPUESTA PARA',P,ey);ey+=16;
+        ctx.font='bold 20px Segoe UI,Arial';ctx.fillStyle='#fff';
+        ey=wt(ctx,d.emp,P,ey,W-P*2,26)+4;
         y+=hEmp;
       }
 
-      // PRODUCTO + BENEFICIOS
+      // ── PRODUCTO + BENEFICIOS ──────────────────────────────
       ctx.fillStyle='#0d0a0e';ctx.fillRect(0,y,W,hProd);
-      sepLine(ctx,0,y,W,.25);y+=14;
-      ctx.font='9px Arial';ctx.fillStyle='#555';ctx.fillText('PRODUCTO COTIZADO',P,y+10);y+=22;
+      sepLine(ctx,0,y,W,.22);
+      var py=y+14;
+      ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('PRODUCTO COTIZADO',P,py);py+=18;
       ctx.font='bold 16px Segoe UI,Arial';ctx.fillStyle='#fff';
-      var ny=wt(ctx,prodName,P,y+2,W-P*2,20);y=ny+18;
-      ctx.font='12px Arial';
+      py=wt(ctx,prodName,P,py,W-P*2,22)+12;
+      ctx.font='11px Arial';
       var colW=(W-P*2-16)/2;
+      var half=Math.ceil(benef.length/2);
       benef.forEach(function(item,i){
-        var col=i<Math.ceil(benef.length/2)?P:P+colW+16;
-        var row=i<Math.ceil(benef.length/2)?i:(i-Math.ceil(benef.length/2));
-        ctx.fillStyle='#9b1c2e';ctx.fillText('✔',col,y+row*lh+12);
-        ctx.fillStyle='#ccc';wt(ctx,item,col+16,y+row*lh+12,colW-16,lh,1);
+        var col=i<half?P:P+colW+16;
+        var row=i<half?i:i-half;
+        ctx.fillStyle='#9b1c2e';ctx.fillText('✔',col,py+row*lh+11);
+        ctx.fillStyle='#ccc';wt(ctx,item,col+14,py+row*lh+11,colW-14,lh,1);
       });
-      y+=Math.ceil(benef.length/2)*lh+14;
+      y+=hProd;
 
-      // PRECIO
-      ctx.fillStyle='#0a0305';ctx.fillRect(0,y,W,hPrec);
-      sepLine(ctx,0,y,W,.3);y+=14;
-      ctx.font='9px Arial';ctx.fillStyle='#555';ctx.fillText('CARGO FIJO MENSUAL',P,y+10);y+=20;
+      // ── PRECIO ─────────────────────────────────────────────
+      ctx.fillStyle='#090204';ctx.fillRect(0,y,W,hPrec);
+      sepLine(ctx,0,y,W,.3);
+      var ry=y+12;
+      ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('CARGO FIJO MENSUAL',P,ry);ry+=20;
       ctx.font='bold 44px Segoe UI,Arial';ctx.fillStyle='#f0c040';
-      ctx.shadowColor='rgba(240,192,64,.25)';ctx.shadowBlur=20;
-      ctx.fillText(d.precio,P,y+40);ctx.shadowBlur=0;y+=50;
-      if(d.clpText&&d.clpText!=='—'){ctx.font='12px Arial';ctx.fillStyle='#888';ctx.fillText(d.clpText,P,y);y+=22;}
+      ctx.shadowColor='rgba(240,192,64,.22)';ctx.shadowBlur=18;
+      ctx.fillText(d.precio,P,ry+40);ctx.shadowBlur=0;ry+=56;
+      if(d.clpText&&d.clpText!=='—'){
+        ctx.font='11px Arial';ctx.fillStyle='#888';ctx.fillText(d.clpText,P,ry);ry+=22;
+      }
       if(dc.pct){
-        rr(ctx,P,y,W-P*2,40,7,'rgba(46,204,113,.07)');
-        ctx.strokeStyle='rgba(46,204,113,.3)';ctx.lineWidth=1;
-        rr(ctx,P,y,W-P*2,40,7,null,'rgba(46,204,113,.3)');
-        ctx.font='bold 22px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('−'+dc.pct+'%',P+12,y+27);
-        ctx.font='11px Arial';ctx.fillStyle='#888';
-        if(dc.lista)ctx.fillText('Lista: '+dc.lista+' UF',P+100,y+16);
-        if(dc.final){ctx.fillStyle='#aaa';ctx.fillText('Final: '+dc.final+' UF',P+100,y+30);}
-        y+=48;
-      } else y+=6;
+        rr(ctx,P,ry,W-P*2,40,7,'rgba(46,204,113,.07)');
+        ctx.strokeStyle='rgba(46,204,113,.28)';ctx.lineWidth=1;
+        rr(ctx,P,ry,W-P*2,40,7,null,'rgba(46,204,113,.28)');
+        ctx.font='bold 22px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('−'+dc.pct+'%',P+12,ry+27);
+        ctx.font='10px Arial';ctx.fillStyle='#888';
+        if(dc.lista)ctx.fillText('Lista: '+dc.lista+' UF',P+100,ry+16);
+        if(dc.final){ctx.fillStyle='#aaa';ctx.fillText('Final: '+dc.final+' UF',P+100,ry+30);}
+      }
+      y+=hPrec;
 
-      // CONDICIONES
+      // ── CONDICIONES ────────────────────────────────────────
       ctx.fillStyle='#0c0508';ctx.fillRect(0,y,W,hCond);
-      sepLine(ctx,0,y,W,.25);y+=10;
-      ctx.font='9px Arial';ctx.fillStyle='#555';ctx.fillText('CONTRATO',P,y+10);y+=16;
-      ctx.font='bold 14px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.plazo,P,y+2);
-      ctx.font='bold 12px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('POSTPAGO · 30 días',P+140,y+2);
-      ctx.font='11px Arial';ctx.fillStyle='#666';ctx.fillText('Ficha · Cédula · Escritura',W-P-160,y+2);
-      y+=hCond-10;
+      sepLine(ctx,0,y,W,.22);
+      var cy=y+10;
+      ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('CONTRATO',P,cy);cy+=16;
+      ctx.font='bold 13px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.plazo,P,cy);
+      ctx.font='bold 11px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('POSTPAGO · 30 días',P+120,cy);
+      ctx.font='10px Arial';ctx.fillStyle='#555';ctx.fillText('Ficha · Cédula · Escritura',W-P-150,cy);
+      y+=hCond;
 
-      // EJECUTIVO
+      // ── EJECUTIVO ──────────────────────────────────────────
       ctx.fillStyle='#0f0507';ctx.fillRect(0,y,W,hExec);
-      sepLine(ctx,0,y,W,.2);y+=10;
-      ctx.font='9px Arial';ctx.fillStyle='#555';ctx.fillText('EJECUTIVO/A COMERCIAL',P,y+10);y+=18;
-      ctx.font='bold 15px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.asesor,P,y+2);
-      if(d.contacto){ctx.font='11px Arial';ctx.fillStyle='#3498db';ctx.fillText(d.contacto,P,y+18);}
-      ctx.textAlign='right';ctx.font='9px Arial';ctx.fillStyle='#444';
-      ctx.fillText('Valores + IVA · Sujeto a vigencia UF',W-P,y+8);ctx.textAlign='left';
+      sepLine(ctx,0,y,W,.18);
+      var ey2=y+10;
+      ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('EJECUTIVO/A COMERCIAL',P,ey2);ey2+=18;
+      ctx.font='bold 14px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.asesor,P,ey2);
+      if(d.contacto){ctx.font='11px Arial';ctx.fillStyle='#3498db';ctx.fillText(d.contacto,P,ey2+17);}
+      ctx.textAlign='right';ctx.font='8px Arial';ctx.fillStyle='#3a3a3a';
+      ctx.fillText('Valores + IVA · Sujeto a vigencia UF',W-P,ey2+8);ctx.textAlign='left';
 
       resolve(cv);
     });
   });
 }
 
-// ── IMAGEN WHATSAPP (1080×1800 vertical, optimizada móvil) ──
+// ── IMAGEN WHATSAPP — layout dinámico, logo grande, sin superposiciones ──
 function getCanvasWsp(){
   return new Promise(function(resolve){
     preloadLogo(function(logo){
       if(!logo){toast('⚠ Logo no encontrado','err','tpl-toast2');return;}
       var d=getCardData();
       var pb=d.prodBlock,prodName=getProdName(pb),benef=getBenef(pb),dc=getDcPct(d.dctoBlock);
-      var W=1080,P=56;
-      // Calcular altura dinámica según contenido — SIN espacio vacío
-      var _nBenef=benef.length;
-      var _hasEmp=!!(d.emp);
-      var _hasClp=!!(d.clpText&&d.clpText!=='—');
-      var _hasDc=!!(dc.pct);
-      var _hasContact=!!(d.contacto);
-      var H=160+28 + // header + gap
-        (_hasEmp?(34+56+(_hasContact?34:0)+36):0) + // empresa
-        (36+48+(_nBenef*36)+14) + // producto
-        (38+104+(_hasClp?42:0)+(_hasDc?74:0)+10) + // precio
-        (18+50) + // condiciones
-        (18+46+(_hasContact?38:0)) + // ejecutivo
-        50; // footer
+      var W=1080,P=60;
+
+      // ── PRE-MEDICIÓN para calcular H exacta ──────────────────
+      var _cv0=document.createElement('canvas');
+      var _c0=_cv0.getContext('2d');
+      function mLines(text,font,maxW){
+        _c0.font=font;
+        var words=text.split(' '),line='',n=0;
+        words.forEach(function(w){var t=line+w+' ';if(_c0.measureText(t).width>maxW&&line){n++;line=w+' ';}else line=t;});
+        if(line.trim())n++;return Math.max(1,n);
+      }
+
+      // Header alto para logo grande
+      var hh=200;
+
+      // Empresa
+      var empL=d.emp?mLines(d.emp,'bold 52px Arial',W-P*2):0;
+      var hEmp=d.emp?(28+empL*62+20):0;
+
+      // Producto
+      var prodL=mLines(prodName,'bold 38px Arial',W-P*2);
+      var hProd=20+50+(prodL*46)+20+(benef.length*42)+20;
+
+      // Precio
+      var hPrec=28+46+120+(d.clpText&&d.clpText!=='—'?48:0)+(dc.pct?88:0)+20;
+
+      // Condiciones
+      var hCond=20+60;
+
+      // Ejecutivo
+      var hExec=20+56+(d.contacto?42:0)+20;
+
+      // Footer
+      var hFoot=60;
+
+      var H=hh+hEmp+hProd+hPrec+hCond+hExec+hFoot;
       var cv=document.createElement('canvas');cv.width=W;cv.height=H;
       var ctx=cv.getContext('2d');
 
-      // Fondo oscuro profundo
+      // Fondo
       var bg=ctx.createLinearGradient(0,0,W*.3,H);
       bg.addColorStop(0,'#0d0305');bg.addColorStop(.5,'#100608');bg.addColorStop(1,'#0a0a14');
       ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-
-      // Acento de color sutil fondo
-      var rg=ctx.createRadialGradient(W,0,0,W,0,W*.8);
-      rg.addColorStop(0,'rgba(155,28,46,.18)');rg.addColorStop(1,'transparent');
+      var rg=ctx.createRadialGradient(W,0,0,W,0,W*.7);
+      rg.addColorStop(0,'rgba(155,28,46,.15)');rg.addColorStop(1,'transparent');
       ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
 
       var y=0;
-      // ── HEADER ──────────────────────────────
-      var hh=160;
-      var hg=ctx.createLinearGradient(0,0,W,hh);hg.addColorStop(0,'#5a0e1a');hg.addColorStop(.5,'#8b1829');hg.addColorStop(1,'#6a1122');
-      ctx.fillStyle=hg;ctx.fillRect(0,y,W,hh);
 
-      // Logo grande
-      drawLogo(ctx,logo,P,y+Math.round((hh-80)/2),80);
+      // ── HEADER ───────────────────────────────────────────────
+      var hgr=ctx.createLinearGradient(0,0,W,hh);
+      hgr.addColorStop(0,'#5a0e1a');hgr.addColorStop(.5,'#8b1829');hgr.addColorStop(1,'#6a1122');
+      ctx.fillStyle=hgr;ctx.fillRect(0,y,W,hh);
 
-      // Badge tipo producto
-      ctx.font='bold 24px Arial';
-      var bw=ctx.measureText(d.badge).width+52;
-      rr(ctx,W-P-bw,y+36,bw,58,29,'rgba(0,0,0,.45)');
+      // Logo PROMINENTE — 100px, centrado verticalmente
+      var logoSz=100;
+      drawLogo(ctx,logo,P,y+Math.round((hh-logoSz)/2),logoSz);
+
+      // Badge
+      ctx.font='bold 26px Arial';
+      var bw=ctx.measureText(d.badge).width+56;
+      var bY=y+Math.round((hh-62)/2);
+      rr(ctx,W-P-bw,bY,bw,62,31,'rgba(0,0,0,.45)');
       ctx.strokeStyle='rgba(240,192,64,.7)';ctx.lineWidth=2;
-      rr(ctx,W-P-bw,y+36,bw,58,29,null,'rgba(240,192,64,.7)');
-      ctx.fillStyle='#f0c040';ctx.fillText(d.badge,W-P-bw+26,y+36+38);
+      rr(ctx,W-P-bw,bY,bw,62,31,null,'rgba(240,192,64,.7)');
+      ctx.fillStyle='#f0c040';ctx.fillText(d.badge,W-P-bw+28,bY+40);
 
-      ctx.font='16px Arial';ctx.fillStyle='rgba(255,255,255,.38)';
-      ctx.fillText('CHILE · SOLUCIONES EMPRESARIALES',P,y+hh-16);
+      // Subtítulo
+      ctx.font='15px Arial';ctx.fillStyle='rgba(255,255,255,.35)';
+      ctx.fillText('CHILE · SOLUCIONES EMPRESARIALES',P,y+hh-18);
       y+=hh;
 
-      // ── EMPRESA ──────────────────────────────
+      // ── EMPRESA ──────────────────────────────────────────────
       if(d.emp){
-        y+=20;
-        sepLine(ctx,P,y,W-P,.3);y+=14;
-        ctx.font='14px Arial';ctx.fillStyle='#666';ctx.fillText('PROPUESTA PARA',P,y+15);y+=34;
+        y+=16;
+        sepLine(ctx,P,y,W-P,.32);y+=12;
+        ctx.font='13px Arial';ctx.fillStyle='#666';ctx.fillText('PROPUESTA PARA',P,y+16);y+=32;
         ctx.font='bold 52px Segoe UI,Arial';ctx.fillStyle='#fff';
-        y=wt(ctx,d.emp,P,y,W-P*2,58)+8;
-        if(d.rut){ctx.font='22px Arial';ctx.fillStyle='#666';ctx.fillText(d.rut,P,y);y+=36;}
-        y+=10;
+        y=wt(ctx,d.emp,P,y,W-P*2,62)+16;
       }
 
-      // ── PRODUCTO ──────────────────────────────
-      y+=4;
-      sepLine(ctx,P,y,W-P,.28);y+=16;
-      ctx.font='14px Arial';ctx.fillStyle='#666';ctx.fillText('PRODUCTO COTIZADO',P,y+15);y+=36;
-      ctx.font='bold 36px Segoe UI,Arial';ctx.fillStyle='#fff';
-      y=wt(ctx,prodName,P,y,W-P*2,42)+16;
+      // ── PRODUCTO ─────────────────────────────────────────────
+      y+=8;
+      sepLine(ctx,P,y,W-P,.25);y+=14;
+      ctx.font='13px Arial';ctx.fillStyle='#666';ctx.fillText('PRODUCTO COTIZADO',P,y+16);y+=38;
+      ctx.font='bold 38px Segoe UI,Arial';ctx.fillStyle='#fff';
+      y=wt(ctx,prodName,P,y,W-P*2,46)+16;
 
-      // Beneficios — lista vertical compacta
-      ctx.font='24px Arial';
+      // Beneficios — lista vertical, 1 por fila
+      ctx.font='22px Arial';
       benef.forEach(function(item){
-        ctx.fillStyle='rgba(155,28,46,.85)';ctx.fillText('✔',P,y+24);
+        var linesBefore=y;
+        ctx.fillStyle='rgba(155,28,46,.9)';ctx.fillText('✔',P,y+24);
         ctx.fillStyle='#d0d0d0';
-        y=wt(ctx,item,P+38,y+24,W-P*2-38,32)+4;
+        var newY=wt(ctx,item,P+38,y+24,W-P*2-38,32)+6;
+        y=Math.max(newY,linesBefore+38);
       });
-      y+=14;
+      y+=16;
 
-      // ── PRECIO — PROTAGONISTA ──────────────────
-      // Bloque de precio con fondo destacado
-      var priceH=200+(d.clpText&&d.clpText!=='—'?44:0)+(dc.pct?80:0);
-      ctx.fillStyle='rgba(155,28,46,.08)';ctx.fillRect(0,y,W,priceH);
-      ctx.strokeStyle='rgba(155,28,46,.3)';ctx.lineWidth=1;
-      ctx.strokeRect(0,y,W,priceH);
+      // ── PRECIO ───────────────────────────────────────────────
+      var priceBlockH=hPrec;
+      var priceY=y;
+      ctx.fillStyle='rgba(155,28,46,.07)';ctx.fillRect(0,priceY,W,priceBlockH);
+      ctx.strokeStyle='rgba(155,28,46,.28)';ctx.lineWidth=1;
+      ctx.strokeRect(0,priceY,W,priceBlockH);
+
       y+=22;
-      ctx.font='15px Arial';ctx.fillStyle='#666';ctx.fillText('CARGO FIJO MENSUAL',P,y+15);y+=38;
-
-      // Precio en tipografía gigante — EL FOCO
-      ctx.font='bold 108px Segoe UI,Arial';
-      ctx.shadowColor='rgba(240,192,64,.3)';ctx.shadowBlur=30;
-      ctx.fillStyle='#f0c040';ctx.fillText(d.precio,P,y+88);ctx.shadowBlur=0;
-      y+=104;
+      ctx.font='14px Arial';ctx.fillStyle='#666';ctx.fillText('CARGO FIJO MENSUAL',P,y+16);y+=44;
+      ctx.font='bold 110px Segoe UI,Arial';
+      ctx.shadowColor='rgba(240,192,64,.28)';ctx.shadowBlur=28;
+      ctx.fillStyle='#f0c040';ctx.fillText(d.precio,P,y+90);ctx.shadowBlur=0;y+=118;
 
       if(d.clpText&&d.clpText!=='—'){
-        ctx.font='26px Arial';ctx.fillStyle='#888';ctx.fillText(d.clpText,P,y);y+=42;
+        ctx.font='26px Arial';ctx.fillStyle='#888';ctx.fillText(d.clpText,P,y);y+=48;
       }
-
-      // Descuento — solo si real
       if(dc.pct){
         y+=8;
-        rr(ctx,P,y,W-P*2,66,10,'rgba(46,204,113,.09)');
-        ctx.strokeStyle='rgba(46,204,113,.35)';ctx.lineWidth=2;
-        rr(ctx,P,y,W-P*2,66,10,null,'rgba(46,204,113,.35)');
-        ctx.font='bold 46px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('−'+dc.pct+'%',P+20,y+48);
-        ctx.font='20px Arial';ctx.fillStyle='#888';
-        if(dc.lista)ctx.fillText('Lista: '+dc.lista+' UF',P+180,y+28);
-        if(dc.final){ctx.fillStyle='#bbb';ctx.fillText('Final: '+dc.final+' UF',P+180,y+52);}
-        y+=74;
+        rr(ctx,P,y,W-P*2,70,12,'rgba(46,204,113,.09)');
+        ctx.strokeStyle='rgba(46,204,113,.32)';ctx.lineWidth=2;
+        rr(ctx,P,y,W-P*2,70,12,null,'rgba(46,204,113,.32)');
+        ctx.font='bold 48px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('−'+dc.pct+'%',P+20,y+50);
+        ctx.font='21px Arial';ctx.fillStyle='#888';
+        if(dc.lista)ctx.fillText('Lista: '+dc.lista+' UF',P+200,y+30);
+        if(dc.final){ctx.fillStyle='#bbb';ctx.fillText('Final: '+dc.final+' UF',P+200,y+56);}
+        y+=80;
       }
-      y+=10;
+      y+=16;
 
-      // ── CONDICIONES ──────────────────────────────
-      sepLine(ctx,P,y,W-P,.28);y+=18;
-      ctx.font='14px Arial';ctx.fillStyle='#666';ctx.fillText('CONDICIONES',P,y+15);y+=36;
-      ctx.font='bold 32px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.plazo,P,y+4);
-      ctx.font='28px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('POSTPAGO · 30 días',P+260,y+4);
-      y+=50;
+      // ── CONDICIONES ──────────────────────────────────────────
+      y+=8;
+      sepLine(ctx,P,y,W-P,.25);y+=16;
+      ctx.font='13px Arial';ctx.fillStyle='#666';ctx.fillText('CONDICIONES',P,y+16);y+=38;
+      ctx.font='bold 34px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.plazo,P,y);
+      ctx.font='28px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('POSTPAGO · 30 días',P+270,y);
+      y+=hCond-38;
 
-      // ── EJECUTIVO ──────────────────────────────
-      sepLine(ctx,P,y,W-P,.22);y+=18;
-      ctx.font='14px Arial';ctx.fillStyle='#666';ctx.fillText('EJECUTIVO/A COMERCIAL',P,y+15);y+=36;
-      ctx.font='bold 34px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.asesor,P,y+4);y+=46;
-      if(d.contacto){ctx.font='26px Arial';ctx.fillStyle='#3498db';ctx.fillText(d.contacto,P,y);y+=38;}
+      // ── EJECUTIVO ────────────────────────────────────────────
+      y+=8;
+      sepLine(ctx,P,y,W-P,.22);y+=16;
+      ctx.font='13px Arial';ctx.fillStyle='#666';ctx.fillText('EJECUTIVO/A COMERCIAL',P,y+16);y+=38;
+      ctx.font='bold 36px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.asesor,P,y);y+=46;
+      if(d.contacto){ctx.font='26px Arial';ctx.fillStyle='#3498db';ctx.fillText(d.contacto,P,y);y+=40;}
 
-      // Pie de página
+      // Pie
       ctx.textAlign='right';
       ctx.font='18px Arial';ctx.fillStyle='#3a3a3a';
-      ctx.fillText(d.fecha,W-P,H-32);
-      ctx.fillText('Valores + IVA · Sujeto a vigencia UF',W-P,H-10);
+      ctx.fillText(d.fecha,W-P,H-36);
+      ctx.fillText('Valores + IVA · Sujeto a vigencia UF',W-P,H-12);
       ctx.textAlign='left';
 
       resolve(cv);
@@ -1315,79 +1358,38 @@ buildApp();
 loadExecutivo();
 preloadLogo(null);
 
-// ═══════════════════════════════════════════════════════════════
-// AUTO-GENERACIÓN REACTIVA COMPLETA
-// Escucha CUALQUIER cambio dentro del panel #p-mail mediante
-// delegación de eventos en el documento. Cubre:
-//   · input (texto, número)     · change (select, checkbox)
-//   · click (checkbox via label) · keyup (escritura)
-// ═══════════════════════════════════════════════════════════════
+// ── AUTO-GENERACIÓN AL CAMBIAR CUALQUIER CAMPO ──────────────────
+// Se activa en la pestaña de plantillas para regenerar en tiempo real
 var _autoGenTimer = null;
-
 function scheduleAutoGen() {
   clearTimeout(_autoGenTimer);
-  // Mostrar indicador de "procesando"
-  var st = document.getElementById('auto-gen-status');
-  if (st) { st.style.color = '#f0c040'; st.textContent = '⏳ Actualizando...'; }
   _autoGenTimer = setTimeout(function() {
+    // Solo si estamos en la pestaña mail y hay producto seleccionado
     var tipo = document.getElementById('mt');
-    // Generar siempre que exista el panel mail, aunque no haya producto seleccionado aún
-    if (tipo) {
-      if (tipo.value) {
-        genMail();
-      } else {
-        // Sin producto: ocultar salida anterior
-        var out = document.getElementById('tpl-out');
-        if (out) out.style.display = 'none';
-        if (st) { st.style.color = '#888'; st.textContent = '← Selecciona un producto para generar'; }
-      }
+    if (tipo && tipo.value && document.getElementById('tpl-out')) {
+      genMail();
     }
-  }, 280);
+  }, 400);
 }
-
-// Delegación total: cualquier evento dentro del documento que
-// afecte al panel de plantillas dispara la regeneración.
-function _mailPanelActive() {
-  var panel = document.getElementById('p-mail');
-  return panel && panel.classList.contains('on');
-}
-
-// Captura input (texto/número), change (select/checkbox), click (label+checkbox)
-['input','change','click'].forEach(function(evName) {
-  document.addEventListener(evName, function(e) {
-    if (!_mailPanelActive()) return;
-    var t = e.target;
-    // Ignorar clics en botones de acción (copiar, generar imagen, etc.)
-    if (t.tagName === 'BUTTON' || t.tagName === 'A') return;
-    // Ignorar el botón de reset ejecutivo
-    if (t.classList && t.classList.contains('btn') && t.classList.contains('sec')) return;
-    scheduleAutoGen();
-  }, true); // useCapture=true para capturar antes del inline handler
+// Escuchar cambios en todos los campos relevantes de la pestaña mail
+document.addEventListener('input', function(e) {
+  var ids = ['mn','me','mr','ma','mf','ml','mu','mula','mc2'];
+  if (ids.indexOf(e.target.id) >= 0) scheduleAutoGen();
+});
+document.addEventListener('change', function(e) {
+  var ids = ['mt','mp'];
+  if (ids.indexOf(e.target.id) >= 0) scheduleAutoGen();
 });
 
-// También escuchar la UF global (afecta CLP calculado)
-var ufGlobal = document.getElementById('uf-global');
-if (ufGlobal) {
-  ufGlobal.addEventListener('input', function() {
-    if (_mailPanelActive()) scheduleAutoGen();
-  });
-}
-
-// ── OVERRIDE goTo — generar al entrar a la pestaña mail ─────────
+// También auto-generar al entrar a la pestaña mail si hay cotización activa
 var _origGoTo = goTo;
 goTo = function(id) {
   _origGoTo(id);
   if (id === 'mail') {
     setTimeout(function() {
       var tipo = document.getElementById('mt');
-      if (tipo && tipo.value) {
-        genMail();
-      } else {
-        // Sin producto aún: limpiar estado
-        var st = document.getElementById('auto-gen-status');
-        if (st) { st.style.color = '#888'; st.textContent = '← Selecciona un producto para generar'; }
-      }
-    }, 150);
+      if (tipo && tipo.value) genMail();
+    }, 200);
   }
 };
 </script>
