@@ -667,10 +667,50 @@ function pagMail(){
           '<button onclick="copPlano();playClick()" style="background:#128c7e;border:none;color:#fff;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:700;">📋 Copiar texto WA</button>'+
         '</div>'+
 
-        // Texto WA
+        // Texto WA (oculto, necesario para copPlano())
+        '<textarea id="tpl-body" style="display:none;"></textarea>'+
+
+        // Vista previa visual tarjeta WSP
         '<div style="padding:14px 18px;border-bottom:1px solid rgba(37,211,102,.2);">'+
-          '<div style="font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Vista previa del mensaje:</div>'+
-          '<textarea id="tpl-body" readonly style="width:100%;min-height:180px;background:#0d1a0f;color:#d0d0d0;border:1px solid rgba(37,211,102,.25);border-radius:6px;padding:12px;font-size:.78rem;font-family:monospace;line-height:1.6;resize:vertical;"></textarea>'+
+          '<div style="font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Vista previa de la propuesta:</div>'+
+          '<div id="cot-card-wsp" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);">'+
+            '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;">'+
+              '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
+                '<div>'+
+                  '<img src="logo-equifax.png" alt="Equifax" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+                  '<div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div>'+
+                '</div>'+
+                '<div style="text-align:right;">'+
+                  '<div id="wcc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div>'+
+                  '<div id="wcc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div>'+
+                '</div>'+
+              '</div>'+
+            '</div>'+
+            '<div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);">'+
+              '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div>'+
+              '<div id="wcc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div>'+
+            '</div>'+
+            '<div id="wcc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div>'+
+            '<div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;">'+
+              '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div>'+
+              '<div id="wcc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div>'+
+              '<div id="wcc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div>'+
+              '<div id="wcc-dcto-block" style="margin-top:8px;"></div>'+
+            '</div>'+
+            '<div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;">'+
+              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="wcc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div>'+
+              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
+              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div>'+
+            '</div>'+
+            '<div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
+              '<div>'+
+                '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div>'+
+                '<div id="wcc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div>'+
+                '<div id="wcc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div>'+
+              '</div>'+
+              '<div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div>'+
+            '</div>'+
+          '</div>'+
         '</div>'+
 
         // Imagen WA
@@ -685,9 +725,12 @@ function pagMail(){
 
       // ── SECCIÓN 3: VISTA PREVIA TARJETA ─────────────────────────────
       '<div style="background:var(--g2);border:1px solid var(--g4);border-radius:10px;overflow:hidden;margin-bottom:8px;">'+
-        '<div style="padding:10px 18px;border-bottom:1px solid var(--g4);">'+
-          '<div style="font-size:.8rem;font-weight:700;color:var(--wa);">🖼 Vista previa de la tarjeta</div>'+
-          '<div style="font-size:.68rem;color:var(--muted);margin-top:2px;">Así verá el cliente la propuesta</div>'+
+        '<div style="padding:10px 18px;border-bottom:1px solid var(--g4);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
+          '<div>'+
+            '<div style="font-size:.8rem;font-weight:700;color:var(--wa);">🖼 Vista previa de la tarjeta</div>'+
+            '<div style="font-size:.68rem;color:var(--muted);margin-top:2px;">Así verá el cliente la propuesta</div>'+
+          '</div>'+
+          '<button onclick="copImgPC();playClick()" style="background:linear-gradient(135deg,#2d1f1f,#1a1010);border:1px solid rgba(155,28,46,.6);color:#ff9b92;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:.78rem;font-weight:700;">📋 Copiar imagen</button>'+
         '</div>'+
         '<div style="padding:16px 18px;">'+
           '<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);">'+
@@ -764,6 +807,28 @@ function genMail(){
   st('cc-clp',clp?'aprox. '+fmtN(clp)+' mensual con IVA incluido':'—');
   st('cc-plazo',pl+' meses');st('cc-asesor',as2);
   st('cc-contacto',(fo||'')+(fo&&ml?' · ':'')+ml);
+
+  // Tarjeta WSP — mismos datos
+  st('wcc-badge',pi.badge);st('wcc-fecha',hoy());
+  st('wcc-emp',em||'');
+  st('wcc-precio',ufV?ufV+' UF + IVA':'[precio] UF + IVA');
+  st('wcc-clp',clp?'aprox. '+fmtN(clp)+' mensual con IVA incluido':'—');
+  st('wcc-plazo',pl+' meses');st('wcc-asesor',as2);
+  st('wcc-contacto',(fo||'')+(fo&&ml?' · ':'')+ml);
+  sv('wcc-prod-block',
+    '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">Producto cotizado</div>'+
+    '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;">'+
+    it.map(function(i){return'<div style="font-size:.8rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;font-size:.85rem;flex-shrink:0;margin-top:1px;">✔</span><span>'+i+'</span></div>';}).join('')+
+    '</div>'
+  );
+  sv('wcc-dcto-block',hayDc?
+    '<div style="margin-top:12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:14px;">'+
+      '<span style="font-size:2rem;font-weight:900;color:#2ecc71;">−'+dc+'%</span>'+
+      '<div><div style="font-size:.72rem;color:#888;text-decoration:line-through;">Lista: '+(ufL?ufL+' UF':'—')+'</div>'+
+      '<div style="font-size:.78rem;color:#bbb;">Precio final: '+(ufV?ufV+' UF':'—')+'</div></div>'+
+    '</div>'
+  :'');
 
   // Producto + beneficios — 2 columnas con iconos
   var mid=Math.ceil(it.length/2);
