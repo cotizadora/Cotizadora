@@ -24,11 +24,11 @@ header{background:linear-gradient(135deg,var(--rd),#a01f30 60%,#6e1220);padding:
 .qcount{color:var(--gn);font-size:.9rem;font-weight:700;text-align:center;padding-top:2px;}
 /* NAV — scroll horizontal en móvil, sin corte */
 nav{background:var(--g2);border-bottom:2px solid var(--g4);display:flex;
-  position:fixed;top:65px;left:0;right:0;z-index:199;overflow-x:auto;
+  position:fixed;top:120px;left:0;right:0;z-index:199;overflow-x:auto;
   scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
   scrollbar-width:none;}
 nav::-webkit-scrollbar{display:none;}
-body{padding-top:107px;}
+body{padding-top:162px;}
 /* Indicador de scroll */
 nav::after{content:'›';position:absolute;right:0;top:0;bottom:0;width:28px;
   background:linear-gradient(90deg,transparent,rgba(30,30,30,.95));
@@ -47,7 +47,7 @@ nav::after{content:'›';position:absolute;right:0;top:0;bottom:0;width:28px;
 .dot{width:7px;height:7px;border-radius:50%;background:var(--gn);display:none;}
 .tab.has-quote .dot{display:inline-block;}
 /* Flecha de scroll nav */
-.nav-scroll-hint{position:fixed;right:4px;top:65px;height:42px;width:22px;
+.nav-scroll-hint{position:fixed;right:4px;top:120px;height:42px;width:22px;
   display:flex;align-items:center;justify-content:center;z-index:200;
   color:rgba(255,255,255,.4);font-size:.85rem;pointer-events:none;
   animation:blink 1.5s infinite;}
@@ -218,7 +218,7 @@ footer{text-align:center;padding:12px;font-size:.63rem;color:#444;
 <body>
 <header>
   <div style="display:flex;align-items:center;gap:14px;">
-    <img src="logo-equifax.png" alt="Equifax" id="header-logo" style="height:42px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">
+    <img src="logo-equifax.png" alt="Equifax" id="header-logo" style="height:96px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">
     <div>
       <div style="font-size:1.1rem;font-weight:900;letter-spacing:1px;color:#fff;">CotizadorGo!</div>
       <div class="logo-sub">Herramienta Comercial Equifax Chile</div>
@@ -965,9 +965,7 @@ function genMail(){
     '<table width="640" cellpadding="0" cellspacing="0" border="0" align="center" style="font-family:Arial,Helvetica,sans-serif;width:640px;border-collapse:collapse;">'+
     '<tr><td bgcolor="#0d0308" style="background-color:#0d0308;padding:0 3px;">'+
     '<table width="634" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,Helvetica,sans-serif;width:634px;border-collapse:collapse;">'+
-
     '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:5px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
     '<tr><td bgcolor="#5a0e1a" style="background-color:#5a0e1a;padding:22px 28px 20px;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
         '<tr>'+
@@ -988,9 +986,7 @@ function genMail(){
         '</tr>'+
       '</table>'+
     '</td></tr>'+
-
     '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
     '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;border-left:6px solid #9b1c2e;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
         '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 26px 20px 22px;">'+
@@ -1004,7 +1000,6 @@ function genMail(){
         '</td>'+
       '</tr></table>'+
     '</td></tr>'+
-
     '<tr><td bgcolor="#f6f2f3" style="background-color:#f6f2f3;padding:0;border-left:6px solid #9b1c2e;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
         '<td bgcolor="#f6f2f3" style="background-color:#f6f2f3;padding:22px 26px 20px 22px;">'+
@@ -1014,9 +1009,7 @@ function genMail(){
         '</td>'+
       '</tr></table>'+
     '</td></tr>'+
-
     '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
     '<tr><td bgcolor="#4a0a14" style="background-color:#4a0a14;padding:22px 26px 20px;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
         (hayDc?
@@ -1048,9 +1041,7 @@ function genMail(){
         '</tr>'+
       '</table>'+
     '</td></tr>'+
-
     '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
     '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;border-left:6px solid #c8960a;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
         '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:16px 26px 14px 22px;">'+
@@ -1059,9 +1050,7 @@ function genMail(){
         '</td>'+
       '</tr></table>'+
     '</td></tr>'+
-
     '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
     '<tr><td bgcolor="#eceaec" style="background-color:#eceaec;padding:20px 26px 18px;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
         '<tr>'+
@@ -1079,13 +1068,10 @@ function genMail(){
         '</tr>'+
       '</table>'+
     '</td></tr>'+
-
     '<tr><td bgcolor="#2a050e" style="background-color:#2a050e;padding:10px 26px;text-align:center;">'+
       '<p style="margin:0;font-size:9px;color:rgba(255,200,210,.45);font-family:Arial,sans-serif;letter-spacing:1.5px;text-transform:uppercase;">Equifax Chile &nbsp;&middot;&nbsp; Informaci&oacute;n confidencial &nbsp;&middot;&nbsp; Solo para el destinatario autorizado</p>'+
     '</td></tr>'+
-
     '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:4px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
     '</table></td></tr></table>';
 
   sv('tpl-rich-outlook', _htmlOutlook);
