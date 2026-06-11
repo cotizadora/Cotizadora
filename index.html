@@ -34,6 +34,33 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .htool-btn{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;
   border-radius:8px;padding:9px 13px;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s;}
 .htool-btn:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
+/* botón de usuario (datos del ejecutivo/a) */
+.user-btn{display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.22);
+  border-radius:30px;padding:5px 13px 5px 5px;cursor:pointer;font-family:inherit;transition:.15s;max-width:190px;}
+.user-btn:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
+.user-btn img{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--g3);border:2px solid rgba(255,255,255,.35);flex-shrink:0;}
+.user-btn span{color:#fff;font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* editor de precio compacto con ▲▼ */
+.price-edit{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 4px;}
+.price-edit input{background:rgba(0,0,0,.4);border:2px solid rgba(155,28,46,.55);border-radius:10px;color:var(--y);
+  font-family:inherit;font-size:1.7rem;font-weight:900;text-align:center;width:130px;padding:8px 6px;}
+.price-edit input:focus{outline:none;border-color:var(--y);box-shadow:0 0 0 3px rgba(240,192,64,.25);}
+.price-edit .unit{font-size:1rem;font-weight:800;color:var(--wa);}
+.stepper{display:flex;flex-direction:column;gap:4px;}
+.stepper button{background:var(--g3);border:1px solid var(--g4);color:#fff;width:42px;height:30px;border-radius:8px;
+  cursor:pointer;font-size:1rem;line-height:1;font-weight:800;transition:.12s;}
+.stepper button:hover{background:var(--r);border-color:var(--rl);}
+
+/* foto del ejecutivo en el modal */
+.exec-photo-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--g3);}
+.exec-photo-row img{width:78px;height:78px;border-radius:50%;object-fit:cover;background:var(--g2);border:3px solid var(--r);flex-shrink:0;}
+.photo-actions{display:flex;flex-direction:column;gap:8px;}
+.photo-actions .hint{font-size:.72rem;color:var(--wb);}
+.btn-foto{background:var(--bl);color:#fff;border:none;border-radius:9px;padding:10px 16px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;}
+.btn-foto:hover{background:#2980b9;}
+.exec-save{width:100%;background:var(--gn);color:#06210f;border:none;border-radius:10px;padding:14px;cursor:pointer;font-family:inherit;font-weight:800;font-size:1rem;margin-top:6px;}
+.exec-save:hover{box-shadow:0 0 18px rgba(46,204,113,.5);}
 
 /* ── BARRA DE PRODUCTOS (gobierna todo) ───────────── */
 #prodbar{position:fixed;top:var(--headH);left:0;right:0;z-index:280;height:var(--barH);
@@ -230,12 +257,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <label>UF Hoy</label>
       <input type="number" id="uf-global" value="40644" step="1">
     </div>
-    <div class="uf-box">
-      <label>Cotizaciones</label>
-      <div class="qc" id="quote-count">0</div>
-    </div>
     <button class="htool-btn" onclick="openUF()">⇄ UF</button>
-    <button class="htool-btn" onclick="openQuotes()">💾 Guardadas</button>
+    <button class="user-btn" id="user-btn" onclick="openExec()" title="Mis datos de ejecutivo/a">
+      <img id="user-avatar" alt="">
+      <span id="user-name">Ejecutivo/a</span>
+    </button>
   </div>
 </header>
 
@@ -248,41 +274,37 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 <div id="workstation" class="m-config">
 
-  <!-- ════════ PANEL IZQUIERDO — CONFIGURACIÓN + RESUMEN ════════ -->
+  <!-- ════════ PANEL IZQUIERDO — CLIENTE · PRODUCTO · CONFIG · RESUMEN ════════ -->
   <section id="left-panel">
+
+    <!-- 1 · DATOS DEL CLIENTE (siempre arriba, lo que cambia en cada cotización) -->
+    <div class="block">
+      <div class="block-t">👤 Datos del cliente</div>
+      <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label>
+      <div id="dest-fields" class="cfg-grid">
+        <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
+        <div class="cfg-2">
+          <div class="fld"><label>RUT</label><input type="text" id="mr" placeholder="76.XXX.XXX-X" oninput="onClientChange()"></div>
+          <div class="fld"><label>Contacto</label><input type="text" id="mn" placeholder="Sr. García" oninput="onClientChange()"></div>
+        </div>
+        <div class="cfg-2">
+          <div class="fld"><label>Correo</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="onClientChange()"></div>
+          <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 …" oninput="onClientChange()"></div>
+        </div>
+        <div class="fld"><label>Observaciones</label><input type="text" id="cli-obs" placeholder="Notas internas / contexto" oninput="onClientChange()"></div>
+      </div>
+    </div>
+
+    <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
+    <!-- 3 · CONFIGURACIÓN COMERCIAL del producto activo -->
     <div class="block">
       <div class="block-t">⚙ Configuración <span id="cfg-prod-name" style="color:var(--wa);font-weight:600;letter-spacing:1px;"></span></div>
       <div id="config-zone" class="cfg-grid"></div>
     </div>
 
+    <!-- 4·5·6 · BENEFICIOS · PRECIO · RESUMEN COMERCIAL -->
     <div class="block" id="summary-block">
-      <div class="block-t">💰 Resumen comercial</div>
       <div id="summary-zone"></div>
-    </div>
-
-    <div class="lbtns">
-      <button class="lbtn save" onclick="saveCurrentQuote()">💾 Guardar cotización</button>
-      <button class="lbtn sec" onclick="openQuotes()">📂 Ver guardadas</button>
-    </div>
-
-    <div class="block">
-      <div class="block-t">👤 Datos del cliente</div>
-      <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Omitir destinatario (propuesta genérica)</label>
-      <div id="dest-fields" class="cfg-grid">
-        <div class="fld"><label>Nombre contacto</label><input type="text" id="mn" placeholder="Sr. García"></div>
-        <div class="fld"><label>Empresa</label><input type="text" id="me" placeholder="Empresa SpA"></div>
-      </div>
-    </div>
-
-    <div class="block">
-      <div class="block-t">🧑‍💼 Tus datos (ejecutivo/a)</div>
-      <div class="cfg-grid">
-        <div class="fld"><label>Tu nombre</label><input type="text" id="ma" placeholder="Eduardo Pérez" oninput="saveExecField()"></div>
-        <div class="fld"><label>WhatsApp / Teléfono</label><input type="text" id="mf" placeholder="+56 9 XXXX XXXX" oninput="saveExecField()">
-          <div id="wsp-link-row" class="wsp-link-row">🟢 <a id="wsp-link" href="#" target="_blank">Abrir WhatsApp directo →</a></div>
-        </div>
-        <div class="fld"><label>Email</label><input type="text" id="ml" placeholder="ej@equifax.cl" oninput="saveExecField()"></div>
-      </div>
     </div>
   </section>
 
@@ -301,7 +323,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     <!-- puentes ocultos: refresh() los escribe, genMail() original los lee -->
     <div style="display:none" aria-hidden="true">
       <input type="hidden" id="mt"><input type="hidden" id="mu"><input type="hidden" id="mula">
-      <input type="hidden" id="mc2"><input type="hidden" id="mp"><input type="hidden" id="mr">
+      <input type="hidden" id="mc2"><input type="hidden" id="mp">
     </div>
 
     <!-- contenedor que genMail() vuelve visible -->
@@ -342,7 +364,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
           <button class="act-btn expand" onclick="ampliar('wsp')">🔍 Ampliar</button>
         </div>
         <div class="pv-frame dark">
-<div id="cot-card-wsp" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="wcc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="wcc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="wcc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div></div><div id="wcc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="wcc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="wcc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="wcc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="wcc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="wcc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="wcc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
+<div id="cot-card-wsp" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="wcc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="wcc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="wcc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div></div><div id="wcc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="wcc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="wcc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="wcc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="wcc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="wcc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="wcc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="wcc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
         </div>
         <textarea id="tpl-body" style="display:none;"></textarea>
         <div class="wa-text" id="wa-text-view"></div>
@@ -357,7 +379,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
           <button class="act-btn expand" onclick="ampliar('img')">🔍 Ampliar</button>
         </div>
         <div class="pv-frame dark">
-<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
+<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
         </div>
       </div>
 
@@ -401,10 +423,37 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   </div>
 </div>
 
-<div class="modal" id="quotes-modal">
-  <div class="modal-card" style="max-width:560px;">
-    <div class="modal-head"><h3>💾 Cotizaciones guardadas</h3><button class="modal-x" onclick="closeModal('quotes-modal')">✕</button></div>
-    <div class="modal-body"><div id="quotes-list"></div></div>
+<div class="modal" id="exec-modal">
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-head"><h3 id="exec-modal-title">🧑‍💼 Mis datos de ejecutivo/a</h3><button class="modal-x" onclick="closeModal('exec-modal')">✕</button></div>
+    <div class="modal-body">
+      <div id="exec-onboard-note" style="display:none;background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.4);border-radius:9px;padding:11px 13px;margin-bottom:16px;font-size:.86rem;color:#f0c040;">
+        👋 Bienvenido/a. Completa tus datos una vez: quedarán guardados en este equipo y no se volverán a pedir.
+      </div>
+      <div class="exec-photo-row">
+        <img id="exec-photo-prev" alt="Foto">
+        <div class="photo-actions">
+          <button class="btn-foto" onclick="document.getElementById('exec-photo-file').click()">📷 Cambiar foto · Examinar</button>
+          <input type="file" id="exec-photo-file" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none" onchange="onPhoto(this)">
+          <div class="hint">JPG · JPEG · PNG · WEBP. Si no subes foto se usa un avatar con tus iniciales.</div>
+        </div>
+      </div>
+      <div class="cfg-grid">
+        <div class="fld"><label>Nombre</label><input type="text" id="ma" placeholder="Eduardo Pérez"></div>
+        <div class="cfg-2">
+          <div class="fld"><label>Cargo</label><input type="text" id="exec-cargo" placeholder="Ejecutivo/a Comercial"></div>
+          <div class="fld"><label>Empresa</label><input type="text" id="exec-empresa" placeholder="Equifax Chile"></div>
+        </div>
+        <div class="fld"><label>Correo</label><input type="email" id="ml" placeholder="ej@equifax.cl"></div>
+        <div class="cfg-2">
+          <div class="fld"><label>Teléfono</label><input type="text" id="exec-tel" placeholder="+56 …"></div>
+          <div class="fld"><label>WhatsApp</label><input type="text" id="mf" placeholder="+56 9 XXXX XXXX"></div>
+        </div>
+        <div id="wsp-link-row" class="wsp-link-row">🟢 <a id="wsp-link" href="#" target="_blank">Abrir WhatsApp directo →</a></div>
+        <div class="fld"><label>Firma comercial</label><input type="text" id="exec-firma" placeholder="Ej: Tu aliado en gestión de riesgo"></div>
+      </div>
+      <button class="exec-save" onclick="saveExec()">✔ Guardar mis datos</button>
+    </div>
   </div>
 </div>
 
@@ -416,7 +465,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
    ESTACIÓN DE COTIZACIÓN — LÓGICA DE INTERFAZ (nueva organización)
    Reutiliza íntegramente genMail(), canvas e impresión del index original.
    ════════════════════════════════════════════════════════════════ */
-var STATE={quotes:[],logoImg:null};
+var STATE={logoImg:null,execImg:null};
 var CURRENT={key:null,override:null};   // override = precio venta ajustado con el slider
 var LAST=null;                            // última config calculada
 
@@ -549,24 +598,26 @@ function renderSummary(c){
   var ufL=c.ufLista,ufV=c.ufVenta;
   var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV>0?ufc(ufV):0;
-  var slMin=ufL>0?(ufL*0.4).toFixed(2):0,slMax=ufL>0?(ufL*1.5).toFixed(2):10;
 
   var html=''+
     '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
-    '<div class="price-wrap">'+
-      '<div class="price-lbl">Precio de venta (cargo fijo)</div>'+
-      '<div class="price-big" id="s-price-big">'+(ufV>0?ufd(ufV)+' UF + IVA':'— UF')+'</div>'+
+    /* 4 · BENEFICIOS Y DESCRIPCIÓN */
+    '<div class="block-t" style="margin:14px 0 8px;">✅ Beneficios y descripción</div>'+
+    '<ul class="benefits" id="s-benefits">'+items.map(function(i){return '<li><span class="ck">✔</span><span>'+i+'</span></li>';}).join('')+'</ul>'+
+    (c.note?'<div class="note-inline" id="s-note" style="margin-top:10px;">'+c.note+'</div>':'')+
+    /* 5 · PRECIO FINAL (editable directo con ▲▼) */
+    '<div class="price-wrap" style="margin-top:16px;">'+
+      '<div class="price-lbl">Precio de venta (cargo fijo mensual)</div>'+
+      '<div class="price-edit">'+
+        '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)">'+
+        '<span class="unit">UF + IVA</span>'+
+        '<div class="stepper"><button type="button" onclick="stepPrice(0.1)" aria-label="Subir">▲</button><button type="button" onclick="stepPrice(-0.1)" aria-label="Bajar">▼</button></div>'+
+      '</div>'+
       '<div class="price-clp" id="s-price-clp">'+(clp>0?'≈ '+fmtN(clp)+' mensual con IVA':'—')+'</div>'+
       '<div id="s-disc">'+(hayDc?discHTML(dc,ufL,ufV):'')+'</div>'+
     '</div>'+
-    (ufL>0?
-    '<div class="slider-box">'+
-      '<div class="st">🎛 Ajustar precio de venta al cliente</div>'+
-      '<div class="slider-row">'+
-        '<input type="range" id="sl-main" min="'+slMin+'" max="'+slMax+'" step="0.1" value="'+ufV+'" oninput="onSlide(this.value)">'+
-        '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)">'+
-      '</div>'+
-    '</div>':'')+
+    /* 6 · RESUMEN COMERCIAL */
+    '<div class="block-t" style="margin:16px 0 8px;">💰 Resumen comercial</div>'+
     '<div class="metrics">'+
       metric('Precio lista','m-lista','y',ufL>0?ufd(ufL)+' UF':'—')+
       metric('Precio venta','m-venta','g',ufV>0?ufd(ufV)+' UF':'—')+
@@ -577,15 +628,19 @@ function renderSummary(c){
       (c.pago?metric('Pago anticipado','m-pago','y',c.pago+' UF'):'')+
       (c.cons?metric('Consultas RI','m-cons','b',c.cons):'')+
     '</div>'+
-    (c.note?'<div class="note-inline" id="s-note">'+c.note+'</div>':'')+
-    '<div class="block-t" style="margin:18px 0 8px;">✅ Argumentos de venta</div>'+
-    '<ul class="benefits" id="s-benefits">'+items.map(function(i){return '<li><span class="ck">✔</span><span>'+i+'</span></li>';}).join('')+'</ul>'+
     '<div class="cond-row" style="margin-top:14px;">'+
       '<div class="ci"><label>Contrato</label><div class="cv">'+(c.plazo||'12')+' meses</div></div>'+
       '<div class="ci"><label>Modalidad</label><div class="cv" style="color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
       '<div class="ci"><label>Documentos</label><div class="cv" style="font-weight:600;color:#ccc;">Ficha · Cédula · Escritura</div></div>'+
     '</div>';
   $('summary-zone').innerHTML=html;
+}
+/* ▲▼ ajustan el precio de venta directamente */
+function stepPrice(delta){
+  if(!LAST)return;
+  var cur=(CURRENT.override!==null?CURRENT.override:LAST.ufVenta)||0;
+  var v=Math.max(0,Math.round((cur+delta)*100)/100);
+  CURRENT.override=v;lightUpdate(v);
 }
 function metric(lbl,id,cls,val){return '<div class="metric"><label>'+lbl+'</label><div class="v '+cls+'" id="'+id+'">'+val+'</div></div>';}
 function discHTML(dc,ufL,ufV){
@@ -598,7 +653,6 @@ function lightUpdate(v){
   var ufL=LAST.ufLista,ufV=v;
   var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV>0?ufc(ufV):0;
-  st('s-price-big',ufV>0?ufd(ufV)+' UF + IVA':'— UF');
   st('s-price-clp',clp>0?'≈ '+fmtN(clp)+' mensual con IVA':'—');
   sv('s-disc',hayDc?discHTML(dc,ufL,ufV):'');
   st('m-venta',ufV>0?ufd(ufV)+' UF':'—');
@@ -607,7 +661,6 @@ function lightUpdate(v){
   st('m-anu-uf',ufV>0?ufd(ufV*12)+' UF':'—');
   st('m-anu-clp',clp>0?fmtN(clp*12):'—');
   var sn=$('sln-main');if(sn&&document.activeElement!==sn)sn.value=ufd(ufV);
-  var sl=$('sl-main');if(sl&&document.activeElement!==sl)sl.value=ufV;
   LAST.ufVenta=ufV;
   setBridge('mu',ufV);
   genMail();syncWA();
@@ -630,19 +683,6 @@ function onSlide(v){v=parseFloat(v);if(isNaN(v)||v<0)return;CURRENT.override=v;l
 function onClientChange(){genMail();syncWA();}
 function syncWA(){var t=$('tpl-body'),o=$('wa-text-view');if(t&&o)o.textContent=t.value;}
 
-function saveExecField(){
-  var ma=$('ma'),mf=$('mf'),ml=$('ml');
-  if(ma&&ma.value.trim())_lsSet('eq_exec_name',ma.value.trim());
-  if(mf)_lsSet('eq_exec_tel',mf.value.trim());
-  if(ml)_lsSet('eq_exec_email',ml.value.trim());
-  updWspLink();genMail();syncWA();
-}
-function resetExec(){
-  if(!confirm('¿Cambiar tus datos de ejecutivo/a?'))return;
-  try{['eq_exec_name','eq_exec_tel','eq_exec_email','eq_exec_date'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
-  ['ma','mf','ml'].forEach(function(id){var e=$(id);if(e)e.value='';});
-  updWspLink();onClientChange();toast('Datos borrados.','ok','mail-toast');
-}
 function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'none':'flex';onClientChange();}
 
 /* ════════ SELECCIÓN DE PRODUCTO (gobierna toda la interfaz) ════════ */
@@ -686,44 +726,61 @@ function cUF(){var u=parseFloat(gv('uf-i'))||0;srUF('res-uf','<b>'+u+' UF</b> = 
 function cCLP(){var c=parseFloat(gv('clp-i'))||0;srUF('res-clp',fmtN(c)+' = <b>'+(c/getUF()).toFixed(6)+' UF</b>');}
 function cCom(){var v=parseFloat(gv('com-u'))||0,p=parseFloat(gv('com-p'))||0,com=v*(p/100);srUF('res-com','Comisión: <b>'+fmtN(ufn(com))+'</b> ('+com.toFixed(6)+' UF)');}
 
-/* ════════ COTIZACIONES GUARDADAS ════════ */
-function captureVals(){var o={};document.querySelectorAll('#config-zone select,#config-zone input').forEach(function(e){o[e.id]=e.value;});return o;}
-function saveCurrentQuote(){
-  if(!LAST)return;
-  var pi=PINFO[LAST.tipo]||{n:'Producto'};
-  STATE.quotes.push({
-    key:CURRENT.key,vals:captureVals(),override:CURRENT.override,
-    mn:gv('mn'),me:gv('me'),
-    prod:pi.n,uf:ufd(LAST.ufVenta),meta:(gv('me')||'Sin empresa')+' · '+hoy(),fecha:hoy()
-  });
-  $('quote-count').textContent=STATE.quotes.length;
-  playSound('save');toast('✔ Cotización guardada','ok','mail-toast');
+/* ════════ DATOS DEL EJECUTIVO/A (modal + foto + almacenamiento local) ════════ */
+function openExec(){
+  loadExecFields();
+  $('exec-onboard-note').style.display='none';
+  $('exec-modal-title').textContent='🧑‍💼 Mis datos de ejecutivo/a';
+  refreshPhotoPrev();updWspLink();
+  $('exec-modal').classList.add('on');
 }
-function openQuotes(){renderQuotesList();$('quotes-modal').classList.add('on');}
-function renderQuotesList(){
-  var el=$('quotes-list');
-  if(!STATE.quotes.length){el.innerHTML='<p style="color:var(--wa);font-size:.9rem;">Aún no hay cotizaciones guardadas. Usa “💾 Guardar cotización”.</p>';return;}
-  el.innerHTML=STATE.quotes.map(function(q,i){
-    return '<div class="qrow"><div><div class="qp">'+q.prod+'</div><div class="qm">'+q.meta+'</div></div>'+
-      '<div class="qpr">'+q.uf+' UF</div>'+
-      '<div class="qa"><button class="load" onclick="loadQuote('+i+')">Cargar</button><button class="del" onclick="delQuote('+i+')">✕</button></div></div>';
-  }).join('');
+function loadExecFields(){
+  var map={ma:'eq_exec_name',exec_cargo:'eq_exec_cargo',exec_empresa:'eq_exec_company',
+    ml:'eq_exec_email',exec_tel:'eq_exec_tel2',mf:'eq_exec_tel',exec_firma:'eq_exec_firma'};
+  for(var dom in map){var e=$(dom.replace('_','-'));var v=_lsGet(map[dom]);if(e&&v!=null)e.value=v;}
 }
-function loadQuote(i){
-  var q=STATE.quotes[i];if(!q)return;
-  CURRENT.key=q.key;CURRENT.override=null;
-  document.querySelectorAll('.pbtn').forEach(function(b){b.classList.toggle('on',b.dataset.key===q.key);});
-  var p=PRODUCTS.find(function(x){return x.key===q.key;});$('cfg-prod-name').textContent=p?'· '+p.lb:'';
-  $('config-zone').innerHTML=cfgHTML(q.key);
-  Object.keys(q.vals||{}).forEach(function(id){var e=$(id);if(e)e.value=q.vals[id];});
-  if($('mn'))$('mn').value=q.mn||'';if($('me'))$('me').value=q.me||'';
-  CURRENT.override=q.override;
-  refresh();
-  closeModal('quotes-modal');
-  if(window.matchMedia('(max-width:880px)').matches)setMobileView('preview');
-  toast('✔ Cotización cargada','ok','mail-toast');
+function saveExec(){
+  var nombre=gv('ma');
+  if(!nombre){toast('Ingresa al menos tu nombre','err','global-toast');return;}
+  _lsSet('eq_exec_name',nombre);
+  _lsSet('eq_exec_cargo',gv('exec-cargo'));
+  _lsSet('eq_exec_company',gv('exec-empresa'));
+  _lsSet('eq_exec_email',gv('ml'));
+  _lsSet('eq_exec_tel2',gv('exec-tel'));
+  _lsSet('eq_exec_tel',gv('mf'));
+  _lsSet('eq_exec_firma',gv('exec-firma'));
+  _lsSet('eq_exec_date',new Date().toDateString());
+  refreshUserBtn();updWspLink();preloadPhoto(null);genMail();syncWA();
+  closeModal('exec-modal');
+  toast('✔ Datos guardados','ok','global-toast');
 }
-function delQuote(i){STATE.quotes.splice(i,1);$('quote-count').textContent=STATE.quotes.length;renderQuotesList();}
+/* ── FOTO ── */
+function onPhoto(input){
+  var f=input.files&&input.files[0];if(!f)return;
+  if(!/image\/(jpeg|jpg|png|webp)/i.test(f.type)){toast('Formato no permitido (usa JPG, PNG o WEBP)','err','global-toast');return;}
+  var r=new FileReader();
+  r.onload=function(){
+    _lsSet('eq_exec_photo',r.result);
+    refreshPhotoPrev();refreshUserBtn();preloadPhoto(null);genMail();
+    toast('✔ Foto actualizada','ok','global-toast');
+  };
+  r.readAsDataURL(f);
+}
+function defaultAvatar(name){
+  var ini=(name||'EQ').trim().split(/\s+/).map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()||'EQ';
+  var bg='#9b1c2e';
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">'+
+    '<rect width="160" height="160" fill="'+bg+'"/>'+
+    '<text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="Arial,Segoe UI,sans-serif" '+
+    'font-size="68" font-weight="700" fill="#f0c040">'+ini+'</text></svg>';
+  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+}
+function execPhoto(){var p=_lsGet('eq_exec_photo');return (p&&p.length>30)?p:defaultAvatar(_lsGet('eq_exec_name')||gv('ma'));}
+function refreshPhotoPrev(){var e=$('exec-photo-prev');if(e)e.src=execPhoto();}
+function refreshUserBtn(){
+  var av=$('user-avatar');if(av)av.src=execPhoto();
+  var nm=$('user-name');if(nm)nm.textContent=(_lsGet('eq_exec_name')||'Ejecutivo/a');
+}
 
 /* cerrar modales al hacer clic en el fondo */
 document.addEventListener('click',function(e){if(e.target.classList&&e.target.classList.contains('modal'))e.target.classList.remove('on');});
@@ -758,31 +815,17 @@ var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.0
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
 var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
 var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
-function loadExecutivoFields(){
-  var sn=_lsGet('eq_exec_name'),st2=_lsGet('eq_exec_tel'),se=_lsGet('eq_exec_email');
-  var ma=document.getElementById('ma');if(ma&&sn&&!ma.value)ma.value=sn;
-  var mf=document.getElementById('mf');if(mf&&st2&&!mf.value)mf.value=st2;
-  var ml=document.getElementById('ml');if(ml&&se&&!ml.value)ml.value=se;
-  updWspLink();
-}
+function loadExecutivoFields(){loadExecFields();updWspLink();}
 function loadExecutivo(){
-  var sn=_lsGet('eq_exec_name'),st2=_lsGet('eq_exec_tel'),se=_lsGet('eq_exec_email'),sd=_lsGet('eq_exec_date');
-  var today=new Date().toDateString();
-  if(sn){var ma=document.getElementById('ma');if(ma)ma.value=sn;var mf=document.getElementById('mf');if(mf&&st2)mf.value=st2;var ml=document.getElementById('ml');if(ml&&se)ml.value=se;}
-  if(!sn||(sd&&sd!==today&&!sn)){
+  refreshUserBtn();
+  if(!_lsGet('eq_exec_name')){
+    /* PRIMER ARRANQUE: solicita los datos una sola vez mediante el panel compacto */
     setTimeout(function(){
-      var nombre=prompt('👤 ¿Cuál es tu nombre como ejecutivo/a?\n(Se guardará y no volverá a preguntar hoy)','');
-      if(nombre&&nombre.trim()){
-        _lsSet('eq_exec_name',nombre.trim());_lsSet('eq_exec_date',today);
-        var tel=prompt('📱 ¿Tu número WhatsApp/Tel? (opcional):','');
-        if(tel&&tel.trim())_lsSet('eq_exec_tel',tel.trim());
-        var email=prompt('✉ ¿Tu email? (opcional):','');
-        if(email&&email.trim())_lsSet('eq_exec_email',email.trim());
-        var ma2=document.getElementById('ma');if(ma2)ma2.value=nombre.trim();
-        var mf2=document.getElementById('mf');if(mf2&&tel&&tel.trim())mf2.value=tel.trim();
-        var ml2=document.getElementById('ml');if(ml2&&email&&email.trim())ml2.value=email.trim();
-      }
-    },800);
+      loadExecFields();refreshPhotoPrev();
+      $('exec-onboard-note').style.display='block';
+      $('exec-modal-title').textContent='👋 Configura tus datos de ejecutivo/a';
+      $('exec-modal').classList.add('on');
+    },600);
   }
 }
 function genMail(){
@@ -792,6 +835,10 @@ function genMail(){
   var n=skip?'Cliente':gv('mn')||'Sr./Sra. [Nombre]';
   var em=skip?'':gv('me')||'',ru=skip?'':gv('mr')||'';
   var as2=gv('ma')||'[Asesor]',fo=gv('mf')||'',ml=gv('ml')||'';
+  var exCargo=(typeof _lsGet==='function'&&_lsGet('eq_exec_cargo'))||'Ejecutivo/a Comercial';
+  var exEmpresa=(typeof _lsGet==='function'&&_lsGet('eq_exec_company'))||'Equifax Chile';
+  var exFirma=(typeof _lsGet==='function'&&_lsGet('eq_exec_firma'))||'';
+  var exFoto=(typeof execPhoto==='function')?execPhoto():'';
   updWspLink();
   var telNum=fo.trim().replace(/\s+/g,'').replace(/[^+\d]/g,'');
   var wspHref=telNum.length>=8?'https://wa.me/'+telNum.replace(/^\+/,''):'';
@@ -818,6 +865,9 @@ function genMail(){
   st('wcc-clp',clp?'aprox. '+fmtN(clp)+' mensual con IVA incluido':'—');
   st('wcc-plazo',pl+' meses');st('wcc-asesor',as2);
   st('wcc-contacto',(fo||'')+(fo&&ml?' · ':'')+ml);
+  var _fsrc=(typeof execPhoto==='function')?execPhoto():'';
+  var _ccf=$('cc-foto');if(_ccf)_ccf.src=_fsrc;
+  var _wccf=$('wcc-foto');if(_wccf)_wccf.src=_fsrc;
   sv('wcc-prod-block',
     '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">Producto cotizado</div>'+
     '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+'</div>'+
@@ -886,7 +936,8 @@ function genMail(){
     "Quedo a su disposici\u00f3n \ud83e\udd1d\n\n" +
     "\u2014\n" +
     "*" + as2 + "*\n" +
-    "_Ejecutivo/a Comercial \u00b7 Equifax Chile_\n" +
+    "_" + exCargo + " \u00b7 " + exEmpresa + "_\n" +
+    (exFirma ? "_" + exFirma + "_\n" : "") +
     (fo ? "\ud83d\udcf1 " + fo + "\n" : "") +
     (ml ? "\u2709 " + ml + "\n" : "") +
     "";
@@ -990,10 +1041,14 @@ function genMail(){
     '<div style="background:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
         '<tr>'+
+          '<td valign="top" width="64" style="padding-right:14px;">'+
+            (exFoto?'<img src="'+exFoto+'" width="56" height="56" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid #c8960a;display:block;">':'')+
+          '</td>'+
           '<td valign="top">'+
-            '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#666;font-family:Arial,sans-serif;margin-bottom:5px;">Ejecutivo/a Comercial</div>'+
+            '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#666;font-family:Arial,sans-serif;margin-bottom:5px;">'+exCargo+'</div>'+
             '<div style="font-size:17px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+as2+'</div>'+
-            '<div style="margin-top:3px;font-size:11px;color:#c8960a;font-family:Arial,sans-serif;">Equifax Chile</div>'+
+            '<div style="margin-top:3px;font-size:11px;color:#c8960a;font-family:Arial,sans-serif;">'+exEmpresa+'</div>'+
+            (exFirma?'<div style="margin-top:3px;font-size:11px;font-style:italic;color:#b0b0b0;font-family:Arial,sans-serif;">'+exFirma+'</div>':'')+
             (fo?'<div style="margin-top:6px;font-size:12px;color:#90d490;font-family:Arial,sans-serif;">&#128241; '+fo+'</div>':'')+
             (ml?'<div style="margin-top:2px;font-size:12px;color:#90b8d4;font-family:Arial,sans-serif;">&#9993; '+ml+'</div>':'')+
           '</td>'+
@@ -1161,10 +1216,14 @@ function genMail(){
       '<td bgcolor="#f0ecee" style="background-color:#f0ecee;padding:20px 22px 18px;">'+
         '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
           '<tr>'+
+            '<td valign="top" width="66" style="padding-right:14px;">'+
+              (exFoto?'<img src="'+exFoto+'" width="58" height="58" alt="" style="width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid #9b1c2e;display:block;">':'')+
+            '</td>'+
             '<td valign="top">'+
-              '<p style="margin:0 0 3px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">EJECUTIVO/A COMERCIAL</p>'+
+              '<p style="margin:0 0 3px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">'+exCargo.toUpperCase()+'</p>'+
               '<p style="margin:0;font-size:18px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;">'+as2+'</p>'+
-              '<p style="margin:3px 0 0;font-size:11px;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1px;">EQUIFAX CHILE</p>'+
+              '<p style="margin:3px 0 0;font-size:11px;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1px;">'+exEmpresa.toUpperCase()+'</p>'+
+              (exFirma?'<p style="margin:3px 0 0;font-size:11px;font-style:italic;color:#555555;font-family:Arial,sans-serif;">'+exFirma+'</p>':'')+
               (fo?'<p style="margin:8px 0 0;font-size:12px;color:#111111;font-family:Arial,sans-serif;font-weight:700;">&#128241; '+fo+'</p>':'')+
               (ml?'<p style="margin:3px 0 0;font-size:12px;color:#1a3a5a;font-family:Arial,sans-serif;">&#9993; '+ml+'</p>':'')+
             '</td>'+
@@ -1275,6 +1334,21 @@ function drawLogo(ctx,logoImg,x,y,h){
   var tx=tc.getContext('2d');tx.drawImage(logoImg,0,0,w*2,h*2);
   tx.globalCompositeOperation='source-in';tx.fillStyle='#fff';tx.fillRect(0,0,w*2,h*2);
   ctx.drawImage(tc,x,y,w,h);
+}
+function preloadPhoto(cb){
+  var src=(typeof execPhoto==='function')?execPhoto():'';
+  if(!src){STATE.execImg=null;if(cb)cb(null);return;}
+  var img=new Image();
+  img.onload=function(){STATE.execImg=img;if(cb)cb(img);};
+  img.onerror=function(){STATE.execImg=null;if(cb)cb(null);};
+  img.src=src;
+}
+function drawCircleImg(ctx,img,cx,cy,r){
+  if(!img||!img.complete||!img.naturalWidth)return false;
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.closePath();ctx.clip();
+  ctx.drawImage(img,cx-r,cy-r,r*2,r*2);ctx.restore();
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.lineWidth=Math.max(2,r*0.06);ctx.strokeStyle='#f0c040';ctx.stroke();ctx.restore();
+  return true;
 }
 
 // ── IMAGEN PC — layout dinámico sin superposiciones ──
@@ -1415,8 +1489,9 @@ function getCanvasPC(){
       ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('EJECUTIVO/A COMERCIAL',P,ey2);ey2+=18;
       ctx.font='bold 14px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.asesor,P,ey2);
       if(d.contacto){ctx.font='11px Arial';ctx.fillStyle='#3498db';ctx.fillText(d.contacto,P,ey2+17);}
+      drawCircleImg(ctx,STATE.execImg,W-P-26,y+(hExec/2),24);
       ctx.textAlign='right';ctx.font='8px Arial';ctx.fillStyle='#3a3a3a';
-      ctx.fillText('Valores + IVA · Sujeto a vigencia UF',W-P,ey2+8);ctx.textAlign='left';
+      ctx.fillText('Valores + IVA · Sujeto a vigencia UF',W-P-58,ey2+8);ctx.textAlign='left';
 
       resolve(cv);
     });
@@ -1576,6 +1651,7 @@ function getCanvasWsp(){
       ctx.fillText('EJECUTIVO/A COMERCIAL',P,ey2);ey2+=36;
       ctx.font='bold 38px Arial';ctx.fillStyle=WHITE;ctx.fillText(d.asesor,P,ey2);ey2+=46;
       if(d.contacto){ctx.font='26px Arial';ctx.fillStyle='#6ab8e8';ctx.fillText(d.contacto,P,ey2);}
+      drawCircleImg(ctx,STATE.execImg,W-P-58,y+(hExec/2),52);
 
       // ══ FOOTER — rojo oscuro ══
       ctx.fillStyle=REDDARK;ctx.fillRect(0,H-hFoot,W,hFoot);
@@ -1651,8 +1727,10 @@ function playClick(){playSound('click');}
    ARRANQUE — abre completamente operativo en Bundle MC 4100 + RI
    ════════════════════════════════════════════════════════════════ */
 buildProdbar();
-loadExecutivo();          // recupera/solicita datos del ejecutivo (igual que el index original)
+loadExecutivo();          // recupera datos del ejecutivo o los solicita una sola vez (modal)
 preloadLogo(null);
+preloadPhoto(null);       // avatar listo para el canvas (foto o iniciales)
+refreshUserBtn();
 
 setProduct('bundle');     // PRODUCTO PREDETERMINADO OBLIGATORIO — valores mínimos cargados
 setPreview('gmail');      // primera vista lista
@@ -1660,9 +1738,6 @@ setPreview('gmail');      // primera vista lista
 /* La UF global recalcula precios al instante */
 var _ufg=$('uf-global');
 if(_ufg)_ufg.addEventListener('input',function(){if(CURRENT.override!==null)lightUpdate(LAST.ufVenta);else refresh();});
-
-/* Datos de cliente reactivos */
-['mn','me'].forEach(function(id){var e=$(id);if(e)e.addEventListener('input',onClientChange);});
 
 /* Conversor listo aunque no se haya abierto */
 cUF();cCLP();cCom();
