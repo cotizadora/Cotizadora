@@ -3,760 +3,248 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>CotizadorGo! — Estación Comercial Equifax Chile</title>
+<title>CotizadorGo! — Herramienta Comercial Equifax Chile</title>
 <style>
-/* ══ VARIABLES ══ */
 :root{
-  --r:#9b1c2e;--rd:#6e1220;--rl:#c0263b;--rm:rgba(155,28,46,.18);
-  --g1:#0d0d0d;--g2:#161616;--g3:#1e1e1e;--g4:#272727;--g5:#333;--g6:#444;
-  --w:#efefef;--wa:#999;--mu:#666;
-  --y:#f0c040;--yn:rgba(240,192,64,.15);
-  --gn:#2ecc71;--gna:rgba(46,204,113,.12);
-  --bl:#3498db;--bla:rgba(52,152,219,.12);
-  --or:#e67e22;
-  --wsp:#25d366;--wspa:rgba(37,211,102,.1);
-  --gmail-c:rgba(234,67,53,.5);--out-c:rgba(0,114,198,.45);
-  --bar-h:58px;
-  --col-left:340px;
+  --r:#9b1c2e;--rd:#6e1220;--rl:#c0263b;
+  --g1:#111;--g2:#1e1e1e;--g3:#282828;--g4:#333;--g5:#444;
+  --w:#f0f0f0;--wa:#bbb;--y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
+  /* ── UX CLARIDAD ── */
+  --fs-base:16px;    /* texto base legible */
+  --fs-label:13px;   /* etiquetas */
+  --fs-title:20px;   /* títulos sección */
+  --fs-price:32px;   /* precio destacado */
+  --fs-mega:42px;    /* precio principal */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html{height:100%;}
-body{
-  background:var(--g1);color:var(--w);
-  font-family:'Segoe UI',Arial,sans-serif;font-size:13px;
-  min-height:100%;
-}
-
-/* ══ BARRA OPERACIONAL SUPERIOR ══ */
-#opbar{
-  position:fixed;top:0;left:0;right:0;z-index:300;
-  background:linear-gradient(135deg,#3a0810 0%,var(--rd) 40%,#6e1420 100%);
-  border-bottom:1px solid rgba(255,255,255,.08);
-  box-shadow:0 2px 24px rgba(0,0,0,.7);
-  height:var(--bar-h);
-  display:flex;align-items:center;gap:0;padding:0;
-}
-#opbar-logo{
-  display:flex;align-items:center;gap:10px;padding:0 16px;
-  border-right:1px solid rgba(255,255,255,.08);
-  height:100%;flex-shrink:0;
-}
-#opbar-logo img{height:34px;width:auto;filter:brightness(0) invert(1);display:block;}
-#opbar-brand{display:flex;flex-direction:column;}
-#opbar-brand .t1{font-size:.72rem;font-weight:800;letter-spacing:.5px;color:#fff;}
-#opbar-brand .t2{font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);}
-
-#opbar-fields{
-  display:flex;align-items:center;gap:0;flex:1;overflow-x:auto;
-  scrollbar-width:none;padding:0 8px;
-}
-#opbar-fields::-webkit-scrollbar{display:none;}
-.obf{
-  display:flex;flex-direction:column;gap:1px;padding:4px 10px;
-  border-right:1px solid rgba(255,255,255,.05);min-width:0;flex-shrink:0;
-}
-.obf label{
-  font-size:.48rem;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(255,255,255,.38);white-space:nowrap;
-}
-.obf input{
-  background:none;border:none;color:#fff;font-size:.82rem;font-family:inherit;
-  outline:none;width:110px;min-width:0;
-}
-.obf input::placeholder{color:rgba(255,255,255,.25);}
-.obf input:focus{background:rgba(255,255,255,.05);border-radius:3px;padding:1px 3px;margin:-1px -3px;}
-
-#obf-prod-wrap{
-  display:flex;flex-direction:column;gap:1px;padding:4px 10px;
-  border-right:1px solid rgba(255,255,255,.05);flex-shrink:0;
-}
-#obf-prod-wrap label{font-size:.48rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.38);}
-#ob-prod{
-  background:none;border:none;color:#f0c040;font-size:.82rem;
-  font-family:inherit;font-weight:700;outline:none;cursor:pointer;
-  min-width:140px;
-}
-#ob-prod option{background:#1e1e1e;color:#fff;}
-
-#uf-zone{
-  display:flex;align-items:center;gap:6px;padding:0 12px;
-  border-right:1px solid rgba(255,255,255,.05);flex-shrink:0;
-}
-#uf-zone label{font-size:.48rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.38);}
-#uf-val-display{font-size:.95rem;font-weight:800;color:var(--y);}
-#uf-realtime-info{font-size:.5rem;color:rgba(255,255,255,.3);white-space:nowrap;}
-#uf-global{background:none;border:none;color:var(--y);font-size:.95rem;font-weight:700;width:80px;font-family:inherit;outline:none;text-align:center;}
-
-#opbar-actions{
-  display:flex;align-items:center;gap:6px;padding:0 12px;flex-shrink:0;
-}
-.oba{
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  color:#fff;border-radius:6px;padding:5px 12px;cursor:pointer;
-  font-family:inherit;font-size:.73rem;font-weight:600;
-  transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px;
-}
-.oba:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.2);}
-.oba.wsp{border-color:rgba(37,211,102,.4);color:#25d366;background:rgba(37,211,102,.06);}
-.oba.wsp:hover{background:rgba(37,211,102,.15);}
-.qcount-badge{
-  background:var(--gn);color:#000;font-size:.6rem;font-weight:800;
-  border-radius:10px;padding:1px 6px;min-width:18px;text-align:center;
-}
-
-/* ══ LAYOUT PRINCIPAL ══ */
-body{padding-top:var(--bar-h);}
-#workspace{
-  display:grid;
-  grid-template-columns:var(--col-left) 1fr 1fr 1fr;
-  gap:0;
-  min-height:calc(100vh - var(--bar-h));
-  align-items:start;
-}
-
-/* ══ COLUMNA IZQUIERDA — COTIZADORA ══ */
-#col-left{
-  border-right:1px solid var(--g4);
-  background:var(--g2);
-  min-height:calc(100vh - var(--bar-h));
-  position:sticky;top:var(--bar-h);
-  max-height:calc(100vh - var(--bar-h));
-  overflow-y:auto;
-  scrollbar-width:thin;
-  scrollbar-color:var(--g5) transparent;
-}
-#col-left::-webkit-scrollbar{width:4px;}
-#col-left::-webkit-scrollbar-thumb{background:var(--g5);border-radius:4px;}
-
-.col-section{padding:12px 14px;border-bottom:1px solid var(--g4);}
-.col-title{
-  font-size:.6rem;letter-spacing:2px;text-transform:uppercase;
-  color:var(--rl);margin-bottom:8px;display:flex;align-items:center;gap:6px;
-}
-.col-title .ico{font-size:.85rem;}
-
-/* PANEL DATOS CLIENTE */
-#crm-paste-area{
-  width:100%;background:var(--g1);border:1px dashed var(--g5);
-  color:var(--wa);font-family:inherit;font-size:.72rem;
-  border-radius:6px;padding:8px;resize:vertical;min-height:52px;max-height:100px;
-  margin-bottom:6px;transition:border-color .15s;
-}
-#crm-paste-area:focus{outline:none;border-color:var(--rl);}
-#crm-paste-area::placeholder{color:var(--mu);}
-
-/* FICHAS DE PRODUCTOS */
-.prod-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
-.prod-chip{
-  background:var(--g3);border:1px solid var(--g4);border-radius:5px;
-  padding:4px 8px;cursor:pointer;font-size:.65rem;font-weight:600;
-  color:var(--wa);transition:all .15s;white-space:nowrap;
-}
-.prod-chip.on{background:var(--r);border-color:var(--r);color:#fff;}
-.prod-chip:hover:not(.on){border-color:var(--rl);color:#fff;}
-
-/* CALCULADORAS — ocultas por defecto, se muestran según selector */
-.calc-panel{display:none;}
-.calc-panel.on{display:block;}
-
-/* Campos dentro de calculadoras */
-.f{display:flex;flex-direction:column;gap:2px;margin-bottom:6px;}
-.f label{font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);}
-.f select,.f input[type=text],.f input[type=number]{
-  background:var(--g1);border:1px solid var(--g5);color:var(--w);
-  padding:6px 8px;font-family:inherit;font-size:.8rem;border-radius:4px;
-  width:100%;transition:border-color .15s;
-}
-.f select:focus,.f input:focus{outline:none;border-color:var(--rl);}
-.crow{display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;}
-.btn{
-  background:var(--r);border:none;color:#fff;padding:7px 14px;cursor:pointer;
-  font-family:inherit;font-size:.76rem;font-weight:700;border-radius:5px;
-  transition:all .15s;
-}
-.btn:hover{background:var(--rl);box-shadow:0 0 12px rgba(155,28,46,.5);}
-.btn.sec{background:var(--g4);box-shadow:none;}
-.btn.sec:hover{background:var(--g5);}
-
-/* Resultado cotización */
-.res{display:none;margin-top:8px;border-radius:6px;overflow:hidden;}
-.res.on{display:block;}
-.res-head{background:var(--rd);padding:6px 10px;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.7);}
-.res-body{background:rgba(0,0,0,.3);border:1px solid rgba(155,28,46,.25);border-top:none;padding:10px;}
-.res-big{font-size:1.2rem;font-weight:700;color:var(--y);margin:4px 0 2px;}
-.rl{font-size:.76rem;color:var(--wa);margin-bottom:4px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap;}
-.rl b{color:var(--y);}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;}
-.gitem{background:var(--g3);border:1px solid var(--g4);border-radius:5px;padding:7px 8px;text-align:center;}
-.gitem label{display:block;font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);margin-bottom:2px;}
-.gitem .val{font-size:.85rem;font-weight:700;}
-.slider-wrap{margin-top:8px;background:rgba(0,0,0,.2);border-radius:5px;padding:8px 10px;}
-.sw-title{font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);margin-bottom:6px;}
-.sw-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px;}
-.sw-row input[type=range]{flex:1;min-width:80px;accent-color:var(--r);}
-.sw-row input[type=number]{background:var(--g1);border:1px solid var(--g5);color:var(--y);padding:4px 6px;font-family:inherit;font-size:.82rem;font-weight:700;border-radius:3px;width:85px;}
-.sw-row input[type=number]:focus{outline:none;border-color:var(--rl);}
-.alerta{background:rgba(240,192,64,.06);border-left:2px solid var(--y);padding:6px 8px;font-size:.68rem;color:var(--wa);margin-bottom:8px;border-radius:0 4px 4px 0;}
-.alerta b{color:var(--y);}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
-.chip{background:var(--g3);border:1px solid var(--g4);border-radius:5px;padding:5px 10px;text-align:center;}
-.chip .n{font-size:1.1rem;font-weight:700;color:var(--bl);}
-.chip .t{font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);}
-.tbl{overflow-x:auto;border-radius:5px;border:1px solid var(--g4);margin-bottom:8px;}
-table{width:100%;border-collapse:collapse;font-size:.72rem;}
+body{background:var(--g1);color:var(--w);font-family:'Segoe UI',Arial,sans-serif;font-size:var(--fs-base);line-height:1.5;}
+header{background:linear-gradient(135deg,var(--rd),#a01f30 60%,#6e1220);padding:8px 20px;
+  display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;
+  box-shadow:0 3px 20px rgba(0,0,0,.7);border-bottom:1px solid rgba(255,255,255,.1);}
+.logo-sub{font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-top:2px;}
+.uf-widget{display:flex;align-items:center;gap:8px;}
+.uf-box{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 12px;text-align:center;}
+.uf-box label{display:block;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1px;}
+.uf-box input{background:none;border:none;color:var(--y);font-size:.95rem;font-weight:700;width:90px;text-align:center;font-family:inherit;}
+.uf-box input:focus{outline:none;}
+.qcount{color:var(--gn);font-size:.9rem;font-weight:700;text-align:center;padding-top:2px;}
+/* NAV — scroll horizontal en móvil, sin corte */
+nav{background:var(--g2);border-bottom:2px solid var(--g4);display:flex;
+  position:fixed;top:120px;left:0;right:0;z-index:199;overflow-x:auto;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+body{padding-top:162px;}
+/* Indicador de scroll */
+nav::after{content:'›';position:absolute;right:0;top:0;bottom:0;width:28px;
+  background:linear-gradient(90deg,transparent,rgba(30,30,30,.95));
+  display:flex;align-items:center;justify-content:center;color:#555;
+  font-size:1.2rem;pointer-events:none;transition:opacity .3s;}
+.tab{display:inline-flex;align-items:center;gap:6px;padding:13px 18px;border:none;
+  border-bottom:3px solid transparent;background:none;color:var(--wa);cursor:pointer;
+  font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.3px;
+  transition:all .15s;white-space:nowrap;scroll-snap-align:start;flex-shrink:0;
+  position:relative;}
+.tab:hover{color:#fff;background:rgba(155,28,46,.25);}
+.tab:hover::after{content:'';position:absolute;inset:0;border-radius:4px;
+  box-shadow:0 0 12px rgba(155,28,46,.6),inset 0 0 8px rgba(155,28,46,.15);
+  pointer-events:none;}
+.tab.on{color:#fff;border-bottom-color:var(--r);background:rgba(155,28,46,.2);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gn);display:none;}
+.tab.has-quote .dot{display:inline-block;}
+/* Flecha de scroll nav */
+.nav-scroll-hint{position:fixed;right:4px;top:120px;height:42px;width:22px;
+  display:flex;align-items:center;justify-content:center;z-index:200;
+  color:rgba(255,255,255,.4);font-size:.85rem;pointer-events:none;
+  animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+main{padding:18px;max-width:1140px;margin:0 auto;}
+.panel{display:none;animation:fi .2s ease;}
+.panel.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.ptitle{font-size:18px;letter-spacing:2px;text-transform:uppercase;color:var(--rl);
+  margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--g4);display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700;}
+.badge{background:var(--rd);font-size:12px;padding:3px 10px;border-radius:20px;letter-spacing:.8px;color:#ddd;font-weight:600;}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;}
+.card{background:var(--g3);border:1px solid var(--g4);border-radius:8px;padding:14px;}
+.card:hover{border-color:rgba(155,28,46,.6);}
+.cl{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:4px;font-weight:600;}
+.cv{font-size:1.7rem;font-weight:800;color:var(--y);}
+.cs{font-size:13px;color:#bbb;margin-top:4px;}
+.tbl{overflow-x:auto;border-radius:7px;border:1px solid var(--g4);margin-bottom:16px;}
+table{width:100%;border-collapse:collapse;font-size:15px;}
 thead tr{background:linear-gradient(90deg,var(--rd),#7a1425);}
-th{padding:7px 8px;text-align:left;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:#fff;white-space:nowrap;}
-td{padding:5px 8px;border-bottom:1px solid var(--g4);color:var(--wa);white-space:nowrap;}
+th{padding:11px 14px;text-align:left;font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:#fff;white-space:nowrap;font-weight:700;}
+td{padding:10px 14px;border-bottom:1px solid var(--g4);color:#cccccc;white-space:nowrap;font-size:15px;}
 tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:rgba(155,28,46,.08);}
-.y{color:var(--y);font-weight:600;}.g{color:var(--gn);font-weight:600;}.b{color:var(--bl);}.mu{color:#555;font-size:.68rem;}.or{color:var(--or);}
-
-/* FICHA COMERCIAL DEL PRODUCTO */
-#prod-card{
-  background:var(--g1);border:1px solid var(--g4);border-radius:6px;
-  padding:10px;margin-bottom:8px;
-}
-.pc-badge{
-  display:inline-block;background:var(--rd);font-size:.55rem;letter-spacing:1px;
-  text-transform:uppercase;padding:2px 8px;border-radius:10px;color:var(--wa);margin-bottom:6px;
-}
-.pc-name{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.3;}
-.pc-desc{font-size:.7rem;color:var(--wa);margin-bottom:8px;line-height:1.5;}
-.pc-benefits{display:flex;flex-direction:column;gap:3px;}
-.pc-b{display:flex;gap:6px;align-items:flex-start;font-size:.68rem;color:#ccc;}
-.pc-b .ico{color:var(--r);font-size:.72rem;flex-shrink:0;margin-top:1px;}
-
-/* COTIZACIONES GUARDADAS */
-.qi{background:var(--g3);border:1px solid var(--g4);border-radius:5px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
-.qi-prod{font-size:.76rem;font-weight:600;color:#fff;}
-.qi-price{font-size:.85rem;font-weight:700;color:var(--y);}
-.qi-meta{font-size:.62rem;color:var(--wa);}
-.qi-acts{display:flex;gap:4px;}
-.qibtn{background:var(--g4);border:none;color:var(--wa);padding:3px 8px;border-radius:3px;cursor:pointer;font-family:inherit;font-size:.65rem;}
+tbody tr:hover{background:rgba(155,28,46,.1);}
+.y{color:var(--y);font-weight:600;}.g{color:var(--gn);font-weight:600;}.b{color:var(--bl);}.mu{color:#666;font-size:.72rem;}.or{color:var(--or);}
+.cbox{background:var(--g3);border:1px solid var(--g4);border-radius:8px;padding:18px;margin-bottom:16px;}
+.cbox h3{font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:var(--rl);margin-bottom:14px;font-weight:700;}
+.crow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.f{display:flex;flex-direction:column;gap:3px;}
+.f label{font-size:13px;letter-spacing:.5px;font-weight:600;color:#cccccc;margin-bottom:2px;}
+.f select,.f input{background:var(--g1);border:1px solid #555;color:var(--w);
+  padding:10px 12px;font-family:inherit;font-size:16px;border-radius:6px;min-width:155px;transition:border-color .15s;}
+.f select:focus,.f input:focus{outline:none;border-color:var(--rl);}
+.btn{background:var(--r);border:none;color:#fff;padding:11px 24px;cursor:pointer;
+  font-family:inherit;font-size:15px;font-weight:700;border-radius:6px;transition:background .15s;}
+.btn:hover{background:var(--rl);}
+.btn.sec{background:var(--g4);}.btn.sec:hover{background:var(--g5);}
+.res{display:none;margin-top:12px;border-radius:7px;overflow:hidden;}
+.res.on{display:block;}
+.res-head{background:var(--rd);padding:8px 14px;font-size:.68rem;letter-spacing:2px;
+  text-transform:uppercase;color:rgba(255,255,255,.7);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+.res-body{background:rgba(0,0,0,.3);border:1px solid rgba(155,28,46,.3);border-top:none;padding:14px;}
+.rl{font-size:15px;color:#cccccc;margin-bottom:6px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;}
+.rl b{color:var(--y);font-size:17px;}
+.res-big{font-size:1.8rem;font-weight:800;color:var(--y);margin:8px 0 4px;}
+.save-btn{background:var(--bl);border:none;color:#fff;padding:8px 16px;cursor:pointer;
+  font-family:inherit;font-size:14px;font-weight:700;border-radius:5px;}
+.save-btn:hover{background:#2980b9;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0;}
+.gitem{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:10px 12px;text-align:center;}
+.gitem label{display:block;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#aaa;margin-bottom:4px;font-weight:600;}
+.gitem .val{font-size:1.15rem;font-weight:800;}
+.slider-wrap{margin-top:12px;background:rgba(0,0,0,.25);border-radius:7px;padding:12px 14px;}
+.sw-title{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#bbb;margin-bottom:10px;font-weight:600;}
+.sw-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px;}
+.sw-row input[type=range]{flex:1;min-width:120px;accent-color:var(--r);}
+.sw-row input[type=number]{background:var(--g1);border:1px solid var(--g5);color:var(--y);
+  padding:5px 8px;font-family:inherit;font-size:.88rem;font-weight:700;border-radius:4px;width:105px;}
+.sw-row input[type=number]:focus{outline:none;border-color:var(--rl);}
+.alerta{background:rgba(240,192,64,.1);border-left:4px solid var(--y);padding:12px 16px;
+  margin-bottom:16px;font-size:15px;color:#cccccc;border-radius:0 6px 6px 0;}
+.alerta b{color:var(--y);}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.chip{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:8px 14px;text-align:center;min-width:90px;}
+.chip .n{font-size:1.3rem;font-weight:700;color:var(--bl);}
+.chip .t{font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);margin-top:1px;}
+.quote-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.qi{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:10px 14px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.qi-prod{font-size:15px;font-weight:700;color:#fff;}
+.qi-price{font-size:17px;font-weight:800;color:var(--y);}
+.qi-meta{font-size:13px;color:#bbb;}
+.qi-acts{display:flex;gap:6px;}
+.qibtn{background:var(--g4);border:none;color:var(--wa);padding:4px 10px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:.7rem;}
 .qibtn:hover{background:var(--g5);color:#fff;}
 .qibtn.del{color:#e74c3c;}
-
-/* ══ COLUMNAS DE PLANTILLAS ══ */
-.col-preview{
-  min-height:calc(100vh - var(--bar-h));
-  padding:0;display:flex;flex-direction:column;
-}
-.col-hdr{
-  padding:10px 14px;border-bottom:1px solid var(--g4);
-  display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:var(--bar-h);z-index:100;background:var(--g2);flex-shrink:0;
-}
-.col-hdr-left{display:flex;align-items:center;gap:8px;}
-.col-hdr-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
-.col-hdr-name{font-size:.82rem;font-weight:800;letter-spacing:.2px;}
-.col-hdr-sub{font-size:.55rem;color:var(--mu);margin-top:1px;}
-.col-copy-btn{
-  border:none;color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;
-  font-size:.72rem;font-weight:700;white-space:nowrap;
-}
-
-/* WhatsApp column */
-#col-wa{border-right:1px solid var(--g4);}
-#col-wa .col-hdr{border-bottom-color:rgba(37,211,102,.3);background:rgba(37,211,102,.04);}
-#col-wa .col-hdr-name{color:var(--wsp);}
-#col-wa .col-copy-btn{background:#128c7e;}
-#col-wa .col-copy-btn:hover{background:#0a6b5e;}
-
-/* Gmail column */
-#col-gmail{border-right:1px solid var(--g4);}
-#col-gmail .col-hdr{border-bottom-color:rgba(234,67,53,.35);background:rgba(234,67,53,.04);}
-#col-gmail .col-hdr-name{color:#ff6b5b;}
-#col-gmail .col-copy-btn{background:linear-gradient(135deg,#ea4335,#c5221f);}
-#col-gmail .col-hdr-icon{background:linear-gradient(135deg,#ea4335,#c5221f);}
-
-/* Outlook column */
-#col-outlook .col-hdr{border-bottom-color:rgba(0,114,198,.35);background:rgba(0,114,198,.04);}
-#col-outlook .col-hdr-name{color:#4da6ff;}
-#col-outlook .col-copy-btn{background:linear-gradient(135deg,#0072c6,#004578);}
-#col-outlook .col-hdr-icon{background:linear-gradient(135deg,#0072c6,#004578);}
-
-.col-preview-body{flex:1;padding:12px;overflow-y:auto;}
-
-/* Vista previa WA — simulador de teléfono compacto */
-#wa-preview-wrap{
-  background:#0c1a14;border-radius:8px;overflow:hidden;
-  border:1px solid rgba(37,211,102,.2);
-}
-#wa-preview-header{
-  background:#1f2c34;padding:8px 12px;
-  display:flex;align-items:center;gap:8px;
-  border-bottom:1px solid rgba(255,255,255,.05);
-}
-#wa-preview-body{
-  background:#0b141a;min-height:200px;padding:10px;
-}
-.wa-bubble{
-  background:#1f2d25;border-radius:6px 6px 6px 2px;
-  padding:8px 10px;max-width:92%;margin:0 auto;
-  font-size:.73rem;color:#d1f5da;line-height:1.5;
-  white-space:pre-wrap;word-break:break-word;
-}
-#cot-card-wsp-wrap{padding:10px;}
-
-/* Gmail/Outlook preview containers */
-.email-preview-frame{
-  background:#fff;border-radius:6px;overflow:hidden;
-  border:1px solid #e0e0e0;
-}
-
-/* Asunto compartido */
-#asunto-bar{
-  background:var(--g3);border:1px solid var(--g4);border-radius:6px;
-  padding:8px 12px;margin-bottom:10px;
-  display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
-}
-#asunto-bar .lbl{font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);margin-bottom:2px;}
-#tpl-asunto{color:var(--y);font-size:.78rem;font-weight:600;word-break:break-word;}
-.asunto-copy{background:var(--g5);border:none;color:var(--wa);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.65rem;}
-.asunto-copy:hover{background:var(--g6);color:#fff;}
-
-/* Campos formulario de destinatario/asesor en la barra */
-#dest-form{
-  padding:10px 14px;border-bottom:1px solid var(--g4);background:var(--g2);
-}
-#dest-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-
-/* Status auto-gen */
-#auto-gen-status{
-  font-size:.65rem;padding:4px 10px;text-align:center;
-  background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.2);
-  border-radius:4px;margin:6px 14px;color:var(--gn);
-}
-
-/* Toast */
-.toast{
-  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-  background:#1a1a1a;border:1px solid var(--g5);color:#fff;
-  padding:9px 20px;border-radius:8px;font-size:.8rem;display:none;z-index:999;
-  box-shadow:0 4px 20px rgba(0,0,0,.6);white-space:nowrap;
-}
-.toast.ok{border-color:var(--gn);color:var(--gn);}
-.toast.err{border-color:#e74c3c;color:#e74c3c;}
-.toast.info{border-color:var(--bl);color:var(--bl);}
-
-/* Sync banner */
-.sync-banner{
-  display:none;align-items:center;gap:8px;padding:6px 10px;
-  background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);
-  border-radius:5px;font-size:.7rem;color:var(--gn);margin-bottom:6px;
-}
+.btn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.bacc{background:var(--g3);border:1px solid var(--g4);border-radius:7px;padding:12px 8px;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--w);font-family:inherit;transition:all .2s;position:relative;overflow:hidden;}
+.bacc span{font-size:14px;font-weight:700;}
+.bacc small{font-size:12px;color:#bbb;text-align:center;}
+.bacc:hover{border-color:var(--rl);background:rgba(155,28,46,.2);
+  box-shadow:0 0 14px rgba(155,28,46,.5),inset 0 0 10px rgba(155,28,46,.1);
+  transform:translateY(-1px);}
+.bacc:active{transform:scale(.96);}
+.bacc.wsp{border-color:rgba(37,211,102,.35);background:rgba(37,211,102,.05);}
+.bacc.wsp:hover{border-color:#25d366;background:rgba(37,211,102,.12);
+  box-shadow:0 0 14px rgba(37,211,102,.4),inset 0 0 10px rgba(37,211,102,.08);}
+.bacc.email-btn{border-color:rgba(52,152,219,.35);background:rgba(52,152,219,.05);}
+.bacc.email-btn:hover{border-color:#3498db;background:rgba(52,152,219,.12);
+  box-shadow:0 0 14px rgba(52,152,219,.4);}
+/* Neón general en todos los .btn */
+.btn{background:var(--r);border:none;color:#fff;padding:11px 24px;cursor:pointer;
+  font-family:inherit;font-size:15px;font-weight:700;border-radius:6px;
+  transition:all .2s;position:relative;}
+.btn:hover{background:var(--rl);box-shadow:0 0 16px rgba(155,28,46,.6);transform:translateY(-1px);}
+.btn:active{transform:scale(.97);}
+.btn.sec{background:var(--g4);box-shadow:none;}
+.btn.sec:hover{background:var(--g5);box-shadow:0 0 10px rgba(255,255,255,.1);}
+/* save-btn neón */
+.save-btn{background:var(--bl);border:none;color:#fff;padding:8px 16px;cursor:pointer;
+  font-family:inherit;font-size:14px;font-weight:700;border-radius:5px;transition:all .2s;}
+.save-btn:hover{background:#2980b9;box-shadow:0 0 14px rgba(52,152,219,.6);transform:translateY(-1px);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.toast{display:none;padding:12px 16px;border-radius:6px;margin-bottom:12px;font-size:15px;font-weight:500;}
+.toast.ok{background:rgba(46,204,113,.15);border-left:3px solid #2ecc71;color:#2ecc71;}
+.toast.err{background:rgba(231,76,60,.15);border-left:3px solid #e74c3c;color:#e74c3c;}
+.toast.info{background:rgba(52,152,219,.15);border-left:3px solid #3498db;color:#3498db;}
+textarea{background:var(--g1);border:1px solid var(--g4);color:var(--wa);
+  font-family:'Courier New',monospace;font-size:.75rem;padding:12px;resize:vertical;
+  outline:none;line-height:1.6;border-radius:0 0 7px 7px;width:100%;}
+.sync-banner{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.35);border-radius:6px;
+  padding:8px 14px;margin-bottom:12px;font-size:.75rem;color:#2ecc71;display:none;align-items:center;gap:8px;}
 .sync-banner.on{display:flex;}
-
-/* UF real-time badge */
-#uf-live-badge{
-  display:flex;flex-direction:column;align-items:flex-end;gap:1px;
+footer{text-align:center;padding:12px;font-size:.63rem;color:#444;
+  letter-spacing:1px;border-top:1px solid var(--g4);margin-top:24px;}
+/* Pulso neón tab plantillas */
+@keyframes neonPulse{
+  0%{box-shadow:0 0 8px rgba(46,204,113,.5);border-color:rgba(46,204,113,.6);}
+  50%{box-shadow:0 0 22px rgba(46,204,113,.9),0 0 40px rgba(46,204,113,.4);border-color:#2ecc71;background:rgba(46,204,113,.18);}
+  100%{box-shadow:0 0 8px rgba(46,204,113,.5);border-color:rgba(46,204,113,.6);}
 }
-
-/* Panel cotizaciones guardadas (compacto) */
-.quote-count-pill{
-  display:inline-flex;align-items:center;gap:4px;
-  background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.25);
-  border-radius:10px;padding:2px 8px;font-size:.6rem;color:var(--gn);
+.tab.pulse-neon{
+  animation:neonPulse .7s ease-in-out 4;
+  border:1px solid rgba(46,204,113,.6);border-radius:4px;
+  color:#2ecc71!important;
 }
-
-/* OUTLOOK note */
-.outlook-note{
-  font-size:.62rem;color:#666;background:rgba(0,114,198,.06);
-  border:1px solid rgba(0,114,198,.15);border-radius:4px;padding:5px 8px;margin-top:6px;
+.tab.pulse-neon::after{
+  content:'👆 Ir a Plantillas';
+  position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);
+  background:#111;border:1px solid #2ecc71;color:#2ecc71;
+  font-size:.6rem;padding:2px 8px;border-radius:4px;white-space:nowrap;
+  pointer-events:none;box-shadow:0 0 8px rgba(46,204,113,.4);
+  display:none;
 }
-
-/* Image buttons */
-.img-btns{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--g4);}
-.img-btn{background:var(--g3);border:1px solid var(--g4);color:var(--wa);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.65rem;}
-.img-btn:hover{background:var(--g4);color:#fff;}
-
-/* Botón copiar imagen gmail */
-.gmail-img-btns{display:flex;gap:6px;flex-wrap:wrap;padding:6px 12px;border-top:1px solid rgba(234,67,53,.15);}
-
-/* WA text actions */
-.wa-actions{display:flex;gap:6px;padding:8px 14px;border-top:1px solid rgba(37,211,102,.15);}
-
-/* Separador sección calculadora */
-.section-sep{height:1px;background:var(--g4);margin:0;}
-
-/* Conversor mini */
-.mini-conv{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
-.mini-conv input{background:var(--g1);border:1px solid var(--g5);color:var(--y);padding:4px 8px;font-family:inherit;font-size:.8rem;font-weight:700;border-radius:4px;width:80px;}
-.mini-conv input:focus{outline:none;border-color:var(--rl);}
-.mini-conv span{font-size:.7rem;color:var(--wa);}
-#conv-result{font-size:.75rem;color:var(--gn);min-height:16px;}
-
-/* Panel lateral scroll hint */
-.scroll-fade{
-  position:sticky;bottom:0;height:20px;
-  background:linear-gradient(to bottom,transparent,var(--g2));
-  pointer-events:none;
-}
-
-/* Responsive — tablet */
-@media(max-width:1200px){
-  :root{--col-left:280px;}
-  #workspace{grid-template-columns:var(--col-left) 1fr 1fr 1fr;}
+#global-toast{position:fixed;bottom:18px;right:18px;z-index:9999;min-width:280px;max-width:400px;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);}
+/* Auto-gen status */
+#auto-gen-status{transition:opacity .3s;}
+/* Layout plantillas mejorado */
+.mail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:860px){.mail-grid{grid-template-columns:1fr;}}
+/* Botones acción más llamativos */
+.bacc{position:relative;}
+.bacc .copy-badge{position:absolute;top:4px;right:4px;background:var(--gn);color:#000;
+  font-size:.55rem;font-weight:700;padding:1px 5px;border-radius:10px;letter-spacing:.5px;}
+@media(max-width:640px){
+  .two-col{grid-template-columns:1fr;}
+  .btn-grid{grid-template-columns:1fr 1fr;}
+  .cards{grid-template-columns:1fr 1fr;}
+  .crow{flex-direction:column;}
+  .f select,.f input{min-width:100%;}
+  header{padding:10px 14px;}
 }
 @media(max-width:900px){
-  #workspace{grid-template-columns:1fr;}
-  #col-left{position:relative;top:0;max-height:none;}
-  .col-preview{min-height:auto;}
+  #tpl-out>[style*="grid-template-columns:1fr 1fr 1fr"]{
+    grid-template-columns:1fr 1fr !important;
+  }
 }
-
-/* Neon hover en botones principales */
-.btn:hover,.col-copy-btn:hover{filter:brightness(1.1);}
+@media(max-width:600px){
+  #tpl-out>[style*="grid-template-columns:1fr 1fr 1fr"]{
+    grid-template-columns:1fr !important;
+  }
+}
 </style>
 </head>
 <body>
-
-<!-- ══ BARRA OPERACIONAL SUPERIOR ══ -->
-<div id="opbar">
-  <div id="opbar-logo">
-    <img src="logo-equifax.png" alt="Equifax" onerror="this.style.opacity=0">
-    <div id="opbar-brand">
-      <span class="t1">CotizadorGo!</span>
-      <span class="t2">Estación Comercial · Solo Uso Interno</span>
+<header>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <img src="logo-equifax.png" alt="Equifax" id="header-logo" style="height:96px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">
+    <div>
+      <div style="font-size:1.1rem;font-weight:900;letter-spacing:1px;color:#fff;">CotizadorGo!</div>
+      <div class="logo-sub">Herramienta Comercial Equifax Chile</div>
     </div>
   </div>
-
-  <div id="opbar-fields">
-    <div class="obf">
-      <label>Empresa / Cliente</label>
-      <input type="text" id="ob-empresa" placeholder="Nombre empresa" oninput="syncFromBar()">
+  <div class="uf-widget">
+    <div class="uf-box">
+      <label>UF Hoy (editable)</label>
+      <input type="number" id="uf-global" value="40644" step="1">
     </div>
-    <div class="obf">
-      <label>Teléfono</label>
-      <input type="text" id="ob-tel" placeholder="+56 9..." oninput="syncFromBar()">
-    </div>
-    <div class="obf">
-      <label>Correo</label>
-      <input type="text" id="ob-correo" placeholder="cliente@..." oninput="syncFromBar()">
-    </div>
-    <div class="obf" style="min-width:0;">
-      <label>RUT</label>
-      <input type="text" id="ob-rut" placeholder="76.XXX.XXX-X" style="width:100px;" oninput="syncFromBar()">
-    </div>
-    <div id="obf-prod-wrap">
-      <label>Producto activo</label>
-      <select id="ob-prod" onchange="syncProdFromBar()">
-        <option value="">— Seleccionar —</option>
-        <option value="bundle4100">Bundle MC 4100 + RI</option>
-        <option value="bundleIlim">Bundle MC Ilimitado + RI</option>
-        <option value="mc_solo">Mora Control</option>
-        <option value="ri_plan">Reporte Interactivo</option>
-        <option value="pfm">Portfolio Monitor</option>
-        <option value="pc">Partner Check</option>
-        <option value="combo3">Combo RI+MC+PFM</option>
-      </select>
-    </div>
-    <div id="uf-zone">
-      <div style="display:flex;flex-direction:column;gap:1px;">
-        <label>UF HOY</label>
-        <input type="number" id="uf-global" value="40644" step="1">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-end;">
-        <div id="uf-live-badge">
-          <span id="uf-live-status" style="font-size:.48rem;color:rgba(255,255,255,.3);">Actualizando...</span>
-        </div>
-      </div>
+    <div class="uf-box">
+      <label>Cotizaciones</label>
+      <div class="qcount" id="quote-count">0</div>
     </div>
   </div>
-
-  <div id="opbar-actions">
-    <button class="oba wsp" onclick="copPlano();playClick()">💬 Copiar WA</button>
-    <button class="oba" onclick="copHTMLGmail();playClick()">📋 Gmail</button>
-    <button class="oba" onclick="copHTMLOutlook();playClick()">📋 Outlook</button>
-    <button class="oba" onclick="copImgWsp();playClick()">🖼 Img WA</button>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 6px;">
-      <span style="font-size:.48rem;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);">Guardadas</span>
-      <span id="quote-count" class="qcount-badge">0</span>
-    </div>
-  </div>
-</div>
-
-<!-- ══ WORKSPACE ══ -->
-<div id="workspace">
-
-  <!-- ══ COL 1: COTIZADORA ══ -->
-  <div id="col-left">
-
-    <!-- DATOS CLIENTE -->
-    <div class="col-section">
-      <div class="col-title"><span class="ico">👤</span> Datos del Cliente</div>
-      <textarea id="crm-paste-area" placeholder="Pega aquí datos del CRM o escribe manualmente…" rows="2" oninput="parseCRMPaste()"></textarea>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;">
-        <div class="f"><label>Nombre contacto</label><input type="text" id="mn" placeholder="Sr. García" oninput="syncToBar()"></div>
-        <div class="f"><label>Empresa</label><input type="text" id="me" placeholder="Empresa SpA" oninput="syncToBar()"></div>
-        <div class="f"><label>RUT</label><input type="text" id="mr" placeholder="76.XXX-X" oninput="syncToBar()"></div>
-      </div>
-    </div>
-
-    <!-- ASESOR -->
-    <div class="col-section">
-      <div class="col-title"><span class="ico">🧑‍💼</span> Asesor Comercial</div>
-      <div style="display:grid;grid-template-columns:1fr auto;gap:5px;align-items:end;margin-bottom:5px;">
-        <div class="f" style="margin:0;"><label>Tu nombre</label><input type="text" id="ma" placeholder="Eduardo Pérez" oninput="saveExecField()"></div>
-        <button class="btn sec" style="padding:5px 8px;font-size:.65rem;" onclick="resetExec()">✏</button>
-      </div>
-      <div class="f"><label>WhatsApp / Tel.</label><input type="text" id="mf" placeholder="+56 9 XXXX XXXX" oninput="saveExecField()"></div>
-      <div id="wsp-link-row" style="display:none;padding:4px 6px;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:4px;font-size:.65rem;margin-top:4px;">🟢 <a id="wsp-link" href="#" target="_blank" style="color:#25d366;font-weight:600;">Abrir WhatsApp →</a></div>
-      <div class="f" style="margin-top:5px;"><label>Email</label><input type="text" id="ml" placeholder="ej@equifax.cl" oninput="saveExecField()"></div>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:6px;font-size:.65rem;color:var(--wa);"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)" style="accent-color:var(--r);width:13px;height:13px;"> Omitir destinatario en plantillas</label>
-    </div>
-
-    <!-- COTIZACIÓN ACTIVA -->
-    <div class="col-section">
-      <div class="col-title"><span class="ico">📦</span> Cotización
-        <div style="margin-left:auto;display:flex;gap:5px;align-items:center;">
-          <select id="mt" style="background:var(--g1);border:1px solid var(--g5);color:var(--y);font-size:.65rem;padding:3px 6px;border-radius:4px;font-family:inherit;font-weight:700;" onchange="syncProdToBar()">
-            <option value="">— Producto —</option>
-            <option value="bundle4100">Bundle MC 4100 + RI</option>
-            <option value="bundleIlim">Bundle MC Ilimitado + RI</option>
-            <option value="mc_solo">Mora Control</option>
-            <option value="ri_plan">Reporte Interactivo</option>
-            <option value="pfm">Portfolio Monitor</option>
-            <option value="pc">Partner Check</option>
-            <option value="combo3">Combo RI+MC+PFM</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;">
-        <div class="f"><label>Precio venta (UF)</label><input type="number" id="mu" placeholder="4.5" step="0.1"></div>
-        <div class="f"><label>Precio lista (UF)</label><input type="number" id="mula" placeholder="6.65" step="0.1"></div>
-        <div class="f"><label>Consultas RI/mes</label><input type="number" id="mc2" placeholder="10"></div>
-        <div class="f"><label>Plazo</label><select id="mp"><option value="12">12 meses</option><option value="6">6 meses</option></select></div>
-      </div>
-      <div id="auto-gen-status" style="margin:0 0 4px;">← Selecciona un producto para generar</div>
-      <div id="sync-banner" class="sync-banner"><span>🔄</span><span><strong>Sincronización:</strong> Datos cargados desde cotización.</span></div>
-    </div>
-
-    <!-- COTIZACIONES GUARDADAS -->
-    <div class="col-section">
-      <div class="col-title"><span class="ico">💾</span> Guardadas</div>
-      <div id="quote-panel-list"><p style="color:var(--mu);font-size:.7rem;">Sin cotizaciones guardadas.</p></div>
-    </div>
-
-    <!-- CALCULADORA RÁPIDA -->
-    <div class="col-section">
-      <div class="col-title"><span class="ico">🧮</span> Calculadora Rápida</div>
-      <div class="prod-tabs" id="calc-tabs">
-        <button class="prod-chip on" onclick="showCalc('bundle',this)">Bundle</button>
-        <button class="prod-chip" onclick="showCalc('mc',this)">Mora Control</button>
-        <button class="prod-chip" onclick="showCalc('ri',this)">RI Plan</button>
-        <button class="prod-chip" onclick="showCalc('bolsa',this)">RI Bolsa</button>
-        <button class="prod-chip" onclick="showCalc('pfm',this)">PFM</button>
-        <button class="prod-chip" onclick="showCalc('pc',this)">Partner Check</button>
-        <button class="prod-chip" onclick="showCalc('uf',this)">UF/CLP</button>
-      </div>
-      <div id="calc-panels"></div>
-    </div>
-
-    <!-- FICHA COMERCIAL -->
-    <div class="col-section">
-      <div class="col-title"><span class="ico">📋</span> Ficha del Producto</div>
-      <div id="prod-card">
-        <div style="color:var(--mu);font-size:.7rem;">Selecciona un producto para ver su ficha comercial.</div>
-      </div>
-    </div>
-
-    <!-- CONVERSOR RÁPIDO -->
-    <div class="col-section">
-      <div class="col-title"><span class="ico">⇄</span> Conversor</div>
-      <div class="mini-conv">
-        <input type="number" id="conv-uf-in" placeholder="UF" step="0.01" oninput="miniConv('uf')">
-        <span>UF =</span>
-        <span id="conv-uf-out" style="color:var(--y);font-weight:700;">—</span>
-      </div>
-      <div class="mini-conv">
-        <input type="number" id="conv-clp-in" placeholder="$CLP" step="1000" oninput="miniConv('clp')">
-        <span>$ =</span>
-        <span id="conv-clp-out" style="color:var(--gn);font-weight:700;">—</span>
-      </div>
-    </div>
-
-    <div style="height:20px;"></div>
-  </div><!-- /col-left -->
-
-  <!-- ══ COL 2: WHATSAPP ══ -->
-  <div id="col-wa" class="col-preview">
-    <div class="col-hdr">
-      <div class="col-hdr-left">
-        <div class="col-hdr-icon" style="background:rgba(37,211,102,.15);font-size:1rem;">💬</div>
-        <div>
-          <div class="col-hdr-name">WhatsApp</div>
-          <div class="col-hdr-sub">Mensaje + imagen para envío móvil</div>
-        </div>
-      </div>
-      <button class="col-copy-btn" onclick="copPlano();playClick()">📋 Copiar texto</button>
-    </div>
-    <div class="col-preview-body">
-      <!-- Asunto compartido -->
-      <div id="asunto-bar">
-        <div>
-          <div class="lbl">📌 Asunto correo</div>
-          <div id="tpl-asunto">— Selecciona producto —</div>
-        </div>
-        <button class="asunto-copy" onclick="copAsunto()">📋</button>
-      </div>
-      <div id="tpl-toast2" class="toast"></div>
-      <!-- Mensaje WA (oculto para copPlano) -->
-      <textarea id="tpl-body" style="display:none;"></textarea>
-
-      <!-- Tarjeta WA tipo burbuja -->
-      <div id="wa-preview-wrap">
-        <div id="wa-preview-header">
-          <div style="width:28px;height:28px;border-radius:50%;background:var(--r);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;">E</div>
-          <div style="flex:1;">
-            <div style="font-size:.72rem;font-weight:700;color:#fff;" id="wa-contact-name">Equifax Chile</div>
-            <div style="font-size:.6rem;color:#667781;">en línea</div>
-          </div>
-          <div style="font-size:.65rem;color:#667781;">WhatsApp</div>
-        </div>
-        <div id="wa-preview-body" style="background:#0b141a;min-height:180px;padding:12px;">
-          <div class="wa-bubble" id="wa-text-bubble">Selecciona un producto y completa los datos para ver la propuesta.</div>
-        </div>
-      </div>
-
-      <!-- Tarjeta visual WA (para imagen) -->
-      <div id="cot-card-wsp-wrap" style="margin-top:10px;">
-        <div style="font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:6px;">Vista previa imagen WhatsApp:</div>
-        <div id="cot-card-wsp" style="max-width:100%;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.6);border:1px solid rgba(155,28,46,.3);">
-          <div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:16px 18px 12px;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-              <div>
-                <img src="logo-equifax.png" alt="Equifax" style="height:40px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">
-                <div style="font-size:.44rem;letter-spacing:2px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:3px;">Chile · Soluciones Empresariales</div>
-              </div>
-              <div style="text-align:right;">
-                <div id="wcc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:3px 10px;border-radius:12px;font-size:.55rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div>
-                <div id="wcc-fecha" style="font-size:.5rem;color:rgba(255,255,255,.3);margin-top:4px;"></div>
-              </div>
-            </div>
-          </div>
-          <div style="background:#12060a;padding:10px 18px;border-bottom:1px solid rgba(155,28,46,.2);">
-            <div style="font-size:.44rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Propuesta para</div>
-            <div id="wcc-emp" style="font-size:1rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div>
-          </div>
-          <div id="wcc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:10px 18px;"></div>
-          <div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:12px 18px;">
-            <div style="font-size:.44rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:5px;">Cargo fijo mensual</div>
-            <div id="wcc-precio" style="font-size:1.8rem;font-weight:900;color:#f0c040;line-height:1;"></div>
-            <div id="wcc-clp" style="font-size:.68rem;color:#888;margin-top:5px;"></div>
-            <div id="wcc-dcto-block" style="margin-top:6px;"></div>
-          </div>
-          <div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:9px 18px;display:flex;gap:18px;flex-wrap:wrap;">
-            <div><div style="font-size:.42rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:2px;">Contrato</div><div id="wcc-plazo" style="font-size:.78rem;font-weight:700;color:#fff;"></div></div>
-            <div><div style="font-size:.42rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:2px;">Modalidad</div><div style="font-size:.7rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>
-          </div>
-          <div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-            <div>
-              <div style="font-size:.42rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:2px;">Ejecutivo/a</div>
-              <div id="wcc-asesor" style="font-size:.82rem;font-weight:700;color:#fff;"></div>
-              <div id="wcc-contacto" style="font-size:.65rem;color:#3498db;margin-top:2px;"></div>
-            </div>
-            <div style="font-size:.5rem;color:#333;">Valores UF + IVA</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="wa-actions">
-      <button class="img-btn" style="background:#145a32;border-color:#25d366;color:#a9dfbf;" onclick="copImgWsp();playClick()">📋 Copiar imagen WA</button>
-    </div>
-  </div><!-- /col-wa -->
-
-  <!-- ══ COL 3: GMAIL ══ -->
-  <div id="col-gmail" class="col-preview">
-    <div class="col-hdr">
-      <div class="col-hdr-left">
-        <div class="col-hdr-icon">M</div>
-        <div>
-          <div class="col-hdr-name">Gmail</div>
-          <div class="col-hdr-sub">HTML moderno · Pega directo en Gmail</div>
-        </div>
-      </div>
-      <button class="col-copy-btn" onclick="copHTMLGmail();playClick()">📋 Copiar Gmail</button>
-    </div>
-    <div class="col-preview-body">
-      <div style="font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:8px;">Vista previa:</div>
-      <div id="tpl-rich-gmail" style="background:#f8f9fa;border-radius:6px;border:1px solid #e0e0e0;"></div>
-    </div>
-    <div class="gmail-img-btns">
-      <button class="img-btn" onclick="copImgPC();playClick()">📋 Copiar imagen correo</button>
-      <button class="img-btn" onclick="descImg();playClick()">⬇ Descargar PNG</button>
-    </div>
-  </div><!-- /col-gmail -->
-
-  <!-- ══ COL 4: OUTLOOK ══ -->
-  <div id="col-outlook" class="col-preview">
-    <div class="col-hdr">
-      <div class="col-hdr-left">
-        <div class="col-hdr-icon">📨</div>
-        <div>
-          <div class="col-hdr-name">Outlook</div>
-          <div class="col-hdr-sub">Tablas robustas · Outlook 2016+</div>
-        </div>
-      </div>
-      <button class="col-copy-btn" onclick="copHTMLOutlook();playClick()">📋 Copiar Outlook</button>
-    </div>
-    <div class="col-preview-body">
-      <div id="tpl-rich-legacy" style="display:none;"></div>
-      <div id="tpl-rich" style="display:none;"></div>
-      <div style="font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--mu);margin-bottom:8px;">Vista previa:</div>
-      <div id="tpl-rich-outlook" style="background:#f5f5f5;border-radius:6px;border:1px solid #ddd;"></div>
-      <div class="outlook-note">⚠️ <strong style="color:#4da6ff;">Nota Outlook:</strong> Esta versión usa tablas y colores sólidos para máxima compatibilidad con Outlook 2016+.</div>
-      <!-- Tarjeta PC oculta — para generación de imagen -->
-      <div id="cot-card-pc" style="display:none;max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);">
-        <div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div>
-              <img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">
-              <div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div>
-            </div>
-            <div style="text-align:right;">
-              <div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div>
-              <div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div>
-            </div>
-          </div>
-        </div>
-        <div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);">
-          <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta para</div>
-          <div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div>
-          <div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div>
-        </div>
-        <div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div>
-        <div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;">
-          <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div>
-          <div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div>
-          <div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div>
-          <div id="cc-dcto-block" style="margin-top:8px;"></div>
-        </div>
-        <div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;">
-          <div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div>
-          <div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>
-          <div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div>
-        </div>
-        <div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-          <div>
-            <div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div>
-            <div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div>
-            <div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div>
-          </div>
-          <div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="img-btns" style="border-top:1px solid rgba(0,114,198,.15);">
-      <button class="img-btn" onclick="copImgPC();playClick()">📋 Copiar imagen correo</button>
-      <button class="img-btn" onclick="descImg();playClick()">⬇ Descargar PNG</button>
-    </div>
-  </div><!-- /col-outlook -->
-
-</div><!-- /workspace -->
-
+</header>
+<nav id="navrow"></nav>
+<main id="main"></main>
 <div id="global-toast" class="toast"></div>
-<footer style="display:none;">CotizadorGo! · Herramienta Comercial Equifax Chile · CONFIDENCIAL · SOLO USO INTERNO</footer>
-
+<footer>CotizadorGo! &nbsp;·&nbsp; Herramienta Comercial Equifax Chile &nbsp;·&nbsp; CONFIDENCIAL &nbsp;·&nbsp; SOLO USO INTERNO</footer>
 <script>
 'use strict';
 var STATE={quotes:[],activeQuoteIndex:-1,logoImg:null};
@@ -789,7 +277,8 @@ function saveQuote(obj){
   STATE.quotes.push(obj);
   STATE.activeQuoteIndex=STATE.quotes.length-1;
   document.getElementById('quote-count').textContent=STATE.quotes.length;
-  /* tabs eliminadas en nuevo layout */
+  var tab=document.querySelector('.tab[data-id="mail"]');
+  if(tab){tab.classList.add('has-quote');pulseMailTab();}
   playSound('save');
   toast('✔ Cotización guardada — ve a ✉ Plantillas para generar el correo','ok');
 }
@@ -835,7 +324,8 @@ function syncQuoteToForm(q){
 }
 
 function goTo(id){
-  /* nuevo layout: no hay tabs — solo scroll y calcular si es necesario */
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.dataset.id===id);});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+id);});
   if(id==='mail'){setTimeout(function(){
     renderQuoteList();loadExecutivoFields();
     if(STATE.activeQuoteIndex>=0&&STATE.quotes[STATE.activeQuoteIndex])syncQuoteToForm(STATE.quotes[STATE.activeQuoteIndex]);
@@ -1079,7 +569,11 @@ function pagMail(){
   return '<div class="ptitle">Plantillas de Cotización <span class="badge">CORREO · WHATSAPP · IMAGEN</span></div>'+
     '<div id="mail-toast" class="toast"></div>'+
     '<div id="sync-banner" class="sync-banner"><span style="font-size:1.1rem;">🔄</span><span><strong>Sincronización automática:</strong> Los datos de tu cotización están cargados.</span></div>'+
-    '<div class="two-col">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">'+
+
+    '<!-- COLUMNA IZQUIERDA: CONFIGURACIÓN -->'+
+    '<div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'+
       '<div class="cbox" style="margin:0;"><h3 style="margin-bottom:8px;">👤 Destinatario</h3>'+
         '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px;font-size:.75rem;color:var(--wa);"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)" style="accent-color:var(--r);width:15px;height:15px;">Omitir destinatario</label>'+
         '<div id="dest-fields" style="display:flex;flex-direction:column;gap:7px;">'+
@@ -1093,7 +587,7 @@ function pagMail(){
           '<div id="wsp-link-row" style="display:none;padding:5px 8px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:5px;font-size:.72rem;">🟢 <a id="wsp-link" href="#" target="_blank" style="color:#25d366;font-weight:600;">Abrir WhatsApp directo →</a></div>'+
           '<div class="f"><label>Email</label><input type="text" id="ml" placeholder="ej@equifax.cl" style="width:100%" oninput="saveExecField()"></div>'+
         '</div></div>'+
-    '</div>'+
+    '</div>'+  // fin subgrid destinatario+asesor
     '<div class="cbox" style="margin-bottom:14px;"><h3 style="margin-bottom:10px;">📦 Cotización</h3>'+
       '<div id="quote-panel-list"></div>'+
       '<div style="background:rgba(0,0,0,.2);border-radius:6px;padding:12px;margin-top:10px;">'+
@@ -1108,6 +602,11 @@ function pagMail(){
       '</div>'+
       '<div id="auto-gen-status" style="margin-top:8px;padding:6px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:5px;font-size:.72rem;color:#2ecc71;text-align:center;">✔ Propuesta actualizada automáticamente</div>'+
     '</div>'+
+    '</div>'+  <!-- fin columna izquierda -->
+
+    '<!-- COLUMNA DERECHA: VISTAS PREVIAS -->'+
+    '<div style="position:sticky;top:170px;">'+
+    '<div style="font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#9b1c2e;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #333;">👁 Vistas Previas en Tiempo Real</div>'+
     '<div id="tpl-out">'+
 
       // ── ASUNTO ──────────────────────────────────────────────────────
@@ -1291,7 +790,9 @@ function pagMail(){
         '</div>'+
       '</div>'+
 
-    '</div>';
+    '</div>'+  // fin tpl-out
+    '</div>'+  // fin columna derecha
+    '</div>';  // fin grid 50/50
 }
 
 function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
@@ -2219,17 +1720,19 @@ function buildApp(){
     d.innerHTML=p.fn();main.appendChild(d);
   });
 }
+buildApp();
 loadExecutivo();
 preloadLogo(null);
-// Nueva UI: scheduleAutoGen inicial
-setTimeout(function(){scheduleAutoGen(100);},500);
 
 // ═══════════════════════════════════════════════════════════════
 // REACTIVIDAD TOTAL — delegación sin whitelist de IDs
 // ═══════════════════════════════════════════════════════════════
 var _autoGenTimer = null;
 
-function _mailOn() { return true; /* siempre visible en nuevo layout */ }
+function _mailOn() {
+  var p = document.getElementById('p-mail');
+  return p && p.classList.contains('on');
+}
 
 function scheduleAutoGen(ms) {
   clearTimeout(_autoGenTimer);
@@ -2281,7 +1784,19 @@ function saveExecField() {
   scheduleAutoGen(300);
 }
 
-// goTo sin override en nuevo layout — plantillas siempre visibles
+// goTo override — generar al entrar a plantillas
+var _origGoTo = goTo;
+goTo = function(id) {
+  _origGoTo(id);
+  if (id === 'mail') {
+    setTimeout(function() {
+      var tipo = document.getElementById('mt');
+      var st = document.getElementById('auto-gen-status');
+      if (tipo && tipo.value) { genMail(); }
+      else if (st) { st.style.color='#888'; st.textContent='← Selecciona un producto para generar'; }
+    }, 150);
+  }
+};
 
 // syncQuoteToForm override — regenerar al sincronizar cotización
 var _origSync = syncQuoteToForm;
@@ -2289,312 +1804,6 @@ syncQuoteToForm = function(q) {
   _origSync(q);
   setTimeout(function() { if (_mailOn()) scheduleAutoGen(100); }, 120);
 };
-</script>
-
-<script>
-// ══ NUEVO LAYOUT: FUNCIONES ADICIONALES ══
-
-// Renderizar calculadoras en el panel lateral
-var CALCS = {
-  bundle: pagBundle,
-  mc: pagMC,
-  ri: pagRI,
-  bolsa: pagBolsa,
-  pfm: pagPFM,
-  pc: pagPC,
-  uf: pagUF
-};
-
-function buildCalcPanels() {
-  var container = document.getElementById('calc-panels');
-  if (!container) return;
-  var html = '';
-  Object.keys(CALCS).forEach(function(k, i) {
-    html += '<div class="calc-panel' + (i===0?' on':'') + '" id="calc-' + k + '">' + CALCS[k]() + '</div>';
-  });
-  container.innerHTML = html;
-}
-
-function showCalc(id, btn) {
-  document.querySelectorAll('.calc-panel').forEach(function(p){ p.classList.remove('on'); });
-  var panel = document.getElementById('calc-' + id);
-  if (panel) panel.classList.add('on');
-  document.querySelectorAll('#calc-tabs .prod-chip').forEach(function(b){ b.classList.remove('on'); });
-  if (btn) btn.classList.add('on');
-}
-
-// Sincronización barra superior <-> campos internos
-function syncFromBar() {
-  var emp = document.getElementById('ob-empresa');
-  var tel = document.getElementById('ob-tel');
-  var cor = document.getElementById('ob-correo');
-  var rut = document.getElementById('ob-rut');
-  var me = document.getElementById('me');
-  var mf = document.getElementById('mf');
-  var ml = document.getElementById('ml');
-  var mr = document.getElementById('mr');
-  if (emp && me) me.value = emp.value;
-  if (tel && mf) { mf.value = tel.value; saveExecField(); }
-  if (cor && ml) { ml.value = cor.value; saveExecField(); }
-  if (rut && mr) mr.value = rut.value;
-  // Actualizar nombre en cabecera WA
-  var wc = document.getElementById('wa-contact-name');
-  if (wc && emp) wc.textContent = emp.value || 'Equifax Chile';
-  scheduleAutoGen(300);
-}
-
-function syncToBar() {
-  var me = document.getElementById('me');
-  var mr = document.getElementById('mr');
-  var ob = document.getElementById('ob-empresa');
-  var obr = document.getElementById('ob-rut');
-  if (me && ob) ob.value = me.value;
-  if (mr && obr) obr.value = mr.value;
-  scheduleAutoGen(300);
-}
-
-function syncProdFromBar() {
-  var v = document.getElementById('ob-prod').value;
-  var mt = document.getElementById('mt');
-  if (mt) { mt.value = v; }
-  updateProdCard(v);
-  scheduleAutoGen(100);
-}
-
-function syncProdToBar() {
-  var v = document.getElementById('mt').value;
-  var ob = document.getElementById('ob-prod');
-  if (ob) ob.value = v;
-  updateProdCard(v);
-  scheduleAutoGen(100);
-}
-
-// Actualizar burbuja WA en tiempo real
-var _waBubTimer = null;
-function updateWaBubble() {
-  var body = document.getElementById('tpl-body');
-  var bubble = document.getElementById('wa-text-bubble');
-  if (!bubble) return;
-  var txt = body ? body.value : '';
-  if (txt && txt.trim()) {
-    // Simular formato WhatsApp básico
-    var display = txt
-      .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
-      .replace(/~([^~]+)~/g, '<s>$1</s>')
-      .replace(/\_([^_]+)_/g, '<em>$1</em>');
-    bubble.innerHTML = display;
-  }
-}
-
-// Ficha comercial de producto
-var PROD_INFO_FULL = {
-  bundle4100: {
-    badge:'BUNDLE OFERTA', name:'Bundle Mora Control 4100 + Reporte Interactivo',
-    desc:'Solución integral que combina gestión de mora y evaluación crediticia. El Bundle más vendido para PyMEs con cartera activa.',
-    benefits:['Publicación DICOM hasta $4.100.000','Informes comerciales incluidos','40 emails + 10 cartas + 5 SMS/mes','~70% recuperación estimada mes 1','Beneficio tributario por castigo de deuda','Contrato mínimo 12 meses · Sin descuento adicional'],
-    preguntas:['¿Da crédito o facilidades de pago?','¿Ha tenido clientes que no pagaron?','¿Cómo evalúa a sus clientes antes de darles crédito?']
-  },
-  bundleIlim: {
-    badge:'BUNDLE PREMIUM', name:'Bundle Mora Control Ilimitado + Reporte Interactivo',
-    desc:'Para empresas con alto volumen de deudas. Publicación DICOM sin tope de monto, el respaldo más potente del mercado.',
-    benefits:['Publicación DICOM ILIMITADA sin tope','Informes comerciales sin límite','40 emails + 10 cartas + 5 SMS/mes','Portal de autogestión 24/7','Beneficio tributario por castigo de deuda','Score de riesgo crediticio incluido'],
-    preguntas:['¿Tiene deudores con montos mayores a $4.100.000?','¿Gestiona una cartera morosa grande?','¿Busca el máximo impacto en recuperación?']
-  },
-  mc_solo: {
-    badge:'GESTIÓN DE CARTERA', name:'Mora Control',
-    desc:'La solución líder en cobranza de Chile. La marca DICOM aumenta 6 veces la probabilidad de recuperación. Incluye envío de cartas, emails y SMS.',
-    benefits:['Publicación en Boletín DICOM','40 emails + 10 cartas + 5 SMS/mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar','Portal de autogestión 24/7'],
-    preguntas:['¿Cuántos clientes tienen documentos impagos?','¿Cómo gestiona hoy su cobranza?','¿Sabe qué documentos se pueden publicar?']
-  },
-  ri_plan: {
-    badge:'EVALUACIÓN CREDITICIA', name:'Reporte Interactivo',
-    desc:'El informe comercial más completo de Chile. Consolida datos de Registro Civil, DICOM, Inspección Laboral, SII y más en un solo reporte.',
-    benefits:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos FONASA, ISE, información tributaria','Fuentes: DICOM, Reg. Civil, Bienes Raíces, OTROS'],
-    preguntas:['¿Conoce el riesgo de no evaluar socios?','¿Cómo evalúa a clientes antes del crédito?','¿Ha tenido pérdidas por clientes no evaluados?']
-  },
-  pfm: {
-    badge:'MONITOREO', name:'Portfolio Monitor',
-    desc:'Herramienta de análisis y monitoreo de cartera. Detecta cambios financieros en tus clientes antes de que se conviertan en problemas.',
-    benefits:['Seguimiento individual o masivo de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual','Consultas de reportes desde la plataforma'],
-    preguntas:['¿Monitorea su cartera constantemente?','¿Cómo reevalúa al renovar líneas de crédito?','¿Sabe si sus buenos clientes han crecido?']
-  },
-  pc: {
-    badge:'PROVEEDORES', name:'Partner Check',
-    desc:'Evalúa proveedores y socios comerciales en 30 minutos. Compliance, KYC y marketplace de licitaciones integrado.',
-    benefits:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7','Ideal para empresas medianas y grandes'],
-    preguntas:['¿Evalúa a sus proveedores antes de contratar?','¿Ha tenido problemas con proveedores no verificados?','¿Participa en licitaciones públicas?']
-  },
-  combo3: {
-    badge:'PROPUESTA INTEGRAL', name:'Combo RI + Mora Control + Portfolio Monitor',
-    desc:'La propuesta más completa del ciclo crediticio. Evalúa, recupera y monitorea — todo desde una sola relación comercial con Equifax.',
-    benefits:['Evalúa clientes antes del crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio'],
-    preguntas:['¿Busca una solución completa de gestión crediticia?','¿Trabaja con crédito, cobranza y monitoreo?','¿Quiere un solo proveedor para todo?']
-  }
-};
-
-function updateProdCard(tipo) {
-  var card = document.getElementById('prod-card');
-  if (!card) return;
-  var info = PROD_INFO_FULL[tipo];
-  if (!info) {
-    card.innerHTML = '<div style="color:var(--mu);font-size:.7rem;">Selecciona un producto para ver su ficha comercial.</div>';
-    return;
-  }
-  card.innerHTML =
-    '<div class="pc-badge">' + info.badge + '</div>' +
-    '<div class="pc-name">' + info.name + '</div>' +
-    '<div class="pc-desc">' + info.desc + '</div>' +
-    '<div class="pc-benefits">' +
-    info.benefits.map(function(b){ return '<div class="pc-b"><span class="ico">✔</span><span>' + b + '</span></div>'; }).join('') +
-    '</div>' +
-    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--g4);">' +
-    '<div style="font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--rl);margin-bottom:5px;">Preguntas clave</div>' +
-    info.preguntas.map(function(p){ return '<div style="font-size:.68rem;color:var(--wa);padding:2px 0;display:flex;gap:5px;"><span style="color:var(--y);">?</span><span>' + p + '</span></div>'; }).join('') +
-    '</div>';
-}
-
-// Conversor rápido en columna
-function miniConv(from) {
-  var uf = getUF();
-  if (from === 'uf') {
-    var v = parseFloat(document.getElementById('conv-uf-in').value) || 0;
-    document.getElementById('conv-uf-out').textContent = fmtN(v * uf * 1.19) + ' c/IVA';
-  } else {
-    var v2 = parseFloat(document.getElementById('conv-clp-in').value) || 0;
-    document.getElementById('conv-clp-out').textContent = (v2 / uf).toFixed(6) + ' UF';
-  }
-}
-
-// Parsear pegado de CRM (básico — preparado para integración posterior)
-function parseCRMPaste() {
-  var txt = document.getElementById('crm-paste-area').value.trim();
-  if (!txt) return;
-  // Intentar extraer empresa/nombre, teléfono, correo, RUT de texto libre
-  var rutMatch = txt.match(/RUT[:\s]+([\d.\-kK]+)/i);
-  var telMatch = txt.match(/(\+56\s?[29]\s?[\d\s]{8,}|56[29][\d]{8}|[29][\d]{8})/);
-  var emailMatch = txt.match(/[\w.-]+@[\w.-]+\.[a-z]{2,}/i);
-  // Primera línea como nombre/empresa
-  var firstLine = txt.split('\n')[0].trim();
-
-  if (firstLine) {
-    var me = document.getElementById('me');
-    var ob = document.getElementById('ob-empresa');
-    if (me && !me.value) { me.value = firstLine; if (ob) ob.value = firstLine; }
-  }
-  if (rutMatch) {
-    var mr = document.getElementById('mr');
-    var obr = document.getElementById('ob-rut');
-    if (mr) { mr.value = rutMatch[1]; if (obr) obr.value = rutMatch[1]; }
-  }
-  if (telMatch) {
-    var mf = document.getElementById('ob-tel');
-    if (mf) mf.value = telMatch[0];
-    syncFromBar();
-  }
-  if (emailMatch) {
-    var em = document.getElementById('ob-correo');
-    if (em) em.value = emailMatch[0];
-    syncFromBar();
-  }
-  scheduleAutoGen(400);
-}
-
-// UF en tiempo real
-function fetchUFRealtime() {
-  var statusEl = document.getElementById('uf-live-status');
-  if (statusEl) statusEl.textContent = 'Actualizando...';
-  // API mindicador.cl
-  fetch('https://mindicador.cl/api/uf')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if (data && data.serie && data.serie[0]) {
-        var v = data.serie[0].valor;
-        var fecha = data.serie[0].fecha ? data.serie[0].fecha.substring(0,10) : '';
-        var ufInput = document.getElementById('uf-global');
-        if (ufInput) {
-          ufInput.value = Math.round(v);
-          // Disparar evento para que los cálculos se actualicen
-          ufInput.dispatchEvent(new Event('input'));
-        }
-        if (statusEl) {
-          var now = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-          statusEl.textContent = fecha + ' · ' + now;
-          statusEl.style.color = 'rgba(46,204,113,.6)';
-        }
-        if (_mailOn()) scheduleAutoGen(300);
-      }
-    })
-    .catch(function(e){
-      if (statusEl) { statusEl.textContent = 'UF manual'; statusEl.style.color='rgba(255,150,0,.5)';}
-    });
-}
-
-// Sobrescribir genMail para actualizar la burbuja WA
-var _origGenMail = genMail;
-genMail = function() {
-  _origGenMail();
-  // Actualizar burbuja texto WA
-  setTimeout(function(){
-    var body = document.getElementById('tpl-body');
-    var bubble = document.getElementById('wa-text-bubble');
-    if (bubble && body && body.value.trim()) {
-      var txt = body.value
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*([^*\n]+)\*/g,'<strong>$1</strong>')
-        .replace(/~([^~\n]+)~/g,'<s>$1</s>')
-        .replace(/_([^_\n]+)_/g,'<em>$1</em>')
-        .replace(/\n/g,'<br>');
-      bubble.innerHTML = txt;
-    }
-    // Actualizar nombre en header WA
-    var em = document.getElementById('me');
-    var wc = document.getElementById('wa-contact-name');
-    if (wc && em) wc.textContent = em.value || 'Equifax Chile';
-  }, 100);
-};
-
-// Sobrescribir scheduleAutoGen para el nuevo flujo (sin tab "mail")
-var _origSchedule = scheduleAutoGen;
-scheduleAutoGen = function(ms) {
-  clearTimeout(_autoGenTimer);
-  var st = document.getElementById('auto-gen-status');
-  if (st) { st.style.color='#f0c040'; st.textContent='⏳ Actualizando...'; }
-  _autoGenTimer = setTimeout(function() {
-    var tipo = document.getElementById('mt');
-    if (!tipo) return;
-    if (tipo.value) {
-      genMail();
-      updateProdCard(tipo.value);
-    } else {
-      if (st) { st.style.color='#888'; st.textContent='← Selecciona un producto para generar'; }
-    }
-  }, ms !== undefined ? ms : 280);
-};
-
-// INIT
-buildCalcPanels();
-loadExecutivo();
-preloadLogo(null);
-fetchUFRealtime();
-// Disparar autoGen inicial si hay producto seleccionado
-setTimeout(function(){ scheduleAutoGen(600); }, 700);
-
-// Delegación de eventos — cualquier input reactivo
-['input','change'].forEach(function(ev) {
-  document.addEventListener(ev, function(e) {
-    var t = e.target;
-    var ids = ['mn','me','mr','ma','mf','ml','mt','mu','mula','mc2','mp','ob-empresa','ob-tel','ob-correo','ob-rut','ob-prod','uf-global'];
-    if (ids.indexOf(t.id) >= 0) {
-      if (t.id === 'uf-global') {
-        scheduleAutoGen(200);
-      } else if (['mt','ob-prod','mu','mula','mc2','mp'].indexOf(t.id) >= 0) {
-        scheduleAutoGen(180);
-      } else {
-        scheduleAutoGen(350);
-      }
-    }
-  }, true);
-});
 </script>
 </body>
 </html>
