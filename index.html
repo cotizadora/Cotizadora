@@ -122,7 +122,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
 @media(max-width:520px){.metrics{grid-template-columns:1fr 1fr;}}
 .metric{background:var(--g2);border:1px solid var(--g3);border-radius:9px;padding:10px 11px;text-align:center;}
-.metric label{display:block;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;}
+.metric label{display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;font-weight:700;}
 .metric .v{font-size:1.05rem;font-weight:800;}
 .v.y{color:var(--y);}.v.g{color:var(--gn);}.v.b{color:var(--bl);}.v.o{color:var(--or);}.v.wa{color:var(--wa);}
 .benefits{list-style:none;display:grid;grid-template-columns:1fr;gap:7px;margin-top:4px;}
@@ -468,7 +468,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
    Reutiliza íntegramente genMail(), canvas e impresión del index original.
    ════════════════════════════════════════════════════════════════ */
 var STATE={logoImg:null,execImg:null};
-var CURRENT={key:null,override:null};   // override = precio venta ajustado con el slider
+var CURRENT={key:null,override:null,overrideLista:null};   // override = precio venta ajustado con el slider
 var LAST=null;                            // última config calculada
 
 function $(id){return document.getElementById(id);}
@@ -587,6 +587,8 @@ function computeCurrent(){
     c.note='Propuesta integral RI + Mora Control + Portfolio Monitor';
   }else return null;
 
+  // Precio lista override
+  if(CURRENT.overrideLista!==null&&!isNaN(CURRENT.overrideLista))c.ufLista=Math.round(CURRENT.overrideLista*10000)/10000;
   // Precio venta final (slider tiene prioridad si está activo)
   var venta=(CURRENT.override!==null&&!isNaN(CURRENT.override))?CURRENT.override:c.base;
   venta=Math.round(venta*10000)/10000;
@@ -605,7 +607,7 @@ function renderSummary(c){
   var ventaCtrl=
     '<div class="metric" style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
       '<div style="flex:1;min-width:0;">'+
-        '<label style="display:block;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;">Precio venta</label>'+
+        '<label style="display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;font-weight:700;">Precio venta</label>'+
         '<div class="v g" style="font-size:1.05rem;font-weight:800;">'+
           '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)"'+
             ' style="background:none;border:none;color:var(--gn);font-size:1.05rem;font-weight:800;font-family:inherit;width:70px;padding:0;outline:none;cursor:text;">'+
@@ -624,11 +626,31 @@ function renderSummary(c){
       '</div>'+
     '</div>';
 
+  var listaCtrl=
+    '<div class="metric" style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
+      '<div style="flex:1;min-width:0;">'+
+        '<label style="display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;font-weight:700;">Precio lista</label>'+
+        '<div class="v y" style="font-size:1.05rem;font-weight:800;">'+
+          '<input type="number" id="sln-lista" value="'+(ufL>0?ufd(ufL):'0')+'" min="0" step="0.1" oninput="onListaInput(this.value)"'+
+            ' style="background:none;border:none;color:var(--y);font-size:1.05rem;font-weight:800;font-family:inherit;width:70px;padding:0;outline:none;cursor:text;">'+
+          '<span style="font-size:.75rem;font-weight:600;color:var(--wa);margin-left:2px;">UF</span>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">'+
+        '<button type="button" onclick="stepLista(0.1)"'+
+          ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:26px;height:22px;border-radius:5px;cursor:pointer;font-size:.7rem;font-weight:900;transition:.12s;line-height:1;padding:0;"'+
+          ' onmouseover="this.style.background=\'var(--r)\'" onmouseout="this.style.background=\'var(--g3)\'">▲</button>'+
+        '<button type="button" onclick="stepLista(-0.1)"'+
+          ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:26px;height:22px;border-radius:5px;cursor:pointer;font-size:.7rem;font-weight:900;transition:.12s;line-height:1;padding:0;"'+
+          ' onmouseover="this.style.background=\'var(--r)\'" onmouseout="this.style.background=\'var(--g3)\'">▼</button>'+
+      '</div>'+
+    '</div>';
+
   var html=
     '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
     '<div class="metrics">'+
       ventaCtrl+
-      metricBig('Precio lista','m-lista','y',ufL>0?ufd(ufL)+' UF':'—')+
+      listaCtrl+
       metricBig('Descuento','m-desc',hayDc?'g':'wa',hayDc?'−'+dc+'%':'—')+
       metric('$/mes c/IVA','m-mes','b',clp>0?fmtN(clp):'—')+
       metric('Anual (UF)','m-anu-uf','o',ufV>0?ufd(ufV*12)+' UF':'—')+
@@ -650,12 +672,28 @@ function stepPrice(delta){
   var v=Math.max(0,Math.round((cur+delta)*100)/100);
   CURRENT.override=v;lightUpdate(v);
 }
+/* ▲▼ ajustan el precio lista directamente */
+function stepLista(delta){
+  if(!LAST)return;
+  var cur=(CURRENT.overrideLista!==null?CURRENT.overrideLista:LAST.ufLista)||0;
+  var v=Math.max(0,Math.round((cur+delta)*100)/100);
+  CURRENT.overrideLista=v;LAST.ufLista=v;lightUpdateLista(v);
+}
+function onListaInput(v){v=parseFloat(v);if(isNaN(v)||v<0)return;CURRENT.overrideLista=v;LAST.ufLista=v;lightUpdateLista(v);}
+function lightUpdateLista(newLista){
+  if(!LAST)return;
+  LAST.ufLista=newLista;
+  setBridge('mula',newLista>0?newLista:'');
+  var sln=$('sln-lista');if(sln&&document.activeElement!==sln)sln.value=ufd(newLista);
+  /* recalculate discount with current venta */
+  lightUpdate(LAST.ufVenta);
+}
 function metric(lbl,id,cls,val){
   return '<div class="metric"><label>'+lbl+'</label><div class="v '+cls+'" id="'+id+'">'+val+'</div></div>';
 }
 function metricBig(lbl,id,cls,val){
   return '<div class="metric" style="padding:12px 14px;">'+
-    '<label style="font-size:.6rem;">'+lbl+'</label>'+
+    '<label style="font-size:.72rem;font-weight:700;">'+lbl+'</label>'+
     '<div class="v '+cls+'" id="'+id+'" style="font-size:1.3rem;margin-top:4px;">'+val+'</div>'+
   '</div>';
 }
@@ -670,15 +708,16 @@ function lightUpdate(v){
   var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV>0?ufc(ufV):0;
   var sn=$('sln-main');if(sn&&document.activeElement!==sn)sn.value=ufd(ufV);
+  var sl=$('sln-lista');if(sl&&document.activeElement!==sl)sl.value=ufd(ufL);
   st('s-price-clp',clp>0?'≈ '+fmtN(clp)+' c/IVA':'—');
   sv('s-disc',hayDc?discHTML(dc,ufL,ufV):'');
-  st('m-lista',ufL>0?ufd(ufL)+' UF':'—');
   var md=$('m-desc');if(md){md.textContent=hayDc?'−'+dc+'%':'—';md.className='v '+(hayDc?'g':'wa');}
   st('m-mes',clp>0?fmtN(clp):'—');
   st('m-anu-uf',ufV>0?ufd(ufV*12)+' UF':'—');
   st('m-anu-clp',clp>0?fmtN(clp*12):'—');
   LAST.ufVenta=ufV;
   setBridge('mu',ufV);
+  setBridge('mula',ufL>0?ufL:'');
   genMail();syncWA();
 }
 
@@ -694,7 +733,7 @@ function refresh(){
   genMail();
   syncWA();
 }
-function onConfigChange(){CURRENT.override=null;refresh();}
+function onConfigChange(){CURRENT.override=null;CURRENT.overrideLista=null;refresh();}
 function onSlide(v){v=parseFloat(v);if(isNaN(v)||v<0)return;CURRENT.override=v;lightUpdate(v);}
 function onClientChange(){genMail();syncWA();}
 function syncWA(){var t=$('tpl-body'),o=$('wa-text-view');if(t&&o)o.textContent=t.value;}
@@ -703,7 +742,7 @@ function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'n
 
 /* ════════ SELECCIÓN DE PRODUCTO (gobierna toda la interfaz) ════════ */
 function setProduct(key){
-  CURRENT.key=key;CURRENT.override=null;
+  CURRENT.key=key;CURRENT.override=null;CURRENT.overrideLista=null;
   document.querySelectorAll('.pbtn').forEach(function(b){b.classList.toggle('on',b.dataset.key===key);});
   var p=PRODUCTS.find(function(x){return x.key===key;});
   $('cfg-prod-name').textContent=p?'· '+p.lb:'';
