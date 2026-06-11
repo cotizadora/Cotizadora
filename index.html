@@ -593,36 +593,32 @@ function renderSummary(c){
   var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV>0?ufc(ufV):0;
 
-  /* tarjeta PRECIO VENTA — único controlador de precio, ocupa fila completa */
+  /* tarjeta PRECIO VENTA — misma forma que las otras métricas, con ▲▼ integrados */
   var ventaCtrl=
-    '<div style="grid-column:1/-1;background:linear-gradient(135deg,#1a0a0e,#23090f);'+
-      'border:2px solid rgba(155,28,46,.65);border-radius:11px;padding:12px 15px;'+
-      'display:flex;align-items:center;justify-content:space-between;gap:10px;">'+
+    '<div class="metric" style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
       '<div style="flex:1;min-width:0;">'+
-        '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);margin-bottom:2px;">Precio venta</div>'+
-        '<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">'+
+        '<label style="display:block;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;">Precio venta</label>'+
+        '<div class="v g" style="font-size:1.05rem;font-weight:800;">'+
           '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)"'+
-            ' style="background:none;border:none;color:var(--y);font-size:2.2rem;font-weight:900;font-family:inherit;width:115px;padding:0;outline:none;cursor:text;">'+
-          '<span style="font-size:.82rem;font-weight:700;color:var(--wa);white-space:nowrap;">UF + IVA</span>'+
+            ' style="background:none;border:none;color:var(--gn);font-size:1.05rem;font-weight:800;font-family:inherit;width:70px;padding:0;outline:none;cursor:text;">'+
+          '<span style="font-size:.75rem;font-weight:600;color:var(--wa);margin-left:2px;">UF</span>'+
         '</div>'+
-        '<div id="s-price-clp" style="font-size:.8rem;color:#cfcfcf;margin-top:1px;">'+(clp>0?'≈ '+fmtN(clp)+' c/IVA':'—')+'</div>'+
-        '<div id="s-disc" style="margin-top:3px;">'+(hayDc?discHTML(dc,ufL,ufV):'')+'</div>'+
+        '<div id="s-price-clp" style="font-size:.68rem;color:var(--wb);margin-top:1px;">'+(clp>0?'≈ '+fmtN(clp):'')+'</div>'+
+        '<div id="s-disc">'+(hayDc?discHTML(dc,ufL,ufV):'')+'</div>'+
       '</div>'+
-      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'+
-        '<button type="button" onclick="stepPrice(0.1)" aria-label="Subir precio"'+
-          ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:40px;height:30px;border-radius:7px;cursor:pointer;font-size:.9rem;font-weight:900;transition:.12s;line-height:1;"'+
-          ' onmouseover="this.style.background=\'var(--r)\';this.style.boxShadow=\'0 0 8px rgba(155,28,46,.55)\'"'+
-          ' onmouseout="this.style.background=\'var(--g3)\';this.style.boxShadow=\'none\'">▲</button>'+
-        '<button type="button" onclick="stepPrice(-0.1)" aria-label="Bajar precio"'+
-          ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:40px;height:30px;border-radius:7px;cursor:pointer;font-size:.9rem;font-weight:900;transition:.12s;line-height:1;"'+
-          ' onmouseover="this.style.background=\'var(--r)\';this.style.boxShadow=\'0 0 8px rgba(155,28,46,.55)\'"'+
-          ' onmouseout="this.style.background=\'var(--g3)\';this.style.boxShadow=\'none\'">▼</button>'+
+      '<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">'+
+        '<button type="button" onclick="stepPrice(0.1)"'+
+          ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:26px;height:22px;border-radius:5px;cursor:pointer;font-size:.7rem;font-weight:900;transition:.12s;line-height:1;padding:0;"'+
+          ' onmouseover="this.style.background=\'var(--r)\'" onmouseout="this.style.background=\'var(--g3)\'">▲</button>'+
+        '<button type="button" onclick="stepPrice(-0.1)"'+
+          ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:26px;height:22px;border-radius:5px;cursor:pointer;font-size:.7rem;font-weight:900;transition:.12s;line-height:1;padding:0;"'+
+          ' onmouseover="this.style.background=\'var(--r)\'" onmouseout="this.style.background=\'var(--g3)\'">▼</button>'+
       '</div>'+
     '</div>';
 
   var html=
     '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
-    '<div class="metrics" style="grid-template-columns:repeat(2,1fr);gap:8px;">'+
+    '<div class="metrics">'+
       ventaCtrl+
       metricBig('Precio lista','m-lista','y',ufL>0?ufd(ufL)+' UF':'—')+
       metricBig('Descuento','m-desc',hayDc?'g':'wa',hayDc?'−'+dc+'%':'—')+
@@ -659,17 +655,15 @@ function discHTML(dc,ufL,ufV){
   return '<div class="price-disc"><span class="pct">−'+dc+'%</span><div class="det"><s>Lista: '+ufd(ufL)+' UF</s><br>Final: '+ufd(ufV)+' UF</div></div>';
 }
 
-/* Actualización ligera al mover el slider (sin reconstruir el resumen) */
+/* Actualización ligera al mover el precio (sin reconstruir el resumen) */
 function lightUpdate(v){
   if(!LAST)return;
   var ufL=LAST.ufLista,ufV=v;
   var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV>0?ufc(ufV):0;
-  /* actualiza el input visible dentro de ventaCtrl */
   var sn=$('sln-main');if(sn&&document.activeElement!==sn)sn.value=ufd(ufV);
   st('s-price-clp',clp>0?'≈ '+fmtN(clp)+' c/IVA':'—');
   sv('s-disc',hayDc?discHTML(dc,ufL,ufV):'');
-  /* métricas secundarias */
   st('m-lista',ufL>0?ufd(ufL)+' UF':'—');
   var md=$('m-desc');if(md){md.textContent=hayDc?'−'+dc+'%':'—';md.className='v '+(hayDc?'g':'wa');}
   st('m-mes',clp>0?fmtN(clp):'—');
