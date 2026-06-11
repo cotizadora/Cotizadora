@@ -3,249 +3,574 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>CotizadorGo! — Herramienta Comercial Equifax Chile</title>
+<title>CotizadorGo! — Estación Comercial Equifax Chile</title>
 <style>
 :root{
-  --r:#9b1c2e;--rd:#6e1220;--rl:#c0263b;
-  --g1:#111;--g2:#1e1e1e;--g3:#282828;--g4:#333;--g5:#444;
-  --w:#f0f0f0;--wa:#bbb;--y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
-  /* ── UX CLARIDAD ── */
-  --fs-base:16px;    /* texto base legible */
-  --fs-label:13px;   /* etiquetas */
-  --fs-title:20px;   /* títulos sección */
-  --fs-price:32px;   /* precio destacado */
-  --fs-mega:42px;    /* precio principal */
+  --r:#9b1c2e;--rd:#6e1220;--rl:#c0263b;--rll:#e8405a;
+  --g1:#0e0e0e;--g2:#181818;--g3:#222;--g4:#2e2e2e;--g5:#3a3a3a;--g6:#464646;
+  --w:#f0f0f0;--w2:#cccccc;--muted:#999;
+  --y:#f0c040;--y2:#c8960a;
+  --gn:#2ecc71;--bl:#3498db;--or:#e67e22;--pu:#9b59b6;
+  --hh:64px;   /* altura header */
+  --lw:420px;  /* ancho panel izquierdo */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--g1);color:var(--w);font-family:'Segoe UI',Arial,sans-serif;font-size:var(--fs-base);line-height:1.5;}
-header{background:linear-gradient(135deg,var(--rd),#a01f30 60%,#6e1220);padding:8px 20px;
-  display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;
-  box-shadow:0 3px 20px rgba(0,0,0,.7);border-bottom:1px solid rgba(255,255,255,.1);}
-.logo-sub{font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-top:2px;}
-.uf-widget{display:flex;align-items:center;gap:8px;}
-.uf-box{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 12px;text-align:center;}
-.uf-box label{display:block;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1px;}
-.uf-box input{background:none;border:none;color:var(--y);font-size:.95rem;font-weight:700;width:90px;text-align:center;font-family:inherit;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--g1);color:var(--w);font-family:'Segoe UI',Arial,sans-serif;font-size:15px;line-height:1.5;}
+
+/* ── HEADER ── */
+#hdr{
+  position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:300;
+  background:linear-gradient(135deg,#4a0a14,#7a1425 55%,#5a0e1a);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;border-bottom:2px solid rgba(240,192,64,.3);
+  box-shadow:0 2px 20px rgba(0,0,0,.7);
+}
+#hdr-left{display:flex;align-items:center;gap:12px;}
+#hdr-logo{height:40px;width:auto;display:block;filter:brightness(0) invert(1);}
+#hdr-title{font-size:13px;font-weight:900;letter-spacing:1px;color:#fff;line-height:1.2;}
+#hdr-sub{font-size:10px;letter-spacing:2.5px;color:rgba(255,255,255,.45);text-transform:uppercase;}
+#hdr-center{display:flex;align-items:center;gap:8px;flex:1;justify-content:center;max-width:600px;}
+#prod-selector-wrap{display:flex;align-items:center;gap:10px;width:100%;}
+#prod-selector-wrap label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);white-space:nowrap;}
+#prod-selector{
+  background:rgba(0,0,0,.4);border:2px solid rgba(240,192,64,.4);
+  color:var(--y);font-size:16px;font-weight:800;padding:6px 14px;
+  border-radius:6px;font-family:inherit;flex:1;max-width:340px;
+  cursor:pointer;transition:border-color .2s;
+}
+#prod-selector:focus{outline:none;border-color:var(--y);}
+#prod-selector option{background:#1a0a0e;color:#fff;font-size:14px;}
+#hdr-right{display:flex;align-items:center;gap:8px;}
+.uf-box{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 12px;text-align:center;min-width:90px;}
+.uf-box label{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:1px;}
+.uf-box input{background:none;border:none;color:var(--y);font-size:15px;font-weight:800;width:80px;text-align:center;font-family:inherit;}
 .uf-box input:focus{outline:none;}
-.qcount{color:var(--gn);font-size:.9rem;font-weight:700;text-align:center;padding-top:2px;}
-/* NAV — scroll horizontal en móvil, sin corte */
-nav{background:var(--g2);border-bottom:2px solid var(--g4);display:flex;
-  position:fixed;top:120px;left:0;right:0;z-index:199;overflow-x:auto;
-  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-  scrollbar-width:none;}
-nav::-webkit-scrollbar{display:none;}
-body{padding-top:162px;}
-/* Indicador de scroll */
-nav::after{content:'›';position:absolute;right:0;top:0;bottom:0;width:28px;
-  background:linear-gradient(90deg,transparent,rgba(30,30,30,.95));
-  display:flex;align-items:center;justify-content:center;color:#555;
-  font-size:1.2rem;pointer-events:none;transition:opacity .3s;}
-.tab{display:inline-flex;align-items:center;gap:6px;padding:13px 18px;border:none;
-  border-bottom:3px solid transparent;background:none;color:var(--wa);cursor:pointer;
-  font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.3px;
-  transition:all .15s;white-space:nowrap;scroll-snap-align:start;flex-shrink:0;
-  position:relative;}
-.tab:hover{color:#fff;background:rgba(155,28,46,.25);}
-.tab:hover::after{content:'';position:absolute;inset:0;border-radius:4px;
-  box-shadow:0 0 12px rgba(155,28,46,.6),inset 0 0 8px rgba(155,28,46,.15);
-  pointer-events:none;}
-.tab.on{color:#fff;border-bottom-color:var(--r);background:rgba(155,28,46,.2);}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--gn);display:none;}
-.tab.has-quote .dot{display:inline-block;}
-/* Flecha de scroll nav */
-.nav-scroll-hint{position:fixed;right:4px;top:120px;height:42px;width:22px;
-  display:flex;align-items:center;justify-content:center;z-index:200;
-  color:rgba(255,255,255,.4);font-size:.85rem;pointer-events:none;
-  animation:blink 1.5s infinite;}
-@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
-main{padding:18px;max-width:1140px;margin:0 auto;}
-.panel{display:none;animation:fi .2s ease;}
-.panel.on{display:block;}
-@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.ptitle{font-size:18px;letter-spacing:2px;text-transform:uppercase;color:var(--rl);
-  margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--g4);display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700;}
-.badge{background:var(--rd);font-size:12px;padding:3px 10px;border-radius:20px;letter-spacing:.8px;color:#ddd;font-weight:600;}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;}
-.card{background:var(--g3);border:1px solid var(--g4);border-radius:8px;padding:14px;}
-.card:hover{border-color:rgba(155,28,46,.6);}
-.cl{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:4px;font-weight:600;}
-.cv{font-size:1.7rem;font-weight:800;color:var(--y);}
-.cs{font-size:13px;color:#bbb;margin-top:4px;}
-.tbl{overflow-x:auto;border-radius:7px;border:1px solid var(--g4);margin-bottom:16px;}
-table{width:100%;border-collapse:collapse;font-size:15px;}
-thead tr{background:linear-gradient(90deg,var(--rd),#7a1425);}
-th{padding:11px 14px;text-align:left;font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:#fff;white-space:nowrap;font-weight:700;}
-td{padding:10px 14px;border-bottom:1px solid var(--g4);color:#cccccc;white-space:nowrap;font-size:15px;}
-tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:rgba(155,28,46,.1);}
-.y{color:var(--y);font-weight:600;}.g{color:var(--gn);font-weight:600;}.b{color:var(--bl);}.mu{color:#666;font-size:.72rem;}.or{color:var(--or);}
-.cbox{background:var(--g3);border:1px solid var(--g4);border-radius:8px;padding:18px;margin-bottom:16px;}
-.cbox h3{font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:var(--rl);margin-bottom:14px;font-weight:700;}
-.crow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
-.f{display:flex;flex-direction:column;gap:3px;}
-.f label{font-size:13px;letter-spacing:.5px;font-weight:600;color:#cccccc;margin-bottom:2px;}
-.f select,.f input{background:var(--g1);border:1px solid #555;color:var(--w);
-  padding:10px 12px;font-family:inherit;font-size:16px;border-radius:6px;min-width:155px;transition:border-color .15s;}
-.f select:focus,.f input:focus{outline:none;border-color:var(--rl);}
-.btn{background:var(--r);border:none;color:#fff;padding:11px 24px;cursor:pointer;
-  font-family:inherit;font-size:15px;font-weight:700;border-radius:6px;transition:background .15s;}
-.btn:hover{background:var(--rl);}
-.btn.sec{background:var(--g4);}.btn.sec:hover{background:var(--g5);}
-.res{display:none;margin-top:12px;border-radius:7px;overflow:hidden;}
-.res.on{display:block;}
-.res-head{background:var(--rd);padding:8px 14px;font-size:.68rem;letter-spacing:2px;
-  text-transform:uppercase;color:rgba(255,255,255,.7);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
-.res-body{background:rgba(0,0,0,.3);border:1px solid rgba(155,28,46,.3);border-top:none;padding:14px;}
-.rl{font-size:15px;color:#cccccc;margin-bottom:6px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;}
-.rl b{color:var(--y);font-size:17px;}
-.res-big{font-size:1.8rem;font-weight:800;color:var(--y);margin:8px 0 4px;}
-.save-btn{background:var(--bl);border:none;color:#fff;padding:8px 16px;cursor:pointer;
-  font-family:inherit;font-size:14px;font-weight:700;border-radius:5px;}
-.save-btn:hover{background:#2980b9;}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0;}
-.gitem{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:10px 12px;text-align:center;}
-.gitem label{display:block;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#aaa;margin-bottom:4px;font-weight:600;}
-.gitem .val{font-size:1.15rem;font-weight:800;}
-.slider-wrap{margin-top:12px;background:rgba(0,0,0,.25);border-radius:7px;padding:12px 14px;}
-.sw-title{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#bbb;margin-bottom:10px;font-weight:600;}
-.sw-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px;}
-.sw-row input[type=range]{flex:1;min-width:120px;accent-color:var(--r);}
-.sw-row input[type=number]{background:var(--g1);border:1px solid var(--g5);color:var(--y);
-  padding:5px 8px;font-family:inherit;font-size:.88rem;font-weight:700;border-radius:4px;width:105px;}
-.sw-row input[type=number]:focus{outline:none;border-color:var(--rl);}
-.alerta{background:rgba(240,192,64,.1);border-left:4px solid var(--y);padding:12px 16px;
-  margin-bottom:16px;font-size:15px;color:#cccccc;border-radius:0 6px 6px 0;}
-.alerta b{color:var(--y);}
-.chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-.chip{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:8px 14px;text-align:center;min-width:90px;}
-.chip .n{font-size:1.3rem;font-weight:700;color:var(--bl);}
-.chip .t{font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);margin-top:1px;}
-.quote-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.qi{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:10px 14px;
-  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
-.qi-prod{font-size:15px;font-weight:700;color:#fff;}
-.qi-price{font-size:17px;font-weight:800;color:var(--y);}
-.qi-meta{font-size:13px;color:#bbb;}
-.qi-acts{display:flex;gap:6px;}
-.qibtn{background:var(--g4);border:none;color:var(--wa);padding:4px 10px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:.7rem;}
-.qibtn:hover{background:var(--g5);color:#fff;}
-.qibtn.del{color:#e74c3c;}
-.btn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-.bacc{background:var(--g3);border:1px solid var(--g4);border-radius:7px;padding:12px 8px;
-  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
-  color:var(--w);font-family:inherit;transition:all .2s;position:relative;overflow:hidden;}
-.bacc span{font-size:14px;font-weight:700;}
-.bacc small{font-size:12px;color:#bbb;text-align:center;}
-.bacc:hover{border-color:var(--rl);background:rgba(155,28,46,.2);
-  box-shadow:0 0 14px rgba(155,28,46,.5),inset 0 0 10px rgba(155,28,46,.1);
-  transform:translateY(-1px);}
-.bacc:active{transform:scale(.96);}
-.bacc.wsp{border-color:rgba(37,211,102,.35);background:rgba(37,211,102,.05);}
-.bacc.wsp:hover{border-color:#25d366;background:rgba(37,211,102,.12);
-  box-shadow:0 0 14px rgba(37,211,102,.4),inset 0 0 10px rgba(37,211,102,.08);}
-.bacc.email-btn{border-color:rgba(52,152,219,.35);background:rgba(52,152,219,.05);}
-.bacc.email-btn:hover{border-color:#3498db;background:rgba(52,152,219,.12);
-  box-shadow:0 0 14px rgba(52,152,219,.4);}
-/* Neón general en todos los .btn */
-.btn{background:var(--r);border:none;color:#fff;padding:11px 24px;cursor:pointer;
-  font-family:inherit;font-size:15px;font-weight:700;border-radius:6px;
-  transition:all .2s;position:relative;}
-.btn:hover{background:var(--rl);box-shadow:0 0 16px rgba(155,28,46,.6);transform:translateY(-1px);}
-.btn:active{transform:scale(.97);}
-.btn.sec{background:var(--g4);box-shadow:none;}
-.btn.sec:hover{background:var(--g5);box-shadow:0 0 10px rgba(255,255,255,.1);}
-/* save-btn neón */
-.save-btn{background:var(--bl);border:none;color:#fff;padding:8px 16px;cursor:pointer;
-  font-family:inherit;font-size:14px;font-weight:700;border-radius:5px;transition:all .2s;}
-.save-btn:hover{background:#2980b9;box-shadow:0 0 14px rgba(52,152,219,.6);transform:translateY(-1px);}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
-.toast{display:none;padding:12px 16px;border-radius:6px;margin-bottom:12px;font-size:15px;font-weight:500;}
-.toast.ok{background:rgba(46,204,113,.15);border-left:3px solid #2ecc71;color:#2ecc71;}
-.toast.err{background:rgba(231,76,60,.15);border-left:3px solid #e74c3c;color:#e74c3c;}
-.toast.info{background:rgba(52,152,219,.15);border-left:3px solid #3498db;color:#3498db;}
-textarea{background:var(--g1);border:1px solid var(--g4);color:var(--wa);
-  font-family:'Courier New',monospace;font-size:.75rem;padding:12px;resize:vertical;
-  outline:none;line-height:1.6;border-radius:0 0 7px 7px;width:100%;}
-.sync-banner{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.35);border-radius:6px;
-  padding:8px 14px;margin-bottom:12px;font-size:.75rem;color:#2ecc71;display:none;align-items:center;gap:8px;}
+#uf-status{font-size:9px;color:rgba(255,255,255,.3);text-align:center;margin-top:1px;letter-spacing:.5px;}
+.qcount-box{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.3);border-radius:6px;padding:5px 10px;text-align:center;}
+.qcount-box label{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(46,204,113,.6);margin-bottom:1px;}
+#quote-count{color:var(--gn);font-size:16px;font-weight:800;}
+
+/* ── LAYOUT PRINCIPAL ── */
+#workspace{
+  position:fixed;top:var(--hh);left:0;right:0;bottom:0;
+  display:grid;grid-template-columns:var(--lw) 1fr;
+  gap:0;overflow:hidden;
+}
+
+/* ── PANEL IZQUIERDO — configuración fija ── */
+#panel-left{
+  background:var(--g2);border-right:2px solid var(--g4);
+  overflow-y:auto;overflow-x:hidden;height:100%;
+  scrollbar-width:thin;scrollbar-color:#333 #111;
+}
+#panel-left::-webkit-scrollbar{width:5px;}
+#panel-left::-webkit-scrollbar-track{background:#111;}
+#panel-left::-webkit-scrollbar-thumb{background:#333;border-radius:3px;}
+
+/* ── PANEL DERECHO — vistas previas ── */
+#panel-right{
+  background:var(--g1);overflow-y:auto;overflow-x:hidden;height:100%;
+  scrollbar-width:thin;scrollbar-color:#333 #111;
+}
+#panel-right::-webkit-scrollbar{width:5px;}
+#panel-right::-webkit-scrollbar-track{background:#111;}
+#panel-right::-webkit-scrollbar-thumb{background:#333;border-radius:3px;}
+
+/* ── SECCIONES DEL PANEL IZQUIERDO ── */
+.lsec{padding:14px 16px;border-bottom:1px solid var(--g4);}
+.lsec-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--rl);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.lsec-title::before{content:'';display:inline-block;width:3px;height:12px;background:var(--r);border-radius:2px;}
+
+/* Campos del panel izquierdo */
+.lf{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}
+.lf:last-child{margin-bottom:0;}
+.lf label{font-size:12px;font-weight:600;color:#bbb;letter-spacing:.3px;}
+.lf input,.lf select,.lf textarea{
+  background:var(--g3);border:1px solid var(--g5);color:var(--w);
+  padding:9px 12px;font-family:inherit;font-size:15px;border-radius:6px;
+  transition:border-color .15s;width:100%;
+}
+.lf input:focus,.lf select:focus{outline:none;border-color:var(--rl);background:var(--g4);}
+.lf select option{background:#222;}
+
+/* Grid 2 columnas dentro del panel izq */
+.lf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.lf-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+
+/* Precio resultado — el más prominente */
+#result-price-box{
+  background:linear-gradient(135deg,#0a0305,#150608);
+  border:2px solid rgba(240,192,64,.3);border-radius:8px;
+  padding:14px 16px;margin-bottom:10px;
+}
+#result-price-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:#888;margin-bottom:4px;}
+#result-price-val{font-size:38px;font-weight:900;color:var(--y);line-height:1;}
+#result-price-clp{font-size:13px;color:#888;margin-top:5px;}
+#result-price-dc{font-size:13px;color:var(--gn);margin-top:3px;}
+
+/* Tarjeta de info producto */
+#prod-info-box{
+  background:var(--g3);border:1px solid var(--g4);border-radius:8px;
+  padding:12px 14px;margin-bottom:10px;
+}
+#prod-info-name{font-size:16px;font-weight:800;color:#fff;margin-bottom:6px;}
+#prod-info-desc{font-size:13px;color:#bbb;line-height:1.6;margin-bottom:8px;}
+#prod-info-benefits{list-style:none;padding:0;}
+#prod-info-benefits li{
+  font-size:13px;color:#ccc;padding:4px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex;gap:7px;align-items:flex-start;
+}
+#prod-info-benefits li::before{content:'✔';color:var(--r);font-size:12px;flex-shrink:0;margin-top:2px;}
+
+/* Botones de acción */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+.abtn{
+  flex:1;min-width:0;padding:10px 8px;border:none;cursor:pointer;
+  border-radius:6px;font-family:inherit;font-size:13px;font-weight:700;
+  transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.abtn-icon{font-size:16px;}
+.abtn-label{font-size:11px;letter-spacing:.3px;}
+.abtn.wsp{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);color:#25d366;}
+.abtn.wsp:hover{background:rgba(37,211,102,.25);box-shadow:0 0 12px rgba(37,211,102,.3);}
+.abtn.gmail{background:rgba(234,67,53,.15);border:1px solid rgba(234,67,53,.4);color:#ff6b5b;}
+.abtn.gmail:hover{background:rgba(234,67,53,.25);box-shadow:0 0 12px rgba(234,67,53,.3);}
+.abtn.outlook{background:rgba(0,114,198,.15);border:1px solid rgba(0,114,198,.4);color:#4da6ff;}
+.abtn.outlook:hover{background:rgba(0,114,198,.25);box-shadow:0 0 12px rgba(0,114,198,.3);}
+.abtn.img{background:rgba(155,28,46,.15);border:1px solid rgba(155,28,46,.4);color:#ff9b92;}
+.abtn.img:hover{background:rgba(155,28,46,.25);box-shadow:0 0 12px rgba(155,28,46,.3);}
+.abtn.img-wsp{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);color:#a9dfbf;}
+.abtn.img-wsp:hover{background:rgba(37,211,102,.2);}
+.abtn.subject{background:var(--g4);border:1px solid var(--g5);color:#ccc;width:100%;}
+.abtn.subject:hover{background:var(--g5);}
+.abtn.save{background:rgba(52,152,219,.15);border:1px solid rgba(52,152,219,.4);color:#85c1e9;flex:none;padding:10px 14px;}
+.abtn.save:hover{background:rgba(52,152,219,.25);}
+
+/* Slider de precio */
+.price-slider-wrap{background:rgba(0,0,0,.2);border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.psl-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:6px;}
+.psl-row{display:flex;gap:8px;align-items:center;}
+.psl-row input[type=range]{flex:1;accent-color:var(--r);}
+.psl-row input[type=number]{
+  background:var(--g3);border:1px solid var(--g5);color:var(--y);
+  padding:6px 8px;font-family:inherit;font-size:15px;font-weight:700;
+  border-radius:5px;width:90px;text-align:center;
+}
+.psl-row input[type=number]:focus{outline:none;border-color:var(--rl);}
+
+/* Tabla compacta producto */
+.ptbl{width:100%;border-collapse:collapse;font-size:13px;}
+.ptbl thead tr{background:linear-gradient(90deg,var(--rd),#7a1425);}
+.ptbl th{padding:7px 10px;text-align:left;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#fff;white-space:nowrap;}
+.ptbl td{padding:6px 10px;border-bottom:1px solid var(--g4);color:#bbb;white-space:nowrap;}
+.ptbl tbody tr:hover{background:rgba(155,28,46,.08);}
+.ptbl .y{color:var(--y);font-weight:700;}
+.ptbl .g{color:var(--gn);font-weight:600;}
+.ptbl .b{color:var(--bl);}
+.ptbl .or{color:var(--or);}
+.ptbl .hi{background:rgba(240,192,64,.1)!important;}
+
+/* Mini chips de datos */
+.chips-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.chip{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:7px 10px;flex:1;min-width:70px;text-align:center;}
+.chip-val{font-size:16px;font-weight:800;color:var(--y);}
+.chip-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+
+/* Alerta info */
+.info-banner{background:rgba(240,192,64,.07);border-left:3px solid var(--y);padding:8px 12px;border-radius:0 5px 5px 0;font-size:13px;color:#bbb;margin-bottom:10px;}
+.info-banner b{color:var(--y);}
+
+/* Toast */
+.toast{display:none;padding:10px 14px;border-radius:5px;margin-bottom:10px;font-size:14px;}
+.toast.ok{background:rgba(46,204,113,.12);border-left:3px solid #2ecc71;color:#2ecc71;}
+.toast.err{background:rgba(231,76,60,.12);border-left:3px solid #e74c3c;color:#e74c3c;}
+.toast.info{background:rgba(52,152,219,.12);border-left:3px solid #3498db;color:#3498db;}
+#global-toast{position:fixed;bottom:16px;right:16px;z-index:9999;min-width:260px;max-width:380px;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+
+/* ── PANEL DERECHO — vistas previas ── */
+#previews-wrap{padding:14px;}
+.prev-section{margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid var(--g4);}
+.prev-head{
+  padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.prev-head-left{display:flex;align-items:center;gap:10px;}
+.prev-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0;}
+.prev-title{font-size:14px;font-weight:800;letter-spacing:.3px;}
+.prev-subtitle{font-size:11px;color:#888;margin-top:1px;}
+.prev-head-right{display:flex;gap:6px;align-items:center;}
+.pbtn{border:none;cursor:pointer;padding:7px 14px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;transition:all .15s;}
+.pbtn.copy{background:var(--g4);color:#ccc;border:1px solid var(--g5);}
+.pbtn.copy:hover{background:var(--g5);color:#fff;}
+.pbtn.ampliar{background:transparent;border:1px solid var(--g5);color:#888;font-size:11px;}
+.pbtn.ampliar:hover{border-color:#666;color:#ccc;}
+.prev-body{padding:14px 16px;}
+
+/* Secc Gmail */
+.prev-section.gmail{border-color:rgba(234,67,53,.3);}
+.prev-section.gmail .prev-head{background:rgba(234,67,53,.08);}
+.prev-section.gmail .prev-icon{background:linear-gradient(135deg,#ea4335,#c5221f);}
+.prev-section.gmail .prev-title{color:#ff6b5b;}
+.prev-section.gmail .pbtn.main{background:linear-gradient(135deg,#ea4335,#c5221f);color:#fff;}
+.prev-section.gmail .pbtn.main:hover{box-shadow:0 0 12px rgba(234,67,53,.5);}
+
+/* Secc Outlook */
+.prev-section.outlook{border-color:rgba(0,114,198,.3);}
+.prev-section.outlook .prev-head{background:rgba(0,114,198,.08);}
+.prev-section.outlook .prev-icon{background:linear-gradient(135deg,#0072c6,#004578);}
+.prev-section.outlook .prev-title{color:#4da6ff;}
+.prev-section.outlook .pbtn.main{background:linear-gradient(135deg,#0072c6,#004578);color:#fff;}
+.prev-section.outlook .pbtn.main:hover{box-shadow:0 0 12px rgba(0,114,198,.5);}
+
+/* Secc WhatsApp */
+.prev-section.wsp{border-color:rgba(37,211,102,.3);}
+.prev-section.wsp .prev-head{background:rgba(37,211,102,.08);}
+.prev-section.wsp .prev-icon{background:linear-gradient(135deg,#25d366,#128c7e);}
+.prev-section.wsp .prev-title{color:#25d366;}
+.prev-section.wsp .pbtn.main{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;}
+.prev-section.wsp .pbtn.main:hover{box-shadow:0 0 12px rgba(37,211,102,.5);}
+
+/* Secc Imagen */
+.prev-section.img{border-color:rgba(155,28,46,.3);}
+.prev-section.img .prev-head{background:rgba(155,28,46,.08);}
+.prev-section.img .prev-icon{background:linear-gradient(135deg,#9b1c2e,#6e1220);}
+.prev-section.img .prev-title{color:#ff9b92;}
+.prev-section.img .pbtn.main{background:linear-gradient(135deg,#9b1c2e,#6e1220);color:#fff;}
+.prev-section.img .pbtn.main:hover{box-shadow:0 0 12px rgba(155,28,46,.5);}
+
+/* Vista previa tarjeta */
+#cot-card-pc{max-width:100%;border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);}
+#cot-card-wsp{max-width:100%;border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);border:1px solid rgba(37,211,102,.2);}
+
+/* Asunto correo */
+#asunto-row{background:var(--g3);border:1px solid var(--g4);border-radius:7px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+#asunto-row-text{flex:1;}
+#asunto-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:3px;}
+#tpl-asunto{color:var(--y);font-size:14px;font-weight:600;}
+
+/* Texto WA oculto */
+#tpl-body{display:none;}
+
+/* Modal ampliar */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+#modal-overlay.on{display:flex;}
+#modal-inner{max-width:700px;width:100%;max-height:90vh;overflow-y:auto;background:var(--g2);border-radius:12px;border:1px solid var(--g4);padding:16px;position:relative;scrollbar-width:thin;}
+#modal-close{position:absolute;top:12px;right:12px;background:var(--g4);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;z-index:10;}
+#modal-close:hover{background:var(--r);}
+
+/* Nota Outlook */
+.outlook-note{font-size:12px;color:#888;background:rgba(0,114,198,.06);border:1px solid rgba(0,114,198,.15);border-radius:5px;padding:7px 10px;margin-top:10px;}
+.outlook-note strong{color:#4da6ff;}
+
+/* Tabs producto (para tablas de precio) */
+.prod-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.prod-tab{background:var(--g4);border:1px solid var(--g5);color:#bbb;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:all .15s;}
+.prod-tab.on{background:var(--r);border-color:var(--r);color:#fff;}
+.prod-tab:hover:not(.on){background:var(--g5);}
+
+/* WA texto preview */
+#wa-text-preview{
+  background:#0d1a0f;border:1px solid rgba(37,211,102,.2);border-radius:6px;
+  padding:12px;font-size:13px;font-family:monospace;color:#d0d0d0;
+  white-space:pre-wrap;word-break:break-word;line-height:1.6;
+  max-height:200px;overflow-y:auto;
+}
+
+/* Sync banner */
+.sync-banner{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:var(--gn);display:none;align-items:center;gap:8px;}
 .sync-banner.on{display:flex;}
-footer{text-align:center;padding:12px;font-size:.63rem;color:#444;
-  letter-spacing:1px;border-top:1px solid var(--g4);margin-top:24px;}
-/* Pulso neón tab plantillas */
-@keyframes neonPulse{
-  0%{box-shadow:0 0 8px rgba(46,204,113,.5);border-color:rgba(46,204,113,.6);}
-  50%{box-shadow:0 0 22px rgba(46,204,113,.9),0 0 40px rgba(46,204,113,.4);border-color:#2ecc71;background:rgba(46,204,113,.18);}
-  100%{box-shadow:0 0 8px rgba(46,204,113,.5);border-color:rgba(46,204,113,.6);}
-}
-.tab.pulse-neon{
-  animation:neonPulse .7s ease-in-out 4;
-  border:1px solid rgba(46,204,113,.6);border-radius:4px;
-  color:#2ecc71!important;
-}
-.tab.pulse-neon::after{
-  content:'👆 Ir a Plantillas';
-  position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);
-  background:#111;border:1px solid #2ecc71;color:#2ecc71;
-  font-size:.6rem;padding:2px 8px;border-radius:4px;white-space:nowrap;
-  pointer-events:none;box-shadow:0 0 8px rgba(46,204,113,.4);
-  display:none;
-}
-#global-toast{position:fixed;bottom:18px;right:18px;z-index:9999;min-width:280px;max-width:400px;
-  box-shadow:0 4px 20px rgba(0,0,0,.5);}
-/* Auto-gen status */
-#auto-gen-status{transition:opacity .3s;}
-/* Layout plantillas mejorado */
-.mail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
-@media(max-width:860px){.mail-grid{grid-template-columns:1fr;}}
-/* Botones acción más llamativos */
-.bacc{position:relative;}
-.bacc .copy-badge{position:absolute;top:4px;right:4px;background:var(--gn);color:#000;
-  font-size:.55rem;font-weight:700;padding:1px 5px;border-radius:10px;letter-spacing:.5px;}
-@media(max-width:640px){
-  .two-col{grid-template-columns:1fr;}
-  .btn-grid{grid-template-columns:1fr 1fr;}
-  .cards{grid-template-columns:1fr 1fr;}
-  .crow{flex-direction:column;}
-  .f select,.f input{min-width:100%;}
-  header{padding:10px 14px;}
-}
-@media(max-width:900px){
-  #tpl-out>[style*="grid-template-columns:1fr 1fr 1fr"]{
-    grid-template-columns:1fr 1fr !important;
-  }
-}
-@media(max-width:600px){
-  #tpl-out>[style*="grid-template-columns:1fr 1fr 1fr"]{
-    grid-template-columns:1fr !important;
-  }
+
+/* UF live indicator */
+#uf-live-dot{width:7px;height:7px;border-radius:50%;background:var(--gn);display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* CRM Ready zone */
+#crm-zone{background:rgba(52,152,219,.05);border:1px dashed rgba(52,152,219,.2);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:rgba(52,152,219,.6);text-align:center;letter-spacing:.5px;}
+
+/* Responsive */
+@media(max-width:860px){
+  :root{--lw:100vw;}
+  #workspace{grid-template-columns:1fr;}
+  #panel-left{position:relative;height:auto;overflow:visible;}
 }
 </style>
 </head>
 <body>
-<header>
-  <div style="display:flex;align-items:center;gap:14px;">
-    <img src="logo-equifax.png" alt="Equifax" id="header-logo" style="height:96px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header id="hdr">
+  <div id="hdr-left">
+    <img src="logo-equifax.png" alt="Equifax" id="hdr-logo" onerror="this.style.opacity=0">
     <div>
-      <div style="font-size:1.1rem;font-weight:900;letter-spacing:1px;color:#fff;">CotizadorGo!</div>
-      <div class="logo-sub">Herramienta Comercial Equifax Chile</div>
+      <div id="hdr-title">CotizadorGo!</div>
+      <div id="hdr-sub">Estación Comercial Equifax Chile</div>
     </div>
   </div>
-  <div class="uf-widget">
-    <div class="uf-box">
-      <label>UF Hoy (editable)</label>
-      <input type="number" id="uf-global" value="40644" step="1">
+
+  <div id="hdr-center">
+    <div id="prod-selector-wrap">
+      <label>Producto</label>
+      <select id="prod-selector" onchange="cambiarProducto(this.value)">
+        <option value="">— Selecciona un producto —</option>
+        <option value="bundle4100">📦 Bundle MC 4100 + RI</option>
+        <option value="bundleIlim">📦 Bundle MC Ilimitado + RI</option>
+        <option value="mc_4100">🚨 Mora Control 4100</option>
+        <option value="mc_6900">🚨 Mora Control 6900</option>
+        <option value="mc_ilim">🚨 Mora Control Ilimitado</option>
+        <option value="ri_plan">📊 Reporte Interactivo Plan</option>
+        <option value="ri_bolsa">🎒 RI Bolsa</option>
+        <option value="pfm_s">📡 Portfolio Monitor Semanal</option>
+        <option value="pfm_q">📡 Portfolio Monitor Quincenal</option>
+        <option value="pfm_m">📡 Portfolio Monitor Mensual</option>
+        <option value="pc_micro">🤝 Partner Check Micro</option>
+        <option value="pc_peq">🤝 Partner Check Pequeña</option>
+        <option value="pc_med">🤝 Partner Check Mediana/Grande</option>
+      </select>
     </div>
+  </div>
+
+  <div id="hdr-right">
     <div class="uf-box">
+      <label><span id="uf-live-dot"></span>UF Hoy</label>
+      <input type="number" id="uf-global" value="40644" step="1" oninput="onUFChange()">
+      <div id="uf-status">editable</div>
+    </div>
+    <div class="qcount-box">
       <label>Cotizaciones</label>
-      <div class="qcount" id="quote-count">0</div>
+      <div id="quote-count">0</div>
     </div>
   </div>
 </header>
-<nav id="navrow"></nav>
-<main id="main"></main>
+
+<!-- ══════════════ WORKSPACE ══════════════ -->
+<div id="workspace">
+
+  <!-- ═══ PANEL IZQUIERDO — CONFIGURACIÓN ═══ -->
+  <div id="panel-left">
+
+    <!-- ZONA CRM READY -->
+    <div style="padding:8px 16px 0;">
+      <div id="crm-zone">🔌 Zona CRM — Integración con Atlas lista para activar</div>
+    </div>
+
+    <!-- DESTINATARIO -->
+    <div class="lsec">
+      <div class="lsec-title">👤 Destinatario</div>
+      <div id="sync-banner-left" class="sync-banner">🔄 <span>Datos sincronizados desde cotización guardada</span></div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:8px;font-size:13px;color:#bbb;">
+        <input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)" style="accent-color:var(--r);width:14px;height:14px;">
+        Omitir destinatario
+      </label>
+      <div id="dest-fields">
+        <div class="lf"><label>Nombre / Contacto</label><input type="text" id="mn" placeholder="Sr. García" oninput="scheduleAutoGen(200)"></div>
+        <div class="lf"><label>Empresa</label><input type="text" id="me" placeholder="Empresa SpA" oninput="scheduleAutoGen(200)"></div>
+        <div class="lf"><label>RUT Empresa</label><input type="text" id="mrut" placeholder="76.xxx.xxx-x" oninput="scheduleAutoGen(200)"></div>
+      </div>
+    </div>
+
+    <!-- ASESOR -->
+    <div class="lsec">
+      <div class="lsec-title">🧑‍💼 Asesor</div>
+      <div class="lf">
+        <label>Tu nombre</label>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="ma" placeholder="Eduardo Pérez" style="flex:1;" oninput="saveExecField()">
+          <button style="background:var(--g4);border:1px solid var(--g5);color:#bbb;padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px;" onclick="resetExec()">✏</button>
+        </div>
+      </div>
+      <div class="lf-grid">
+        <div class="lf"><label>WhatsApp / Tel.</label><input type="text" id="mf" placeholder="+56 9 XXXX" oninput="saveExecField()"></div>
+        <div class="lf"><label>Email</label><input type="text" id="ml" placeholder="ej@equifax.cl" oninput="saveExecField()"></div>
+      </div>
+      <div id="wsp-link-row" style="display:none;padding:6px 10px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:5px;font-size:13px;">
+        🟢 <a id="wsp-link" href="#" target="_blank" style="color:#25d366;font-weight:600;">Abrir WhatsApp directo →</a>
+      </div>
+    </div>
+
+    <!-- PRODUCTO Y CONFIGURACIÓN — se llena dinámicamente -->
+    <div id="prod-config-zone"></div>
+
+    <!-- RESULTADO PRECIO -->
+    <div class="lsec" id="price-result-zone" style="display:none;">
+      <div class="lsec-title">💰 Precio</div>
+      <div id="toast-left" class="toast"></div>
+      <div id="result-price-box">
+        <div id="result-price-label">CARGO FIJO MENSUAL</div>
+        <div id="result-price-val">—</div>
+        <div id="result-price-clp"></div>
+        <div id="result-price-dc"></div>
+      </div>
+      <div id="price-slider-zone"></div>
+      <div class="chips-row" id="price-chips"></div>
+
+      <!-- ASUNTO -->
+      <div id="asunto-row">
+        <div id="asunto-row-text">
+          <div id="asunto-label">📌 Asunto del correo</div>
+          <div id="tpl-asunto" style="color:var(--y);font-size:13px;font-weight:600;">—</div>
+        </div>
+        <button class="abtn subject" onclick="copAsunto();playClick()" style="flex:none;padding:7px 12px;flex-direction:row;gap:6px;">📋 Copiar asunto</button>
+      </div>
+
+      <!-- BOTONES DE ACCIÓN -->
+      <div style="margin-bottom:8px;">
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:6px;">Copiar para enviar</div>
+        <div class="btn-row" style="margin-bottom:6px;">
+          <button class="abtn gmail" onclick="copHTMLGmail();playClick()"><span class="abtn-icon">M</span><span class="abtn-label">Gmail</span></button>
+          <button class="abtn outlook" onclick="copHTMLOutlook();playClick()"><span class="abtn-icon">📨</span><span class="abtn-label">Outlook</span></button>
+          <button class="abtn wsp" onclick="copPlano();playClick()"><span class="abtn-icon">💬</span><span class="abtn-label">WA Texto</span></button>
+        </div>
+        <div class="btn-row">
+          <button class="abtn img" onclick="copImgPC();playClick()"><span class="abtn-icon">🖼</span><span class="abtn-label">Imagen correo</span></button>
+          <button class="abtn img-wsp" onclick="copImgWsp();playClick()"><span class="abtn-icon">📱</span><span class="abtn-label">Imagen WA</span></button>
+          <button class="abtn save" onclick="guardarCotizacion()" title="Guardar cotización"><span class="abtn-icon">💾</span><span class="abtn-label">Guardar</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO COMERCIAL DEL PRODUCTO -->
+    <div class="lsec" id="prod-info-zone" style="display:none;">
+      <div class="lsec-title">📋 Información Comercial</div>
+      <div id="prod-info-box">
+        <div id="prod-info-name"></div>
+        <div id="prod-info-desc"></div>
+        <ul id="prod-info-benefits"></ul>
+      </div>
+    </div>
+
+    <!-- COTIZACIONES GUARDADAS -->
+    <div class="lsec" id="saved-quotes-zone">
+      <div class="lsec-title">📁 Cotizaciones Guardadas</div>
+      <div id="quote-panel-list"><p style="color:#888;font-size:13px;">Sin cotizaciones guardadas.</p></div>
+    </div>
+
+  </div><!-- fin panel-left -->
+
+  <!-- ═══ PANEL DERECHO — VISTAS PREVIAS ═══ -->
+  <div id="panel-right">
+    <div id="previews-wrap">
+
+      <div id="no-product-msg" style="padding:40px 20px;text-align:center;color:#555;">
+        <div style="font-size:36px;margin-bottom:12px;">☝️</div>
+        <div style="font-size:16px;color:#888;margin-bottom:4px;">Selecciona un producto arriba</div>
+        <div style="font-size:13px;color:#555;">Las vistas previas aparecerán aquí en tiempo real</div>
+      </div>
+
+      <div id="previews-content" style="display:none;">
+        <!-- ASUNTO -->
+        <div style="margin-bottom:12px;padding:10px 14px;background:var(--g3);border-radius:7px;border:1px solid var(--g4);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;">
+            <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:3px;">📌 Asunto</div>
+            <div id="tpl-asunto-r" style="color:var(--y);font-size:14px;font-weight:600;">—</div>
+          </div>
+          <button class="pbtn copy" onclick="copAsunto();playClick()">📋 Copiar asunto</button>
+        </div>
+
+        <!-- GMAIL -->
+        <div class="prev-section gmail">
+          <div class="prev-head">
+            <div class="prev-head-left">
+              <div class="prev-icon">M</div>
+              <div>
+                <div class="prev-title">Gmail</div>
+                <div class="prev-subtitle">HTML moderno · Bordes redondeados</div>
+              </div>
+            </div>
+            <div class="prev-head-right">
+              <button class="pbtn ampliar" onclick="abrirModal('gmail')">⛶ Ampliar</button>
+              <button class="pbtn main copy" onclick="copHTMLGmail();playClick()">📋 Copiar para Gmail</button>
+            </div>
+          </div>
+          <div class="prev-body">
+            <div id="tpl-rich-gmail" style="background:#f8f9fa;border-radius:6px;padding:10px;border:1px solid #e0e0e0;"></div>
+          </div>
+        </div>
+
+        <!-- OUTLOOK -->
+        <div class="prev-section outlook">
+          <div class="prev-head">
+            <div class="prev-head-left">
+              <div class="prev-icon">📨</div>
+              <div>
+                <div class="prev-title">Outlook</div>
+                <div class="prev-subtitle">Tablas robustas · Outlook 2016+</div>
+              </div>
+            </div>
+            <div class="prev-head-right">
+              <button class="pbtn ampliar" onclick="abrirModal('outlook')">⛶ Ampliar</button>
+              <button class="pbtn main copy" onclick="copHTMLOutlook();playClick()">📋 Copiar para Outlook</button>
+            </div>
+          </div>
+          <div class="prev-body">
+            <div id="tpl-rich-outlook" style="background:#f5f5f5;border-radius:5px;padding:10px;border:1px solid #ddd;"></div>
+            <div class="outlook-note">⚠️ <strong>Nota Outlook:</strong> Fondos con gradiente y bordes redondeados pueden no renderizarse. Esta versión usa colores sólidos y tablas para máxima compatibilidad.</div>
+          </div>
+        </div>
+
+        <!-- WHATSAPP -->
+        <div class="prev-section wsp">
+          <div class="prev-head">
+            <div class="prev-head-left">
+              <div class="prev-icon">💬</div>
+              <div>
+                <div class="prev-title">WhatsApp</div>
+                <div class="prev-subtitle">Texto + imagen para enviar</div>
+              </div>
+            </div>
+            <div class="prev-head-right">
+              <button class="pbtn ampliar" onclick="abrirModal('wsp')">⛶ Ampliar</button>
+              <button class="pbtn main copy" onclick="copPlano();playClick()">📋 Copiar texto WA</button>
+              <button class="pbtn copy" onclick="copImgWsp();playClick()">📱 Imagen WA</button>
+            </div>
+          </div>
+          <div class="prev-body">
+            <div id="cot-card-wsp" style="max-width:100%;border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);border:1px solid rgba(37,211,102,.2);margin-bottom:10px;"></div>
+            <div id="wa-text-preview"></div>
+          </div>
+        </div>
+
+        <!-- IMAGEN -->
+        <div class="prev-section img">
+          <div class="prev-head">
+            <div class="prev-head-left">
+              <div class="prev-icon">🖼</div>
+              <div>
+                <div class="prev-title">Vista Previa Tarjeta</div>
+                <div class="prev-subtitle">Así verá el cliente la propuesta</div>
+              </div>
+            </div>
+            <div class="prev-head-right">
+              <button class="pbtn ampliar" onclick="abrirModal('tarjeta')">⛶ Ampliar</button>
+              <button class="pbtn copy" onclick="descImg();playClick()">⬇ Descargar PNG</button>
+              <button class="pbtn main copy" onclick="copImgPC();playClick()">📋 Copiar imagen</button>
+            </div>
+          </div>
+          <div class="prev-body">
+            <div id="cot-card-pc" style="max-width:100%;border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"></div>
+          </div>
+        </div>
+
+      </div><!-- fin previews-content -->
+    </div><!-- fin previews-wrap -->
+  </div><!-- fin panel-right -->
+
+</div><!-- fin workspace -->
+
+<!-- ══ MODAL AMPLIAR ══ -->
+<div id="modal-overlay" onclick="if(event.target===this)cerrarModal()">
+  <div id="modal-inner">
+    <button id="modal-close" onclick="cerrarModal()">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
 <div id="global-toast" class="toast"></div>
-<footer>CotizadorGo! &nbsp;·&nbsp; Herramienta Comercial Equifax Chile &nbsp;·&nbsp; CONFIDENCIAL &nbsp;·&nbsp; SOLO USO INTERNO</footer>
+<textarea id="tpl-body" style="display:none;"></textarea>
+
 <script>
+'use strict';
 'use strict';
 var STATE={quotes:[],activeQuoteIndex:-1,logoImg:null};
 function _lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
@@ -569,11 +894,7 @@ function pagMail(){
   return '<div class="ptitle">Plantillas de Cotización <span class="badge">CORREO · WHATSAPP · IMAGEN</span></div>'+
     '<div id="mail-toast" class="toast"></div>'+
     '<div id="sync-banner" class="sync-banner"><span style="font-size:1.1rem;">🔄</span><span><strong>Sincronización automática:</strong> Los datos de tu cotización están cargados.</span></div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">'+
-
-    '<!-- COLUMNA IZQUIERDA: CONFIGURACIÓN -->'+
-    '<div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'+
+    '<div class="two-col">'+
       '<div class="cbox" style="margin:0;"><h3 style="margin-bottom:8px;">👤 Destinatario</h3>'+
         '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px;font-size:.75rem;color:var(--wa);"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)" style="accent-color:var(--r);width:15px;height:15px;">Omitir destinatario</label>'+
         '<div id="dest-fields" style="display:flex;flex-direction:column;gap:7px;">'+
@@ -587,7 +908,7 @@ function pagMail(){
           '<div id="wsp-link-row" style="display:none;padding:5px 8px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:5px;font-size:.72rem;">🟢 <a id="wsp-link" href="#" target="_blank" style="color:#25d366;font-weight:600;">Abrir WhatsApp directo →</a></div>'+
           '<div class="f"><label>Email</label><input type="text" id="ml" placeholder="ej@equifax.cl" style="width:100%" oninput="saveExecField()"></div>'+
         '</div></div>'+
-    '</div>'+  // fin subgrid destinatario+asesor
+    '</div>'+
     '<div class="cbox" style="margin-bottom:14px;"><h3 style="margin-bottom:10px;">📦 Cotización</h3>'+
       '<div id="quote-panel-list"></div>'+
       '<div style="background:rgba(0,0,0,.2);border-radius:6px;padding:12px;margin-top:10px;">'+
@@ -602,11 +923,6 @@ function pagMail(){
       '</div>'+
       '<div id="auto-gen-status" style="margin-top:8px;padding:6px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:5px;font-size:.72rem;color:#2ecc71;text-align:center;">✔ Propuesta actualizada automáticamente</div>'+
     '</div>'+
-    '</div>'+  <!-- fin columna izquierda -->
-
-    '<!-- COLUMNA DERECHA: VISTAS PREVIAS -->'+
-    '<div style="position:sticky;top:170px;">'+
-    '<div style="font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#9b1c2e;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #333;">👁 Vistas Previas en Tiempo Real</div>'+
     '<div id="tpl-out">'+
 
       // ── ASUNTO ──────────────────────────────────────────────────────
@@ -790,9 +1106,7 @@ function pagMail(){
         '</div>'+
       '</div>'+
 
-    '</div>'+  // fin tpl-out
-    '</div>'+  // fin columna derecha
-    '</div>';  // fin grid 50/50
+    '</div>';
 }
 
 function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
@@ -1804,6 +2118,583 @@ syncQuoteToForm = function(q) {
   _origSync(q);
   setTimeout(function() { if (_mailOn()) scheduleAutoGen(100); }, 120);
 };
+
+
+// ══════════════════════════════════════════════════════════════
+// NUEVO SISTEMA DE ORQUESTACIÓN — CotizadorGo! Estación Única
+// ══════════════════════════════════════════════════════════════
+
+// ── DATOS DE PRODUCTOS (con info comercial del PDF) ──────────
+var PROD_INFO = {
+  bundle4100:{
+    name:'Bundle MC 4100 + Reporte Interactivo',
+    badge:'BUNDLE OFERTA',
+    tipo:'bundle4100',
+    desc:'Combinación integral de Mora Control 4100 y Reporte Interactivo. Gestiona morosidades y evalúa el riesgo crediticio de tus clientes en una sola contratación.',
+    benefits:[
+      'Publicación DICOM hasta $4.100.000',
+      '40 Emails + 10 Cartas + 5 SMS por mes incluidos',
+      'Informes comerciales incluidos en el plan',
+      '~70% de recuperación estimada en el mes 1',
+      'Beneficio tributario por castigo de deuda',
+      'Acceso a Score de riesgo Equifax',
+      'Evaluación de crédito de nuevos clientes'
+    ],
+    plazo:'12',hasDc:false,precioLista:null,
+    tablaKey:'bundle4100'
+  },
+  bundleIlim:{
+    name:'Bundle MC Ilimitado + Reporte Interactivo',
+    badge:'BUNDLE PREMIUM',
+    tipo:'bundleIlim',
+    desc:'El plan más completo: Mora Control Ilimitado y Reporte Interactivo. Sin límite de monto de publicación. Para empresas con alto volumen de cobranza.',
+    benefits:[
+      'Publicación DICOM ILIMITADA en monto',
+      '40 Emails + 10 Cartas + 5 SMS por mes incluidos',
+      'Informes comerciales incluidos en el plan',
+      'Sin restricción de monto de deuda',
+      'Beneficio tributario por castigo de deuda',
+      'Acceso completo a indicadores de riesgo Equifax'
+    ],
+    plazo:'12',hasDc:false,precioLista:null,
+    tablaKey:'bundleIlim'
+  },
+  mc_4100:{
+    name:'Mora Control 4100',
+    badge:'MORA CONTROL',
+    tipo:'mc_solo',
+    desc:'Solución integral para gestión y control de deudas morosas. Publica, monitorea y cobra a tus deudores desde una sola plataforma con el respaldo de la marca DICOM.',
+    benefits:[
+      'Publicación en DICOM hasta $4.100.000',
+      '40 Emails + 10 Cartas + 5 SMS mensuales incluidos',
+      'Las acciones de cobranza aumentan 6 veces la probabilidad de recuperar',
+      'Portal de autogestión para carga masiva o individual',
+      'Monitoreo de pagos y abonos parciales',
+      'Bloqueo comercial del deudor moroso',
+      'Contratación para personas naturales y empresas'
+    ],
+    plazo:'12',hasDc:true,precioLista:2.65,precio:2.65,
+    tablaKey:null
+  },
+  mc_6900:{
+    name:'Mora Control 6900',
+    badge:'MORA CONTROL',
+    tipo:'mc_solo',
+    desc:'Plan ampliado de Mora Control con límite de publicación de hasta $6.900.000. Para empresas con documentos de mayor monto a gestionar.',
+    benefits:[
+      'Publicación en DICOM hasta $6.900.000',
+      '40 Emails + 10 Cartas + 5 SMS mensuales incluidos',
+      'Las acciones de cobranza aumentan 6 veces la probabilidad de recuperar',
+      'Portal de autogestión para carga masiva o individual',
+      'Monitoreo de pagos y abonos parciales',
+      'Bloqueo comercial del deudor moroso'
+    ],
+    plazo:'12',hasDc:true,precioLista:3.65,precio:3.65,
+    tablaKey:null
+  },
+  mc_ilim:{
+    name:'Mora Control Ilimitado',
+    badge:'MORA CONTROL',
+    tipo:'mc_solo',
+    desc:'El plan definitivo de gestión de cobranza: publicación sin límite de monto. Ideal para empresas con carteras de gran volumen y deudas de alto monto.',
+    benefits:[
+      'Publicación en DICOM SIN LÍMITE de monto',
+      '40 Emails + 10 Cartas + 5 SMS mensuales incluidos',
+      'Las acciones de cobranza aumentan 6 veces la probabilidad de recuperar',
+      'Portal de autogestión para carga masiva o individual',
+      'Beneficio tributario por castigo de deuda',
+      'Respaldo exclusivo de marca DICOM Equifax'
+    ],
+    plazo:'12',hasDc:true,precioLista:6.65,precio:6.65,
+    tablaKey:null
+  },
+  ri_plan:{
+    name:'Reporte Interactivo Plan',
+    badge:'REPORTE INTERACTIVO',
+    tipo:'ri_plan',
+    desc:'Informe Platinum Interactivo con análisis completo de riesgo crediticio. Consolida información de múltiples bancos de datos para tomar decisiones con mayor confianza.',
+    benefits:[
+      'Antecedentes particulares y score de riesgo Equifax',
+      'Identificación de consultas en línea y morosidades',
+      'Información patrimonial y financiera',
+      'Datos FONASA, ISE, Tributarios y Laborales',
+      'Evaluación de crédito y contactabilidad',
+      'Conexión con Registro Civil, DICOM, Bienes Raíces y más'
+    ],
+    plazo:'12',hasDc:true,precioLista:null,precio:null,
+    tablaKey:'ri_plan'
+  },
+  ri_bolsa:{
+    name:'RI Bolsa (One Time)',
+    badge:'RI BOLSA',
+    tipo:'ri_bolsa',
+    desc:'Plan de bolsa de Reportes Interactivos con pago anticipado. Ideal para uso no continuo. Incluye 20 consultas por año sin cargo fijo mensual recurrente.',
+    benefits:[
+      'Pago único anticipado por 12 meses',
+      'Sin cargo fijo mensual recurrente',
+      'Acceso a Informe Platinum Interactivo completo',
+      'Ideal para uso esporádico o evaluación de nuevos clientes',
+      'Tarifa adicional si supera el plan'
+    ],
+    plazo:'12',hasDc:false,precioLista:null,precio:null,
+    tablaKey:'ri_bolsa'
+  },
+  pfm_s:{
+    name:'Portfolio Monitor Semanal',
+    badge:'PORTFOLIO MONITOR',
+    tipo:'pfm',
+    desc:'Monitorea tu cartera de clientes semanalmente. Identifica variaciones en morosidad, potencia clientes con alto potencial y genera alertas comerciales automáticas.',
+    benefits:[
+      'Seguimiento semanal de personas naturales y jurídicas',
+      'Indicadores analíticos orientados a riesgo y marketing',
+      'Alertas comerciales configurables',
+      'Carteras estáticas o dinámicas de grandes volúmenes',
+      'Reevaluación de líneas de crédito y facilidades de pago',
+      'Detecta tendencias de crecimiento o decrecimiento'
+    ],
+    plazo:'12',hasDc:true,precioLista:null,precio:null,
+    tablaKey:'pfm_s'
+  },
+  pfm_q:{
+    name:'Portfolio Monitor Quincenal',
+    badge:'PORTFOLIO MONITOR',
+    tipo:'pfm',
+    desc:'Monitoreo quincenal de tu cartera. El punto medio ideal entre frecuencia de actualización y costo. Perfecta para carteras medianas con seguimiento regular.',
+    benefits:[
+      'Actualización quincenal de indicadores',
+      'Análisis de evolución del comportamiento financiero',
+      'Alertas de cambios en situación de morosidad',
+      'Filtros para información específica por cliente',
+      'Switch persona natural / empresa'
+    ],
+    plazo:'12',hasDc:true,precioLista:null,precio:null,
+    tablaKey:'pfm_q'
+  },
+  pfm_m:{
+    name:'Portfolio Monitor Mensual',
+    badge:'PORTFOLIO MONITOR',
+    tipo:'pfm',
+    desc:'Monitoreo mensual de cartera al mejor precio. Ideal para empresas que necesitan visibilidad periódica del comportamiento financiero de sus clientes.',
+    benefits:[
+      'Actualización mensual de indicadores de riesgo',
+      'Seguimiento individual o masivo de clientes',
+      'Detección de nuevas morosidades en la cartera',
+      'Consulta de reportes desde la plataforma',
+      'Definición de acciones comerciales basadas en datos'
+    ],
+    plazo:'12',hasDc:true,precioLista:null,precio:null,
+    tablaKey:'pfm_m'
+  },
+  pc_micro:{
+    name:'Partner Check Micro',
+    badge:'PARTNER CHECK',
+    tipo:'pc',
+    desc:'Plataforma Partner Check para micro empresas. Evalúa a tus socios comerciales, proveedores y clientes B2B antes de establecer relaciones comerciales.',
+    benefits:[
+      'Evaluación completa de socios y proveedores',
+      'Acceso a historial comercial y financiero',
+      'Reducción de riesgo en nuevas relaciones B2B',
+      'Validación de datos formales e informales',
+      'Contrato 12 meses'
+    ],
+    plazo:'12',hasDc:false,precioLista:6,precio:6,
+    tablaKey:null
+  },
+  pc_peq:{
+    name:'Partner Check Pequeña Empresa',
+    badge:'PARTNER CHECK',
+    tipo:'pc',
+    desc:'Partner Check para pequeñas empresas. Mayor capacidad de consulta para equipos con volumen medio de evaluaciones a socios y proveedores.',
+    benefits:[
+      'Evaluación ampliada de socios y proveedores',
+      'Mayor volumen de consultas mensuales',
+      'Acceso a score de riesgo empresarial Equifax',
+      'Ideal para empresas en crecimiento',
+      'Contrato 12 meses'
+    ],
+    plazo:'12',hasDc:false,precioLista:9,precio:9,
+    tablaKey:null
+  },
+  pc_med:{
+    name:'Partner Check Mediana/Grande',
+    badge:'PARTNER CHECK',
+    tipo:'pc',
+    desc:'Partner Check para medianas y grandes empresas. Cobertura completa para equipos comerciales y de riesgo con alto volumen de evaluación de contrapartes.',
+    benefits:[
+      'Acceso ilimitado para equipos de riesgo y ventas',
+      'Evaluación masiva de socios comerciales',
+      'Score de riesgo empresarial y financiero completo',
+      'Integración con flujos de aprobación de crédito',
+      'Contrato 12 meses'
+    ],
+    plazo:'12',hasDc:false,precioLista:23,precio:23,
+    tablaKey:null
+  }
+};
+
+// ── Estado global ──────────────────────────────────────────
+var COTIZADOR = {
+  prodKey: null,
+  ufVenta: null,
+  ufLista: null,
+  plazo: '12',
+  cons: null,
+  ruts: null,
+  freq: 's',
+  quotes: STATE ? STATE.quotes : [],
+  activeIndex: -1
+};
+
+// ── Cambiar producto ───────────────────────────────────────
+function cambiarProducto(key) {
+  if (!key) return;
+  COTIZADOR.prodKey = key;
+  var pi = PROD_INFO[key];
+  if (!pi) return;
+
+  // Mostrar zona de vistas previas
+  document.getElementById('no-product-msg').style.display = 'none';
+  document.getElementById('previews-content').style.display = 'block';
+  document.getElementById('price-result-zone').style.display = 'block';
+  document.getElementById('prod-info-zone').style.display = 'block';
+
+  // Actualizar info comercial
+  document.getElementById('prod-info-name').textContent = pi.name;
+  document.getElementById('prod-info-desc').textContent = pi.desc;
+  var ul = document.getElementById('prod-info-benefits');
+  ul.innerHTML = pi.benefits.map(function(b){ return '<li>'+b+'</li>'; }).join('');
+
+  // Renderizar zona de configuración del producto
+  renderProdConfig(key, pi);
+
+  // Sincronizar con genMail si existe
+  syncProdToMailForm(key, pi);
+
+  // Generar vistas previas
+  scheduleAutoGen(100);
+}
+
+// ── Renderizar configuración del producto ──────────────────
+function renderProdConfig(key, pi) {
+  var z = document.getElementById('prod-config-zone');
+  var html = '<div class="lsec"><div class="lsec-title">⚙️ Configuración</div>';
+
+  if (key === 'bundle4100' || key === 'bundleIlim') {
+    var tbl = key === 'bundle4100' ? B4100 : BILIM;
+    html += '<div class="info-banner"><b>⚠</b> No aplica descuento al bundle · Mínimo 12 meses · Postpago 30 días</div>';
+    html += '<div class="lf"><label>Consultas RI / mes</label>';
+    html += '<select id="cfg-ri-cons" onchange="calcDesdeConfig()">';
+    tbl.forEach(function(r){ html += '<option value="'+r.r+'">'+r.r+' consultas</option>'; });
+    html += '</select></div>';
+    html += '<div class="lf"><label>Plazo</label>';
+    html += '<select id="cfg-plazo" onchange="calcDesdeConfig()"><option value="12">12 meses</option></select></div>';
+
+  } else if (key === 'mc_4100' || key === 'mc_6900' || key === 'mc_ilim') {
+    var pLista = pi.precioLista;
+    html += '<div class="info-banner"><b>ℹ</b> Precio lista: <b>'+pLista+' UF + IVA</b> · Contrato 12 meses · Postpago 30 días</div>';
+    html += '<div class="lf-grid">';
+    html += '<div class="lf"><label>Precio venta (UF)</label><input type="number" id="cfg-uf-venta" value="'+pLista+'" step="0.1" oninput="calcDesdeConfig()"></div>';
+    html += '<div class="lf"><label>Plazo</label><select id="cfg-plazo" onchange="calcDesdeConfig()"><option value="12">12 meses</option><option value="6">6 meses</option></select></div>';
+    html += '</div>';
+    html += '<div class="lf"><label>Incluye acciones de cobranza</label><div style="font-size:13px;color:#bbb;padding:6px 10px;background:var(--g3);border-radius:5px;">40 Emails · 10 Cartas · 5 SMS / mes</div></div>';
+
+  } else if (key === 'ri_plan') {
+    html += '<div class="lf-grid">';
+    html += '<div class="lf"><label>Consultas / mes</label>';
+    html += '<select id="cfg-ri-cons" onchange="calcDesdeConfig()">';
+    RI_T.forEach(function(r){ html += '<option value="'+r.c+'">'+r.c+' consultas</option>'; });
+    html += '</select></div>';
+    html += '<div class="lf"><label>Plazo</label><select id="cfg-plazo" onchange="calcDesdeConfig()"><option value="12">12 meses</option><option value="6">6 meses</option></select></div>';
+    html += '</div>';
+    html += '<div class="lf"><label>Precio venta (UF) — ajustable</label><input type="number" id="cfg-uf-venta" value="" step="0.01" placeholder="Auto desde tabla" oninput="calcDesdeConfig()"></div>';
+
+  } else if (key === 'ri_bolsa') {
+    html += '<div class="info-banner"><b>ℹ</b> Bolsa 20 consultas · Pago anticipado 12 meses · 5 UF + IVA</div>';
+    html += '<div class="lf"><label>Consultas incluidas</label>';
+    html += '<select id="cfg-ri-cons" onchange="calcDesdeConfig()">';
+    RIB_T.forEach(function(r){ html += '<option value="'+r.c+'"'+(r.c===20?' selected':'')+'>'+r.c+' consultas</option>'; });
+    html += '</select></div>';
+
+  } else if (key.indexOf('pfm_') === 0) {
+    var fr = key === 'pfm_s' ? 's' : key === 'pfm_q' ? 'q' : 'm';
+    html += '<div class="lf-grid">';
+    html += '<div class="lf"><label>Cantidad de RUTs</label><input type="number" id="cfg-ruts" value="10" min="1" oninput="calcDesdeConfig()"></div>';
+    html += '<div class="lf"><label>Plazo</label><select id="cfg-plazo" onchange="calcDesdeConfig()"><option value="12">12 meses</option><option value="6">6 meses</option></select></div>';
+    html += '</div>';
+    html += '<div class="lf"><label>Precio venta (UF) — ajustable</label><input type="number" id="cfg-uf-venta" step="0.01" placeholder="Auto desde tabla" oninput="calcDesdeConfig()"></div>';
+
+  } else if (key.indexOf('pc_') === 0) {
+    html += '<div class="info-banner"><b>ℹ</b> Precio fijo: <b>'+pi.precioLista+' UF + IVA</b> · Contrato 12 meses</div>';
+    html += '<div class="lf"><label>Precio venta (UF)</label><input type="number" id="cfg-uf-venta" value="'+pi.precioLista+'" step="0.1" oninput="calcDesdeConfig()"></div>';
+  }
+
+  html += '</div>';
+  z.innerHTML = html;
+
+  // Calcular inmediatamente
+  setTimeout(calcDesdeConfig, 50);
+}
+
+// ── Calcular precio desde configuración ───────────────────
+function calcDesdeConfig() {
+  var key = COTIZADOR.prodKey;
+  if (!key) return;
+  var pi = PROD_INFO[key];
+  var uf = getUF();
+  var ufV = null, ufL = null, plazo = '12', cons = null;
+
+  if (key === 'bundle4100' || key === 'bundleIlim') {
+    var consEl = document.getElementById('cfg-ri-cons');
+    cons = consEl ? parseInt(consEl.value) : 10;
+    var tbl = key === 'bundle4100' ? B4100 : BILIM;
+    var row = tbl.find(function(r){ return r.r === cons; }) || tbl[0];
+    ufV = row.u; ufL = row.u;
+    plazo = '12';
+
+  } else if (key === 'mc_4100' || key === 'mc_6900' || key === 'mc_ilim') {
+    var ventaEl = document.getElementById('cfg-uf-venta');
+    ufV = ventaEl ? parseFloat(ventaEl.value) : pi.precioLista;
+    ufL = pi.precioLista;
+    var plazoEl = document.getElementById('cfg-plazo');
+    plazo = plazoEl ? plazoEl.value : '12';
+
+  } else if (key === 'ri_plan') {
+    var consEl = document.getElementById('cfg-ri-cons');
+    cons = consEl ? parseInt(consEl.value) : 20;
+    var autoUF = null;
+    RI_T.forEach(function(r){ if(r.c===cons) autoUF=r.u; });
+    var ventaEl = document.getElementById('cfg-uf-venta');
+    var ventaVal = ventaEl ? parseFloat(ventaEl.value) : null;
+    ufV = (ventaVal && !isNaN(ventaVal)) ? ventaVal : (autoUF || 0.11);
+    ufL = autoUF || ufV;
+    var plazoEl = document.getElementById('cfg-plazo');
+    plazo = plazoEl ? plazoEl.value : '12';
+
+  } else if (key === 'ri_bolsa') {
+    var consEl = document.getElementById('cfg-ri-cons');
+    cons = consEl ? parseInt(consEl.value) : 20;
+    var row = RIB_T.find(function(r){ return r.c===cons; }) || RIB_T[1];
+    ufV = parseFloat(row.u) || 5; ufL = ufV;
+    plazo = '12';
+
+  } else if (key.indexOf('pfm_') === 0) {
+    var fr = key === 'pfm_s' ? 's' : key === 'pfm_q' ? 'q' : 'm';
+    var rutsEl = document.getElementById('cfg-ruts');
+    var ruts = rutsEl ? parseInt(rutsEl.value) : 10;
+    var tarifa = pfmT(fr, ruts);
+    var autoUF = parseFloat((tarifa * ruts).toFixed(4));
+    var ventaEl = document.getElementById('cfg-uf-venta');
+    var ventaVal = ventaEl ? parseFloat(ventaEl.value) : null;
+    ufV = (ventaVal && !isNaN(ventaVal)) ? ventaVal : autoUF;
+    ufL = autoUF;
+    COTIZADOR.ruts = ruts;
+    var plazoEl = document.getElementById('cfg-plazo');
+    plazo = plazoEl ? plazoEl.value : '12';
+
+  } else if (key.indexOf('pc_') === 0) {
+    var ventaEl = document.getElementById('cfg-uf-venta');
+    ufV = ventaEl ? parseFloat(ventaEl.value) : pi.precioLista;
+    ufL = pi.precioLista;
+    plazo = '12';
+  }
+
+  if (ufV === null || isNaN(ufV)) return;
+
+  COTIZADOR.ufVenta = ufV;
+  COTIZADOR.ufLista = ufL;
+  COTIZADOR.plazo = plazo;
+  COTIZADOR.cons = cons;
+
+  // Actualizar display de precio
+  var hayDc = ufL && ufV < ufL;
+  var dc = hayDc ? Math.round((1 - ufV/ufL)*100) : 0;
+  var clp = ufc(ufV);
+
+  document.getElementById('result-price-val').textContent = ufV + ' UF + IVA';
+  document.getElementById('result-price-clp').textContent = 'aprox. ' + fmtN(clp) + ' mensual con IVA';
+  document.getElementById('result-price-dc').textContent = hayDc ? ('−'+dc+'% sobre precio lista') : '';
+
+  // Sincronizar con formulario de plantillas (para genMail)
+  syncProdToMailForm(key, pi);
+  scheduleAutoGen(150);
+}
+
+// ── Sincronizar producto con el formulario de plantillas ───
+function syncProdToMailForm(key, pi) {
+  var mt = document.getElementById('mt');
+  if (mt) mt.value = pi ? pi.tipo : '';
+
+  var mu = document.getElementById('mu');
+  if (mu && COTIZADOR.ufVenta) mu.value = COTIZADOR.ufVenta;
+
+  var mula = document.getElementById('mula');
+  if (mula && COTIZADOR.ufLista) mula.value = COTIZADOR.ufLista;
+
+  var mc2 = document.getElementById('mc2');
+  if (mc2 && COTIZADOR.cons) mc2.value = COTIZADOR.cons;
+
+  var mp = document.getElementById('mp');
+  if (mp && COTIZADOR.plazo) mp.value = COTIZADOR.plazo;
+}
+
+// ── Guardar cotización desde estación ─────────────────────
+function guardarCotizacion() {
+  if (!COTIZADOR.prodKey || !COTIZADOR.ufVenta) {
+    toast('Primero configura el producto y el precio','err');
+    return;
+  }
+  var pi = PROD_INFO[COTIZADOR.prodKey];
+  var qData = {
+    prod: pi.name,
+    tipo: pi.tipo,
+    uf: COTIZADOR.ufVenta,
+    ufL: COTIZADOR.ufLista,
+    cons: COTIZADOR.cons || 0,
+    meta: COTIZADOR.ufVenta + ' UF · ' + COTIZADOR.plazo + ' meses',
+    plazo: COTIZADOR.plazo
+  };
+  saveQuote(qData);
+  renderQuoteList();
+}
+
+// ── Toggle destinatario ────────────────────────────────────
+function toggleDest(skip) {
+  var df = document.getElementById('dest-fields');
+  if (df) df.style.display = skip ? 'none' : 'flex';
+  scheduleAutoGen(0);
+}
+
+// ── Modal ampliar ──────────────────────────────────────────
+function abrirModal(tipo) {
+  var body = document.getElementById('modal-body');
+  var overlay = document.getElementById('modal-overlay');
+  var html = '';
+
+  if (tipo === 'gmail') {
+    var el = document.getElementById('tpl-rich-gmail');
+    html = el ? el.innerHTML : '';
+    body.innerHTML = '<div style="background:#f8f9fa;padding:16px;border-radius:6px;">'+html+'</div>';
+  } else if (tipo === 'outlook') {
+    var el = document.getElementById('tpl-rich-outlook');
+    html = el ? el.innerHTML : '';
+    body.innerHTML = '<div style="background:#f5f5f5;padding:16px;border-radius:6px;">'+html+'</div>';
+  } else if (tipo === 'tarjeta') {
+    var el = document.getElementById('cot-card-pc');
+    html = el ? el.innerHTML : '';
+    body.innerHTML = '<div style="max-width:600px;margin:0 auto;">'+html+'</div>';
+  } else if (tipo === 'wsp') {
+    var el = document.getElementById('cot-card-wsp');
+    html = el ? el.innerHTML : '';
+    body.innerHTML = '<div style="max-width:500px;margin:0 auto;">'+html+'</div>';
+  }
+  overlay.classList.add('on');
+}
+function cerrarModal() {
+  document.getElementById('modal-overlay').classList.remove('on');
+}
+
+// ── UF change ──────────────────────────────────────────────
+function onUFChange() {
+  calcDesdeConfig();
+}
+
+// ── Obtener UF en tiempo real desde mindicador.cl ──────────
+function fetchUFReal() {
+  var url = 'https://mindicador.cl/api/uf';
+  fetch(url).then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.serie && d.serie[0]) {
+      var val = d.serie[0].valor;
+      var fecha = new Date(d.serie[0].fecha);
+      var el = document.getElementById('uf-global');
+      if (el) el.value = Math.round(val);
+      var st = document.getElementById('uf-status');
+      if (st) st.textContent = 'Actualizado ' + fecha.toLocaleDateString('es-CL',{day:'2-digit',month:'short'});
+      calcDesdeConfig();
+    }
+  }).catch(function(){
+    var st = document.getElementById('uf-status');
+    if (st) st.textContent = 'valor manual';
+  });
+}
+
+// ── Auto-gen timer ─────────────────────────────────────────
+var _autoGenTimer = null;
+function _mailOn() { return true; } // siempre activo en nueva interfaz
+
+function scheduleAutoGen(ms) {
+  clearTimeout(_autoGenTimer);
+  _autoGenTimer = setTimeout(function() {
+    if (!COTIZADOR.prodKey) return;
+    syncProdToMailForm(COTIZADOR.prodKey, PROD_INFO[COTIZADOR.prodKey]);
+    genMail();
+    // Sincronizar asunto duplicado en panel derecho
+    var a = document.getElementById('tpl-asunto');
+    var ar = document.getElementById('tpl-asunto-r');
+    if (a && ar) ar.textContent = a.textContent;
+    // Actualizar wa-text-preview
+    var tb = document.getElementById('tpl-body');
+    var wp = document.getElementById('wa-text-preview');
+    if (tb && wp) wp.textContent = tb.value;
+  }, ms !== undefined ? ms : 280);
+}
+
+// ── Reactivity: campos destinatario y asesor ───────────────
+['mn','me','mrut','ma','mf','ml'].forEach(function(id) {
+  document.addEventListener('input', function(e) {
+    if (e.target.id === id) scheduleAutoGen(280);
+  });
+});
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'skip-dest') scheduleAutoGen(0);
+});
+document.getElementById('uf-global').addEventListener('input', function() {
+  calcDesdeConfig();
+  scheduleAutoGen(300);
+});
+
+// ── goTo override para compatibilidad ─────────────────────
+var _origGoTo = goTo;
+goTo = function(id) {
+  _origGoTo(id);
+};
+
+// ── syncQuoteToForm override ───────────────────────────────
+var _origSync = syncQuoteToForm;
+syncQuoteToForm = function(q) {
+  _origSync(q);
+  if (q && q.tipo) {
+    // Encontrar la key del producto por tipo
+    var foundKey = null;
+    Object.keys(PROD_INFO).forEach(function(k) {
+      if (PROD_INFO[k].tipo === q.tipo && !foundKey) {
+        if ((q.uf && PROD_INFO[k].precio === q.uf) || k.indexOf(q.tipo) >= 0 || PROD_INFO[k].tipo === q.tipo)
+          foundKey = k;
+      }
+    });
+    if (foundKey) {
+      var sel = document.getElementById('prod-selector');
+      if (sel) sel.value = foundKey;
+      cambiarProducto(foundKey);
+    }
+    setTimeout(function(){ scheduleAutoGen(100); }, 120);
+  }
+};
+
+// ── Inicialización ─────────────────────────────────────────
+loadExecutivo();
+preloadLogo(null);
+renderQuoteList();
+fetchUFReal();
+
+// Cargar primer producto por defecto
+setTimeout(function() {
+  var sel = document.getElementById('prod-selector');
+  if (sel) {
+    sel.value = 'bundle4100';
+    cambiarProducto('bundle4100');
+  }
+}, 200);
+
 </script>
 </body>
 </html>
