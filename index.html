@@ -568,6 +568,78 @@ body{background:var(--g1);color:var(--w);font-family:'Segoe UI',Arial,sans-serif
 
 <div id="global-toast" class="toast"></div>
 <textarea id="tpl-body" style="display:none;"></textarea>
+<!-- Campos ocultos requeridos por genMail() -->
+<div style="display:none;">
+  <select id="mt"><option value=""></option><option value="bundle4100">bundle4100</option><option value="bundleIlim">bundleIlim</option><option value="mc_solo">mc_solo</option><option value="ri_plan">ri_plan</option><option value="ri_bolsa">ri_bolsa</option><option value="pfm">pfm</option><option value="pc">pc</option><option value="combo3">combo3</option></select>
+  <input type="number" id="mu">
+  <input type="number" id="mula">
+  <input type="number" id="mc2">
+  <select id="mp"><option value="12">12</option><option value="6">6</option></select>
+  <input id="mn-hidden" type="text">
+  <input id="me-hidden" type="text">
+  <input id="ma-hidden" type="text">
+  <input id="mf-hidden" type="text">
+  <input id="ml-hidden" type="text">
+  <input id="mr" type="text">
+  <div id="mail-toast" class="toast"></div>
+  <div id="tpl-toast2" class="toast"></div>
+  <div id="auto-gen-status"></div>
+  <div id="tpl-rich" style="display:none;"></div>
+  <div id="sync-banner" class="sync-banner"></div>
+  <!-- Tarjeta PC completa necesaria para genMail -->
+  <div id="cot-card-pc-hidden">
+    <div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">
+          <div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div>
+        </div>
+        <div style="text-align:right;">
+          <div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div>
+          <div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);">
+      <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div>
+      <div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div>
+      <div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div>
+    </div>
+    <div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div>
+    <div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;">
+      <div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div>
+      <div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div>
+      <div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div>
+      <div id="cc-dcto-block" style="margin-top:8px;"></div>
+    </div>
+    <div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;">
+      <div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div>
+      <div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>
+      <div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div>
+    </div>
+    <div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div>
+        <div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div>
+        <div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div>
+      </div>
+      <div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div>
+    </div>
+  </div>
+  <!-- Tarjeta WSP oculta -->
+  <div id="cot-card-wsp-hidden">
+    <div id="wcc-badge" style="display:none;"></div>
+    <div id="wcc-fecha" style="display:none;"></div>
+    <div id="wcc-emp" style="display:none;"></div>
+    <div id="wcc-precio" style="display:none;"></div>
+    <div id="wcc-clp" style="display:none;"></div>
+    <div id="wcc-plazo" style="display:none;"></div>
+    <div id="wcc-asesor" style="display:none;"></div>
+    <div id="wcc-contacto" style="display:none;"></div>
+    <div id="wcc-prod-block" style="display:none;"></div>
+    <div id="wcc-dcto-block" style="display:none;"></div>
+  </div>
+</div>
 
 <script>
 'use strict';
@@ -2535,6 +2607,13 @@ function syncProdToMailForm(key, pi) {
 
   var mp = document.getElementById('mp');
   if (mp && COTIZADOR.plazo) mp.value = COTIZADOR.plazo;
+
+  // Sincronizar campos de texto: leer de los IDs del nuevo layout
+  // genMail usa gv() que lee por id, así que mn/me/ma/mf/ml deben existir con esos ids
+  // Los campos del nuevo layout tienen esos IDs directamente
+  // Solo aseguramos que updWspLink pueda leer mf
+  var mfEl = document.getElementById('mf');
+  if (mfEl) { /* ya existe con id correcto */ }
 }
 
 // ── Guardar cotización desde estación ─────────────────────
@@ -2631,10 +2710,16 @@ function scheduleAutoGen(ms) {
     var a = document.getElementById('tpl-asunto');
     var ar = document.getElementById('tpl-asunto-r');
     if (a && ar) ar.textContent = a.textContent;
+    // Copiar tarjeta PC del hidden al visible
+    var pcHidden = document.getElementById('cot-card-pc-hidden');
+    var pcVisible = document.getElementById('cot-card-pc');
+    if (pcHidden && pcVisible) pcVisible.innerHTML = pcHidden.innerHTML;
     // Actualizar wa-text-preview
     var tb = document.getElementById('tpl-body');
     var wp = document.getElementById('wa-text-preview');
     if (tb && wp) wp.textContent = tb.value;
+    // Construir tarjeta WSP visible
+    buildWspCard();
   }, ms !== undefined ? ms : 280);
 }
 
@@ -2680,20 +2765,84 @@ syncQuoteToForm = function(q) {
   }
 };
 
+// ── Construir tarjeta WSP visible ─────────────────────────
+function buildWspCard() {
+  var key = COTIZADOR.prodKey;
+  if (!key) return;
+  var pi = PROD_INFO[key];
+  var ufV = COTIZADOR.ufVenta;
+  var ufL = COTIZADOR.ufLista;
+  var pl = COTIZADOR.plazo || '12';
+  var skip = document.getElementById('skip-dest') && document.getElementById('skip-dest').checked;
+  var em = skip ? '' : (document.getElementById('me') ? document.getElementById('me').value.trim() : '');
+  var n = skip ? 'Cliente' : (document.getElementById('mn') ? document.getElementById('mn').value.trim() || 'Sr./Sra. [Nombre]' : 'Sr./Sra. [Nombre]');
+  var as2 = document.getElementById('ma') ? document.getElementById('ma').value.trim() || '[Asesor]' : '[Asesor]';
+  var fo = document.getElementById('mf') ? document.getElementById('mf').value.trim() : '';
+  var ml = document.getElementById('ml') ? document.getElementById('ml').value.trim() : '';
+  var hayDc = ufL && ufV && ufV < ufL;
+  var dc = hayDc ? Math.round((1 - ufV/ufL)*100) : 0;
+  var clp = ufV ? ufc(ufV) : null;
+  var items = (typeof PITEMS !== 'undefined' && PITEMS[pi.tipo]) ? PITEMS[pi.tipo] : pi.benefits.slice(0,5);
+
+  var html =
+    '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
+        '<div>'+
+          '<img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+          '<div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div>'+
+        '</div>'+
+        '<div style="text-align:right;">'+
+          '<div style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">'+pi.badge+'</div>'+
+          '<div style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;">'+hoy()+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    (em ? '<div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;">'+em+'</div></div>' : '')+
+    '<div style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;">'+
+      '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">Producto cotizado</div>'+
+      '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.name+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;">'+
+        items.map(function(i){ return '<div style="font-size:.8rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;font-size:.85rem;flex-shrink:0;margin-top:1px;">✔</span><span>'+i+'</span></div>'; }).join('')+
+      '</div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;">'+
+      '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div>'+
+      '<div style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;">'+(ufV ? ufV+' UF + IVA' : '[precio] UF + IVA')+'</div>'+
+      (clp ? '<div style="font-size:.78rem;color:#888;margin-top:7px;">aprox. '+fmtN(clp)+' mensual con IVA incluido</div>' : '')+
+      (hayDc ? '<div style="margin-top:12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:14px;"><span style="font-size:2rem;font-weight:900;color:#2ecc71;">−'+dc+'%</span><div><div style="font-size:.72rem;color:#888;text-decoration:line-through;">Lista: '+ufL+' UF</div><div style="font-size:.78rem;color:#bbb;">Precio final: '+ufV+' UF</div></div></div>' : '')+
+    '</div>'+
+    '<div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;">'+
+      '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div style="font-size:.9rem;font-weight:700;color:#fff;">'+pl+' meses</div></div>'+
+      '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
+      '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
+      '<div>'+
+        '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div>'+
+        '<div style="font-size:.95rem;font-weight:700;color:#fff;">'+as2+'</div>'+
+        (fo||ml ? '<div style="font-size:.75rem;color:#3498db;margin-top:3px;">'+(fo||'')+(fo&&ml?' · ':'')+ml+'</div>' : '')+
+      '</div>'+
+      '<div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div>'+
+    '</div>';
+
+  var wspVisible = document.getElementById('cot-card-wsp');
+  if (wspVisible) wspVisible.innerHTML = html;
+}
+
 // ── Inicialización ─────────────────────────────────────────
 loadExecutivo();
 preloadLogo(null);
 renderQuoteList();
 fetchUFReal();
 
-// Cargar primer producto por defecto
+// Cargar primer producto por defecto — esperar DOM completo
 setTimeout(function() {
   var sel = document.getElementById('prod-selector');
   if (sel) {
     sel.value = 'bundle4100';
     cambiarProducto('bundle4100');
   }
-}, 200);
+}, 300);
 
 </script>
 </body>
