@@ -419,7 +419,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 <div class="modal" id="exec-modal">
   <div class="modal-card" style="max-width:520px;">
-    <div class="modal-head"><h3 id="exec-modal-title">🧑‍💼 Mis datos de ejecutivo/a</h3><button class="modal-x" onclick="closeModal('exec-modal')">✕</button></div>
+    <div class="modal-head"><h3 id="exec-modal-title">🧑‍💼 Mis datos de ejecutivo/a</h3><button class="modal-x" onclick="cancelExec()">✕</button></div>
     <div class="modal-body">
       <div id="exec-onboard-note" style="display:none;background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.4);border-radius:9px;padding:11px 13px;margin-bottom:16px;font-size:.86rem;color:#f0c040;">
         👋 Bienvenido/a. Completa tus datos una vez: quedarán guardados en este equipo y no se volverán a pedir.
@@ -435,7 +435,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <div class="cfg-grid">
         <div class="fld"><label>Nombre</label><input type="text" id="ma" placeholder="Eduardo Pérez"></div>
         <div class="cfg-2">
-          <div class="fld"><label>Cargo</label><input type="text" id="exec-cargo" placeholder="Ejecutivo/a Comercial"></div>
+          <div class="fld"><label>Cargo</label>
+            <select id="exec-cargo">
+              <option value="Ejecutivo Comercial">Ejecutivo Comercial</option>
+              <option value="Ejecutiva Comercial">Ejecutiva Comercial</option>
+            </select>
+          </div>
           <div class="fld"><label>Empresa</label><input type="text" id="exec-empresa" placeholder="Equifax Chile"></div>
         </div>
         <div class="fld"><label>Correo</label><input type="email" id="ml" placeholder="ej@equifax.cl"></div>
@@ -446,7 +451,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
         <div id="wsp-link-row" class="wsp-link-row">🟢 <a id="wsp-link" href="#" target="_blank">Abrir WhatsApp directo →</a></div>
         <div class="fld"><label>Firma comercial</label><input type="text" id="exec-firma" placeholder="Ej: Tu aliado en gestión de riesgo"></div>
       </div>
-      <button class="exec-save" onclick="saveExec()">✔ Guardar mis datos</button>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="exec-save" onclick="saveExec()" style="flex:1;">💾 Guardar</button>
+        <button onclick="cancelExec()" style="flex:0 0 auto;background:var(--g3);color:var(--w);border:none;border-radius:10px;padding:14px 20px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.95rem;">❌ Cancelar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -735,18 +743,47 @@ function cCLP(){var c=parseFloat(gv('clp-i'))||0;srUF('res-clp',fmtN(c)+' = <b>'
 function cCom(){var v=parseFloat(gv('com-u'))||0,p=parseFloat(gv('com-p'))||0,com=v*(p/100);srUF('res-com','Comisión: <b>'+fmtN(ufn(com))+'</b> ('+com.toFixed(6)+' UF)');}
 
 /* ════════ DATOS DEL EJECUTIVO/A (modal + foto + almacenamiento local) ════════ */
+
+/* snapshot para poder cancelar sin afectar las vistas previas */
+var _execSnapshot=null;
+
 function openExec(){
+  /* guardar snapshot del estado actual antes de editar */
+  _execSnapshot={
+    name:_lsGet('eq_exec_name')||'',
+    cargo:_lsGet('eq_exec_cargo')||'Ejecutivo Comercial',
+    company:_lsGet('eq_exec_company')||'',
+    email:_lsGet('eq_exec_email')||'',
+    tel2:_lsGet('eq_exec_tel2')||'',
+    tel:_lsGet('eq_exec_tel')||'',
+    firma:_lsGet('eq_exec_firma')||'',
+    photo:_lsGet('eq_exec_photo')||''
+  };
   loadExecFields();
   $('exec-onboard-note').style.display='none';
   $('exec-modal-title').textContent='🧑‍💼 Mis datos de ejecutivo/a';
   refreshPhotoPrev();updWspLink();
   $('exec-modal').classList.add('on');
 }
+
 function loadExecFields(){
-  var map={ma:'eq_exec_name',exec_cargo:'eq_exec_cargo',exec_empresa:'eq_exec_company',
+  var fields={ma:'eq_exec_name',exec_empresa:'eq_exec_company',
     ml:'eq_exec_email',exec_tel:'eq_exec_tel2',mf:'eq_exec_tel',exec_firma:'eq_exec_firma'};
-  for(var dom in map){var e=$(dom.replace('_','-'));var v=_lsGet(map[dom]);if(e&&v!=null)e.value=v;}
+  for(var dom in fields){
+    var e=$(dom.replace(/_/g,'-'));
+    var v=_lsGet(fields[dom]);
+    if(e&&v!=null)e.value=v;
+  }
+  /* cargo — select */
+  var sc=$('exec-cargo');
+  if(sc){
+    var savedCargo=_lsGet('eq_exec_cargo')||'Ejecutivo Comercial';
+    for(var i=0;i<sc.options.length;i++){
+      if(sc.options[i].value===savedCargo){sc.selectedIndex=i;break;}
+    }
+  }
 }
+
 function saveExec(){
   var nombre=gv('ma');
   if(!nombre){toast('Ingresa al menos tu nombre','err','global-toast');return;}
@@ -758,19 +795,42 @@ function saveExec(){
   _lsSet('eq_exec_tel',gv('mf'));
   _lsSet('eq_exec_firma',gv('exec-firma'));
   _lsSet('eq_exec_date',new Date().toDateString());
-  refreshUserBtn();updWspLink();preloadPhoto(null);genMail();syncWA();
+  _execSnapshot=null;
+  refreshUserBtn();updWspLink();preloadPhoto(null);
+  /* solo aquí se actualizan las vistas previas */
+  genMail();syncWA();
   closeModal('exec-modal');
   toast('✔ Datos guardados','ok','global-toast');
 }
-/* ── FOTO ── */
+
+function cancelExec(){
+  /* restaurar snapshot si existe */
+  if(_execSnapshot){
+    _lsSet('eq_exec_name',_execSnapshot.name);
+    _lsSet('eq_exec_cargo',_execSnapshot.cargo);
+    _lsSet('eq_exec_company',_execSnapshot.company);
+    _lsSet('eq_exec_email',_execSnapshot.email);
+    _lsSet('eq_exec_tel2',_execSnapshot.tel2);
+    _lsSet('eq_exec_tel',_execSnapshot.tel);
+    _lsSet('eq_exec_firma',_execSnapshot.firma);
+    if(_execSnapshot.photo)_lsSet('eq_exec_photo',_execSnapshot.photo);
+    _execSnapshot=null;
+    refreshUserBtn();preloadPhoto(null);
+  }
+  closeModal('exec-modal');
+}
+
+/* ── FOTO — solo actualiza preview, no dispara genMail ── */
 function onPhoto(input){
   var f=input.files&&input.files[0];if(!f)return;
   if(!/image\/(jpeg|jpg|png|webp)/i.test(f.type)){toast('Formato no permitido (usa JPG, PNG o WEBP)','err','global-toast');return;}
   var r=new FileReader();
   r.onload=function(){
+    /* guardar temporalmente en snapshot para poder cancelar */
+    if(_execSnapshot)_execSnapshot.photo=_lsGet('eq_exec_photo')||'';
     _lsSet('eq_exec_photo',r.result);
-    refreshPhotoPrev();refreshUserBtn();preloadPhoto(null);genMail();
-    toast('✔ Foto actualizada','ok','global-toast');
+    refreshPhotoPrev();refreshUserBtn();preloadPhoto(null);
+    toast('✔ Foto lista — guarda para aplicar','ok','global-toast');
   };
   r.readAsDataURL(f);
 }
@@ -791,7 +851,12 @@ function refreshUserBtn(){
 }
 
 /* cerrar modales al hacer clic en el fondo */
-document.addEventListener('click',function(e){if(e.target.classList&&e.target.classList.contains('modal'))e.target.classList.remove('on');});
+document.addEventListener('click',function(e){
+  if(e.target.classList&&e.target.classList.contains('modal')){
+    if(e.target.id==='exec-modal'){cancelExec();}
+    else{e.target.classList.remove('on');}
+  }
+});
 function _lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function _lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function getUF(){return parseFloat(document.getElementById('uf-global').value)||40644;}
