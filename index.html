@@ -1,1 +1,1341 @@
-COTIZADOR BUNDLE MC 4100 + RI				
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CotizadorGo! — Herramienta Comercial Equifax Chile</title>
+<style>
+:root{
+  --r:#9b1c2e;--rd:#6e1220;--rl:#c0263b;
+  --g1:#0e0e0e;--g2:#161616;--g3:#1e1e1e;--g4:#2a2a2a;--g5:#383838;
+  --w:#f2f2f2;--wa:#b0b0b0;--y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
+  --header-h:58px;
+  --prodbar-h:54px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--g1);color:var(--w);font-family:'Segoe UI',Arial,sans-serif;font-size:15px;}
+
+/* ── HEADER ── */
+#hdr{
+  height:var(--header-h);
+  background:linear-gradient(135deg,var(--rd) 0%,#a01f30 60%,#6e1220 100%);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;position:fixed;top:0;left:0;right:0;z-index:300;
+  box-shadow:0 2px 18px rgba(0,0,0,.7);border-bottom:1px solid rgba(255,255,255,.08);
+}
+.hdr-logo{display:flex;align-items:center;gap:12px;}
+.hdr-logo img{height:38px;width:auto;filter:brightness(0) invert(1);}
+.hdr-title{font-size:1.05rem;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1.1;}
+.hdr-sub{font-size:.55rem;letter-spacing:2.5px;color:rgba(255,255,255,.45);text-transform:uppercase;}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+.uf-box{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:6px;
+  padding:4px 11px;text-align:center;}
+.uf-box label{display:block;font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:1px;}
+.uf-box input{background:none;border:none;color:var(--y);font-size:.9rem;font-weight:700;
+  width:86px;text-align:center;font-family:inherit;cursor:text;}
+.uf-box input:focus{outline:none;}
+.exec-badge{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:6px;
+  padding:4px 11px;font-size:.72rem;color:rgba(255,255,255,.6);cursor:pointer;
+  white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;}
+.exec-badge:hover{border-color:rgba(255,255,255,.3);color:#fff;}
+
+/* ── PRODUCT BAR ── */
+#prodbar{
+  height:var(--prodbar-h);
+  background:var(--g2);border-bottom:2px solid var(--g4);
+  display:flex;align-items:center;
+  position:fixed;top:var(--header-h);left:0;right:0;z-index:299;
+  overflow-x:auto;scrollbar-width:none;gap:0;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  padding:0 4px;
+}
+#prodbar::-webkit-scrollbar{display:none;}
+.ptab{
+  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:0 16px;height:100%;border:none;background:none;
+  color:var(--wa);cursor:pointer;font-family:inherit;font-size:.72rem;
+  letter-spacing:.3px;text-transform:uppercase;
+  border-bottom:3px solid transparent;
+  transition:all .15s;white-space:nowrap;scroll-snap-align:start;flex-shrink:0;
+  position:relative;min-width:100px;
+}
+.ptab .pt-icon{font-size:1.15rem;line-height:1;}
+.ptab .pt-label{font-size:.62rem;letter-spacing:.5px;}
+.ptab:hover{color:#fff;background:rgba(155,28,46,.18);}
+.ptab.on{color:#fff;border-bottom-color:var(--r);background:rgba(155,28,46,.2);}
+.ptab.on .pt-icon{filter:drop-shadow(0 0 4px rgba(240,192,64,.5));}
+
+/* ── MAIN SPLIT ── */
+#workspace{
+  position:fixed;
+  top:calc(var(--header-h) + var(--prodbar-h));
+  left:0;right:0;bottom:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  overflow:hidden;
+}
+
+/* ── LEFT PANEL ── */
+#left-panel{
+  background:var(--g2);
+  border-right:2px solid var(--g4);
+  overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--g4) transparent;
+}
+#left-panel::-webkit-scrollbar{width:5px;}
+#left-panel::-webkit-scrollbar-thumb{background:var(--g4);border-radius:4px;}
+
+/* ── RIGHT PANEL ── */
+#right-panel{
+  background:var(--g1);
+  overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--g4) transparent;
+}
+#right-panel::-webkit-scrollbar{width:5px;}
+#right-panel::-webkit-scrollbar-thumb{background:var(--g4);border-radius:4px;}
+
+/* ── CONFIGURADOR (left content) ── */
+.cfg{padding:14px 16px;}
+.cfg-section{background:var(--g3);border:1px solid var(--g4);border-radius:8px;
+  padding:14px 16px;margin-bottom:10px;}
+.cfg-section h3{font-size:.63rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--rl);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.cfg-section h3 .s-icon{font-size:.9rem;}
+.field-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end;}
+.f{display:flex;flex-direction:column;gap:3px;}
+.f label{font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);}
+.f select,.f input{background:var(--g1);border:1px solid var(--g5);color:var(--w);
+  padding:8px 10px;font-family:inherit;font-size:.84rem;border-radius:5px;
+  min-width:140px;transition:border-color .15s;}
+.f select:focus,.f input:focus{outline:none;border-color:var(--rl);}
+.f select:hover,.f input:hover{border-color:var(--g5);}
+
+/* Big compute button */
+.calc-btn{
+  background:var(--r);border:none;color:#fff;
+  padding:9px 22px;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;
+  border-radius:5px;transition:all .2s;align-self:flex-end;
+  box-shadow:0 2px 10px rgba(155,28,46,.3);
+}
+.calc-btn:hover{background:var(--rl);box-shadow:0 0 18px rgba(155,28,46,.6);transform:translateY(-1px);}
+.calc-btn:active{transform:scale(.97);}
+
+/* Result summary */
+#result-summary{display:none;}
+#result-summary.on{display:block;}
+.r-price{font-size:2rem;font-weight:900;color:var(--y);line-height:1;margin:6px 0 3px;}
+.r-sub{font-size:.78rem;color:var(--wa);}
+.r-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0;}
+.r-item{background:var(--g1);border:1px solid var(--g4);border-radius:5px;
+  padding:8px 10px;text-align:center;}
+.r-item .ril{font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);margin-bottom:2px;}
+.r-item .riv{font-size:.88rem;font-weight:700;}
+
+/* Slider */
+.slider-wrap{background:rgba(0,0,0,.25);border-radius:6px;padding:10px 12px;margin-top:8px;}
+.sw-title{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--wa);margin-bottom:7px;}
+.sw-row{display:flex;gap:10px;align-items:center;}
+.sw-row input[type=range]{flex:1;accent-color:var(--r);min-width:80px;}
+.sw-row input[type=number]{background:var(--g1);border:1px solid var(--g5);color:var(--y);
+  padding:5px 8px;font-family:inherit;font-size:.85rem;font-weight:700;border-radius:4px;width:90px;}
+.sw-row input[type=number]:focus{outline:none;border-color:var(--rl);}
+
+/* Benefits showcase */
+.benefits-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px;}
+.bitem{background:var(--g1);border:1px solid var(--g4);border-radius:5px;
+  padding:7px 9px;font-size:.75rem;color:var(--wa);display:flex;align-items:flex-start;gap:6px;}
+.bitem .bi-check{color:var(--r);font-weight:900;flex-shrink:0;margin-top:1px;}
+
+/* Product headline */
+.prod-headline{padding:12px 16px;border-bottom:1px solid var(--g4);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.prod-badge{background:var(--rd);font-size:.58rem;padding:3px 9px;
+  border-radius:16px;letter-spacing:1px;color:rgba(255,255,255,.7);text-transform:uppercase;}
+.prod-name{font-size:.88rem;font-weight:700;color:#fff;}
+
+/* Alerta */
+.alerta{background:rgba(240,192,64,.07);border-left:3px solid var(--y);
+  padding:8px 11px;margin-bottom:10px;font-size:.73rem;color:var(--wa);border-radius:0 5px 5px 0;}
+.alerta b{color:var(--y);}
+
+/* Data table */
+.tbl{overflow-x:auto;border-radius:6px;border:1px solid var(--g4);}
+table{width:100%;border-collapse:collapse;font-size:.74rem;}
+thead tr{background:linear-gradient(90deg,var(--rd),#7a1425);}
+th{padding:7px 10px;text-align:left;font-size:.62rem;letter-spacing:1px;
+  text-transform:uppercase;color:#fff;white-space:nowrap;}
+td{padding:6px 10px;border-bottom:1px solid var(--g4);color:var(--wa);white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(155,28,46,.08);}
+.y{color:var(--y);font-weight:600;}.gn{color:var(--gn);font-weight:600;}.bl{color:var(--bl);}
+.mu{color:#666;font-size:.7rem;}.or{color:var(--or);}
+
+/* Client data */
+.client-section{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+
+/* Save button */
+.save-btn{background:var(--bl);border:none;color:#fff;padding:6px 14px;cursor:pointer;
+  font-family:inherit;font-size:.72rem;font-weight:700;border-radius:4px;
+  transition:all .2s;}
+.save-btn:hover{background:#2980b9;box-shadow:0 0 12px rgba(52,152,219,.5);}
+
+/* Right panel tabs */
+#preview-tabs{
+  display:flex;gap:0;border-bottom:2px solid var(--g4);
+  padding:0 14px;background:var(--g2);position:sticky;top:0;z-index:10;
+}
+.vtab{border:none;background:none;color:var(--wa);padding:11px 14px;
+  cursor:pointer;font-family:inherit;font-size:.72rem;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid transparent;
+  margin-bottom:-2px;transition:all .15s;white-space:nowrap;}
+.vtab:hover{color:#fff;background:rgba(155,28,46,.15);}
+.vtab.on{color:#fff;border-bottom-color:var(--r);background:rgba(155,28,46,.12);}
+.vpanel{display:none;padding:14px;}
+.vpanel.on{display:block;}
+
+/* Preview cards */
+.prev-header{display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.prev-title{font-size:.75rem;font-weight:700;color:var(--wa);}
+.copy-btn{border:none;color:#fff;padding:7px 15px;cursor:pointer;
+  font-family:inherit;font-size:.73rem;font-weight:700;border-radius:5px;
+  transition:all .2s;}
+.copy-btn:hover{transform:translateY(-1px);}
+.copy-btn:active{transform:scale(.97);}
+.copy-btn.wsp{background:#128c7e;}
+.copy-btn.wsp:hover{background:#075e54;box-shadow:0 0 12px rgba(18,140,126,.5);}
+.copy-btn.gmail{background:#c5221f;}
+.copy-btn.gmail:hover{background:#a31e1b;box-shadow:0 0 12px rgba(197,34,31,.5);}
+.copy-btn.outlook{background:#004578;}
+.copy-btn.outlook:hover{background:#003a66;box-shadow:0 0 12px rgba(0,69,120,.5);}
+.copy-btn.img{background:var(--g4);}
+.copy-btn.img:hover{background:var(--g5);}
+.copy-btn.sec{background:var(--g4);}
+.copy-btn.sec:hover{background:var(--g5);}
+
+/* Subject bar */
+.subject-bar{background:var(--g3);border:1px solid var(--g4);border-radius:6px;
+  padding:9px 14px;margin-bottom:10px;display:flex;justify-content:space-between;
+  align-items:center;gap:8px;flex-wrap:wrap;}
+.subject-label{font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);margin-bottom:3px;}
+.subject-value{font-size:.84rem;font-weight:600;color:var(--y);}
+
+/* Gmail preview box */
+.gmail-preview-box{background:#f8f9fa;border-radius:7px;padding:10px;
+  border:1px solid #e0e0e0;min-height:100px;}
+.outlook-preview-box{background:#f5f5f5;border-radius:6px;padding:10px;
+  border:1px solid #ddd;min-height:100px;}
+
+/* WSP card preview */
+#wsp-card-preview{max-width:480px;border-radius:9px;overflow:hidden;
+  box-shadow:0 6px 28px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);}
+
+/* PC image card */
+#pc-card-preview{max-width:480px;border-radius:9px;overflow:hidden;
+  box-shadow:0 6px 28px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);}
+
+/* Toast */
+.toast-fixed{position:fixed;bottom:16px;right:16px;z-index:9999;
+  min-width:260px;max-width:380px;padding:9px 14px;border-radius:5px;
+  font-size:.78rem;display:none;box-shadow:0 4px 18px rgba(0,0,0,.5);}
+.toast-fixed.ok{background:rgba(46,204,113,.15);border-left:3px solid #2ecc71;color:#2ecc71;display:block;}
+.toast-fixed.err{background:rgba(231,76,60,.15);border-left:3px solid #e74c3c;color:#e74c3c;display:block;}
+.toast-fixed.info{background:rgba(52,152,219,.15);border-left:3px solid #3498db;color:#3498db;display:block;}
+
+/* Expand overlay */
+.expand-overlay{display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(3px);
+  justify-content:center;align-items:flex-start;padding:30px 20px;overflow-y:auto;}
+.expand-overlay.on{display:flex;}
+.expand-inner{max-width:660px;width:100%;position:relative;}
+.expand-close{position:sticky;top:0;background:var(--rd);border:none;color:#fff;
+  padding:7px 16px;border-radius:5px;cursor:pointer;font-size:.8rem;font-weight:700;
+  margin-bottom:12px;font-family:inherit;}
+.expand-close:hover{background:var(--rl);}
+
+/* Wsp link */
+.wsp-link-row{padding:5px 8px;background:rgba(37,211,102,.1);
+  border:1px solid rgba(37,211,102,.3);border-radius:5px;
+  font-size:.72rem;margin-top:4px;}
+
+/* Exec reset btn */
+.exec-reset-btn{background:var(--g4);border:none;color:var(--wa);
+  padding:5px 9px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:.7rem;}
+.exec-reset-btn:hover{background:var(--g5);color:#fff;}
+
+/* Skip dest checkbox */
+.skip-check{display:flex;align-items:center;gap:7px;cursor:pointer;
+  font-size:.72rem;color:var(--wa);margin-bottom:8px;}
+.skip-check input{accent-color:var(--r);width:14px;height:14px;}
+
+/* Chip row */
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.chip{background:var(--g3);border:1px solid var(--g4);border-radius:5px;
+  padding:7px 11px;text-align:center;min-width:70px;}
+.chip .cn{font-size:1.1rem;font-weight:700;color:var(--bl);}
+.chip .ct{font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);margin-top:1px;}
+
+/* Auto-status */
+#auto-status{font-size:.68rem;padding:5px 10px;background:rgba(46,204,113,.07);
+  border:1px solid rgba(46,204,113,.2);border-radius:4px;color:#2ecc71;
+  text-align:center;margin-top:6px;}
+
+/* Textarea hidden */
+textarea.hidden{display:none;}
+
+/* Image buttons row */
+.img-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+
+/* Nota outlook */
+.outlook-note{font-size:.68rem;color:#aaa;background:rgba(0,114,198,.08);
+  border:1px solid rgba(0,114,198,.2);border-radius:4px;padding:6px 10px;margin-top:8px;}
+
+/* Mobile fallback */
+@media(max-width:780px){
+  html,body{overflow:auto;}
+  #workspace{position:relative;top:auto;grid-template-columns:1fr;height:auto;}
+  #left-panel,#right-panel{overflow:visible;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="hdr">
+  <div class="hdr-logo">
+    <img src="logo-equifax.png" alt="Equifax" onerror="this.style.opacity=0">
+    <div>
+      <div class="hdr-title">CotizadorGo!</div>
+      <div class="hdr-sub">Herramienta Comercial Equifax Chile</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="uf-box">
+      <label>UF Hoy</label>
+      <input type="number" id="uf-global" value="40644" step="1" title="Valor de la UF (editable)">
+    </div>
+    <div class="exec-badge" onclick="resetExec()" title="Haz clic para cambiar tus datos">
+      <span id="exec-name-display">👤 Sin nombre</span>
+    </div>
+  </div>
+</header>
+
+<!-- PRODUCT BAR -->
+<div id="prodbar">
+  <button class="ptab on" data-prod="bundle" onclick="setProd('bundle')">
+    <span class="pt-icon">📦</span><span class="pt-label">Bundle MC+RI</span>
+  </button>
+  <button class="ptab" data-prod="mc" onclick="setProd('mc')">
+    <span class="pt-icon">🚨</span><span class="pt-label">Mora Control</span>
+  </button>
+  <button class="ptab" data-prod="ri" onclick="setProd('ri')">
+    <span class="pt-icon">📊</span><span class="pt-label">RI Mensual</span>
+  </button>
+  <button class="ptab" data-prod="bolsa" onclick="setProd('bolsa')">
+    <span class="pt-icon">🎒</span><span class="pt-label">RI Bolsa</span>
+  </button>
+  <button class="ptab" data-prod="pfm" onclick="setProd('pfm')">
+    <span class="pt-icon">📡</span><span class="pt-label">Portfolio Mon.</span>
+  </button>
+  <button class="ptab" data-prod="pc" onclick="setProd('pc')">
+    <span class="pt-icon">🤝</span><span class="pt-label">Partner Check</span>
+  </button>
+  <button class="ptab" data-prod="uf" onclick="setProd('uf')">
+    <span class="pt-icon">⇄</span><span class="pt-label">UF / CLP</span>
+  </button>
+</div>
+
+<!-- WORKSPACE: LEFT + RIGHT -->
+<div id="workspace">
+
+  <!-- ════════════════════════════ LEFT PANEL ════════════════════════════ -->
+  <div id="left-panel">
+    <div id="left-content"></div>
+  </div>
+
+  <!-- ════════════════════════════ RIGHT PANEL ════════════════════════════ -->
+  <div id="right-panel">
+    <div id="preview-tabs">
+      <button class="vtab on" data-v="wsp" onclick="setView('wsp')">💬 WhatsApp</button>
+      <button class="vtab" data-v="gmail" onclick="setView('gmail')">📧 Gmail</button>
+      <button class="vtab" data-v="outlook" onclick="setView('outlook')">📨 Outlook</button>
+      <button class="vtab" data-v="img" onclick="setView('img')">🖼 Imagen</button>
+    </div>
+
+    <!-- Destinatario + Asesor (sticky config for templates) -->
+    <div id="dest-config" style="padding:10px 14px;border-bottom:1px solid var(--g4);background:var(--g2);">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="cfg-section" style="margin:0;padding:10px 12px;">
+          <h3 style="margin-bottom:8px;"><span class="s-icon">👤</span> Destinatario</h3>
+          <label class="skip-check">
+            <input type="checkbox" id="skip-dest" onchange="scheduleAutoGen(0)">
+            Omitir destinatario
+          </label>
+          <div id="dest-fields" style="display:flex;flex-direction:column;gap:6px;">
+            <div class="f"><label>Nombre contacto</label><input type="text" id="mn" placeholder="Sr. García"></div>
+            <div class="f"><label>Empresa</label><input type="text" id="me" placeholder="Empresa SpA"></div>
+          </div>
+        </div>
+        <div class="cfg-section" style="margin:0;padding:10px 12px;">
+          <h3 style="margin-bottom:8px;"><span class="s-icon">🧑‍💼</span> Asesor</h3>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div class="f"><label>Tu nombre</label>
+              <div style="display:flex;gap:5px;">
+                <input type="text" id="ma" placeholder="Eduardo Pérez" oninput="saveExecField()" style="flex:1;">
+                <button class="exec-reset-btn" onclick="resetExec()" title="Cambiar datos">✏</button>
+              </div>
+            </div>
+            <div class="f"><label>WhatsApp / Tel.</label><input type="text" id="mf" placeholder="+56 9 XXXX XXXX" oninput="saveExecField()"></div>
+            <div id="wsp-link-row" class="wsp-link-row" style="display:none;">
+              🟢 <a id="wsp-link" href="#" target="_blank" style="color:#25d366;font-weight:600;">Abrir WhatsApp →</a>
+            </div>
+            <div class="f"><label>Email</label><input type="text" id="ml" placeholder="ej@equifax.cl" oninput="saveExecField()"></div>
+          </div>
+        </div>
+      </div>
+      <div id="auto-status">✔ Propuesta generada automáticamente</div>
+    </div>
+
+    <!-- Vista WhatsApp -->
+    <div class="vpanel on" id="vp-wsp">
+      <div class="prev-header">
+        <div class="prev-title">💬 Propuesta por WhatsApp</div>
+        <div style="display:flex;gap:7px;">
+          <button class="copy-btn wsp" onclick="copPlano();playClick()">📋 Copiar texto WA</button>
+          <button class="copy-btn img" onclick="copImgWsp();playClick()">📸 Copiar imagen WA</button>
+        </div>
+      </div>
+      <textarea id="tpl-body" class="hidden"></textarea>
+      <div id="wsp-card-preview"></div>
+    </div>
+
+    <!-- Vista Gmail -->
+    <div class="vpanel" id="vp-gmail">
+      <div class="prev-header">
+        <div class="prev-title">📧 Gmail</div>
+        <button class="copy-btn gmail" onclick="copHTMLGmail();playClick()">📋 Copiar para Gmail</button>
+      </div>
+      <div class="subject-bar">
+        <div><div class="subject-label">Asunto</div><div id="tpl-asunto" class="subject-value">—</div></div>
+        <button class="copy-btn sec" onclick="copAsunto()" style="padding:5px 11px;font-size:.7rem;">📋 Copiar asunto</button>
+      </div>
+      <div style="font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:#666;margin-bottom:8px;">Vista previa:</div>
+      <div id="tpl-rich-gmail" class="gmail-preview-box"></div>
+      <div class="img-btn-row">
+        <button class="copy-btn img" onclick="copImgPC();playClick()">📋 Copiar imagen</button>
+        <button class="copy-btn sec" onclick="descImg();playClick()">⬇ Descargar PNG</button>
+      </div>
+    </div>
+
+    <!-- Vista Outlook -->
+    <div class="vpanel" id="vp-outlook">
+      <div class="prev-header">
+        <div class="prev-title">📨 Outlook</div>
+        <button class="copy-btn outlook" onclick="copHTMLOutlook();playClick()">📋 Copiar para Outlook</button>
+      </div>
+      <div class="subject-bar">
+        <div><div class="subject-label">Asunto</div><div id="tpl-asunto-out" class="subject-value">—</div></div>
+      </div>
+      <div style="font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:#666;margin-bottom:8px;">Vista previa (Outlook):</div>
+      <div id="tpl-rich-outlook" class="outlook-preview-box"></div>
+      <div class="outlook-note">⚠️ <strong style="color:#4da6ff;">Outlook:</strong> Fondos sólidos y tablas para máxima compatibilidad con Outlook 2016+</div>
+    </div>
+
+    <!-- Vista Imagen -->
+    <div class="vpanel" id="vp-img">
+      <div class="prev-header">
+        <div class="prev-title">🖼 Imagen de cotización</div>
+        <div style="display:flex;gap:7px;">
+          <button class="copy-btn img" onclick="copImgPC();playClick()">📋 Copiar imagen</button>
+          <button class="copy-btn sec" onclick="descImg();playClick()">⬇ Descargar PNG</button>
+        </div>
+      </div>
+      <div id="pc-card-preview"></div>
+    </div>
+
+    <!-- Legacy compat div (hidden) -->
+    <div id="tpl-rich" style="display:none;"></div>
+    <div id="tpl-toast2" class="toast-fixed" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- Global toast -->
+<div id="global-toast" class="toast-fixed" style="display:none;"></div>
+
+<!-- Expand overlay -->
+<div class="expand-overlay" id="expand-overlay" onclick="closeExpand(event)">
+  <div class="expand-inner" id="expand-inner">
+    <button class="expand-close" onclick="closeExpand()">✕ Cerrar</button>
+    <div id="expand-body"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════
+// DATOS Y UTILIDADES
+// ══════════════════════════════════════════════
+var B4100=[{r:10,u:2.5,p:28},{r:20,u:3,p:32},{r:30,u:3.5,p:38},{r:40,u:4,p:42},{r:50,u:4.5,p:46},{r:60,u:5,p:50},{r:70,u:5.5,p:54},{r:80,u:6,p:58},{r:90,u:6.5,p:62},{r:100,u:7,p:66}];
+var BILIM=[{r:10,u:4,p:42},{r:20,u:4.5,p:46},{r:30,u:5,p:48},{r:40,u:5.5,p:50},{r:50,u:6,p:52},{r:60,u:6.5,p:54},{r:70,u:7,p:56},{r:80,u:7.5,p:58},{r:90,u:8,p:60},{r:100,u:8.5,p:62}];
+var RI_T=[{c:10,u:0.11},{c:20,u:0.165},{c:30,u:0.2419},{c:40,u:0.3153},{c:50,u:0.3658},{c:60,u:0.4264},{c:70,u:0.4808},{c:80,u:0.5283},{c:90,u:0.5681},{c:100,u:0.627},{c:150,u:0.8359},{c:200,u:0.891},{c:250,u:0.9432},{c:300,u:0.9874},{c:350,u:1.017},{c:400,u:1.0365},{c:500,u:1.056},{c:1000,u:1.8612}];
+var RIB_T=[{c:10,u:3},{c:20,u:5},{c:30,u:6},{c:40,u:7},{c:50,u:8},{c:60,u:9},{c:70,u:10},{c:80,u:11},{c:90,u:12},{c:100,u:14},{c:150,u:18},{c:200,u:19},{c:250,u:20},{c:300,u:21},{c:500,u:25},{c:1000,u:40}];
+var MC_P=[{id:'4100',lbl:'MC 4100',u:2.65,p:30},{id:'6900',lbl:'MC 6900',u:3.65,p:44},{id:'ilim',lbl:'MC Ilimitado',u:6.65,p:80}];
+var PFM_S={1:0.0725,2:0.0711,3:0.0697,5:0.0683,10:0.067,20:0.065,30:0.063,40:0.062,50:0.060,60:0.058,70:0.056,80:0.054,90:0.052,100:0.050,200:0.039,300:0.035,500:0.029,1000:0.024};
+var PFM_Q={1:0.0563,2:0.0554,3:0.0546,5:0.0538,10:0.053,20:0.051,30:0.050,40:0.048,50:0.046,60:0.045,70:0.043,80:0.041,90:0.039,100:0.038,200:0.029,300:0.025,500:0.021,1000:0.017};
+var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.039,50:0.038,60:0.036,70:0.035,80:0.033,90:0.032,100:0.030,200:0.023,300:0.020,500:0.017,1000:0.013};
+
+var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
+var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
+
+var STATE={logoImg:null,currentProd:'bundle',currentView:'wsp',currentQuote:null};
+
+function _lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function _lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function getUF(){return parseFloat(document.getElementById('uf-global').value)||40644;}
+function fmtN(n){return '$'+Math.round(n).toLocaleString('es-CL');}
+function ufc(u){return u*getUF()*1.19;}
+function ufn(u){return u*getUF();}
+function hoy(){return new Date().toLocaleDateString('es-CL',{day:'2-digit',month:'long',year:'numeric'});}
+function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
+
+function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function st(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+function sv(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;}
+
+function toast(msg,type,id){
+  var el=document.getElementById(id||'global-toast');if(!el)return;
+  el.className='toast-fixed '+(type||'ok');el.textContent=msg;el.style.display='block';
+  clearTimeout(el._t);el._t=setTimeout(function(){el.style.display='none';},4500);
+}
+
+function preloadLogo(cb){
+  if(STATE.logoImg&&STATE.logoImg.complete&&STATE.logoImg.naturalWidth>0){if(cb)cb(STATE.logoImg);return;}
+  var img=new Image();
+  img.onload=function(){STATE.logoImg=img;if(cb)cb(img);};
+  img.onerror=function(){STATE.logoImg=null;if(cb)cb(null);};
+  img.src='logo-equifax.png';
+}
+preloadLogo(null);
+
+// ══════════════════════════════════════════════
+// PRODUCTO ACTIVO
+// ══════════════════════════════════════════════
+function setProd(id){
+  STATE.currentProd=id;
+  document.querySelectorAll('.ptab').forEach(function(t){t.classList.toggle('on',t.dataset.prod===id);});
+  // Toggle right panel visibility
+  var isUtility=(id==='uf');
+  document.getElementById('dest-config').style.display=isUtility?'none':'block';
+  document.getElementById('preview-tabs').style.display=isUtility?'none':'flex';
+  document.querySelectorAll('.vpanel').forEach(function(p){p.style.display=isUtility&&p.id!=='vp-wsp'?'none':p.classList.contains('on')?'block':'none';});
+
+  renderLeft(id);
+  if(!isUtility) scheduleAutoGen(50);
+}
+
+function setView(id){
+  STATE.currentView=id;
+  document.querySelectorAll('.vtab').forEach(function(t){t.classList.toggle('on',t.dataset.v===id);});
+  document.querySelectorAll('.vpanel').forEach(function(p){p.classList.toggle('on',p.id==='vp-'+id);});
+}
+
+// ══════════════════════════════════════════════
+// RENDER LEFT PANEL
+// ══════════════════════════════════════════════
+function renderLeft(id){
+  var lc=document.getElementById('left-content');
+  if(id==='bundle') lc.innerHTML=leftBundle();
+  else if(id==='mc') lc.innerHTML=leftMC();
+  else if(id==='ri') lc.innerHTML=leftRI();
+  else if(id==='bolsa') lc.innerHTML=leftBolsa();
+  else if(id==='pfm') lc.innerHTML=leftPFM();
+  else if(id==='pc') lc.innerHTML=leftPC();
+  else if(id==='uf') lc.innerHTML=leftUF();
+  // Auto-calc after render
+  setTimeout(function(){
+    if(id==='bundle') calcBundle();
+    else if(id==='mc') calcMC();
+    else if(id==='ri') calcRI();
+    else if(id==='bolsa') calcBolsa();
+    else if(id==='pfm') calcPFM();
+    else if(id==='pc') calcPC();
+  },30);
+}
+
+// ══════════════════════════════════════════════
+// LEFT PANEL TEMPLATES
+// ══════════════════════════════════════════════
+function leftBundle(){
+  var o4=B4100.map(function(r){return'<option value="'+r.r+'">'+r.r+' consultas RI</option>';}).join('');
+  var r4=B4100.map(function(r){return'<tr><td>'+r.r+'</td><td class="y">'+r.u+' UF</td><td class="gn">'+r.p+' UF</td><td class="bl">'+fmtN(ufc(r.u))+'</td><td class="or">'+fmtN(ufc(r.u)*12)+'</td></tr>';}).join('');
+  var rI=BILIM.map(function(r){return'<tr><td>'+r.r+'</td><td class="y">'+r.u+' UF</td><td class="gn">'+r.p+' UF</td><td class="bl">'+fmtN(ufc(r.u))+'</td><td class="or">'+fmtN(ufc(r.u)*12)+'</td></tr>';}).join('');
+  return '<div class="cfg">'+
+    '<div class="prod-headline"><div><div class="prod-name">📦 Bundle MC + Reporte Interactivo</div></div><span class="prod-badge">SIN DESCUENTO ADICIONAL</span></div>'+
+    '<div style="height:10px;"></div>'+
+    '<div class="alerta"><b>⚠</b> No aplica descuento al bundle · Contrato mínimo 12 meses · Pago postpago 30 días</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">🧮</span> Configurar Bundle</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Tipo MC</label><select id="b-mc" onchange="calcBundle()"><option value="4100">MC 4100 (hasta $4.100.000)</option><option value="ilim">MC Ilimitado (sin tope)</option></select></div>'+
+        '<div class="f"><label>Consultas RI / mes</label><select id="b-ri" onchange="calcBundle()">'+o4+'</select></div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="result-bundle" class="cfg-section" style="display:none;"></div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">📋</span> Tarifas Bundle MC 4100</h3>'+
+      '<div class="tbl"><table><thead><tr><th>RI/mes</th><th>UF/mes</th><th>P. anticip.</th><th>$/mes c/IVA</th><th>$/año c/IVA</th></tr></thead><tbody>'+r4+'</tbody></table></div>'+
+    '</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">📋</span> Tarifas Bundle MC Ilimitado</h3>'+
+      '<div class="tbl"><table><thead><tr><th>RI/mes</th><th>UF/mes</th><th>P. anticip.</th><th>$/mes c/IVA</th><th>$/año c/IVA</th></tr></thead><tbody>'+rI+'</tbody></table></div>'+
+    '</div>'+
+  '</div>';
+}
+
+function leftMC(){
+  var opts=MC_P.map(function(p){return'<option value="'+p.u+'">'+p.lbl+' — '+p.u+' UF/mes</option>';}).join('');
+  var cards=MC_P.map(function(p){return'<div class="r-item"><div class="ril">'+p.lbl+'</div><div class="riv y">'+p.u+' UF/mes</div><div style="font-size:.62rem;color:#888;">Antic: '+p.p+' UF</div></div>';}).join('');
+  return '<div class="cfg">'+
+    '<div class="prod-headline"><div class="prod-name">🚨 Mora Control</div><span class="prod-badge">GESTIÓN DE CARTERA</span></div>'+
+    '<div style="height:10px;"></div>'+
+    '<div class="chip-row"><div class="chip"><div class="cn">40</div><div class="ct">Emails</div></div><div class="chip"><div class="cn">10</div><div class="ct">Cartas</div></div><div class="chip"><div class="cn">5</div><div class="ct">SMS</div></div></div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">🧮</span> Calcular</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Plan</label><select id="mc-p" onchange="calcMC()">'+opts+'</select></div>'+
+        '<div class="f"><label>Descuento DOA</label><select id="mc-d" onchange="calcMC()"><option value="0">Sin descuento</option><option value="15">15% Asesor</option><option value="25">25% Supervisor</option></select></div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="result-mc" class="cfg-section" style="display:none;"></div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">📊</span> Planes disponibles</h3>'+
+      '<div class="r-grid">'+cards+'</div>'+
+    '</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">⚡</span> Cobros adicionales MC 4100</h3>'+
+      '<div class="tbl"><table><thead><tr><th>Extra UF</th><th>Desde</th><th>Hasta</th></tr></thead><tbody>'+
+      '<tr><td class="y">0,6 UF</td><td>$4.100.001</td><td>$5.500.000</td></tr>'+
+      '<tr><td class="y">1,2 UF</td><td>$5.500.001</td><td>$6.900.000</td></tr>'+
+      '<tr><td class="y">1,8 UF</td><td>$6.900.001</td><td>$8.300.000</td></tr>'+
+      '<tr><td class="y">2,4 UF</td><td>$8.300.001</td><td>$9.700.000</td></tr>'+
+      '<tr><td class="y">3,0 UF</td><td>$9.700.001</td><td>$11.100.000</td></tr>'+
+      '<tr><td class="y">3,6 UF</td><td>$11.100.001</td><td>$12.500.000</td></tr>'+
+      '<tr><td class="y">4,2 UF</td><td>$12.500.001</td><td>$13.900.000</td></tr>'+
+      '<tr><td class="y">4,8 UF</td><td>$13.900.001</td><td>Ilimitado</td></tr>'+
+      '</tbody></table></div>'+
+    '</div>'+
+  '</div>';
+}
+
+function leftRI(){
+  var opts=RI_T.map(function(r){return'<option value="'+r.u+'" data-c="'+r.c+'">'+r.c+' consultas/mes</option>';}).join('');
+  var rows=RI_T.map(function(r){return'<tr><td>'+r.c+'</td><td class="y">'+r.u+'</td><td class="mu">'+(r.u/r.c).toFixed(6)+'</td><td class="bl">'+fmtN(ufc(r.u))+'</td></tr>';}).join('');
+  return '<div class="cfg">'+
+    '<div class="prod-headline"><div class="prod-name">📊 Reporte Interactivo — Plan Mensual</div><span class="prod-badge">12 MESES</span></div>'+
+    '<div style="height:10px;"></div>'+
+    '<div class="alerta"><b>Descuentos:</b> Asesor 15% autónomo · Supervisor 25% · Subgerente 35% · Gerente 50%</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">🧮</span> Calcular RI</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Consultas / mes</label><select id="ri-c" onchange="calcRI()">'+opts+'</select></div>'+
+        '<div class="f"><label>Descuento DOA</label><select id="ri-d" onchange="calcRI()"><option value="0">Sin dcto</option><option value="10">10%</option><option value="15">15% Asesor</option><option value="20">20%</option><option value="25">25% Supervisor</option><option value="35">35% Subgerente</option><option value="50">50% Gerente</option></select></div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="result-ri" class="cfg-section" style="display:none;"></div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">📋</span> Tarifas 12 meses</h3>'+
+      '<div class="tbl"><table><thead><tr><th>Consultas</th><th>UF/mes</th><th>UF/consulta</th><th>$/mes c/IVA</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '</div>'+
+  '</div>';
+}
+
+function leftBolsa(){
+  var opts=RIB_T.map(function(r){return'<option value="'+r.u+'" data-c="'+r.c+'">'+r.c+' consultas</option>';}).join('');
+  var rows=RIB_T.map(function(r){return'<tr><td>'+r.c+'</td><td class="y">'+r.u+' UF</td><td class="mu">'+(r.u/r.c).toFixed(4)+'</td><td class="bl">'+fmtN(ufc(r.u))+'</td></tr>';}).join('');
+  return '<div class="cfg">'+
+    '<div class="prod-headline"><div class="prod-name">🎒 Reporte Interactivo — Bolsa</div><span class="prod-badge">PAGO ÚNICO 12M</span></div>'+
+    '<div style="height:10px;"></div>'+
+    '<div class="alerta"><b>Bolsa:</b> Pago único para 12 meses. Sin cargo mensual recurrente.</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">🧮</span> Calcular Bolsa RI</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Consultas totales 12m</label><select id="bls-c" onchange="calcBolsa()">'+opts+'</select></div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="result-bolsa" class="cfg-section" style="display:none;"></div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">📋</span> Tabla de bolsas</h3>'+
+      '<div class="tbl"><table><thead><tr><th>Consultas</th><th>Precio 12m (UF)</th><th>UF/consulta</th><th>$CLP total</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '</div>'+
+  '</div>';
+}
+
+function leftPFM(){
+  var rows=[1,2,5,10,20,30,50,100,200,300,500,1000].map(function(r){
+    return'<tr><td>'+r+'</td><td class="y">'+pfmT('s',r)+'</td><td class="y">'+pfmT('q',r)+'</td><td class="y">'+pfmT('m',r)+'</td></tr>';
+  }).join('');
+  return '<div class="cfg">'+
+    '<div class="prod-headline"><div class="prod-name">📡 Portfolio Monitor</div><span class="prod-badge">MONITOREO</span></div>'+
+    '<div style="height:10px;"></div>'+
+    '<div class="alerta"><b>Descuentos:</b> Asesor 15% · Supervisor 25%</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">🧮</span> Calcular PFM</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Frecuencia</label><select id="pfm-fr" onchange="calcPFM()"><option value="s">Semanales</option><option value="q">Quincenales</option><option value="m">Mensuales</option></select></div>'+
+        '<div class="f"><label>Cantidad RUTs</label><input type="number" id="pfm-r" value="10" min="1" max="5000" oninput="calcPFM()"></div>'+
+        '<div class="f"><label>Descuento DOA</label><select id="pfm-d" onchange="calcPFM()"><option value="0">Sin dcto</option><option value="15">15% Asesor</option><option value="25">25% Supervisor</option></select></div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="result-pfm" class="cfg-section" style="display:none;"></div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">📋</span> Tarifas por tramo (UF/RUT)</h3>'+
+      '<div class="tbl"><table><thead><tr><th>RUTs</th><th>Semanal</th><th>Quincenal</th><th>Mensual</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '</div>'+
+  '</div>';
+}
+
+function leftPC(){
+  return '<div class="cfg">'+
+    '<div class="prod-headline"><div class="prod-name">🤝 Partner Check</div><span class="prod-badge">PROVEEDORES</span></div>'+
+    '<div style="height:10px;"></div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">🧮</span> Calcular</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Tamaño empresa</label><select id="pc-s" onchange="calcPC()"><option value="6">Micro — 6 UF/año</option><option value="9">Pequeña — 9 UF/año</option><option value="23">Mediana/Grande — 23 UF/año</option></select></div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="result-pc" class="cfg-section" style="display:none;"></div>'+
+    '<div class="alerta"><b>Contrato:</b> 12 meses · Evaluación en 30 min · Cloud 24/7 · Marketplace licitaciones</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">✅</span> Beneficios incluidos</h3>'+
+      '<div class="benefits-grid">'+PITEMS.pc.map(function(i){return'<div class="bitem"><span class="bi-check">✔</span>'+i+'</div>';}).join('')+
+    '</div></div>'+
+  '</div>';
+}
+
+function leftUF(){
+  return '<div class="cfg">'+
+    '<div class="prod-headline"><div class="prod-name">⇄ Conversor UF / CLP</div><span class="prod-badge">HERRAMIENTA</span></div>'+
+    '<div style="height:10px;"></div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">🔄</span> UF → Pesos</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Valor en UF</label><input type="number" id="uf-i" value="1" step="0.0001"></div>'+
+        '<button class="calc-btn" onclick="cUF()">Convertir</button>'+
+      '</div>'+
+      '<div id="res-uf" style="margin-top:10px;"></div>'+
+    '</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">🔄</span> Pesos → UF</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Valor en $CLP</label><input type="number" id="clp-i" value="100000" step="1000"></div>'+
+        '<button class="calc-btn" onclick="cCLP()">Convertir</button>'+
+      '</div>'+
+      '<div id="res-clp" style="margin-top:10px;"></div>'+
+    '</div>'+
+    '<div class="cfg-section">'+
+      '<h3><span class="s-icon">💼</span> Comisión por venta</h3>'+
+      '<div class="field-row">'+
+        '<div class="f"><label>Venta total (UF)</label><input type="number" id="com-u" value="200"></div>'+
+        '<div class="f"><label>Comisión %</label><input type="number" id="com-p" value="0.5" step="0.1"></div>'+
+        '<button class="calc-btn" onclick="cCom()">Calcular</button>'+
+      '</div>'+
+      '<div id="res-com" style="margin-top:10px;"></div>'+
+    '</div>'+
+  '</div>';
+}
+
+// ══════════════════════════════════════════════
+// CALC FUNCTIONS — render result block
+// ══════════════════════════════════════════════
+function buildResultBlock(d){
+  var ufL=d.ufLista||d.uf||0,ufV=d.ufVenta||d.uf||0;
+  var hayDc=ufL>0&&ufV<ufL;
+  var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
+  var slMin=(ufL>0?ufL*0.4:ufV*0.4);
+  var id=d.tipo||'res';
+
+  // Store quote data
+  STATE.currentQuote={
+    prod:d.prod,tipo:d.tipo,uf:ufV,ufL:ufL,
+    cons:d.cons||0,meta:d.meta||'',plazo:d.plazo||'12',
+    fecha:hoy(),ufUsada:getUF(),
+    ejecutivo:_lsGet('eq_exec_name')||'',
+    ejecutivoTel:_lsGet('eq_exec_tel')||'',
+    ejecutivoEmail:_lsGet('eq_exec_email')||''
+  };
+
+  var html=
+    '<div style="margin-bottom:6px;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--rl);">'+d.prod+'</div>'+
+    '<div class="r-price">'+ufV+' UF/mes</div>'+
+    '<div class="r-sub">'+fmtN(ufc(ufV))+' mensual con IVA</div>'+
+    (hayDc?'<div style="font-size:.88rem;color:var(--gn);font-weight:700;margin-top:4px;">−'+dc+'% descuento</div>':'')+
+    (d.extra||'')+
+    '<div class="r-grid">'+
+      '<div class="r-item"><div class="ril">Precio lista</div><div class="riv y">'+ufL+' UF</div></div>'+
+      '<div class="r-item"><div class="ril">Precio venta</div><div class="riv gn">'+ufV+' UF</div></div>'+
+      '<div class="r-item"><div class="ril">Dcto.</div><div class="riv '+(hayDc?'gn':'')+'">'+( hayDc?'−'+dc+'%':'—')+'</div></div>'+
+      '<div class="r-item"><div class="ril">Mensual c/IVA</div><div class="riv bl">'+fmtN(ufc(ufV))+'</div></div>'+
+      '<div class="r-item"><div class="ril">Anual UF</div><div class="riv or">'+(ufV*12).toFixed(1)+' UF</div></div>'+
+      '<div class="r-item"><div class="ril">Anual CLP</div><div class="riv or">'+fmtN(ufc(ufV)*12)+'</div></div>'+
+    '</div>'+
+    '<div class="slider-wrap">'+
+      '<div class="sw-title">🎛 Ajustar precio de venta</div>'+
+      '<div class="sw-row">'+
+        '<input type="range" id="sl-'+id+'" min="'+slMin.toFixed(4)+'" max="'+(ufL*1.5).toFixed(4)+'" step="0.1" value="'+ufV+'" oninput="updSl(\''+id+'\','+ufL+',this.value)">'+
+        '<input type="number" id="sln-'+id+'" value="'+ufV+'" min="0.0001" step="0.1" oninput="updSlN(\''+id+'\','+ufL+',this.value)">'+
+      '</div>'+
+      '<div class="r-grid" style="margin-top:6px;">'+
+        '<div class="r-item"><div class="ril">$/mes c/IVA</div><div class="riv bl" id="sl-c-'+id+'">'+fmtN(ufc(ufV))+'</div></div>'+
+        '<div class="r-item"><div class="ril">Descuento</div><div class="riv gn" id="sl-d-'+id+'">'+(hayDc?'−'+dc+'%':'—')+'</div></div>'+
+        '<div class="r-item"><div class="ril">Precio lista</div><div class="riv y">'+ufL+' UF</div></div>'+
+      '</div>'+
+    '</div>'+
+    // Benefits
+    '<div style="margin-top:10px;"><div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--rl);margin-bottom:6px;">Beneficios incluidos</div>'+
+    '<div class="benefits-grid">'+
+      (PITEMS[d.tipo]||[]).map(function(i){return'<div class="bitem"><span class="bi-check">✔</span>'+i+'</div>';}).join('')+
+    '</div></div>';
+
+  return html;
+}
+
+function showResult(boxId,d){
+  var box=document.getElementById(boxId);if(!box)return;
+  box.style.display='block';
+  box.innerHTML='<h3 style="margin-bottom:10px;"><span class="s-icon">📌</span> Resultado</h3>'+buildResultBlock(d);
+  scheduleAutoGen(60);
+}
+
+function updSl(id,ufL,v){
+  v=parseFloat(v);document.getElementById('sln-'+id).value=v;
+  var h=ufL>0&&v<ufL,dc=h?Math.round((1-v/ufL)*100):0;
+  var cc=document.getElementById('sl-c-'+id);if(cc)cc.textContent=fmtN(ufc(v));
+  var cd=document.getElementById('sl-d-'+id);if(cd)cd.textContent=h?'−'+dc+'%':'—';
+  if(STATE.currentQuote){STATE.currentQuote.uf=v;STATE.currentQuote.ufL=ufL;}
+  scheduleAutoGen(200);
+}
+function updSlN(id,ufL,v){v=parseFloat(v);if(isNaN(v)||v<0)return;var sl=document.getElementById('sl-'+id);if(sl)sl.value=v;updSl(id,ufL,v);}
+
+function calcBundle(){
+  var mc=document.getElementById('b-mc');var ri=document.getElementById('b-ri');
+  if(!mc||!ri)return;
+  var mcv=mc.value;var riv=parseInt(ri.value);
+  var t=mcv==='4100'?B4100:BILIM;
+  var row=t.find(function(r){return r.r===riv;})||t[0];
+  showResult('result-bundle',{prod:'Bundle MC '+(mcv==='4100'?'4100':'Ilimitado')+' + '+riv+' RI',tipo:mcv==='4100'?'bundle4100':'bundleIlim',ufLista:row.u,ufVenta:row.u,cons:riv,plazo:'12',meta:'P. anticipado '+row.p+' UF · 12 meses',extra:'<div style="font-size:.74rem;color:var(--wa);margin-top:4px;">Pago anticipado: <b style="color:var(--y);">'+row.p+' UF</b> → '+fmtN(ufc(row.p))+'</div>'});
+}
+function calcMC(){
+  var mcp=document.getElementById('mc-p');var mcd=document.getElementById('mc-d');
+  if(!mcp||!mcd)return;
+  var ufL=parseFloat(mcp.value);var dc=parseInt(mcd.value);
+  var ufV=ufL*(1-dc/100);
+  var pl=MC_P.find(function(p){return p.u===ufL;})||MC_P[0];
+  showResult('result-mc',{prod:pl.lbl,tipo:'mc_solo',ufLista:ufL,ufVenta:ufV,plazo:'12',meta:'P.anticip '+pl.p+' UF'+(dc?' · Dcto '+dc+'%':''),extra:'<div style="font-size:.74rem;color:var(--wa);margin-top:4px;">Pago anticipado: <b style="color:var(--y);">'+pl.p+' UF</b> → '+fmtN(ufc(pl.p))+'</div>'});
+}
+function calcRI(){
+  var sel=document.getElementById('ri-c');var rid=document.getElementById('ri-d');
+  if(!sel||!rid)return;
+  var ufL=parseFloat(sel.value);
+  var cons=parseInt(sel.options[sel.selectedIndex].dataset.c)||20;
+  var dc=parseInt(rid.value);
+  var ufV=ufL*(1-dc/100);
+  showResult('result-ri',{prod:'RI '+cons+' consultas/mes',tipo:'ri_plan',ufLista:ufL,ufVenta:ufV,cons:cons,plazo:'12',meta:cons+' consultas · 12 meses'+(dc?' · Dcto '+dc+'%':''),extra:'<div style="font-size:.74rem;color:var(--wa);margin-top:4px;">UF/consulta lista: <b style="color:var(--y);">'+(ufL/cons).toFixed(6)+' UF</b></div>'});
+}
+function calcBolsa(){
+  var sel=document.getElementById('bls-c');if(!sel)return;
+  var ufL=parseFloat(sel.value);
+  var cons=parseInt(sel.options[sel.selectedIndex].dataset.c)||20;
+  showResult('result-bolsa',{prod:'RI Bolsa '+cons+' consultas',tipo:'ri_plan',ufLista:ufL,ufVenta:ufL,cons:cons,plazo:'12',meta:'Pago único 12m',extra:'<div style="font-size:.74rem;color:var(--wa);margin-top:4px;">UF/consulta: <b style="color:var(--y);">'+(ufL/cons).toFixed(4)+' UF</b></div>'});
+}
+function calcPFM(){
+  var fr=document.getElementById('pfm-fr');var rr2=document.getElementById('pfm-r');var pd=document.getElementById('pfm-d');
+  if(!fr||!rr2||!pd)return;
+  var frv=fr.value;var ruts=parseInt(rr2.value)||10;var dc=parseInt(pd.value);
+  var tar=pfmT(frv,ruts);
+  var ufL=tar*ruts,ufV=ufL*(1-dc/100);
+  var lbl={s:'Semanales',q:'Quincenales',m:'Mensuales'};
+  showResult('result-pfm',{prod:'PFM '+lbl[frv]+' '+ruts+' RUTs',tipo:'pfm',ufLista:ufL,ufVenta:ufV,plazo:'12',meta:ruts+' RUTs · '+lbl[frv]+(dc?' · Dcto '+dc+'%':''),extra:'<div style="font-size:.74rem;color:var(--wa);margin-top:4px;">Tarifa: <b style="color:var(--y);">'+tar+' UF/rut</b></div>'});
+}
+function calcPC(){
+  var pcs=document.getElementById('pc-s');if(!pcs)return;
+  var ufL=parseFloat(pcs.value);
+  var lbls={6:'Micro',9:'Pequeña',23:'Mediana/Grande'};
+  showResult('result-pc',{prod:'Partner Check — '+lbls[ufL],tipo:'pc',ufLista:ufL,ufVenta:ufL,plazo:'12',meta:'Pago anual · 12 meses',extra:'<div style="font-size:.74rem;color:var(--wa);margin-top:4px;">Mensualizado: <b style="color:var(--y);">'+(ufL/12).toFixed(4)+' UF/mes</b> → '+fmtN(ufc(ufL/12))+'/mes</div>'});
+}
+
+// UF converter
+function cUF(){var u=parseFloat(document.getElementById('uf-i').value)||0;document.getElementById('res-uf').innerHTML='<div class="alerta"><b>'+u+' UF</b> sin IVA = <b style="color:var(--bl);">'+fmtN(ufn(u))+'</b><br><b>'+u+' UF</b> con IVA = <b style="color:var(--gn);">'+fmtN(ufc(u))+'</b></div>';}
+function cCLP(){var c=parseFloat(document.getElementById('clp-i').value)||0;document.getElementById('res-clp').innerHTML='<div class="alerta">'+fmtN(c)+' = <b style="color:var(--y);">'+(c/getUF()).toFixed(6)+' UF</b></div>';}
+function cCom(){var v=parseFloat(document.getElementById('com-u').value)||0,p=parseFloat(document.getElementById('com-p').value)||0,c=v*(p/100);document.getElementById('res-com').innerHTML='<div class="alerta">Venta <b>'+v+' UF</b> · Comisión <b>'+p+'%</b> = <b style="color:var(--y);">'+fmtN(ufn(c))+'</b> sin IVA</div>';}
+
+// ══════════════════════════════════════════════
+// EXEC DATA
+// ══════════════════════════════════════════════
+function loadExec(){
+  var sn=_lsGet('eq_exec_name'),st2=_lsGet('eq_exec_tel'),se=_lsGet('eq_exec_email');
+  var today=new Date().toDateString();
+  if(sn){
+    var ma=document.getElementById('ma');if(ma)ma.value=sn;
+    var mf=document.getElementById('mf');if(mf&&st2)mf.value=st2;
+    var ml=document.getElementById('ml');if(ml&&se)ml.value=se;
+    var nd=document.getElementById('exec-name-display');if(nd)nd.textContent='👤 '+sn;
+    updWspLink();
+  } else {
+    setTimeout(function(){
+      var nombre=prompt('👤 ¿Cuál es tu nombre como ejecutivo/a?\n(Se guardará para esta sesión)','');
+      if(nombre&&nombre.trim()){
+        _lsSet('eq_exec_name',nombre.trim());_lsSet('eq_exec_date',today);
+        var tel=prompt('📱 ¿Tu número WhatsApp/Tel? (opcional):','');
+        if(tel&&tel.trim())_lsSet('eq_exec_tel',tel.trim());
+        var email=prompt('✉ ¿Tu email? (opcional):','');
+        if(email&&email.trim())_lsSet('eq_exec_email',email.trim());
+        var ma2=document.getElementById('ma');if(ma2)ma2.value=nombre.trim();
+        var mf2=document.getElementById('mf');if(mf2&&tel&&tel.trim())mf2.value=tel.trim();
+        var ml2=document.getElementById('ml');if(ml2&&email&&email.trim())ml2.value=email.trim();
+        var nd2=document.getElementById('exec-name-display');if(nd2)nd2.textContent='👤 '+nombre.trim();
+        updWspLink();
+        scheduleAutoGen(200);
+      }
+    },1000);
+  }
+}
+
+function saveExecField(){
+  var ma=document.getElementById('ma'),mf=document.getElementById('mf'),ml=document.getElementById('ml');
+  if(ma&&ma.value.trim()){_lsSet('eq_exec_name',ma.value.trim());var nd=document.getElementById('exec-name-display');if(nd)nd.textContent='👤 '+ma.value.trim();}
+  if(mf)_lsSet('eq_exec_tel',mf.value.trim());
+  if(ml)_lsSet('eq_exec_email',ml.value.trim());
+  updWspLink();
+  scheduleAutoGen(300);
+}
+
+function resetExec(){
+  if(!confirm('¿Cambiar tus datos de ejecutivo/a?'))return;
+  try{['eq_exec_name','eq_exec_tel','eq_exec_email','eq_exec_date'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
+  var ma=document.getElementById('ma'),mf=document.getElementById('mf'),ml=document.getElementById('ml');
+  if(ma)ma.value='';if(mf)mf.value='';if(ml)ml.value='';
+  var nd=document.getElementById('exec-name-display');if(nd)nd.textContent='👤 Sin nombre';
+  updWspLink();toast('Datos borrados. Recarga para ingresar nuevamente.','ok');
+}
+
+function updWspLink(){
+  var mf=document.getElementById('mf'),row=document.getElementById('wsp-link-row'),lnk=document.getElementById('wsp-link');
+  if(!mf||!row||!lnk)return;
+  var tel=mf.value.trim().replace(/\s+/g,'').replace(/[^+\d]/g,'');
+  if(tel.length>=8){lnk.href='https://wa.me/'+tel.replace(/^\+/,'');row.style.display='block';}
+  else row.style.display='none';
+}
+
+// ══════════════════════════════════════════════
+// AUTO-GEN TEMPLATES
+// ══════════════════════════════════════════════
+var _autoGenTimer=null;
+function scheduleAutoGen(ms){
+  clearTimeout(_autoGenTimer);
+  _autoGenTimer=setTimeout(function(){genMail();},ms!==undefined?ms:280);
+}
+
+function genMail(){
+  var q=STATE.currentQuote;
+  var tipo=q?q.tipo:'bundle4100';
+  if(!tipo)return;
+
+  var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
+  var n=skip?'Cliente':gv('mn')||'Sr./Sra. [Nombre]';
+  var em=skip?'':gv('me')||'';
+  var as2=gv('ma')||'[Asesor]',fo=gv('mf')||'',ml2=gv('ml')||'';
+
+  updWspLink();
+  var telNum=fo.trim().replace(/\s+/g,'').replace(/[^+\d]/g,'');
+
+  var ufV=q?q.uf:2.5,ufL=q?q.ufL:2.5;
+  if(!ufV)ufV=2.5;if(!ufL)ufL=ufV;
+  var co=q?q.cons:10,pl=q?q.plazo:'12';
+
+  var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'[Producto]'};
+  var it=PITEMS[tipo]||[];
+  var hayDc=ufL&&ufV&&ufV<ufL;
+  var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
+  var clp=ufV?ufc(ufV):null;
+
+  // ── WSP CARD ──
+  var wspCard=
+    '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:18px 20px 14px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
+        '<div>'+
+          '<img src="logo-equifax.png" alt="Equifax" style="height:44px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
+          '<div style="font-size:.5rem;letter-spacing:3px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:3px;">Chile · Soluciones Empresariales</div>'+
+        '</div>'+
+        '<div style="text-align:right;">'+
+          '<div style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:3px 10px;border-radius:12px;font-size:.6rem;font-weight:700;letter-spacing:1px;">'+pi.badge+'</div>'+
+          '<div style="font-size:.55rem;color:rgba(255,255,255,.3);margin-top:4px;">'+hoy()+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    (em?'<div style="background:#12060a;padding:12px 20px;border-bottom:1px solid rgba(155,28,46,.2);">'+
+      '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Propuesta para</div>'+
+      '<div style="font-size:1.1rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;">'+em+'</div>'+
+    '</div>':'')+
+    '<div style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:12px 20px;">'+
+      '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Producto cotizado</div>'+
+      '<div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.3;">'+pi.n+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">'+
+      it.map(function(i){return'<div style="font-size:.75rem;color:#ccc;padding:4px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:6px;"><span style="color:#9b1c2e;font-weight:900;flex-shrink:0;">✔</span>'+i+'</div>';}).join('')+
+      '</div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:14px 20px;">'+
+      '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Cargo fijo mensual</div>'+
+      '<div style="font-size:2.2rem;font-weight:900;color:#f0c040;line-height:1;">'+(ufV?ufV+' UF + IVA':'—')+'</div>'+
+      (clp?'<div style="font-size:.72rem;color:#888;margin-top:6px;">aprox. '+fmtN(clp)+' mensual con IVA</div>':'')+
+      (hayDc?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:7px;padding:8px 14px;display:flex;align-items:center;gap:12px;"><span style="font-size:1.7rem;font-weight:900;color:#2ecc71;">−'+dc+'%</span><div><div style="font-size:.68rem;color:#888;text-decoration:line-through;">Lista: '+ufL+' UF</div><div style="font-size:.72rem;color:#bbb;">Precio final: '+ufV+' UF</div></div></div>':'')+
+    '</div>'+
+    '<div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:10px 20px;display:flex;gap:20px;flex-wrap:wrap;">'+
+      '<div><div style="font-size:.48rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:2px;">Contrato</div><div style="font-size:.85rem;font-weight:700;color:#fff;">'+pl+' meses</div></div>'+
+      '<div><div style="font-size:.48rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:2px;">Modalidad</div><div style="font-size:.78rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
+      '<div><div style="font-size:.48rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:2px;">Documentos</div><div style="font-size:.68rem;color:#aaa;">Ficha · Cédula · Escritura</div></div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
+      '<div>'+
+        '<div style="font-size:.48rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:2px;">Ejecutivo/a Comercial</div>'+
+        '<div style="font-size:.88rem;font-weight:700;color:#fff;">'+as2+'</div>'+
+        (fo||ml2?'<div style="font-size:.7rem;color:#3498db;margin-top:2px;">'+(fo||'')+(fo&&ml2?' · ':'')+ml2+'</div>':'')+
+      '</div>'+
+      '<div style="font-size:.55rem;color:#333;">Valores + IVA</div>'+
+    '</div>';
+
+  sv('wsp-card-preview',wspCard);
+  sv('pc-card-preview',wspCard);
+
+  // ── ASUNTO ──
+  var aEmp=(em?' | '+em:'');
+  var asunto='Propuesta Comercial Equifax — '+pi.n+aEmp;
+  st('tpl-asunto',asunto);
+  st('tpl-asunto-out',asunto);
+
+  // ── TEXTO WA ──
+  var encab2='';if(!skip&&em)encab2='*'+em+'*\n\n';
+  var txt=encab2+
+    'Muy buenos días *'+n+'*,\n\n'+
+    'Junto con saludar, le presento la siguiente propuesta:\n\n'+
+    '━━━━━━━━━━━━━━━━━━━━\n'+
+    '*'+pi.n+'*\n'+
+    '━━━━━━━━━━━━━━━━━━━━\n\n'+
+    it.map(function(x){return'✔ '+x;}).join('\n')+'\n\n'+
+    '━━━━━━━━━━━━━━━━━━━━\n*CONDICIONES*\n━━━━━━━━━━━━━━━━━━━━\n\n'+
+    (hayDc?'~Precio lista: '+ufL+' UF + IVA~\n':'')+
+    '*Precio ofrecido:* '+(ufV?'*'+ufV+' UF* + IVA':'[X] UF + IVA')+'\n'+
+    (clp?'💰 _Aprox. '+fmtN(clp)+' mensual c/IVA_\n':'')+
+    (hayDc?'🎯 *Descuento: −'+dc+'%*\n':'')+
+    '📅 Plazo: *'+pl+' meses*\n'+
+    '💳 Modalidad: _POSTPAGO · 30 días_\n'+
+    (co&&(tipo.indexOf('ri')>=0||tipo.indexOf('bundle')>=0)?'📊 Consultas RI/mes: *'+co+'*\n':'')+
+    '\n━━━━━━━━━━━━━━━━━━━━\n*DOCUMENTOS*\n━━━━━━━━━━━━━━━━━━━━\n\n'+
+    '1️⃣ Ficha de contratación\n2️⃣ Cédula representante legal\n3️⃣ Escritura con poderes de firma\n\n'+
+    'Quedo a su disposición 🤝\n\n—\n'+
+    '*'+as2+'*\n_Ejecutivo/a Comercial · Equifax Chile_\n'+
+    (fo?'📱 '+fo+'\n':'')+(ml2?'✉ '+ml2+'\n':'');
+  document.getElementById('tpl-body').value=txt;
+
+  // ── GMAIL HTML ──
+  var _listaItems=it.map(function(item){
+    return'<tr>'+
+      '<td valign="top" width="20" style="font-size:13px;color:#9b1c2e;font-weight:900;padding:5px 6px 5px 0;font-family:Arial,sans-serif;">&#10003;</td>'+
+      '<td style="font-size:13px;color:#333333;line-height:1.5;padding:5px 0;font-family:Arial,sans-serif;">'+item+'</td>'+
+    '</tr>';
+  }).join('');
+
+  var _htmlGmail=
+    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:620px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
+    '<div style="background:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:22px 26px 18px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td valign="middle"><img src="logo-equifax.png" alt="Equifax" width="320" height="auto" style="display:block;max-height:100px;width:auto;"/><div style="margin-top:5px;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.55);text-transform:uppercase;font-family:Arial,sans-serif;">Chile &middot; Soluciones Empresariales</div></td>'+
+        '<td valign="top" align="right"><div style="display:inline-block;background:rgba(0,0,0,.35);border:1px solid rgba(240,192,64,.6);border-radius:20px;padding:5px 14px;"><span style="font-size:10px;font-weight:800;color:#f0c040;letter-spacing:1.5px;font-family:Arial,sans-serif;">'+pi.badge+'</span></div><div style="margin-top:7px;font-size:10px;color:rgba(255,255,255,.5);font-family:Arial,sans-serif;text-align:right;">'+hoy()+'</div></td>'+
+      '</tr></table></div>'+
+    '<div style="background:#1a1218;padding:18px 26px;border-bottom:3px solid #9b1c2e;">'+
+      (em?'<div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#9b4455;font-family:Arial,sans-serif;margin-bottom:5px;">Propuesta para</div><div style="font-size:20px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'+(n&&!skip?'<div style="margin-top:5px;font-size:13px;color:#ccbbbb;font-family:Arial,sans-serif;">A/A: '+n+'</div>':''):
+      '<div style="font-size:14px;color:#ddcccc;font-family:Arial,sans-serif;">Estimado/a <strong style="color:#ffffff;">'+(skip?'Cliente':n)+'</strong>,</div><div style="margin-top:5px;font-size:13px;color:#aaa;font-family:Arial,sans-serif;">Le presento la siguiente propuesta comercial:</div>')+
+    '</div>'+
+    '<div style="background:#ffffff;padding:20px 26px;border-left:5px solid #9b1c2e;">'+
+      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:5px;">Producto cotizado</div>'+
+      '<div style="font-size:17px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:10px;border-bottom:2px solid #9b1c2e;margin-bottom:12px;">'+pi.n+'</div>'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+_listaItems+'</table>'+
+    '</div>'+
+    '<div style="background:linear-gradient(135deg,#5a0e1a 0%,#7a1425 60%,#9b1c2e 100%);padding:20px 26px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+        (hayDc?'<tr><td style="font-size:11px;color:#ddaaaa;font-family:Arial,sans-serif;padding:3px 0;">Precio lista</td><td align="right" style="font-size:11px;color:#ddaaaa;text-decoration:line-through;font-family:Arial,sans-serif;padding:3px 0;">'+ufL+' UF + IVA</td></tr>':'')+
+        '<tr><td style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,220,220,.9);font-family:Arial,sans-serif;padding:7px 0 3px;vertical-align:bottom;">Precio ofrecido</td><td align="right" style="padding:5px 0 3px;vertical-align:bottom;"><span style="font-size:32px;font-weight:900;color:#f0c040;font-family:Arial,sans-serif;line-height:1;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</span></td></tr>'+
+        (clp?'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Aprox. mensual con IVA</td><td align="right" style="font-size:13px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;padding:2px 0;">'+fmtN(clp)+'</td></tr>':'')+
+        (hayDc?'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Descuento aplicado</td><td align="right" style="font-size:13px;font-weight:800;color:#4ade80;font-family:Arial,sans-serif;padding:2px 0;">&#8722;'+dc+'% sobre precio lista</td></tr>':'')+
+        '<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:7px 0 2px;">Plazo / Modalidad</td><td align="right" style="font-size:12px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:7px 0 2px;">'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</td></tr>'+
+      '</table></div>'+
+    '<div style="background:#fffdf5;padding:12px 26px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
+      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:4px;">Documentos para contratar</div>'+
+      '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma</div>'+
+    '</div>'+
+    '<div style="background:#120810;padding:18px 26px;border-top:3px solid #9b1c2e;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td valign="top"><div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#666;font-family:Arial,sans-serif;margin-bottom:4px;">Ejecutivo/a Comercial</div><div style="font-size:16px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+as2+'</div><div style="margin-top:2px;font-size:11px;color:#c8960a;font-family:Arial,sans-serif;">Equifax Chile</div>'+(fo?'<div style="margin-top:5px;font-size:12px;color:#90d490;font-family:Arial,sans-serif;">&#128241; '+fo+'</div>':'')+(ml2?'<div style="margin-top:2px;font-size:12px;color:#90b8d4;font-family:Arial,sans-serif;">&#9993; '+ml2+'</div>':'')+'</td>'+
+        '<td valign="bottom" align="right"><div style="font-size:10px;color:#555;font-family:Arial,sans-serif;">'+hoy()+'</div><div style="margin-top:2px;font-size:10px;color:#444;font-family:Arial,sans-serif;">Valores en UF + IVA</div></td>'+
+      '</tr></table></div>'+
+    '<div style="background:#0d060a;padding:9px 26px;text-align:center;border-top:1px solid #2a1420;"><div style="font-size:9px;color:#444;font-family:Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;">Equifax Chile &middot; Informaci&oacute;n confidencial &middot; Solo para el destinatario autorizado</div></div>'+
+    '</div>';
+
+  sv('tpl-rich-gmail',_htmlGmail);
+  sv('tpl-rich',_htmlGmail);
+
+  // ── OUTLOOK HTML ──
+  var _listaItemsOut=it.map(function(item){
+    return'<tr>'+
+      '<td valign="top" width="22" style="font-size:13px;color:#9b1c2e;font-weight:900;padding:5px 6px 5px 0;font-family:Arial,sans-serif;">&#10003;</td>'+
+      '<td style="font-size:13px;color:#111111;line-height:1.5;padding:5px 0;border-bottom:1px solid #e8e0e4;font-family:Arial,sans-serif;">'+item+'</td>'+
+    '</tr>';
+  }).join('');
+
+  var _htmlOutlook=
+    '<table width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="font-family:Arial,Helvetica,sans-serif;width:600px;border-collapse:collapse;">'+
+    '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:4px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
+    '<tr><td bgcolor="#5a0e1a" style="background-color:#5a0e1a;padding:20px 22px 18px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
+        '<td valign="middle"><img src="logo-equifax.png" alt="Equifax" width="240" height="auto" style="display:block;max-height:78px;border:0;outline:none;text-decoration:none;"/><p style="margin:5px 0 0;font-size:8px;letter-spacing:3px;color:#ffffff;text-transform:uppercase;font-family:Arial,sans-serif;line-height:1;">CHILE &nbsp;&middot;&nbsp; SOLUCIONES EMPRESARIALES</p></td>'+
+        '<td valign="middle" align="right"><table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr><td bgcolor="#f0c040" style="background-color:#f0c040;padding:7px 14px;"><p style="margin:0;font-size:10px;font-weight:900;color:#2a1500;letter-spacing:1.5px;font-family:Arial,sans-serif;text-transform:uppercase;white-space:nowrap;">'+pi.badge+'</p></td></tr><tr><td align="right" style="padding-top:6px;"><p style="margin:0;font-size:10px;color:#ffffff;font-family:Arial,sans-serif;">'+hoy()+'</p></td></tr></table></td>'+
+      '</tr></table></td></tr>'+
+    '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
+    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;border-left:6px solid #9b1c2e;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:20px 20px 18px 16px;">'+
+        '<p style="margin:0 0 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">PROPUESTA PREPARADA PARA</p>'+
+        (em?'<p style="margin:0;font-size:20px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;padding-bottom:9px;border-bottom:2px solid #eeeeee;">'+em+'</p>'+(n&&!skip?'<p style="margin:7px 0 0;font-size:12px;color:#444444;font-family:Arial,sans-serif;">A/A: <strong style="color:#111111;">'+n+'</strong></p>':''):
+        '<p style="margin:0;font-size:13px;color:#111111;font-family:Arial,sans-serif;">Estimado/a <strong>'+(skip?'Cliente':n)+'</strong>,</p><p style="margin:6px 0 0;font-size:12px;color:#444444;font-family:Arial,sans-serif;">Le presento la siguiente propuesta comercial:</p>')+
+      '</td></tr></table></td></tr>'+
+    '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:0;border-left:6px solid #9b1c2e;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:20px 20px 18px 16px;">'+
+        '<p style="margin:0 0 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">PRODUCTO COTIZADO</p>'+
+        '<p style="margin:0 0 12px;font-size:17px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.3;padding-bottom:9px;border-bottom:2px solid #9b1c2e;">'+pi.n+'</p>'+
+        '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+_listaItemsOut+'</table>'+
+      '</td></tr></table></td></tr>'+
+    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
+    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:20px 20px 18px 20px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
+        (hayDc?'<tr><td style="font-size:11px;color:#888888;font-family:Arial,sans-serif;padding:0 0 3px;">Precio lista</td><td align="right" style="font-size:11px;color:#999999;text-decoration:line-through;font-family:Arial,sans-serif;padding:0 0 3px;">'+ufL+' UF + IVA</td></tr>':'')+
+        '<tr><td style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;padding:3px 0;vertical-align:bottom;">PRECIO OFRECIDO</td><td align="right" style="padding:3px 0;vertical-align:bottom;"><span style="font-size:34px;font-weight:900;color:#9b1c2e;font-family:Arial,sans-serif;line-height:1;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</span></td></tr>'+
+        '<tr><td colspan="2" bgcolor="#eeeeee" style="background-color:#eeeeee;height:1px;padding:0;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
+        (clp?'<tr><td style="font-size:11px;color:#666666;font-family:Arial,sans-serif;padding:7px 0 3px;">Aprox. mensual con IVA</td><td align="right" style="font-size:14px;font-weight:700;color:#111111;font-family:Arial,sans-serif;padding:7px 0 3px;">'+fmtN(clp)+'</td></tr>':'')+
+        (hayDc?'<tr><td style="font-size:11px;color:#666666;font-family:Arial,sans-serif;padding:3px 0;">Descuento aplicado</td><td align="right" style="padding:3px 0;"><table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr><td bgcolor="#e8f5ee" style="background-color:#e8f5ee;padding:4px 10px;border:1px solid #2ecc71;"><span style="font-size:12px;font-weight:900;color:#1a7a40;font-family:Arial,sans-serif;">&#8722;'+dc+'% sobre precio lista</span></td></tr></table></td></tr>':'')+
+        '<tr><td colspan="2" bgcolor="#eeeeee" style="background-color:#eeeeee;height:1px;padding:0;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
+        '<tr><td style="font-size:11px;color:#666666;font-family:Arial,sans-serif;padding:7px 0 2px;">Plazo / Modalidad</td><td align="right" style="font-size:12px;font-weight:700;color:#111111;font-family:Arial,sans-serif;padding:7px 0 2px;">'+pl+' meses &nbsp;&middot;&nbsp; POSTPAGO 30 d&iacute;as</td></tr>'+
+      '</table></td></tr>'+
+    '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
+    '<tr><td bgcolor="#fdf8f0" style="background-color:#fdf8f0;padding:0;border-left:6px solid #c8960a;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#fdf8f0" style="background-color:#fdf8f0;padding:14px 20px 12px 16px;">'+
+        '<p style="margin:0 0 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#8a6010;font-family:Arial,sans-serif;font-weight:900;">DOCUMENTOS PARA CONTRATAR</p>'+
+        '<p style="margin:0;font-size:12px;color:#1a1200;font-family:Arial,sans-serif;line-height:1.8;">&#9656;&nbsp;Ficha de contrataci&oacute;n&nbsp;&nbsp;&#9656;&nbsp;C&eacute;dula representante legal&nbsp;&nbsp;&#9656;&nbsp;Escritura con poderes de firma</p>'+
+      '</td></tr></table></td></tr>'+
+    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
+    '<tr><td bgcolor="#f0ecee" style="background-color:#f0ecee;padding:18px 20px 16px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
+        '<td valign="top"><p style="margin:0 0 2px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">EJECUTIVO/A COMERCIAL</p><p style="margin:0;font-size:17px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;">'+as2+'</p><p style="margin:2px 0 0;font-size:11px;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1px;">EQUIFAX CHILE</p>'+(fo?'<p style="margin:7px 0 0;font-size:12px;color:#111111;font-family:Arial,sans-serif;font-weight:700;">&#128241; '+fo+'</p>':'')+(ml2?'<p style="margin:2px 0 0;font-size:12px;color:#1a3a5a;font-family:Arial,sans-serif;">&#9993; '+ml2+'</p>':'')+'</td>'+
+        '<td valign="bottom" align="right"><p style="margin:0;font-size:10px;color:#555555;font-family:Arial,sans-serif;font-weight:700;">'+hoy()+'</p><p style="margin:2px 0 0;font-size:10px;color:#888888;font-family:Arial,sans-serif;">Valores en UF + IVA</p></td>'+
+      '</tr></table></td></tr>'+
+    '<tr><td bgcolor="#5a0e1a" style="background-color:#5a0e1a;padding:9px 20px;text-align:center;"><p style="margin:0;font-size:9px;color:#ffffff;font-family:Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;">Equifax Chile &nbsp;&middot;&nbsp; Informaci&oacute;n confidencial &nbsp;&middot;&nbsp; Solo para el destinatario autorizado</p></td></tr>'+
+    '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:4px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
+    '</table>';
+
+  sv('tpl-rich-outlook',_htmlOutlook);
+
+  var st2=document.getElementById('auto-status');
+  if(st2){
+    var tt=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    st2.style.color='#2ecc71';st2.textContent='✔ Actualizado · '+tt;
+  }
+}
+
+// ══════════════════════════════════════════════
+// COPY FUNCTIONS
+// ══════════════════════════════════════════════
+function copAsunto(){navigator.clipboard.writeText(document.getElementById('tpl-asunto').textContent).then(function(){toast('✔ Asunto copiado','ok');});}
+function copPlano(){navigator.clipboard.writeText(document.getElementById('tpl-body').value).then(function(){toast('✔ Texto WhatsApp copiado','ok');}).catch(function(){toast('✖ Copia manualmente','err');});}
+function copHTMLGmail(){var el=document.getElementById('tpl-rich-gmail');if(!el)return;_copHTMLEl(el,'📋 Plantilla Gmail copiada');}
+function copHTMLOutlook(){var el=document.getElementById('tpl-rich-outlook');if(!el)return;_copHTMLEl(el,'📋 Plantilla Outlook copiada');}
+function _copHTMLEl(el,msg){
+  try{
+    if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+      var bH=new Blob([el.innerHTML],{type:'text/html'}),bT=new Blob([el.innerText||''],{type:'text/plain'});
+      navigator.clipboard.write([new ClipboardItem({'text/html':bH,'text/plain':bT})])
+        .then(function(){toast(msg,'ok');})
+        .catch(function(){_copHTMLFallback(el,msg);});
+    }else _copHTMLFallback(el,msg);
+  }catch(e){_copHTMLFallback(el,msg);}
+}
+function _copHTMLFallback(el,msg){
+  var sel=window.getSelection(),r=document.createRange();r.selectNodeContents(el);sel.removeAllRanges();sel.addRange(r);document.execCommand('copy');sel.removeAllRanges();
+  toast(msg||'📝 Copiado','ok');
+}
+
+// ══════════════════════════════════════════════
+// IMAGE GENERATION
+// ══════════════════════════════════════════════
+function rr(c,x,y,w,h,r,fill,stroke){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=typeof stroke==='number'?stroke:1;c.stroke();}}
+function wt(c,t,x,y,mw,lh,mx){if(!t)return y;var ws=t.split(' '),l='',lines=0;ws.forEach(function(w){var tt=l+w+' ';if(c.measureText(tt).width>mw&&l){if(!mx||lines<mx){c.fillText(l.trim(),x,y);y+=lh;lines++;}l=w+' ';}else l=tt;});if(!mx||lines<mx)c.fillText(l.trim(),x,y);return y+lh;}
+function sepLine(ctx,x1,y,x2,alpha){var g=ctx.createLinearGradient(x1,y,x2,y);g.addColorStop(0,'rgba(155,28,46,'+alpha+')');g.addColorStop(1,'rgba(155,28,46,0)');ctx.fillStyle=g;ctx.fillRect(x1,y,x2-x1,1);}
+function drawLogo(ctx,logoImg,x,y,h){
+  if(!logoImg||!logoImg.naturalWidth)return;
+  var w=Math.round(h*(logoImg.naturalWidth/logoImg.naturalHeight));
+  var tc=document.createElement('canvas');tc.width=w*2;tc.height=h*2;
+  var tx=tc.getContext('2d');tx.drawImage(logoImg,0,0,w*2,h*2);
+  tx.globalCompositeOperation='source-in';tx.fillStyle='#fff';tx.fillRect(0,0,w*2,h*2);
+  ctx.drawImage(tc,x,y,w,h);
+}
+
+function getCardData(){
+  // Get data from STATE.currentQuote and form fields
+  var q=STATE.currentQuote;
+  var tipo=q?q.tipo:'bundle4100';
+  var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'Producto'};
+  var it=PITEMS[tipo]||[];
+  var em=gv('me')||'';
+  var as2=gv('ma')||_lsGet('eq_exec_name')||'';
+  var fo=gv('mf')||'';var ml2=gv('ml')||'';
+  var ufV=q?q.uf:2.5,ufL=q?q.ufL:2.5;
+  var hayDc=ufL&&ufV&&ufV<ufL;
+  var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
+  var clp=ufV?ufc(ufV):null;
+  return{
+    badge:pi.badge,prod:pi.n,items:it,em:em,
+    precio:ufV?(ufV+' UF + IVA'):'—',
+    clpText:clp?('aprox. '+fmtN(clp)+' mensual c/IVA'):'—',
+    plazo:(q?q.plazo:'12')+' meses',
+    asesor:as2,contacto:(fo||'')+(fo&&ml2?' · ':'')+ml2,
+    hayDc:hayDc,dc:dc,ufL:ufL,ufV:ufV,
+    fecha:hoy()
+  };
+}
+
+function getCanvasPC(){
+  return new Promise(function(resolve){
+    preloadLogo(function(logo){
+      if(!logo){toast('⚠ Logo no encontrado','err');resolve(null);return;}
+      var d=getCardData();
+      var benef=d.items;
+      var W=620,P=32,sc=2,lh=20;
+      var _cv0=document.createElement('canvas');var _ctx0=_cv0.getContext('2d');
+      function measureLines(text,font,maxW){_ctx0.font=font;var words=text.split(' '),line='',lines=0;words.forEach(function(w){var t=line+w+' ';if(_ctx0.measureText(t).width>maxW&&line){lines++;line=w+' ';}else line=t;});if(line.trim())lines++;return Math.max(1,lines);}
+      var hHead=220;
+      var empLines=d.em?measureLines(d.em,'bold 20px Arial',W-P*2):0;
+      var hEmp=d.em?(32+empLines*26+16):0;
+      var prodLines=measureLines(d.prod,'bold 16px Arial',W-P*2);
+      var hProd=14+16+(prodLines*22)+14+(Math.ceil(benef.length/2)*lh)+18;
+      var hPrec=12+18+20+56+(d.clpText&&d.clpText!=='—'?22:0)+(d.hayDc?52:0)+8;
+      var hCond=56,hExec=72;
+      var H=hHead+hEmp+hProd+hPrec+hCond+hExec;
+      var cv=document.createElement('canvas');cv.width=W*sc;cv.height=H*sc;
+      var ctx=cv.getContext('2d');ctx.scale(sc,sc);
+      ctx.fillStyle='#0c0508';ctx.fillRect(0,0,W,H);
+      var y=0;
+      var hg=ctx.createLinearGradient(0,0,W,hHead);hg.addColorStop(0,'#5a0e1a');hg.addColorStop(.5,'#9b1c2e');hg.addColorStop(1,'#7a1425');ctx.fillStyle=hg;ctx.fillRect(0,y,W,hHead);
+      var logoH=186;drawLogo(ctx,logo,P,y+Math.round((hHead*0.55-logoH)/2)+4,logoH);
+      ctx.font='7.5px Arial';ctx.fillStyle='rgba(255,255,255,.38)';ctx.fillText('CHILE · SOLUCIONES EMPRESARIALES',P,y+hHead-12);
+      ctx.font='bold 10px Arial';var bw=ctx.measureText(d.badge).width+22;var badgeY=y+Math.round((hHead-26)/2);rr(ctx,W-P-bw,badgeY,bw,26,13,'rgba(0,0,0,.45)');ctx.strokeStyle='rgba(240,192,64,.65)';ctx.lineWidth=1;rr(ctx,W-P-bw,badgeY,bw,26,13,null,'rgba(240,192,64,.65)');ctx.fillStyle='#f0c040';ctx.fillText(d.badge,W-P-bw+11,badgeY+17);
+      ctx.font='7px Arial';ctx.fillStyle='rgba(255,255,255,.28)';ctx.textAlign='right';ctx.fillText(d.fecha,W-P,y+hHead-12);ctx.textAlign='left';y+=hHead;
+      if(d.em){ctx.fillStyle='#120608';ctx.fillRect(0,y,W,hEmp);sepLine(ctx,0,y,W,.35);var ey=y+14;ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('PROPUESTA PARA',P,ey);ey+=16;ctx.font='bold 20px Segoe UI,Arial';ctx.fillStyle='#fff';ey=wt(ctx,d.em,P,ey,W-P*2,26)+4;y+=hEmp;}
+      ctx.fillStyle='#0d0a0e';ctx.fillRect(0,y,W,hProd);sepLine(ctx,0,y,W,.22);var py=y+14;ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('PRODUCTO COTIZADO',P,py);py+=18;ctx.font='bold 16px Segoe UI,Arial';ctx.fillStyle='#fff';py=wt(ctx,d.prod,P,py,W-P*2,22)+12;ctx.font='11px Arial';var colW=(W-P*2-16)/2;var half=Math.ceil(benef.length/2);benef.forEach(function(item,i){var col=i<half?P:P+colW+16;var row=i<half?i:i-half;ctx.fillStyle='#9b1c2e';ctx.fillText('✔',col,py+row*lh+11);ctx.fillStyle='#ccc';wt(ctx,item,col+14,py+row*lh+11,colW-14,lh,1);});y+=hProd;
+      ctx.fillStyle='#090204';ctx.fillRect(0,y,W,hPrec);sepLine(ctx,0,y,W,.3);var ry=y+12;ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('CARGO FIJO MENSUAL',P,ry);ry+=20;ctx.font='bold 44px Segoe UI,Arial';ctx.fillStyle='#f0c040';ctx.shadowColor='rgba(240,192,64,.22)';ctx.shadowBlur=18;ctx.fillText(d.precio,P,ry+40);ctx.shadowBlur=0;ry+=56;if(d.clpText&&d.clpText!=='—'){ctx.font='11px Arial';ctx.fillStyle='#888';ctx.fillText(d.clpText,P,ry);ry+=22;}if(d.hayDc){rr(ctx,P,ry,W-P*2,40,7,'rgba(46,204,113,.07)');ctx.strokeStyle='rgba(46,204,113,.28)';ctx.lineWidth=1;rr(ctx,P,ry,W-P*2,40,7,null,'rgba(46,204,113,.28)');ctx.font='bold 22px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('−'+d.dc+'%',P+12,ry+27);ctx.font='10px Arial';ctx.fillStyle='#888';if(d.ufL)ctx.fillText('Lista: '+d.ufL+' UF',P+100,ry+16);if(d.ufV){ctx.fillStyle='#aaa';ctx.fillText('Final: '+d.ufV+' UF',P+100,ry+30);}}y+=hPrec;
+      ctx.fillStyle='#0c0508';ctx.fillRect(0,y,W,hCond);sepLine(ctx,0,y,W,.22);var cy=y+10;ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('CONTRATO',P,cy);cy+=16;ctx.font='bold 13px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.plazo,P,cy);ctx.font='bold 11px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('POSTPAGO · 30 días',P+120,cy);ctx.font='10px Arial';ctx.fillStyle='#555';ctx.fillText('Ficha · Cédula · Escritura',W-P-150,cy);y+=hCond;
+      ctx.fillStyle='#0f0507';ctx.fillRect(0,y,W,hExec);sepLine(ctx,0,y,W,.18);var ey2=y+10;ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('EJECUTIVO/A COMERCIAL',P,ey2);ey2+=18;ctx.font='bold 14px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.asesor,P,ey2);if(d.contacto){ctx.font='11px Arial';ctx.fillStyle='#3498db';ctx.fillText(d.contacto,P,ey2+17);}ctx.textAlign='right';ctx.font='8px Arial';ctx.fillStyle='#3a3a3a';ctx.fillText('Valores + IVA · Sujeto a vigencia UF',W-P,ey2+8);ctx.textAlign='left';
+      resolve(cv);
+    });
+  });
+}
+
+function getCanvasWsp(){
+  return new Promise(function(resolve){
+    preloadLogo(function(logo){
+      if(!logo){toast('⚠ Logo no encontrado','err');resolve(null);return;}
+      var d=getCardData();var benef=d.items;
+      var W=1080,P=64;
+      var _cv0=document.createElement('canvas');var _c0=_cv0.getContext('2d');
+      function mLines(text,font,maxW){_c0.font=font;var words=text.split(' '),line='',n=0;words.forEach(function(w){var t=line+w+' ';if(_c0.measureText(t).width>maxW&&line){n++;line=w+' ';}else line=t;});if(line.trim())n++;return Math.max(1,n);}
+      var hh=420;var hDest=d.em?(40+mLines(d.em,'bold 52px Arial',W-P*2)*62+32):0;
+      var prodL=mLines(d.prod,'bold 36px Arial',W-P*2);var hProd=32+52+(prodL*46)+24+(benef.length*46)+28;
+      var hPrec=32+50+130+(d.clpText&&d.clpText!=='—'?50:0)+(d.hayDc?96:0)+24;
+      var hCond=24+80;var hExec=28+60+(d.contacto?44:0)+28;var hFoot=64;
+      var H=hh+hDest+hProd+hPrec+hCond+hExec+hFoot;
+      var cv=document.createElement('canvas');cv.width=W;cv.height=H;var ctx=cv.getContext('2d');
+      var RED='#9b1c2e',REDHD='#7a1425',REDDARK='#4a0a14',GOLD='#f0c040',WHITE='#ffffff',OFFWHITE='#f0eae8',GRAY1='#1a1a1a',GRAY2='#262626';
+      ctx.fillStyle=GRAY1;ctx.fillRect(0,0,W,H);
+      var y=0;
+      var hgr=ctx.createLinearGradient(0,0,W,hh);hgr.addColorStop(0,'#6e1220');hgr.addColorStop(.55,RED);hgr.addColorStop(1,REDHD);ctx.fillStyle=hgr;ctx.fillRect(0,y,W,hh);
+      var logoSz=330;drawLogo(ctx,logo,P,y+Math.round((hh-logoSz)/2),logoSz);
+      ctx.font='16px Arial';ctx.fillStyle='rgba(255,255,255,.45)';ctx.fillText('CHILE · SOLUCIONES EMPRESARIALES',P,y+hh-20);
+      ctx.font='bold 24px Arial';var bw=ctx.measureText(d.badge).width+56;var bY=y+Math.round((hh-58)/2);ctx.fillStyle=GOLD;rr(ctx,W-P-bw,bY,bw,58,29,GOLD);ctx.fillStyle='#3a2000';ctx.fillText(d.badge,W-P-bw+28,bY+37);
+      ctx.font='14px Arial';ctx.fillStyle='rgba(255,255,255,.35)';ctx.textAlign='right';ctx.fillText(d.fecha,W-P,y+hh-20);ctx.textAlign='left';y+=hh;
+      if(d.em){ctx.fillStyle=GRAY2;ctx.fillRect(0,y,W,hDest);ctx.fillStyle=RED;ctx.fillRect(0,y,6,hDest);var ey=y+24;ctx.font='bold 14px Arial';ctx.fillStyle='rgba(155,28,46,.9)';ctx.fillText('PROPUESTA PARA',P,ey);ey+=28;ctx.font='bold 52px Arial';ctx.fillStyle=WHITE;ey=wt(ctx,d.em,P,ey,W-P*2,62)+16;y+=hDest;}
+      ctx.fillStyle=OFFWHITE;ctx.fillRect(0,y,W,hProd);ctx.fillStyle=RED;ctx.fillRect(0,y,6,hProd);var py=y+28;ctx.font='bold 13px Arial';ctx.fillStyle=RED;ctx.fillText('PRODUCTO COTIZADO',P,py);py+=26;ctx.fillStyle='rgba(155,28,46,.35)';ctx.fillRect(P,py,W-P*2,2);py+=16;ctx.font='bold 36px Arial';ctx.fillStyle='#111111';py=wt(ctx,d.prod,P,py,W-P*2,46)+20;ctx.font='22px Arial';benef.forEach(function(item){var lb=py;ctx.fillStyle=RED;ctx.fillText('✔',P,py+26);ctx.fillStyle='#2a2a2a';var ny=wt(ctx,item,P+40,py+26,W-P*2-40,32)+10;py=Math.max(ny,lb+42);});y+=hProd;
+      ctx.fillStyle=RED;ctx.fillRect(0,y,W,hPrec);var ry=y+28;ctx.font='bold 14px Arial';ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillText('CARGO FIJO MENSUAL',P,ry);ry+=50;ctx.font='bold 110px Arial';ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=20;ctx.fillStyle=GOLD;ctx.fillText(d.precio,P,ry+90);ctx.shadowBlur=0;ry+=128;if(d.clpText&&d.clpText!=='—'){ctx.font='26px Arial';ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillText(d.clpText,P,ry);ry+=50;}if(d.hayDc){ry+=8;rr(ctx,P,ry,W-P*2,78,12,'rgba(0,0,0,.25)');ctx.font='bold 52px Arial';ctx.fillStyle='#88ff88';ctx.fillText('−'+d.dc+'%',P+20,ry+54);ctx.font='22px Arial';ctx.fillStyle='rgba(255,255,255,.7)';if(d.ufL)ctx.fillText('Lista: '+d.ufL+' UF',P+230,ry+32);if(d.ufV){ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText('Precio: '+d.ufV+' UF',P+230,ry+58);}ry+=88;}y+=hPrec;
+      ctx.fillStyle='#eeeeee';ctx.fillRect(0,y,W,hCond);ctx.fillStyle=RED;ctx.fillRect(0,y,6,hCond);var cy=y+20;ctx.font='bold 13px Arial';ctx.fillStyle=RED;ctx.fillText('CONDICIONES',P,cy);cy+=38;ctx.font='bold 36px Arial';ctx.fillStyle='#111111';ctx.fillText(d.plazo,P,cy);ctx.font='bold 28px Arial';ctx.fillStyle='#1a7a40';ctx.fillText('POSTPAGO · 30 días',P+280,cy);y+=hCond;
+      ctx.fillStyle=GRAY2;ctx.fillRect(0,y,W,hExec);ctx.fillStyle=REDHD;ctx.fillRect(0,y,W,4);var ey2=y+24;ctx.font='bold 13px Arial';ctx.fillStyle='rgba(155,28,46,.85)';ctx.fillText('EJECUTIVO/A COMERCIAL',P,ey2);ey2+=36;ctx.font='bold 38px Arial';ctx.fillStyle=WHITE;ctx.fillText(d.asesor,P,ey2);ey2+=46;if(d.contacto){ctx.font='26px Arial';ctx.fillStyle='#6ab8e8';ctx.fillText(d.contacto,P,ey2);}
+      ctx.fillStyle=REDDARK;ctx.fillRect(0,H-hFoot,W,hFoot);ctx.textAlign='right';ctx.font='18px Arial';ctx.fillStyle='rgba(255,200,200,.55)';ctx.fillText(d.fecha,W-P,H-34);ctx.fillText('Valores + IVA · Sujeto a vigencia UF',W-P,H-10);ctx.textAlign='left';
+      resolve(cv);
+    });
+  });
+}
+
+function handleCopy(cv,toastId){
+  if(!cv)return;
+  cv.toBlob(function(blob){
+    if(navigator.clipboard&&window.ClipboardItem){
+      navigator.clipboard.write([new ClipboardItem({'image/png':blob})])
+        .then(function(){toast('🖼 Imagen copiada — pega directamente','ok',toastId||'global-toast');})
+        .catch(function(){var url=URL.createObjectURL(blob);window.open(url,'_blank');toast('🖼 Imagen abierta — clic derecho → Copiar','ok',toastId||'global-toast');});
+    }else{var url=URL.createObjectURL(blob);window.open(url,'_blank');toast('🖼 Imagen abierta — clic derecho → Copiar','ok',toastId||'global-toast');}
+  },'image/png');
+}
+function copImgPC(){toast('⏳ Generando imagen...','info');getCanvasPC().then(function(cv){handleCopy(cv);});}
+function copImgWsp(){toast('⏳ Generando imagen WhatsApp...','info');getCanvasWsp().then(function(cv){handleCopy(cv);});}
+function descImg(){
+  toast('⏳ Generando PNG...','info');
+  getCanvasPC().then(function(cv){
+    if(!cv)return;
+    var a=document.createElement('a');
+    var em=gv('me').replace(/[^a-z0-9]/gi,'_')||'cot';
+    a.download='cotizadargo_'+em+'_'+Date.now()+'.png';
+    a.href=cv.toDataURL('image/png');a.click();
+    toast('⬇ PNG descargado','ok');
+  });
+}
+
+// ══════════════════════════════════════════════
+// AUDIO
+// ══════════════════════════════════════════════
+var _audioCtx=null;
+function getAudio(){if(!_audioCtx)_audioCtx=new(window.AudioContext||window.webkitAudioContext)();return _audioCtx;}
+function playTone(freq,dur,type,vol){try{var a=getAudio();var o=a.createOscillator();var g=a.createGain();o.connect(g);g.connect(a.destination);o.type=type||'sine';o.frequency.value=freq;g.gain.setValueAtTime(vol||0.06,a.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+dur);o.start(a.currentTime);o.stop(a.currentTime+dur);}catch(e){}}
+function playClick(){playTone(660,.1,'sine',.05);setTimeout(function(){playTone(880,.08,'sine',.04);},60);}
+function playHover(){playTone(880,.08,'sine',.03);}
+
+// ══════════════════════════════════════════════
+// REACTIVE — any input in right panel triggers autoGen
+// ══════════════════════════════════════════════
+['input','change'].forEach(function(ev){
+  document.getElementById('dest-config').addEventListener(ev,function(e){
+    var t=e.target;
+    if(t.id==='skip-dest'){var df=document.getElementById('dest-fields');if(df)df.style.display=t.checked?'none':'flex';}
+    scheduleAutoGen(280);
+  },true);
+});
+document.getElementById('uf-global').addEventListener('input',function(){scheduleAutoGen(300);});
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+// Render default product (Bundle MC 4100 + RI)
+setProd('bundle');
+// Load exec data
+loadExec();
+</script>
+</body>
+</html>
+Listo
+
+Se quedó sin mensajes gratuitos hasta 4:00 p.m.
