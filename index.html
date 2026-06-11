@@ -3,245 +3,730 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>CotizadorGo! — Herramienta Comercial Equifax Chile</title>
+<title>CotizadorGo! — Estación de Cotización Equifax Chile</title>
 <style>
 :root{
-  --r:#9b1c2e;--rd:#6e1220;--rl:#c0263b;
-  --g1:#111;--g2:#1e1e1e;--g3:#282828;--g4:#333;--g5:#444;
-  --w:#f0f0f0;--wa:#aaa;--y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
+  --r:#9b1c2e;--rd:#6e1220;--rl:#c0263b;--rdd:#4a0a14;
+  --g0:#0d0d0e;--g1:#141416;--g2:#1c1c1f;--g3:#26262a;--g4:#34343a;--g5:#46464d;
+  --w:#f2f2f2;--wa:#a6a6ad;--wb:#7a7a82;
+  --y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
+  --headH:62px;--barH:92px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--g1);color:var(--w);font-family:'Segoe UI',Arial,sans-serif;font-size:14px;}
-header{background:linear-gradient(135deg,var(--rd),#a01f30 60%,#6e1220);padding:12px 20px;
-  display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;
-  box-shadow:0 3px 20px rgba(0,0,0,.7);border-bottom:1px solid rgba(255,255,255,.1);}
-.logo-sub{font-size:.58rem;letter-spacing:3px;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:1px;}
-.uf-widget{display:flex;align-items:center;gap:8px;}
-.uf-box{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 12px;text-align:center;}
-.uf-box label{display:block;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1px;}
-.uf-box input{background:none;border:none;color:var(--y);font-size:.95rem;font-weight:700;width:90px;text-align:center;font-family:inherit;}
+html,body{height:100%;}
+body{background:var(--g0);color:var(--w);font-family:'Segoe UI',system-ui,Arial,sans-serif;
+  font-size:16px;line-height:1.45;overflow:hidden;}
+
+/* ── HEADER ───────────────────────────────────────── */
+header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 60%,var(--rdd));
+  display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 18px;
+  position:fixed;top:0;left:0;right:0;z-index:300;box-shadow:0 2px 14px rgba(0,0,0,.6);}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;}
+.brand img{height:40px;width:auto;display:block;filter:brightness(0) invert(1);}
+.brand .nm{font-size:1.25rem;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1;}
+.brand .sb{font-size:.6rem;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:3px;}
+.htools{display:flex;align-items:center;gap:10px;}
+.uf-box{background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:5px 12px;text-align:center;}
+.uf-box label{display:block;font-size:.56rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55);}
+.uf-box input{background:none;border:none;color:var(--y);font-size:1.05rem;font-weight:800;width:88px;text-align:center;font-family:inherit;}
 .uf-box input:focus{outline:none;}
-.qcount{color:var(--gn);font-size:.9rem;font-weight:700;text-align:center;padding-top:2px;}
-/* NAV — scroll horizontal en móvil, sin corte */
-nav{background:var(--g2);border-bottom:2px solid var(--g4);display:flex;
-  position:fixed;top:120px;left:0;right:0;z-index:199;overflow-x:auto;
-  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-  scrollbar-width:none;}
-nav::-webkit-scrollbar{display:none;}
-body{padding-top:162px;}
-/* Indicador de scroll */
-nav::after{content:'›';position:absolute;right:0;top:0;bottom:0;width:28px;
-  background:linear-gradient(90deg,transparent,rgba(30,30,30,.95));
-  display:flex;align-items:center;justify-content:center;color:#555;
-  font-size:1.2rem;pointer-events:none;transition:opacity .3s;}
-.tab{display:inline-flex;align-items:center;gap:5px;padding:11px 14px;border:none;
-  border-bottom:3px solid transparent;background:none;color:var(--wa);cursor:pointer;
-  font-family:inherit;font-size:.76rem;letter-spacing:.4px;text-transform:uppercase;
-  transition:all .15s;white-space:nowrap;scroll-snap-align:start;flex-shrink:0;
-  position:relative;}
-.tab:hover{color:#fff;background:rgba(155,28,46,.25);}
-.tab:hover::after{content:'';position:absolute;inset:0;border-radius:4px;
-  box-shadow:0 0 12px rgba(155,28,46,.6),inset 0 0 8px rgba(155,28,46,.15);
-  pointer-events:none;}
-.tab.on{color:#fff;border-bottom-color:var(--r);background:rgba(155,28,46,.2);}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--gn);display:none;}
-.tab.has-quote .dot{display:inline-block;}
-/* Flecha de scroll nav */
-.nav-scroll-hint{position:fixed;right:4px;top:120px;height:42px;width:22px;
-  display:flex;align-items:center;justify-content:center;z-index:200;
-  color:rgba(255,255,255,.4);font-size:.85rem;pointer-events:none;
-  animation:blink 1.5s infinite;}
-@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
-main{padding:18px;max-width:1140px;margin:0 auto;}
-.panel{display:none;animation:fi .2s ease;}
-.panel.on{display:block;}
-@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.ptitle{font-size:1rem;letter-spacing:3px;text-transform:uppercase;color:var(--rl);
-  margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--g4);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.badge{background:var(--rd);font-size:.6rem;padding:2px 8px;border-radius:20px;letter-spacing:1px;color:var(--wa);}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;}
-.card{background:var(--g3);border:1px solid var(--g4);border-radius:8px;padding:14px;}
-.card:hover{border-color:rgba(155,28,46,.6);}
-.cl{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--wa);margin-bottom:3px;}
-.cv{font-size:1.4rem;font-weight:700;color:var(--y);}
-.cs{font-size:.7rem;color:var(--wa);margin-top:3px;}
-.tbl{overflow-x:auto;border-radius:7px;border:1px solid var(--g4);margin-bottom:16px;}
-table{width:100%;border-collapse:collapse;font-size:.79rem;}
-thead tr{background:linear-gradient(90deg,var(--rd),#7a1425);}
-th{padding:9px 12px;text-align:left;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:#fff;white-space:nowrap;}
-td{padding:7px 12px;border-bottom:1px solid var(--g4);color:var(--wa);white-space:nowrap;}
-tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:rgba(155,28,46,.1);}
-.y{color:var(--y);font-weight:600;}.g{color:var(--gn);font-weight:600;}.b{color:var(--bl);}.mu{color:#666;font-size:.72rem;}.or{color:var(--or);}
-.cbox{background:var(--g3);border:1px solid var(--g4);border-radius:8px;padding:18px;margin-bottom:16px;}
-.cbox h3{font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--rl);margin-bottom:12px;}
-.crow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
-.f{display:flex;flex-direction:column;gap:3px;}
-.f label{font-size:.63rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);}
-.f select,.f input{background:var(--g1);border:1px solid var(--g5);color:var(--w);
-  padding:7px 10px;font-family:inherit;font-size:.82rem;border-radius:5px;min-width:155px;transition:border-color .15s;}
-.f select:focus,.f input:focus{outline:none;border-color:var(--rl);}
-.btn{background:var(--r);border:none;color:#fff;padding:8px 20px;cursor:pointer;
-  font-family:inherit;font-size:.8rem;font-weight:600;border-radius:5px;transition:background .15s;}
-.btn:hover{background:var(--rl);}
-.btn.sec{background:var(--g4);}.btn.sec:hover{background:var(--g5);}
-.res{display:none;margin-top:12px;border-radius:7px;overflow:hidden;}
-.res.on{display:block;}
-.res-head{background:var(--rd);padding:8px 14px;font-size:.68rem;letter-spacing:2px;
-  text-transform:uppercase;color:rgba(255,255,255,.7);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
-.res-body{background:rgba(0,0,0,.3);border:1px solid rgba(155,28,46,.3);border-top:none;padding:14px;}
-.rl{font-size:.8rem;color:var(--wa);margin-bottom:5px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;}
-.rl b{color:var(--y);}
-.res-big{font-size:1.3rem;font-weight:700;color:var(--y);margin:6px 0 3px;}
-.save-btn{background:var(--bl);border:none;color:#fff;padding:5px 12px;cursor:pointer;
-  font-family:inherit;font-size:.72rem;font-weight:600;border-radius:4px;}
-.save-btn:hover{background:#2980b9;}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0;}
-.gitem{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:10px 12px;text-align:center;}
-.gitem label{display:block;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);margin-bottom:3px;}
-.gitem .val{font-size:.95rem;font-weight:700;}
-.slider-wrap{margin-top:12px;background:rgba(0,0,0,.25);border-radius:7px;padding:12px 14px;}
-.sw-title{font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--wa);margin-bottom:8px;}
-.sw-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px;}
-.sw-row input[type=range]{flex:1;min-width:120px;accent-color:var(--r);}
-.sw-row input[type=number]{background:var(--g1);border:1px solid var(--g5);color:var(--y);
-  padding:5px 8px;font-family:inherit;font-size:.88rem;font-weight:700;border-radius:4px;width:105px;}
-.sw-row input[type=number]:focus{outline:none;border-color:var(--rl);}
-.alerta{background:rgba(240,192,64,.08);border-left:3px solid var(--y);padding:9px 12px;
-  margin-bottom:14px;font-size:.77rem;color:var(--wa);border-radius:0 5px 5px 0;}
-.alerta b{color:var(--y);}
-.chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-.chip{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:8px 14px;text-align:center;min-width:90px;}
-.chip .n{font-size:1.3rem;font-weight:700;color:var(--bl);}
-.chip .t{font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--wa);margin-top:1px;}
-.quote-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.qi{background:var(--g3);border:1px solid var(--g4);border-radius:6px;padding:10px 14px;
-  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
-.qi-prod{font-size:.8rem;font-weight:600;color:#fff;}
-.qi-price{font-size:.9rem;font-weight:700;color:var(--y);}
-.qi-meta{font-size:.68rem;color:var(--wa);}
-.qi-acts{display:flex;gap:6px;}
-.qibtn{background:var(--g4);border:none;color:var(--wa);padding:4px 10px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:.7rem;}
-.qibtn:hover{background:var(--g5);color:#fff;}
-.qibtn.del{color:#e74c3c;}
-.btn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-.bacc{background:var(--g3);border:1px solid var(--g4);border-radius:7px;padding:12px 8px;
-  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
-  color:var(--w);font-family:inherit;transition:all .2s;position:relative;overflow:hidden;}
-.bacc span{font-size:.78rem;font-weight:600;}
-.bacc small{font-size:.63rem;color:var(--wa);text-align:center;}
-.bacc:hover{border-color:var(--rl);background:rgba(155,28,46,.2);
-  box-shadow:0 0 14px rgba(155,28,46,.5),inset 0 0 10px rgba(155,28,46,.1);
-  transform:translateY(-1px);}
-.bacc:active{transform:scale(.96);}
-.bacc.wsp{border-color:rgba(37,211,102,.35);background:rgba(37,211,102,.05);}
-.bacc.wsp:hover{border-color:#25d366;background:rgba(37,211,102,.12);
-  box-shadow:0 0 14px rgba(37,211,102,.4),inset 0 0 10px rgba(37,211,102,.08);}
-.bacc.email-btn{border-color:rgba(52,152,219,.35);background:rgba(52,152,219,.05);}
-.bacc.email-btn:hover{border-color:#3498db;background:rgba(52,152,219,.12);
-  box-shadow:0 0 14px rgba(52,152,219,.4);}
-/* Neón general en todos los .btn */
-.btn{background:var(--r);border:none;color:#fff;padding:8px 20px;cursor:pointer;
-  font-family:inherit;font-size:.8rem;font-weight:600;border-radius:5px;
-  transition:all .2s;position:relative;}
-.btn:hover{background:var(--rl);box-shadow:0 0 16px rgba(155,28,46,.6);transform:translateY(-1px);}
-.btn:active{transform:scale(.97);}
-.btn.sec{background:var(--g4);box-shadow:none;}
-.btn.sec:hover{background:var(--g5);box-shadow:0 0 10px rgba(255,255,255,.1);}
-/* save-btn neón */
-.save-btn{background:var(--bl);border:none;color:#fff;padding:5px 12px;cursor:pointer;
-  font-family:inherit;font-size:.72rem;font-weight:600;border-radius:4px;transition:all .2s;}
-.save-btn:hover{background:#2980b9;box-shadow:0 0 14px rgba(52,152,219,.6);transform:translateY(-1px);}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
-.toast{display:none;padding:9px 14px;border-radius:5px;margin-bottom:10px;font-size:.78rem;}
-.toast.ok{background:rgba(46,204,113,.15);border-left:3px solid #2ecc71;color:#2ecc71;}
-.toast.err{background:rgba(231,76,60,.15);border-left:3px solid #e74c3c;color:#e74c3c;}
-.toast.info{background:rgba(52,152,219,.15);border-left:3px solid #3498db;color:#3498db;}
-textarea{background:var(--g1);border:1px solid var(--g4);color:var(--wa);
-  font-family:'Courier New',monospace;font-size:.75rem;padding:12px;resize:vertical;
-  outline:none;line-height:1.6;border-radius:0 0 7px 7px;width:100%;}
-.sync-banner{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.35);border-radius:6px;
-  padding:8px 14px;margin-bottom:12px;font-size:.75rem;color:#2ecc71;display:none;align-items:center;gap:8px;}
-.sync-banner.on{display:flex;}
-footer{text-align:center;padding:12px;font-size:.63rem;color:#444;
-  letter-spacing:1px;border-top:1px solid var(--g4);margin-top:24px;}
-/* Pulso neón tab plantillas */
-@keyframes neonPulse{
-  0%{box-shadow:0 0 8px rgba(46,204,113,.5);border-color:rgba(46,204,113,.6);}
-  50%{box-shadow:0 0 22px rgba(46,204,113,.9),0 0 40px rgba(46,204,113,.4);border-color:#2ecc71;background:rgba(46,204,113,.18);}
-  100%{box-shadow:0 0 8px rgba(46,204,113,.5);border-color:rgba(46,204,113,.6);}
+.uf-box .qc{color:var(--gn);font-size:1.15rem;font-weight:800;line-height:1.3;}
+.htool-btn{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;
+  border-radius:8px;padding:9px 13px;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s;}
+.htool-btn:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
+
+/* ── BARRA DE PRODUCTOS (gobierna todo) ───────────── */
+#prodbar{position:fixed;top:var(--headH);left:0;right:0;z-index:280;height:var(--barH);
+  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;align-items:center;gap:10px;
+  padding:0 16px;overflow-x:auto;scrollbar-width:thin;}
+#prodbar::-webkit-scrollbar{height:6px;}
+#prodbar::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px;}
+.pbtn{flex:0 0 auto;min-width:140px;background:var(--g2);border:2px solid var(--g3);border-radius:12px;
+  padding:11px 16px;cursor:pointer;color:var(--w);font-family:inherit;text-align:left;transition:.15s;
+  display:flex;flex-direction:column;gap:2px;}
+.pbtn .ic{font-size:1.3rem;line-height:1;}
+.pbtn .lb{font-size:.92rem;font-weight:800;letter-spacing:.2px;}
+.pbtn .su{font-size:.66rem;color:var(--wa);letter-spacing:.3px;}
+.pbtn:hover{border-color:var(--rl);background:rgba(155,28,46,.16);}
+.pbtn.on{border-color:var(--r);background:linear-gradient(135deg,rgba(155,28,46,.32),rgba(155,28,46,.14));
+  box-shadow:0 0 0 1px var(--r) inset,0 4px 16px rgba(155,28,46,.35);}
+.pbtn.on .su{color:#e9b9bf;}
+
+/* ── ESTACIÓN DE TRABAJO — 2 PANELES ──────────────── */
+#workstation{position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;bottom:0;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;}
+#left-panel{border-right:3px solid var(--g4);overflow-y:auto;padding:18px 20px 40px;background:var(--g0);}
+#right-panel{overflow-y:auto;padding:0;background:#101012;}
+#left-panel::-webkit-scrollbar,#right-panel::-webkit-scrollbar{width:9px;}
+#left-panel::-webkit-scrollbar-thumb,#right-panel::-webkit-scrollbar-thumb{background:var(--g4);border-radius:5px;}
+
+/* ── BLOQUES IZQUIERDA ────────────────────────────── */
+.block{background:var(--g1);border:1px solid var(--g3);border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+.block-t{font-size:.72rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--rl);font-weight:800;
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.cfg-grid{display:flex;flex-direction:column;gap:13px;}
+.fld{display:flex;flex-direction:column;gap:5px;}
+.fld label{font-size:.74rem;letter-spacing:.6px;text-transform:uppercase;color:var(--wa);font-weight:600;}
+.fld select,.fld input{background:var(--g0);border:2px solid var(--g4);color:var(--w);
+  padding:11px 12px;font-family:inherit;font-size:1.02rem;font-weight:600;border-radius:9px;min-height:46px;transition:.15s;}
+.fld select:focus,.fld input:focus{outline:none;border-color:var(--rl);box-shadow:0 0 0 3px rgba(155,28,46,.22);}
+.cfg-2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+@media(max-width:520px){.cfg-2{grid-template-columns:1fr;}}
+
+/* Resumen comercial */
+.sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.sum-name{font-size:1.2rem;font-weight:900;color:#fff;line-height:1.25;}
+.sum-badge{background:var(--rd);color:var(--y);border:1px solid rgba(240,192,64,.5);font-size:.62rem;font-weight:800;
+  letter-spacing:1px;padding:4px 11px;border-radius:20px;white-space:nowrap;}
+.price-wrap{background:linear-gradient(135deg,#1a0a0e,#23090f);border:1px solid rgba(155,28,46,.5);
+  border-radius:12px;padding:16px 18px;margin-bottom:12px;}
+.price-lbl{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);margin-bottom:4px;}
+.price-big{font-size:2.7rem;font-weight:900;color:var(--y);line-height:1;}
+.price-clp{font-size:1rem;color:#cfcfcf;margin-top:7px;font-weight:600;}
+.price-disc{display:inline-flex;align-items:center;gap:10px;margin-top:11px;background:rgba(46,204,113,.1);
+  border:1px solid rgba(46,204,113,.4);border-radius:9px;padding:7px 13px;}
+.price-disc .pct{font-size:1.5rem;font-weight:900;color:var(--gn);}
+.price-disc .det{font-size:.78rem;color:#bbb;}
+.price-disc .det s{color:var(--wb);}
+.slider-box{background:rgba(0,0,0,.32);border-radius:10px;padding:13px 15px;margin-bottom:12px;}
+.slider-box .st{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);margin-bottom:9px;font-weight:600;}
+.slider-row{display:flex;gap:12px;align-items:center;}
+.slider-row input[type=range]{flex:1;accent-color:var(--r);height:8px;}
+.slider-row input[type=number]{background:var(--g0);border:2px solid var(--g4);color:var(--y);
+  padding:9px 10px;font-size:1.05rem;font-weight:800;border-radius:8px;width:120px;text-align:center;}
+.slider-row input[type=number]:focus{outline:none;border-color:var(--rl);}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+@media(max-width:520px){.metrics{grid-template-columns:1fr 1fr;}}
+.metric{background:var(--g2);border:1px solid var(--g3);border-radius:9px;padding:10px 11px;text-align:center;}
+.metric label{display:block;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;}
+.metric .v{font-size:1.05rem;font-weight:800;}
+.v.y{color:var(--y);}.v.g{color:var(--gn);}.v.b{color:var(--bl);}.v.o{color:var(--or);}.v.wa{color:var(--wa);}
+.benefits{list-style:none;display:grid;grid-template-columns:1fr;gap:7px;margin-top:4px;}
+.benefits li{display:flex;gap:10px;align-items:flex-start;font-size:.95rem;color:#dcdcdc;
+  background:var(--g2);border:1px solid var(--g3);border-left:3px solid var(--r);border-radius:8px;padding:9px 12px;}
+.benefits li .ck{color:var(--r);font-weight:900;flex-shrink:0;}
+.cond-row{display:flex;flex-wrap:wrap;gap:18px;margin-top:6px;}
+.cond-row .ci label{display:block;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wb);}
+.cond-row .ci .cv{font-size:.95rem;font-weight:700;color:#fff;margin-top:2px;}
+.note-inline{background:rgba(240,192,64,.08);border-left:3px solid var(--y);border-radius:0 8px 8px 0;
+  padding:9px 13px;font-size:.85rem;color:#d8c890;margin-top:10px;}
+.note-inline b{color:var(--y);}
+
+.lbtns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.lbtn{flex:1;min-width:130px;border:none;border-radius:10px;padding:13px 16px;cursor:pointer;
+  font-family:inherit;font-size:.95rem;font-weight:800;letter-spacing:.3px;transition:.15s;}
+.lbtn.save{background:var(--bl);color:#fff;}.lbtn.save:hover{background:#2980b9;box-shadow:0 0 16px rgba(52,152,219,.5);}
+.lbtn.sec{background:var(--g3);color:var(--w);}.lbtn.sec:hover{background:var(--g4);}
+
+.chk-row{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:.85rem;color:var(--wa);margin-bottom:11px;}
+.chk-row input{accent-color:var(--r);width:18px;height:18px;}
+.wsp-link-row{display:none;padding:8px 11px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);border-radius:8px;font-size:.85rem;margin-top:4px;}
+.wsp-link-row a{color:#25d366;font-weight:700;text-decoration:none;}
+
+/* ── PANEL DERECHO — VISTAS PREVIAS ───────────────── */
+.pv-bar{position:sticky;top:0;z-index:10;background:#101012;border-bottom:2px solid var(--g4);
+  display:flex;gap:6px;padding:12px 16px 0;}
+.pv-tab{flex:1;border:none;border-bottom:3px solid transparent;background:var(--g2);color:var(--wa);
+  border-radius:9px 9px 0 0;padding:12px 8px;cursor:pointer;font-family:inherit;font-size:.92rem;font-weight:800;
+  letter-spacing:.3px;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.pv-tab:hover{color:#fff;background:var(--g3);}
+.pv-tab.on{color:#fff;background:var(--g3);border-bottom-color:var(--r);box-shadow:inset 0 0 0 1px var(--g4);}
+.pv-actions{display:flex;gap:8px;flex-wrap:wrap;padding:14px 16px 10px;align-items:center;}
+.pv-actions .lead{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wb);margin-right:auto;font-weight:700;}
+.act-btn{border:none;border-radius:9px;padding:11px 16px;cursor:pointer;font-family:inherit;font-size:.88rem;font-weight:800;transition:.15s;white-space:nowrap;}
+.act-btn.gmail{background:linear-gradient(135deg,#ea4335,#c5221f);color:#fff;}
+.act-btn.outlook{background:linear-gradient(135deg,#0072c6,#004578);color:#fff;}
+.act-btn.wsp{background:#128c7e;color:#fff;}
+.act-btn.img{background:linear-gradient(135deg,#7a1425,#9b1c2e);color:#fff;}
+.act-btn.ghost{background:var(--g3);color:var(--w);}
+.act-btn:hover{filter:brightness(1.12);transform:translateY(-1px);}
+.act-btn.expand{background:var(--y);color:#2a1500;}
+.pv-pane{display:none;padding:6px 16px 30px;}
+.pv-pane.on{display:block;}
+.pv-frame{background:#f3f3f3;border-radius:10px;padding:14px;overflow-x:auto;}
+.pv-frame.dark{background:transparent;padding:0;display:flex;justify-content:center;}
+.subject-bar{background:var(--g2);border:1px solid var(--g4);border-radius:10px;padding:12px 15px;margin-bottom:14px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.subject-bar .sl{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);}
+.subject-bar .sv{color:var(--y);font-size:.95rem;font-weight:700;word-break:break-word;}
+.wa-text{background:var(--g1);border:1px solid var(--g4);color:#cfcfcf;font-family:'Courier New',monospace;
+  font-size:.82rem;line-height:1.6;padding:14px;border-radius:10px;white-space:pre-wrap;margin-top:14px;max-height:320px;overflow:auto;}
+.outlook-note{font-size:.78rem;color:#9aa;background:rgba(0,114,198,.1);border:1px solid rgba(0,114,198,.3);
+  border-radius:8px;padding:9px 13px;margin-top:12px;}
+.outlook-note b{color:#5ab0ff;}
+#auto-gen-status{margin:0 16px;padding:8px 13px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);
+  border-radius:8px;font-size:.78rem;color:var(--gn);text-align:center;}
+
+/* ── TOASTS ───────────────────────────────────────── */
+.toast{display:none;padding:10px 15px;border-radius:9px;margin:0 16px 12px;font-size:.85rem;font-weight:600;}
+.toast.ok{background:rgba(46,204,113,.16);border-left:4px solid var(--gn);color:var(--gn);}
+.toast.err{background:rgba(231,76,60,.16);border-left:4px solid #e74c3c;color:#e74c3c;}
+.toast.info{background:rgba(52,152,219,.16);border-left:4px solid var(--bl);color:var(--bl);}
+#global-toast{position:fixed;bottom:18px;right:18px;z-index:9999;min-width:280px;max-width:420px;margin:0;
+  box-shadow:0 6px 24px rgba(0,0,0,.6);}
+
+/* ── MODAL (Ampliar / UF / Guardadas) ─────────────── */
+.modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.82);
+  padding:24px;overflow:auto;align-items:flex-start;justify-content:center;}
+.modal.on{display:flex;}
+.modal-card{background:var(--g1);border:1px solid var(--g4);border-radius:14px;max-width:760px;width:100%;
+  margin:auto;box-shadow:0 12px 48px rgba(0,0,0,.7);}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
+  border-bottom:1px solid var(--g4);position:sticky;top:0;background:var(--g1);border-radius:14px 14px 0 0;}
+.modal-head h3{font-size:1rem;font-weight:800;color:var(--rl);letter-spacing:1px;}
+.modal-x{background:var(--g3);border:none;color:#fff;width:38px;height:38px;border-radius:9px;cursor:pointer;font-size:1.2rem;}
+.modal-x:hover{background:var(--r);}
+.modal-body{padding:18px;}
+.modal-body.light{background:#f3f3f3;border-radius:0 0 14px 14px;}
+#quotes-list{display:flex;flex-direction:column;gap:9px;}
+.qrow{background:var(--g2);border:1px solid var(--g3);border-radius:9px;padding:11px 14px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+.qrow .qp{font-weight:700;color:#fff;font-size:.92rem;}
+.qrow .qm{font-size:.72rem;color:var(--wa);}
+.qrow .qpr{color:var(--y);font-weight:800;}
+.qrow .qa{display:flex;gap:6px;}
+.qrow button{border:none;border-radius:7px;padding:7px 12px;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;}
+.qrow .load{background:var(--gn);color:#06210f;}
+.qrow .del{background:var(--g4);color:#e74c3c;}
+.uf-tool{display:flex;flex-direction:column;gap:14px;}
+.uf-tool .uf-r{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+.uf-tool .res{font-size:1.05rem;font-weight:800;color:var(--y);padding-top:6px;}
+
+/* ── ALTERNADOR MÓVIL ─────────────────────────────── */
+#mtoggle{display:none;}
+@media(max-width:880px){
+  body{overflow:auto;}
+  :root{--barH:84px;}
+  #workstation{position:static;display:block;height:auto;margin-top:calc(var(--headH) + var(--barH) + 52px);}
+  #left-panel{border-right:none;border-bottom:3px solid var(--g4);overflow:visible;min-height:auto;}
+  #right-panel{overflow:visible;}
+  #mtoggle{display:flex;position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;z-index:270;
+    height:52px;background:var(--g2);border-bottom:2px solid var(--g4);}
+  #mtoggle button{flex:1;border:none;background:none;color:var(--wa);font-family:inherit;font-size:.95rem;font-weight:800;cursor:pointer;border-bottom:3px solid transparent;}
+  #mtoggle button.on{color:#fff;border-bottom-color:var(--r);background:rgba(155,28,46,.14);}
+  #workstation.m-config #right-panel{display:none;}
+  #workstation.m-preview #left-panel{display:none;}
+  .brand .sb{display:none;}
+  .uf-box input{width:74px;}
+  .pv-tab{font-size:.8rem;padding:11px 4px;}
 }
-.tab.pulse-neon{
-  animation:neonPulse .7s ease-in-out 4;
-  border:1px solid rgba(46,204,113,.6);border-radius:4px;
-  color:#2ecc71!important;
-}
-.tab.pulse-neon::after{
-  content:'👆 Ir a Plantillas';
-  position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);
-  background:#111;border:1px solid #2ecc71;color:#2ecc71;
-  font-size:.6rem;padding:2px 8px;border-radius:4px;white-space:nowrap;
-  pointer-events:none;box-shadow:0 0 8px rgba(46,204,113,.4);
-  display:none;
-}
-#global-toast{position:fixed;bottom:18px;right:18px;z-index:9999;min-width:280px;max-width:400px;
-  box-shadow:0 4px 20px rgba(0,0,0,.5);}
-/* Auto-gen status */
-#auto-gen-status{transition:opacity .3s;}
-/* Layout plantillas mejorado */
-.mail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
-@media(max-width:860px){.mail-grid{grid-template-columns:1fr;}}
-/* Botones acción más llamativos */
-.bacc{position:relative;}
-.bacc .copy-badge{position:absolute;top:4px;right:4px;background:var(--gn);color:#000;
-  font-size:.55rem;font-weight:700;padding:1px 5px;border-radius:10px;letter-spacing:.5px;}
-@media(max-width:640px){
-  .two-col{grid-template-columns:1fr;}
-  .btn-grid{grid-template-columns:1fr 1fr;}
-  .cards{grid-template-columns:1fr 1fr;}
-  .crow{flex-direction:column;}
-  .f select,.f input{min-width:100%;}
-  header{padding:10px 14px;}
-}
-@media(max-width:900px){
-  #tpl-out>[style*="grid-template-columns:1fr 1fr 1fr"]{
-    grid-template-columns:1fr 1fr !important;
-  }
-}
-@media(max-width:600px){
-  #tpl-out>[style*="grid-template-columns:1fr 1fr 1fr"]{
-    grid-template-columns:1fr !important;
-  }
+@media(max-width:560px){
+  .brand .nm{font-size:1.05rem;}
+  .price-big{font-size:2.2rem;}
 }
 </style>
 </head>
 <body>
 <header>
-  <div style="display:flex;align-items:center;gap:14px;">
-    <img src="logo-equifax.png" alt="Equifax" id="header-logo" style="height:96px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">
+  <div class="brand">
+    <img src="logo-equifax.png" alt="Equifax" id="header-logo" onerror="this.style.display='none'">
     <div>
-      <div style="font-size:1.1rem;font-weight:900;letter-spacing:1px;color:#fff;">CotizadorGo!</div>
-      <div class="logo-sub">Herramienta Comercial Equifax Chile</div>
+      <div class="nm">CotizadorGo!</div>
+      <div class="sb">Estación de Cotización · Equifax Chile</div>
     </div>
   </div>
-  <div class="uf-widget">
+  <div class="htools">
     <div class="uf-box">
-      <label>UF Hoy (editable)</label>
+      <label>UF Hoy</label>
       <input type="number" id="uf-global" value="40644" step="1">
     </div>
     <div class="uf-box">
       <label>Cotizaciones</label>
-      <div class="qcount" id="quote-count">0</div>
+      <div class="qc" id="quote-count">0</div>
     </div>
+    <button class="htool-btn" onclick="openUF()">⇄ UF</button>
+    <button class="htool-btn" onclick="openQuotes()">💾 Guardadas</button>
   </div>
 </header>
-<nav id="navrow"></nav>
-<main id="main"></main>
+
+<div id="prodbar"></div>
+
+<div id="mtoggle">
+  <button id="mt-config" class="on" onclick="setMobileView('config')">⚙ Configurar</button>
+  <button id="mt-preview" onclick="setMobileView('preview')">👁 Vista previa</button>
+</div>
+
+<div id="workstation" class="m-config">
+
+  <!-- ════════ PANEL IZQUIERDO — CONFIGURACIÓN + RESUMEN ════════ -->
+  <section id="left-panel">
+    <div class="block">
+      <div class="block-t">⚙ Configuración <span id="cfg-prod-name" style="color:var(--wa);font-weight:600;letter-spacing:1px;"></span></div>
+      <div id="config-zone" class="cfg-grid"></div>
+    </div>
+
+    <div class="block" id="summary-block">
+      <div class="block-t">💰 Resumen comercial</div>
+      <div id="summary-zone"></div>
+    </div>
+
+    <div class="lbtns">
+      <button class="lbtn save" onclick="saveCurrentQuote()">💾 Guardar cotización</button>
+      <button class="lbtn sec" onclick="openQuotes()">📂 Ver guardadas</button>
+    </div>
+
+    <div class="block">
+      <div class="block-t">👤 Datos del cliente</div>
+      <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Omitir destinatario (propuesta genérica)</label>
+      <div id="dest-fields" class="cfg-grid">
+        <div class="fld"><label>Nombre contacto</label><input type="text" id="mn" placeholder="Sr. García"></div>
+        <div class="fld"><label>Empresa</label><input type="text" id="me" placeholder="Empresa SpA"></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-t">🧑‍💼 Tus datos (ejecutivo/a)</div>
+      <div class="cfg-grid">
+        <div class="fld"><label>Tu nombre</label><input type="text" id="ma" placeholder="Eduardo Pérez" oninput="saveExecField()"></div>
+        <div class="fld"><label>WhatsApp / Teléfono</label><input type="text" id="mf" placeholder="+56 9 XXXX XXXX" oninput="saveExecField()">
+          <div id="wsp-link-row" class="wsp-link-row">🟢 <a id="wsp-link" href="#" target="_blank">Abrir WhatsApp directo →</a></div>
+        </div>
+        <div class="fld"><label>Email</label><input type="text" id="ml" placeholder="ej@equifax.cl" oninput="saveExecField()"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ PANEL DERECHO — VISTAS PREVIAS ════════ -->
+  <section id="right-panel">
+    <div class="pv-bar">
+      <button class="pv-tab on" data-pv="gmail" onclick="setPreview('gmail')">📧 Gmail</button>
+      <button class="pv-tab" data-pv="outlook" onclick="setPreview('outlook')">📨 Outlook</button>
+      <button class="pv-tab" data-pv="wsp" onclick="setPreview('wsp')">💬 WhatsApp</button>
+      <button class="pv-tab" data-pv="img" onclick="setPreview('img')">🖼 Imagen</button>
+    </div>
+    <div id="auto-gen-status">✔ Propuesta actualizada automáticamente</div>
+    <div id="mail-toast" class="toast"></div>
+    <div id="tpl-toast2" class="toast"></div>
+
+    <!-- puentes ocultos: refresh() los escribe, genMail() original los lee -->
+    <div style="display:none" aria-hidden="true">
+      <input type="hidden" id="mt"><input type="hidden" id="mu"><input type="hidden" id="mula">
+      <input type="hidden" id="mc2"><input type="hidden" id="mp"><input type="hidden" id="mr">
+    </div>
+
+    <!-- contenedor que genMail() vuelve visible -->
+    <div id="tpl-out">
+
+      <!-- GMAIL -->
+      <div class="pv-pane on" id="pane-gmail">
+        <div class="pv-actions">
+          <span class="lead">Asunto + cuerpo HTML</span>
+          <button class="act-btn ghost" onclick="copAsunto()">📋 Asunto</button>
+          <button class="act-btn gmail" onclick="copHTMLGmail();playClick()">📋 Copiar para Gmail</button>
+          <button class="act-btn expand" onclick="ampliar('gmail')">🔍 Ampliar</button>
+        </div>
+        <div class="subject-bar">
+          <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto"></div></div>
+        </div>
+        <div class="pv-frame"><div id="tpl-rich-gmail"></div></div>
+        <div id="tpl-rich" style="display:none;"></div>
+      </div>
+
+      <!-- OUTLOOK -->
+      <div class="pv-pane" id="pane-outlook">
+        <div class="pv-actions">
+          <span class="lead">Tablas robustas · Outlook 2016+</span>
+          <button class="act-btn outlook" onclick="copHTMLOutlook();playClick()">📋 Copiar para Outlook</button>
+          <button class="act-btn expand" onclick="ampliar('outlook')">🔍 Ampliar</button>
+        </div>
+        <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
+        <div class="outlook-note">⚠️ <b>Nota Outlook:</b> usa colores sólidos y tablas para máxima compatibilidad. Pega directo en el cuerpo del mensaje.</div>
+      </div>
+
+      <!-- WHATSAPP -->
+      <div class="pv-pane" id="pane-wsp">
+        <div class="pv-actions">
+          <span class="lead">Tarjeta + texto para chat</span>
+          <button class="act-btn wsp" onclick="copPlano();playClick()">📋 Copiar texto WA</button>
+          <button class="act-btn wsp" onclick="copImgWsp();playClick()">🖼 Imagen WA</button>
+          <button class="act-btn expand" onclick="ampliar('wsp')">🔍 Ampliar</button>
+        </div>
+        <div class="pv-frame dark">
+<div id="cot-card-wsp" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="wcc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="wcc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="wcc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div></div><div id="wcc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="wcc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="wcc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="wcc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="wcc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="wcc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="wcc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
+        </div>
+        <textarea id="tpl-body" style="display:none;"></textarea>
+        <div class="wa-text" id="wa-text-view"></div>
+      </div>
+
+      <!-- IMAGEN -->
+      <div class="pv-pane" id="pane-img">
+        <div class="pv-actions">
+          <span class="lead">Tarjeta para correo / adjunto</span>
+          <button class="act-btn img" onclick="copImgPC();playClick()">📋 Copiar imagen</button>
+          <button class="act-btn ghost" onclick="descImg();playClick()">⬇ Descargar PNG</button>
+          <button class="act-btn expand" onclick="ampliar('img')">🔍 Ampliar</button>
+        </div>
+        <div class="pv-frame dark">
+<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- ════════ MODALES ════════ -->
+<div class="modal" id="ampliar-modal">
+  <div class="modal-card" style="max-width:680px;">
+    <div class="modal-head"><h3 id="ampliar-title">Vista ampliada</h3><button class="modal-x" onclick="closeModal('ampliar-modal')">✕</button></div>
+    <div class="modal-body" id="ampliar-body"></div>
+  </div>
+</div>
+
+<div class="modal" id="uf-modal">
+  <div class="modal-card" style="max-width:480px;">
+    <div class="modal-head"><h3>⇄ Conversor UF / CLP</h3><button class="modal-x" onclick="closeModal('uf-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="uf-tool">
+        <div class="block" style="margin:0;">
+          <div class="block-t">UF → Pesos</div>
+          <div class="uf-r"><div class="fld" style="flex:1;"><label>Valor en UF</label><input type="number" id="uf-i" value="1" step="0.0001" oninput="cUF()"></div></div>
+          <div class="res" id="res-uf"></div>
+        </div>
+        <div class="block" style="margin:0;">
+          <div class="block-t">Pesos → UF</div>
+          <div class="uf-r"><div class="fld" style="flex:1;"><label>Valor en $CLP</label><input type="number" id="clp-i" value="100000" step="1000" oninput="cCLP()"></div></div>
+          <div class="res" id="res-clp"></div>
+        </div>
+        <div class="block" style="margin:0;">
+          <div class="block-t">Comisión por venta</div>
+          <div class="uf-r">
+            <div class="fld" style="flex:1;"><label>Venta (UF)</label><input type="number" id="com-u" value="200" oninput="cCom()"></div>
+            <div class="fld" style="flex:1;"><label>Comisión %</label><input type="number" id="com-p" value="0.5" step="0.1" oninput="cCom()"></div>
+          </div>
+          <div class="res" id="res-com"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="quotes-modal">
+  <div class="modal-card" style="max-width:560px;">
+    <div class="modal-head"><h3>💾 Cotizaciones guardadas</h3><button class="modal-x" onclick="closeModal('quotes-modal')">✕</button></div>
+    <div class="modal-body"><div id="quotes-list"></div></div>
+  </div>
+</div>
+
 <div id="global-toast" class="toast"></div>
-<footer>CotizadorGo! &nbsp;·&nbsp; Herramienta Comercial Equifax Chile &nbsp;·&nbsp; CONFIDENCIAL &nbsp;·&nbsp; SOLO USO INTERNO</footer>
+
 <script>
 'use strict';
-var STATE={quotes:[],activeQuoteIndex:-1,logoImg:null};
+/* ════════════════════════════════════════════════════════════════
+   ESTACIÓN DE COTIZACIÓN — LÓGICA DE INTERFAZ (nueva organización)
+   Reutiliza íntegramente genMail(), canvas e impresión del index original.
+   ════════════════════════════════════════════════════════════════ */
+var STATE={quotes:[],logoImg:null};
+var CURRENT={key:null,override:null};   // override = precio venta ajustado con el slider
+var LAST=null;                            // última config calculada
+
+function $(id){return document.getElementById(id);}
+function gv(id){var e=$(id);return e?(''+e.value).trim():'';}
+function st(id,v){var e=$(id);if(e)e.textContent=v;}
+function sv(id,v){var e=$(id);if(e)e.innerHTML=v;}
+function setBridge(id,v){var e=$(id);if(e)e.value=(v===undefined||v===null)?'':v;}
+function ufd(x){return (Math.round(x*10000)/10000).toString();}
+
+/* ── Catálogo: EXACTAMENTE los productos del index (fuente de verdad) ── */
+var PRODUCTS=[
+  {key:'bundle',ic:'📦',lb:'Bundle MC + RI',su:'4100 / Ilimitado'},
+  {key:'mc',    ic:'🚨',lb:'Mora Control',  su:'Gestión de cartera'},
+  {key:'ri',    ic:'📊',lb:'RI Mensual',    su:'12 meses'},
+  {key:'bolsa', ic:'🎒',lb:'RI Bolsa',      su:'Pago único 12m'},
+  {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
+  {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
+  {key:'combo', ic:'🧩',lb:'Combo Integral',  su:'RI + MC + PFM'}
+];
+
+function buildProdbar(){
+  var bar=$('prodbar');bar.innerHTML='';
+  PRODUCTS.forEach(function(p){
+    var b=document.createElement('button');
+    b.className='pbtn';b.dataset.key=p.key;
+    b.innerHTML='<span class="ic">'+p.ic+'</span><span class="lb">'+p.lb+'</span><span class="su">'+p.su+'</span>';
+    b.onclick=function(){playClick();setProduct(p.key);};
+    bar.appendChild(b);
+  });
+}
+
+/* ════════ CONFIGURACIÓN POR PRODUCTO (inputs del panel izquierdo) ════════ */
+function optsFrom(arr,valFn,labFn,dataFn){
+  return arr.map(function(r){return '<option value="'+valFn(r)+'"'+(dataFn?dataFn(r):'')+'>'+labFn(r)+'</option>';}).join('');
+}
+function dcSelect(id,vals){
+  var labs={0:'Sin descuento',10:'10%',15:'15% Asesor',20:'20%',25:'25% Supervisor',35:'35% Subgerente',50:'50% Gerente'};
+  return '<div class="fld"><label>Descuento DOA</label><select id="'+id+'" oninput="onConfigChange()" onchange="onConfigChange()">'+
+    vals.map(function(v){return '<option value="'+v+'">'+labs[v]+'</option>';}).join('')+'</select></div>';
+}
+
+function cfgHTML(key){
+  if(key==='bundle')
+    return '<div class="cfg-2">'+
+      '<div class="fld"><label>Tipo Mora Control</label><select id="c-mc" oninput="onConfigChange()" onchange="onConfigChange()"><option value="4100">MC 4100</option><option value="ilim">MC Ilimitado</option></select></div>'+
+      '<div class="fld"><label>Consultas RI / mes</label><select id="c-ri" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(B4100,function(r){return r.r;},function(r){return r.r+' consultas';})+'</select></div>'+
+      '</div>';
+  if(key==='mc')
+    return '<div class="cfg-2">'+
+      '<div class="fld"><label>Plan</label><select id="c-plan" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(MC_P,function(p){return p.u;},function(p){return p.lbl+' — '+p.u+' UF';},function(p){return ' data-p="'+p.p+'"';})+'</select></div>'+
+      dcSelect('c-dc',[0,15,25])+
+      '</div>';
+  if(key==='ri')
+    return '<div class="cfg-2">'+
+      '<div class="fld"><label>Consultas / mes</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(RI_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>'+
+      dcSelect('c-dc',[0,10,15,20,25,35,50])+
+      '</div>';
+  if(key==='bolsa')
+    return '<div class="fld"><label>Consultas totales (12 meses)</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(RIB_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>';
+  if(key==='pfm')
+    return '<div class="cfg-2">'+
+      '<div class="fld"><label>Frecuencia</label><select id="c-fr" oninput="onConfigChange()" onchange="onConfigChange()"><option value="s">Semanal</option><option value="q">Quincenal</option><option value="m">Mensual</option></select></div>'+
+      '<div class="fld"><label>Cantidad de RUTs</label><input type="number" id="c-ruts" value="10" min="1" max="5000" oninput="onConfigChange()"></div>'+
+      dcSelect('c-dc',[0,15,25])+
+      '</div>';
+  if(key==='pc')
+    return '<div class="fld"><label>Tamaño de empresa</label><select id="c-size" oninput="onConfigChange()" onchange="onConfigChange()"><option value="6">Micro — 6 UF/año</option><option value="9">Pequeña — 9 UF/año</option><option value="23">Mediana/Grande — 23 UF/año</option></select></div>';
+  if(key==='combo'){
+    var cmbMin=Math.round((RI_T[0].u+MC_P[0].u+PFM_M[10]*10)*100)/100;
+    return '<div class="note-inline" style="margin:0 0 12px;">🧩 <b>Combo Integral:</b> valor sugerido de partida ('+cmbMin+' UF = mínimos RI + MC + PFM). Ajústalo al precio negociado.</div>'+
+      '<div class="cfg-2">'+
+      '<div class="fld"><label>Precio venta (UF)</label><input type="number" id="c-uv" value="'+cmbMin+'" step="0.1" oninput="onConfigChange()"></div>'+
+      '<div class="fld"><label>Precio lista (UF)</label><input type="number" id="c-ul" value="'+cmbMin+'" step="0.1" oninput="onConfigChange()"></div>'+
+      '<div class="fld"><label>Consultas RI / mes</label><input type="number" id="c-cons" value="10" oninput="onConfigChange()"></div>'+
+      '<div class="fld"><label>Plazo</label><select id="c-plazo" oninput="onConfigChange()" onchange="onConfigChange()"><option value="12">12 meses</option><option value="6">6 meses</option></select></div>'+
+      '</div>';
+  }
+  return '';
+}
+
+/* ════════ CÁLCULO DE LA CONFIGURACIÓN ACTIVA ════════ */
+function computeCurrent(){
+  var k=CURRENT.key,c={tipo:'',ufLista:0,base:0,cons:0,plazo:'12',pago:0,note:''};
+  if(k==='bundle'){
+    var mc=gv('c-mc'),ri=parseInt(gv('c-ri'))||10;
+    var t=(mc==='4100')?B4100:BILIM,row=t.find(function(r){return r.r===ri;})||t[0];
+    c.tipo=(mc==='4100')?'bundle4100':'bundleIlim';c.ufLista=row.u;c.base=row.u;c.cons=ri;c.pago=row.p;
+    c.note='Sin descuento adicional al bundle · Pago anticipado <b>'+row.p+' UF</b> ('+fmtN(ufc(row.p))+')';
+  }else if(k==='mc'){
+    var u=parseFloat(gv('c-plan')),dc=parseInt(gv('c-dc'))||0;
+    var sel=$('c-plan'),pago=sel?parseFloat(sel.options[sel.selectedIndex].dataset.p):0;
+    c.tipo='mc_solo';c.ufLista=u;c.base=u*(1-dc/100);c.pago=pago;
+    c.note='Incluye 40 Emails · 10 Cartas · 5 SMS/mes · Pago anticipado <b>'+pago+' UF</b>';
+  }else if(k==='ri'){
+    var sR=$('c-cons'),uR=parseFloat(gv('c-cons')),dcR=parseInt(gv('c-dc'))||0;
+    var cR=sR?parseInt(sR.options[sR.selectedIndex].dataset.c):0;
+    c.tipo='ri_plan';c.ufLista=uR;c.base=uR*(1-dcR/100);c.cons=cR;
+    c.note='Plan mensual 12 meses · UF/consulta lista: <b>'+(uR/cR).toFixed(6)+'</b>';
+  }else if(k==='bolsa'){
+    var sB=$('c-cons'),uB=parseFloat(gv('c-cons'));
+    var cB=sB?parseInt(sB.options[sB.selectedIndex].dataset.c):0;
+    c.tipo='ri_plan';c.ufLista=uB;c.base=uB;c.cons=cB;
+    c.note='Bolsa de pago único para 12 meses, sin cargo mensual · UF/consulta: <b>'+(uB/cB).toFixed(4)+'</b>';
+  }else if(k==='pfm'){
+    var fr=gv('c-fr'),ruts=parseInt(gv('c-ruts'))||10,dcP=parseInt(gv('c-dc'))||0;
+    var tar=pfmT(fr,ruts);c.tipo='pfm';c.ufLista=tar*ruts;c.base=c.ufLista*(1-dcP/100);
+    var fl={s:'Semanal',q:'Quincenal',m:'Mensual'};
+    c.note=fl[fr]+' · '+ruts+' RUTs · Tarifa <b>'+tar+' UF/rut</b>';
+  }else if(k==='pc'){
+    var v=parseFloat(gv('c-size'));c.tipo='pc';c.ufLista=v;c.base=v;c.plazo='12';
+    c.note='Pago anual (12 meses) · Mensualizado <b>'+(v/12).toFixed(4)+' UF</b> ('+fmtN(ufc(v/12))+'/mes) · Evaluación en 30 min';
+  }else if(k==='combo'){
+    var uv=parseFloat(gv('c-uv'))||0,ul=parseFloat(gv('c-ul'))||uv;
+    c.tipo='combo3';c.ufLista=ul;c.base=uv;c.cons=parseInt(gv('c-cons'))||0;c.plazo=gv('c-plazo')||'12';
+    c.note='Propuesta integral RI + Mora Control + Portfolio Monitor';
+  }else return null;
+
+  // Precio venta final (slider tiene prioridad si está activo)
+  var venta=(CURRENT.override!==null&&!isNaN(CURRENT.override))?CURRENT.override:c.base;
+  venta=Math.round(venta*10000)/10000;
+  c.ufVenta=venta;
+  return c;
+}
+
+/* ════════ RESUMEN COMERCIAL (panel izquierdo) ════════ */
+function renderSummary(c){
+  var pi=PINFO[c.tipo]||{badge:'COTIZACIÓN',n:'Producto'};
+  var items=PITEMS[c.tipo]||[];
+  var ufL=c.ufLista,ufV=c.ufVenta;
+  var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
+  var clp=ufV>0?ufc(ufV):0;
+  var slMin=ufL>0?(ufL*0.4).toFixed(2):0,slMax=ufL>0?(ufL*1.5).toFixed(2):10;
+
+  var html=''+
+    '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
+    '<div class="price-wrap">'+
+      '<div class="price-lbl">Precio de venta (cargo fijo)</div>'+
+      '<div class="price-big" id="s-price-big">'+(ufV>0?ufd(ufV)+' UF + IVA':'— UF')+'</div>'+
+      '<div class="price-clp" id="s-price-clp">'+(clp>0?'≈ '+fmtN(clp)+' mensual con IVA':'—')+'</div>'+
+      '<div id="s-disc">'+(hayDc?discHTML(dc,ufL,ufV):'')+'</div>'+
+    '</div>'+
+    (ufL>0?
+    '<div class="slider-box">'+
+      '<div class="st">🎛 Ajustar precio de venta al cliente</div>'+
+      '<div class="slider-row">'+
+        '<input type="range" id="sl-main" min="'+slMin+'" max="'+slMax+'" step="0.1" value="'+ufV+'" oninput="onSlide(this.value)">'+
+        '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)">'+
+      '</div>'+
+    '</div>':'')+
+    '<div class="metrics">'+
+      metric('Precio lista','m-lista','y',ufL>0?ufd(ufL)+' UF':'—')+
+      metric('Precio venta','m-venta','g',ufV>0?ufd(ufV)+' UF':'—')+
+      metric('Descuento','m-desc',hayDc?'g':'wa',hayDc?'−'+dc+'%':'—')+
+      metric('$/mes c/IVA','m-mes','b',clp>0?fmtN(clp):'—')+
+      metric('Anual (UF)','m-anu-uf','o',ufV>0?ufd(ufV*12)+' UF':'—')+
+      metric('Anual (CLP)','m-anu-clp','o',clp>0?fmtN(clp*12):'—')+
+      (c.pago?metric('Pago anticipado','m-pago','y',c.pago+' UF'):'')+
+      (c.cons?metric('Consultas RI','m-cons','b',c.cons):'')+
+    '</div>'+
+    (c.note?'<div class="note-inline" id="s-note">'+c.note+'</div>':'')+
+    '<div class="block-t" style="margin:18px 0 8px;">✅ Argumentos de venta</div>'+
+    '<ul class="benefits" id="s-benefits">'+items.map(function(i){return '<li><span class="ck">✔</span><span>'+i+'</span></li>';}).join('')+'</ul>'+
+    '<div class="cond-row" style="margin-top:14px;">'+
+      '<div class="ci"><label>Contrato</label><div class="cv">'+(c.plazo||'12')+' meses</div></div>'+
+      '<div class="ci"><label>Modalidad</label><div class="cv" style="color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
+      '<div class="ci"><label>Documentos</label><div class="cv" style="font-weight:600;color:#ccc;">Ficha · Cédula · Escritura</div></div>'+
+    '</div>';
+  $('summary-zone').innerHTML=html;
+}
+function metric(lbl,id,cls,val){return '<div class="metric"><label>'+lbl+'</label><div class="v '+cls+'" id="'+id+'">'+val+'</div></div>';}
+function discHTML(dc,ufL,ufV){
+  return '<div class="price-disc"><span class="pct">−'+dc+'%</span><div class="det"><s>Lista: '+ufd(ufL)+' UF</s><br>Final: '+ufd(ufV)+' UF</div></div>';
+}
+
+/* Actualización ligera al mover el slider (sin reconstruir el resumen) */
+function lightUpdate(v){
+  if(!LAST)return;
+  var ufL=LAST.ufLista,ufV=v;
+  var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
+  var clp=ufV>0?ufc(ufV):0;
+  st('s-price-big',ufV>0?ufd(ufV)+' UF + IVA':'— UF');
+  st('s-price-clp',clp>0?'≈ '+fmtN(clp)+' mensual con IVA':'—');
+  sv('s-disc',hayDc?discHTML(dc,ufL,ufV):'');
+  st('m-venta',ufV>0?ufd(ufV)+' UF':'—');
+  var md=$('m-desc');if(md){md.textContent=hayDc?'−'+dc+'%':'—';md.className='v '+(hayDc?'g':'wa');}
+  st('m-mes',clp>0?fmtN(clp):'—');
+  st('m-anu-uf',ufV>0?ufd(ufV*12)+' UF':'—');
+  st('m-anu-clp',clp>0?fmtN(clp*12):'—');
+  var sn=$('sln-main');if(sn&&document.activeElement!==sn)sn.value=ufd(ufV);
+  var sl=$('sl-main');if(sl&&document.activeElement!==sl)sl.value=ufV;
+  LAST.ufVenta=ufV;
+  setBridge('mu',ufV);
+  genMail();syncWA();
+}
+
+/* ════════ PUENTE → genMail() (motor original intacto) ════════ */
+function refresh(){
+  var c=computeCurrent();if(!c)return;LAST=c;
+  setBridge('mt',c.tipo);
+  setBridge('mu',c.ufVenta>0?c.ufVenta:'');
+  setBridge('mula',c.ufLista>0?c.ufLista:'');
+  setBridge('mc2',c.cons||'');
+  setBridge('mp',c.plazo||'12');
+  renderSummary(c);
+  genMail();
+  syncWA();
+}
+function onConfigChange(){CURRENT.override=null;refresh();}
+function onSlide(v){v=parseFloat(v);if(isNaN(v)||v<0)return;CURRENT.override=v;lightUpdate(v);}
+function onClientChange(){genMail();syncWA();}
+function syncWA(){var t=$('tpl-body'),o=$('wa-text-view');if(t&&o)o.textContent=t.value;}
+
+function saveExecField(){
+  var ma=$('ma'),mf=$('mf'),ml=$('ml');
+  if(ma&&ma.value.trim())_lsSet('eq_exec_name',ma.value.trim());
+  if(mf)_lsSet('eq_exec_tel',mf.value.trim());
+  if(ml)_lsSet('eq_exec_email',ml.value.trim());
+  updWspLink();genMail();syncWA();
+}
+function resetExec(){
+  if(!confirm('¿Cambiar tus datos de ejecutivo/a?'))return;
+  try{['eq_exec_name','eq_exec_tel','eq_exec_email','eq_exec_date'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
+  ['ma','mf','ml'].forEach(function(id){var e=$(id);if(e)e.value='';});
+  updWspLink();onClientChange();toast('Datos borrados.','ok','mail-toast');
+}
+function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'none':'flex';onClientChange();}
+
+/* ════════ SELECCIÓN DE PRODUCTO (gobierna toda la interfaz) ════════ */
+function setProduct(key){
+  CURRENT.key=key;CURRENT.override=null;
+  document.querySelectorAll('.pbtn').forEach(function(b){b.classList.toggle('on',b.dataset.key===key);});
+  var p=PRODUCTS.find(function(x){return x.key===key;});
+  $('cfg-prod-name').textContent=p?'· '+p.lb:'';
+  $('config-zone').innerHTML=cfgHTML(key);
+  refresh();
+  if(window.matchMedia('(max-width:880px)').matches)setMobileView('config');
+}
+
+/* ════════ VISTAS PREVIAS (panel derecho) ════════ */
+function setPreview(which){
+  document.querySelectorAll('.pv-tab').forEach(function(t){t.classList.toggle('on',t.dataset.pv===which);});
+  ['gmail','outlook','wsp','img'].forEach(function(p){var e=$('pane-'+p);if(e)e.classList.toggle('on',p===which);});
+}
+function setMobileView(v){
+  var ws=$('workstation');ws.classList.toggle('m-config',v==='config');ws.classList.toggle('m-preview',v==='preview');
+  $('mt-config').classList.toggle('on',v==='config');$('mt-preview').classList.toggle('on',v==='preview');
+}
+
+/* ════════ AMPLIAR (modal por formato) ════════ */
+function ampliar(which){
+  var body=$('ampliar-body'),title=$('ampliar-title'),html='',light=false;
+  if(which==='gmail'){title.textContent='📧 Vista ampliada — Gmail';html='<div style="background:#f8f9fa;border-radius:8px;padding:12px;">'+($('tpl-rich-gmail').innerHTML)+'</div>';light=true;}
+  else if(which==='outlook'){title.textContent='📨 Vista ampliada — Outlook';html='<div style="background:#fff;border-radius:8px;padding:12px;overflow-x:auto;">'+($('tpl-rich-outlook').innerHTML)+'</div>';light=true;}
+  else if(which==='wsp'){title.textContent='💬 Vista ampliada — WhatsApp';html='<div style="display:flex;justify-content:center;">'+($('cot-card-wsp').outerHTML)+'</div>';}
+  else if(which==='img'){title.textContent='🖼 Vista ampliada — Imagen';html='<div style="display:flex;justify-content:center;">'+($('cot-card-pc').outerHTML)+'</div>';}
+  body.className='modal-body'+(light?' light':'');
+  body.innerHTML=html;
+  $('ampliar-modal').classList.add('on');
+}
+function closeModal(id){$(id).classList.remove('on');}
+
+/* ════════ CONVERSOR UF / CLP (herramienta) ════════ */
+function openUF(){cUF();cCLP();cCom();$('uf-modal').classList.add('on');}
+function srUF(id,h){var e=$(id);if(e)e.innerHTML=h;}
+function cUF(){var u=parseFloat(gv('uf-i'))||0;srUF('res-uf','<b>'+u+' UF</b> = '+fmtN(ufn(u))+' (sin IVA) · <span style="color:#2ecc71;">'+fmtN(ufc(u))+'</span> (c/IVA)');}
+function cCLP(){var c=parseFloat(gv('clp-i'))||0;srUF('res-clp',fmtN(c)+' = <b>'+(c/getUF()).toFixed(6)+' UF</b>');}
+function cCom(){var v=parseFloat(gv('com-u'))||0,p=parseFloat(gv('com-p'))||0,com=v*(p/100);srUF('res-com','Comisión: <b>'+fmtN(ufn(com))+'</b> ('+com.toFixed(6)+' UF)');}
+
+/* ════════ COTIZACIONES GUARDADAS ════════ */
+function captureVals(){var o={};document.querySelectorAll('#config-zone select,#config-zone input').forEach(function(e){o[e.id]=e.value;});return o;}
+function saveCurrentQuote(){
+  if(!LAST)return;
+  var pi=PINFO[LAST.tipo]||{n:'Producto'};
+  STATE.quotes.push({
+    key:CURRENT.key,vals:captureVals(),override:CURRENT.override,
+    mn:gv('mn'),me:gv('me'),
+    prod:pi.n,uf:ufd(LAST.ufVenta),meta:(gv('me')||'Sin empresa')+' · '+hoy(),fecha:hoy()
+  });
+  $('quote-count').textContent=STATE.quotes.length;
+  playSound('save');toast('✔ Cotización guardada','ok','mail-toast');
+}
+function openQuotes(){renderQuotesList();$('quotes-modal').classList.add('on');}
+function renderQuotesList(){
+  var el=$('quotes-list');
+  if(!STATE.quotes.length){el.innerHTML='<p style="color:var(--wa);font-size:.9rem;">Aún no hay cotizaciones guardadas. Usa “💾 Guardar cotización”.</p>';return;}
+  el.innerHTML=STATE.quotes.map(function(q,i){
+    return '<div class="qrow"><div><div class="qp">'+q.prod+'</div><div class="qm">'+q.meta+'</div></div>'+
+      '<div class="qpr">'+q.uf+' UF</div>'+
+      '<div class="qa"><button class="load" onclick="loadQuote('+i+')">Cargar</button><button class="del" onclick="delQuote('+i+')">✕</button></div></div>';
+  }).join('');
+}
+function loadQuote(i){
+  var q=STATE.quotes[i];if(!q)return;
+  CURRENT.key=q.key;CURRENT.override=null;
+  document.querySelectorAll('.pbtn').forEach(function(b){b.classList.toggle('on',b.dataset.key===q.key);});
+  var p=PRODUCTS.find(function(x){return x.key===q.key;});$('cfg-prod-name').textContent=p?'· '+p.lb:'';
+  $('config-zone').innerHTML=cfgHTML(q.key);
+  Object.keys(q.vals||{}).forEach(function(id){var e=$(id);if(e)e.value=q.vals[id];});
+  if($('mn'))$('mn').value=q.mn||'';if($('me'))$('me').value=q.me||'';
+  CURRENT.override=q.override;
+  refresh();
+  closeModal('quotes-modal');
+  if(window.matchMedia('(max-width:880px)').matches)setMobileView('preview');
+  toast('✔ Cotización cargada','ok','mail-toast');
+}
+function delQuote(i){STATE.quotes.splice(i,1);$('quote-count').textContent=STATE.quotes.length;renderQuotesList();}
+
+/* cerrar modales al hacer clic en el fondo */
+document.addEventListener('click',function(e){if(e.target.classList&&e.target.classList.contains('modal'))e.target.classList.remove('on');});
 function _lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function _lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function getUF(){return parseFloat(document.getElementById('uf-global').value)||40644;}
@@ -262,120 +747,6 @@ function preloadLogo(cb){
   img.onerror=function(){STATE.logoImg=null;if(cb)cb(null);};
   img.src='logo-equifax.png';
 }
-
-function saveQuote(obj){
-  obj.fecha=hoy();obj.ufUsada=getUF();
-  obj.ejecutivo=_lsGet('eq_exec_name')||'';
-  obj.ejecutivoTel=_lsGet('eq_exec_tel')||'';
-  obj.ejecutivoEmail=_lsGet('eq_exec_email')||'';
-  STATE.quotes.push(obj);
-  STATE.activeQuoteIndex=STATE.quotes.length-1;
-  document.getElementById('quote-count').textContent=STATE.quotes.length;
-  var tab=document.querySelector('.tab[data-id="mail"]');
-  if(tab){tab.classList.add('has-quote');pulseMailTab();}
-  playSound('save');
-  toast('✔ Cotización guardada — ve a ✉ Plantillas para generar el correo','ok');
-}
-function removeQuote(i){
-  STATE.quotes.splice(i,1);
-  if(STATE.activeQuoteIndex>=STATE.quotes.length)STATE.activeQuoteIndex=STATE.quotes.length-1;
-  document.getElementById('quote-count').textContent=STATE.quotes.length;
-  renderQuoteList();
-}
-function renderQuoteList(){
-  var el=document.getElementById('quote-panel-list');if(!el)return;
-  if(!STATE.quotes.length){el.innerHTML='<p style="color:var(--wa);font-size:.8rem;padding:8px 0;">Sin cotizaciones guardadas. Usa el botón 💾 en cada calculadora.</p>';return;}
-  el.innerHTML='<div class="quote-list">'+STATE.quotes.map(function(q,i){
-    var act=i===STATE.activeQuoteIndex;
-    return '<div class="qi" style="'+(act?'border-color:#2ecc71;background:rgba(46,204,113,.07);':'')+'">'+
-      '<div><div class="qi-prod">'+q.prod+(act?' <span style="color:#2ecc71;font-size:.65rem;">● ACTIVA</span>':'')+'</div>'+
-      '<div class="qi-meta">'+q.meta+(q.fecha?' · '+q.fecha:'')+'</div></div>'+
-      '<div class="qi-price">'+(q.uf?q.uf+' UF':'—')+'</div>'+
-      '<div class="qi-acts">'+
-        '<button class="qibtn" onclick="useInMail('+i+')" style="'+(act?'color:#2ecc71;':'')+'">'+
-          (act?'✔ Activa':'Usar')+'</button>'+
-        '<button class="qibtn del" onclick="removeQuote('+i+')">✕</button>'+
-      '</div></div>';
-  }).join('')+'</div>';
-}
-function useInMail(i){
-  var q=STATE.quotes[i];STATE.activeQuoteIndex=i;
-  goTo('mail');
-  setTimeout(function(){syncQuoteToForm(q);renderQuoteList();toast('✔ Datos cargados.','ok','mail-toast');},150);
-}
-function syncQuoteToForm(q){
-  if(!q)return;
-  var t=document.getElementById('mt');if(t&&q.tipo)t.value=q.tipo;
-  var u=document.getElementById('mu');if(u&&q.uf!==undefined)u.value=q.uf;
-  var ul=document.getElementById('mula');if(ul&&q.ufL!==undefined)ul.value=q.ufL;
-  var c=document.getElementById('mc2');if(c&&q.cons)c.value=q.cons;
-  var pl=document.getElementById('mp');if(pl&&q.plazo)pl.value=q.plazo;
-  var ma=document.getElementById('ma');if(ma)ma.value=q.ejecutivo||_lsGet('eq_exec_name')||'';
-  var mf=document.getElementById('mf');if(mf)mf.value=q.ejecutivoTel||_lsGet('eq_exec_tel')||'';
-  var ml=document.getElementById('ml');if(ml)ml.value=q.ejecutivoEmail||_lsGet('eq_exec_email')||'';
-  updWspLink();
-  var b=document.getElementById('sync-banner');if(b){b.classList.add('on');setTimeout(function(){b.classList.remove('on');},5000);}
-}
-
-function goTo(id){
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.dataset.id===id);});
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+id);});
-  if(id==='mail'){setTimeout(function(){
-    renderQuoteList();loadExecutivoFields();
-    if(STATE.activeQuoteIndex>=0&&STATE.quotes[STATE.activeQuoteIndex])syncQuoteToForm(STATE.quotes[STATE.activeQuoteIndex]);
-  },50);}
-}
-
-function showRes(id,d){
-  var box=document.getElementById(id);if(!box)return;
-  var ufL=d.ufLista||d.uf||0,ufV=d.ufVenta||d.uf||0;
-  var hayDc=ufL>0&&ufV<ufL;
-  var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
-  var slMin=(ufL>0?ufL*0.4:ufV*0.4);
-  var qData={prod:d.prod,tipo:d.tipo,uf:ufV,ufL:ufL,cons:d.cons||0,meta:d.meta||'',plazo:d.plazo||'12'};
-  var qStr=JSON.stringify(qData).replace(/'/g,"&#39;");
-  box.innerHTML=
-    '<div class="res-head"><span>'+d.prod+'</span>'+
-    '</div>'+
-    '<div class="res-body">'+
-      '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;">'+
-        '<div><div class="res-big">'+ufV+' UF/mes</div><div style="font-size:.7rem;color:var(--wa);">precio venta</div></div>'+
-        '<div><div class="res-big" style="color:var(--bl);">'+fmtN(ufc(ufV))+'</div><div style="font-size:.7rem;color:var(--wa);">mensual c/IVA</div></div>'+
-        (hayDc?'<div><div class="res-big" style="color:var(--gn);">−'+dc+'%</div><div style="font-size:.7rem;color:var(--wa);">descuento</div></div>':'')+
-      '</div>'+(d.extra||'')+
-      '<div class="grid3">'+
-        '<div class="gitem"><label>Precio lista</label><div class="val y">'+ufL+' UF</div></div>'+
-        '<div class="gitem"><label>Precio venta</label><div class="val g">'+ufV+' UF</div></div>'+
-        '<div class="gitem"><label>Descuento</label><div class="val '+(hayDc?'g':'wa')+'">'+(hayDc?'−'+dc+'%':'—')+'</div></div>'+
-        '<div class="gitem"><label>Mensual c/IVA</label><div class="val b">'+fmtN(ufc(ufV))+'</div></div>'+
-        '<div class="gitem"><label>Anual 12m (UF)</label><div class="val or">'+(ufV*12)+' UF</div></div>'+
-        '<div class="gitem"><label>Anual (CLP)</label><div class="val or">'+fmtN(ufc(ufV)*12)+'</div></div>'+
-      '</div>'+
-      '<div class="slider-wrap">'+
-        '<div class="sw-title">🎛 Ajustar precio de venta al cliente</div>'+
-        '<div class="sw-row">'+
-          '<input type="range" id="sl-'+id+'" min="'+slMin.toFixed(4)+'" max="'+(ufL*1.5).toFixed(4)+'" step="0.1" value="'+ufV+'" style="flex:1;" oninput="updSl(\''+id+'\','+ufL+',this.value)">'+
-          '<input type="number" id="sln-'+id+'" value="'+ufV+'" min="0.0001" step="0.1" oninput="updSlN(\''+id+'\','+ufL+',this.value)">'+
-        '</div>'+
-        '<div class="grid3">'+
-          '<div class="gitem"><label>$ mensual c/IVA</label><div class="val b" id="sl-c-'+id+'">'+fmtN(ufc(ufV))+'</div></div>'+
-          '<div class="gitem"><label>Descuento %</label><div class="val g" id="sl-d-'+id+'">'+(hayDc?'−'+dc+'%':'—')+'</div></div>'+
-          '<div class="gitem"><label>Precio lista</label><div class="val y">'+ufL+' UF</div></div>'+
-        '</div>'+
-      '</div>'+
-    '</div>';
-  box.classList.add('on');
-  setTimeout(function(){saveQuote(qData);},60);
-}
-function updSl(id,ufL,v){
-  v=parseFloat(v);document.getElementById('sln-'+id).value=v;
-  var h=ufL>0&&v<ufL,dc=h?Math.round((1-v/ufL)*100):0;
-  document.getElementById('sl-c-'+id).textContent=fmtN(ufc(v));
-  document.getElementById('sl-d-'+id).textContent=h?'−'+dc+'%':'—';
-}
-function updSlN(id,ufL,v){v=parseFloat(v);if(isNaN(v)||v<0)return;document.getElementById('sl-'+id).value=v;updSl(id,ufL,v);}
-
-// ── DATOS PRODUCTO ──────────────────────────────────
 var B4100=[{r:10,u:2.5,p:28},{r:20,u:3,p:32},{r:30,u:3.5,p:38},{r:40,u:4,p:42},{r:50,u:4.5,p:46},{r:60,u:5,p:50},{r:70,u:5.5,p:54},{r:80,u:6,p:58},{r:90,u:6.5,p:62},{r:100,u:7,p:66}];
 var BILIM=[{r:10,u:4,p:42},{r:20,u:4.5,p:46},{r:30,u:5,p:48},{r:40,u:5.5,p:50},{r:50,u:6,p:52},{r:60,u:6.5,p:54},{r:70,u:7,p:56},{r:80,u:7.5,p:58},{r:90,u:8,p:60},{r:100,u:8.5,p:62}];
 var RI_T=[{c:10,u:0.11},{c:20,u:0.165},{c:30,u:0.2419},{c:40,u:0.3153},{c:50,u:0.3658},{c:60,u:0.4264},{c:70,u:0.4808},{c:80,u:0.5283},{c:90,u:0.5681},{c:100,u:0.627},{c:150,u:0.8359},{c:200,u:0.891},{c:250,u:0.9432},{c:300,u:0.9874},{c:350,u:1.017},{c:400,u:1.0365},{c:500,u:1.056},{c:1000,u:1.8612}];
@@ -385,152 +756,8 @@ var PFM_S={1:0.0725,2:0.0711,3:0.0697,5:0.0683,10:0.067,20:0.065,30:0.063,40:0.0
 var PFM_Q={1:0.0563,2:0.0554,3:0.0546,5:0.0538,10:0.053,20:0.051,30:0.050,40:0.048,50:0.046,60:0.045,70:0.043,80:0.041,90:0.039,100:0.038,200:0.029,300:0.025,500:0.021,1000:0.017};
 var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.039,50:0.038,60:0.036,70:0.035,80:0.033,90:0.032,100:0.030,200:0.023,300:0.020,500:0.017,1000:0.013};
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
-
-// ── PÁGINAS ─────────────────────────────────────────
-function pagBundle(){
-  var r4=B4100.map(function(r){return'<tr><td>'+r.r+'</td><td class="y">'+r.u+' UF</td><td class="g">'+r.p+' UF</td><td class="b">'+fmtN(ufc(r.u))+'</td><td class="or">'+fmtN(ufc(r.u)*12)+'</td></tr>';}).join('');
-  var rI=BILIM.map(function(r){return'<tr><td>'+r.r+'</td><td class="y">'+r.u+' UF</td><td class="g">'+r.p+' UF</td><td class="b">'+fmtN(ufc(r.u))+'</td><td class="or">'+fmtN(ufc(r.u)*12)+'</td></tr>';}).join('');
-  var o4=B4100.map(function(r){return'<option value="'+r.r+'">'+r.r+'</option>';}).join('');
-  return '<div class="ptitle">Bundle MC + Reporte Interactivo <span class="badge">SIN DESCUENTO ADICIONAL</span></div>'+
-    '<div class="alerta"><b>⚠</b> No aplica descuento al bundle · Contrato mínimo 12 meses · Pago postpago 30 días</div>'+
-    '<div class="cbox"><h3>🧮 Calcular Bundle</h3><div class="crow">'+
-      '<div class="f"><label>Tipo MC</label><select id="b-mc"><option value="4100">MC 4100</option><option value="ilim">MC Ilimitado</option></select></div>'+
-      '<div class="f"><label>Consultas RI/mes</label><select id="b-ri">'+o4+'</select></div>'+
-      '<button class="btn" onmouseenter="playHover()" onclick="calcBundle();playClick()">Calcular</button></div>'+
-    '<div id="res-bundle" class="res"></div></div>'+
-    '<div class="cbox"><h3>📋 Bundle MC 4100</h3><div class="tbl"><table><thead><tr><th>RI/mes</th><th>UF/mes</th><th>Pago antic.</th><th>$/mes c/IVA</th><th>$/año c/IVA</th></tr></thead><tbody>'+r4+'</tbody></table></div></div>'+
-    '<div class="cbox"><h3>📋 Bundle MC Ilimitado</h3><div class="tbl"><table><thead><tr><th>RI/mes</th><th>UF/mes</th><th>Pago antic.</th><th>$/mes c/IVA</th><th>$/año c/IVA</th></tr></thead><tbody>'+rI+'</tbody></table></div></div>';
-}
-function calcBundle(){
-  var mc=document.getElementById('b-mc').value;
-  var ri=parseInt(document.getElementById('b-ri').value);
-  var t=mc==='4100'?B4100:BILIM;
-  var row=t.find(function(r){return r.r===ri;})||t[0];
-  showRes('res-bundle',{prod:'Bundle MC '+(mc==='4100'?'4100':'Ilimitado')+' + '+ri+' RI',tipo:mc==='4100'?'bundle4100':'bundleIlim',ufLista:row.u,ufVenta:row.u,cons:ri,plazo:'12',meta:'P. anticipado '+row.p+' UF · 12 meses',extra:'<div class="rl">Pago anticipado: <b>'+row.p+' UF</b> → '+fmtN(ufc(row.p))+'</div>'});
-}
-
-function pagMC(){
-  var cards=MC_P.map(function(p){return'<div class="card"><div class="cl">'+p.lbl+'</div><div class="cv">'+p.u+' UF/mes</div><div class="cs">P.anticip: '+p.p+' UF</div></div>';}).join('');
-  var opts=MC_P.map(function(p){return'<option value="'+p.u+'">'+p.lbl+' — '+p.u+' UF</option>';}).join('');
-  return '<div class="ptitle">Mora Control <span class="badge">GESTIÓN DE CARTERA</span></div>'+
-    '<div class="cbox"><h3>🧮 Calcular</h3><div class="crow">'+
-      '<div class="f"><label>Plan</label><select id="mc-p">'+opts+'</select></div>'+
-      '<div class="f"><label>Descuento DOA</label><select id="mc-d"><option value="0">Sin descuento</option><option value="15">15% Asesor</option><option value="25">25% Supervisor</option></select></div>'+
-      '<button class="btn" onmouseenter="playHover()" onclick="calcMC();playClick()">Calcular</button></div>'+
-    '<div id="res-mc" class="res"></div></div>'+
-    '<div class="cards">'+cards+'</div>'+
-    '<div class="chips"><div class="chip"><div class="n">40</div><div class="t">Emails</div></div><div class="chip"><div class="n">10</div><div class="t">Cartas</div></div><div class="chip"><div class="n">5</div><div class="t">SMS</div></div></div>'+
-    '<div class="cbox"><h3>📋 Cobros adicionales MC 4100</h3><div class="tbl"><table><thead><tr><th>Extra</th><th>Desde</th><th>Hasta</th></tr></thead><tbody>'+
-    '<tr><td class="y">0,6 UF</td><td>$4.100.001</td><td>$5.500.000</td></tr>'+
-    '<tr><td class="y">1,2 UF</td><td>$5.500.001</td><td>$6.900.000</td></tr>'+
-    '<tr><td class="y">1,8 UF</td><td>$6.900.001</td><td>$8.300.000</td></tr>'+
-    '<tr><td class="y">2,4 UF</td><td>$8.300.001</td><td>$9.700.000</td></tr>'+
-    '<tr><td class="y">3,0 UF</td><td>$9.700.001</td><td>$11.100.000</td></tr>'+
-    '<tr><td class="y">3,6 UF</td><td>$11.100.001</td><td>$12.500.000</td></tr>'+
-    '<tr><td class="y">4,2 UF</td><td>$12.500.001</td><td>$13.900.000</td></tr>'+
-    '<tr><td class="y">4,8 UF</td><td>$13.900.001</td><td>Ilimitado</td></tr>'+
-    '</tbody></table></div></div>';
-}
-function calcMC(){
-  var ufL=parseFloat(document.getElementById('mc-p').value);
-  var dc=parseInt(document.getElementById('mc-d').value);
-  var ufV=ufL*(1-dc/100);
-  var pl=MC_P.find(function(p){return p.u===ufL;})||MC_P[0];
-  showRes('res-mc',{prod:pl.lbl,tipo:'mc_solo',ufLista:ufL,ufVenta:ufV,plazo:'12',meta:'P.anticip '+pl.p+' UF'+(dc?' · Dcto '+dc+'%':''),extra:'<div class="rl">Pago anticipado: <b>'+pl.p+' UF</b> → '+fmtN(ufc(pl.p))+'</div>'});
-}
-
-function pagRI(){
-  var opts=RI_T.map(function(r){return'<option value="'+r.u+'" data-c="'+r.c+'">'+r.c+' consultas</option>';}).join('');
-  var rows=RI_T.map(function(r){return'<tr><td>'+r.c+'</td><td class="y">'+r.u+'</td><td class="mu">'+(r.u/r.c).toFixed(6)+'</td><td class="b">'+fmtN(ufc(r.u))+'</td></tr>';}).join('');
-  return '<div class="ptitle">Reporte Interactivo — Plan Mensual <span class="badge">12 MESES</span></div>'+
-    '<div class="alerta"><b>Descuentos:</b> Asesor 15% autónomo · Supervisor 25% · Subgerente 35% · Gerente 50%</div>'+
-    '<div class="cbox"><h3>🧮 Calcular RI</h3><div class="crow">'+
-      '<div class="f"><label>Consultas/mes</label><select id="ri-c">'+opts+'</select></div>'+
-      '<div class="f"><label>Descuento DOA</label><select id="ri-d"><option value="0">Sin dcto</option><option value="10">10%</option><option value="15">15% Asesor</option><option value="20">20%</option><option value="25">25% Supervisor</option><option value="35">35% Subgerente</option><option value="50">50% Gerente</option></select></div>'+
-      '<button class="btn" onmouseenter="playHover()" onclick="calcRI();playClick()">Calcular</button></div>'+
-    '<div id="res-ri" class="res"></div></div>'+
-    '<div class="cbox"><h3>📋 Tarifas 12 meses</h3><div class="tbl"><table><thead><tr><th>Consultas</th><th>Cargo fijo (UF)</th><th>UF/consulta</th><th>$/mes c/IVA</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
-}
-function calcRI(){
-  var sel=document.getElementById('ri-c');
-  var ufL=parseFloat(sel.value);
-  var cons=parseInt(sel.options[sel.selectedIndex].dataset.c)||20;
-  var dc=parseInt(document.getElementById('ri-d').value);
-  var ufV=ufL*(1-dc/100);
-  showRes('res-ri',{prod:'RI '+cons+' consultas/mes',tipo:'ri_plan',ufLista:ufL,ufVenta:ufV,cons:cons,plazo:'12',meta:cons+' consultas · 12 meses'+(dc?' · Dcto '+dc+'%':''),extra:'<div class="rl">UF/consulta lista: <b>'+(ufL/cons).toFixed(6)+' UF</b></div>'});
-}
-
-function pagBolsa(){
-  var opts=RIB_T.map(function(r){return'<option value="'+r.u+'" data-c="'+r.c+'">'+r.c+' consultas</option>';}).join('');
-  var rows=RIB_T.map(function(r){return'<tr><td>'+r.c+'</td><td class="y">'+r.u+' UF</td><td class="mu">'+(r.u/r.c).toFixed(4)+'</td><td class="b">'+fmtN(ufc(r.u))+'</td></tr>';}).join('');
-  return '<div class="ptitle">Reporte Interactivo — Bolsa <span class="badge">PAGO ÚNICO 12M</span></div>'+
-    '<div class="alerta"><b>Bolsa:</b> Pago único para 12 meses. Sin cargo mensual.</div>'+
-    '<div class="cbox"><h3>🧮 Calcular Bolsa</h3><div class="crow">'+
-      '<div class="f"><label>Consultas totales</label><select id="bls-c">'+opts+'</select></div>'+
-      '<button class="btn" onmouseenter="playHover()" onclick="calcBolsa();playClick()">Calcular</button></div>'+
-    '<div id="res-bolsa" class="res"></div></div>'+
-    '<div class="cbox"><h3>📋 Tabla bolsa</h3><div class="tbl"><table><thead><tr><th>Consultas</th><th>Precio 12m (UF)</th><th>UF/consulta</th><th>$CLP total</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
-}
-function calcBolsa(){
-  var sel=document.getElementById('bls-c');
-  var ufL=parseFloat(sel.value);
-  var cons=parseInt(sel.options[sel.selectedIndex].dataset.c)||20;
-  showRes('res-bolsa',{prod:'RI Bolsa '+cons+' consultas',tipo:'ri_plan',ufLista:ufL,ufVenta:ufL,cons:cons,plazo:'12',meta:'Pago único 12m',extra:'<div class="rl">UF/consulta: <b>'+(ufL/cons).toFixed(4)+' UF</b></div>'});
-}
-
-function pagPFM(){
-  var rows=[1,2,5,10,20,30,50,100,200,300,500,1000].map(function(r){
-    return'<tr><td>'+r+'</td><td class="y">'+pfmT('s',r)+'</td><td class="y">'+pfmT('q',r)+'</td><td class="y">'+pfmT('m',r)+'</td></tr>';
-  }).join('');
-  return '<div class="ptitle">Portfolio Monitor <span class="badge">MONITOREO</span></div>'+
-    '<div class="alerta"><b>Descuentos:</b> Asesor 15% · Supervisor 25%</div>'+
-    '<div class="cbox"><h3>🧮 Calcular PFM</h3><div class="crow">'+
-      '<div class="f"><label>Frecuencia</label><select id="pfm-fr"><option value="s">Semanales</option><option value="q">Quincenales</option><option value="m">Mensuales</option></select></div>'+
-      '<div class="f"><label>Cantidad RUTs</label><input type="number" id="pfm-r" value="10" min="1" max="5000"></div>'+
-      '<div class="f"><label>Descuento DOA</label><select id="pfm-d"><option value="0">Sin dcto</option><option value="15">15% Asesor</option><option value="25">25% Supervisor</option></select></div>'+
-      '<button class="btn" onmouseenter="playHover()" onclick="calcPFM();playClick()">Calcular</button></div>'+
-    '<div id="res-pfm" class="res"></div></div>'+
-    '<div class="cbox"><h3>📋 Tarifas por tramo</h3><div class="tbl"><table><thead><tr><th>RUTs</th><th>Semanal UF/rut</th><th>Quincenal</th><th>Mensual</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
-}
-function calcPFM(){
-  var fr=document.getElementById('pfm-fr').value;
-  var ruts=parseInt(document.getElementById('pfm-r').value)||10;
-  var dc=parseInt(document.getElementById('pfm-d').value);
-  var tar=pfmT(fr,ruts);
-  var ufL=tar*ruts,ufV=ufL*(1-dc/100);
-  var lbl={s:'Semanales',q:'Quincenales',m:'Mensuales'};
-  showRes('res-pfm',{prod:'PFM '+lbl[fr]+' '+ruts+' RUTs',tipo:'pfm',ufLista:ufL,ufVenta:ufV,plazo:'12',meta:ruts+' RUTs · '+lbl[fr]+(dc?' · Dcto '+dc+'%':''),extra:'<div class="rl">Tarifa: <b>'+tar+' UF/rut</b></div>'});
-}
-
-function pagPC(){
-  return '<div class="ptitle">Partner Check <span class="badge">PROVEEDORES</span></div>'+
-    '<div class="cbox"><h3>🧮 Calcular</h3><div class="crow">'+
-      '<div class="f"><label>Tamaño empresa</label><select id="pc-s"><option value="6">Micro — 6 UF/año</option><option value="9">Pequeña — 9 UF/año</option><option value="23">Mediana/Grande — 23 UF/año</option></select></div>'+
-      '<button class="btn" onmouseenter="playHover()" onclick="calcPC();playClick()">Calcular</button></div>'+
-    '<div id="res-pc" class="res"></div></div>'+
-    '<div class="alerta"><b>Contrato:</b> 12 meses · Evaluación en 30 min · Cloud 24/7 · Marketplace licitaciones</div>';
-}
-function calcPC(){
-  var ufL=parseFloat(document.getElementById('pc-s').value);
-  var lbls={6:'Micro',9:'Pequeña',23:'Mediana/Grande'};
-  showRes('res-pc',{prod:'Partner Check — '+lbls[ufL],tipo:'pc',ufLista:ufL,ufVenta:ufL,plazo:'12',meta:'Pago anual · 12 meses',extra:'<div class="rl">Mensualizado: <b>'+(ufL/12).toFixed(4)+' UF/mes</b> → '+fmtN(ufc(ufL/12))+'/mes</div>'});
-}
-
-function pagUF(){
-  return '<div class="ptitle">Conversor UF / CLP <span class="badge">HERRAMIENTA</span></div>'+
-    '<div class="cbox"><h3>🔄 UF → Pesos</h3><div class="crow"><div class="f"><label>Valor en UF</label><input type="number" id="uf-i" value="1" step="0.0001"></div><button class="btn" onmouseenter="playHover()" onclick="cUF();playClick()">Convertir</button></div><div id="res-uf" class="res"></div></div>'+
-    '<div class="cbox"><h3>🔄 Pesos → UF</h3><div class="crow"><div class="f"><label>Valor en $CLP</label><input type="number" id="clp-i" value="100000" step="1000"></div><button class="btn" onmouseenter="playHover()" onclick="cCLP();playClick()">Convertir</button></div><div id="res-clp" class="res"></div></div>'+
-    '<div class="cbox"><h3>💼 Comisión por venta</h3><div class="crow"><div class="f"><label>Venta total (UF)</label><input type="number" id="com-u" value="200"></div><div class="f"><label>Comisión %</label><input type="number" id="com-p" value="0.5" step="0.1"></div><button class="btn" onmouseenter="playHover()" onclick="cCom();playClick()">Calcular</button></div><div id="res-com" class="res"></div></div>';
-}
-function sr(id,h){var b=document.getElementById(id);if(!b)return;b.innerHTML=h;b.classList.add('on');}
-function cUF(){var u=parseFloat(document.getElementById('uf-i').value)||0;sr('res-uf','<div class="res-head">Conversión UF</div><div class="res-body"><div class="rl"><b>'+u+' UF</b> sin IVA = <b style="color:var(--bl);">'+fmtN(ufn(u))+'</b></div><div class="rl"><b>'+u+' UF</b> con IVA = <b style="color:var(--gn);">'+fmtN(ufc(u))+'</b></div></div>');}
-function cCLP(){var c=parseFloat(document.getElementById('clp-i').value)||0;sr('res-clp','<div class="res-head">Conversión CLP</div><div class="res-body"><div class="rl">'+fmtN(c)+' = <b style="color:var(--y);">'+(c/getUF()).toFixed(6)+' UF</b></div></div>');}
-function cCom(){var v=parseFloat(document.getElementById('com-u').value)||0,p=parseFloat(document.getElementById('com-p').value)||0,c=v*(p/100);sr('res-com','<div class="res-head">Comisión</div><div class="res-body"><div class="rl">Venta <b>'+v+' UF</b> · Comisión <b>'+p+'%</b></div><div class="res-big">'+fmtN(ufn(c))+'</div><div style="font-size:.7rem;color:var(--wa);">'+c.toFixed(6)+' UF sin IVA</div></div>');}
-
-// ── PLANTILLAS ──────────────────────────────────────
 var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
 var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
-
 function loadExecutivoFields(){
   var sn=_lsGet('eq_exec_name'),st2=_lsGet('eq_exec_tel'),se=_lsGet('eq_exec_email');
   var ma=document.getElementById('ma');if(ma&&sn&&!ma.value)ma.value=sn;
@@ -558,230 +785,6 @@ function loadExecutivo(){
     },800);
   }
 }
-
-function pagMail(){
-  return '<div class="ptitle">Plantillas de Cotización <span class="badge">CORREO · WHATSAPP · IMAGEN</span></div>'+
-    '<div id="mail-toast" class="toast"></div>'+
-    '<div id="sync-banner" class="sync-banner"><span style="font-size:1.1rem;">🔄</span><span><strong>Sincronización automática:</strong> Los datos de tu cotización están cargados.</span></div>'+
-    '<div class="two-col">'+
-      '<div class="cbox" style="margin:0;"><h3 style="margin-bottom:8px;">👤 Destinatario</h3>'+
-        '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px;font-size:.75rem;color:var(--wa);"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)" style="accent-color:var(--r);width:15px;height:15px;">Omitir destinatario</label>'+
-        '<div id="dest-fields" style="display:flex;flex-direction:column;gap:7px;">'+
-          '<div class="f"><label>Nombre contacto</label><input type="text" id="mn" placeholder="Sr. García" style="width:100%"></div>'+
-          '<div class="f"><label>Empresa</label><input type="text" id="me" placeholder="Empresa SpA" style="width:100%"></div>'+
-        '</div></div>'+
-      '<div class="cbox" style="margin:0;"><h3 style="margin-bottom:8px;">🧑‍💼 Asesor</h3>'+
-        '<div style="display:flex;flex-direction:column;gap:7px;">'+
-          '<div class="f"><label>Tu nombre</label><div style="display:flex;gap:6px;"><input type="text" id="ma" placeholder="Eduardo Pérez" style="width:100%" oninput="saveExecField()"><button class="btn sec" style="padding:5px 10px;font-size:.68rem;" onclick="resetExec()">✏</button></div></div>'+
-          '<div class="f"><label>WhatsApp / Tel.</label><input type="text" id="mf" placeholder="+56 9 XXXX XXXX" style="width:100%" oninput="saveExecField()"></div>'+
-          '<div id="wsp-link-row" style="display:none;padding:5px 8px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:5px;font-size:.72rem;">🟢 <a id="wsp-link" href="#" target="_blank" style="color:#25d366;font-weight:600;">Abrir WhatsApp directo →</a></div>'+
-          '<div class="f"><label>Email</label><input type="text" id="ml" placeholder="ej@equifax.cl" style="width:100%" oninput="saveExecField()"></div>'+
-        '</div></div>'+
-    '</div>'+
-    '<div class="cbox" style="margin-bottom:14px;"><h3 style="margin-bottom:10px;">📦 Cotización</h3>'+
-      '<div id="quote-panel-list"></div>'+
-      '<div style="background:rgba(0,0,0,.2);border-radius:6px;padding:12px;margin-top:10px;">'+
-        '<div style="font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--wa);margin-bottom:8px;">Ingreso manual:</div>'+
-        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;">'+
-          '<div class="f"><label>Producto</label><select id="mt" style="width:100%"><option value="">— Selecciona —</option><option value="bundle4100">Bundle MC 4100 + RI</option><option value="bundleIlim">Bundle MC Ilimitado + RI</option><option value="mc_solo">Mora Control</option><option value="ri_plan">Reporte Interactivo</option><option value="pfm">Portfolio Monitor</option><option value="pc">Partner Check</option><option value="combo3">Combo RI+MC+PFM</option></select></div>'+
-          '<div class="f"><label>Precio venta (UF)</label><input type="number" id="mu" placeholder="ej: 4.5" step="0.1" style="width:100%"></div>'+
-          '<div class="f"><label>Precio lista (UF)</label><input type="number" id="mula" placeholder="ej: 6.65" step="0.1" style="width:100%"></div>'+
-          '<div class="f"><label>Consultas RI</label><input type="number" id="mc2" placeholder="ej: 10" style="width:100%"></div>'+
-          '<div class="f"><label>Plazo</label><select id="mp" style="width:100%"><option value="12">12 meses</option><option value="6">6 meses</option></select></div>'+
-        '</div>'+
-      '</div>'+
-      '<div id="auto-gen-status" style="margin-top:8px;padding:6px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:5px;font-size:.72rem;color:#2ecc71;text-align:center;">✔ Propuesta actualizada automáticamente</div>'+
-    '</div>'+
-    '<div id="tpl-out">'+
-
-      // ── ASUNTO ──────────────────────────────────────────────────────
-      '<div style="background:var(--g3);border:1px solid var(--g4);border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">'+
-        '<div style="flex:1;min-width:0;">'+
-          '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">📌 Asunto del correo</div>'+
-          '<div id="tpl-asunto" style="color:var(--y);font-size:.88rem;font-weight:600;word-break:break-word;"></div>'+
-        '</div>'+
-        '<button onclick="copAsunto()" style="background:#333;border:1px solid #555;color:#ccc;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:.75rem;white-space:nowrap;">📋 Copiar asunto</button>'+
-      '</div>'+
-      '<div id="tpl-toast2" class="toast"></div>'+
-
-      // ── SECCIÓN 1A: GMAIL ────────────────────────────────────────────
-      '<div style="background:var(--g2);border:2px solid rgba(234,67,53,.5);border-radius:12px;overflow:hidden;margin-bottom:16px;">'+
-        '<div style="background:linear-gradient(90deg,rgba(234,67,53,.22),rgba(234,67,53,.08));padding:13px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid rgba(234,67,53,.3);">'+
-          '<div style="display:flex;align-items:center;gap:10px;">'+
-            '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#ea4335,#c5221f);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">M</div>'+
-            '<div>'+
-              '<div style="font-size:.95rem;font-weight:800;color:#ff6b5b;letter-spacing:.3px;">Gmail</div>'+
-              '<div style="font-size:.68rem;color:#aaa;margin-top:1px;">HTML moderno · Bordes redondeados · Copia y pega directamente</div>'+
-            '</div>'+
-          '</div>'+
-          '<button onclick="copHTMLGmail();playClick()" style="background:linear-gradient(135deg,#ea4335,#c5221f);border:none;color:#fff;padding:9px 20px;border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:700;box-shadow:0 2px 8px rgba(234,67,53,.4);white-space:nowrap;">📋 Copiar para Gmail</button>'+
-        '</div>'+
-        '<div style="padding:16px 18px;">'+
-          '<div style="font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:10px;">Vista previa — Gmail:</div>'+
-          '<div id="tpl-rich-gmail" style="background:#f8f9fa;border-radius:8px;padding:12px;border:1px solid #e0e0e0;"></div>'+
-        '</div>'+
-        '<div style="padding:10px 18px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border-top:1px solid rgba(234,67,53,.15);">'+
-          '<div style="font-size:.7rem;color:#888;">📎 Imagen adjunta para correo</div>'+
-          '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
-            '<button onclick="copImgPC();playClick()" style="background:#2d1f1f;border:1px solid rgba(234,67,53,.5);color:#ff9b92;padding:6px 13px;border-radius:6px;cursor:pointer;font-size:.74rem;font-weight:600;">📋 Copiar imagen</button>'+
-            '<button onclick="descImg();playClick()" style="background:#1e1e1e;border:1px solid #444;color:#aaa;padding:6px 13px;border-radius:6px;cursor:pointer;font-size:.74rem;">⬇ Descargar PNG</button>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-
-      // ── SECCIÓN 1B: OUTLOOK ──────────────────────────────────────────
-      '<div style="background:var(--g2);border:2px solid rgba(0,114,198,.45);border-radius:12px;overflow:hidden;margin-bottom:20px;">'+
-        '<div style="background:linear-gradient(90deg,rgba(0,114,198,.2),rgba(0,114,198,.06));padding:13px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid rgba(0,114,198,.25);">'+
-          '<div style="display:flex;align-items:center;gap:10px;">'+
-            '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#0072c6,#004578);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📨</div>'+
-            '<div>'+
-              '<div style="font-size:.95rem;font-weight:800;color:#4da6ff;letter-spacing:.3px;">Outlook</div>'+
-              '<div style="font-size:.68rem;color:#aaa;margin-top:1px;">Tablas robustas · Máxima compatibilidad · Optimizado para Outlook 2016+</div>'+
-            '</div>'+
-          '</div>'+
-          '<button onclick="copHTMLOutlook();playClick()" style="background:linear-gradient(135deg,#0072c6,#004578);border:none;color:#fff;padding:9px 20px;border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:700;box-shadow:0 2px 8px rgba(0,114,198,.4);white-space:nowrap;">📋 Copiar para Outlook</button>'+
-        '</div>'+
-        '<div style="padding:16px 18px;">'+
-          '<div style="font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:10px;">Vista previa — Outlook:</div>'+
-          '<div id="tpl-rich-outlook" style="background:#f5f5f5;border-radius:6px;padding:12px;border:1px solid #ddd;"></div>'+
-        '</div>'+
-        '<div style="padding:10px 18px 14px;border-top:1px solid rgba(0,114,198,.15);">'+
-          '<div style="font-size:.68rem;color:#666;background:rgba(0,114,198,.08);border:1px solid rgba(0,114,198,.2);border-radius:5px;padding:6px 10px;">'+
-            '⚠️ <strong style="color:#4da6ff;">Nota Outlook:</strong> <span style="color:#aaa;">Fondos con gradiente y bordes redondeados pueden no renderizarse. Esta versión usa colores sólidos y tablas para máxima compatibilidad.</span>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-
-      // ID legacy manteniéndose para compatibilidad con copHTML() y copImgPC()
-      '<div id="tpl-rich" style="display:none;"></div>'+
-
-      // ── SECCIÓN 2: WHATSAPP ──────────────────────────────────────────
-      '<div style="background:var(--g2);border:2px solid rgba(37,211,102,.4);border-radius:10px;overflow:hidden;margin-bottom:20px;">'+
-
-        // Cabecera de sección
-        '<div style="background:rgba(37,211,102,.1);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
-          '<div>'+
-            '<div style="font-size:1rem;font-weight:700;color:#25d366;">💬 Propuesta por WhatsApp</div>'+
-            '<div style="font-size:.72rem;color:var(--muted);margin-top:2px;">Copia el texto y pégalo en el chat de WhatsApp</div>'+
-          '</div>'+
-          '<button onclick="copPlano();playClick()" style="background:#128c7e;border:none;color:#fff;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:700;">📋 Copiar texto WA</button>'+
-        '</div>'+
-
-        // Texto WA (oculto, necesario para copPlano())
-        '<textarea id="tpl-body" style="display:none;"></textarea>'+
-
-        // Vista previa visual tarjeta WSP
-        '<div style="padding:14px 18px;border-bottom:1px solid rgba(37,211,102,.2);">'+
-          '<div style="font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Vista previa de la propuesta:</div>'+
-          '<div id="cot-card-wsp" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);">'+
-            '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;">'+
-              '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
-                '<div>'+
-                  '<img src="logo-equifax.png" alt="Equifax" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
-                  '<div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div>'+
-                '</div>'+
-                '<div style="text-align:right;">'+
-                  '<div id="wcc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div>'+
-                  '<div id="wcc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div>'+
-                '</div>'+
-              '</div>'+
-            '</div>'+
-            '<div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);">'+
-              '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div>'+
-              '<div id="wcc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div>'+
-            '</div>'+
-            '<div id="wcc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div>'+
-            '<div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;">'+
-              '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div>'+
-              '<div id="wcc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div>'+
-              '<div id="wcc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div>'+
-              '<div id="wcc-dcto-block" style="margin-top:8px;"></div>'+
-            '</div>'+
-            '<div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;">'+
-              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="wcc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div>'+
-              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
-              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div>'+
-            '</div>'+
-            '<div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
-              '<div>'+
-                '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div>'+
-                '<div id="wcc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div>'+
-                '<div id="wcc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div>'+
-              '</div>'+
-              '<div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div>'+
-            '</div>'+
-          '</div>'+
-        '</div>'+
-
-        // Imagen WA
-        '<div style="padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'+
-          '<div>'+
-            '<div style="font-size:.75rem;font-weight:600;color:var(--wa);">📸 Imagen para enviar por WhatsApp</div>'+
-            '<div style="font-size:.68rem;color:var(--muted);">Imagen vertical 1080px — perfecta para móvil</div>'+
-          '</div>'+
-          '<button onclick="copImgWsp();playClick()" style="background:#145a32;border:1px solid #25d366;color:#a9dfbf;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:.75rem;font-weight:600;">📋 Copiar imagen WA</button>'+
-        '</div>'+
-      '</div>'+
-
-      // ── SECCIÓN 3: VISTA PREVIA TARJETA ─────────────────────────────
-      '<div style="background:var(--g2);border:1px solid var(--g4);border-radius:10px;overflow:hidden;margin-bottom:8px;">'+
-        '<div style="padding:10px 18px;border-bottom:1px solid var(--g4);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
-          '<div>'+
-            '<div style="font-size:.8rem;font-weight:700;color:var(--wa);">🖼 Vista previa de la tarjeta</div>'+
-            '<div style="font-size:.68rem;color:var(--muted);margin-top:2px;">Así verá el cliente la propuesta</div>'+
-          '</div>'+
-          '<button onclick="copImgPC();playClick()" style="background:linear-gradient(135deg,#2d1f1f,#1a1010);border:1px solid rgba(155,28,46,.6);color:#ff9b92;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:.78rem;font-weight:700;">📋 Copiar imagen</button>'+
-        '</div>'+
-        '<div style="padding:16px 18px;">'+
-          '<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);">'+
-            '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;">'+
-              '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
-                '<div>'+
-                  '<img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0">'+
-                  '<div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div>'+
-                '</div>'+
-                '<div style="text-align:right;">'+
-                  '<div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div>'+
-                  '<div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div>'+
-                '</div>'+
-              '</div>'+
-            '</div>'+
-            '<div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);">'+
-              '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div>'+
-              '<div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div>'+
-              '<div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div>'+
-            '</div>'+
-            '<div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div>'+
-            '<div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;">'+
-              '<div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div>'+
-              '<div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div>'+
-              '<div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div>'+
-              '<div id="cc-dcto-block" style="margin-top:8px;"></div>'+
-            '</div>'+
-            '<div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;">'+
-              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div>'+
-              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
-              '<div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div>'+
-            '</div>'+
-            '<div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
-              '<div>'+
-                '<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div>'+
-                '<div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div>'+
-                '<div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div>'+
-              '</div>'+
-              '<div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div>'+
-            '</div>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-
-    '</div>';
-}
-
-function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
-function st(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-function sv(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;}
-
 function genMail(){
   var tipo=gv('mt');
   if(!tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
@@ -1195,22 +1198,12 @@ function genMail(){
     _st3.style.color='#2ecc71'; _st3.textContent='✔ Actualizado · '+_tt3;
   }
 }
-
-/* toggleDest → reactive block */
-/* saveExecField → reactive block */
 function updWspLink(){
   var mf=document.getElementById('mf'),row=document.getElementById('wsp-link-row'),lnk=document.getElementById('wsp-link');
   if(!mf||!row||!lnk)return;
   var tel=mf.value.trim().replace(/\s+/g,'').replace(/[^+\d]/g,'');
   if(tel.length>=8){lnk.href='https://wa.me/'+tel.replace(/^\+/,'');row.style.display='block';}
   else row.style.display='none';
-}
-function resetExec(){
-  if(!confirm('¿Cambiar tus datos de ejecutivo/a?'))return;
-  try{['eq_exec_name','eq_exec_tel','eq_exec_email','eq_exec_date'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
-  var ma=document.getElementById('ma'),mf=document.getElementById('mf'),ml=document.getElementById('ml');
-  if(ma)ma.value='';if(mf)mf.value='';if(ml)ml.value='';
-  updWspLink();toast('Datos borrados.','ok','mail-toast');
 }
 function copAsunto(){navigator.clipboard.writeText(document.getElementById('tpl-asunto').textContent).then(function(){toast('✔ Asunto copiado','ok','tpl-toast2');});}
 function copPlano(){navigator.clipboard.writeText(document.getElementById('tpl-body').value).then(function(){toast('✔ Texto copiado','ok','tpl-toast2');}).catch(function(){toast('✖ Copia manualmente','err','tpl-toast2');});}
@@ -1240,7 +1233,6 @@ function _copHTMLFallback(el,msg){
   var sel=window.getSelection(),r=document.createRange();r.selectNodeContents(el);sel.removeAllRanges();sel.addRange(r);document.execCommand('copy');sel.removeAllRanges();
   toast(msg||'📝 Copiado','ok','tpl-toast2');
 }
-
 // ══════════════════════════════════════════════
 // GENERACIÓN DE IMÁGENES — 2 VERSIONES
 // ══════════════════════════════════════════════
@@ -1631,9 +1623,6 @@ function descImg(){
     toast('⬇ PNG descargado','ok','tpl-toast2');
   });
 }
-
-// ── INIT ──────────────────────────────────────────────
-
 // ══════════════════════════════════════════════
 // SONIDOS UI — Web Audio API
 // ══════════════════════════════════════════════
@@ -1658,135 +1647,25 @@ function playSound(type){
 function playHover(){playSound('hover');}
 function playClick(){playSound('click');}
 
-// ══════════════════════════════════════════════
-// PULSO NEÓN TAB PLANTILLAS
-// ══════════════════════════════════════════════
-function pulseMailTab(){
-  var tab=document.querySelector('.tab[data-id="mail"]');
-  if(!tab)return;
-  // Eliminar pulso anterior si existe
-  tab.classList.remove('pulse-neon');
-  void tab.offsetWidth; // reflow
-  tab.classList.add('pulse-neon');
-  // Tooltip de guía
-  var tip=document.getElementById('mail-tab-tip');
-  if(!tip){
-    tip=document.createElement('div');tip.id='mail-tab-tip';
-    tip.style.cssText='position:fixed;z-index:300;background:#1a1a1a;border:1px solid #2ecc71;border-radius:8px;padding:8px 14px;font-size:.75rem;color:#2ecc71;box-shadow:0 0 20px rgba(46,204,113,.4);pointer-events:none;white-space:nowrap;transition:opacity .3s;';
-    tip.innerHTML='👆 <strong>¡Cotización guardada!</strong> Toca aquí para generar el correo';
-    document.body.appendChild(tip);
-  }
-  // Posicionar sobre el tab
-  var rect=tab.getBoundingClientRect();
-  tip.style.top=(rect.bottom+8)+'px';
-  tip.style.left=Math.max(8,rect.left-10)+'px';
-  tip.style.opacity='1';tip.style.display='block';
-  setTimeout(function(){tip.style.opacity='0';setTimeout(function(){tip.style.display='none';},400);},4000);
-}
-
-var PAGES=[
-  {id:'bundle',label:'📦 Bundle',fn:pagBundle},
-  {id:'mc',label:'🚨 Mora Control',fn:pagMC},
-  {id:'ri',label:'📊 RI Mensual',fn:pagRI},
-  {id:'bolsa',label:'🎒 RI Bolsa',fn:pagBolsa},
-  {id:'pfm',label:'📡 Portfolio Monitor',fn:pagPFM},
-  {id:'pc',label:'🤝 Partner Check',fn:pagPC},
-  {id:'uf',label:'⇄ UF/CLP',fn:pagUF},
-  {id:'mail',label:'✉ Plantillas',fn:pagMail},
-];
-function buildApp(){
-  var nav=document.getElementById('navrow'),main=document.getElementById('main');
-  PAGES.forEach(function(p,i){
-    var t=document.createElement('button');t.className='tab'+(i===0?' on':'');t.dataset.id=p.id;
-    t.innerHTML='<span class="dot"></span>'+p.label;t.onclick=function(){goTo(p.id);};nav.appendChild(t);
-    var d=document.createElement('div');d.className='panel'+(i===0?' on':'');d.id='p-'+p.id;
-    d.innerHTML=p.fn();main.appendChild(d);
-  });
-}
-buildApp();
-loadExecutivo();
+/* ════════════════════════════════════════════════════════════════
+   ARRANQUE — abre completamente operativo en Bundle MC 4100 + RI
+   ════════════════════════════════════════════════════════════════ */
+buildProdbar();
+loadExecutivo();          // recupera/solicita datos del ejecutivo (igual que el index original)
 preloadLogo(null);
 
-// ═══════════════════════════════════════════════════════════════
-// REACTIVIDAD TOTAL — delegación sin whitelist de IDs
-// ═══════════════════════════════════════════════════════════════
-var _autoGenTimer = null;
+setProduct('bundle');     // PRODUCTO PREDETERMINADO OBLIGATORIO — valores mínimos cargados
+setPreview('gmail');      // primera vista lista
 
-function _mailOn() {
-  var p = document.getElementById('p-mail');
-  return p && p.classList.contains('on');
-}
+/* La UF global recalcula precios al instante */
+var _ufg=$('uf-global');
+if(_ufg)_ufg.addEventListener('input',function(){if(CURRENT.override!==null)lightUpdate(LAST.ufVenta);else refresh();});
 
-function scheduleAutoGen(ms) {
-  clearTimeout(_autoGenTimer);
-  var st = document.getElementById('auto-gen-status');
-  if (st) { st.style.color='#f0c040'; st.textContent='⏳ Actualizando...'; }
-  _autoGenTimer = setTimeout(function() {
-    var tipo = document.getElementById('mt');
-    if (!tipo) return;
-    if (tipo.value) {
-      genMail();
-    } else {
-      var out = document.getElementById('tpl-out');
-      if (out) out.style.display = 'none';
-      if (st) { st.style.color='#888'; st.textContent='← Selecciona un producto para generar'; }
-    }
-  }, ms !== undefined ? ms : 280);
-}
+/* Datos de cliente reactivos */
+['mn','me'].forEach(function(id){var e=$(id);if(e)e.addEventListener('input',onClientChange);});
 
-// Delegación total — captura cualquier cambio en el panel mail
-['input','change','click'].forEach(function(ev) {
-  document.addEventListener(ev, function(e) {
-    if (!_mailOn()) return;
-    var t = e.target;
-    if (t.tagName==='BUTTON' || t.tagName==='A' || t.tagName==='IMG') return;
-    scheduleAutoGen(ev === 'click' ? 10 : 280);
-  }, true);
-});
-
-// UF global afecta precios en plantillas
-var _ufg = document.getElementById('uf-global');
-if (_ufg) _ufg.addEventListener('input', function() {
-  if (_mailOn()) scheduleAutoGen(300);
-});
-
-// toggleDest reactivo
-function toggleDest(skip) {
-  var df = document.getElementById('dest-fields');
-  if (df) df.style.display = skip ? 'none' : 'flex';
-  scheduleAutoGen(0);
-}
-
-// saveExecField reactivo
-function saveExecField() {
-  var ma=document.getElementById('ma'),mf=document.getElementById('mf'),ml=document.getElementById('ml');
-  if(ma&&ma.value.trim())_lsSet('eq_exec_name',ma.value.trim());
-  if(mf)_lsSet('eq_exec_tel',mf.value.trim());
-  if(ml)_lsSet('eq_exec_email',ml.value.trim());
-  updWspLink();
-  scheduleAutoGen(300);
-}
-
-// goTo override — generar al entrar a plantillas
-var _origGoTo = goTo;
-goTo = function(id) {
-  _origGoTo(id);
-  if (id === 'mail') {
-    setTimeout(function() {
-      var tipo = document.getElementById('mt');
-      var st = document.getElementById('auto-gen-status');
-      if (tipo && tipo.value) { genMail(); }
-      else if (st) { st.style.color='#888'; st.textContent='← Selecciona un producto para generar'; }
-    }, 150);
-  }
-};
-
-// syncQuoteToForm override — regenerar al sincronizar cotización
-var _origSync = syncQuoteToForm;
-syncQuoteToForm = function(q) {
-  _origSync(q);
-  setTimeout(function() { if (_mailOn()) scheduleAutoGen(100); }, 120);
-};
+/* Conversor listo aunque no se haya abierto */
+cUF();cCLP();cCom();
 </script>
 </body>
 </html>
