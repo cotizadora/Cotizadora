@@ -10,7 +10,7 @@
   --g0:#0d0d0e;--g1:#141416;--g2:#1c1c1f;--g3:#26262a;--g4:#34343a;--g5:#46464d;
   --w:#f2f2f2;--wa:#a6a6ad;--wb:#7a7a82;
   --y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
-  --headH:62px;--barH:92px;
+  --headH:62px;--barH:52px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
@@ -41,16 +41,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .user-btn img{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--g3);border:2px solid rgba(255,255,255,.35);flex-shrink:0;}
 .user-btn span{color:#fff;font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-/* editor de precio compacto con ▲▼ */
-.price-edit{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 4px;}
-.price-edit input{background:rgba(0,0,0,.4);border:2px solid rgba(155,28,46,.55);border-radius:10px;color:var(--y);
-  font-family:inherit;font-size:1.7rem;font-weight:900;text-align:center;width:130px;padding:8px 6px;}
-.price-edit input:focus{outline:none;border-color:var(--y);box-shadow:0 0 0 3px rgba(240,192,64,.25);}
-.price-edit .unit{font-size:1rem;font-weight:800;color:var(--wa);}
-.stepper{display:flex;flex-direction:column;gap:4px;}
-.stepper button{background:var(--g3);border:1px solid var(--g4);color:#fff;width:42px;height:30px;border-radius:8px;
-  cursor:pointer;font-size:1rem;line-height:1;font-weight:800;transition:.12s;}
-.stepper button:hover{background:var(--r);border-color:var(--rl);}
+/* stepper inline en resumen */
+.stepper-inline button{background:var(--g3);border:1px solid var(--g4);color:#fff;width:44px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:800;transition:.12s;}
+.stepper-inline button:hover{background:var(--r);border-color:var(--rl);}
 
 /* foto del ejecutivo en el modal */
 .exec-photo-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--g3);}
@@ -64,20 +57,23 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 /* ── BARRA DE PRODUCTOS (gobierna todo) ───────────── */
 #prodbar{position:fixed;top:var(--headH);left:0;right:0;z-index:280;height:var(--barH);
-  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;align-items:center;gap:10px;
-  padding:0 16px;overflow-x:auto;scrollbar-width:thin;}
-#prodbar::-webkit-scrollbar{height:6px;}
+  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;align-items:center;gap:7px;
+  padding:0 14px;overflow-x:auto;scrollbar-width:thin;}
+#prodbar::-webkit-scrollbar{height:4px;}
 #prodbar::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px;}
-.pbtn{flex:0 0 auto;min-width:140px;background:var(--g2);border:2px solid var(--g3);border-radius:12px;
-  padding:11px 16px;cursor:pointer;color:var(--w);font-family:inherit;text-align:left;transition:.15s;
-  display:flex;flex-direction:column;gap:2px;}
-.pbtn .ic{font-size:1.3rem;line-height:1;}
-.pbtn .lb{font-size:.92rem;font-weight:800;letter-spacing:.2px;}
-.pbtn .su{font-size:.66rem;color:var(--wa);letter-spacing:.3px;}
-.pbtn:hover{border-color:var(--rl);background:rgba(155,28,46,.16);}
-.pbtn.on{border-color:var(--r);background:linear-gradient(135deg,rgba(155,28,46,.32),rgba(155,28,46,.14));
-  box-shadow:0 0 0 1px var(--r) inset,0 4px 16px rgba(155,28,46,.35);}
-.pbtn.on .su{color:#e9b9bf;}
+.pbtn{flex:0 0 auto;background:var(--g2);border:1px solid var(--g3);border-radius:8px;
+  padding:8px 14px;cursor:pointer;color:var(--w);font-family:inherit;text-align:center;
+  transition:all .18s ease;display:flex;align-items:center;gap:7px;white-space:nowrap;
+  font-size:.88rem;font-weight:700;letter-spacing:.2px;position:relative;}
+.pbtn .ic{font-size:1rem;line-height:1;flex-shrink:0;}
+.pbtn .lb{font-size:.88rem;font-weight:700;}
+.pbtn .su{display:none;}
+.pbtn:hover{border-color:var(--rl);background:rgba(155,28,46,.18);
+  box-shadow:0 0 10px rgba(192,38,59,.35),0 0 20px rgba(155,28,46,.15);
+  color:#fff;transform:translateY(-1px);}
+.pbtn.on{border-color:var(--r);background:linear-gradient(135deg,rgba(155,28,46,.32),rgba(155,28,46,.12));
+  box-shadow:0 0 0 1px var(--r) inset,0 0 14px rgba(155,28,46,.45),0 0 28px rgba(155,28,46,.2);
+  color:#fff;}
 
 /* ── ESTACIÓN DE TRABAJO — 2 PANELES ──────────────── */
 #workstation{position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;bottom:0;
@@ -223,7 +219,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 #mtoggle{display:none;}
 @media(max-width:880px){
   body{overflow:auto;}
-  :root{--barH:84px;}
+  :root{--barH:48px;}
   #workstation{position:static;display:block;height:auto;margin-top:calc(var(--headH) + var(--barH) + 52px);}
   #left-panel{border-right:none;border-bottom:3px solid var(--g4);overflow:visible;min-height:auto;}
   #right-panel{overflow:visible;}
@@ -594,30 +590,39 @@ function computeCurrent(){
 /* ════════ RESUMEN COMERCIAL (panel izquierdo) ════════ */
 function renderSummary(c){
   var pi=PINFO[c.tipo]||{badge:'COTIZACIÓN',n:'Producto'};
-  var items=PITEMS[c.tipo]||[];
   var ufL=c.ufLista,ufV=c.ufVenta;
   var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV>0?ufc(ufV):0;
 
-  var html=''+
-    '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
-    /* 4 · BENEFICIOS Y DESCRIPCIÓN */
-    '<div class="block-t" style="margin:14px 0 8px;">✅ Beneficios y descripción</div>'+
-    '<ul class="benefits" id="s-benefits">'+items.map(function(i){return '<li><span class="ck">✔</span><span>'+i+'</span></li>';}).join('')+'</ul>'+
-    (c.note?'<div class="note-inline" id="s-note" style="margin-top:10px;">'+c.note+'</div>':'')+
-    /* 5 · PRECIO FINAL (editable directo con ▲▼) */
-    '<div class="price-wrap" style="margin-top:16px;">'+
-      '<div class="price-lbl">Precio de venta (cargo fijo mensual)</div>'+
-      '<div class="price-edit">'+
-        '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)">'+
-        '<span class="unit">UF + IVA</span>'+
-        '<div class="stepper"><button type="button" onclick="stepPrice(0.1)" aria-label="Subir">▲</button><button type="button" onclick="stepPrice(-0.1)" aria-label="Bajar">▼</button></div>'+
+  /* Precio venta editable con ▲▼ — en la cabecera del resumen */
+  var priceRow=
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;'+
+      'background:linear-gradient(135deg,#1a0a0e,#23090f);border:1px solid rgba(155,28,46,.5);'+
+      'border-radius:10px;padding:10px 14px;margin-bottom:10px;">'+
+      '<div>'+
+        '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;">Precio venta</div>'+
+        '<div style="display:flex;align-items:baseline;gap:6px;">'+
+          '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)"'+
+            ' style="background:none;border:none;color:var(--y);font-size:1.8rem;font-weight:900;font-family:inherit;width:110px;padding:0;outline:none;">'+
+          '<span style="font-size:.82rem;font-weight:700;color:var(--wa);">UF + IVA</span>'+
+        '</div>'+
+        '<div id="s-price-clp" style="font-size:.82rem;color:#cfcfcf;margin-top:2px;">'+(clp>0?'≈ '+fmtN(clp)+' c/IVA':'—')+'</div>'+
+        '<div id="s-disc">'+(hayDc?discHTML(dc,ufL,ufV):'')+'</div>'+
       '</div>'+
-      '<div class="price-clp" id="s-price-clp">'+(clp>0?'≈ '+fmtN(clp)+' mensual con IVA':'—')+'</div>'+
-      '<div id="s-disc">'+(hayDc?discHTML(dc,ufL,ufV):'')+'</div>'+
-    '</div>'+
-    /* 6 · RESUMEN COMERCIAL */
-    '<div class="block-t" style="margin:16px 0 8px;">💰 Resumen comercial</div>'+
+      '<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">'+
+        '<button type="button" onclick="stepPrice(0.1)" aria-label="Subir"'+
+          ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:44px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:800;transition:.12s;"'+
+          ' onmouseover="this.style.background=\'var(--r)\'" onmouseout="this.style.background=\'var(--g3)\'">▲</button>'+
+        '<button type="button" onclick="stepPrice(-0.1)" aria-label="Bajar"'+
+          ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:44px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:800;transition:.12s;"'+
+          ' onmouseover="this.style.background=\'var(--r)\'" onmouseout="this.style.background=\'var(--g3)\'">▼</button>'+
+      '</div>'+
+    '</div>';
+
+  var html=
+    '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
+    priceRow+
+    /* RESUMEN COMERCIAL */
     '<div class="metrics">'+
       metric('Precio lista','m-lista','y',ufL>0?ufd(ufL)+' UF':'—')+
       metric('Precio venta','m-venta','g',ufV>0?ufd(ufV)+' UF':'—')+
@@ -628,7 +633,7 @@ function renderSummary(c){
       (c.pago?metric('Pago anticipado','m-pago','y',c.pago+' UF'):'')+
       (c.cons?metric('Consultas RI','m-cons','b',c.cons):'')+
     '</div>'+
-    '<div class="cond-row" style="margin-top:14px;">'+
+    '<div class="cond-row" style="margin-top:10px;">'+
       '<div class="ci"><label>Contrato</label><div class="cv">'+(c.plazo||'12')+' meses</div></div>'+
       '<div class="ci"><label>Modalidad</label><div class="cv" style="color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
       '<div class="ci"><label>Documentos</label><div class="cv" style="font-weight:600;color:#ccc;">Ficha · Cédula · Escritura</div></div>'+
@@ -653,7 +658,7 @@ function lightUpdate(v){
   var ufL=LAST.ufLista,ufV=v;
   var hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV>0?ufc(ufV):0;
-  st('s-price-clp',clp>0?'≈ '+fmtN(clp)+' mensual con IVA':'—');
+  st('s-price-clp',clp>0?'≈ '+fmtN(clp)+' c/IVA':'—');
   sv('s-disc',hayDc?discHTML(dc,ufL,ufV):'');
   st('m-venta',ufV>0?ufd(ufV)+' UF':'—');
   var md=$('m-desc');if(md){md.textContent=hayDc?'−'+dc+'%':'—';md.className='v '+(hayDc?'g':'wa');}
