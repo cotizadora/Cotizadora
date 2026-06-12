@@ -121,9 +121,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .slider-row input[type=number]:focus{outline:none;border-color:var(--rl);}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
 @media(max-width:520px){.metrics{grid-template-columns:1fr 1fr;}}
-.metric{background:var(--g2);border:1px solid var(--g3);border-radius:9px;padding:10px 11px;text-align:center;}
-.metric label{display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;font-weight:700;}
-.metric .v{font-size:1.05rem;font-weight:800;}
+.metric{background:var(--g2);border:1px solid var(--g3);border-radius:9px;padding:8px 10px;text-align:center;}
+.metric label{display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:2px;font-weight:800;line-height:1.1;}
+.metric .v{font-size:1.05rem;font-weight:800;line-height:1.15;}
 .v.y{color:var(--y);}.v.g{color:var(--gn);}.v.b{color:var(--bl);}.v.o{color:var(--or);}.v.wa{color:var(--wa);}
 .benefits{list-style:none;display:grid;grid-template-columns:1fr;gap:7px;margin-top:4px;}
 .benefits li{display:flex;gap:10px;align-items:flex-start;font-size:.95rem;color:#dcdcdc;
@@ -255,7 +255,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <input type="number" id="uf-global" value="40644" step="1">
     </div>
     <button class="htool-btn" onclick="openUF()">⇄ UF</button>
-    <button class="user-btn" id="user-btn" onclick="openExec()" title="Mis datos de ejecutivo/a">
+    <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
       <span id="user-name">Ejecutivo/a</span>
     </button>
@@ -605,9 +605,9 @@ function renderSummary(c){
 
   /* tarjeta PRECIO VENTA — misma forma que las otras métricas, con ▲▼ integrados */
   var ventaCtrl=
-    '<div class="metric" style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
+    '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
       '<div style="flex:1;min-width:0;">'+
-        '<label style="display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;font-weight:700;">Precio venta</label>'+
+        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:2px;font-weight:800;line-height:1.1;">Precio venta</label>'+
         '<div class="v g" style="font-size:1.05rem;font-weight:800;">'+
           '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)"'+
             ' style="background:none;border:none;color:var(--gn);font-size:1.05rem;font-weight:800;font-family:inherit;width:70px;padding:0;outline:none;cursor:text;">'+
@@ -627,9 +627,9 @@ function renderSummary(c){
     '</div>';
 
   var listaCtrl=
-    '<div class="metric" style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
+    '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
       '<div style="flex:1;min-width:0;">'+
-        '<label style="display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--wb);margin-bottom:3px;font-weight:700;">Precio lista</label>'+
+        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:2px;font-weight:800;line-height:1.1;">Precio lista</label>'+
         '<div class="v y" style="font-size:1.05rem;font-weight:800;">'+
           '<input type="number" id="sln-lista" value="'+(ufL>0?ufd(ufL):'0')+'" min="0" step="0.1" oninput="onListaInput(this.value)"'+
             ' style="background:none;border:none;color:var(--y);font-size:1.05rem;font-weight:800;font-family:inherit;width:70px;padding:0;outline:none;cursor:text;">'+
@@ -692,9 +692,9 @@ function metric(lbl,id,cls,val){
   return '<div class="metric"><label>'+lbl+'</label><div class="v '+cls+'" id="'+id+'">'+val+'</div></div>';
 }
 function metricBig(lbl,id,cls,val){
-  return '<div class="metric" style="padding:12px 14px;">'+
-    '<label style="font-size:.72rem;font-weight:700;">'+lbl+'</label>'+
-    '<div class="v '+cls+'" id="'+id+'" style="font-size:1.3rem;margin-top:4px;">'+val+'</div>'+
+  return '<div class="metric" style="padding:8px 11px;">'+
+    '<label style="font-size:.86rem;font-weight:800;letter-spacing:.2px;color:#cbcbd0;line-height:1.1;">'+lbl+'</label>'+
+    '<div class="v '+cls+'" id="'+id+'" style="font-size:1.25rem;margin-top:3px;line-height:1.15;">'+val+'</div>'+
   '</div>';
 }
 function discHTML(dc,ufL,ufV){
@@ -781,98 +781,103 @@ function cUF(){var u=parseFloat(gv('uf-i'))||0;srUF('res-uf','<b>'+u+' UF</b> = 
 function cCLP(){var c=parseFloat(gv('clp-i'))||0;srUF('res-clp',fmtN(c)+' = <b>'+(c/getUF()).toFixed(6)+' UF</b>');}
 function cCom(){var v=parseFloat(gv('com-u'))||0,p=parseFloat(gv('com-p'))||0,com=v*(p/100);srUF('res-com','Comisión: <b>'+fmtN(ufn(com))+'</b> ('+com.toFixed(6)+' UF)');}
 
-/* ════════ DATOS DEL EJECUTIVO/A (modal + foto + almacenamiento local) ════════ */
+/* ════════ DATOS DEL EJECUTIVO/A — FUENTE ÚNICA (localStorage) ════════
+   Regla de oro:
+   - genMail() y todas las vistas LEEN exclusivamente desde getExecData().
+   - Mientras el modal está abierto, las ediciones quedan en _pendingExec
+     (buffer en memoria). NO se escriben en localStorage hasta Guardar.
+   - Esto evita: datos antiguos, versiones paralelas, fotos desincronizadas,
+     y previews que se actualizan a medias mientras el usuario edita.
+*/
 
-/* snapshot para poder cancelar sin afectar las vistas previas */
-var _execSnapshot=null;
+var _pendingExec=null;        // buffer mientras el modal está abierto
 
-function openExec(){
-  /* guardar snapshot del estado actual antes de editar */
-  _execSnapshot={
-    name:_lsGet('eq_exec_name')||'',
-    cargo:_lsGet('eq_exec_cargo')||'Ejecutivo Comercial',
-    company:_lsGet('eq_exec_company')||'',
-    email:_lsGet('eq_exec_email')||'',
-    tel2:_lsGet('eq_exec_tel2')||'',
-    tel:_lsGet('eq_exec_tel')||'',
-    firma:_lsGet('eq_exec_firma')||'',
-    photo:_lsGet('eq_exec_photo')||''
+function getExecData(){
+  return {
+    name   : _lsGet('eq_exec_name')   || '',
+    cargo  : _lsGet('eq_exec_cargo')  || 'Ejecutivo Comercial',
+    company: _lsGet('eq_exec_company')|| 'Equifax Chile',
+    email  : _lsGet('eq_exec_email')  || '',
+    tel    : _lsGet('eq_exec_tel2')   || '',
+    wsp    : _lsGet('eq_exec_tel')    || '',
+    firma  : _lsGet('eq_exec_firma')  || '',
+    photo  : _lsGet('eq_exec_photo')  || ''
   };
-  loadExecFields();
-  $('exec-onboard-note').style.display='none';
-  $('exec-modal-title').textContent='🧑‍💼 Mis datos de ejecutivo/a';
-  refreshPhotoPrev();updWspLink();
-  $('exec-modal').classList.add('on');
 }
 
-function loadExecFields(){
-  var fields={ma:'eq_exec_name',exec_empresa:'eq_exec_company',
-    ml:'eq_exec_email',exec_tel:'eq_exec_tel2',mf:'eq_exec_tel',exec_firma:'eq_exec_firma'};
-  for(var dom in fields){
-    var e=$(dom.replace(/_/g,'-'));
-    var v=_lsGet(fields[dom]);
-    if(e&&v!=null)e.value=v;
-  }
+function openExec(){
+  /* cargar buffer desde localStorage */
+  _pendingExec=getExecData();
+  /* poblar inputs del modal desde el buffer */
+  $('ma').value           = _pendingExec.name;
+  $('exec-empresa').value = _pendingExec.company;
+  $('ml').value           = _pendingExec.email;
+  $('exec-tel').value     = _pendingExec.tel;
+  $('mf').value           = _pendingExec.wsp;
+  $('exec-firma').value   = _pendingExec.firma;
   /* cargo — select */
   var sc=$('exec-cargo');
   if(sc){
-    var savedCargo=_lsGet('eq_exec_cargo')||'Ejecutivo Comercial';
     for(var i=0;i<sc.options.length;i++){
-      if(sc.options[i].value===savedCargo){sc.selectedIndex=i;break;}
+      if(sc.options[i].value===_pendingExec.cargo){sc.selectedIndex=i;break;}
     }
   }
+  /* preview de la foto desde el buffer */
+  var pv=$('exec-photo-prev');
+  if(pv)pv.src=(_pendingExec.photo&&_pendingExec.photo.length>30)?_pendingExec.photo:defaultAvatar(_pendingExec.name);
+  $('exec-onboard-note').style.display='none';
+  $('exec-modal-title').textContent='✏️ Editar datos del ejecutivo/a';
+  updWspLink();
+  $('exec-modal').classList.add('on');
 }
+
+function loadExecFields(){ /* compat: ahora delega en openExec si hace falta */ }
 
 function saveExec(){
   var nombre=gv('ma');
   if(!nombre){toast('Ingresa al menos tu nombre','err','global-toast');return;}
-  _lsSet('eq_exec_name',nombre);
-  _lsSet('eq_exec_cargo',gv('exec-cargo'));
-  _lsSet('eq_exec_company',gv('exec-empresa'));
-  _lsSet('eq_exec_email',gv('ml'));
-  _lsSet('eq_exec_tel2',gv('exec-tel'));
-  _lsSet('eq_exec_tel',gv('mf'));
-  _lsSet('eq_exec_firma',gv('exec-firma'));
-  _lsSet('eq_exec_date',new Date().toDateString());
-  _execSnapshot=null;
-  refreshUserBtn();updWspLink();preloadPhoto(null);
-  /* solo aquí se actualizan las vistas previas */
-  genMail();syncWA();
+  /* commit del buffer a localStorage — ÚNICA FUENTE */
+  _lsSet('eq_exec_name'   , nombre);
+  _lsSet('eq_exec_cargo'  , gv('exec-cargo'));
+  _lsSet('eq_exec_company', gv('exec-empresa')||'Equifax Chile');
+  _lsSet('eq_exec_email'  , gv('ml'));
+  _lsSet('eq_exec_tel2'   , gv('exec-tel'));
+  _lsSet('eq_exec_tel'    , gv('mf'));
+  _lsSet('eq_exec_firma'  , gv('exec-firma'));
+  if(_pendingExec && _pendingExec.photo) _lsSet('eq_exec_photo', _pendingExec.photo);
+  _lsSet('eq_exec_date'   , new Date().toDateString());
+  _pendingExec=null;
+  /* recién aquí se regeneran TODAS las vistas */
+  refreshUserBtn();
+  updWspLink();
+  preloadPhoto(function(){ genMail(); syncWA(); });
   closeModal('exec-modal');
   toast('✔ Datos guardados','ok','global-toast');
 }
 
 function cancelExec(){
-  /* restaurar snapshot si existe */
-  if(_execSnapshot){
-    _lsSet('eq_exec_name',_execSnapshot.name);
-    _lsSet('eq_exec_cargo',_execSnapshot.cargo);
-    _lsSet('eq_exec_company',_execSnapshot.company);
-    _lsSet('eq_exec_email',_execSnapshot.email);
-    _lsSet('eq_exec_tel2',_execSnapshot.tel2);
-    _lsSet('eq_exec_tel',_execSnapshot.tel);
-    _lsSet('eq_exec_firma',_execSnapshot.firma);
-    if(_execSnapshot.photo)_lsSet('eq_exec_photo',_execSnapshot.photo);
-    _execSnapshot=null;
-    refreshUserBtn();preloadPhoto(null);
-  }
+  /* descartar buffer — localStorage no se tocó durante la edición */
+  _pendingExec=null;
   closeModal('exec-modal');
 }
 
-/* ── FOTO — solo actualiza preview, no dispara genMail ── */
+/* ── FOTO — solo entra al buffer, NO toca localStorage ── */
 function onPhoto(input){
-  var f=input.files&&input.files[0];if(!f)return;
-  if(!/image\/(jpeg|jpg|png|webp)/i.test(f.type)){toast('Formato no permitido (usa JPG, PNG o WEBP)','err','global-toast');return;}
+  var f=input.files&&input.files[0];if(!f){input.value='';return;}
+  if(!/image\/(jpeg|jpg|png|webp)/i.test(f.type)){toast('Formato no permitido (usa JPG, JPEG, PNG o WEBP)','err','global-toast');input.value='';return;}
   var r=new FileReader();
   r.onload=function(){
-    /* guardar temporalmente en snapshot para poder cancelar */
-    if(_execSnapshot)_execSnapshot.photo=_lsGet('eq_exec_photo')||'';
-    _lsSet('eq_exec_photo',r.result);
-    refreshPhotoPrev();refreshUserBtn();preloadPhoto(null);
-    toast('✔ Foto lista — guarda para aplicar','ok','global-toast');
+    if(!_pendingExec)_pendingExec=getExecData();
+    _pendingExec.photo=r.result;
+    /* SOLO se actualiza el preview del modal */
+    var pv=$('exec-photo-prev');if(pv)pv.src=r.result;
+    toast('✔ Foto cargada — guarda para aplicar','info','global-toast');
   };
   r.readAsDataURL(f);
+  /* reset input para permitir reseleccionar el mismo archivo después */
+  setTimeout(function(){input.value='';},100);
 }
+
 function defaultAvatar(name){
   var ini=(name||'EQ').trim().split(/\s+/).map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()||'EQ';
   var bg='#9b1c2e';
@@ -882,11 +887,15 @@ function defaultAvatar(name){
     'font-size="68" font-weight="700" fill="#f0c040">'+ini+'</text></svg>';
   return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
 }
-function execPhoto(){var p=_lsGet('eq_exec_photo');return (p&&p.length>30)?p:defaultAvatar(_lsGet('eq_exec_name')||gv('ma'));}
+function execPhoto(){
+  var d=getExecData();
+  return (d.photo && d.photo.length>30) ? d.photo : defaultAvatar(d.name);
+}
 function refreshPhotoPrev(){var e=$('exec-photo-prev');if(e)e.src=execPhoto();}
 function refreshUserBtn(){
-  var av=$('user-avatar');if(av)av.src=execPhoto();
-  var nm=$('user-name');if(nm)nm.textContent=(_lsGet('eq_exec_name')||'Ejecutivo/a');
+  var d=getExecData();
+  var av=$('user-avatar');if(av)av.src=(d.photo&&d.photo.length>30)?d.photo:defaultAvatar(d.name);
+  var nm=$('user-name');if(nm)nm.textContent=d.name||'Ejecutivo/a';
 }
 
 /* cerrar modales al hacer clic en el fondo */
@@ -927,16 +936,15 @@ var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.0
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
 var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
 var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
-function loadExecutivoFields(){loadExecFields();updWspLink();}
+function loadExecutivoFields(){updWspLink();}
 function loadExecutivo(){
   refreshUserBtn();
   if(!_lsGet('eq_exec_name')){
-    /* PRIMER ARRANQUE: solicita los datos una sola vez mediante el panel compacto */
+    /* PRIMER ARRANQUE: usa el mismo modal con buffer */
     setTimeout(function(){
-      loadExecFields();refreshPhotoPrev();
+      openExec();
       $('exec-onboard-note').style.display='block';
       $('exec-modal-title').textContent='👋 Configura tus datos de ejecutivo/a';
-      $('exec-modal').classList.add('on');
     },600);
   }
 }
@@ -946,11 +954,15 @@ function genMail(){
   var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
   var n=skip?'Cliente':gv('mn')||'Sr./Sra. [Nombre]';
   var em=skip?'':gv('me')||'',ru=skip?'':gv('mr')||'';
-  var as2=gv('ma')||'[Asesor]',fo=gv('mf')||'',ml=gv('ml')||'';
-  var exCargo=(typeof _lsGet==='function'&&_lsGet('eq_exec_cargo'))||'Ejecutivo/a Comercial';
-  var exEmpresa=(typeof _lsGet==='function'&&_lsGet('eq_exec_company'))||'Equifax Chile';
-  var exFirma=(typeof _lsGet==='function'&&_lsGet('eq_exec_firma'))||'';
-  var exFoto=(typeof execPhoto==='function')?execPhoto():'';
+  /* ── EJECUTIVO/A — FUENTE ÚNICA (localStorage vía getExecData) ── */
+  var _ex=getExecData();
+  var as2     = _ex.name   || '[Asesor]';
+  var fo      = _ex.wsp    || '';
+  var ml      = _ex.email  || '';
+  var exCargo = _ex.cargo  || 'Ejecutivo Comercial';
+  var exEmpresa = _ex.company || 'Equifax Chile';
+  var exFirma = _ex.firma  || '';
+  var exFoto  = (typeof execPhoto==='function') ? execPhoto() : '';
   updWspLink();
   var telNum=fo.trim().replace(/\s+/g,'').replace(/[^+\d]/g,'');
   var wspHref=telNum.length>=8?'https://wa.me/'+telNum.replace(/^\+/,''):'';
