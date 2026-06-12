@@ -163,6 +163,19 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 .chk-row{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:.85rem;color:var(--wa);margin-bottom:11px;}
 .chk-row input{accent-color:var(--r);width:18px;height:18px;}
+
+/* ── INTEGRACIÓN CRM EXTRACTOR PRO ── */
+.crm-paste-btn{display:inline-flex;align-items:center;gap:7px;background:var(--g2);border:1px solid var(--g4);
+  color:var(--wa);padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;
+  margin-bottom:11px;transition:all .15s;}
+.crm-paste-btn:hover{background:var(--g3);border-color:#25D366;box-shadow:0 0 10px rgba(37,211,102,.35);transform:translateY(-1px);}
+#cvbtn-wsp{position:relative;}
+#cvbtn-wsp .wsp-dot{display:none;position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;
+  background:#25D366;box-shadow:0 0 8px rgba(37,211,102,.9);flex:0 0 auto;}
+#cvbtn-wsp.wsp-ready .wsp-dot{display:block;animation:wspPulse 1.5s ease-in-out infinite;}
+@keyframes wspPulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.45);opacity:.5;}}
+.pv-copy-btn.wsp-open{border-color:rgba(37,211,102,.55);color:#25D366;margin-right:8px;}
+.pv-copy-btn.wsp-open:hover{border-color:#25D366;box-shadow:0 0 12px rgba(37,211,102,.5);}
 .wsp-link-row{display:none;padding:8px 11px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);border-radius:8px;font-size:.85rem;margin-top:4px;}
 .wsp-link-row a{color:#25d366;font-weight:700;text-decoration:none;}
 
@@ -292,6 +305,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     <!-- 1 · DATOS DEL CLIENTE (siempre arriba, lo que cambia en cada cotización) -->
     <div class="block">
       <div class="block-t">👤 Datos del cliente</div>
+      <button type="button" id="btn-crm-paste" class="crm-paste-btn" onclick="pegarCRM();playClick();" title="Pega los datos copiados desde CRM Extractor Pro">📋 Pegar datos CRM</button>
       <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label>
       <div id="dest-fields" class="cfg-grid">
         <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
@@ -350,6 +364,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
         <path fill="#fff" d="M17.4 14.4c-.3-.15-1.7-.85-2-.95-.25-.1-.45-.15-.65.15s-.75.95-.9 1.15c-.2.2-.35.2-.65.05-1.7-.85-2.85-1.55-4-3.5-.3-.5.3-.5.85-1.55.1-.2.05-.4 0-.55-.05-.15-.65-1.6-.9-2.2-.25-.55-.5-.5-.65-.5h-.6c-.2 0-.55.05-.85.4-.3.35-1.1 1.05-1.1 2.55s1.1 2.95 1.3 3.15c.15.2 2.15 3.3 5.2 4.6.75.3 1.3.5 1.75.6.75.25 1.4.2 1.95.1.6-.1 1.7-.7 1.95-1.35.25-.65.25-1.2.15-1.35-.1-.15-.3-.2-.6-.35z"/>
       </svg>
       <span>WhatsApp</span>
+      <span class="wsp-dot" aria-hidden="true"></span>
     </button>
 
     <!-- Ficha de Oferta -->
@@ -417,6 +432,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <!-- WHATSAPP — solo texto enriquecido -->
       <div class="pv-pane" id="pane-wsp">
         <div class="pv-toolbar">
+          <button class="pv-copy-btn wsp-open" id="btn-open-wspweb" style="display:none;" onclick="abrirWspWeb();playClick();" title="Abrir WhatsApp Web con mensaje prearmado">
+            <span class="ico">🟢</span><span>Abrir WhatsApp Web</span>
+          </button>
           <button class="pv-copy-btn" onclick="copPlano();playClick();" title="Copiar texto para WhatsApp">
             <span class="ico">📋</span><span>Copiar texto para WhatsApp</span>
           </button>
@@ -801,7 +819,7 @@ function refresh(){
 }
 function onConfigChange(){CURRENT.override=null;CURRENT.overrideLista=null;refresh();}
 function onSlide(v){v=parseFloat(v);if(isNaN(v)||v<0)return;CURRENT.override=v;lightUpdate(v);}
-function onClientChange(){genMail();syncWA();}
+function onClientChange(){genMail();syncWA();updateCRMWsp();}
 function syncWA(){var t=$('tpl-body'),o=$('wa-text-view');if(t&&o)o.textContent=t.value;}
 
 function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'none':'flex';onClientChange();}
@@ -1929,6 +1947,82 @@ function playHover(){playSound('hover');}
 function playClick(){playSound('click');}
 
 /* ════════════════════════════════════════════════════════════════
+   INTEGRACIÓN CRM EXTRACTOR PRO → COTIZADORGO
+   Pegado desde portapapeles · mapeo Empresa/Teléfono ·
+   detección celular chileno · WhatsApp Web contextualizado
+   ════════════════════════════════════════════════════════════════ */
+function esCelularChileno(t){
+  var d=(''+(t||'')).replace(/\D/g,'');
+  if(d.slice(0,2)==='56'&&d.length===11)d=d.slice(2);
+  return d.length===9&&d.charAt(0)==='9';
+}
+function celularNormalizado(t){
+  var d=(''+(t||'')).replace(/\D/g,'');
+  if(d.slice(0,2)==='56'&&d.length===11)d=d.slice(2);
+  return (d.length===9&&d.charAt(0)==='9')?'56'+d:'';
+}
+function pegarCRM(){
+  if(!navigator.clipboard||!navigator.clipboard.readText){
+    toast('✖ Este navegador no permite leer el portapapeles','err','global-toast');return;
+  }
+  navigator.clipboard.readText()
+    .then(function(txt){mapearCRM(txt||'');})
+    .catch(function(){toast('✖ Permite el acceso al portapapeles e intenta de nuevo','err','global-toast');});
+}
+function mapearCRM(txt){
+  /* Busca la primera línea con campos separados por tabulación:
+     FECHA · RAZÓN SOCIAL · RUT · TELÉFONO · EMAIL */
+  var lineas=txt.split(/\r?\n/),campos=null;
+  for(var i=0;i<lineas.length;i++){
+    var p=lineas[i].split('\t').map(function(s){return s.trim();}).filter(function(s){return s!=='';});
+    if(p.length>=3){campos=p;break;}
+  }
+  if(!campos){onClientChange();return;} /* sin datos reconocibles → no rellenar, sin errores técnicos */
+  var esFecha=function(s){return /^\d{1,2}-\d{1,2}-\d{4}$/.test(s);};
+  var esRut=function(s){return /^\d{1,3}(\.\d{3}){1,2}-[\dkK]$/.test(s)||/^\d{7,9}-[\dkK]$/.test(s);};
+  var esEmail=function(s){return s.indexOf('@')>-1;};
+  var esFono=function(s){return /^\+?[\d\s]{7,17}$/.test(s)&&/\d{7,}/.test(s.replace(/\s+/g,''));};
+  var fono='',libres=[];
+  campos.forEach(function(c){
+    if(esFecha(c)||esRut(c)||esEmail(c))return;   /* FECHA, RUT y EMAIL se ignoran por diseño */
+    if(!fono&&esFono(c)){fono=c;return;}
+    libres.push(c);
+  });
+  var razon=libres.length?libres.slice().sort(function(a,b){return b.length-a.length;})[0]:'';
+  var ok=false;
+  if(razon){var e=$('me');if(e){e.value=razon;ok=true;}}
+  if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/\s+/g,'');ok=true;}}
+  /* El campo Contacto se mantiene intacto: la extensión no entrega nombre */
+  onClientChange();
+  if(ok)toast('✔ Datos CRM cargados','ok','global-toast');
+}
+function updateCRMWsp(){
+  var skip=$('skip-dest')&&$('skip-dest').checked;
+  var listo=!skip&&!!celularNormalizado(gv('cli-tel'));
+  var b=$('cvbtn-wsp');if(b)b.classList.toggle('wsp-ready',listo);
+  var o=$('btn-open-wspweb');if(o)o.style.display=listo?'':'none';
+}
+function abrirWspWeb(){
+  var cel=celularNormalizado(gv('cli-tel'));
+  var skip=$('skip-dest')&&$('skip-dest').checked;
+  if(!cel||skip)return;
+  var _ex=getExecData();
+  var nombre=_ex.name||'';
+  var cargo=_ex.cargo||'Ejecutivo Comercial';
+  var empEx=_ex.company||'Equifax Chile';
+  var atento=/ejecutiva/i.test(cargo)?'atenta':'atento';
+  var pi=PINFO[gv('mt')]||{n:''};
+  var dest=gv('me');
+  var msg='Estimado/a.\n\n'+
+    'Le saluda '+(nombre?nombre:'su '+cargo)+', '+cargo+' de '+empEx+'.\n\n'+
+    'Tal como conversamos telefónicamente hace unos momentos, le comparto por este medio el detalle de la propuesta comercial correspondiente a '+
+    (pi.n||'nuestros servicios')+(dest?', preparada para '+dest:'')+'.\n\n'+
+    'Quedo '+atento+' a cualquier consulta.\n\n'+
+    'Saludos cordiales.';
+  window.open('https://wa.me/'+cel+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+/* ════════════════════════════════════════════════════════════════
    ARRANQUE — abre completamente operativo en Bundle MC 4100 + RI
    ════════════════════════════════════════════════════════════════ */
 buildProdbar();
@@ -1939,6 +2033,7 @@ refreshUserBtn();
 
 setProduct('bundle');     // PRODUCTO PREDETERMINADO OBLIGATORIO — valores mínimos cargados
 setPreview('gmail');      // primera vista lista
+updateCRMWsp();           // estado inicial integración CRM/WhatsApp
 
 /* La UF global recalcula precios al instante */
 var _ufg=$('uf-global');
