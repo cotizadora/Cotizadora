@@ -1048,6 +1048,7 @@ function genMail(){
   var tipo=gv('mt');
   if(!tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
   var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
+  var sal=saludoChile(); /* saludo según hora real de Chile, calculado al generar */
   /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
   var em=skip?'':gv('me')||'',ru=skip?'':gv('mr')||'';
   /* ── EJECUTIVO/A — FUENTE ÚNICA (localStorage vía getExecData) ── */
@@ -1132,7 +1133,7 @@ function genMail(){
   var encab2 = "";
   if(!skip && em) encab2 = "*" + em + "*\n\n";
   var txt = encab2 +
-    "Muy buenos d\u00edas,\n\n" +
+    sal + (skip ? ".\n\n" : ",\n\n") +
     "Junto con saludar, le presento la siguiente propuesta:\n\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*" + pi.n + "*\n" +
@@ -1204,9 +1205,10 @@ function genMail(){
     '<div style="background:#1a1218;padding:20px 28px;border-bottom:3px solid #9b1c2e;">'+
       (em
         ? '<div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#9b4455;font-family:Arial,sans-serif;margin-bottom:6px;">Propuesta para</div>'+
-          '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'
+          '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'+
+          '<div style="margin-top:8px;font-size:13px;color:#ccbbbb;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</div>'
         : '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;letter-spacing:1px;">Propuesta Comercial</div>'+
-          '<div style="margin-top:6px;font-size:13px;color:#aaa;font-family:Arial,sans-serif;">Le presento la siguiente propuesta comercial:</div>'
+          '<div style="margin-top:6px;font-size:13px;color:#aaa;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</div>'
       )+
     '</div>'+
 
@@ -1346,9 +1348,10 @@ function genMail(){
           '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 22px 20px 18px;">'+
             (em
               ? '<p style="margin:0 0 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">PROPUESTA PREPARADA PARA</p>'+
-                '<p style="margin:0;font-size:22px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;padding-bottom:10px;border-bottom:2px solid #eeeeee;">'+em+'</p>'
+                '<p style="margin:0;font-size:22px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;padding-bottom:10px;border-bottom:2px solid #eeeeee;">'+em+'</p>'+
+                '<p style="margin:8px 0 0;font-size:13px;color:#444444;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</p>'
               : '<p style="margin:0;font-size:22px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;letter-spacing:1px;padding-bottom:10px;border-bottom:2px solid #eeeeee;">PROPUESTA COMERCIAL</p>'+
-                '<p style="margin:7px 0 0;font-size:13px;color:#444444;font-family:Arial,sans-serif;">Le presento la siguiente propuesta comercial:</p>'
+                '<p style="margin:7px 0 0;font-size:13px;color:#444444;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</p>'
             )+
           '</td>'+
         '</tr></table>'+
@@ -1941,6 +1944,35 @@ function playSound(type){
 }
 function playHover(){playSound('hover');}
 function playClick(){playSound('click');}
+
+/* ════════════════════════════════════════════════════════════════
+   SALUDO DINÁMICO — HORA REAL DE CHILE (America/Santiago)
+   00:00–11:59 Buenos días · 12:00–19:59 Buenas tardes · 20:00–23:59 Buenas noches
+   ════════════════════════════════════════════════════════════════ */
+function horaChile(){
+  try{
+    var h=parseInt(new Intl.DateTimeFormat('es-CL',{timeZone:'America/Santiago',hour:'2-digit',hourCycle:'h23'}).format(new Date()),10);
+    if(isNaN(h))throw 0;
+    if(h===24)h=0;
+    return h;
+  }catch(e){return new Date().getHours();} /* respaldo solo si el motor no soporta timeZone */
+}
+function saludoChile(){
+  var h=horaChile();
+  if(h<12)return 'Buenos d\u00edas';
+  if(h<20)return 'Buenas tardes';
+  return 'Buenas noches';
+}
+function tramoSaludo(){var h=horaChile();return h<12?0:(h<20?1:2);}
+var _saludoTramo=tramoSaludo();
+/* Si la app queda abierta y cambia el tramo horario, todas las vistas se regeneran solas */
+setInterval(function(){
+  var t=tramoSaludo();
+  if(t!==_saludoTramo){
+    _saludoTramo=t;
+    try{onClientChange();}catch(e){}
+  }
+},60000);
 
 /* ════════════════════════════════════════════════════════════════
    INTEGRACIÓN CRM EXTRACTOR PRO → COTIZADORGO
