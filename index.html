@@ -200,7 +200,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .subject-bar .sb-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
 .pv-copy-btn.sm{padding:7px 12px;font-size:.76rem;}
 .wa-text{background:var(--g1);border:1px solid var(--g4);color:#cfcfcf;font-family:'Courier New',monospace;
-  font-size:.82rem;line-height:1.6;padding:14px;border-radius:10px;white-space:pre-wrap;margin-top:14px;max-height:320px;overflow:auto;}
+  font-size:.92rem;line-height:1.55;padding:16px 18px;border-radius:10px;white-space:pre-wrap;margin-top:8px;
+  max-height:none;min-height:calc(100vh - 240px);overflow:visible;}
 .outlook-note{font-size:.78rem;color:#9aa;background:rgba(0,114,198,.1);border:1px solid rgba(0,114,198,.3);
   border-radius:8px;padding:9px 13px;margin-top:12px;}
 .outlook-note b{color:#5ab0ff;}
@@ -309,12 +310,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label>
       <div id="dest-fields" class="cfg-grid">
         <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
-        <div class="cfg-2">
-          <div class="fld"><label>Contacto</label><input type="text" id="mn" placeholder="Juan Pérez" oninput="onClientChange()"></div>
-          <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="onClientChange()"></div>
-        </div>
-        <!-- campos ocultos para compatibilidad -->
-        <input type="hidden" id="mr"><input type="hidden" id="cli-email"><input type="hidden" id="cli-obs">
+        <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="onClientChange()"></div>
+        <!-- campos ocultos para compatibilidad (el contacto ya no se usa en propuestas) -->
+        <input type="hidden" id="mn"><input type="hidden" id="mr"><input type="hidden" id="cli-email"><input type="hidden" id="cli-obs">
       </div>
     </div>
 
@@ -1050,7 +1048,7 @@ function genMail(){
   var tipo=gv('mt');
   if(!tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
   var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
-  var n=skip?'Cliente':gv('mn')||'Sr./Sra. [Nombre]';
+  /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
   var em=skip?'':gv('me')||'',ru=skip?'':gv('mr')||'';
   /* ── EJECUTIVO/A — FUENTE ÚNICA (localStorage vía getExecData) ── */
   var _ex=getExecData();
@@ -1134,7 +1132,7 @@ function genMail(){
   var encab2 = "";
   if(!skip && em) encab2 = "*" + em + "*\n\n";
   var txt = encab2 +
-    "Muy buenos d\u00edas *" + n + "*,\n\n" +
+    "Muy buenos d\u00edas,\n\n" +
     "Junto con saludar, le presento la siguiente propuesta:\n\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*" + pi.n + "*\n" +
@@ -1206,9 +1204,8 @@ function genMail(){
     '<div style="background:#1a1218;padding:20px 28px;border-bottom:3px solid #9b1c2e;">'+
       (em
         ? '<div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#9b4455;font-family:Arial,sans-serif;margin-bottom:6px;">Propuesta para</div>'+
-          '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'+
-          (n&&!skip?'<div style="margin-top:6px;font-size:13px;color:#ccbbbb;font-family:Arial,sans-serif;">A/A: '+n+'</div>':'')
-        : '<div style="font-size:14px;color:#ddcccc;font-family:Arial,sans-serif;">Estimado/a <strong style="color:#ffffff;">'+(skip?'Cliente':n)+'</strong>,</div>'+
+          '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'
+        : '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;letter-spacing:1px;">Propuesta Comercial</div>'+
           '<div style="margin-top:6px;font-size:13px;color:#aaa;font-family:Arial,sans-serif;">Le presento la siguiente propuesta comercial:</div>'
       )+
     '</div>'+
@@ -1347,11 +1344,10 @@ function genMail(){
       '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;border-left:6px solid #9b1c2e;">'+
         '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
           '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 22px 20px 18px;">'+
-            '<p style="margin:0 0 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">PROPUESTA PREPARADA PARA</p>'+
             (em
-              ? '<p style="margin:0;font-size:22px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;padding-bottom:10px;border-bottom:2px solid #eeeeee;">'+em+'</p>'+
-                (n&&!skip?'<p style="margin:8px 0 0;font-size:12px;color:#444444;font-family:Arial,sans-serif;">A/A: <strong style="color:#111111;">'+n+'</strong></p>':'')
-              : '<p style="margin:0;font-size:14px;color:#111111;font-family:Arial,sans-serif;">Estimado/a <strong>'+(skip?'Cliente':n)+'</strong>,</p>'+
+              ? '<p style="margin:0 0 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">PROPUESTA PREPARADA PARA</p>'+
+                '<p style="margin:0;font-size:22px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;padding-bottom:10px;border-bottom:2px solid #eeeeee;">'+em+'</p>'
+              : '<p style="margin:0;font-size:22px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;letter-spacing:1px;padding-bottom:10px;border-bottom:2px solid #eeeeee;">PROPUESTA COMERCIAL</p>'+
                 '<p style="margin:7px 0 0;font-size:13px;color:#444444;font-family:Arial,sans-serif;">Le presento la siguiente propuesta comercial:</p>'
             )+
           '</td>'+
