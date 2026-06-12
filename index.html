@@ -77,10 +77,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 /* ── ESTACIÓN DE TRABAJO — 3 COLUMNAS ─────────────── */
 #workstation{position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;bottom:0;
-  display:grid;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);gap:0;}
+  display:grid;grid-template-columns:minmax(0,1fr) max-content minmax(0,1fr);gap:0;}
 #left-panel{border-right:3px solid var(--g4);overflow-y:auto;padding:18px 20px 40px;background:var(--g0);}
 #center-panel{border-right:2px solid var(--g3);background:linear-gradient(to bottom,#0a0a0c,#0e0e10 50%,#0a0a0c);
-  overflow-y:auto;padding:16px 10px 30px;display:flex;flex-direction:column;gap:6px;align-items:stretch;}
+  overflow-y:auto;padding:16px 14px 30px;display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:175px;}
 #center-panel::-webkit-scrollbar{width:0;}
 #right-panel{overflow:hidden;padding:0;background:#101012;display:flex;}
 
@@ -165,6 +165,14 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .chk-row input{accent-color:var(--r);width:18px;height:18px;}
 .wsp-link-row{display:none;padding:8px 11px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);border-radius:8px;font-size:.85rem;margin-top:4px;}
 .wsp-link-row a{color:#25d366;font-weight:700;text-decoration:none;}
+
+/* ── BARRA DE ACCIÓN CONTEXTUAL POR VISTA ─────────── */
+.pv-toolbar{display:flex;justify-content:flex-end;margin-bottom:10px;}
+.pv-copy-btn{display:inline-flex;align-items:center;gap:7px;background:var(--g2);border:1px solid var(--g4);
+  color:#fff;border-radius:9px;padding:9px 15px;cursor:pointer;font-family:inherit;font-size:.82rem;
+  font-weight:700;white-space:nowrap;transition:all .15s ease;}
+.pv-copy-btn:hover{background:var(--g3);border-color:var(--rl);box-shadow:0 0 10px rgba(192,38,59,.4);transform:translateY(-1px);}
+.pv-copy-btn .ico{font-size:.95rem;line-height:1;}
 
 /* ── PANEL DERECHO — solo vista previa ───────────── */
 .pv-content{flex:1;min-width:0;overflow-y:auto;padding:14px 16px 30px;}
@@ -352,24 +360,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <span>Ficha de Oferta</span>
     </button>
 
-    <div class="cv-sep"></div>
-    <div class="cv-section-lbl">Acciones</div>
-
-    <button class="cv-btn" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
-      <span class="ico">📋</span><span>Copiar asunto</span>
-    </button>
-    <button class="cv-btn" onclick="smartCopy();" title="Copiar contenido de la vista activa">
-      <span class="ico">🖼</span><span>Copiar</span>
-    </button>
-
-    <div class="cv-sep"></div>
-
-    <button class="cv-btn" onclick="descImg();playClick();" title="Descargar PNG">
-      <span class="ico">📥</span><span>Descargar</span>
-    </button>
-    <button class="cv-btn" onclick="ampliarActive();playClick();" title="Ampliar vista actual">
-      <span class="ico">🔍</span><span>Ampliar</span>
-    </button>
   </nav>
 
   <!-- ════════ PANEL DERECHO — VISTA PREVIA ════════ -->
@@ -390,6 +380,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- GMAIL -->
       <div class="pv-pane on" id="pane-gmail">
+        <div class="pv-toolbar">
+          <button class="pv-copy-btn" onclick="copHTMLGmail();playClick();" title="Copiar texto para Gmail">
+            <span class="ico">📋</span><span>Copiar texto para Gmail</span>
+          </button>
+        </div>
         <div class="subject-bar">
           <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto"></div></div>
         </div>
@@ -399,12 +394,22 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- OUTLOOK -->
       <div class="pv-pane" id="pane-outlook">
+        <div class="pv-toolbar">
+          <button class="pv-copy-btn" onclick="copHTMLOutlook();playClick();" title="Copiar texto para Outlook">
+            <span class="ico">📋</span><span>Copiar texto para Outlook</span>
+          </button>
+        </div>
         <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
         <div class="outlook-note">⚠️ <b>Nota Outlook:</b> usa colores sólidos y tablas para máxima compatibilidad. Pega directo en el cuerpo del mensaje.</div>
       </div>
 
       <!-- WHATSAPP — solo texto enriquecido -->
       <div class="pv-pane" id="pane-wsp">
+        <div class="pv-toolbar">
+          <button class="pv-copy-btn" onclick="copPlano();playClick();" title="Copiar texto para WhatsApp">
+            <span class="ico">📋</span><span>Copiar texto para WhatsApp</span>
+          </button>
+        </div>
         <textarea id="tpl-body" style="display:none;"></textarea>
         <div class="wa-text" id="wa-text-view"></div>
       </div>
@@ -416,6 +421,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- IMAGEN -->
       <div class="pv-pane" id="pane-img">
+        <div class="pv-toolbar">
+          <button class="pv-copy-btn" onclick="copImgPC();playClick();" title="Copiar Ficha como Imagen">
+            <span class="ico">🖼</span><span>Copiar Ficha como Imagen</span>
+          </button>
+        </div>
         <div class="pv-frame dark">
 <div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
         </div>
