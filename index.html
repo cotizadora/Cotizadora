@@ -149,21 +149,38 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 /* ── PANEL DERECHO — VISTAS PREVIAS + COLUMNA LATERAL ─ */
 .pv-content{flex:1;min-width:0;overflow-y:auto;padding:14px 16px 30px;}
-.pv-rail{flex:0 0 64px;background:linear-gradient(to bottom,#0a0a0c,#0e0e10 50%,#0a0a0c);
-  border-left:1px solid rgba(155,28,46,.22);padding:14px 7px;display:flex;flex-direction:column;
-  align-items:center;gap:6px;box-shadow:-4px 0 14px rgba(0,0,0,.4);overflow-y:auto;}
+.pv-rail{flex:0 0 130px;background:linear-gradient(to bottom,#0a0a0c,#0e0e10 50%,#0a0a0c);
+  border-left:1px solid rgba(155,28,46,.22);padding:12px 8px 12px;display:flex;flex-direction:column;
+  align-items:stretch;gap:5px;box-shadow:-4px 0 14px rgba(0,0,0,.4);overflow-y:auto;}
 .pv-rail::-webkit-scrollbar{width:0;}
-.rail-btn{width:50px;height:46px;border-radius:14px;border:1px solid var(--g4);
-  background:var(--g2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:all .18s ease;font-family:inherit;position:relative;padding:0;flex-shrink:0;}
+
+/* ── etiquetas de sección dentro del rail ─ */
+.rail-section-label{font-size:.52rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--wb);font-weight:700;padding:0 4px 3px;margin-top:4px;flex-shrink:0;}
+
+/* ── botones plataforma (cápsula, logo + texto) ─ */
+.rail-btn{width:100%;height:34px;border-radius:20px;border:1px solid var(--g4);
+  background:var(--g2);color:#fff;cursor:pointer;display:flex;align-items:center;
+  justify-content:flex-start;gap:7px;padding:0 10px;
+  transition:all .18s ease;font-family:inherit;position:relative;flex-shrink:0;
+  font-size:.78rem;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;}
 .rail-btn:hover{background:var(--g3);border-color:var(--rl);
-  box-shadow:0 0 12px rgba(192,38,59,.45),0 4px 10px rgba(0,0,0,.45);transform:translateX(-2px);}
-.rail-btn:active{transform:translateX(-2px) scale(.95);}
+  box-shadow:0 0 10px rgba(192,38,59,.35);color:#fff;}
+.rail-btn:active{transform:scale(.97);}
 .rail-btn.on{background:linear-gradient(135deg,var(--rd),var(--r));border-color:var(--rl);
-  box-shadow:0 0 0 1px var(--r) inset,0 0 16px rgba(155,28,46,.55),0 0 28px rgba(155,28,46,.22);color:#fff;}
-.rail-btn .ico{font-size:1.15rem;line-height:1;}
-.rail-btn svg{display:block;width:22px;height:22px;}
-.rail-sep{width:34px;height:1px;background:linear-gradient(to right,transparent 0%,var(--g4) 30%,var(--g4) 70%,transparent 100%);margin:4px 0;flex-shrink:0;}
+  box-shadow:0 0 0 1px var(--r) inset,0 0 14px rgba(155,28,46,.5);color:#fff;}
+
+/* ── botones de acción (más pequeños, sin texto largo) ─ */
+.rail-btn.action{justify-content:center;gap:5px;font-size:.72rem;font-weight:600;
+  background:var(--g3);border-color:var(--g4);height:30px;border-radius:8px;}
+.rail-btn.action:hover{background:var(--g4);border-color:var(--g5);}
+
+.rail-btn .ico{font-size:1rem;line-height:1;flex-shrink:0;}
+.rail-btn .rail-logo{display:block;flex-shrink:0;}
+.rail-btn svg{display:block;}
+.rail-btn .rail-label{overflow:hidden;text-overflow:ellipsis;}
+
+.rail-sep{width:100%;height:1px;background:linear-gradient(to right,transparent 0%,var(--g4) 30%,var(--g4) 70%,transparent 100%);margin:5px 0;flex-shrink:0;}
 .rail-btn.ctx{display:none;}
 .pv-rail.show-gmail .ctx-gmail,
 .pv-rail.show-outlook .ctx-outlook,
@@ -237,10 +254,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   .uf-box input{width:74px;}
   #right-panel{overflow:visible;}
   .pv-content{overflow-y:visible;padding:12px 12px 30px;}
-  .pv-rail{flex:0 0 58px;padding:12px 6px;gap:5px;position:sticky;top:calc(var(--headH) + var(--barH) + 52px);align-self:flex-start;max-height:calc(100vh - var(--headH) - var(--barH) - 52px);}
-  .rail-btn{width:44px;height:42px;border-radius:12px;}
-  .rail-btn svg{width:20px;height:20px;}
-  .rail-btn .ico{font-size:1rem;}
+  .pv-rail{flex:0 0 110px;padding:10px 6px;gap:4px;position:sticky;top:calc(var(--headH) + var(--barH) + 52px);align-self:flex-start;max-height:calc(100vh - var(--headH) - var(--barH) - 52px);}
+  .rail-btn{height:30px;font-size:.7rem;}
+  .rail-btn.action{height:26px;font-size:.66rem;}
+  .rail-section-label{font-size:.48rem;}
 }
 @media(max-width:560px){
   .brand .nm{font-size:1.05rem;}
@@ -362,51 +379,72 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
    <!-- COLUMNA LATERAL DE ACCIONES -->
    <aside class="pv-rail show-gmail" id="pv-rail">
-     <!-- Selectores de vista (con iconos oficiales) -->
+
+     <!-- ── PLATAFORMAS ── -->
+     <div class="rail-section-label">Plataformas</div>
+
+     <!-- Gmail -->
      <button class="rail-btn tab on" data-pv="gmail" onclick="setPreview('gmail');playClick();" title="Gmail" aria-label="Vista Gmail">
-       <svg viewBox="0 0 24 24" aria-hidden="true">
-         <path fill="#fff" d="M3 6.2A2.2 2.2 0 0 1 5.2 4h13.6A2.2 2.2 0 0 1 21 6.2v11.6A2.2 2.2 0 0 1 18.8 20H5.2A2.2 2.2 0 0 1 3 17.8z"/>
-         <path fill="#EA4335" d="M3 6.2 12 13l9-6.8v3.2L12 16 3 9.4z"/>
-         <path fill="#FBBC04" d="M3 6.2 12 13l9-6.8V6.2A2.2 2.2 0 0 0 18.8 4H5.2A2.2 2.2 0 0 0 3 6.2z"/>
+       <svg class="rail-logo" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+         <path fill="#fff" d="M2.5 5.2A1.8 1.8 0 0 1 4.3 3.4h11.4A1.8 1.8 0 0 1 17.5 5.2v9.6A1.8 1.8 0 0 1 15.7 16.6H4.3A1.8 1.8 0 0 1 2.5 14.8z"/>
+         <path fill="#EA4335" d="M2.5 5.2 10 10.8l7.5-5.6v2.6L10 13.4 2.5 7.8z"/>
+         <path fill="#FBBC04" d="M2.5 5.2 10 10.8l7.5-5.6V5.2A1.8 1.8 0 0 0 15.7 3.4H4.3A1.8 1.8 0 0 0 2.5 5.2z"/>
        </svg>
+       <span class="rail-label">Gmail</span>
      </button>
+
+     <!-- Outlook -->
      <button class="rail-btn tab" data-pv="outlook" onclick="setPreview('outlook');playClick();" title="Outlook" aria-label="Vista Outlook">
-       <svg viewBox="0 0 24 24" aria-hidden="true">
-         <rect x="3" y="4" width="13" height="16" rx="1.5" fill="#0078D4"/>
-         <ellipse cx="9.5" cy="12" rx="3" ry="4" fill="#fff"/>
-         <ellipse cx="9.5" cy="12" rx="1.5" ry="2.3" fill="#0078D4"/>
-         <rect x="16" y="6" width="5" height="12" fill="#28A8EA"/>
-         <path fill="#0078D4" d="M16 6h5l-2.5 4z"/>
+       <svg class="rail-logo" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+         <rect x="2.5" y="3.2" width="10.5" height="13.6" rx="1.3" fill="#0078D4"/>
+         <ellipse cx="7.8" cy="10" rx="2.5" ry="3.2" fill="#fff"/>
+         <ellipse cx="7.8" cy="10" rx="1.2" ry="1.8" fill="#0078D4"/>
+         <rect x="13" y="5" width="4.5" height="10" fill="#28A8EA"/>
+         <path fill="#0078D4" d="M13 5h4.5l-2.25 3.2z"/>
        </svg>
+       <span class="rail-label">Outlook</span>
      </button>
+
+     <!-- WhatsApp -->
      <button class="rail-btn tab" data-pv="wsp" onclick="setPreview('wsp');playClick();" title="WhatsApp" aria-label="Vista WhatsApp">
-       <svg viewBox="0 0 24 24" aria-hidden="true">
-         <path fill="#25D366" d="M12 2C6.5 2 2 6.5 2 12c0 1.85.5 3.6 1.4 5.1L2 22l5-1.4c1.4.8 3.1 1.3 5 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/>
-         <path fill="#fff" d="M17.4 14.4c-.3-.15-1.7-.85-2-.95-.25-.1-.45-.15-.65.15s-.75.95-.9 1.15c-.2.2-.35.2-.65.05-1.7-.85-2.85-1.55-4-3.5-.3-.5.3-.5.85-1.55.1-.2.05-.4 0-.55-.05-.15-.65-1.6-.9-2.2-.25-.55-.5-.5-.65-.5h-.6c-.2 0-.55.05-.85.4-.3.35-1.1 1.05-1.1 2.55s1.1 2.95 1.3 3.15c.15.2 2.15 3.3 5.2 4.6.75.3 1.3.5 1.75.6.75.25 1.4.2 1.95.1.6-.1 1.7-.7 1.95-1.35.25-.65.25-1.2.15-1.35-.1-.15-.3-.2-.6-.35z"/>
+       <svg class="rail-logo" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+         <path fill="#25D366" d="M10 1.5C5.3 1.5 1.5 5.3 1.5 10c0 1.55.42 3 1.15 4.25L1.5 18.5l4.35-1.15c1.2.65 2.55 1.05 4 1.1 4.7.05 8.65-3.7 8.65-8.45S14.7 1.5 10 1.5z"/>
+         <path fill="#fff" d="M14.5 12c-.25-.12-1.42-.7-1.65-.78-.2-.08-.37-.12-.53.12s-.62.78-.75.95c-.16.17-.3.17-.54.04-1.4-.7-2.35-1.28-3.3-2.9-.25-.42.25-.41.7-1.28.08-.17.04-.33 0-.45C8.38 7.5 7.84 6.15 7.62 5.67c-.21-.45-.42-.4-.54-.4h-.5c-.17 0-.45.05-.7.33-.25.3-.92.88-.92 2.12s.9 2.45 1.05 2.63c.13.17 1.78 2.73 4.3 3.8.62.25 1.08.4 1.45.5.62.2 1.17.17 1.6.08.5-.08 1.4-.57 1.6-1.12.2-.54.2-1 .13-1.1-.08-.12-.26-.17-.5-.3z"/>
        </svg>
+       <span class="rail-label">WhatsApp</span>
      </button>
-     <button class="rail-btn tab" data-pv="img" onclick="setPreview('img');playClick();" title="Imagen corporativa" aria-label="Vista Imagen">
-       <svg viewBox="0 0 24 24" aria-hidden="true">
-         <rect x="3" y="4.5" width="18" height="15" rx="2" fill="none" stroke="#f0c040" stroke-width="1.8"/>
-         <circle cx="8.5" cy="10" r="1.6" fill="#f0c040"/>
-         <path d="M3.5 17.5 9 12.5l3.5 3.5 3-3 5 5" fill="none" stroke="#f0c040" stroke-width="1.8" stroke-linejoin="round"/>
+
+     <!-- Ficha de Oferta -->
+     <button class="rail-btn tab" data-pv="img" onclick="setPreview('img');playClick();" title="Ficha de Oferta" aria-label="Vista Ficha de Oferta">
+       <svg class="rail-logo" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+         <rect x="2.5" y="3.5" width="15" height="13" rx="1.8" fill="none" stroke="#f0c040" stroke-width="1.6"/>
+         <circle cx="7" cy="8.5" r="1.4" fill="#f0c040"/>
+         <path d="M2.8 14.5 7.5 10l3 3 2.5-2.5 4.2 4" fill="none" stroke="#f0c040" stroke-width="1.6" stroke-linejoin="round"/>
        </svg>
+       <span class="rail-label">Ficha Oferta</span>
      </button>
 
      <div class="rail-sep"></div>
 
-     <!-- Acciones siempre disponibles -->
-     <button class="rail-btn" onclick="copAsunto();playClick();" title="Copiar asunto del correo" aria-label="Copiar asunto"><span class="ico">📝</span></button>
-     <button class="rail-btn" onclick="smartCopy();" title="Copiar contenido de la vista activa" aria-label="Copiar"><span class="ico">📋</span></button>
+     <!-- ── ACCIONES ── -->
+     <div class="rail-section-label">Acciones</div>
 
-     <!-- Acción contextual sólo visible en WhatsApp -->
-     <button class="rail-btn ctx ctx-wsp" onclick="copImgWsp();playClick();" title="Copiar imagen WhatsApp" aria-label="Copiar imagen WhatsApp"><span class="ico">🖼</span></button>
+     <button class="rail-btn action" onclick="copAsunto();playClick();" title="Copiar asunto del correo" aria-label="Copiar asunto">
+       <span class="ico">📋</span><span class="rail-label">Copiar asunto</span>
+     </button>
+     <button class="rail-btn action" onclick="smartCopy();" title="Copiar contenido de la vista activa" aria-label="Copiar">
+       <span class="ico">📄</span><span class="rail-label">Copiar texto</span>
+     </button>
 
-     <div class="rail-sep"></div>
+     <!-- Contextual WhatsApp -->
+     <button class="rail-btn action ctx ctx-wsp" onclick="copImgWsp();playClick();" title="Copiar imagen WhatsApp" aria-label="Copiar imagen WhatsApp">
+       <span class="ico">🖼</span><span class="rail-label">Copiar imagen</span>
+     </button>
 
-     <!-- Ampliar y descargar -->
-     <button class="rail-btn" onclick="ampliarActive();playClick();" title="Ampliar vista actual" aria-label="Ampliar"><span class="ico">🔍</span></button>
-     <button class="rail-btn" onclick="descImg();playClick();" title="Descargar PNG" aria-label="Descargar PNG"><span class="ico">📥</span></button>
+     <button class="rail-btn action" onclick="descImg();playClick();" title="Descargar PNG" aria-label="Descargar PNG">
+       <span class="ico">📥</span><span class="rail-label">Descargar</span>
+     </button>
+
    </aside>
   </section>
 </div>
@@ -817,7 +855,7 @@ function ampliar(which){
   if(which==='gmail'){title.textContent='📧 Vista ampliada — Gmail';html='<div style="background:#f8f9fa;border-radius:8px;padding:12px;">'+($('tpl-rich-gmail').innerHTML)+'</div>';light=true;}
   else if(which==='outlook'){title.textContent='📨 Vista ampliada — Outlook';html='<div style="background:#fff;border-radius:8px;padding:12px;overflow-x:auto;">'+($('tpl-rich-outlook').innerHTML)+'</div>';light=true;}
   else if(which==='wsp'){title.textContent='💬 Vista ampliada — WhatsApp';html='<div style="display:flex;justify-content:center;">'+($('cot-card-wsp').outerHTML)+'</div>';}
-  else if(which==='img'){title.textContent='🖼 Vista ampliada — Imagen';html='<div style="display:flex;justify-content:center;">'+($('cot-card-pc').outerHTML)+'</div>';}
+  else if(which==='img'){title.textContent='🖼 Ficha de Oferta';html='<div style="display:flex;justify-content:center;">'+($('cot-card-pc').outerHTML)+'</div>';}
   body.className='modal-body'+(light?' light':'');
   body.innerHTML=html;
   $('ampliar-modal').classList.add('on');
