@@ -167,7 +167,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .wsp-link-row a{color:#25d366;font-weight:700;text-decoration:none;}
 
 /* ── BARRA DE ACCIÓN CONTEXTUAL POR VISTA ─────────── */
-.pv-toolbar{display:flex;justify-content:flex-end;margin-bottom:10px;}
+.pv-toolbar{display:flex;justify-content:flex-end;margin-bottom:8px;}
 .pv-copy-btn{display:inline-flex;align-items:center;gap:7px;background:var(--g2);border:1px solid var(--g4);
   color:#fff;border-radius:9px;padding:9px 15px;cursor:pointer;font-family:inherit;font-size:.82rem;
   font-weight:700;white-space:nowrap;transition:all .15s ease;}
@@ -184,6 +184,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
 .subject-bar .sl{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);}
 .subject-bar .sv{color:var(--y);font-size:.95rem;font-weight:700;word-break:break-word;}
+.subject-bar .sb-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.pv-copy-btn.sm{padding:7px 12px;font-size:.76rem;}
 .wa-text{background:var(--g1);border:1px solid var(--g4);color:#cfcfcf;font-family:'Courier New',monospace;
   font-size:.82rem;line-height:1.6;padding:14px;border-radius:10px;white-space:pre-wrap;margin-top:14px;max-height:320px;overflow:auto;}
 .outlook-note{font-size:.78rem;color:#9aa;background:rgba(0,114,198,.1);border:1px solid rgba(0,114,198,.3);
@@ -380,13 +382,16 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- GMAIL -->
       <div class="pv-pane on" id="pane-gmail">
-        <div class="pv-toolbar">
-          <button class="pv-copy-btn" onclick="copHTMLGmail();playClick();" title="Copiar texto para Gmail">
-            <span class="ico">📋</span><span>Copiar texto para Gmail</span>
-          </button>
-        </div>
         <div class="subject-bar">
           <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto"></div></div>
+          <div class="sb-actions">
+            <button class="pv-copy-btn sm" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
+              <span class="ico">📋</span><span>Copiar Asunto</span>
+            </button>
+            <button class="pv-copy-btn sm" onclick="copHTMLGmail();playClick();" title="Copiar texto para Gmail">
+              <span class="ico">📋</span><span>Copiar Texto</span>
+            </button>
+          </div>
         </div>
         <div class="pv-frame"><div id="tpl-rich-gmail"></div></div>
         <div id="tpl-rich" style="display:none;"></div>
@@ -394,10 +399,16 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- OUTLOOK -->
       <div class="pv-pane" id="pane-outlook">
-        <div class="pv-toolbar">
-          <button class="pv-copy-btn" onclick="copHTMLOutlook();playClick();" title="Copiar texto para Outlook">
-            <span class="ico">📋</span><span>Copiar texto para Outlook</span>
-          </button>
+        <div class="subject-bar">
+          <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto-outlook"></div></div>
+          <div class="sb-actions">
+            <button class="pv-copy-btn sm" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
+              <span class="ico">📋</span><span>Copiar Asunto</span>
+            </button>
+            <button class="pv-copy-btn sm" onclick="copHTMLOutlook();playClick();" title="Copiar texto para Outlook">
+              <span class="ico">📋</span><span>Copiar Texto</span>
+            </button>
+          </div>
         </div>
         <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
         <div class="outlook-note">⚠️ <b>Nota Outlook:</b> usa colores sólidos y tablas para máxima compatibilidad. Pega directo en el cuerpo del mensaje.</div>
@@ -1099,6 +1110,7 @@ function genMail(){
   // Asunto
   var aEmp=(em?' | '+em:'');
   st('tpl-asunto','Propuesta Comercial Equifax — '+pi.n+aEmp);
+  st('tpl-asunto-outlook','Propuesta Comercial Equifax — '+pi.n+aEmp);
 
   // ── TEXTO WA (formato markdown WhatsApp) ──
   var encab2 = "";
