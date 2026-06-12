@@ -79,9 +79,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 #workstation{position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;bottom:0;
   display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;}
 #left-panel{border-right:3px solid var(--g4);overflow-y:auto;padding:18px 20px 40px;background:var(--g0);}
-#right-panel{overflow-y:auto;padding:0;background:#101012;}
-#left-panel::-webkit-scrollbar,#right-panel::-webkit-scrollbar{width:9px;}
-#left-panel::-webkit-scrollbar-thumb,#right-panel::-webkit-scrollbar-thumb{background:var(--g4);border-radius:5px;}
+#right-panel{overflow:hidden;padding:0;background:#101012;display:flex;}
+#left-panel::-webkit-scrollbar,#right-panel::-webkit-scrollbar,.pv-content::-webkit-scrollbar{width:9px;}
+#left-panel::-webkit-scrollbar-thumb,#right-panel::-webkit-scrollbar-thumb,.pv-content::-webkit-scrollbar-thumb{background:var(--g4);border-radius:5px;}
 
 /* ── BLOQUES IZQUIERDA ────────────────────────────── */
 .block{background:var(--g1);border:1px solid var(--g3);border-radius:12px;padding:16px 18px;margin-bottom:14px;}
@@ -147,29 +147,33 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .wsp-link-row{display:none;padding:8px 11px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);border-radius:8px;font-size:.85rem;margin-top:4px;}
 .wsp-link-row a{color:#25d366;font-weight:700;text-decoration:none;}
 
-/* ── PANEL DERECHO — VISTAS PREVIAS ───────────────── */
-.pv-bar{position:sticky;top:0;z-index:10;background:#101012;border-bottom:2px solid var(--g4);
-  display:flex;gap:6px;padding:12px 16px 0;}
-.pv-tab{flex:1;border:none;border-bottom:3px solid transparent;background:var(--g2);color:var(--wa);
-  border-radius:9px 9px 0 0;padding:12px 8px;cursor:pointer;font-family:inherit;font-size:.92rem;font-weight:800;
-  letter-spacing:.3px;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.pv-tab:hover{color:#fff;background:var(--g3);}
-.pv-tab.on{color:#fff;background:var(--g3);border-bottom-color:var(--r);box-shadow:inset 0 0 0 1px var(--g4);}
-.pv-actions{display:flex;gap:8px;flex-wrap:wrap;padding:14px 16px 10px;align-items:center;}
-.pv-actions .lead{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wb);margin-right:auto;font-weight:700;}
-.act-btn{border:none;border-radius:9px;padding:11px 16px;cursor:pointer;font-family:inherit;font-size:.88rem;font-weight:800;transition:.15s;white-space:nowrap;}
-.act-btn.gmail{background:linear-gradient(135deg,#ea4335,#c5221f);color:#fff;}
-.act-btn.outlook{background:linear-gradient(135deg,#0072c6,#004578);color:#fff;}
-.act-btn.wsp{background:#128c7e;color:#fff;}
-.act-btn.img{background:linear-gradient(135deg,#7a1425,#9b1c2e);color:#fff;}
-.act-btn.ghost{background:var(--g3);color:var(--w);}
-.act-btn:hover{filter:brightness(1.14);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.35);}
-.act-btn.expand{background:var(--y);color:#2a1500;}
-.pv-pane{display:none;padding:6px 16px 30px;}
+/* ── PANEL DERECHO — VISTAS PREVIAS + COLUMNA LATERAL ─ */
+.pv-content{flex:1;min-width:0;overflow-y:auto;padding:14px 16px 30px;}
+.pv-rail{flex:0 0 64px;background:linear-gradient(to bottom,#0a0a0c,#0e0e10 50%,#0a0a0c);
+  border-left:1px solid rgba(155,28,46,.22);padding:14px 7px;display:flex;flex-direction:column;
+  align-items:center;gap:6px;box-shadow:-4px 0 14px rgba(0,0,0,.4);overflow-y:auto;}
+.pv-rail::-webkit-scrollbar{width:0;}
+.rail-btn{width:50px;height:46px;border-radius:14px;border:1px solid var(--g4);
+  background:var(--g2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .18s ease;font-family:inherit;position:relative;padding:0;flex-shrink:0;}
+.rail-btn:hover{background:var(--g3);border-color:var(--rl);
+  box-shadow:0 0 12px rgba(192,38,59,.45),0 4px 10px rgba(0,0,0,.45);transform:translateX(-2px);}
+.rail-btn:active{transform:translateX(-2px) scale(.95);}
+.rail-btn.on{background:linear-gradient(135deg,var(--rd),var(--r));border-color:var(--rl);
+  box-shadow:0 0 0 1px var(--r) inset,0 0 16px rgba(155,28,46,.55),0 0 28px rgba(155,28,46,.22);color:#fff;}
+.rail-btn .ico{font-size:1.15rem;line-height:1;}
+.rail-btn svg{display:block;width:22px;height:22px;}
+.rail-sep{width:34px;height:1px;background:linear-gradient(to right,transparent 0%,var(--g4) 30%,var(--g4) 70%,transparent 100%);margin:4px 0;flex-shrink:0;}
+.rail-btn.ctx{display:none;}
+.pv-rail.show-gmail .ctx-gmail,
+.pv-rail.show-outlook .ctx-outlook,
+.pv-rail.show-wsp .ctx-wsp,
+.pv-rail.show-img .ctx-img{display:flex;}
+.pv-pane{display:none;padding:0;}
 .pv-pane.on{display:block;}
 .pv-frame{background:#f3f3f3;border-radius:10px;padding:14px;overflow-x:auto;}
 .pv-frame.dark{background:transparent;padding:0;display:flex;justify-content:center;}
-.subject-bar{background:var(--g2);border:1px solid var(--g4);border-radius:10px;padding:12px 15px;margin-bottom:14px;
+.subject-bar{background:var(--g2);border:1px solid var(--g4);border-radius:10px;padding:10px 14px;margin-bottom:12px;
   display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
 .subject-bar .sl{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);}
 .subject-bar .sv{color:var(--y);font-size:.95rem;font-weight:700;word-break:break-word;}
@@ -178,8 +182,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .outlook-note{font-size:.78rem;color:#9aa;background:rgba(0,114,198,.1);border:1px solid rgba(0,114,198,.3);
   border-radius:8px;padding:9px 13px;margin-top:12px;}
 .outlook-note b{color:#5ab0ff;}
-#auto-gen-status{margin:0 16px;padding:8px 13px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);
-  border-radius:8px;font-size:.78rem;color:var(--gn);text-align:center;}
+#auto-gen-status{margin:0 0 10px;padding:6px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);
+  border-radius:8px;font-size:.74rem;color:var(--gn);text-align:center;}
 
 /* ── TOASTS ───────────────────────────────────────── */
 .toast{display:none;padding:10px 15px;border-radius:9px;margin:0 16px 12px;font-size:.85rem;font-weight:600;}
@@ -223,7 +227,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   :root{--barH:48px;}
   #workstation{position:static;display:block;height:auto;margin-top:calc(var(--headH) + var(--barH) + 52px);}
   #left-panel{border-right:none;border-bottom:3px solid var(--g4);overflow:visible;min-height:auto;}
-  #right-panel{overflow:visible;}
   #mtoggle{display:flex;position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;z-index:270;
     height:52px;background:var(--g2);border-bottom:2px solid var(--g4);}
   #mtoggle button{flex:1;border:none;background:none;color:var(--wa);font-family:inherit;font-size:.95rem;font-weight:800;cursor:pointer;border-bottom:3px solid transparent;}
@@ -232,7 +235,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   #workstation.m-preview #left-panel{display:none;}
   .brand .sb{display:none;}
   .uf-box input{width:74px;}
-  .pv-tab{font-size:.8rem;padding:11px 4px;}
+  #right-panel{overflow:visible;}
+  .pv-content{overflow-y:visible;padding:12px 12px 30px;}
+  .pv-rail{flex:0 0 58px;padding:12px 6px;gap:5px;position:sticky;top:calc(var(--headH) + var(--barH) + 52px);align-self:flex-start;max-height:calc(100vh - var(--headH) - var(--barH) - 52px);}
+  .rail-btn{width:44px;height:42px;border-radius:12px;}
+  .rail-btn svg{width:20px;height:20px;}
+  .rail-btn .ico{font-size:1rem;}
 }
 @media(max-width:560px){
   .brand .nm{font-size:1.05rem;}
@@ -302,14 +310,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     </div>
   </section>
 
-  <!-- ════════ PANEL DERECHO — VISTAS PREVIAS ════════ -->
+  <!-- ════════ PANEL DERECHO — VISTAS PREVIAS + COLUMNA LATERAL ════════ -->
   <section id="right-panel">
-    <div class="pv-bar">
-      <button class="pv-tab on" data-pv="gmail" onclick="setPreview('gmail')">📧 Gmail</button>
-      <button class="pv-tab" data-pv="outlook" onclick="setPreview('outlook')">📨 Outlook</button>
-      <button class="pv-tab" data-pv="wsp" onclick="setPreview('wsp')">💬 WhatsApp</button>
-      <button class="pv-tab" data-pv="img" onclick="setPreview('img')">🖼 Imagen</button>
-    </div>
+   <div class="pv-content">
     <div id="auto-gen-status">✔ Propuesta actualizada automáticamente</div>
     <div id="mail-toast" class="toast"></div>
     <div id="tpl-toast2" class="toast"></div>
@@ -325,12 +328,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- GMAIL -->
       <div class="pv-pane on" id="pane-gmail">
-        <div class="pv-actions">
-          <span class="lead">Asunto + cuerpo HTML</span>
-          <button class="act-btn ghost" onclick="copAsunto()">📋 Asunto</button>
-          <button class="act-btn gmail" onclick="copHTMLGmail();playClick()">📋 Copiar para Gmail</button>
-          <button class="act-btn expand" onclick="ampliar('gmail')">🔍 Ampliar</button>
-        </div>
         <div class="subject-bar">
           <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto"></div></div>
         </div>
@@ -340,23 +337,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- OUTLOOK -->
       <div class="pv-pane" id="pane-outlook">
-        <div class="pv-actions">
-          <span class="lead">Tablas robustas · Outlook 2016+</span>
-          <button class="act-btn outlook" onclick="copHTMLOutlook();playClick()">📋 Copiar para Outlook</button>
-          <button class="act-btn expand" onclick="ampliar('outlook')">🔍 Ampliar</button>
-        </div>
         <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
         <div class="outlook-note">⚠️ <b>Nota Outlook:</b> usa colores sólidos y tablas para máxima compatibilidad. Pega directo en el cuerpo del mensaje.</div>
       </div>
 
       <!-- WHATSAPP -->
       <div class="pv-pane" id="pane-wsp">
-        <div class="pv-actions">
-          <span class="lead">Tarjeta + texto para chat</span>
-          <button class="act-btn wsp" onclick="copPlano();playClick()">📋 Copiar texto WA</button>
-          <button class="act-btn wsp" onclick="copImgWsp();playClick()">🖼 Imagen WA</button>
-          <button class="act-btn expand" onclick="ampliar('wsp')">🔍 Ampliar</button>
-        </div>
         <div class="pv-frame dark">
 <div id="cot-card-wsp" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="wcc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="wcc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="wcc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div></div><div id="wcc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="wcc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="wcc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="wcc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="wcc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="wcc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="wcc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="wcc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
         </div>
@@ -366,18 +352,62 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- IMAGEN -->
       <div class="pv-pane" id="pane-img">
-        <div class="pv-actions">
-          <span class="lead">Tarjeta para correo / adjunto</span>
-          <button class="act-btn img" onclick="copImgPC();playClick()">📋 Copiar imagen</button>
-          <button class="act-btn ghost" onclick="descImg();playClick()">⬇ Descargar PNG</button>
-          <button class="act-btn expand" onclick="ampliar('img')">🔍 Ampliar</button>
-        </div>
         <div class="pv-frame dark">
 <div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
         </div>
       </div>
 
     </div>
+   </div>
+
+   <!-- COLUMNA LATERAL DE ACCIONES -->
+   <aside class="pv-rail show-gmail" id="pv-rail">
+     <!-- Selectores de vista (con iconos oficiales) -->
+     <button class="rail-btn tab on" data-pv="gmail" onclick="setPreview('gmail');playClick();" title="Gmail" aria-label="Vista Gmail">
+       <svg viewBox="0 0 24 24" aria-hidden="true">
+         <path fill="#fff" d="M3 6.2A2.2 2.2 0 0 1 5.2 4h13.6A2.2 2.2 0 0 1 21 6.2v11.6A2.2 2.2 0 0 1 18.8 20H5.2A2.2 2.2 0 0 1 3 17.8z"/>
+         <path fill="#EA4335" d="M3 6.2 12 13l9-6.8v3.2L12 16 3 9.4z"/>
+         <path fill="#FBBC04" d="M3 6.2 12 13l9-6.8V6.2A2.2 2.2 0 0 0 18.8 4H5.2A2.2 2.2 0 0 0 3 6.2z"/>
+       </svg>
+     </button>
+     <button class="rail-btn tab" data-pv="outlook" onclick="setPreview('outlook');playClick();" title="Outlook" aria-label="Vista Outlook">
+       <svg viewBox="0 0 24 24" aria-hidden="true">
+         <rect x="3" y="4" width="13" height="16" rx="1.5" fill="#0078D4"/>
+         <ellipse cx="9.5" cy="12" rx="3" ry="4" fill="#fff"/>
+         <ellipse cx="9.5" cy="12" rx="1.5" ry="2.3" fill="#0078D4"/>
+         <rect x="16" y="6" width="5" height="12" fill="#28A8EA"/>
+         <path fill="#0078D4" d="M16 6h5l-2.5 4z"/>
+       </svg>
+     </button>
+     <button class="rail-btn tab" data-pv="wsp" onclick="setPreview('wsp');playClick();" title="WhatsApp" aria-label="Vista WhatsApp">
+       <svg viewBox="0 0 24 24" aria-hidden="true">
+         <path fill="#25D366" d="M12 2C6.5 2 2 6.5 2 12c0 1.85.5 3.6 1.4 5.1L2 22l5-1.4c1.4.8 3.1 1.3 5 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/>
+         <path fill="#fff" d="M17.4 14.4c-.3-.15-1.7-.85-2-.95-.25-.1-.45-.15-.65.15s-.75.95-.9 1.15c-.2.2-.35.2-.65.05-1.7-.85-2.85-1.55-4-3.5-.3-.5.3-.5.85-1.55.1-.2.05-.4 0-.55-.05-.15-.65-1.6-.9-2.2-.25-.55-.5-.5-.65-.5h-.6c-.2 0-.55.05-.85.4-.3.35-1.1 1.05-1.1 2.55s1.1 2.95 1.3 3.15c.15.2 2.15 3.3 5.2 4.6.75.3 1.3.5 1.75.6.75.25 1.4.2 1.95.1.6-.1 1.7-.7 1.95-1.35.25-.65.25-1.2.15-1.35-.1-.15-.3-.2-.6-.35z"/>
+       </svg>
+     </button>
+     <button class="rail-btn tab" data-pv="img" onclick="setPreview('img');playClick();" title="Imagen corporativa" aria-label="Vista Imagen">
+       <svg viewBox="0 0 24 24" aria-hidden="true">
+         <rect x="3" y="4.5" width="18" height="15" rx="2" fill="none" stroke="#f0c040" stroke-width="1.8"/>
+         <circle cx="8.5" cy="10" r="1.6" fill="#f0c040"/>
+         <path d="M3.5 17.5 9 12.5l3.5 3.5 3-3 5 5" fill="none" stroke="#f0c040" stroke-width="1.8" stroke-linejoin="round"/>
+       </svg>
+     </button>
+
+     <div class="rail-sep"></div>
+
+     <!-- Acciones siempre disponibles -->
+     <button class="rail-btn" onclick="copAsunto();playClick();" title="Copiar asunto del correo" aria-label="Copiar asunto"><span class="ico">📝</span></button>
+     <button class="rail-btn" onclick="smartCopy();" title="Copiar contenido de la vista activa" aria-label="Copiar"><span class="ico">📋</span></button>
+
+     <!-- Acción contextual sólo visible en WhatsApp -->
+     <button class="rail-btn ctx ctx-wsp" onclick="copImgWsp();playClick();" title="Copiar imagen WhatsApp" aria-label="Copiar imagen WhatsApp"><span class="ico">🖼</span></button>
+
+     <div class="rail-sep"></div>
+
+     <!-- Ampliar y descargar -->
+     <button class="rail-btn" onclick="ampliarActive();playClick();" title="Ampliar vista actual" aria-label="Ampliar"><span class="ico">🔍</span></button>
+     <button class="rail-btn" onclick="descImg();playClick();" title="Descargar PNG" aria-label="Descargar PNG"><span class="ico">📥</span></button>
+   </aside>
   </section>
 </div>
 
@@ -752,10 +782,30 @@ function setProduct(key){
 }
 
 /* ════════ VISTAS PREVIAS (panel derecho) ════════ */
+var CURRENT_PV='gmail';
 function setPreview(which){
-  document.querySelectorAll('.pv-tab').forEach(function(t){t.classList.toggle('on',t.dataset.pv===which);});
+  CURRENT_PV=which;
+  /* tabs en la columna lateral */
+  document.querySelectorAll('.rail-btn.tab').forEach(function(t){t.classList.toggle('on',t.dataset.pv===which);});
+  /* paneles */
   ['gmail','outlook','wsp','img'].forEach(function(p){var e=$('pane-'+p);if(e)e.classList.toggle('on',p===which);});
+  /* botones contextuales del rail */
+  var rail=$('pv-rail');
+  if(rail){
+    rail.classList.remove('show-gmail','show-outlook','show-wsp','show-img');
+    rail.classList.add('show-'+which);
+  }
 }
+/* Copia inteligente — delega al copiador específico de la vista activa */
+function smartCopy(){
+  playClick();
+  if(CURRENT_PV==='gmail')      copHTMLGmail();
+  else if(CURRENT_PV==='outlook') copHTMLOutlook();
+  else if(CURRENT_PV==='wsp')     copPlano();
+  else if(CURRENT_PV==='img')     copImgPC();
+}
+/* Ampliar la vista actualmente activa */
+function ampliarActive(){ ampliar(CURRENT_PV); }
 function setMobileView(v){
   var ws=$('workstation');ws.classList.toggle('m-config',v==='config');ws.classList.toggle('m-preview',v==='preview');
   $('mt-config').classList.toggle('on',v==='config');$('mt-preview').classList.toggle('on',v==='preview');
