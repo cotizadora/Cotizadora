@@ -75,11 +75,30 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   box-shadow:0 0 0 1px var(--r) inset,0 0 14px rgba(155,28,46,.45),0 0 28px rgba(155,28,46,.2);
   color:#fff;}
 
-/* ── ESTACIÓN DE TRABAJO — 2 PANELES ──────────────── */
+/* ── ESTACIÓN DE TRABAJO — 3 COLUMNAS ─────────────── */
 #workstation{position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;bottom:0;
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;}
+  display:grid;grid-template-columns:minmax(0,1fr) 138px minmax(0,1fr);gap:0;}
 #left-panel{border-right:3px solid var(--g4);overflow-y:auto;padding:18px 20px 40px;background:var(--g0);}
+#center-panel{border-right:2px solid var(--g3);background:linear-gradient(to bottom,#0a0a0c,#0e0e10 50%,#0a0a0c);
+  overflow-y:auto;padding:16px 10px 30px;display:flex;flex-direction:column;gap:6px;align-items:stretch;}
+#center-panel::-webkit-scrollbar{width:0;}
 #right-panel{overflow:hidden;padding:0;background:#101012;display:flex;}
+
+/* ── COLUMNA CENTRAL — botones con logo + texto ───── */
+.cv-section-lbl{font-size:.55rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--wb);
+  text-align:center;margin:8px 0 4px;font-weight:700;}
+.cv-sep{height:1px;background:linear-gradient(to right,transparent,var(--g4),transparent);margin:8px 0;}
+.cv-btn{display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--g4);
+  background:var(--g2);color:#fff;border-radius:10px;padding:10px 10px;cursor:pointer;
+  font-family:inherit;font-size:.82rem;font-weight:700;transition:all .18s ease;white-space:nowrap;
+  line-height:1;}
+.cv-btn:hover{background:var(--g3);border-color:var(--rl);
+  box-shadow:0 0 10px rgba(192,38,59,.4);transform:translateY(-1px);}
+.cv-btn.on{background:linear-gradient(135deg,rgba(155,28,46,.35),rgba(155,28,46,.15));
+  border-color:var(--r);box-shadow:0 0 0 1px var(--r) inset,0 0 14px rgba(155,28,46,.4);}
+.cv-btn svg{width:20px;height:20px;flex-shrink:0;display:block;}
+.cv-btn .ico{font-size:1.05rem;flex-shrink:0;line-height:1;}
+.cv-btn span{flex:1;text-align:left;}
 #left-panel::-webkit-scrollbar,#right-panel::-webkit-scrollbar,.pv-content::-webkit-scrollbar{width:9px;}
 #left-panel::-webkit-scrollbar-thumb,#right-panel::-webkit-scrollbar-thumb,.pv-content::-webkit-scrollbar-thumb{background:var(--g4);border-radius:5px;}
 
@@ -147,35 +166,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .wsp-link-row{display:none;padding:8px 11px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);border-radius:8px;font-size:.85rem;margin-top:4px;}
 .wsp-link-row a{color:#25d366;font-weight:700;text-decoration:none;}
 
-/* ── PANEL DERECHO — VISTAS PREVIAS + COLUMNA LATERAL ─ */
+/* ── PANEL DERECHO — solo vista previa ───────────── */
 .pv-content{flex:1;min-width:0;overflow-y:auto;padding:14px 16px 30px;}
-.pv-rail{flex:0 0 88px;width:88px;background:linear-gradient(to bottom,#0a0a0c,#0e0e10 50%,#0a0a0c);
-  border-left:1px solid rgba(155,28,46,.22);padding:10px 6px;display:flex;flex-direction:column;
-  align-items:stretch;gap:4px;box-shadow:-4px 0 14px rgba(0,0,0,.4);overflow-y:auto;overflow-x:hidden;}
-.pv-rail::-webkit-scrollbar{width:0;}
-/* botón base del rail — horizontal: icono + texto en una sola línea */
-.rail-btn{width:76px;height:32px;border-radius:9px;border:1px solid var(--g4);
-  background:var(--g2);color:var(--wa);cursor:pointer;
-  display:flex;align-items:center;justify-content:flex-start;gap:5px;
-  transition:all .18s ease;font-family:inherit;position:relative;
-  padding:0 7px;flex-shrink:0;white-space:nowrap;overflow:hidden;}
-.rail-btn:hover{background:var(--g3);border-color:var(--rl);color:#fff;
-  box-shadow:0 0 10px rgba(192,38,59,.4);}
-.rail-btn:active{scale:.96;}
-.rail-btn.on{background:linear-gradient(135deg,var(--rd),var(--r));border-color:var(--rl);
-  box-shadow:0 0 0 1px var(--r) inset,0 0 14px rgba(155,28,46,.5);color:#fff;}
-/* icono dentro del rail-btn */
-.rail-btn svg{display:block;width:16px;height:16px;flex-shrink:0;}
-.rail-btn .ico{font-size:.95rem;line-height:1;flex-shrink:0;}
-/* etiqueta de texto obligatoria */
-.rail-btn .rlbl{font-size:.7rem;font-weight:700;letter-spacing:.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-/* separador */
-.rail-sep{height:1px;background:linear-gradient(to right,transparent 0%,var(--g4) 30%,var(--g4) 70%,transparent 100%);margin:4px 0;flex-shrink:0;}
-.rail-btn.ctx{display:none;}
-.pv-rail.show-gmail .ctx-gmail,
-.pv-rail.show-outlook .ctx-outlook,
-.pv-rail.show-wsp .ctx-wsp,
-.pv-rail.show-img .ctx-img{display:flex;}
 .pv-pane{display:none;padding:0;}
 .pv-pane.on{display:block;}
 .pv-frame{background:#f3f3f3;border-radius:10px;padding:14px;overflow-x:auto;}
@@ -234,21 +226,18 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   :root{--barH:48px;}
   #workstation{position:static;display:block;height:auto;margin-top:calc(var(--headH) + var(--barH) + 52px);}
   #left-panel{border-right:none;border-bottom:3px solid var(--g4);overflow:visible;min-height:auto;}
+  #center-panel{flex-direction:row;flex-wrap:wrap;gap:6px;padding:10px;border-right:none;border-bottom:2px solid var(--g3);}
   #mtoggle{display:flex;position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;z-index:270;
     height:52px;background:var(--g2);border-bottom:2px solid var(--g4);}
   #mtoggle button{flex:1;border:none;background:none;color:var(--wa);font-family:inherit;font-size:.95rem;font-weight:800;cursor:pointer;border-bottom:3px solid transparent;}
   #mtoggle button.on{color:#fff;border-bottom-color:var(--r);background:rgba(155,28,46,.14);}
-  #workstation.m-config #right-panel{display:none;}
+  #workstation.m-config #right-panel,#workstation.m-config #center-panel{display:none;}
   #workstation.m-preview #left-panel{display:none;}
   .brand .sb{display:none;}
   .uf-box input{width:74px;}
   #right-panel{overflow:visible;}
   .pv-content{overflow-y:visible;padding:12px 12px 30px;}
-  .pv-rail{flex:0 0 80px;width:80px;padding:10px 5px;gap:4px;position:sticky;top:calc(var(--headH) + var(--barH) + 52px);align-self:flex-start;max-height:calc(100vh - var(--headH) - var(--barH) - 52px);}
-  .rail-btn{width:70px;height:30px;border-radius:8px;padding:0 5px;gap:4px;}
-  .rail-btn svg{width:14px;height:14px;}
-  .rail-btn .ico{font-size:.85rem;}
-  .rail-btn .rlbl{font-size:.65rem;}
+  .cv-btn{flex:0 0 auto;width:auto;}
 }
 @media(max-width:560px){
   .brand .nm{font-size:1.05rem;}
@@ -318,7 +307,72 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     </div>
   </section>
 
-  <!-- ════════ PANEL DERECHO — VISTAS PREVIAS + COLUMNA LATERAL ════════ -->
+  <!-- ════════ COLUMNA CENTRAL — CONTROLES DE VISUALIZACIÓN ════════ -->
+  <nav id="center-panel" aria-label="Controles de vista previa">
+    <div class="cv-section-lbl">Vista previa</div>
+
+    <!-- Gmail -->
+    <button class="cv-btn tab on" data-pv="gmail" id="cvbtn-gmail" onclick="setPreview('gmail');playClick();" title="Vista Gmail">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#fff" d="M3 6.2A2.2 2.2 0 0 1 5.2 4h13.6A2.2 2.2 0 0 1 21 6.2v11.6A2.2 2.2 0 0 1 18.8 20H5.2A2.2 2.2 0 0 1 3 17.8z"/>
+        <path fill="#EA4335" d="M3 6.2 12 13l9-6.8v3.2L12 16 3 9.4z"/>
+        <path fill="#FBBC04" d="M3 6.2 12 13l9-6.8V6.2A2.2 2.2 0 0 0 18.8 4H5.2A2.2 2.2 0 0 0 3 6.2z"/>
+      </svg>
+      <span>Gmail</span>
+    </button>
+
+    <!-- Outlook -->
+    <button class="cv-btn tab" data-pv="outlook" id="cvbtn-outlook" onclick="setPreview('outlook');playClick();" title="Vista Outlook">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="4" width="13" height="16" rx="1.5" fill="#0078D4"/>
+        <ellipse cx="9.5" cy="12" rx="3" ry="4" fill="#fff"/>
+        <ellipse cx="9.5" cy="12" rx="1.5" ry="2.3" fill="#0078D4"/>
+        <rect x="16" y="6" width="5" height="12" fill="#28A8EA"/>
+        <path fill="#0078D4" d="M16 6h5l-2.5 4z"/>
+      </svg>
+      <span>Outlook</span>
+    </button>
+
+    <!-- WhatsApp -->
+    <button class="cv-btn tab" data-pv="wsp" id="cvbtn-wsp" onclick="setPreview('wsp');playClick();" title="Vista WhatsApp">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#25D366" d="M12 2C6.5 2 2 6.5 2 12c0 1.85.5 3.6 1.4 5.1L2 22l5-1.4c1.4.8 3.1 1.3 5 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/>
+        <path fill="#fff" d="M17.4 14.4c-.3-.15-1.7-.85-2-.95-.25-.1-.45-.15-.65.15s-.75.95-.9 1.15c-.2.2-.35.2-.65.05-1.7-.85-2.85-1.55-4-3.5-.3-.5.3-.5.85-1.55.1-.2.05-.4 0-.55-.05-.15-.65-1.6-.9-2.2-.25-.55-.5-.5-.65-.5h-.6c-.2 0-.55.05-.85.4-.3.35-1.1 1.05-1.1 2.55s1.1 2.95 1.3 3.15c.15.2 2.15 3.3 5.2 4.6.75.3 1.3.5 1.75.6.75.25 1.4.2 1.95.1.6-.1 1.7-.7 1.95-1.35.25-.65.25-1.2.15-1.35-.1-.15-.3-.2-.6-.35z"/>
+      </svg>
+      <span>WhatsApp</span>
+    </button>
+
+    <!-- Ficha de Oferta -->
+    <button class="cv-btn tab" data-pv="img" id="cvbtn-img" onclick="setPreview('img');playClick();" title="Ficha de Oferta">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="4.5" width="18" height="15" rx="2" fill="none" stroke="#f0c040" stroke-width="1.8"/>
+        <circle cx="8.5" cy="10" r="1.6" fill="#f0c040"/>
+        <path d="M3.5 17.5 9 12.5l3.5 3.5 3-3 5 5" fill="none" stroke="#f0c040" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      <span>Ficha</span>
+    </button>
+
+    <div class="cv-sep"></div>
+    <div class="cv-section-lbl">Acciones</div>
+
+    <button class="cv-btn" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
+      <span class="ico">📋</span><span>Copiar asunto</span>
+    </button>
+    <button class="cv-btn" onclick="smartCopy();" title="Copiar contenido de la vista activa">
+      <span class="ico">🖼</span><span>Copiar</span>
+    </button>
+
+    <div class="cv-sep"></div>
+
+    <button class="cv-btn" onclick="descImg();playClick();" title="Descargar PNG">
+      <span class="ico">📥</span><span>Descargar</span>
+    </button>
+    <button class="cv-btn" onclick="ampliarActive();playClick();" title="Ampliar vista actual">
+      <span class="ico">🔍</span><span>Ampliar</span>
+    </button>
+  </nav>
+
+  <!-- ════════ PANEL DERECHO — VISTA PREVIA ════════ -->
   <section id="right-panel">
    <div class="pv-content">
     <div id="auto-gen-status">✔ Propuesta actualizada automáticamente</div>
@@ -351,14 +405,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- WHATSAPP -->
       <div class="pv-pane" id="pane-wsp">
-        <!-- tarjeta visual oculta: usada por canvas/ampliar, NO visible en el pane -->
-        <div style="display:none" aria-hidden="true">
+        <div class="pv-frame dark">
 <div id="cot-card-wsp" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:48px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="wcc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="wcc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="wcc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div></div><div id="wcc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="wcc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="wcc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="wcc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="wcc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="wcc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="wcc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="wcc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
-        </div><!-- fin tarjeta oculta -->
-        <textarea id="tpl-body" style="display:none;"></textarea>
-        <div class="pv-frame dark" style="padding:14px;">
-          <div class="wa-text" id="wa-text-view" style="max-height:none;"></div>
         </div>
+        <textarea id="tpl-body" style="display:none;"></textarea>
+        <div class="wa-text" id="wa-text-view"></div>
       </div>
 
       <!-- IMAGEN -->
@@ -370,67 +421,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
     </div>
    </div>
-
-   <!-- COLUMNA LATERAL DE ACCIONES — 88px max, logo+texto en una línea -->
-   <aside class="pv-rail show-gmail" id="pv-rail">
-
-     <!-- ── SELECTORES DE PLATAFORMA ── -->
-     <button class="rail-btn tab on" data-pv="gmail" onclick="setPreview('gmail');playClick();" title="Gmail" aria-label="Vista Gmail">
-       <svg viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0">
-         <path fill="#fff" d="M3 6.2A2.2 2.2 0 0 1 5.2 4h13.6A2.2 2.2 0 0 1 21 6.2v11.6A2.2 2.2 0 0 1 18.8 20H5.2A2.2 2.2 0 0 1 3 17.8z"/>
-         <path fill="#EA4335" d="M3 6.2 12 13l9-6.8v3.2L12 16 3 9.4z"/>
-         <path fill="#FBBC04" d="M3 6.2 12 13l9-6.8V6.2A2.2 2.2 0 0 0 18.8 4H5.2A2.2 2.2 0 0 0 3 6.2z"/>
-       </svg>
-       <span class="rlbl">Gmail</span>
-     </button>
-
-     <button class="rail-btn tab" data-pv="outlook" onclick="setPreview('outlook');playClick();" title="Outlook" aria-label="Vista Outlook">
-       <svg viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0">
-         <rect x="3" y="4" width="13" height="16" rx="1.5" fill="#0078D4"/>
-         <ellipse cx="9.5" cy="12" rx="3" ry="4" fill="#fff"/>
-         <ellipse cx="9.5" cy="12" rx="1.5" ry="2.3" fill="#0078D4"/>
-         <rect x="16" y="6" width="5" height="12" fill="#28A8EA"/>
-         <path fill="#0078D4" d="M16 6h5l-2.5 4z"/>
-       </svg>
-       <span class="rlbl">Outlook</span>
-     </button>
-
-     <button class="rail-btn tab" data-pv="wsp" onclick="setPreview('wsp');playClick();" title="WhatsApp" aria-label="Vista WhatsApp">
-       <svg viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0">
-         <path fill="#25D366" d="M12 2C6.5 2 2 6.5 2 12c0 1.85.5 3.6 1.4 5.1L2 22l5-1.4c1.4.8 3.1 1.3 5 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/>
-         <path fill="#fff" d="M17.4 14.4c-.3-.15-1.7-.85-2-.95-.25-.1-.45-.15-.65.15s-.75.95-.9 1.15c-.2.2-.35.2-.65.05-1.7-.85-2.85-1.55-4-3.5-.3-.5.3-.5.85-1.55.1-.2.05-.4 0-.55-.05-.15-.65-1.6-.9-2.2-.25-.55-.5-.5-.65-.5h-.6c-.2 0-.55.05-.85.4-.3.35-1.1 1.05-1.1 2.55s1.1 2.95 1.3 3.15c.15.2 2.15 3.3 5.2 4.6.75.3 1.3.5 1.75.6.75.25 1.4.2 1.95.1.6-.1 1.7-.7 1.95-1.35.25-.65.25-1.2.15-1.35-.1-.15-.3-.2-.6-.35z"/>
-       </svg>
-       <span class="rlbl">WhatsApp</span>
-     </button>
-
-     <button class="rail-btn tab" data-pv="img" onclick="setPreview('img');playClick();" title="Ficha de Oferta" aria-label="Vista Ficha">
-       <svg viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0">
-         <rect x="3" y="4.5" width="18" height="15" rx="2" fill="none" stroke="#f0c040" stroke-width="1.8"/>
-         <circle cx="8.5" cy="10" r="1.6" fill="#f0c040"/>
-         <path d="M3.5 17.5 9 12.5l3.5 3.5 3-3 5 5" fill="none" stroke="#f0c040" stroke-width="1.8" stroke-linejoin="round"/>
-       </svg>
-       <span class="rlbl">Ficha</span>
-     </button>
-
-     <div class="rail-sep"></div>
-
-     <!-- ── ACCIONES ── -->
-     <button class="rail-btn" onclick="copAsunto();playClick();" title="Copiar asunto del correo" aria-label="Copiar asunto">
-       <span class="ico">📝</span><span class="rlbl">Asunto</span>
-     </button>
-     <button class="rail-btn" onclick="smartCopy();" title="Copiar contenido de la vista activa" aria-label="Copiar">
-       <span class="ico">📋</span><span class="rlbl">Copiar</span>
-     </button>
-     <button class="rail-btn ctx ctx-wsp" onclick="copImgWsp();playClick();" title="Copiar imagen WhatsApp" aria-label="Copiar imagen WhatsApp">
-       <span class="ico">🖼</span><span class="rlbl">Img WSP</span>
-     </button>
-
-     <div class="rail-sep"></div>
-
-     <button class="rail-btn" onclick="descImg();playClick();" title="Descargar PNG" aria-label="Descargar PNG">
-       <span class="ico">📥</span><span class="rlbl">Descargar</span>
-     </button>
-   </aside>
   </section>
 </div>
 
@@ -808,16 +798,10 @@ function setProduct(key){
 var CURRENT_PV='gmail';
 function setPreview(which){
   CURRENT_PV=which;
-  /* tabs en la columna lateral */
-  document.querySelectorAll('.rail-btn.tab').forEach(function(t){t.classList.toggle('on',t.dataset.pv===which);});
+  /* tabs en la columna central */
+  document.querySelectorAll('.cv-btn.tab').forEach(function(t){t.classList.toggle('on',t.dataset.pv===which);});
   /* paneles */
   ['gmail','outlook','wsp','img'].forEach(function(p){var e=$('pane-'+p);if(e)e.classList.toggle('on',p===which);});
-  /* botones contextuales del rail */
-  var rail=$('pv-rail');
-  if(rail){
-    rail.classList.remove('show-gmail','show-outlook','show-wsp','show-img');
-    rail.classList.add('show-'+which);
-  }
 }
 /* Copia inteligente — delega al copiador específico de la vista activa */
 function smartCopy(){
