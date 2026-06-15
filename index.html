@@ -1403,31 +1403,29 @@ function genMail(){
     '</td></tr>'+
 
     // ══════════════════════════════════════════
-    // DESTINATARIO — fondo vino oscuro
+    // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
     // ══════════════════════════════════════════
-    _sepR+
-    '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding:22px 28px;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;">'+
+    '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:22px 28px 20px 33px;border-left:5px solid #9b1c2e;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
         (em
-          ? '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding-bottom:6px;">'+
-              '<font face="Arial,sans-serif" color="#e08090" style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;">PROPUESTA PARA</font>'+
+          ? '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:5px;">'+
+              '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:10px;letter-spacing:1px;">PROPUESTA PARA</font></b></font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding-bottom:8px;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:22px;font-weight:bold;line-height:1.2;"><b>'+em+'</b></font>'+
+            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
+              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;line-height:1.2;">'+em+'</font></b></font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;">'+
-              '<font face="Arial,sans-serif" color="#e8d8d8" style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font>'+
+            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
+              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
             '</td></tr>'
-          : '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding-bottom:6px;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:22px;font-weight:bold;"><b>Propuesta Comercial</b></font>'+
+          : '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
+              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;">Propuesta Comercial</font></b></font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;">'+
-              '<font face="Arial,sans-serif" color="#dddddd" style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font>'+
+            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
+              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
             '</td></tr>'
         )+
       '</table>'+
     '</td></tr>'+
-    _sepR+
 
     // ══════════════════════════════════════════
     // PRODUCTO — fondo blanco
@@ -1527,46 +1525,45 @@ function genMail(){
     '</td></tr>'+
 
     // ══════════════════════════════════════════
-    // FIRMA — fondo vino oscuro
+    // FIRMA — fondo gris claro, texto oscuro (garantizado Outlook)
     // ══════════════════════════════════════════
-    _sepR+
-    '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding:22px 28px;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;"><tr>'+
-        '<td valign="top" bgcolor="#2a1520" style="background-color:#2a1520;">'+
+    '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding:22px 28px;border-top:3px solid #9b1c2e;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td valign="top" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
           '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding-bottom:5px;">'+
-              '<font face="Arial,sans-serif" color="#cccccc" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">'+exCargo+'</font>'+
+            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-bottom:5px;">'+
+              '<font face="Arial,sans-serif" color="#666666"><font style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">'+exCargo+'</font></font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:17px;font-weight:bold;"><b>'+as2+'</b></font>'+
+            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
+              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:17px;">'+as2+'</font></b></font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding-top:4px;">'+
-              '<font face="Arial,sans-serif" color="#d4a020" style="font-size:12px;font-weight:bold;"><b>'+exEmpresa+'</b></font>'+
+            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:4px;">'+
+              '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:12px;">'+exEmpresa+'</font></b></font>'+
             '</td></tr>'+
             (exFirma
-              ? '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding-top:3px;">'+
-                  '<font face="Arial,sans-serif" color="#cccccc" style="font-size:11px;font-style:italic;"><i>'+exFirma+'</i></font>'+
+              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
+                  '<font face="Arial,sans-serif" color="#555555"><i><font style="font-size:11px;">'+exFirma+'</font></i></font>'+
                 '</td></tr>'
               : '')+
             (fo
-              ? '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding-top:7px;">'+
-                  '<font face="Arial,sans-serif" color="#70c870" style="font-size:12px;">&#128241; '+fo+'</font>'+
+              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:7px;">'+
+                  '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">&#128241; '+fo+'</font></font>'+
                 '</td></tr>'
               : '')+
             (ml
-              ? '<tr><td bgcolor="#2a1520" style="background-color:#2a1520;padding-top:3px;">'+
-                  '<font face="Arial,sans-serif" color="#80aacc" style="font-size:12px;">&#9993; '+ml+'</font>'+
+              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
+                  '<font face="Arial,sans-serif" color="#1a4a7a"><font style="font-size:12px;">&#9993; '+ml+'</font></font>'+
                 '</td></tr>'
               : '')+
           '</table>'+
         '</td>'+
-        '<td valign="bottom" align="right" bgcolor="#2a1520" style="background-color:#2a1520;">'+
+        '<td valign="bottom" align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
           '<table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;">'+
-            '<tr><td align="right" bgcolor="#2a1520" style="background-color:#2a1520;">'+
-              '<font face="Arial,sans-serif" color="#cccccc" style="font-size:10px;">'+hoy()+'</font>'+
+            '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
+              '<font face="Arial,sans-serif" color="#555555"><font style="font-size:10px;">'+hoy()+'</font></font>'+
             '</td></tr>'+
-            '<tr><td align="right" bgcolor="#2a1520" style="background-color:#2a1520;padding-top:3px;">'+
-              '<font face="Arial,sans-serif" color="#aaaaaa" style="font-size:10px;">Valores en UF + IVA</font>'+
+            '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
+              '<font face="Arial,sans-serif" color="#777777"><font style="font-size:10px;">Valores en UF + IVA</font></font>'+
             '</td></tr>'+
           '</table>'+
         '</td>'+
@@ -1574,12 +1571,12 @@ function genMail(){
     '</td></tr>'+
 
     // ══════════════════════════════════════════
-    // PIE — fondo muy oscuro, texto gris claro
+    // PIE — fondo gris medio, texto oscuro legible
     // ══════════════════════════════════════════
-    '<tr><td bgcolor="#1a0d12" style="background-color:#1a0d12;padding:10px 28px;text-align:center;">'+
+    '<tr><td bgcolor="#cccccc" style="background-color:#cccccc;padding:8px 28px;text-align:center;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td align="center" bgcolor="#1a0d12" style="background-color:#1a0d12;padding:0;">'+
-          '<font face="Arial,sans-serif" color="#bbbbbb" style="font-size:9px;text-transform:uppercase;letter-spacing:1px;">Equifax Chile &middot; Informaci&oacute;n confidencial &middot; Solo para el destinatario autorizado</font>'+
+        '<td align="center" bgcolor="#cccccc" style="background-color:#cccccc;padding:0;">'+
+          '<font face="Arial,sans-serif" color="#444444"><font style="font-size:9px;text-transform:uppercase;letter-spacing:1px;">Equifax Chile &middot; Informaci&oacute;n confidencial &middot; Solo para el destinatario autorizado</font></font>'+
         '</td>'+
       '</tr></table>'+
     '</td></tr>'+
