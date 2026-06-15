@@ -1234,7 +1234,7 @@ function genMail(){
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:0;">'+
         '<tr>'+
           '<td valign="middle">'+
-            '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="360" height="auto" style="display:block;max-height:114px;width:auto;" />'+
+            '<img src="logo-equifax.png" alt="Equifax" width="360" height="auto" style="display:block;max-height:114px;width:auto;" />'+
             '<div style="margin-top:6px;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.55);text-transform:uppercase;font-family:Arial,sans-serif;">Chile &middot; Soluciones Empresariales</div>'+
           '</td>'+
           '<td valign="top" align="right">'+
@@ -1337,19 +1337,104 @@ function genMail(){
   sv('tpl-rich', _htmlGmail);
 
   // ══════════════════════════════════════════════════════════════
-  // VERSIÓN OUTLOOK — CLON EXACTO DE LA PLANTILLA GMAIL
-  // Tras la prueba real, el diseño Gmail se renderiza mejor en Outlook
-  // que la antigua plantilla Outlook, que queda DESCARTADA por completo.
-  // Outlook reutiliza íntegramente el HTML de Gmail: mismo diseño, misma
-  // estructura, mismo centrado, mismo logo, mismo bloque de precio, misma
-  // firma y exactamente la misma información. La única adaptación técnica
-  // (respaldo de color sólido bajo los gradientes del header y del precio)
-  // ya está incorporada en la plantilla compartida, de modo que Gmail y
-  // Outlook son la misma propuesta sobre dos motores de renderizado.
-  // Sin bordes rojos en la lista de beneficios (la lista Gmail no los tiene)
-  // y sin divisiones internas en el header (tabla con border-collapse y border:0).
+  // VERSIÓN OUTLOOK — TABLAS + bgcolor (compatible con el motor Word)
+  // Mismo diseño, mismos colores, mismas dimensiones, mismo logo (misma URL
+  // alojada) que Gmail. La ÚNICA diferencia es la estructura HTML: en lugar
+  // de <div> con background-image/background-color (que Outlook Desktop
+  // descarta), cada banda de color es un <td bgcolor="..."> dentro de una
+  // tabla. Así los fondos, el logo y las alineaciones sobreviven al pegado.
+  // Gradientes -> color sólido de respaldo (Outlook no renderiza gradientes).
   // ══════════════════════════════════════════════════════════════
-  var _htmlOutlook = _htmlGmail;
+  var _htmlOutlook =
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:600px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">'+
+
+    // HEADER — rojo sólido (bgcolor) + logo blanco (misma URL alojada)
+    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;padding:24px 28px;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td valign="middle" align="left">'+
+          '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="300" style="display:block;width:300px;height:auto;border:0;outline:none;text-decoration:none;" />'+
+          '<div style="margin-top:8px;font-size:10px;color:#e7c4c9;text-transform:uppercase;font-family:Arial,sans-serif;">CHILE &middot; SOLUCIONES EMPRESARIALES</div>'+
+        '</td>'+
+        '<td valign="top" align="right">'+
+          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr>'+
+            '<td bgcolor="#2b0a10" align="center" style="background-color:#2b0a10;border:1px solid #c79a3e;padding:5px 14px;font-size:10px;font-weight:bold;color:#f0c040;font-family:Arial,sans-serif;white-space:nowrap;">'+pi.badge+'</td>'+
+          '</tr></table>'+
+          '<div style="margin-top:8px;font-size:10px;color:#d4a3a9;font-family:Arial,sans-serif;">'+hoy()+'</div>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+
+    // DESTINATARIO — fondo oscuro sólido
+    '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding:20px 28px;border-bottom:3px solid #9b1c2e;">'+
+      (em
+        ? '<div style="font-size:10px;text-transform:uppercase;color:#b56575;font-family:Arial,sans-serif;margin-bottom:6px;">Propuesta para</div>'+
+          '<div style="font-size:22px;font-weight:bold;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'+
+          '<div style="margin-top:8px;font-size:13px;color:#ccbbbb;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</div>'
+        : '<div style="font-size:22px;font-weight:bold;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">Propuesta Comercial</div>'+
+          '<div style="margin-top:6px;font-size:13px;color:#aaaaaa;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</div>'
+      )+
+    '</td></tr>'+
+
+    // PRODUCTO — fondo blanco, columna roja a la izquierda (celda, no border)
+    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
+        '<td style="padding:22px 28px;">'+
+          '<div style="font-size:10px;text-transform:uppercase;color:#999999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
+          '<div style="font-size:18px;font-weight:bold;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+'</div>'+
+          '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+_listaItems+'</table>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+
+    // PRECIO — rojo sólido (bgcolor), valor en dorado
+    '<tr><td bgcolor="#7a1425" style="background-color:#7a1425;padding:22px 28px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+        (hayDc?'<tr><td style="font-size:11px;color:#e0b9b9;font-family:Arial,sans-serif;padding:3px 0;">Precio lista</td><td align="right" style="font-size:11px;color:#e0b9b9;text-decoration:line-through;font-family:Arial,sans-serif;padding:3px 0;">'+ufL+' UF + IVA</td></tr>':'')+
+        '<tr><td valign="bottom" style="font-size:11px;text-transform:uppercase;color:#f2d4d4;font-family:Arial,sans-serif;padding:8px 0 4px;">Precio ofrecido</td>'+
+          '<td valign="bottom" align="right" style="padding:6px 0 4px;font-size:32px;font-weight:bold;color:#f0c040;font-family:Arial,sans-serif;line-height:1;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</td></tr>'+
+        (clp?'<tr><td style="font-size:11px;color:#eccccc;font-family:Arial,sans-serif;padding:2px 0;">Aprox. mensual con IVA</td><td align="right" style="font-size:14px;font-weight:bold;color:#ffffff;font-family:Arial,sans-serif;padding:2px 0;">'+fmtN(clp)+'</td></tr>':'')+
+        (hayDc?'<tr><td style="font-size:11px;color:#eccccc;font-family:Arial,sans-serif;padding:2px 0;">Descuento aplicado</td><td align="right" style="font-size:14px;font-weight:bold;color:#4ade80;font-family:Arial,sans-serif;padding:2px 0;">&#8722;'+dc+'% sobre precio lista</td></tr>':'')+
+        '<tr><td colspan="2" bgcolor="#a85f68" style="background-color:#a85f68;font-size:1px;line-height:1px;height:1px;">&nbsp;</td></tr>'+
+        '<tr><td style="font-size:11px;color:#eccccc;font-family:Arial,sans-serif;padding:8px 0 0;">Plazo / Modalidad</td><td align="right" style="font-size:13px;font-weight:bold;color:#ffffff;font-family:Arial,sans-serif;padding:8px 0 0;">'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</td></tr>'+
+      '</table>'+
+    '</td></tr>'+
+
+    // DOCUMENTOS — ámbar suave, columna dorada a la izquierda
+    '<tr><td bgcolor="#fffdf5" style="background-color:#fffdf5;padding:0;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td width="5" bgcolor="#c8960a" style="background-color:#c8960a;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
+        '<td style="padding:14px 28px;">'+
+          '<div style="font-size:10px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
+          '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma</div>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+
+    // FIRMA — fondo oscuro sólido (sin fotografía, igual que Gmail)
+    '<tr><td bgcolor="#120810" style="background-color:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td valign="top">'+
+          '<div style="font-size:10px;text-transform:uppercase;color:#7a7a7a;font-family:Arial,sans-serif;margin-bottom:5px;">'+exCargo+'</div>'+
+          '<div style="font-size:17px;font-weight:bold;color:#ffffff;font-family:Arial,sans-serif;">'+as2+'</div>'+
+          '<div style="margin-top:3px;font-size:11px;color:#c8960a;font-family:Arial,sans-serif;">'+exEmpresa+'</div>'+
+          (exFirma?'<div style="margin-top:3px;font-size:11px;font-style:italic;color:#b0b0b0;font-family:Arial,sans-serif;">'+exFirma+'</div>':'')+
+          (fo?'<div style="margin-top:6px;font-size:12px;color:#90d490;font-family:Arial,sans-serif;">&#128241; '+fo+'</div>':'')+
+          (ml?'<div style="margin-top:2px;font-size:12px;color:#90b8d4;font-family:Arial,sans-serif;">&#9993; '+ml+'</div>':'')+
+        '</td>'+
+        '<td valign="bottom" align="right">'+
+          '<div style="font-size:10px;color:#6a6a6a;font-family:Arial,sans-serif;">'+hoy()+'</div>'+
+          '<div style="margin-top:2px;font-size:10px;color:#5a5a5a;font-family:Arial,sans-serif;">Valores en UF + IVA</div>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+
+    // PIE
+    '<tr><td bgcolor="#0d060a" style="background-color:#0d060a;padding:10px 28px;text-align:center;border-top:1px solid #2a1420;">'+
+      '<div style="font-size:9px;color:#6a6a6a;font-family:Arial,sans-serif;text-transform:uppercase;">Equifax Chile &middot; Informaci&oacute;n confidencial &middot; Solo para el destinatario autorizado</div>'+
+    '</td></tr>'+
+
+    '</table>';
 
   sv('tpl-rich-outlook', _htmlOutlook);
 
