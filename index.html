@@ -1382,20 +1382,20 @@ function genMail(){
           '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="260" height="auto" style="display:block;width:260px;height:auto;border:0;" />'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;"><tr>'+
             '<td bgcolor="#9b1c2e" style="background-color:#9b1c2e;color:#ffffff;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></font>'+
+              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;"><span style="color:#ffffff;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></span></font>'+
             '</td>'+
           '</tr></table>'+
         '</td>'+
         // Columna badge + fecha
         '<td valign="top" align="right" bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr>'+
-            '<td bgcolor="#6e1220" align="center" style="background-color:#6e1220;padding:6px 14px;">'+
-              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:11px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><b>'+pi.badge+'</b></font>'+
+            '<td bgcolor="#6e1220" align="center" style="background-color:#6e1220;color:#f0c040;padding:6px 14px;">'+
+              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:11px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
             '</td>'+
           '</tr></table>'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:8px;"><tr>'+
-            '<td bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;">'+hoy()+'</font>'+
+            '<td bgcolor="#9b1c2e" style="background-color:#9b1c2e;color:#ffffff;">'+
+              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;"><span style="color:#ffffff;">'+hoy()+'</span></font>'+
             '</td>'+
           '</tr></table>'+
         '</td>'+
@@ -1467,19 +1467,19 @@ function genMail(){
           : '')+
         '<tr>'+
           '<td bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;text-transform:uppercase;"><b>Precio ofrecido</b></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;text-transform:uppercase;"><span style="color:#ffffff;"><b>Precio ofrecido</b></span></font>'+
           '</td>'+
           '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:6px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:28px;font-weight:bold;line-height:1;"><b>'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</b></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:28px;font-weight:bold;line-height:1;"><span style="color:#ffffff;"><b>'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</b></span></font>'+
           '</td>'+
         '</tr>'+
         (clp
           ? '<tr>'+
               '<td bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><b>Aprox. mensual con IVA</b></font>'+
+                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Aprox. mensual con IVA</b></span></font>'+
               '</td>'+
               '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:14px;font-weight:bold;"><b>'+fmtN(clp)+'</b></font>'+
+                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:14px;font-weight:bold;"><span style="color:#ffffff;"><b>'+fmtN(clp)+'</b></span></font>'+
               '</td>'+
             '</tr>'
           : '')+
@@ -1496,10 +1496,10 @@ function genMail(){
         '<tr><td colspan="2" bgcolor="#c07080" style="background-color:#c07080;font-size:1px;line-height:1px;height:1px;padding:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
         '<tr>'+
           '<td bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><b>Plazo / Modalidad</b></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Plazo / Modalidad</b></span></font>'+
           '</td>'+
           '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><b>'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></span></font>'+
           '</td>'+
         '</tr>'+
       '</table>'+
