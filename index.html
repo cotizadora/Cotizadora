@@ -1263,9 +1263,6 @@ function genMail(){
     '<div style="background:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
         '<tr>'+
-          '<td valign="top" width="64" style="padding-right:14px;">'+
-            (exFoto?'<img src="'+exFoto+'" width="56" height="56" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid #c8960a;display:block;">':'')+
-          '</td>'+
           '<td valign="top">'+
             '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#666;font-family:Arial,sans-serif;margin-bottom:5px;">'+exCargo+'</div>'+
             '<div style="font-size:17px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+as2+'</div>'+
@@ -1736,7 +1733,53 @@ function handleCopy(cv,toastId){
   },'image/png');
 }
 
-function copImgPC(){toast('⏳ Generando imagen correo...','info','tpl-toast2');getCanvasPC().then(function(cv){handleCopy(cv,'tpl-toast2');});}
+// ── CAPTURA FIEL DE LA FICHA VISIBLE — vista previa == imagen copiada ──
+// Toma directamente el mismo nodo #cot-card-pc que se ve en pantalla.
+// No genera plantilla paralela, no reconstruye desde datos.
+function captureCardPC(){
+  return new Promise(function(resolve,reject){
+    var el=document.getElementById('cot-card-pc');
+    if(!el){reject();return;}
+    var rect=el.getBoundingClientRect();
+    var W=Math.ceil(rect.width)||600, H=Math.ceil(rect.height)||400, sc=2;
+    var clone=el.cloneNode(true);
+    clone.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
+    function buildSVG(){
+      var xml=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'">'+
+              '<foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+xml+'</foreignObject></svg>';
+      var img=new Image();
+      img.onload=function(){
+        var cv=document.createElement('canvas');cv.width=W*sc;cv.height=H*sc;
+        var ctx=cv.getContext('2d');ctx.scale(sc,sc);
+        ctx.drawImage(img,0,0);
+        resolve(cv);
+      };
+      img.onerror=function(){reject();};
+      img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+    }
+    // El logo es una ruta relativa que no resuelve dentro del SVG aislado:
+    // se incrusta como data URI usando la imagen ya precargada (la foto del
+    // ejecutivo ya es data URI, así que no requiere conversión).
+    var logoEl=clone.querySelector('img[src*="logo-equifax"]');
+    if(logoEl && STATE.logoImg && STATE.logoImg.naturalWidth){
+      try{
+        var lc=document.createElement('canvas');
+        lc.width=STATE.logoImg.naturalWidth;lc.height=STATE.logoImg.naturalHeight;
+        lc.getContext('2d').drawImage(STATE.logoImg,0,0);
+        logoEl.setAttribute('src',lc.toDataURL('image/png'));
+      }catch(e){}
+    }
+    buildSVG();
+  });
+}
+function copImgPC(){
+  toast('⏳ Generando imagen...','info','tpl-toast2');
+  preloadLogo(function(){
+    captureCardPC().then(function(cv){handleCopy(cv,'tpl-toast2');})
+                   .catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});
+  });
+}
 function copImgWsp(){
   toast('⏳ Generando imagen WhatsApp...','info','global-toast');
   getCanvasWsp().then(function(cv){
