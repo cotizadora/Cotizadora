@@ -424,7 +424,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
           </div>
         </div>
         <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
-        <div class="outlook-note">⚠️ <b>Nota Outlook:</b> usa colores sólidos y tablas para máxima compatibilidad. Pega directo en el cuerpo del mensaje.</div>
+        <div class="outlook-note">⚠️ <b>Nota Outlook:</b> misma plantilla premium que Gmail, con respaldo de color sólido para máxima compatibilidad. Pega directo en el cuerpo del mensaje.</div>
       </div>
 
       <!-- WHATSAPP — solo texto enriquecido -->
@@ -1183,9 +1183,9 @@ function genMail(){
   var _htmlGmail =
     '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:620px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
 
-    // HEADER — gradiente rojo con logo
-    '<div style="background:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:24px 28px 20px;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+    // HEADER — gradiente rojo con logo (con respaldo sólido para Outlook)
+    '<div style="background-color:#9b1c2e;background-image:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:24px 28px 20px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:0;">'+
         '<tr>'+
           '<td valign="middle">'+
             '<img src="logo-equifax.png" alt="Equifax" width="360" height="auto" style="display:block;max-height:114px;width:auto;" />'+
@@ -1219,8 +1219,8 @@ function genMail(){
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+_listaItems+'</table>'+
     '</div>'+
 
-    // PRECIO — gradiente rojo oscuro
-    '<div style="background:linear-gradient(135deg,#5a0e1a 0%,#7a1425 60%,#9b1c2e 100%);padding:22px 28px;">'+
+    // PRECIO — gradiente rojo oscuro (con respaldo sólido para Outlook)
+    '<div style="background-color:#7a1425;background-image:linear-gradient(135deg,#5a0e1a 0%,#7a1425 60%,#9b1c2e 100%);padding:22px 28px;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
         (hayDc?
           '<tr>'+
@@ -1294,181 +1294,19 @@ function genMail(){
   sv('tpl-rich', _htmlGmail);
 
   // ══════════════════════════════════════════════════════════════
-  // VERSIÓN OUTLOOK — esquema claro, máxima compatibilidad
-  // Regla: fondos seguros (blanco/gris/rojo sólido), sin PNG con
-  // canal alpha, sin gradientes. Logo en header rojo con fondo rojo
-  // puro → usamos texto tipográfico para máxima fidelidad en Outlook.
+  // VERSIÓN OUTLOOK — CLON EXACTO DE LA PLANTILLA GMAIL
+  // Tras la prueba real, el diseño Gmail se renderiza mejor en Outlook
+  // que la antigua plantilla Outlook, que queda DESCARTADA por completo.
+  // Outlook reutiliza íntegramente el HTML de Gmail: mismo diseño, misma
+  // estructura, mismo centrado, mismo logo, mismo bloque de precio, misma
+  // firma y exactamente la misma información. La única adaptación técnica
+  // (respaldo de color sólido bajo los gradientes del header y del precio)
+  // ya está incorporada en la plantilla compartida, de modo que Gmail y
+  // Outlook son la misma propuesta sobre dos motores de renderizado.
+  // Sin bordes rojos en la lista de beneficios (la lista Gmail no los tiene)
+  // y sin divisiones internas en el header (tabla con border-collapse y border:0).
   // ══════════════════════════════════════════════════════════════
-  var _listaItemsOutlook = it.map(function(item){
-    return '<tr>'+
-      '<td valign="top" width="22" style="font-size:13px;color:#9b1c2e;font-weight:900;padding:5px 6px 5px 0;font-family:Arial,sans-serif;">&#10003;</td>'+
-      '<td style="font-size:13px;color:#111111;line-height:1.5;padding:5px 0;border-bottom:1px solid #e8e0e4;font-family:Arial,sans-serif;">'+item+'</td>'+
-    '</tr>';
-  }).join('');
-
-  var _htmlOutlook =
-    // ══ OUTLOOK — fondos 100% claros fuera del header (regla Outlook Desktop) ══
-
-    '<table width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="font-family:Arial,Helvetica,sans-serif;width:600px;border-collapse:collapse;">'+
-
-    // ── BANDA SUPERIOR DORADA ──
-    '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:4px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
-    // ── HEADER ROJO — único lugar con fondo oscuro + texto blanco ──
-    '<tr>'+
-      '<td bgcolor="#5a0e1a" style="background-color:#5a0e1a;padding:22px 24px 20px;">'+
-        '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
-          '<tr>'+
-            '<td valign="middle">'+
-              '<img src="logo-equifax.png" alt="Equifax" width="260" height="auto" style="display:block;max-height:84px;border:0;outline:none;text-decoration:none;" />'+
-              '<p style="margin:6px 0 0;font-size:8px;letter-spacing:3px;color:#ffffff;text-transform:uppercase;font-family:Arial,sans-serif;line-height:1;">CHILE &nbsp;&middot;&nbsp; SOLUCIONES EMPRESARIALES</p>'+
-            '</td>'+
-            '<td valign="middle" align="right">'+
-              '<table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;">'+
-                '<tr><td bgcolor="#f0c040" style="background-color:#f0c040;padding:8px 16px;">'+
-                  '<p style="margin:0;font-size:10px;font-weight:900;color:#2a1500;letter-spacing:1.5px;font-family:Arial,sans-serif;text-transform:uppercase;white-space:nowrap;">'+pi.badge+'</p>'+
-                '</td></tr>'+
-                '<tr><td align="right" style="padding-top:7px;">'+
-                  '<p style="margin:0;font-size:10px;color:#ffffff;font-family:Arial,sans-serif;">'+hoy()+'</p>'+
-                '</td></tr>'+
-              '</table>'+
-            '</td>'+
-          '</tr>'+
-        '</table>'+
-      '</td>'+
-    '</tr>'+
-
-    // ── BANDA DORADA SEPARADORA ──
-    '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
-    // ── DESTINATARIO — blanco puro, borde rojo izquierdo ──
-    '<tr>'+
-      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;border-left:6px solid #9b1c2e;">'+
-        '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
-          '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 22px 20px 18px;">'+
-            (em
-              ? '<p style="margin:0 0 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">PROPUESTA PREPARADA PARA</p>'+
-                '<p style="margin:0;font-size:22px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;padding-bottom:10px;border-bottom:2px solid #eeeeee;">'+em+'</p>'+
-                '<p style="margin:8px 0 0;font-size:13px;color:#444444;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</p>'
-              : '<p style="margin:0;font-size:22px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;letter-spacing:1px;padding-bottom:10px;border-bottom:2px solid #eeeeee;">PROPUESTA COMERCIAL</p>'+
-                '<p style="margin:7px 0 0;font-size:13px;color:#444444;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</p>'
-            )+
-          '</td>'+
-        '</tr></table>'+
-      '</td>'+
-    '</tr>'+
-
-    // ── PRODUCTO — gris perla claro, borde rojo ──
-    '<tr>'+
-      '<td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:0;border-left:6px solid #9b1c2e;">'+
-        '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
-          '<td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:22px 22px 20px 18px;">'+
-            '<p style="margin:0 0 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">PRODUCTO COTIZADO</p>'+
-            '<p style="margin:0 0 14px;font-size:18px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.3;padding-bottom:10px;border-bottom:2px solid #9b1c2e;">'+pi.n+'</p>'+
-            '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+_listaItemsOutlook+'</table>'+
-          '</td>'+
-        '</tr></table>'+
-      '</td>'+
-    '</tr>'+
-
-    // ── DIVISOR ROJO ──
-    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
-    // ── PRECIO — blanco con acento rojo, precio en rojo corporativo grande ──
-    '<tr>'+
-      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 22px 20px 22px;">'+
-        '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
-          (hayDc?
-            '<tr>'+
-              '<td style="font-size:11px;color:#888888;font-family:Arial,sans-serif;padding:0 0 3px;">Precio lista</td>'+
-              '<td align="right" style="font-size:11px;color:#999999;text-decoration:line-through;font-family:Arial,sans-serif;padding:0 0 3px;">'+ufL+' UF + IVA</td>'+
-            '</tr>':'') +
-          '<tr>'+
-            '<td style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;padding:4px 0;vertical-align:bottom;">PRECIO OFRECIDO</td>'+
-            '<td align="right" style="padding:4px 0;vertical-align:bottom;">'+
-              '<span style="font-size:36px;font-weight:900;color:#9b1c2e;font-family:Arial,sans-serif;line-height:1;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</span>'+
-            '</td>'+
-          '</tr>'+
-          '<tr><td colspan="2" bgcolor="#eeeeee" style="background-color:#eeeeee;height:1px;padding:0;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-          (clp?
-            '<tr>'+
-              '<td style="font-size:11px;color:#666666;font-family:Arial,sans-serif;padding:8px 0 3px;">Aprox. mensual con IVA</td>'+
-              '<td align="right" style="font-size:15px;font-weight:700;color:#111111;font-family:Arial,sans-serif;padding:8px 0 3px;">'+fmtN(clp)+'</td>'+
-            '</tr>':'') +
-          (hayDc?
-            '<tr>'+
-              '<td style="font-size:11px;color:#666666;font-family:Arial,sans-serif;padding:3px 0;">Descuento aplicado</td>'+
-              '<td align="right" style="padding:3px 0;">'+
-                '<table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;">'+
-                  '<tr><td bgcolor="#e8f5ee" style="background-color:#e8f5ee;padding:4px 12px;border:1px solid #2ecc71;">'+
-                    '<span style="font-size:13px;font-weight:900;color:#1a7a40;font-family:Arial,sans-serif;">&#8722;'+dc+'% sobre precio lista</span>'+
-                  '</td></tr>'+
-                '</table>'+
-              '</td>'+
-            '</tr>':'') +
-          '<tr><td colspan="2" bgcolor="#eeeeee" style="background-color:#eeeeee;height:1px;padding:0;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-          '<tr>'+
-            '<td style="font-size:11px;color:#666666;font-family:Arial,sans-serif;padding:8px 0 2px;">Plazo / Modalidad</td>'+
-            '<td align="right" style="font-size:13px;font-weight:700;color:#111111;font-family:Arial,sans-serif;padding:8px 0 2px;">'+pl+' meses &nbsp;&middot;&nbsp; POSTPAGO 30 d&iacute;as</td>'+
-          '</tr>'+
-        '</table>'+
-      '</td>'+
-    '</tr>'+
-
-    // ── DIVISOR DORADO ──
-    '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
-    // ── DOCUMENTOS — crema muy claro, borde ámbar ──
-    '<tr>'+
-      '<td bgcolor="#fdf8f0" style="background-color:#fdf8f0;padding:0;border-left:6px solid #c8960a;">'+
-        '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+
-          '<td bgcolor="#fdf8f0" style="background-color:#fdf8f0;padding:16px 22px 14px 18px;">'+
-            '<p style="margin:0 0 5px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#8a6010;font-family:Arial,sans-serif;font-weight:900;">DOCUMENTOS PARA CONTRATAR</p>'+
-            '<p style="margin:0;font-size:12px;color:#1a1200;font-family:Arial,sans-serif;line-height:1.8;">&#9656;&nbsp;Ficha de contrataci&oacute;n&nbsp;&nbsp;&#9656;&nbsp;C&eacute;dula representante legal&nbsp;&nbsp;&#9656;&nbsp;Escritura con poderes de firma</p>'+
-          '</td>'+
-        '</tr></table>'+
-      '</td>'+
-    '</tr>'+
-
-    // ── DIVISOR ROJO ──
-    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;height:2px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
-    // ── FIRMA — gris claro, texto negro, siempre legible ──
-    '<tr>'+
-      '<td bgcolor="#f0ecee" style="background-color:#f0ecee;padding:20px 22px 18px;">'+
-        '<table width="100%" cellpadding="0" cellspacing="0" border="0">'+
-          '<tr>'+
-            '<td valign="top" width="66" style="padding-right:14px;">'+
-              (exFoto?'<img src="'+exFoto+'" width="58" height="58" alt="" style="width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid #9b1c2e;display:block;">':'')+
-            '</td>'+
-            '<td valign="top">'+
-              '<p style="margin:0 0 3px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;">'+exCargo.toUpperCase()+'</p>'+
-              '<p style="margin:0;font-size:18px;font-weight:900;color:#0a0205;font-family:Arial,sans-serif;line-height:1.2;">'+as2+'</p>'+
-              '<p style="margin:3px 0 0;font-size:11px;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1px;">'+exEmpresa.toUpperCase()+'</p>'+
-              (exFirma?'<p style="margin:3px 0 0;font-size:11px;font-style:italic;color:#555555;font-family:Arial,sans-serif;">'+exFirma+'</p>':'')+
-              (fo?'<p style="margin:8px 0 0;font-size:12px;color:#111111;font-family:Arial,sans-serif;font-weight:700;">&#128241; '+fo+'</p>':'')+
-              (ml?'<p style="margin:3px 0 0;font-size:12px;color:#1a3a5a;font-family:Arial,sans-serif;">&#9993; '+ml+'</p>':'')+
-            '</td>'+
-            '<td valign="bottom" align="right">'+
-              '<p style="margin:0;font-size:10px;color:#555555;font-family:Arial,sans-serif;font-weight:700;">'+hoy()+'</p>'+
-              '<p style="margin:3px 0 0;font-size:10px;color:#888888;font-family:Arial,sans-serif;">Valores en UF + IVA</p>'+
-            '</td>'+
-          '</tr>'+
-        '</table>'+
-      '</td>'+
-    '</tr>'+
-
-    // ── PIE — rojo oscuro (funciona en Outlook con texto de color) ──
-    '<tr>'+
-      '<td bgcolor="#5a0e1a" style="background-color:#5a0e1a;padding:10px 22px;text-align:center;">'+
-        '<p style="margin:0;font-size:9px;color:#ffffff;font-family:Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;">Equifax Chile &nbsp;&middot;&nbsp; Informaci&oacute;n confidencial &nbsp;&middot;&nbsp; Solo para el destinatario autorizado</p>'+
-      '</td>'+
-    '</tr>'+
-
-    // ── BANDA INFERIOR DORADA ──
-    '<tr><td bgcolor="#c8960a" style="background-color:#c8960a;height:4px;font-size:1px;line-height:1px;">&nbsp;</td></tr>'+
-
-    '</table>';
+  var _htmlOutlook = _htmlGmail;
 
   sv('tpl-rich-outlook', _htmlOutlook);
 
