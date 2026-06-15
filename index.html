@@ -564,6 +564,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 var STATE={logoImg:null,execImg:null};
 var CURRENT={key:null,override:null,overrideLista:null};   // override = precio venta ajustado con el slider
 var LAST=null;                            // última config calculada
+var _OUTLOOK_HTML_STR='';                 // HTML Outlook-safe guardado como string para clipboard directo
 
 function $(id){return document.getElementById(id);}
 function gv(id){var e=$(id);return e?(''+e.value).trim():'';}
@@ -872,7 +873,12 @@ function _copyRich(el,msg){
 /* ── Clic en la modalidad = cambiar vista + copiar automáticamente ── */
 function autoCopy(which){
   if(which==='gmail'){var g=document.getElementById('tpl-rich-gmail');if(g)_copyRich(g,'Propuesta Gmail copiada');}
-  else if(which==='outlook'){var o=document.getElementById('tpl-rich-outlook');if(o)_copyRich(o,'Propuesta Outlook copiada');}
+  else if(which==='outlook'){
+    if(_OUTLOOK_HTML_STR&&window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+      var bH2=new Blob([_OUTLOOK_HTML_STR],{type:'text/html'}),bT2=new Blob(['Propuesta Equifax'],{type:'text/plain'});
+      navigator.clipboard.write([new ClipboardItem({'text/html':bH2,'text/plain':bT2})]).then(function(){cpToast('Propuesta Outlook copiada');}).catch(function(){var o=document.getElementById('tpl-rich-outlook');if(o)_copyRich(o,'Propuesta Outlook copiada');});
+    }else{var o=document.getElementById('tpl-rich-outlook');if(o)_copyRich(o,'Propuesta Outlook copiada');}
+  }
   else if(which==='wsp'){var b=document.getElementById('tpl-body');if(b)navigator.clipboard.writeText(b.value).then(function(){cpToast('Propuesta WhatsApp copiada');}).catch(function(){cpToast('Copia manualmente');});}
   else if(which==='img'){
     cpToast('Generando imagen…');
@@ -1382,7 +1388,7 @@ function genMail(){
           '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="260" height="auto" style="display:block;width:260px;height:auto;border:0;" />'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;"><tr>'+
             '<td align="left" bgcolor="#9b1c2e" style="background-color:#9b1c2e;color:#ffffff;">'+
-              '<font face="Arial,sans-serif" color="#ffffff"><span style="font-size:10px;color:#ffffff;mso-color-alt:#ffffff;letter-spacing:1px;text-transform:uppercase;font-weight:bold;">CHILE &middot; SOLUCIONES EMPRESARIALES</span></font>'+
+              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;"><span style="color:#ffffff;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></span></font>'+
             '</td>'+
           '</tr></table>'+
         '</td>'+
@@ -1390,7 +1396,7 @@ function genMail(){
         '<td valign="top" align="right" bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr>'+
             '<td bgcolor="#6e1220" align="center" style="background-color:#6e1220;color:#f0c040;padding:6px 14px;">'+
-              '<font face="Arial,sans-serif" color="#f0c040"><span style="font-size:11px;color:#f0c040;mso-color-alt:#f0c040;font-weight:bold;letter-spacing:1px;white-space:nowrap;">'+pi.badge+'</span></font>'+
+              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:11px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
             '</td>'+
           '</tr></table>'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:8px;"><tr>'+
@@ -1454,52 +1460,52 @@ function genMail(){
     // PRECIO — fondo rojo oscuro
     // ══════════════════════════════════════════
     '<tr><td bgcolor="#7a1425" style="background-color:#7a1425;padding:22px 28px;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;">'+
         (hayDc
           ? '<tr>'+
-              '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;color:#f5e0e0;">'+
-                '<font face="Arial,sans-serif" color="#f5e0e0"><span style="font-size:11px;color:#f5e0e0;mso-color-alt:#f5e0e0;">Precio lista</span></font>'+
+              '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;">'+
+                '<font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;">Precio lista</font>'+
               '</td>'+
-              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;color:#f5e0e0;">'+
-                '<font face="Arial,sans-serif" color="#f5e0e0"><span style="font-size:11px;color:#f5e0e0;mso-color-alt:#f5e0e0;text-decoration:line-through;">'+ufL+' UF + IVA</span></font>'+
+              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;">'+
+                '<font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</font>'+
               '</td>'+
             '</tr>'
           : '')+
         '<tr>'+
           '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff"><span style="font-size:11px;color:#ffffff;mso-color-alt:#ffffff;text-transform:uppercase;font-weight:bold;">Precio ofrecido</span></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;text-transform:uppercase;"><span style="color:#ffffff;"><b>Precio ofrecido</b></span></font>'+
           '</td>'+
           '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:6px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff"><span style="font-size:28px;color:#ffffff;mso-color-alt:#ffffff;font-weight:bold;line-height:1;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</span></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:28px;font-weight:bold;line-height:1;"><span style="color:#ffffff;"><b>'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</b></span></font>'+
           '</td>'+
         '</tr>'+
         (clp
           ? '<tr>'+
               '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#ffffff"><span style="font-size:11px;color:#ffffff;mso-color-alt:#ffffff;font-weight:bold;">Aprox. mensual con IVA</span></font>'+
+                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Aprox. mensual con IVA</b></span></font>'+
               '</td>'+
               '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#ffffff"><span style="font-size:14px;color:#ffffff;mso-color-alt:#ffffff;font-weight:bold;">'+fmtN(clp)+'</span></font>'+
+                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:14px;font-weight:bold;"><span style="color:#ffffff;"><b>'+fmtN(clp)+'</b></span></font>'+
               '</td>'+
             '</tr>'
           : '')+
         (hayDc
           ? '<tr>'+
-              '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;color:#f5e5e5;">'+
-                '<font face="Arial,sans-serif" color="#f5e5e5"><span style="font-size:11px;color:#f5e5e5;mso-color-alt:#f5e5e5;">Descuento aplicado</span></font>'+
+              '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;">'+
+                '<font face="Arial,sans-serif" color="#f5e5e5" style="font-size:11px;">Descuento aplicado</font>'+
               '</td>'+
-              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;color:#50e870;">'+
-                '<font face="Arial,sans-serif" color="#50e870"><span style="font-size:14px;color:#50e870;mso-color-alt:#50e870;font-weight:bold;">&#8722;'+dc+'% sobre precio lista</span></font>'+
+              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;">'+
+                '<font face="Arial,sans-serif" color="#50e870" style="font-size:14px;font-weight:bold;"><b>&#8722;'+dc+'% sobre precio lista</b></font>'+
               '</td>'+
             '</tr>'
           : '')+
         '<tr><td colspan="2" bgcolor="#c07080" style="background-color:#c07080;font-size:1px;line-height:1px;height:1px;padding:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
         '<tr>'+
           '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-            '<font face="Arial,sans-serif" color="#ffffff"><span style="font-size:11px;color:#ffffff;mso-color-alt:#ffffff;font-weight:bold;">Plazo / Modalidad</span></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Plazo / Modalidad</b></span></font>'+
           '</td>'+
           '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-            '<font face="Arial,sans-serif" color="#ffffff"><span style="font-size:13px;color:#ffffff;mso-color-alt:#ffffff;font-weight:bold;">'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</span></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></span></font>'+
           '</td>'+
         '</tr>'+
       '</table>'+
@@ -1583,6 +1589,7 @@ function genMail(){
 
     '</table>';
 
+  _OUTLOOK_HTML_STR = _htmlOutlook;   // guardado como string puro para clipboard directo
   sv('tpl-rich-outlook', _htmlOutlook);
 
   document.getElementById('tpl-out').style.display='block';
@@ -1610,8 +1617,19 @@ function copHTMLGmail(){
   _copHTMLEl(el,'📋 Plantilla Gmail copiada — pega directamente en el cuerpo del correo');
 }
 function copHTMLOutlook(){
-  var el=document.getElementById('tpl-rich-outlook');if(!el)return;
-  _copHTMLEl(el,'📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje');
+  if(!_OUTLOOK_HTML_STR){toast('⚠ Genera primero la propuesta','err','tpl-toast2');return;}
+  var msg='📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje';
+  try{
+    if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+      var bH=new Blob([_OUTLOOK_HTML_STR],{type:'text/html'});
+      var bT=new Blob(['Propuesta Equifax'],{type:'text/plain'});
+      navigator.clipboard.write([new ClipboardItem({'text/html':bH,'text/plain':bT})])
+        .then(function(){toast(msg,'ok','tpl-toast2');})
+        .catch(function(){toast('⚠ Permite el portapapeles e intenta de nuevo','err','tpl-toast2');});
+    }else{
+      toast('⚠ Navegador sin soporte de clipboard HTML — usa Chrome','err','tpl-toast2');
+    }
+  }catch(e){toast('⚠ Error al copiar: '+e.message,'err','tpl-toast2');}
 }
 function _copHTMLEl(el,msg){
   try{
