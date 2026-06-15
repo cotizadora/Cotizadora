@@ -215,6 +215,14 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .toast.info{background:rgba(52,152,219,.16);border-left:4px solid var(--bl);color:var(--bl);}
 #global-toast{position:fixed;bottom:18px;right:18px;z-index:9999;min-width:280px;max-width:420px;margin:0;
   box-shadow:0 6px 24px rgba(0,0,0,.6);}
+/* confirmaciones que NO empujan el layout (UX) */
+#tpl-toast2,#mail-toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9998;margin:0;
+  min-width:0;max-width:90%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5);}
+#cp-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.94);z-index:10001;
+  padding:16px 32px;border-radius:14px;background:rgba(18,10,14,.9);color:#fff;font-weight:700;font-size:1rem;
+  letter-spacing:.3px;box-shadow:0 14px 44px rgba(0,0,0,.55);border:1px solid rgba(240,192,64,.35);
+  opacity:0;pointer-events:none;transition:opacity .28s ease,transform .28s ease;max-width:84%;text-align:center;}
+#cp-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
 
 /* ── MODAL (Ampliar / UF / Guardadas) ─────────────── */
 .modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.82);
@@ -334,7 +342,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     <div class="cv-section-lbl">Vista previa</div>
 
     <!-- Gmail -->
-    <button class="cv-btn tab on" data-pv="gmail" id="cvbtn-gmail" onclick="setPreview('gmail');playClick();" title="Vista Gmail">
+    <button class="cv-btn tab on" data-pv="gmail" id="cvbtn-gmail" onclick="pvTab('gmail');" title="Vista Gmail">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path fill="#fff" d="M3 6.2A2.2 2.2 0 0 1 5.2 4h13.6A2.2 2.2 0 0 1 21 6.2v11.6A2.2 2.2 0 0 1 18.8 20H5.2A2.2 2.2 0 0 1 3 17.8z"/>
         <path fill="#EA4335" d="M3 6.2 12 13l9-6.8v3.2L12 16 3 9.4z"/>
@@ -344,7 +352,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     </button>
 
     <!-- Outlook -->
-    <button class="cv-btn tab" data-pv="outlook" id="cvbtn-outlook" onclick="setPreview('outlook');playClick();" title="Vista Outlook">
+    <button class="cv-btn tab" data-pv="outlook" id="cvbtn-outlook" onclick="pvTab('outlook');" title="Vista Outlook">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <rect x="3" y="4" width="13" height="16" rx="1.5" fill="#0078D4"/>
         <ellipse cx="9.5" cy="12" rx="3" ry="4" fill="#fff"/>
@@ -356,7 +364,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     </button>
 
     <!-- WhatsApp -->
-    <button class="cv-btn tab" data-pv="wsp" id="cvbtn-wsp" onclick="setPreview('wsp');playClick();" title="Vista WhatsApp">
+    <button class="cv-btn tab" data-pv="wsp" id="cvbtn-wsp" onclick="pvTab('wsp');" title="Vista WhatsApp">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path fill="#25D366" d="M12 2C6.5 2 2 6.5 2 12c0 1.85.5 3.6 1.4 5.1L2 22l5-1.4c1.4.8 3.1 1.3 5 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/>
         <path fill="#fff" d="M17.4 14.4c-.3-.15-1.7-.85-2-.95-.25-.1-.45-.15-.65.15s-.75.95-.9 1.15c-.2.2-.35.2-.65.05-1.7-.85-2.85-1.55-4-3.5-.3-.5.3-.5.85-1.55.1-.2.05-.4 0-.55-.05-.15-.65-1.6-.9-2.2-.25-.55-.5-.5-.65-.5h-.6c-.2 0-.55.05-.85.4-.3.35-1.1 1.05-1.1 2.55s1.1 2.95 1.3 3.15c.15.2 2.15 3.3 5.2 4.6.75.3 1.3.5 1.75.6.75.25 1.4.2 1.95.1.6-.1 1.7-.7 1.95-1.35.25-.65.25-1.2.15-1.35-.1-.15-.3-.2-.6-.35z"/>
@@ -366,7 +374,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     </button>
 
     <!-- Ficha de Oferta -->
-    <button class="cv-btn tab" data-pv="img" id="cvbtn-img" onclick="setPreview('img');playClick();" title="Ficha de Oferta">
+    <button class="cv-btn tab" data-pv="img" id="cvbtn-img" onclick="pvTab('img');" title="Ficha de Oferta">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <rect x="3" y="4.5" width="18" height="15" rx="2" fill="none" stroke="#f0c040" stroke-width="1.8"/>
         <circle cx="8.5" cy="10" r="1.6" fill="#f0c040"/>
@@ -380,6 +388,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   <!-- ════════ PANEL DERECHO — VISTA PREVIA ════════ -->
   <section id="right-panel">
    <div class="pv-content">
+    <button id="top-subject-btn" class="pv-copy-btn" style="width:100%;justify-content:center;margin:0 0 10px;padding:11px 14px;font-size:.92rem;font-weight:700;" onclick="copAsunto();playClick();" title="Copiar el asunto del correo">
+      <span class="ico">📋</span><span>Copiar Asunto</span>
+    </button>
     <div id="auto-gen-status">✔ Propuesta actualizada automáticamente</div>
     <div id="mail-toast" class="toast"></div>
     <div id="tpl-toast2" class="toast"></div>
@@ -542,6 +553,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 </div>
 
 <div id="global-toast" class="toast"></div>
+<div id="cp-toast" aria-live="polite"></div>
 
 <script>
 'use strict';
@@ -842,6 +854,40 @@ function setPreview(which){
   /* paneles */
   ['gmail','outlook','wsp','img'].forEach(function(p){var e=$('pane-'+p);if(e)e.classList.toggle('on',p===which);});
 }
+/* ── Confirmación flotante (overlay, no mueve el layout) ── */
+function cpToast(msg){
+  var e=document.getElementById('cp-toast');if(!e)return;
+  e.textContent=msg;e.classList.remove('show');void e.offsetWidth;e.classList.add('show');
+  clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('show');},1600);
+}
+function _copyRich(el,msg){
+  function fb(){try{var s=window.getSelection(),r=document.createRange();r.selectNodeContents(el);s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges();}catch(_){}cpToast(msg);}
+  try{
+    if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+      var bH=new Blob([el.innerHTML],{type:'text/html'}),bT=new Blob([el.innerText||''],{type:'text/plain'});
+      navigator.clipboard.write([new ClipboardItem({'text/html':bH,'text/plain':bT})]).then(function(){cpToast(msg);}).catch(fb);
+    }else fb();
+  }catch(e){fb();}
+}
+/* ── Clic en la modalidad = cambiar vista + copiar automáticamente ── */
+function autoCopy(which){
+  if(which==='gmail'){var g=document.getElementById('tpl-rich-gmail');if(g)_copyRich(g,'Propuesta Gmail copiada');}
+  else if(which==='outlook'){var o=document.getElementById('tpl-rich-outlook');if(o)_copyRich(o,'Propuesta Outlook copiada');}
+  else if(which==='wsp'){var b=document.getElementById('tpl-body');if(b)navigator.clipboard.writeText(b.value).then(function(){cpToast('Propuesta WhatsApp copiada');}).catch(function(){cpToast('Copia manualmente');});}
+  else if(which==='img'){
+    cpToast('Generando imagen…');
+    preloadLogo(function(){
+      captureCardPC().then(function(cv){
+        cv.toBlob(function(blob){
+          if(navigator.clipboard&&window.ClipboardItem){
+            navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(function(){cpToast('Ficha copiada como imagen');}).catch(function(){var u=URL.createObjectURL(blob);window.open(u,'_blank');cpToast('Imagen abierta — clic derecho → Copiar');});
+          }else{var u=URL.createObjectURL(blob);window.open(u,'_blank');cpToast('Imagen abierta — clic derecho → Copiar');}
+        },'image/png');
+      }).catch(function(){cpToast('No se pudo generar la imagen');});
+    });
+  }
+}
+function pvTab(which){ setPreview(which); playClick(); autoCopy(which); }
 /* Copia inteligente — delega al copiador específico de la vista activa */
 function smartCopy(){
   playClick();
@@ -1740,27 +1786,15 @@ function captureCardPC(){
   return new Promise(function(resolve,reject){
     var el=document.getElementById('cot-card-pc');
     if(!el){reject();return;}
-    var rect=el.getBoundingClientRect();
-    var W=Math.ceil(rect.width)||600, H=Math.ceil(rect.height)||400, sc=2;
+    var baseW=Math.ceil(el.getBoundingClientRect().width)||600, sc=2;
     var clone=el.cloneNode(true);
     clone.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
-    function buildSVG(){
-      var xml=new XMLSerializer().serializeToString(clone);
-      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'">'+
-              '<foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+xml+'</foreignObject></svg>';
-      var img=new Image();
-      img.onload=function(){
-        var cv=document.createElement('canvas');cv.width=W*sc;cv.height=H*sc;
-        var ctx=cv.getContext('2d');ctx.scale(sc,sc);
-        ctx.drawImage(img,0,0);
-        resolve(cv);
-      };
-      img.onerror=function(){reject();};
-      img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
-    }
-    // El logo es una ruta relativa que no resuelve dentro del SVG aislado:
-    // se incrusta como data URI usando la imagen ya precargada (la foto del
-    // ejecutivo ya es data URI, así que no requiere conversión).
+    // Recorte EXACTO al contenido: sin borde externo, sin radio (esquinas
+    // transparentes), sin sombra, sin margen y sin max-width del contenedor.
+    clone.style.margin='0';clone.style.maxWidth='none';clone.style.width=baseW+'px';
+    clone.style.border='0';clone.style.borderRadius='0';clone.style.boxShadow='none';
+    // El logo es ruta relativa que no resuelve dentro del SVG aislado:
+    // se incrusta como data URI (la foto del ejecutivo ya es data URI).
     var logoEl=clone.querySelector('img[src*="logo-equifax"]');
     if(logoEl && STATE.logoImg && STATE.logoImg.naturalWidth){
       try{
@@ -1770,7 +1804,25 @@ function captureCardPC(){
         logoEl.setAttribute('src',lc.toDataURL('image/png'));
       }catch(e){}
     }
-    buildSVG();
+    // Medir el clon ya recortado, fuera de pantalla, para obtener el tamaño justo.
+    var holder=document.createElement('div');
+    holder.style.cssText='position:fixed;left:-99999px;top:0;width:'+baseW+'px;';
+    holder.appendChild(clone);document.body.appendChild(holder);
+    var W=Math.ceil(clone.offsetWidth)||baseW, H=Math.ceil(clone.offsetHeight)||400;
+    document.body.removeChild(holder);
+    var xml=new XMLSerializer().serializeToString(clone);
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'">'+
+            '<foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+xml+'</foreignObject></svg>';
+    var img=new Image();
+    img.onload=function(){
+      var cv=document.createElement('canvas');cv.width=W*sc;cv.height=H*sc;
+      var ctx=cv.getContext('2d');ctx.scale(sc,sc);
+      ctx.fillStyle='#0c0508';ctx.fillRect(0,0,W,H); // base opaca: sin zonas transparentes
+      ctx.drawImage(img,0,0);
+      resolve(cv);
+    };
+    img.onerror=function(){reject();};
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
   });
 }
 function copImgPC(){
