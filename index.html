@@ -345,7 +345,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     <div class="cv-section-lbl">Vista previa</div>
 
     <!-- Gmail -->
-    <button class="cv-btn tab on" data-pv="gmail" id="cvbtn-gmail" onclick="pvTab('gmail');" title="Vista Gmail">
+    <button class="cv-btn tab" data-pv="gmail" id="cvbtn-gmail" onclick="pvTab('gmail');" title="Vista Gmail">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path fill="#fff" d="M3 6.2A2.2 2.2 0 0 1 5.2 4h13.6A2.2 2.2 0 0 1 21 6.2v11.6A2.2 2.2 0 0 1 18.8 20H5.2A2.2 2.2 0 0 1 3 17.8z"/>
         <path fill="#EA4335" d="M3 6.2 12 13l9-6.8v3.2L12 16 3 9.4z"/>
@@ -355,7 +355,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     </button>
 
     <!-- Outlook -->
-    <button class="cv-btn tab" data-pv="outlook" id="cvbtn-outlook" onclick="pvTab('outlook');" title="Vista Outlook">
+    <button class="cv-btn tab on" data-pv="outlook" id="cvbtn-outlook" onclick="pvTab('outlook');" title="Vista Outlook">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <rect x="3" y="4" width="13" height="16" rx="1.5" fill="#0078D4"/>
         <ellipse cx="9.5" cy="12" rx="3" ry="4" fill="#fff"/>
@@ -408,7 +408,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     <div id="tpl-out">
 
       <!-- GMAIL -->
-      <div class="pv-pane on" id="pane-gmail">
+      <div class="pv-pane" id="pane-gmail">
         <div class="subject-bar">
           <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto"></div></div>
           <div class="sb-actions">
@@ -425,7 +425,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       </div>
 
       <!-- OUTLOOK -->
-      <div class="pv-pane" id="pane-outlook">
+      <div class="pv-pane on" id="pane-outlook">
         <div class="subject-bar">
           <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto-outlook"></div></div>
           <div class="sb-actions">
@@ -857,7 +857,7 @@ function setProduct(key){
 }
 
 /* ════════ VISTAS PREVIAS (panel derecho) ════════ */
-var CURRENT_PV='gmail';
+var CURRENT_PV='outlook';
 function setPreview(which){
   CURRENT_PV=which;
   /* tabs en la columna central */
@@ -1416,7 +1416,10 @@ function genMail(){
     // ══════════════════════════════════════════
     // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
     // ══════════════════════════════════════════
-    '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:22px 28px 20px 33px;border-left:5px solid #9b1c2e;">'+
+    '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:0;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
+        '<td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:22px 28px 20px 28px;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
         (em
           ? '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:5px;">'+
@@ -1436,10 +1439,9 @@ function genMail(){
             '</td></tr>'
         )+
       '</table>'+
+        '</td>'+
+      '</tr></table>'+
     '</td></tr>'+
-
-    // ══════════════════════════════════════════
-    // PRODUCTO — fondo blanco
     // ══════════════════════════════════════════
     '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
@@ -2334,7 +2336,7 @@ preloadPhoto(null);       // avatar listo para el canvas (foto o iniciales)
 refreshUserBtn();
 
 setProduct('bundle');     // PRODUCTO PREDETERMINADO OBLIGATORIO — valores mínimos cargados
-setPreview('gmail');      // primera vista lista
+setPreview('outlook');      // primera vista lista
 updateCRMWsp();           // estado inicial integración CRM/WhatsApp
 
 /* La UF global recalcula precios al instante */
