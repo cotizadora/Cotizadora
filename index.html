@@ -10,7 +10,7 @@
   --g0:#0d0d0e;--g1:#141416;--g2:#1c1c1f;--g3:#26262a;--g4:#34343a;--g5:#46464d;
   --w:#f2f2f2;--wa:#a6a6ad;--wb:#7a7a82;
   --y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
-  --headH:62px;--barH:50px;
+  --headH:84px;--barH:50px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
@@ -22,7 +22,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 18px;
   position:fixed;top:0;left:0;right:0;z-index:300;box-shadow:0 2px 14px rgba(0,0,0,.6);}
 .brand{display:flex;align-items:center;gap:12px;min-width:0;}
-.brand img{height:40px;width:auto;display:block;filter:brightness(0) invert(1);}
+.brand img{height:64px;width:auto;display:block;filter:brightness(0) invert(1);}
 .brand .nm{font-size:1.25rem;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1;}
 .brand .sb{font-size:.6rem;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:3px;}
 .htools{display:flex;align-items:center;gap:10px;}
@@ -58,6 +58,24 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .ext-btn:hover .ext-dl{animation:extb .9s ease-in-out infinite;}
 @keyframes extb{0%,100%{transform:translateY(0);}50%{transform:translateY(2px);}}
 @media(max-width:560px){.ext-btn .ext-txt{display:none;} .ext-btn{padding:8px 11px;gap:5px;}}
+/* indicador de actualización — chip en el encabezado */
+.hstatus{display:flex;align-items:center;gap:6px;background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.4);
+  color:var(--gn);border-radius:20px;padding:6px 13px;font-size:.7rem;font-weight:700;white-space:nowrap;line-height:1;}
+/* toggle de sonido de interfaz */
+.snd-toggle{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;
+  width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;transition:.15s;flex-shrink:0;}
+.snd-toggle:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
+.snd-toggle.off{opacity:.5;}
+/* franja de acciones compacta (Gmail / Outlook) */
+.act-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  background:var(--g2);border:1px solid var(--g4);border-radius:10px;padding:8px 12px;margin-bottom:10px;}
+.act-strip .as-subject{display:flex;align-items:center;gap:9px;min-width:0;flex:1;}
+.act-strip .as-lb{font-size:.58rem;letter-spacing:2px;color:var(--wb);font-weight:800;flex-shrink:0;}
+.act-strip .sv{color:var(--y);font-size:.9rem;font-weight:700;word-break:break-word;flex:1;min-width:80px;
+  padding:4px 8px;border-radius:6px;border:1px solid transparent;outline:none;}
+.act-strip .sv:focus{border-color:var(--rl);background:var(--g0);}
+.act-strip .as-actions{display:flex;gap:7px;flex-wrap:wrap;flex-shrink:0;}
+@media(max-width:560px){.act-strip .as-subject{flex:1 1 100%;}}
 
 /* stepper inline en resumen */
 .stepper-inline button{background:var(--g3);border:1px solid var(--g4);color:#fff;width:44px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:800;transition:.12s;}
@@ -206,7 +224,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pv-copy-btn .ico{font-size:.95rem;line-height:1;}
 
 /* ── PANEL DERECHO — solo vista previa ───────────── */
-.pv-content{flex:1;min-width:0;overflow-y:auto;padding:14px 16px 30px;}
+.pv-content{flex:1;min-width:0;overflow-y:auto;padding:10px 16px 30px;}
 .pv-pane{display:none;padding:0;}
 .pv-pane.on{display:block;}
 .pv-frame{background:#f3f3f3;border-radius:10px;padding:14px;overflow-x:auto;}
@@ -223,8 +241,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .outlook-note{font-size:.78rem;color:#9aa;background:rgba(0,114,198,.1);border:1px solid rgba(0,114,198,.3);
   border-radius:8px;padding:9px 13px;margin-top:12px;}
 .outlook-note b{color:#5ab0ff;}
-#auto-gen-status{margin:0 0 10px;padding:6px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);
-  border-radius:8px;font-size:.74rem;color:var(--gn);text-align:center;}
 
 /* ── TOASTS ───────────────────────────────────────── */
 .toast{display:none;padding:10px 15px;border-radius:9px;margin:0 16px 12px;font-size:.85rem;font-weight:600;}
@@ -284,6 +300,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   #workstation.m-config #right-panel,#workstation.m-config #center-panel{display:none;}
   #workstation.m-preview #left-panel{display:none;}
   .brand .sb{display:none;}
+  .user-btn span{display:none;}
+  .user-btn{padding:5px;max-width:none;}
+  .hstatus{font-size:.6rem;padding:5px 9px;max-width:160px;overflow:hidden;text-overflow:ellipsis;}
+  .brand img{height:48px;}
   .uf-box input{width:74px;}
   #right-panel{overflow:visible;}
   .pv-content{overflow-y:visible;padding:12px 12px 30px;}
@@ -292,6 +312,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 @media(max-width:560px){
   .brand .nm{font-size:1.05rem;}
   .price-big{font-size:2.2rem;}
+  .snd-toggle{display:none;}
 }
 </style>
 </head>
@@ -305,11 +326,13 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     </div>
   </div>
   <div class="htools">
+    <div id="auto-gen-status" class="hstatus">✔ Actualizado</div>
     <div class="uf-box">
       <label>UF Hoy</label>
       <input type="number" id="uf-global" value="40644" step="1">
     </div>
     <button class="htool-btn" onclick="openUF()">⇄ UF</button>
+    <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
     <a class="ext-btn" href="https://drive.google.com/uc?export=download&id=1p_zfxeoZMO2Q9SEVCtmxZaeQ1YFR9XWl" target="_blank" rel="noopener" title="Descargar extensión CRM Extractor Pro — conecta el discador con el CRM (Chrome / Edge)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V19c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V21H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/></svg>
       <span class="ext-txt"><span class="ext-lb">Extensión CRM</span><span class="ext-sb">Discador ⇄ CRM</span></span>
@@ -414,10 +437,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   <!-- ════════ PANEL DERECHO — VISTA PREVIA ════════ -->
   <section id="right-panel">
    <div class="pv-content">
-    <button id="top-subject-btn" class="pv-copy-btn" style="width:100%;justify-content:center;margin:0 0 10px;padding:11px 14px;font-size:.92rem;font-weight:700;" onclick="copAsunto();playClick();" title="Copiar el asunto del correo">
-      <span class="ico">📋</span><span>Copiar Asunto</span>
-    </button>
-    <div id="auto-gen-status">✔ Propuesta actualizada automáticamente</div>
     <div id="mail-toast" class="toast"></div>
     <div id="tpl-toast2" class="toast"></div>
 
@@ -432,11 +451,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- GMAIL -->
       <div class="pv-pane" id="pane-gmail">
-        <div class="subject-bar">
-          <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto"></div></div>
-          <div class="sb-actions">
+        <div class="act-strip">
+          <div class="as-subject"><span class="as-lb">ASUNTO</span><span class="sv" id="tpl-asunto" contenteditable="true" spellcheck="false" title="Editable — puedes ajustarlo antes de copiar"></span></div>
+          <div class="as-actions">
             <button class="pv-copy-btn sm" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
-              <span class="ico">📋</span><span>Copiar Asunto</span>
+              <span class="ico">📋</span><span>Asunto</span>
             </button>
             <button class="pv-copy-btn sm" onclick="copHTMLGmail();playClick();" title="Copiar texto para Gmail">
               <span class="ico">📋</span><span>Copiar Texto</span>
@@ -449,27 +468,22 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- OUTLOOK -->
       <div class="pv-pane on" id="pane-outlook">
-        <div class="subject-bar">
-          <div><div class="sl">📌 Asunto del correo</div><div class="sv" id="tpl-asunto-outlook"></div></div>
-          <div class="sb-actions">
-            <button class="pv-copy-btn sm" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
-              <span class="ico">📋</span><span>Copiar Asunto</span>
+        <div class="act-strip">
+          <div class="as-subject"><span class="as-lb">ASUNTO</span><span class="sv" id="tpl-asunto-outlook" contenteditable="true" spellcheck="false" title="Editable — puedes ajustarlo antes de copiar o descargar el .eml"></span></div>
+          <div class="as-actions">
+            <button class="pv-copy-btn sm" onclick="navigator.clipboard.writeText(document.getElementById('tpl-asunto-outlook').textContent);toast('✔ Asunto copiado','ok','tpl-toast2');playClick();" title="Copiar asunto del correo">
+              <span class="ico">📋</span><span>Asunto</span>
             </button>
             <button class="pv-copy-btn sm" onclick="copHTMLOutlook();playClick();" title="Copiar texto para Outlook">
               <span class="ico">📋</span><span>Copiar Texto</span>
             </button>
-            <button class="pv-copy-btn sm" onclick="diagClipboard();" title="Diagnóstico: ver qué hay en el clipboard" style="border-color:#f0c040;color:#f0c040;">
-              <span class="ico">🔍</span><span>Diagnóstico</span>
+            <button class="pv-copy-btn sm" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía" style="border-color:#0078D4;color:#5ab4ff;">
+              <span class="ico">📨</span><span>Abrir en Outlook</span>
             </button>
           </div>
         </div>
-        <div class="pv-toolbar" style="margin-bottom:10px;">
-          <button class="pv-copy-btn" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía" style="width:100%;justify-content:center;padding:13px 18px;font-size:.95rem;font-weight:800;background:linear-gradient(135deg,rgba(0,78,152,.35),rgba(0,120,212,.2));border-color:#0078D4;color:#5ab4ff;letter-spacing:.3px;">
-            <span class="ico">📨</span><span>Abrir en Outlook — con destinatario, asunto y cuerpo listos</span>
-          </button>
-        </div>
         <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
-        <div class="outlook-note">⚠️ <b>Nota Outlook:</b> el botón de arriba descarga un <b>.eml</b> que abre Outlook con todo precargado. Solo adjunta el PDF y envía. Si prefieres copiar y pegar manualmente, usa "Copiar Texto".</div>
+        <div class="outlook-note">⚠️ <b>Nota Outlook:</b> "Abrir en Outlook" descarga un <b>.eml</b> con todo precargado. Solo adjunta el PDF y envía. Si prefieres pegar manualmente, usa "Copiar Texto".</div>
       </div>
 
       <!-- WHATSAPP — solo texto enriquecido -->
@@ -2238,6 +2252,26 @@ function playSound(type){
 }
 function playHover(){playSound('hover');}
 function playClick(){playSound('click');}
+
+/* ── Toggle de sonido + feedback sonoro de hover (delegado y throttled) ── */
+var _sndOn=true;
+function toggleSnd(){_sndOn=!_sndOn;var b=document.getElementById('snd-toggle');if(b){b.textContent=_sndOn?'🔊':'🔇';b.classList.toggle('off',!_sndOn);}}
+(function(){
+  var _last=0;
+  var SEL='.cv-btn,.pbtn,.pv-copy-btn,.htool-btn,.ext-btn,.user-btn,.snd-toggle,.btn-foto,.crm-paste-btn,.exec-save';
+  document.addEventListener('pointerover',function(e){
+    if(!_sndOn)return;
+    if(e.pointerType&&e.pointerType!=='mouse')return; /* solo mouse, nada en táctil */
+    var t=e.target&&e.target.closest?e.target.closest(SEL):null;
+    if(!t)return;
+    if(e.relatedTarget&&t.contains(e.relatedTarget))return; /* movimiento dentro del mismo botón */
+    var now=Date.now();if(now-_last<120)return;_last=now; /* throttle: sin ráfagas */
+    try{var a=getAudio();if(a.state==='suspended')a.resume();}catch(_){}
+    playSound('hover');
+  },true);
+  /* reanuda el contexto en el primer gesto real (política de autoplay) */
+  document.addEventListener('pointerdown',function(){try{var a=getAudio();if(a.state==='suspended')a.resume();}catch(_){}},{once:true});
+})();
 
 /* ════════════════════════════════════════════════════════════════
    SALUDO DINÁMICO — HORA REAL DE CHILE (America/Santiago)
