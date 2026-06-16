@@ -1238,13 +1238,13 @@ function genMail(){
         '<tr>'+
           '<td valign="middle">'+
             '<img src="logo-equifax.png" alt="Equifax" width="360" height="auto" style="display:block;max-height:114px;width:auto;" />'+
-            '<div style="margin-top:6px;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.55);text-transform:uppercase;font-family:Arial,sans-serif;">Chile &middot; Soluciones Empresariales</div>'+
+            '<div style="margin-top:6px;font-size:9px;letter-spacing:3px;color:#D299A1;text-transform:uppercase;font-family:Arial,sans-serif;">Chile &middot; Soluciones Empresariales</div>'+
           '</td>'+
           '<td valign="top" align="right">'+
             '<div style="display:inline-block;background:rgba(0,0,0,.35);border:1px solid rgba(240,192,64,.6);border-radius:20px;padding:5px 16px;">'+
               '<span style="font-size:10px;font-weight:800;color:#f0c040;letter-spacing:1.5px;font-family:Arial,sans-serif;">'+pi.badge+'</span>'+
             '</div>'+
-            '<div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,.5);font-family:Arial,sans-serif;text-align:right;">'+hoy()+'</div>'+
+            '<div style="margin-top:8px;font-size:10px;color:#CD8E97;font-family:Arial,sans-serif;text-align:right;">'+hoy()+'</div>'+
           '</td>'+
         '</tr>'+
       '</table>'+
@@ -1277,26 +1277,26 @@ function genMail(){
             '<td align="right" style="font-size:11px;color:#ddaaaa;text-decoration:line-through;font-family:Arial,sans-serif;padding:3px 0;">'+ufL+' UF + IVA</td>'+
           '</tr>':'') +
         '<tr>'+
-          '<td style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,220,220,.9);font-family:Arial,sans-serif;padding:8px 0 4px;vertical-align:bottom;">Precio ofrecido</td>'+
+          '<td style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#F2C8CA;font-family:Arial,sans-serif;padding:8px 0 4px;vertical-align:bottom;">Precio ofrecido</td>'+
           '<td align="right" style="padding:6px 0 4px;vertical-align:bottom;">'+
             '<span style="font-size:34px;font-weight:900;color:#f0c040;font-family:Arial,sans-serif;line-height:1;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</span>'+
           '</td>'+
         '</tr>'+
         (clp?
           '<tr>'+
-            '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Aprox. mensual con IVA</td>'+
+            '<td style="font-size:11px;color:#DEAAAE;font-family:Arial,sans-serif;padding:2px 0;">Aprox. mensual con IVA</td>'+
             '<td align="right" style="font-size:14px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;padding:2px 0;">'+fmtN(clp)+'</td>'+
           '</tr>':'') +
         (hayDc?
           '<tr>'+
-            '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Descuento aplicado</td>'+
+            '<td style="font-size:11px;color:#DEAAAE;font-family:Arial,sans-serif;padding:2px 0;">Descuento aplicado</td>'+
             '<td align="right" style="font-size:14px;font-weight:800;color:#4ade80;font-family:Arial,sans-serif;padding:2px 0;">&#8722;'+dc+'% sobre precio lista</td>'+
           '</tr>':'') +
         '<tr>'+
           '<td colspan="2" style="border-top:1px solid rgba(200,100,110,.5);padding-top:8px;margin-top:4px;"></td>'+
         '</tr>'+
         '<tr>'+
-          '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td>'+
+          '<td style="font-size:11px;color:#DEAAAE;font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td>'+
           '<td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</td>'+
         '</tr>'+
       '</table>'+
