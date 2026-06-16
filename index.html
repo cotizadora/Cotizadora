@@ -318,9 +318,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label>
       <div id="dest-fields" class="cfg-grid">
         <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
-        <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="onClientChange()"></div>
-        <!-- campos ocultos para compatibilidad (el contacto ya no se usa en propuestas) -->
-        <input type="hidden" id="mn"><input type="hidden" id="mr"><input type="hidden" id="cli-email"><input type="hidden" id="cli-obs">
+        <div class="cfg-2">
+          <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="onClientChange()"></div>
+          <div class="fld"><label>Correo electrónico</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="onClientChange()"></div>
+        </div>
+        <!-- campos ocultos para compatibilidad -->
+        <input type="hidden" id="mn"><input type="hidden" id="mr"><input type="hidden" id="cli-obs">
       </div>
     </div>
 
@@ -435,13 +438,15 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
             <button class="pv-copy-btn sm" onclick="diagClipboard();" title="Diagnóstico: ver qué hay en el clipboard" style="border-color:#f0c040;color:#f0c040;">
               <span class="ico">🔍</span><span>Diagnóstico</span>
             </button>
-            <button class="pv-copy-btn sm" onclick="descargarEML();playClick();" title="Descarga un archivo .eml que abre Outlook con destinatario, asunto y cuerpo ya listos" style="border-color:#2ecc71;color:#2ecc71;">
-              <span class="ico">📥</span><span>Descargar correo (.eml)</span>
-            </button>
           </div>
         </div>
+        <div class="pv-toolbar" style="margin-bottom:10px;">
+          <button class="pv-copy-btn" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía" style="width:100%;justify-content:center;padding:13px 18px;font-size:.95rem;font-weight:800;background:linear-gradient(135deg,rgba(0,78,152,.35),rgba(0,120,212,.2));border-color:#0078D4;color:#5ab4ff;letter-spacing:.3px;">
+            <span class="ico">📨</span><span>Abrir en Outlook — con destinatario, asunto y cuerpo listos</span>
+          </button>
+        </div>
         <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
-        <div class="outlook-note">⚠️ <b>Nota Outlook:</b> misma plantilla premium que Gmail, con respaldo de color sólido para máxima compatibilidad. Pega directo en el cuerpo del mensaje.</div>
+        <div class="outlook-note">⚠️ <b>Nota Outlook:</b> el botón de arriba descarga un <b>.eml</b> que abre Outlook con todo precargado. Solo adjunta el PDF y envía. Si prefieres copiar y pegar manualmente, usa "Copiar Texto".</div>
       </div>
 
       <!-- WHATSAPP — solo texto enriquecido -->
@@ -2263,9 +2268,10 @@ function mapearCRM(txt){
   var esRut=function(s){return /^\d{1,3}(\.\d{3}){1,2}-[\dkK]$/.test(s)||/^\d{7,9}-[\dkK]$/.test(s);};
   var esEmail=function(s){return s.indexOf('@')>-1;};
   var esFono=function(s){return /^\+?[\d\s]{7,17}$/.test(s)&&/\d{7,}/.test(s.replace(/\s+/g,''));};
-  var fono='',libres=[];
+  var fono='',email='',libres=[];
   campos.forEach(function(c){
-    if(esFecha(c)||esRut(c)||esEmail(c))return;   /* FECHA, RUT y EMAIL se ignoran por diseño */
+    if(esFecha(c)||esRut(c))return;      /* FECHA y RUT se ignoran */
+    if(!email&&esEmail(c)){email=c;return;}
     if(!fono&&esFono(c)){fono=c;return;}
     libres.push(c);
   });
@@ -2273,6 +2279,7 @@ function mapearCRM(txt){
   var ok=false;
   if(razon){var e=$('me');if(e){e.value=razon;ok=true;}}
   if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/\s+/g,'');ok=true;}}
+  if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
   /* El campo Contacto se mantiene intacto: la extensión no entrega nombre */
   onClientChange();
   if(ok)toast('✔ Datos CRM cargados','ok','global-toast');
@@ -2282,6 +2289,20 @@ function updateCRMWsp(){
   var listo=!skip&&!!celularNormalizado(gv('cli-tel'));
   var b=$('cvbtn-wsp');if(b)b.classList.toggle('wsp-ready',listo);
   var o=$('btn-open-wspweb');if(o)o.style.display=listo?'':'none';
+  /* Outlook: iluminar botón cuando hay email del cliente */
+  var email=(gv('cli-email')||'').trim();
+  var btnOtl=$('btn-abrir-outlook');
+  if(btnOtl){
+    if(email&&!skip){
+      btnOtl.style.borderColor='#0078D4';
+      btnOtl.style.boxShadow='0 0 14px rgba(0,120,212,.45)';
+      btnOtl.title='Abre Outlook con destinatario ('+email+'), asunto y cuerpo listos. Solo adjunta PDF y envía.';
+    }else{
+      btnOtl.style.borderColor='rgba(0,120,212,.45)';
+      btnOtl.style.boxShadow='none';
+      btnOtl.title='Descarga un .eml que abre Outlook con asunto y cuerpo listos. Sin destinatario (agrega email del cliente).';
+    }
+  }
 }
 function abrirWspWeb(){
   var cel=celularNormalizado(gv('cli-tel'));
