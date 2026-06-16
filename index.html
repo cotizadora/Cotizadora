@@ -77,10 +77,19 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .act-strip .sv:focus{border-color:var(--rl);background:var(--g0);white-space:normal;overflow:visible;}
 .act-strip .as-actions{display:flex;gap:7px;flex-wrap:wrap;flex-shrink:0;}
 @media(max-width:560px){.act-strip .as-subject{flex:1 1 100%;}}
-/* panel superior fijo (sticky) — Mejora 7: visible siempre, no invasivo */
+/* panel superior fijo (sticky) — corporativo limpio, sin cápsula */
 .act-strip.sticky-bar{position:sticky;top:0;z-index:50;
-  background:rgba(28,28,31,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  box-shadow:0 4px 14px rgba(0,0,0,.35);}
+  background:#1c1c1f;backdrop-filter:none;-webkit-backdrop-filter:none;
+  border-radius:0;border-left:none;border-right:none;border-top:none;
+  border-bottom:2px solid var(--g4);
+  margin-bottom:10px;
+  box-shadow:0 4px 18px rgba(0,0,0,.6);}
+/* toolbar WSP sticky — mismo tratamiento */
+.pv-toolbar.sticky-bar{position:sticky;top:0;z-index:50;
+  background:#1c1c1f;
+  border-radius:0;border-bottom:2px solid var(--g4);
+  margin-bottom:8px;padding:8px 0;
+  box-shadow:0 4px 18px rgba(0,0,0,.6);}
 
 /* stepper inline en resumen */
 .stepper-inline button{background:var(--g3);border:1px solid var(--g4);color:#fff;width:44px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:800;transition:.12s;}
@@ -257,27 +266,75 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .wa-text{color:#0b1a13;font-family:'Segoe UI',Helvetica,Arial,sans-serif;
   font-size:.92rem;line-height:1.45;white-space:pre-wrap;margin:0;}
 
-/* ── VISTA REALISTA DE WHATSAPP (Mejora 1) — reutiliza #wa-text-view, sin duplicar lógica ── */
-.wa-phone-shell{border-radius:10px;overflow:hidden;border:1px solid var(--g4);
-  max-height:calc(100vh - 230px);display:flex;flex-direction:column;}
-.wa-shell-head{display:flex;align-items:center;gap:11px;background:#1f2c34;color:#e9edef;
-  padding:10px 14px;flex-shrink:0;}
-.wa-shell-avatar{width:36px;height:36px;border-radius:50%;background:#3b4a54;display:flex;
-  align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
-.wa-shell-id{display:flex;flex-direction:column;line-height:1.25;min-width:0;}
-.wa-shell-name{font-size:.92rem;font-weight:700;}
-.wa-shell-sub{font-size:.7rem;color:#8696a0;}
-.wa-shell-body{background:#0b141a;background-image:
-  radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);
-  background-size:13px 13px;padding:16px 14px;flex:1;overflow:auto;}
-.wa-bubble{background:#202c33;color:#e9edef;border-radius:9px 9px 9px 2px;
-  padding:9px 11px 7px;max-width:78%;box-shadow:0 1px 1.5px rgba(0,0,0,.4);
-  position:relative;margin-left:0;}
-.wa-bubble .wa-text{color:#e9edef;}
-.wa-bubble-meta{display:flex;justify-content:flex-end;align-items:center;gap:4px;
-  margin-top:4px;font-size:.68rem;color:#8696a0;}
-.wa-bubble-meta .wa-check{color:#53bdeb;font-size:.74rem;letter-spacing:-1px;}
-@media(max-width:560px){.wa-phone-shell{max-height:none;}}
+/* ── VISTA REALISTA DE WHATSAPP — interfaz WhatsApp Web/Desktop ── */
+.wa-phone-shell{
+  border-radius:4px;overflow:hidden;
+  border:1px solid #1a272f;
+  max-height:calc(100vh - 230px);display:flex;flex-direction:column;
+  font-family:'Segoe UI',Helvetica,Arial,sans-serif;
+  background:#0b141a;
+  box-shadow:0 4px 24px rgba(0,0,0,.5);}
+/* Header — barra superior WhatsApp */
+.wa-shell-head{
+  display:flex;align-items:center;gap:0;
+  background:#202c33;color:#e9edef;
+  padding:10px 16px;flex-shrink:0;
+  border-bottom:1px solid #1a272f;
+  min-height:59px;}
+.wa-shell-avatar{
+  width:40px;height:40px;border-radius:50%;
+  background:#6b7c85;display:flex;
+  align-items:center;justify-content:center;
+  flex-shrink:0;overflow:hidden;margin-right:12px;}
+.wa-shell-avatar svg{width:26px;height:26px;fill:#fff;opacity:.85;}
+.wa-shell-id{display:flex;flex-direction:column;line-height:1.3;min-width:0;flex:1;}
+.wa-shell-name{font-size:.9375rem;font-weight:400;color:#e9edef;letter-spacing:.01em;}
+.wa-shell-sub{font-size:.75rem;color:#8696a0;margin-top:1px;}
+/* Iconos derecha del header */
+.wa-shell-head-icons{display:flex;align-items:center;gap:20px;margin-left:auto;flex-shrink:0;}
+.wa-shell-head-icons svg{width:20px;height:20px;fill:#aebac1;cursor:pointer;}
+/* Cuerpo — fondo con patrón de WhatsApp */
+.wa-shell-body{
+  background-color:#0b141a;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='86' height='76'%3E%3Cpath fill='%23111b21' fill-opacity='.45' d='M86 73.7v2.3H0V0h2.8C4 9.3 8.5 18 15.4 24.5c6.8 6.4 15.8 10.2 25.1 11 9.3.9 18.8-1.4 26.7-6.3 7.9-5 14-12.7 17-21.7 1-3 1.6-6.2 1.8-9.5H86V73.7z'/%3E%3C/svg%3E");
+  background-size:86px 76px;
+  padding:12px 14px 16px;flex:1;overflow:auto;}
+/* Burbuja enviada (derecha — estilo ejecutivo enviando) */
+.wa-bubble{
+  background:#005c4b;
+  color:#e9edef;
+  border-radius:7.5px 7.5px 2px 7.5px;
+  padding:6px 7px 8px 9px;
+  max-width:65%;
+  box-shadow:0 1px 2px rgba(0,0,0,.26);
+  position:relative;
+  margin-left:auto;/* burbujas a la derecha */
+  display:inline-block;
+  float:right;
+  clear:both;}
+/* Cola de la burbuja enviada */
+.wa-bubble::after{
+  content:'';position:absolute;
+  top:0;right:-8px;
+  width:0;height:0;
+  border-style:solid;
+  border-width:0 0 9px 9px;
+  border-color:transparent transparent transparent #005c4b;}
+.wa-bubble .wa-text{
+  color:#e9edef;
+  font-size:.875rem;
+  line-height:1.4;
+  white-space:pre-wrap;
+  margin:0;word-break:break-word;}
+.wa-bubble-meta{
+  display:flex;justify-content:flex-end;align-items:center;gap:4px;
+  margin-top:2px;margin-right:0;
+  font-size:.6875rem;color:#8696a0;
+  float:right;clear:both;margin-left:8px;}
+.wa-bubble-meta .wa-check{color:#53bdeb;font-size:.7rem;letter-spacing:-1px;margin-left:2px;}
+/* Clearfix para el float */
+.wa-shell-body::after{content:'';display:table;clear:both;}
+@media(max-width:560px){.wa-phone-shell{max-height:none;border-radius:0;}}
 .outlook-note{font-size:.78rem;color:#9aa;background:rgba(0,114,198,.1);border:1px solid rgba(0,114,198,.3);
   border-radius:8px;padding:9px 13px;margin-top:12px;}
 .outlook-note b{color:#5ab0ff;}
@@ -539,10 +596,24 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
         <textarea id="tpl-body" style="display:none;"></textarea>
         <div class="wa-phone-shell" id="wa-phone-shell">
           <div class="wa-shell-head">
-            <div class="wa-shell-avatar" aria-hidden="true">👤</div>
+            <div class="wa-shell-avatar" aria-hidden="true">
+              <svg viewBox="0 0 212 212" xmlns="http://www.w3.org/2000/svg">
+                <path d="M106.251.5C164.653.5 212 47.846 212 106.25S164.653 212 106.25 212C47.846 212 .5 164.654.5 106.25S47.846.5 106.251.5z" fill="#DFE5E7"/>
+                <path d="M173.561 171.615a62.767 62.767 0 0 0-2.065-2.955 67.7 67.7 0 0 0-2.608-3.299 70.112 70.112 0 0 0-3.184-3.527 71.097 71.097 0 0 0-5.924-5.47 72.458 72.458 0 0 0-10.204-7.026 73.87 73.87 0 0 0-12.666-5.565A16.203 16.203 0 0 0 132 141.5c-.828 0-2.10.113-3.400.344a27.552 27.552 0 0 0-4.240 1.206 28.836 28.836 0 0 0-4.126 2.066 28.278 28.278 0 0 0-3.535 2.810 27.552 27.552 0 0 0-2.810 3.535 28.836 28.836 0 0 0-2.066 4.126 27.554 27.554 0 0 0-1.206 4.240c-.231 1.300-.344 2.572-.344 3.400 0 5.520 2.002 10.625 5.918 14.757a49.78 49.78 0 0 0 1.858 1.87c-10.206-2.967-19.688-8.001-27.843-14.820a96.96 96.96 0 0 1-9.447-9.448C38.458 140.44 29.5 124.272 29.5 106.25c0-42.388 34.362-76.75 76.75-76.75 42.388 0 76.75 34.362 76.75 76.75 0 18.024-6.502 34.505-17.221 47.168a16.228 16.228 0 0 0-2.065-2.955z" fill="#fff" opacity=".1"/>
+                <path d="M106.25 29.5C63.862 29.5 29.5 63.862 29.5 106.25S63.862 183 106.25 183 183 148.638 183 106.25 148.638 29.5 106.25 29.5zM88.25 66.5c0-9.941 8.059-18 18-18s18 8.059 18 18v12c0 9.941-8.059 18-18 18s-18-8.059-18-18V66.5zm-28.5 97.5c0-24.853 20.647-45 46-45h.5c25.353 0 46 20.147 46 45H59.75z" fill="#b2bec3"/>
+              </svg>
+            </div>
             <div class="wa-shell-id">
-              <div class="wa-shell-name">Cliente</div>
+              <div class="wa-shell-name" id="wa-contact-name">Cliente</div>
               <div class="wa-shell-sub">en línea</div>
+            </div>
+            <div class="wa-shell-head-icons" aria-hidden="true">
+              <!-- ícono videollamada -->
+              <svg viewBox="0 0 24 24"><path d="M15.937 0v2.063H8.062V0H0v24h24V0zM22.5 8.4l-5.1 3.3V8.4h-4.2v7.2h4.2v-3.3l5.1 3.3V8.4z" style="display:none"/><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+              <!-- ícono llamada -->
+              <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+              <!-- ícono tres puntos -->
+              <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
             </div>
           </div>
           <div class="wa-shell-body">
@@ -1470,9 +1541,9 @@ function genMail(){
             '<div style="margin-top:3px;font-size:11px;color:#c8960a;font-family:Arial,sans-serif;">'+exEmpresa+'</div>'+
             (exFirma?'<div style="margin-top:3px;font-size:11px;font-style:italic;color:#b0b0b0;font-family:Arial,sans-serif;">'+exFirma+'</div>':'')+
             (fo?'<div style="margin-top:6px;font-size:12px;font-family:Arial,sans-serif;">'+
-                  '<a href="'+(wspSigHref||'#')+'" target="_blank" style="text-decoration:none;font-weight:700;">'+
-                    '<span style="vertical-align:middle;color:#90d490;">'+fo+'</span>'+
-                  '</a>'+
+                  (wspSigHref
+                    ? '<a href="'+wspSigHref+'" target="_blank" style="text-decoration:none;font-weight:700;"><span style="vertical-align:middle;color:#90d490;">'+fo+'</span></a>'
+                    : '<span style="color:#90d490;font-weight:700;">'+fo+'</span>')+
                 '</div>':'')+
             (ml?'<div style="margin-top:2px;font-size:12px;color:#90b8d4;font-family:Arial,sans-serif;">&#9993; '+ml+'</div>':'')+
           '</td>'+
@@ -1708,9 +1779,9 @@ function genMail(){
               : '')+
             (fo
               ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:7px;">'+
-                  '<a href="'+(wspSigHref||'#')+'" target="_blank" style="text-decoration:none;">'+
-                    '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">'+fo+'</font></font>'+
-                  '</a>'+
+                  (wspSigHref
+                    ? '<a href="'+wspSigHref+'" target="_blank" style="text-decoration:none;"><font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">'+fo+'</font></font></a>'
+                    : '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">'+fo+'</font></font>')+
                 '</td></tr>'
               : '')+
             (ml
