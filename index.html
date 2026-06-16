@@ -71,11 +71,16 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   background:var(--g2);border:1px solid var(--g4);border-radius:10px;padding:8px 12px;margin-bottom:10px;}
 .act-strip .as-subject{display:flex;align-items:center;gap:9px;min-width:0;flex:1;}
 .act-strip .as-lb{font-size:.58rem;letter-spacing:2px;color:var(--wb);font-weight:800;flex-shrink:0;}
-.act-strip .sv{color:var(--y);font-size:.9rem;font-weight:700;word-break:break-word;flex:1;min-width:80px;
+.act-strip .sv{color:var(--y);font-size:.9rem;font-weight:700;flex:1;min-width:60px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   padding:4px 8px;border-radius:6px;border:1px solid transparent;outline:none;}
-.act-strip .sv:focus{border-color:var(--rl);background:var(--g0);}
+.act-strip .sv:focus{border-color:var(--rl);background:var(--g0);white-space:normal;overflow:visible;}
 .act-strip .as-actions{display:flex;gap:7px;flex-wrap:wrap;flex-shrink:0;}
 @media(max-width:560px){.act-strip .as-subject{flex:1 1 100%;}}
+/* panel superior fijo (sticky) — Mejora 7: visible siempre, no invasivo */
+.act-strip.sticky-bar{position:sticky;top:0;z-index:50;
+  background:rgba(28,28,31,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 4px 14px rgba(0,0,0,.35);}
 
 /* stepper inline en resumen */
 .stepper-inline button{background:var(--g3);border:1px solid var(--g4);color:#fff;width:44px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:800;transition:.12s;}
@@ -214,6 +219,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pv-copy-btn.wsp-open:hover{border-color:#25D366;box-shadow:0 0 12px rgba(37,211,102,.5);}
 .wsp-link-row{display:none;padding:8px 11px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);border-radius:8px;font-size:.85rem;margin-top:4px;}
 .wsp-link-row a{color:#25d366;font-weight:700;text-decoration:none;}
+.wsp-fmt-warn{padding:8px 11px;background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.4);border-radius:8px;font-size:.8rem;color:#ff8a7a;margin-top:4px;line-height:1.4;}
+.wsp-fmt-warn b{color:#ffb0a3;}
 
 /* ── BARRA DE ACCIÓN CONTEXTUAL POR VISTA ─────────── */
 .pv-toolbar{display:flex;justify-content:flex-end;margin-bottom:8px;}
@@ -222,6 +229,17 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   font-weight:700;white-space:nowrap;transition:all .15s ease;}
 .pv-copy-btn:hover{background:var(--g3);border-color:var(--rl);box-shadow:0 0 10px rgba(192,38,59,.4);transform:translateY(-1px);}
 .pv-copy-btn .ico{font-size:.95rem;line-height:1;}
+
+/* ── DESTELLO DE CONFIRMACIÓN — unificado para toda acción de copiado ── */
+@keyframes flashPulse{
+  0%{box-shadow:0 0 0 0 rgba(240,192,64,0);}
+  25%{box-shadow:0 0 0 3px rgba(240,192,64,.55),0 0 28px 6px rgba(240,192,64,.45);}
+  100%{box-shadow:0 0 0 0 rgba(240,192,64,0);}
+}
+.flash-copy{animation:flashPulse .45s ease-out;}
+
+/* ── Comportamiento unificado: hover/glow consistente en botones de acción ── */
+.pv-copy-btn,.htool-btn,.lbtn,.exec-save,.crm-paste-btn{transition:background .15s ease,border-color .15s ease,box-shadow .15s ease,transform .15s ease;}
 
 /* ── PANEL DERECHO — solo vista previa ───────────── */
 .pv-content{flex:1;min-width:0;overflow-y:auto;padding:10px 16px 30px;}
@@ -236,9 +254,30 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .subject-bar .sv{color:var(--y);font-size:.95rem;font-weight:700;word-break:break-word;}
 .subject-bar .sb-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
 .pv-copy-btn.sm{padding:7px 12px;font-size:.76rem;}
-.wa-text{background:var(--g1);border:1px solid var(--g4);color:#cfcfcf;font-family:'Courier New',monospace;
-  font-size:.92rem;line-height:1.55;padding:16px 18px;border-radius:10px;white-space:pre-wrap;margin-top:8px;
-  max-height:none;min-height:calc(100vh - 240px);overflow:visible;}
+.wa-text{color:#0b1a13;font-family:'Segoe UI',Helvetica,Arial,sans-serif;
+  font-size:.92rem;line-height:1.45;white-space:pre-wrap;margin:0;}
+
+/* ── VISTA REALISTA DE WHATSAPP (Mejora 1) — reutiliza #wa-text-view, sin duplicar lógica ── */
+.wa-phone-shell{border-radius:10px;overflow:hidden;border:1px solid var(--g4);
+  max-height:calc(100vh - 230px);display:flex;flex-direction:column;}
+.wa-shell-head{display:flex;align-items:center;gap:11px;background:#1f2c34;color:#e9edef;
+  padding:10px 14px;flex-shrink:0;}
+.wa-shell-avatar{width:36px;height:36px;border-radius:50%;background:#3b4a54;display:flex;
+  align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
+.wa-shell-id{display:flex;flex-direction:column;line-height:1.25;min-width:0;}
+.wa-shell-name{font-size:.92rem;font-weight:700;}
+.wa-shell-sub{font-size:.7rem;color:#8696a0;}
+.wa-shell-body{background:#0b141a;background-image:
+  radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:13px 13px;padding:16px 14px;flex:1;overflow:auto;}
+.wa-bubble{background:#202c33;color:#e9edef;border-radius:9px 9px 9px 2px;
+  padding:9px 11px 7px;max-width:78%;box-shadow:0 1px 1.5px rgba(0,0,0,.4);
+  position:relative;margin-left:0;}
+.wa-bubble .wa-text{color:#e9edef;}
+.wa-bubble-meta{display:flex;justify-content:flex-end;align-items:center;gap:4px;
+  margin-top:4px;font-size:.68rem;color:#8696a0;}
+.wa-bubble-meta .wa-check{color:#53bdeb;font-size:.74rem;letter-spacing:-1px;}
+@media(max-width:560px){.wa-phone-shell{max-height:none;}}
 .outlook-note{font-size:.78rem;color:#9aa;background:rgba(0,114,198,.1);border:1px solid rgba(0,114,198,.3);
   border-radius:8px;padding:9px 13px;margin-top:12px;}
 .outlook-note b{color:#5ab0ff;}
@@ -452,7 +491,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- GMAIL -->
       <div class="pv-pane" id="pane-gmail">
-        <div class="act-strip">
+        <div class="act-strip sticky-bar">
           <div class="as-subject"><span class="as-lb">ASUNTO</span><span class="sv" id="tpl-asunto" contenteditable="true" spellcheck="false" title="Editable — puedes ajustarlo antes de copiar"></span></div>
           <div class="as-actions">
             <button class="pv-copy-btn sm" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
@@ -469,7 +508,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- OUTLOOK -->
       <div class="pv-pane on" id="pane-outlook">
-        <div class="act-strip">
+        <div class="act-strip sticky-bar">
           <div class="as-subject"><span class="as-lb">ASUNTO</span><span class="sv" id="tpl-asunto-outlook" contenteditable="true" spellcheck="false" title="Editable — puedes ajustarlo antes de copiar o descargar el .eml"></span></div>
           <div class="as-actions">
             <button class="pv-copy-btn sm" onclick="navigator.clipboard.writeText(document.getElementById('tpl-asunto-outlook').textContent);toast('✔ Asunto copiado','ok','tpl-toast2');playClick();" title="Copiar asunto del correo">
@@ -487,9 +526,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
         <div class="outlook-note">⚠️ <b>Nota Outlook:</b> "Abrir en Outlook" descarga un <b>.eml</b> con todo precargado. Solo adjunta el PDF y envía. Si prefieres pegar manualmente, usa "Copiar Texto".</div>
       </div>
 
-      <!-- WHATSAPP — solo texto enriquecido -->
+      <!-- WHATSAPP — vista realista envolviendo el mismo contenido generado -->
       <div class="pv-pane" id="pane-wsp">
-        <div class="pv-toolbar">
+        <div class="pv-toolbar sticky-bar">
           <button class="pv-copy-btn wsp-open" id="btn-open-wspweb" style="display:none;" onclick="abrirWspWeb();playClick();" title="Abrir WhatsApp Web con mensaje prearmado">
             <span class="ico">🟢</span><span>Abrir WhatsApp Web</span>
           </button>
@@ -498,7 +537,21 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
           </button>
         </div>
         <textarea id="tpl-body" style="display:none;"></textarea>
-        <div class="wa-text" id="wa-text-view"></div>
+        <div class="wa-phone-shell" id="wa-phone-shell">
+          <div class="wa-shell-head">
+            <div class="wa-shell-avatar" aria-hidden="true">👤</div>
+            <div class="wa-shell-id">
+              <div class="wa-shell-name">Cliente</div>
+              <div class="wa-shell-sub">en línea</div>
+            </div>
+          </div>
+          <div class="wa-shell-body">
+            <div class="wa-bubble">
+              <div class="wa-text" id="wa-text-view"></div>
+              <div class="wa-bubble-meta"><span id="wa-shell-time">--:--</span><span class="wa-check">✔✔</span></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- cot-card-wsp: elemento oculto mantenido para el motor de canvas -->
@@ -588,8 +641,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
         <div class="fld"><label>Correo</label><input type="email" id="ml" placeholder="ej@equifax.cl"></div>
         <div class="cfg-2">
           <div class="fld"><label>Teléfono</label><input type="text" id="exec-tel" placeholder="+56 9 9796 6724"></div>
-          <div class="fld"><label>WhatsApp</label><input type="text" id="mf" placeholder="+56 9 9796 6724"></div>
+          <div class="fld"><label>WhatsApp</label><input type="text" id="mf" placeholder="+56 9 9796 6724" oninput="checkWspExecFormat();updWspLink();"></div>
         </div>
+        <div id="wsp-fmt-warn" class="wsp-fmt-warn" style="display:none;">⚠️ El número debe ingresarse con código de país de Chile. Ejemplo: <b>+56997966724</b></div>
         <div id="wsp-link-row" class="wsp-link-row">🟢 <a id="wsp-link" href="#" target="_blank">Abrir WhatsApp directo →</a></div>
         <div class="fld"><label>Firma comercial</label><input type="text" id="exec-firma" placeholder="Ej: Tu aliado en gestión de riesgo"></div>
       </div>
@@ -616,7 +670,7 @@ var LAST=null;                            // última config calculada
 
 function $(id){return document.getElementById(id);}
 function gv(id){var e=$(id);return e?(''+e.value).trim():'';}
-function st(id,v){var e=$(id);if(e)e.textContent=v;}
+function st(id,v){var e=$(id);if(e){e.textContent=v;if(id==='tpl-asunto'||id==='tpl-asunto-outlook')e.title=v;}}
 function sv(id,v){var e=$(id);if(e)e.innerHTML=v;}
 function setBridge(id,v){var e=$(id);if(e)e.value=(v===undefined||v===null)?'':v;}
 function ufd(x){return (Math.round(x*10000)/10000).toString();}
@@ -879,7 +933,14 @@ function refresh(){
 function onConfigChange(){CURRENT.override=null;CURRENT.overrideLista=null;refresh();}
 function onSlide(v){v=parseFloat(v);if(isNaN(v)||v<0)return;CURRENT.override=v;lightUpdate(v);}
 function onClientChange(){genMail();syncWA();updateCRMWsp();}
-function syncWA(){var t=$('tpl-body'),o=$('wa-text-view');if(t&&o)o.textContent=t.value;}
+function syncWA(){
+  var t=$('tpl-body'),o=$('wa-text-view');if(t&&o)o.textContent=t.value;
+  var tm=$('wa-shell-time');
+  if(tm){
+    try{tm.textContent=new Intl.DateTimeFormat('es-CL',{timeZone:'America/Santiago',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());}
+    catch(e){tm.textContent=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});}
+  }
+}
 
 function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'none':'flex';onClientChange();}
 
@@ -908,6 +969,8 @@ function cpToast(msg){
   var e=document.getElementById('cp-toast');if(!e)return;
   e.textContent=msg;e.classList.remove('show');void e.offsetWidth;e.classList.add('show');
   clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('show');},1600);
+  flashCopyOn(CURRENT_PV);
+  playSound('copy');
 }
 function _copyRich(el,msg){
   function fb(){try{var s=window.getSelection(),r=document.createRange();r.selectNodeContents(el);s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges();}catch(_){}cpToast(msg);}
@@ -935,6 +998,21 @@ function autoCopy(which){
       }).catch(function(){cpToast('No se pudo generar la imagen');});
     });
   }
+}
+/* ── Destello de confirmación — vista previa correspondiente ── */
+function flashCopyOn(which){
+  var el=null;
+  if(which==='gmail')   el=document.getElementById('tpl-rich-gmail');
+  else if(which==='outlook') el=document.getElementById('tpl-rich-outlook');
+  else if(which==='wsp')     el=document.getElementById('wa-phone-shell')||document.getElementById('wa-text-view');
+  else if(which==='img')     el=document.getElementById('cot-card-pc');
+  if(!el)return;
+  var frame=el.closest?(el.closest('.pv-frame')||el):el;
+  frame.classList.remove('flash-copy');
+  void frame.offsetWidth;
+  frame.classList.add('flash-copy');
+  clearTimeout(frame._ft);
+  frame._ft=setTimeout(function(){frame.classList.remove('flash-copy');},500);
 }
 function pvTab(which){ setPreview(which); playClick(); autoCopy(which); }
 /* Copia inteligente — delega al copiador específico de la vista activa */
@@ -1019,6 +1097,7 @@ function openExec(){
   $('exec-onboard-note').style.display='none';
   $('exec-modal-title').textContent='✏️ Editar datos del ejecutivo/a';
   updWspLink();
+  checkWspExecFormat();
   $('exec-modal').classList.add('on');
 }
 
@@ -1027,6 +1106,12 @@ function loadExecFields(){ /* compat: ahora delega en openExec si hace falta */ 
 function saveExec(){
   var nombre=gv('ma');
   if(!nombre){toast('Ingresa al menos tu nombre','err','global-toast');return;}
+  var _vwsp=validarWspEjecutivo(gv('mf'));
+  if(!_vwsp.ok){
+    checkWspExecFormat();
+    toast('⚠ '+_vwsp.mensaje,'err','global-toast');
+    return;
+  }
   /* commit del buffer a localStorage — ÚNICA FUENTE */
   _lsSet('eq_exec_name'   , nombre);
   _lsSet('eq_exec_cargo'  , gv('exec-cargo'));
@@ -1107,6 +1192,10 @@ function toast(msg,type,id){
   var el=document.getElementById(id||'global-toast');if(!el)return;
   el.className='toast '+(type||'ok');el.textContent=msg;el.style.display='block';
   clearTimeout(el._t);el._t=setTimeout(function(){el.style.display='none';},4500);
+  if((id==='tpl-toast2'||id==='mail-toast')&&(type==='ok'||!type)){
+    flashCopyOn(CURRENT_PV);
+    playSound('copy');
+  }
 }
 
 function preloadLogo(cb){
@@ -1166,8 +1255,9 @@ function genMail(){
   var exFirma = _ex.firma  || '';
   var exFoto  = (typeof execPhoto==='function') ? execPhoto() : '';
   updWspLink();
-  var telNum=fo.trim().replace(/\s+/g,'').replace(/[^+\d]/g,'');
-  var wspHref=telNum.length>=8?'https://wa.me/'+telNum.replace(/^\+/,''):'';
+  var _vwspExec=validarWspEjecutivo(fo);
+  var telNum=_vwspExec.normalizado.replace(/^\+/,'');
+  var wspHref=telNum?'https://wa.me/'+telNum:'';
   var ufV=parseFloat(gv('mu'))||null,ufL=parseFloat(gv('mula'))||ufV;
   var co=parseInt(gv('mc2'))||10,pl=gv('mp')||'12';
   var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'[Producto]'};
@@ -1175,7 +1265,7 @@ function genMail(){
   var _execNm=(as2&&as2!=='[Asesor]')?as2:'';
   var _prodNm=(pi&&pi.n&&pi.n!=='[Producto]')?pi.n:'';
   var _sigMsg='Hola'+(_execNm?' '+_execNm:'')+', recib\u00ed su propuesta comercial de Equifax'+(_prodNm?' de '+_prodNm:'')+' y quisiera m\u00e1s informaci\u00f3n.';
-  var wspSigHref=telNum.length>=8?'https://wa.me/'+telNum.replace(/^\+/,'')+'?text='+encodeURIComponent(_sigMsg):'';
+  var wspSigHref=telNum?'https://wa.me/'+telNum+'?text='+encodeURIComponent(_sigMsg):'';
   var it=PITEMS[tipo]||[];
   var itMail=(typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:it; /* enriquecido solo Gmail/Outlook */
   var hayDc=ufL&&ufV&&ufV<ufL;
@@ -1381,7 +1471,6 @@ function genMail(){
             (exFirma?'<div style="margin-top:3px;font-size:11px;font-style:italic;color:#b0b0b0;font-family:Arial,sans-serif;">'+exFirma+'</div>':'')+
             (fo?'<div style="margin-top:6px;font-size:12px;font-family:Arial,sans-serif;">'+
                   '<a href="'+(wspSigHref||'#')+'" target="_blank" style="text-decoration:none;font-weight:700;">'+
-                    '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/64px-WhatsApp.svg.png" alt="WhatsApp" width="16" height="16" border="0" style="vertical-align:middle;border:0;margin-right:6px;" />'+
                     '<span style="vertical-align:middle;color:#90d490;">'+fo+'</span>'+
                   '</a>'+
                 '</div>':'')+
@@ -1620,7 +1709,6 @@ function genMail(){
             (fo
               ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:7px;">'+
                   '<a href="'+(wspSigHref||'#')+'" target="_blank" style="text-decoration:none;">'+
-                    '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/64px-WhatsApp.svg.png" alt="WhatsApp" width="16" height="16" border="0" style="vertical-align:middle;border:0;margin-right:6px;" />'+
                     '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">'+fo+'</font></font>'+
                   '</a>'+
                 '</td></tr>'
@@ -1670,8 +1758,8 @@ function genMail(){
 function updWspLink(){
   var mf=document.getElementById('mf'),row=document.getElementById('wsp-link-row'),lnk=document.getElementById('wsp-link');
   if(!mf||!row||!lnk)return;
-  var tel=mf.value.trim().replace(/\s+/g,'').replace(/[^+\d]/g,'');
-  if(tel.length>=8){lnk.href='https://wa.me/'+tel.replace(/^\+/,'');row.style.display='block';}
+  var v=validarWspEjecutivo(mf.value);
+  if(v.ok&&v.normalizado){lnk.href='https://wa.me/'+v.normalizado.replace(/^\+/,'');row.style.display='block';}
   else row.style.display='none';
 }
 function copAsunto(){navigator.clipboard.writeText(document.getElementById('tpl-asunto').textContent).then(function(){toast('✔ Asunto copiado','ok','tpl-toast2');});}
@@ -2330,6 +2418,36 @@ function celularNormalizado(t){
   var d=(''+(t||'')).replace(/\D/g,'');
   if(d.slice(0,2)==='56'&&d.length===11)d=d.slice(2);
   return (d.length===9&&d.charAt(0)==='9')?'56'+d:'';
+}
+/* ════════════════════════════════════════════════════════════════
+   VALIDACIÓN DEL TELÉFONO WHATSAPP DEL EJECUTIVO/A
+   Acepta: +56997966724 · 56997966724 · +56 9 9796 6724
+   Rechaza (con advertencia, sin normalización silenciosa): 997966724
+   ════════════════════════════════════════════════════════════════ */
+function validarWspEjecutivo(raw){
+  var s=(''+(raw||'')).trim();
+  if(!s)return{ok:true,normalizado:''}; /* campo vacío: válido, sin WhatsApp configurado */
+  var d=s.replace(/\D/g,'');
+  /* Caso correcto: 56 + 9 dígitos empezando en 9 (con o sin "+") */
+  if(d.length===11&&d.slice(0,2)==='56'&&d.charAt(2)==='9'){
+    return{ok:true,normalizado:'+56'+d.slice(2)};
+  }
+  /* Caso ambiguo pero 100% recuperable: 9 dígitos chilenos sin código de país */
+  if(d.length===9&&d.charAt(0)==='9'){
+    return{ok:false,normalizado:'',sugerido:'+56'+d,
+      mensaje:'Falta el código de país. ¿Quisiste decir +56'+d+'?'};
+  }
+  return{ok:false,normalizado:'',
+    mensaje:'El número debe ingresarse con código de país de Chile. Ejemplo: +56997966724'};
+}
+function checkWspExecFormat(){
+  var inp=document.getElementById('mf'),warn=document.getElementById('wsp-fmt-warn');
+  if(!inp||!warn)return;
+  var v=validarWspEjecutivo(inp.value);
+  if(v.ok){warn.style.display='none';return false;}
+  warn.innerHTML='⚠️ '+v.mensaje;
+  warn.style.display='block';
+  return true;
 }
 function pegarCRM(){
   if(!navigator.clipboard||!navigator.clipboard.readText){
