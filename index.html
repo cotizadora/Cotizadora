@@ -1360,230 +1360,256 @@ function genMail(){
   // Alternativa sin imagen externa para separador
   var _sepR = '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;mso-line-height-rule:exactly;line-height:3px;font-size:3px;" height="3">&nbsp;</td></tr>';
 
-  // Items de beneficios sobre fondo blanco — color oscuro, sin problema
-  var _listaItemsOtl = it.map(function(item){
+  // ── Contenido comercial ampliado SOLO para Outlook (datos reales del producto; NO altera Gmail ni PITEMS) ──
+  var POTL = {
+    bundle4100:[
+      'Las acciones de cobranza multiplican por 6 la probabilidad de recuperar la deuda',
+      'Portal de autogestión para publicar y administrar tus documentos cuando lo necesites',
+      'Informe y Score Equifax para evaluar a tus clientes antes de dar crédito',
+      'Respaldo de DICOM, marca de Equifax reconocida a nivel nacional'
+    ],
+    bundleIlim:[
+      'Publicación sin tope para gestionar carteras de morosidad de cualquier tamaño',
+      'Las acciones de cobranza multiplican por 6 la probabilidad de recuperación',
+      'Informe y Score Equifax incluidos para evaluar antes de otorgar crédito',
+      'Respaldo de DICOM, marca de Equifax reconocida a nivel nacional'
+    ],
+    mc_solo:[
+      'Solución integral: revisa, monitorea, envía cartas y publica moras en un solo lugar',
+      'Las acciones de cobranza multiplican por 6 la probabilidad de recuperar',
+      'Publica documentos impagos de todo tipo, no solo facturas',
+      'Bloqueo comercial del deudor que incentiva la regularización de la deuda',
+      'Contratable por personas naturales (con y sin giro) y empresas'
+    ],
+    ri_plan:[
+      'Informe Platinum que consolida Registro Civil, DICOM, Inspección Laboral y Bienes Raíces',
+      'Resumen de protestos y morosidades impagas con indicador de riesgo crediticio',
+      'Información patrimonial, financiera y antecedentes laborales',
+      'Identificación de consultas en línea y datos de contactabilidad'
+    ],
+    pfm:[
+      'Análisis, monitoreo y control de personas naturales y jurídicas',
+      'Detecta variaciones de morosidad y potencia a tus mejores clientes',
+      'Carteras de grandes volúmenes, estáticas o dinámicas, con filtros avanzados',
+      'Switch para alternar entre información de personas y empresas'
+    ],
+    pc:[
+      'Evalúa el desempeño de tus proveedores con información verificada',
+      'Compliance y KYC integrados sobre tecnología cloud disponible 24/7'
+    ],
+    combo3:[
+      'Evalúa, recupera y monitorea desde una sola relación comercial',
+      'Cobertura integral de todo el ciclo crediticio de tu cartera'
+    ]
+  };
+
+  // Items de beneficios sobre fondo blanco — color oscuro (incluye contenido ampliado solo-Outlook)
+  var _itOtl = it.concat(POTL[tipo]||[]);
+  var _listaItemsOtl = _itOtl.map(function(item){
     return '<tr>'+
-      '<td valign="top" width="18" bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 6px 4px 0;font-family:Arial,sans-serif;">'+
-        '<font color="#9b1c2e" style="font-size:13px;font-weight:bold;">&#10003;</font>'+
+      '<td valign="top" width="20" bgcolor="#ffffff" style="background-color:#ffffff;padding:5px 8px 5px 0;font-family:Arial,sans-serif;">'+
+        '<font color="#9b1c2e" style="font-size:15px;font-weight:bold;">&#10003;</font>'+
       '</td>'+
-      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 0;font-family:Arial,sans-serif;">'+
-        '<font color="#222222" style="font-size:13px;line-height:1.5;">'+item+'</font>'+
+      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:5px 0;font-family:Arial,sans-serif;">'+
+        '<font color="#222222" style="font-size:15px;line-height:1.5;">'+item+'</font>'+
       '</td>'+
     '</tr>';
   }).join('');
 
   var _htmlOutlook =
-    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:600px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">'+
+    // ===== WRAPPER + LÍNEA IZQUIERDA CONTINUA (una sola celda roja de altura completa) =====
+    '<table role="presentation" width="640" cellpadding="0" cellspacing="0" border="0" align="center" style="width:640px;max-width:640px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">'+
+      '<tr>'+
+        '<td width="6" valign="top" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:6px;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td>'+
+        '<td valign="top" style="padding:0;">'+
+          '<table role="presentation" width="634" cellpadding="0" cellspacing="0" border="0" style="width:634px;max-width:634px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">'+
 
-    // ══════════════════════════════════════════
-    // HEADER — fondo rojo sólido
-    // ══════════════════════════════════════════
-    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;padding:22px 28px 18px 28px;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;"><tr>'+
-        // Columna logo
-        '<td valign="middle" align="left" bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
-          '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="260" height="auto" style="display:block;width:260px;height:auto;border:0;" />'+
-          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;"><tr>'+
-            '<td align="left" bgcolor="#9b1c2e" style="background-color:#9b1c2e;color:#ffffff;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;"><span style="color:#ffffff;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></span></font>'+
-            '</td>'+
-          '</tr></table>'+
-        '</td>'+
-        // Columna badge + fecha
-        '<td valign="top" align="right" bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
-          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr>'+
-            '<td bgcolor="#6e1220" align="center" style="background-color:#6e1220;color:#f0c040;padding:6px 14px;">'+
-              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:11px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
-            '</td>'+
-          '</tr></table>'+
-          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:8px;"><tr>'+
-            '<td bgcolor="#9b1c2e" style="background-color:#9b1c2e;color:#ffffff;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;"><span style="color:#ffffff;">'+hoy()+'</span></font>'+
-            '</td>'+
-          '</tr></table>'+
-        '</td>'+
-      '</tr></table>'+
-    '</td></tr>'+
+          // ===== HEADER =====
+          '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;padding:18px 28px 14px 28px;">'+
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;"><tr>'+
+              '<td valign="middle" align="left" bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
+                '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="260" height="auto" style="display:block;width:260px;height:auto;border:0;" />'+
+                '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;"><tr>'+
+                  '<td align="left" bgcolor="#9b1c2e" style="background-color:#9b1c2e;color:#ffffff;">'+
+                    '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;letter-spacing:1px;text-transform:uppercase;"><span style="color:#ffffff;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></span></font>'+
+                  '</td>'+
+                '</tr></table>'+
+              '</td>'+
+              '<td valign="top" align="right" bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
+                '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr>'+
+                  '<td bgcolor="#6e1220" align="center" style="background-color:#6e1220;color:#f0c040;padding:6px 14px;">'+
+                    '<font face="Arial,sans-serif" color="#f0c040" style="font-size:12px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
+                  '</td>'+
+                '</tr></table>'+
+                '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:8px;"><tr>'+
+                  '<td bgcolor="#9b1c2e" style="background-color:#9b1c2e;color:#ffffff;">'+
+                    '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;">'+hoy()+'</span></font>'+
+                  '</td>'+
+                '</tr></table>'+
+              '</td>'+
+            '</tr></table>'+
+          '</td></tr>'+
 
-    // ══════════════════════════════════════════
-    // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
-    // ══════════════════════════════════════════
-    '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:22px 28px 20px 33px;border-left:5px solid #9b1c2e;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-        (em
-          ? '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:5px;">'+
-              '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:10px;letter-spacing:1px;">PROPUESTA PARA</font></b></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;line-height:1.2;">'+em+'</font></b></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
-              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
-            '</td></tr>'
-          : '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;">Propuesta Comercial</font></b></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
-              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
-            '</td></tr>'
-        )+
-      '</table>'+
-    '</td></tr>'+
+          // ===== DESTINATARIO ===== (la línea izquierda la da el bar continuo; sin border-left)
+          '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:16px 28px 14px 28px;">'+
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+              (em
+                ? '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:5px;">'+
+                    '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:11px;letter-spacing:1px;">PROPUESTA PARA</font></b></font>'+
+                  '</td></tr>'+
+                  '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:7px;">'+
+                    '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;line-height:1.2;">'+em+'</font></b></font>'+
+                  '</td></tr>'+
+                  '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
+                    '<font face="Arial,sans-serif" color="#444444"><font style="font-size:15px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
+                  '</td></tr>'
+                : '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
+                    '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;">Propuesta Comercial</font></b></font>'+
+                  '</td></tr>'+
+                  '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
+                    '<font face="Arial,sans-serif" color="#444444"><font style="font-size:15px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
+                  '</td></tr>'
+              )+
+            '</table>'+
+          '</td></tr>'+
 
-    // ══════════════════════════════════════════
-    // PRODUCTO — fondo blanco
-    // ══════════════════════════════════════════
-    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-        '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;">'+
-          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:5px;">'+
-              '<font face="Arial,sans-serif" color="#777777" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:10px;">'+
-              '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;font-weight:bold;"><b>'+pi.n+'</b></font>'+
-            '</td></tr>'+
-          '</table>'+
-          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;font-size:2px;line-height:2px;height:2px;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
-          '</table>'+
-          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:12px;">'+_listaItemsOtl+'</table>'+
-        '</td>'+
-      '</tr></table>'+
-    '</td></tr>'+
+          // ===== PRODUCTO ===== (sin columna roja interna; la línea la da el bar)
+          '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:18px 28px;">'+
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+              '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:5px;">'+
+                '<font face="Arial,sans-serif" color="#777777" style="font-size:11px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font>'+
+              '</td></tr>'+
+              '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:10px;">'+
+                '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;font-weight:bold;"><b>'+pi.n+'</b></font>'+
+              '</td></tr>'+
+            '</table>'+
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+              '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;font-size:2px;line-height:2px;height:2px;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
+            '</table>'+
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:12px;">'+_listaItemsOtl+'</table>'+
+          '</td></tr>'+
 
-    // ══════════════════════════════════════════
-    // PRECIO — fondo rojo oscuro
-    // ══════════════════════════════════════════
-    '<tr><td bgcolor="#7a1425" style="background-color:#7a1425;padding:22px 28px;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;">'+
-        (hayDc
-          ? '<tr>'+
-              '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;">'+
-                '<font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;">Precio lista</font>'+
-              '</td>'+
-              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;">'+
-                '<font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</font>'+
-              '</td>'+
-            '</tr>'
-          : '')+
-        '<tr>'+
-          '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;text-transform:uppercase;"><span style="color:#ffffff;"><b>Precio ofrecido</b></span></font>'+
-          '</td>'+
-          '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:6px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:28px;font-weight:bold;line-height:1;"><span style="color:#ffffff;"><b>'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</b></span></font>'+
-          '</td>'+
-        '</tr>'+
-        (clp
-          ? '<tr>'+
-              '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Aprox. mensual con IVA</b></span></font>'+
-              '</td>'+
-              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:14px;font-weight:bold;"><span style="color:#ffffff;"><b>'+fmtN(clp)+'</b></span></font>'+
-              '</td>'+
-            '</tr>'
-          : '')+
-        (hayDc
-          ? '<tr>'+
-              '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#f5e5e5" style="font-size:11px;">Descuento aplicado</font>'+
-              '</td>'+
-              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#50e870" style="font-size:14px;font-weight:bold;"><b>&#8722;'+dc+'% sobre precio lista</b></font>'+
-              '</td>'+
-            '</tr>'
-          : '')+
-        '<tr><td colspan="2" bgcolor="#c07080" style="background-color:#c07080;font-size:1px;line-height:1px;height:1px;padding:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
-        '<tr>'+
-          '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Plazo / Modalidad</b></span></font>'+
-          '</td>'+
-          '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></span></font>'+
-          '</td>'+
-        '</tr>'+
-      '</table>'+
-    '</td></tr>'+
+          // ===== PRECIO ===== (fondo rojo oscuro — TODO el texto con font color a nivel de run)
+          '<tr><td bgcolor="#7a1425" style="background-color:#7a1425;padding:18px 28px;">'+
+            '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;">'+
+              (hayDc
+                ? '<tr>'+
+                    '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;">'+
+                      '<font face="Arial,sans-serif" color="#f5e0e0" style="font-size:12px;">Precio lista</font>'+
+                    '</td>'+
+                    '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;">'+
+                      '<font face="Arial,sans-serif" color="#f5e0e0" style="font-size:12px;text-decoration:line-through;">'+ufL+' UF + IVA</font>'+
+                    '</td>'+
+                  '</tr>'
+                : '')+
+              '<tr>'+
+                '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 4px;vertical-align:bottom;">'+
+                  '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;text-transform:uppercase;"><span style="color:#ffffff;"><b>Precio ofrecido</b></span></font>'+
+                '</td>'+
+                '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:6px 0 4px;vertical-align:bottom;">'+
+                  '<font face="Arial,sans-serif" color="#ffffff" style="font-size:28px;font-weight:bold;line-height:1;"><span style="color:#ffffff;"><b>'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</b></span></font>'+
+                '</td>'+
+              '</tr>'+
+              (clp
+                ? '<tr>'+
+                    '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
+                      '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;"><span style="color:#ffffff;"><b>Aprox. mensual con IVA</b></span></font>'+
+                    '</td>'+
+                    '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
+                      '<font face="Arial,sans-serif" color="#ffffff" style="font-size:16px;font-weight:bold;"><span style="color:#ffffff;"><b>'+fmtN(clp)+'</b></span></font>'+
+                    '</td>'+
+                  '</tr>'
+                : '')+
+              (hayDc
+                ? '<tr>'+
+                    '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;">'+
+                      '<font face="Arial,sans-serif" color="#f5e5e5" style="font-size:13px;">Descuento aplicado</font>'+
+                    '</td>'+
+                    '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;">'+
+                      '<font face="Arial,sans-serif" color="#50e870" style="font-size:16px;font-weight:bold;"><b>&#8722;'+dc+'% sobre precio lista</b></font>'+
+                    '</td>'+
+                  '</tr>'
+                : '')+
+              '<tr><td colspan="2" bgcolor="#c07080" style="background-color:#c07080;font-size:1px;line-height:1px;height:1px;padding:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
+              '<tr>'+
+                '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
+                  '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;"><span style="color:#ffffff;"><b>Plazo / Modalidad</b></span></font>'+
+                '</td>'+
+                '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
+                  '<font face="Arial,sans-serif" color="#ffffff" style="font-size:15px;font-weight:bold;"><span style="color:#ffffff;"><b>'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></span></font>'+
+                '</td>'+
+              '</tr>'+
+            '</table>'+
+          '</td></tr>'+
 
-    // ══════════════════════════════════════════
-    // DOCUMENTOS — fondo crema claro
-    // ══════════════════════════════════════════
-    '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:0;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td width="5" bgcolor="#c8960a" style="background-color:#c8960a;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-        '<td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:14px 28px;">'+
-          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding-bottom:4px;">'+
-              '<font face="Arial,sans-serif" color="#7a5808" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Documentos para contratar</font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;">'+
-              '<font face="Arial,sans-serif" color="#3a2c04" style="font-size:12px;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma</font>'+
-            '</td></tr>'+
-          '</table>'+
-        '</td>'+
-      '</tr></table>'+
-    '</td></tr>'+
+          // ===== DOCUMENTOS ===== (sin columna dorada interna)
+          '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:12px 28px;">'+
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+              '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding-bottom:4px;">'+
+                '<font face="Arial,sans-serif" color="#7a5808" style="font-size:11px;text-transform:uppercase;letter-spacing:1px;">Documentos para contratar</font>'+
+              '</td></tr>'+
+              '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;">'+
+                '<font face="Arial,sans-serif" color="#3a2c04" style="font-size:14px;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma</font>'+
+              '</td></tr>'+
+            '</table>'+
+          '</td></tr>'+
 
-    // ══════════════════════════════════════════
-    // FIRMA — fondo gris claro, texto oscuro (garantizado Outlook)
-    // ══════════════════════════════════════════
-    '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding:22px 28px;border-top:3px solid #9b1c2e;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td valign="top" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
-          '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-bottom:5px;">'+
-              '<font face="Arial,sans-serif" color="#666666"><font style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">'+exCargo+'</font></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:17px;">'+as2+'</font></b></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:4px;">'+
-              '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:12px;">'+exEmpresa+'</font></b></font>'+
-            '</td></tr>'+
-            (exFirma
-              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
-                  '<font face="Arial,sans-serif" color="#555555"><i><font style="font-size:11px;">'+exFirma+'</font></i></font>'+
-                '</td></tr>'
-              : '')+
-            (fo
-              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:7px;">'+
-                  '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">&#128241; '+fo+'</font></font>'+
-                '</td></tr>'
-              : '')+
-            (ml
-              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
-                  '<font face="Arial,sans-serif" color="#1a4a7a"><font style="font-size:12px;">&#9993; '+ml+'</font></font>'+
-                '</td></tr>'
-              : '')+
-          '</table>'+
-        '</td>'+
-        '<td valign="bottom" align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
-          '<table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;">'+
-            '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
-              '<font face="Arial,sans-serif" color="#555555"><font style="font-size:10px;">'+hoy()+'</font></font>'+
-            '</td></tr>'+
-            '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
-              '<font face="Arial,sans-serif" color="#777777"><font style="font-size:10px;">Valores en UF + IVA</font></font>'+
-            '</td></tr>'+
+          // ===== FIRMA =====
+          '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding:18px 28px;border-top:3px solid #9b1c2e;">'+
+            '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+              '<td valign="top" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
+                '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+                  '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-bottom:5px;">'+
+                    '<font face="Arial,sans-serif" color="#666666"><font style="font-size:11px;text-transform:uppercase;letter-spacing:1px;">'+exCargo+'</font></font>'+
+                  '</td></tr>'+
+                  '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
+                    '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:18px;">'+as2+'</font></b></font>'+
+                  '</td></tr>'+
+                  '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:4px;">'+
+                    '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:14px;">'+exEmpresa+'</font></b></font>'+
+                  '</td></tr>'+
+                  (exFirma
+                    ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
+                        '<font face="Arial,sans-serif" color="#555555"><i><font style="font-size:13px;">'+exFirma+'</font></i></font>'+
+                      '</td></tr>'
+                    : '')+
+                  (fo
+                    ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:7px;">'+
+                        '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:14px;">&#128241; '+fo+'</font></font>'+
+                      '</td></tr>'
+                    : '')+
+                  (ml
+                    ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
+                        '<font face="Arial,sans-serif" color="#1a4a7a"><font style="font-size:14px;">&#9993; '+ml+'</font></font>'+
+                      '</td></tr>'
+                    : '')+
+                '</table>'+
+              '</td>'+
+              '<td valign="bottom" align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
+                '<table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;">'+
+                  '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
+                    '<font face="Arial,sans-serif" color="#555555"><font style="font-size:11px;">'+hoy()+'</font></font>'+
+                  '</td></tr>'+
+                  '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
+                    '<font face="Arial,sans-serif" color="#777777"><font style="font-size:11px;">Valores en UF + IVA</font></font>'+
+                  '</td></tr>'+
+                '</table>'+
+              '</td>'+
+            '</tr></table>'+
+          '</td></tr>'+
+
+          // ===== PIE =====
+          '<tr><td bgcolor="#cccccc" style="background-color:#cccccc;padding:8px 28px;text-align:center;">'+
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+              '<td align="center" bgcolor="#cccccc" style="background-color:#cccccc;padding:0;">'+
+                '<font face="Arial,sans-serif" color="#444444"><font style="font-size:11px;text-transform:uppercase;letter-spacing:1px;">Equifax Chile &middot; Informaci&oacute;n confidencial &middot; Solo para el destinatario autorizado</font></font>'+
+              '</td>'+
+            '</tr></table>'+
+          '</td></tr>'+
+
           '</table>'+
         '</td>'+
-      '</tr></table>'+
-    '</td></tr>'+
-
-    // ══════════════════════════════════════════
-    // PIE — fondo gris medio, texto oscuro legible
-    // ══════════════════════════════════════════
-    '<tr><td bgcolor="#cccccc" style="background-color:#cccccc;padding:8px 28px;text-align:center;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td align="center" bgcolor="#cccccc" style="background-color:#cccccc;padding:0;">'+
-          '<font face="Arial,sans-serif" color="#444444"><font style="font-size:9px;text-transform:uppercase;letter-spacing:1px;">Equifax Chile &middot; Informaci&oacute;n confidencial &middot; Solo para el destinatario autorizado</font></font>'+
-        '</td>'+
-      '</tr></table>'+
-    '</td></tr>'+
-
+      '</tr>'+
     '</table>';
 
   sv('tpl-rich-outlook', _htmlOutlook);
