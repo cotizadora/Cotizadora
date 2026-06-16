@@ -2673,6 +2673,49 @@ if(_ufg)_ufg.addEventListener('input',function(){if(CURRENT.override!==null)ligh
 
 /* Conversor listo aunque no se haya abierto */
 cUF();cCLP();cCom();
+
+/* ════════════════════════════════════════════════════════════════
+   FETCH UF EN TIEMPO REAL — mindicador.cl (primaria) / CMF (fallback)
+   Se ejecuta al cargar y se refresca cada 30 minutos.
+   El usuario puede editar el campo manualmente en cualquier momento.
+   ════════════════════════════════════════════════════════════════ */
+(function fetchUFReal(){
+  var inp=$('uf-global');
+  var chip=$('auto-gen-status');
+  function aplicarUF(valor,fuente){
+    if(!inp||isNaN(valor)||valor<30000||valor>60000)return; /* rango razonable para UF */
+    inp.value=Math.round(valor);
+    /* disparar recalculo exactamente igual que si el usuario editara el campo */
+    inp.dispatchEvent(new Event('input'));
+    cUF();cCLP();cCom();
+    if(chip){chip.textContent='✔ UF '+Math.round(valor).toLocaleString('es-CL')+' · '+fuente;chip.style.color='#2ecc71';}
+  }
+  function intentarMindicador(){
+    fetch('https://mindicador.cl/api/uf/today',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():Promise.reject('status '+r.status);})
+      .then(function(d){
+        var v=d&&d.serie&&d.serie[0]&&d.serie[0].valor;
+        if(v){aplicarUF(v,'mindicador');}
+        else{intentarCMF();}
+      })
+      .catch(function(){intentarCMF();});
+  }
+  function intentarCMF(){
+    fetch('https://api.cmfchile.cl/api-sbifv3/recursos/v1/uf?formato=json',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():Promise.reject('status '+r.status);})
+      .then(function(d){
+        var v=d&&d.UFs&&d.UFs[0]&&parseFloat((d.UFs[0].Valor||'').replace('.','').replace(',','.'));
+        if(v){aplicarUF(v,'CMF');}
+        else if(chip){chip.textContent='⚠ UF manual';chip.style.color='#f0c040';}
+      })
+      .catch(function(){
+        if(chip){chip.textContent='⚠ UF manual (sin conexión)';chip.style.color='#f0c040';}
+      });
+  }
+  intentarMindicador();
+  /* refresco cada 30 minutos — la UF cambia una vez al día pero puede haber cambio de fecha */
+  setInterval(intentarMindicador,30*60*1000);
+})();
 </script>
 </body>
 </html>
