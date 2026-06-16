@@ -1171,6 +1171,11 @@ function genMail(){
   var ufV=parseFloat(gv('mu'))||null,ufL=parseFloat(gv('mula'))||ufV;
   var co=parseInt(gv('mc2'))||10,pl=gv('mp')||'12';
   var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'[Producto]'};
+  /* ── Enlace de WhatsApp para la firma (cliente → ejecutivo) con mensaje contextual ── */
+  var _execNm=(as2&&as2!=='[Asesor]')?as2:'';
+  var _prodNm=(pi&&pi.n&&pi.n!=='[Producto]')?pi.n:'';
+  var _sigMsg='Hola'+(_execNm?' '+_execNm:'')+', recib\u00ed su propuesta comercial de Equifax'+(_prodNm?' de '+_prodNm:'')+' y quisiera m\u00e1s informaci\u00f3n.';
+  var wspSigHref=telNum.length>=8?'https://wa.me/'+telNum.replace(/^\+/,'')+'?text='+encodeURIComponent(_sigMsg):'';
   var it=PITEMS[tipo]||[];
   var itMail=(typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:it; /* enriquecido solo Gmail/Outlook */
   var hayDc=ufL&&ufV&&ufV<ufL;
@@ -1374,7 +1379,12 @@ function genMail(){
             '<div style="font-size:17px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+as2+'</div>'+
             '<div style="margin-top:3px;font-size:11px;color:#c8960a;font-family:Arial,sans-serif;">'+exEmpresa+'</div>'+
             (exFirma?'<div style="margin-top:3px;font-size:11px;font-style:italic;color:#b0b0b0;font-family:Arial,sans-serif;">'+exFirma+'</div>':'')+
-            (fo?'<div style="margin-top:6px;font-size:12px;color:#90d490;font-family:Arial,sans-serif;">&#128241; '+fo+'</div>':'')+
+            (fo?'<div style="margin-top:6px;font-size:12px;font-family:Arial,sans-serif;">'+
+                  '<a href="'+(wspSigHref||'#')+'" target="_blank" style="text-decoration:none;font-weight:700;">'+
+                    '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/64px-WhatsApp.svg.png" alt="WhatsApp" width="16" height="16" border="0" style="vertical-align:middle;border:0;margin-right:6px;" />'+
+                    '<span style="vertical-align:middle;color:#90d490;">'+fo+'</span>'+
+                  '</a>'+
+                '</div>':'')+
             (ml?'<div style="margin-top:2px;font-size:12px;color:#90b8d4;font-family:Arial,sans-serif;">&#9993; '+ml+'</div>':'')+
           '</td>'+
           '<td valign="bottom" align="right">'+
@@ -1609,7 +1619,10 @@ function genMail(){
               : '')+
             (fo
               ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:7px;">'+
-                  '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">&#128241; '+fo+'</font></font>'+
+                  '<a href="'+(wspSigHref||'#')+'" target="_blank" style="text-decoration:none;">'+
+                    '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/64px-WhatsApp.svg.png" alt="WhatsApp" width="16" height="16" border="0" style="vertical-align:middle;border:0;margin-right:6px;" />'+
+                    '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">'+fo+'</font></font>'+
+                  '</a>'+
                 '</td></tr>'
               : '')+
             (ml
