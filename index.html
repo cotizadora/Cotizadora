@@ -1112,6 +1112,16 @@ var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.0
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
 var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
 var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
+/* ── BULLETS ENRIQUECIDOS — SOLO Gmail/Outlook (WhatsApp usa PITEMS) ── */
+var PITEMS_MAIL={
+  bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda','Acciones de cobranza 6× más eficaces','Bloqueo comercial que promueve el pago','Score de riesgo Equifax para evaluar','Portal de autogestión disponible 24/7','Evalúa antes de dar crédito y cobra después'],
+  bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda','Publica facturas, cheques y documentos impagos','Acciones de cobranza 6× más eficaces','Bloqueo comercial del deudor moroso','Score de riesgo Equifax incluido','Gestión de abonos y pagos parciales'],
+  mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda','Gestión integral de cobranza en una plataforma','Agrupa deudores por monto y fecha','Carga masiva o individual de documentos','Bloqueo comercial que promueve el pago','Publica facturas, cheques y otros impagos','Contratable por personas y empresas'],
+  ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral','Análisis de riesgo, crédito y contactabilidad','Identificación de consultas en línea','Antecedentes FONASA y tributarios','Reduce el riesgo de incobrabilidad','Mejor evaluación de nuevos prospectos'],
+  pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual','Revisión periódica de toda la cartera','Potencia buenos clientes, limita los riesgosos','Detección temprana de deterioro financiero','Seguimiento de personas y empresas','Reevaluación al renovar líneas de crédito'],
+  pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7','Validación de antecedentes de cada proveedor','Reduce el riesgo de contraparte','Centraliza la gestión de proveedores','Respaldo de la marca Equifax'],
+  combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio','Score de riesgo Equifax para cada decisión','Acciones de cobranza 6× más eficaces','Alertas tempranas de deterioro financiero','Potencia buenos clientes y limita riesgos','Una plataforma para evaluar, cobrar y monitorear']
+};
 function loadExecutivoFields(){updWspLink();}
 function loadExecutivo(){
   refreshUserBtn();
@@ -1147,6 +1157,7 @@ function genMail(){
   var co=parseInt(gv('mc2'))||10,pl=gv('mp')||'12';
   var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'[Producto]'};
   var it=PITEMS[tipo]||[];
+  var itMail=(typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:it; /* enriquecido solo Gmail/Outlook */
   var hayDc=ufL&&ufV&&ufV<ufL;
   var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV?ufc(ufV):null;
@@ -1185,13 +1196,13 @@ function genMail(){
   :'');
 
   // Producto + beneficios — 2 columnas con iconos
-  var mid=Math.ceil(it.length/2);
-  var col1=it.slice(0,mid),col2=it.slice(mid);
+  var mid=Math.ceil(itMail.length/2);
+  var col1=itMail.slice(0,mid),col2=itMail.slice(mid);
   sv('cc-prod-block',
     '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">Producto cotizado</div>'+
     '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+'</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;">'+
-    it.map(function(i){return'<div style="font-size:.8rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;font-size:.85rem;flex-shrink:0;margin-top:1px;">✔</span><span>'+i+'</span></div>';}).join('')+
+    itMail.map(function(i){return'<div style="font-size:.8rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;font-size:.85rem;flex-shrink:0;margin-top:1px;">✔</span><span>'+i+'</span></div>';}).join('')+
     '</div>'
   );
 
@@ -1249,7 +1260,7 @@ function genMail(){
   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
   var saludoEmp=(!skip&&em)?'<p style="margin:0 0 2px;font-size:11px;color:#888;">'+em+'</p>':'';
   // ── EMAIL OUTLOOK-SAFE: bgcolor ATRIBUTO + style simultáneo ──
-  var _listaItems = it.map(function(item){
+  var _listaItems = itMail.map(function(item){
     return '<tr>'+
       '<td valign="top" width="20" style="font-size:13px;color:#9b1c2e;font-weight:900;padding:5px 6px 5px 0;font-family:Arial,sans-serif;">&#10003;</td>'+
       '<td style="font-size:13px;color:#333333;line-height:1.5;padding:5px 0;font-family:Arial,sans-serif;">'+item+'</td>'+
@@ -1392,7 +1403,7 @@ function genMail(){
   var _sepR = '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;mso-line-height-rule:exactly;line-height:3px;font-size:3px;" height="3">&nbsp;</td></tr>';
 
   // Items de beneficios sobre fondo blanco — color oscuro, sin problema
-  var _listaItemsOtl = it.map(function(item){
+  var _listaItemsOtl = itMail.map(function(item){
     return '<tr>'+
       '<td valign="top" width="18" bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 6px 4px 0;font-family:Arial,sans-serif;">'+
         '<font color="#9b1c2e" style="font-size:13px;font-weight:bold;">&#10003;</font>'+
