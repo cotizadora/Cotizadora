@@ -432,6 +432,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
             <button class="pv-copy-btn sm" onclick="copHTMLOutlook();playClick();" title="Copiar texto para Outlook">
               <span class="ico">📋</span><span>Copiar Texto</span>
             </button>
+            <button class="pv-copy-btn sm" onclick="diagClipboard();" title="Diagnóstico: ver qué hay en el clipboard" style="border-color:#f0c040;color:#f0c040;">
+              <span class="ico">🔍</span><span>Diagnóstico</span>
+            </button>
           </div>
         </div>
         <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
@@ -564,7 +567,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 var STATE={logoImg:null,execImg:null};
 var CURRENT={key:null,override:null,overrideLista:null};   // override = precio venta ajustado con el slider
 var LAST=null;                            // última config calculada
-var _OUTLOOK_HTML_STR='';                 // HTML Outlook-safe guardado como string para clipboard directo
 
 function $(id){return document.getElementById(id);}
 function gv(id){var e=$(id);return e?(''+e.value).trim():'';}
@@ -873,12 +875,7 @@ function _copyRich(el,msg){
 /* ── Clic en la modalidad = cambiar vista + copiar automáticamente ── */
 function autoCopy(which){
   if(which==='gmail'){var g=document.getElementById('tpl-rich-gmail');if(g)_copyRich(g,'Propuesta Gmail copiada');}
-  else if(which==='outlook'){
-    if(_OUTLOOK_HTML_STR&&window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
-      var bH2=new Blob([_OUTLOOK_HTML_STR],{type:'text/html'}),bT2=new Blob(['Propuesta Equifax'],{type:'text/plain'});
-      navigator.clipboard.write([new ClipboardItem({'text/html':bH2,'text/plain':bT2})]).then(function(){cpToast('Propuesta Outlook copiada');}).catch(function(){var o=document.getElementById('tpl-rich-outlook');if(o)_copyRich(o,'Propuesta Outlook copiada');});
-    }else{var o=document.getElementById('tpl-rich-outlook');if(o)_copyRich(o,'Propuesta Outlook copiada');}
-  }
+  else if(which==='outlook'){var o=document.getElementById('tpl-rich-outlook');if(o)_copyRich(o,'Propuesta Outlook copiada');}
   else if(which==='wsp'){var b=document.getElementById('tpl-body');if(b)navigator.clipboard.writeText(b.value).then(function(){cpToast('Propuesta WhatsApp copiada');}).catch(function(){cpToast('Copia manualmente');});}
   else if(which==='img'){
     cpToast('Generando imagen…');
@@ -1589,7 +1586,6 @@ function genMail(){
 
     '</table>';
 
-  _OUTLOOK_HTML_STR = _htmlOutlook;   // guardado como string puro para clipboard directo
   sv('tpl-rich-outlook', _htmlOutlook);
 
   document.getElementById('tpl-out').style.display='block';
@@ -1617,19 +1613,52 @@ function copHTMLGmail(){
   _copHTMLEl(el,'📋 Plantilla Gmail copiada — pega directamente en el cuerpo del correo');
 }
 function copHTMLOutlook(){
-  if(!_OUTLOOK_HTML_STR){toast('⚠ Genera primero la propuesta','err','tpl-toast2');return;}
-  var msg='📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje';
-  try{
-    if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
-      var bH=new Blob([_OUTLOOK_HTML_STR],{type:'text/html'});
-      var bT=new Blob(['Propuesta Equifax'],{type:'text/plain'});
-      navigator.clipboard.write([new ClipboardItem({'text/html':bH,'text/plain':bT})])
-        .then(function(){toast(msg,'ok','tpl-toast2');})
-        .catch(function(){toast('⚠ Permite el portapapeles e intenta de nuevo','err','tpl-toast2');});
-    }else{
-      toast('⚠ Navegador sin soporte de clipboard HTML — usa Chrome','err','tpl-toast2');
-    }
-  }catch(e){toast('⚠ Error al copiar: '+e.message,'err','tpl-toast2');}
+  var el=document.getElementById('tpl-rich-outlook');if(!el)return;
+  _copHTMLEl(el,'📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje');
+}
+function diagClipboard(){
+  /* 1. Intenta copiar el HTML de Outlook */
+  var el=document.getElementById('tpl-rich-outlook');
+  if(!el){alert('ERROR: elemento tpl-rich-outlook no encontrado');return;}
+  var htmlStr=el.innerHTML;
+  /* 2. Verifica API disponible */
+  if(!window.ClipboardItem||!navigator.clipboard||!navigator.clipboard.write){
+    alert('⚠ DIAGNÓSTICO:\n\nnavigator.clipboard.write NO disponible en este navegador/contexto.\n\nEsto significa que el HTML correcto NUNCA llega al portapapeles.\nOutlook recibe texto plano, no HTML.\n\nSOLUCIÓN: Abre el archivo desde un servidor web (no desde file://) o usa Chrome con el archivo en localhost.');
+    return;
+  }
+  /* 3. Escribe en clipboard y luego lee de vuelta */
+  var bH=new Blob([htmlStr],{type:'text/html'}),bT=new Blob(['test'],{type:'text/plain'});
+  navigator.clipboard.write([new ClipboardItem({'text/html':bH,'text/plain':bT})])
+    .then(function(){
+      /* Leer de vuelta para confirmar */
+      return navigator.clipboard.read();
+    })
+    .then(function(items){
+      var found=false;
+      for(var i=0;i<items.length;i++){
+        var item=items[i];
+        if(item.types.indexOf('text/html')>-1){
+          item.getType('text/html').then(function(blob){
+            blob.text().then(function(txt){
+              var preview=txt.substring(0,300);
+              var hasBgcolor=txt.indexOf('bgcolor')>-1;
+              var hasFontColor=txt.indexOf('font face')>-1||txt.indexOf('<font')>-1;
+              var hasWhite=txt.indexOf('#ffffff')>-1||txt.indexOf('color="#ffffff"')>-1;
+              alert('✅ HTML SÍ llega al clipboard ('+txt.length+' chars)\n\n'+
+                '¿Tiene bgcolor? '+(hasBgcolor?'SÍ':'NO — PROBLEMA')+'\n'+
+                '¿Tiene <font color>? '+(hasFontColor?'SÍ':'NO — PROBLEMA')+'\n'+
+                '¿Tiene #ffffff? '+(hasWhite?'SÍ':'NO — PROBLEMA')+'\n\n'+
+                'PRIMEROS 300 CHARS:\n'+preview);
+            });
+          });
+          found=true;break;
+        }
+      }
+      if(!found)alert('⚠ El clipboard NO contiene text/html — solo texto plano.\nOutlook no puede leer el HTML.');
+    })
+    .catch(function(e){
+      alert('⚠ DIAGNÓSTICO:\n\nError al escribir/leer clipboard: '+e.message+'\n\nPosible causa: archivo abierto como file:// en lugar de http://\nO permisos de clipboard denegados en el navegador.');
+    });
 }
 function _copHTMLEl(el,msg){
   try{
