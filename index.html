@@ -1412,11 +1412,10 @@ function genMail(){
   st('tpl-asunto-outlook','Propuesta Comercial Equifax — '+pi.n+aEmp);
 
   // ── TEXTO WA (formato markdown WhatsApp) ──
-  var encab2 = "";
-  if(!skip && em) encab2 = "*" + em + "*\n\n";
-  var txt = encab2 +
-    sal + (skip ? ".\n\n" : ",\n\n") +
-    "Junto con saludar, le presento la siguiente propuesta:\n\n" +
+  var _waEncab = (!skip && em)
+    ? "Se\u00f1ores *" + em + "*:\nAdjunto la propuesta comercial solicitada para el servicio *" + pi.n + "*.\n\n"
+    : "Estimados:\nAdjunto la propuesta comercial solicitada para el servicio *" + pi.n + "*.\n\n";
+  var txt = _waEncab +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*" + pi.n + "*\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n" +
