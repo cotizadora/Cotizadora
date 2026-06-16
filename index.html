@@ -40,6 +40,24 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .user-btn:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
 .user-btn img{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--g3);border:2px solid rgba(255,255,255,.35);flex-shrink:0;}
 .user-btn span{color:#fff;font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* botón oficial — descarga de la extensión Discador ⇄ CRM */
+.ext-btn{display:flex;align-items:center;gap:8px;text-decoration:none;position:relative;
+  background:linear-gradient(135deg,rgba(52,152,219,.24),rgba(0,0,0,.32));
+  border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:8px;
+  padding:7px 13px;font-family:inherit;font-size:.82rem;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:.15s;}
+.ext-btn:hover{border-color:var(--y);transform:translateY(-1px);
+  background:linear-gradient(135deg,rgba(52,152,219,.36),rgba(0,0,0,.42));
+  box-shadow:0 0 14px rgba(52,152,219,.4);}
+.ext-btn svg{width:19px;height:19px;fill:#7ec8f0;flex-shrink:0;transition:.15s;}
+.ext-btn:hover svg{fill:var(--y);}
+.ext-btn .ext-txt{display:flex;flex-direction:column;line-height:1.05;align-items:flex-start;}
+.ext-btn .ext-lb{font-size:.8rem;font-weight:800;}
+.ext-btn .ext-sb{font-size:.54rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);}
+.ext-btn .ext-dl{font-size:.95rem;color:var(--y);font-weight:900;line-height:1;margin-left:1px;}
+.ext-btn:hover .ext-dl{animation:extb .9s ease-in-out infinite;}
+@keyframes extb{0%,100%{transform:translateY(0);}50%{transform:translateY(2px);}}
+@media(max-width:560px){.ext-btn .ext-txt{display:none;} .ext-btn{padding:8px 11px;gap:5px;}}
 
 /* stepper inline en resumen */
 .stepper-inline button{background:var(--g3);border:1px solid var(--g4);color:#fff;width:44px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:800;transition:.12s;}
@@ -292,6 +310,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <input type="number" id="uf-global" value="40644" step="1">
     </div>
     <button class="htool-btn" onclick="openUF()">⇄ UF</button>
+    <a class="ext-btn" href="https://drive.google.com/uc?export=download&id=1p_zfxeoZMO2Q9SEVCtmxZaeQ1YFR9XWl" target="_blank" rel="noopener" title="Descargar extensión CRM Extractor Pro — conecta el discador con el CRM (Chrome / Edge)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V19c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V21H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/></svg>
+      <span class="ext-txt"><span class="ext-lb">Extensión CRM</span><span class="ext-sb">Discador ⇄ CRM</span></span>
+      <span class="ext-dl">↓</span>
+    </a>
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
       <span id="user-name">Ejecutivo/a</span>
