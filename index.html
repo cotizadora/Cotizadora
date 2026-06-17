@@ -328,7 +328,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   border:none;outline:1px solid #111b21;
   max-height:calc(100vh - 230px);display:flex;flex-direction:column;
   font-family:'Segoe UI',system-ui,Helvetica,Arial,sans-serif;
-  background:#0b141a;}
+  background:#0b141a;
+  /* ancho moderadamente ampliado para mejorar lectura, sin ocupar todo
+     el panel derecho — y alineado a la izquierda (cerca del resto de
+     la interfaz) en vez de quedar centrado/desplazado a la derecha */
+  width:100%;max-width:560px;margin:0;}
 /* ── Header: fondo #202c33, altura 59px como WhatsApp Web ── */
 .wa-shell-head{
   display:flex;align-items:center;
@@ -629,7 +633,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
         </div>
         <div class="pv-frame"><div id="tpl-rich-gmail"></div></div>
         <div id="tpl-rich" style="display:none;"></div>
-        <div class="outlook-note">✉️ <b>Nota Gmail:</b> "Abrir en Gmail" abre la ventana de redacción con destinatario, asunto y cuerpo en <b>texto</b> ya cargados. Para conservar el diseño con formato, usa "Copiar Texto" y pega en el correo.</div>
+        <div class="outlook-note">✉️ <b>Nota Gmail:</b> "Abrir en Gmail" abre la ventana de redacción con destinatario, asunto y cuerpo en <b>texto</b> (limitación propia de Gmail: no admite HTML enriquecido vía URL) y, en simultáneo, copia automáticamente la plantilla con diseño al portapapeles. Solo presiona <b>Ctrl+V</b> dentro del cuerpo del correo para reemplazarlo por la versión con formato.</div>
       </div>
 
       <!-- OUTLOOK -->
@@ -781,9 +785,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
         </div>
         <div class="fld"><label>Correo</label><input type="email" id="ml" placeholder="ej@equifax.cl"></div>
         <div class="cfg-2">
-          <div class="fld"><label>Teléfono</label><input type="text" id="exec-tel" placeholder="+56 9 9796 6724"></div>
-          <div class="fld"><label>WhatsApp</label><input type="text" id="mf" placeholder="+56 9 9796 6724" oninput="checkWspExecFormat();updWspLink();"></div>
+          <div class="fld"><label>Teléfono</label><input type="text" id="exec-tel" placeholder="+56927690949"></div>
+          <div class="fld"><label>WhatsApp</label><input type="text" id="mf" placeholder="+56927690949" oninput="checkWspExecFormat();updWspLink();"></div>
         </div>
+        <div class="wsp-fmt-help" style="font-size:.72rem;color:var(--wb);margin-top:-4px;">Formato obligatorio: <b>+569XXXXXXXX</b> (sin espacios ni guiones)</div>
         <div id="wsp-fmt-warn" class="wsp-fmt-warn" style="display:none;">⚠️ El número debe ingresarse con código de país de Chile. Ejemplo: <b>+56997966724</b></div>
         <div id="wsp-link-row" class="wsp-link-row">🟢 <a id="wsp-link" href="#" target="_blank">Abrir WhatsApp directo →</a></div>
         <div class="fld"><label>Firma comercial</label><input type="text" id="exec-firma" placeholder="Ej: Tu aliado en gestión de riesgo"></div>
@@ -818,13 +823,13 @@ function ufd(x){return (Math.round(x*10000)/10000).toString();}
 
 /* ── Catálogo: EXACTAMENTE los productos del index (fuente de verdad) ── */
 var PRODUCTS=[
-  {key:'bundle',ic:'📦',lb:'Bundle MC + RI',su:'4100 / Ilimitado'},
+  {key:'bundle',ic:'📦',lb:'Mora Control + Informes Comerciales',su:'4100 / Ilimitado'},
   {key:'mc',    ic:'🚨',lb:'Mora Control',  su:'Gestión de cartera'},
-  {key:'ri',    ic:'📊',lb:'RI Mensual',    su:'12 meses'},
-  {key:'bolsa', ic:'🎒',lb:'RI Bolsa',      su:'Pago único 12m'},
+  {key:'ri',    ic:'📊',lb:'Informes Comerciales Mensual',    su:'12 meses'},
+  {key:'bolsa', ic:'🎒',lb:'Informes Comerciales Bolsa',      su:'Pago único 12m'},
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
-  {key:'combo', ic:'🧩',lb:'Combo Integral',  su:'RI + MC + PFM'}
+  {key:'combo', ic:'🧩',lb:'Combo Integral',  su:'Informes Comerciales + Mora Control + Portfolio Monitor'}
 ];
 
 function buildProdbar(){
@@ -1917,13 +1922,22 @@ function abrirGmail(){
     var asunto=((document.getElementById('tpl-asunto')||{}).textContent||'Propuesta Comercial Equifax').trim();
     var dest=((document.getElementById('cli-email')||{}).value||'').trim();
     var bodyRaw=(document.getElementById('tpl-body')||{}).value||'';
-    var body=bodyRaw.replace(/[*_~]/g,''); // texto limpio (Gmail compose no admite HTML)
+    var body=bodyRaw.replace(/[*_~]/g,''); // texto limpio (Gmail compose no admite HTML vía URL — limitación propia de Gmail)
     var url='https://mail.google.com/mail/?view=cm&fs=1&tf=1'+
             '&to='+encodeURIComponent(dest)+
             '&su='+encodeURIComponent(asunto)+
             '&body='+encodeURIComponent(body);
     window.open(url,'_blank');
-    toast('📧 Abriendo Gmail con destinatario, asunto y cuerpo…','ok','tpl-toast2');
+    /* Gmail no admite precargar HTML enriquecido por URL (solo texto plano).
+       Por eso, en simultáneo, copiamos al portapapeles la versión HTML rica
+       ya generada para Gmail (misma fuente que "Copiar Texto"), reutilizando
+       _copHTMLEl — sin duplicar lógica de copiado. */
+    var elRich=document.getElementById('tpl-rich-gmail');
+    if(elRich){
+      _copHTMLEl(elRich,'📧 Gmail abierto · Plantilla copiada al portapapeles — use Ctrl+V dentro del cuerpo del correo');
+    }else{
+      toast('📧 Abriendo Gmail con destinatario, asunto y cuerpo…','ok','tpl-toast2');
+    }
   }catch(e){ alert('⚠ No se pudo abrir Gmail: '+e.message); }
 }
 function descargarEML(){
@@ -2660,19 +2674,11 @@ function abrirWspWeb(){
   var cel=celularNormalizado(gv('cli-tel'));
   var skip=$('skip-dest')&&$('skip-dest').checked;
   if(!cel||skip)return;
-  var _ex=getExecData();
-  var nombre=_ex.name||'';
-  var cargo=_ex.cargo||'Ejecutivo Comercial';
-  var empEx=_ex.company||'Equifax Chile';
-  var atento=/ejecutiva/i.test(cargo)?'atenta':'atento';
-  var pi=PINFO[gv('mt')]||{n:''};
-  var dest=gv('me');
-  var msg='Estimado/a.\n\n'+
-    'Le saluda '+(nombre?nombre:'su '+cargo)+', '+cargo+' de '+empEx+'.\n\n'+
-    'Tal como conversamos telefónicamente hace unos momentos, le comparto por este medio el detalle de la propuesta comercial correspondiente a '+
-    (pi.n||'nuestros servicios')+(dest?', preparada para '+dest:'')+'.\n\n'+
-    'Quedo '+atento+' a cualquier consulta.\n\n'+
-    'Saludos cordiales.';
+  /* Fuente única de verdad: el mismo texto que muestra la vista previa
+     y que usa "Copiar texto para WhatsApp" (copPlano). Sin generadores
+     paralelos: lo que el vendedor ve es exactamente lo que recibe el cliente. */
+  var msg=(document.getElementById('tpl-body')||{}).value||'';
+  if(!msg)return;
   window.open('https://wa.me/'+cel+'?text='+encodeURIComponent(msg),'_blank');
 }
 
