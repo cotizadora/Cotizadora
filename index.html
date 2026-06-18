@@ -445,6 +445,17 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 #paste-notice .pn-sub{font-size:1.15rem;font-weight:700;color:#fff;}
 #paste-notice .pn-sub b{color:#f0c040;}
 @keyframes pnIn{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);}}
+/* ── Botón de envío directo — flecha verde grande a la derecha ── */
+.btn-envio-directo{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--g2);border:1.5px solid rgba(37,211,102,.55);color:#25D366;
+  border-radius:9px;padding:9px 14px;cursor:pointer;font-family:inherit;font-size:.82rem;
+  font-weight:800;white-space:nowrap;transition:all .15s ease;flex-shrink:0;}
+.btn-envio-directo:hover{background:rgba(37,211,102,.12);border-color:#25D366;
+  box-shadow:0 0 12px rgba(37,211,102,.45);transform:translateY(-1px);}
+.btn-envio-directo .edir-txt{flex:1;text-align:left;}
+.btn-envio-directo .edir-arrow{font-size:1.35rem;line-height:1;color:#25D366;flex-shrink:0;margin-left:6px;}
+/* Botón copiar asunto — ocupa el resto del ancho disponible */
+.btn-copiar-asunto{flex:1;min-width:0;}
 
 /* ── MODAL (Ampliar / UF / Guardadas) ─────────────── */
 .modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.82);
@@ -641,15 +652,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <div class="pv-pane" id="pane-gmail">
         <div class="act-strip sticky-bar">
           <div class="as-subject"><span class="as-lb">ASUNTO</span><span class="sv" id="tpl-asunto" contenteditable="true" spellcheck="false" title="Editable — puedes ajustarlo antes de copiar"></span></div>
-          <div class="as-actions">
-            <button class="pv-copy-btn sm" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
-              <span class="ico">📋</span><span>Asunto</span>
+          <div class="as-actions" style="flex:1;display:flex;gap:7px;align-items:stretch;">
+            <button class="pv-copy-btn btn-destacado btn-copiar-asunto" onclick="copHTMLGmail();playClick();" title="Copia el contenido del correo para pegarlo en Gmail">
+              <span class="ico">📋</span><span>COPIAR ASUNTO GMAIL</span>
             </button>
-            <button class="pv-copy-btn sm btn-destacado" onclick="copHTMLGmail();playClick();" title="Copia el contenido del correo para pegarlo en Gmail">
-              <span class="ico">📋</span><span>COPIAR ASUNTO</span>
-            </button>
-            <button class="pv-copy-btn sm" id="btn-abrir-gmail" onclick="abrirGmail();playClick();" title="Abre Gmail con destinatario y asunto, y copia el diseño al portapapeles: solo haz clic en el cuerpo y pega con Ctrl+V" style="border-color:#EA4335;color:#f28b82;">
-              <span class="ico">📧</span><span>Abrir en Gmail</span>
+            <button class="btn-envio-directo" id="btn-abrir-gmail" onclick="abrirGmail();playClick();" title="Abre Gmail con destinatario y asunto, y copia el diseño al portapapeles: solo haz clic en el cuerpo y pega con Ctrl+V">
+              <span class="edir-txt">ENVÍO DIRECTO GMAIL</span><span class="edir-arrow">➜</span>
             </button>
           </div>
         </div>
@@ -662,15 +670,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <div class="pv-pane on" id="pane-outlook">
         <div class="act-strip sticky-bar">
           <div class="as-subject"><span class="as-lb">ASUNTO</span><span class="sv" id="tpl-asunto-outlook" contenteditable="true" spellcheck="false" title="Editable — puedes ajustarlo antes de copiar o descargar el .eml"></span></div>
-          <div class="as-actions">
-            <button class="pv-copy-btn sm" onclick="navigator.clipboard.writeText(document.getElementById('tpl-asunto-outlook').textContent);toast('✔ Asunto copiado','ok','tpl-toast2');playClick();" title="Copiar asunto del correo">
-              <span class="ico">📋</span><span>Asunto</span>
+          <div class="as-actions" style="flex:1;display:flex;gap:7px;align-items:stretch;">
+            <button class="pv-copy-btn btn-destacado btn-copiar-asunto" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
+              <span class="ico">📋</span><span>COPIAR ASUNTO OUTLOOK</span>
             </button>
-            <button class="pv-copy-btn sm btn-destacado" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
-              <span class="ico">📋</span><span>COPIAR ASUNTO</span>
-            </button>
-            <button class="pv-copy-btn sm" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía">
-              <span class="ico">📨</span><span>Abrir en Outlook</span>
+            <button class="btn-envio-directo" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía">
+              <span class="edir-txt">ENVÍO DIRECTO OUTLOOK</span><span class="edir-arrow">➜</span>
             </button>
           </div>
         </div>
@@ -680,12 +685,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
       <!-- WHATSAPP — vista realista envolviendo el mismo contenido generado -->
       <div class="pv-pane" id="pane-wsp">
-        <div class="pv-toolbar sticky-bar">
-          <button class="pv-copy-btn wsp-open" id="btn-open-wspweb" style="display:none;" onclick="abrirWspWeb();playClick();" title="Abrir WhatsApp Web con mensaje prearmado">
-            <span class="ico">🟢</span><span>Abrir WhatsApp Web</span>
+        <div class="pv-toolbar sticky-bar" style="justify-content:stretch;gap:7px;padding:8px 12px;">
+          <button class="pv-copy-btn btn-copiar-asunto" onclick="copPlano();playClick();" title="Copiar texto para WhatsApp">
+            <span class="ico">📋</span><span>COPIAR TEXTO WHATSAPP</span>
           </button>
-          <button class="pv-copy-btn" onclick="copPlano();playClick();" title="Copiar texto para WhatsApp">
-            <span class="ico">📋</span><span>Copiar texto para WhatsApp</span>
+          <button class="btn-envio-directo" id="btn-open-wspweb" style="display:none;" onclick="abrirWspWeb();playClick();" title="Abrir WhatsApp Web — el mensaje ya está copiado, solo pega con Ctrl+V">
+            <span class="edir-txt">ENVÍO DIRECTO WHATSAPP</span><span class="edir-arrow">➜</span>
           </button>
         </div>
         <textarea id="tpl-body" style="display:none;"></textarea>
