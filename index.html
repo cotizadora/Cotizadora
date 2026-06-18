@@ -1994,12 +1994,12 @@ function copHTML(){
 function copHTMLGmail(){
   var el=document.getElementById('tpl-rich-gmail');if(!el)return;
   _copHTMLEl(el,'📋 Plantilla Gmail copiada — pega directamente en el cuerpo del correo');
-  try{if(_sndOn&&'speechSynthesis'in window){var _ug=new SpeechSynthesisUtterance('Mensaje copiado para Gmail.');_ug.lang='es-CL';_ug.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_ug);}}catch(e){}
+  try{if(_sndOn&&'speechSynthesis'in window){var _ug=new SpeechSynthesisUtterance('Asunto copiado para Gmail.');_ug.lang='es-CL';_ug.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_ug);}}catch(e){}
 }
 function copHTMLOutlook(){
   var el=document.getElementById('tpl-rich-outlook');if(!el)return;
   _copHTMLEl(el,'📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje');
-  try{if(_sndOn&&'speechSynthesis'in window){var _uo=new SpeechSynthesisUtterance('Mensaje copiado para Outlook.');_uo.lang='es-CL';_uo.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_uo);}}catch(e){}
+  try{if(_sndOn&&'speechSynthesis'in window){var _uo=new SpeechSynthesisUtterance('Asunto copiado para Outlook.');_uo.lang='es-CL';_uo.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_uo);}}catch(e){}
 }
 function abrirGmail(){
   try{
