@@ -424,6 +424,28 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   opacity:0;pointer-events:none;transition:opacity .28s ease,transform .28s ease;max-width:84%;text-align:center;}
 #cp-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
 
+/* ── Req 3: botón destacado para copiar el cuerpo del correo ── */
+.pv-copy-btn.btn-destacado{border-color:#f0c040 !important;color:#1a1206 !important;
+  background:linear-gradient(135deg,#ffd863,#f0c040) !important;font-weight:800 !important;
+  box-shadow:0 0 0 1px rgba(240,192,64,.55),0 0 14px rgba(240,192,64,.55);
+  animation:destPulse 1.8s ease-in-out infinite;}
+.pv-copy-btn.btn-destacado:hover{filter:brightness(1.06);
+  box-shadow:0 0 0 1px rgba(240,192,64,.9),0 0 22px rgba(240,192,64,.85);}
+@keyframes destPulse{0%,100%{box-shadow:0 0 0 1px rgba(240,192,64,.5),0 0 9px rgba(240,192,64,.4);}
+  50%{box-shadow:0 0 0 1px rgba(240,192,64,.95),0 0 22px rgba(240,192,64,.8);}}
+/* ── Req 3: aviso grande "MENSAJE COPIADO / Ctrl+V" ── */
+#paste-notice{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;
+  background:rgba(5,3,6,.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);cursor:pointer;}
+#paste-notice.on{display:flex;animation:pnIn .18s ease;}
+#paste-notice .pn-card{background:linear-gradient(135deg,#123d1c,#0c2a14);border:2px solid #2ecc71;
+  border-radius:18px;padding:28px 42px;text-align:center;max-width:90%;
+  box-shadow:0 0 0 1px rgba(46,204,113,.4),0 18px 60px rgba(0,0,0,.6),0 0 40px rgba(46,204,113,.45);}
+#paste-notice .pn-check{font-size:3rem;line-height:1;margin-bottom:6px;}
+#paste-notice .pn-title{font-size:1.5rem;font-weight:900;color:#2ecc71;letter-spacing:1px;margin-bottom:10px;}
+#paste-notice .pn-sub{font-size:1.15rem;font-weight:700;color:#fff;}
+#paste-notice .pn-sub b{color:#f0c040;}
+@keyframes pnIn{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);}}
+
 /* ── MODAL (Ampliar / UF / Guardadas) ─────────────── */
 .modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.82);
   padding:24px;overflow:auto;align-items:flex-start;justify-content:center;}
@@ -623,8 +645,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
             <button class="pv-copy-btn sm" onclick="copAsunto();playClick();" title="Copiar asunto del correo">
               <span class="ico">📋</span><span>Asunto</span>
             </button>
-            <button class="pv-copy-btn sm" onclick="copHTMLGmail();playClick();" title="Copiar texto para Gmail">
-              <span class="ico">📋</span><span>Copiar Texto</span>
+            <button class="pv-copy-btn sm btn-destacado" onclick="copHTMLGmail();playClick();" title="Copia el contenido del correo para pegarlo en Gmail">
+              <span class="ico">📋</span><span>COPIAR ASUNTO DESTACADO</span>
             </button>
             <button class="pv-copy-btn sm" id="btn-abrir-gmail" onclick="abrirGmail();playClick();" title="Abre Gmail con destinatario y asunto, y copia el diseño al portapapeles: solo haz clic en el cuerpo y pega con Ctrl+V" style="border-color:#EA4335;color:#f28b82;">
               <span class="ico">📧</span><span>Abrir en Gmail</span>
@@ -644,8 +666,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
             <button class="pv-copy-btn sm" onclick="navigator.clipboard.writeText(document.getElementById('tpl-asunto-outlook').textContent);toast('✔ Asunto copiado','ok','tpl-toast2');playClick();" title="Copiar asunto del correo">
               <span class="ico">📋</span><span>Asunto</span>
             </button>
-            <button class="pv-copy-btn sm" onclick="copHTMLOutlook();playClick();" title="Copiar texto para Outlook">
-              <span class="ico">📋</span><span>Copiar Texto</span>
+            <button class="pv-copy-btn sm btn-destacado" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
+              <span class="ico">📋</span><span>COPIAR ASUNTO DESTACADO</span>
             </button>
             <button class="pv-copy-btn sm" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía">
               <span class="ico">📨</span><span>Abrir en Outlook</span>
@@ -712,7 +734,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
           </button>
         </div>
         <div class="pv-frame dark">
-<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
+<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura · Carpeta Tributaria</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
         </div>
       </div>
 
@@ -803,6 +825,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 <div id="global-toast" class="toast"></div>
 <div id="cp-toast" aria-live="polite"></div>
+<div id="paste-notice" onclick="this.classList.remove('on');"><div class="pn-card"><div class="pn-check">✅</div><div class="pn-title">MENSAJE COPIADO</div><div class="pn-sub" id="paste-notice-sub">Pégalo con <b>Ctrl+V</b></div></div></div>
 
 <script>
 'use strict';
@@ -828,8 +851,7 @@ var PRODUCTS=[
   {key:'ri',    ic:'📊',lb:'Informes Comerciales Mensual',    su:'12 meses'},
   {key:'bolsa', ic:'🎒',lb:'Informes Comerciales Bolsa',      su:'Pago único 12m'},
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
-  {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
-  {key:'combo', ic:'🧩',lb:'Combo Integral',  su:'Informes Comerciales + Mora Control + Portfolio Monitor'}
+  {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'}
 ];
 
 function buildProdbar(){
@@ -1004,7 +1026,7 @@ function renderSummary(c){
     '<div class="cond-row" style="margin-top:10px;">'+
       '<div class="ci"><label>Contrato</label><div class="cv">'+(c.plazo||'12')+' meses</div></div>'+
       '<div class="ci"><label>Modalidad</label><div class="cv" style="color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
-      '<div class="ci"><label>Documentos</label><div class="cv" style="font-weight:600;color:#ccc;">Ficha · Cédula · Escritura</div></div>'+
+      '<div class="ci"><label>Documentos</label><div class="cv" style="font-weight:600;color:#ccc;">Ficha · Cédula · Escritura · Carpeta Tributaria</div></div>'+
     '</div>';
   $('summary-zone').innerHTML=html;
 }
@@ -1334,6 +1356,23 @@ function fmtN(n){return '$'+Math.round(n).toLocaleString('es-CL');}
 function ufc(u){return u*getUF()*1.19;}
 function ufn(u){return u*getUF();}
 function hoy(){return new Date().toLocaleDateString('es-CL',{day:'2-digit',month:'long',year:'numeric'});}
+function nombreArchivo(ext){
+  /* Nombre descriptivo EMPRESA_AAAA-MM-DD_HH-MM.ext para identificar el archivo
+     sin abrirlo. Quita caracteres no válidos en Windows/Outlook/Gmail (\ / : * ? " < > |). */
+  var me=document.getElementById('me');
+  var emp=(me&&me.value)?me.value:((document.getElementById('cc-emp')||{}).textContent||'');
+  emp=(emp||'Cotizacion').toString().trim()
+        .replace(/[\\\/:*?"<>|\r\n\t]/g,'')
+        .replace(/[\s.]+/g,'_')
+        .replace(/_+/g,'_')
+        .replace(/^_+|_+$/g,'');
+  if(!emp) emp='Cotizacion';
+  emp=emp.substring(0,60);
+  var d=new Date(),p=function(n){return (n<10?'0':'')+n;};
+  var fecha=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+  var hora=p(d.getHours())+'-'+p(d.getMinutes());
+  return emp+'_'+fecha+'_'+hora+'.'+ext;
+}
 function toast(msg,type,id){
   var el=document.getElementById(id||'global-toast');if(!el)return;
   el.className='toast '+(type||'ok');el.textContent=msg;el.style.display='block';
@@ -1342,6 +1381,22 @@ function toast(msg,type,id){
     flashCopyOn(CURRENT_PV);
     playSound('copy');
   }
+}
+function avisoPegado(destino){
+  /* Req 3: aviso grande, breve e imposible de ignorar tras abrir Gmail/Outlook.
+     Voz opcional 100% nativa (SpeechSynthesis), sin librerías ni dependencias,
+     y respetando el botón de sonido existente. La prioridad es el aviso visual. */
+  var sub=document.getElementById('paste-notice-sub');
+  if(sub)sub.innerHTML='PÉGALO EN '+destino.toUpperCase()+' CON <b>CTRL+V</b>';
+  var el=document.getElementById('paste-notice');
+  if(el){el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('on');},3000);}
+  try{
+    if(_sndOn&&('speechSynthesis'in window)){
+      var u=new SpeechSynthesisUtterance('Mensaje copiado. Pégalo en '+destino+'.');
+      u.lang='es-CL';u.rate=1.05;
+      window.speechSynthesis.cancel();window.speechSynthesis.speak(u);
+    }
+  }catch(e){}
 }
 
 function preloadLogo(cb){
@@ -1500,7 +1555,8 @@ function genMail(){
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n" +
     "1\ufe0f\u20e3 Ficha de contrataci\u00f3n\n" +
     "2\ufe0f\u20e3 C\u00e9dula representante legal\n" +
-    "3\ufe0f\u20e3 Escritura con poderes de firma\n\n" +
+    "3\ufe0f\u20e3 Escritura con poderes de firma\n" +
+    "4\ufe0f\u20e3 Carpeta tributaria\n\n" +
     "Quedo a su disposici\u00f3n \ud83e\udd1d\n\n" +
     "\u2014\n" +
     "*" + as2 + "*\n" +
@@ -1602,7 +1658,7 @@ function genMail(){
     // DOCUMENTOS — fondo ámbar muy suave
     '<div style="background:#fffdf5;padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
-      '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma</div>'+
+      '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</div>'+
     '</div>'+
 
     // FIRMA — fondo oscuro corporativo
@@ -1821,7 +1877,7 @@ function genMail(){
               '<font face="Arial,sans-serif" color="#7a5808" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Documentos para contratar</font>'+
             '</td></tr>'+
             '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;">'+
-              '<font face="Arial,sans-serif" color="#3a2c04" style="font-size:12px;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma</font>'+
+              '<font face="Arial,sans-serif" color="#3a2c04" style="font-size:12px;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</font>'+
             '</td></tr>'+
           '</table>'+
         '</td>'+
@@ -1930,6 +1986,7 @@ function abrirGmail(){
             '&to='+encodeURIComponent(dest)+
             '&su='+encodeURIComponent(asunto);
     window.open(url,'_blank');
+    avisoPegado('Gmail');
   }catch(e){ alert('⚠ No se pudo abrir Gmail: '+e.message); }
 }
 function descargarEML(){
@@ -1939,6 +1996,17 @@ function descargarEML(){
     var asunto=(document.getElementById('tpl-asunto-outlook')||{}).textContent||'Propuesta Comercial Equifax';
     var destinatario=(document.getElementById('cli-email')||{}).value||(document.getElementById('ml')||{}).value||'';
     var htmlBody=elBody.innerHTML;
+
+    /* Copiamos también el cuerpo al portapapeles (sin aviso extra) para que el
+       mensaje "PÉGALO EN OUTLOOK CON CTRL+V" sea real: el usuario puede pegar el
+       contenido si lo prefiere a abrir el .eml. No altera la descarga del .eml. */
+    try{
+      if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+        var _bH=new Blob([elBody.innerHTML],{type:'text/html'});
+        var _bT=new Blob([elBody.innerText||''],{type:'text/plain'});
+        navigator.clipboard.write([new ClipboardItem({'text/html':_bH,'text/plain':_bT})]).catch(function(){});
+      }
+    }catch(e){}
 
     // Encabezados MIME mínimos para que Outlook reconozca el .eml como correo HTML
     function mimeEncodeHeader(s){
@@ -1959,13 +2027,14 @@ function descargarEML(){
     var url=URL.createObjectURL(blob);
     var a=document.createElement('a');
     a.href=url;
-    a.download='Propuesta_Equifax.eml';
+    a.download=nombreArchivo('eml');
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     setTimeout(function(){URL.revokeObjectURL(url);},2000);
 
     toast('📥 Correo descargado — abre el archivo .eml para continuar en Outlook','ok','tpl-toast2');
+    avisoPegado('Outlook');
   }catch(e){
     alert('⚠ Error generando el archivo .eml: '+e.message);
   }
@@ -2215,7 +2284,7 @@ function getCanvasPC(){
       ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('CONTRATO',P,cy);cy+=16;
       ctx.font='bold 13px Segoe UI,Arial';ctx.fillStyle='#fff';ctx.fillText(d.plazo,P,cy);
       ctx.font='bold 11px Arial';ctx.fillStyle='#2ecc71';ctx.fillText('POSTPAGO · 30 días',P+120,cy);
-      ctx.font='10px Arial';ctx.fillStyle='#555';ctx.fillText('Ficha · Cédula · Escritura',W-P-150,cy);
+      ctx.font='10px Arial';ctx.fillStyle='#555';ctx.textAlign='right';ctx.fillText('Ficha · Cédula · Escritura · Carpeta Tributaria',W-P,cy);ctx.textAlign='left';
       y+=hCond;
 
       // ── EJECUTIVO ──────────────────────────────────────────
@@ -2426,6 +2495,16 @@ function captureCardPC(){
     // transparentes), sin sombra, sin margen y sin max-width del contenedor.
     clone.style.margin='0';clone.style.maxWidth='none';clone.style.width=baseW+'px';
     clone.style.border='0';clone.style.borderRadius='0';clone.style.boxShadow='none';
+    // El nodo en pantalla HEREDA tipografía del <body>; dentro del SVG aislado esa
+    // herencia se pierde y el navegador cae a una fuente/espaciado por defecto. Se
+    // fija explícitamente la tipografía computada real para que la imagen copiada
+    // sea idéntica a la vista previa (misma fuente, mismo interlineado, mismo color).
+    try{
+      var _cs=window.getComputedStyle(el);
+      clone.style.fontFamily=_cs.fontFamily;
+      clone.style.lineHeight=_cs.lineHeight;
+      clone.style.color=_cs.color;
+    }catch(e){}
     // El logo es ruta relativa que no resuelve dentro del SVG aislado:
     // se incrusta como data URI (la foto del ejecutivo ya es data URI).
     var logoEl=clone.querySelector('img[src*="logo-equifax"]');
@@ -2481,8 +2560,7 @@ function descImg(){
   toast('⏳ Generando PNG...','info','tpl-toast2');
   getCanvasPC().then(function(cv){
     var a=document.createElement('a');
-    var em=(document.getElementById('cc-emp')?document.getElementById('cc-emp').textContent:'cot').replace(/[^a-z0-9]/gi,'_');
-    a.download='cotizadargo_'+em+'_'+Date.now()+'.png';
+    a.download=nombreArchivo('png');
     a.href=cv.toDataURL('image/png');a.click();
     toast('⬇ PNG descargado','ok','tpl-toast2');
   });
@@ -2616,16 +2694,26 @@ function pegarCRM(){
 function mapearCRM(txt){
   /* Busca la primera línea con campos separados por tabulación:
      FECHA · RAZÓN SOCIAL · RUT · TELÉFONO · EMAIL */
+  /* Limpieza por celda: al copiar desde Excel, las celdas con caracteres
+     especiales llegan envueltas en comillas dobles y a veces con espacios no
+     separables; los datos de la extensión CRM no traen nada de esto. Se
+     normaliza para que el pegado desde Excel quede idéntico al de la extensión.
+     Para datos ya limpios (CRM) estas operaciones no cambian nada. */
+  var _cleanCell=function(s){
+    s=(''+s).replace(/[\u00a0\u2007\u202f\u2009\u200b]/g,' ').trim();
+    if(s.length>=2&&s.charAt(0)==='"'&&s.charAt(s.length-1)==='"')s=s.slice(1,-1).replace(/""/g,'"');
+    return s.trim();
+  };
   var lineas=txt.split(/\r?\n/),campos=null;
   for(var i=0;i<lineas.length;i++){
-    var p=lineas[i].split('\t').map(function(s){return s.trim();}).filter(function(s){return s!=='';});
+    var p=lineas[i].split('\t').map(_cleanCell).filter(function(s){return s!=='';});
     if(p.length>=3){campos=p;break;}
   }
   if(!campos){onClientChange();return;} /* sin datos reconocibles → no rellenar, sin errores técnicos */
   var esFecha=function(s){return /^\d{1,2}-\d{1,2}-\d{4}$/.test(s);};
   var esRut=function(s){return /^\d{1,3}(\.\d{3}){1,2}-[\dkK]$/.test(s)||/^\d{7,9}-[\dkK]$/.test(s);};
   var esEmail=function(s){return s.indexOf('@')>-1;};
-  var esFono=function(s){return /^\+?[\d\s]{7,17}$/.test(s)&&/\d{7,}/.test(s.replace(/\s+/g,''));};
+  var esFono=function(s){if(!/^\+?[\d\s().\-]{7,20}$/.test(s))return false;var d=s.replace(/[^\d]/g,'');return d.length>=7&&d.length<=15;};
   var fono='',email='',libres=[];
   campos.forEach(function(c){
     if(esFecha(c)||esRut(c))return;      /* FECHA y RUT se ignoran */
@@ -2636,7 +2724,7 @@ function mapearCRM(txt){
   var razon=libres.length?libres.slice().sort(function(a,b){return b.length-a.length;})[0]:'';
   var ok=false;
   if(razon){var e=$('me');if(e){e.value=razon;ok=true;}}
-  if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/\s+/g,'');ok=true;}}
+  if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/[^\d+]/g,'');ok=true;}}
   if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
   /* El campo Contacto se mantiene intacto: la extensión no entrega nombre */
   onClientChange();
@@ -2671,7 +2759,12 @@ function abrirWspWeb(){
      paralelos: lo que el vendedor ve es exactamente lo que recibe el cliente. */
   var msg=(document.getElementById('tpl-body')||{}).value||'';
   if(!msg)return;
-  window.open('https://wa.me/'+cel+'?text='+encodeURIComponent(msg),'_blank');
+  /* Reutiliza una única ventana/pestaña de WhatsApp Web abierta por la app:
+     un nombre de target fijo hace que el navegador reuse la misma ventana y
+     solo actualice la URL + le devuelva el foco (CASO A). Si no existe ninguna,
+     abre una nueva con normalidad (CASO B). Solo APIs estándar del navegador. */
+  var w=window.open('https://wa.me/'+cel+'?text='+encodeURIComponent(msg),'cotizador_wsp_win');
+  if(w){try{w.focus();}catch(e){}}
 }
 
 /* ════════════════════════════════════════════════════════════════
