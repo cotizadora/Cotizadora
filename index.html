@@ -2750,21 +2750,30 @@ function updateCRMWsp(){
       :'Descarga un .eml que abre Outlook con asunto y cuerpo listos. Sin destinatario (agrega email del cliente).';
   }
 }
+var _waWin=null;
 function abrirWspWeb(){
   var cel=celularNormalizado(gv('cli-tel'));
   var skip=$('skip-dest')&&$('skip-dest').checked;
   if(!cel||skip)return;
-  /* Fuente única de verdad: el mismo texto que muestra la vista previa
-     y que usa "Copiar texto para WhatsApp" (copPlano). Sin generadores
-     paralelos: lo que el vendedor ve es exactamente lo que recibe el cliente. */
+  /* Fuente única de verdad: el mismo texto que muestra la vista previa y que
+     usa "Copiar texto para WhatsApp" (copPlano). Lo que el vendedor ve es
+     exactamente lo que recibe el cliente. */
   var msg=(document.getElementById('tpl-body')||{}).value||'';
   if(!msg)return;
-  /* Reutiliza una única ventana/pestaña de WhatsApp Web abierta por la app:
-     un nombre de target fijo hace que el navegador reuse la misma ventana y
-     solo actualice la URL + le devuelva el foco (CASO A). Si no existe ninguna,
-     abre una nueva con normalidad (CASO B). Solo APIs estándar del navegador. */
-  var w=window.open('https://wa.me/'+cel+'?text='+encodeURIComponent(msg),'cotizador_wsp_win');
-  if(w){try{w.focus();}catch(e){}}
+  /* WhatsApp WEB directo (NO wa.me). En escritorio, wa.me reenvía el mensaje a
+     la app de WhatsApp y en ese traspaso los emojis se corrompen (UTF-8 leído
+     como Latin-1) y se abre una pestaña nueva en cada envío. Yendo directo a
+     web.whatsapp.com el texto se decodifica como UTF-8 en el navegador —idéntico
+     al copiado/pegado manual— y la pestaña sí se puede reutilizar. */
+  var url='https://web.whatsapp.com/send?phone='+encodeURIComponent(cel)+'&text='+encodeURIComponent(msg);
+  /* Reutilización real: si ya hay una pestaña viva, se navega y se enfoca; si el
+     navegador lo bloquea por ser otro origen, el nombre de target fijo hace que
+     window.open reutilice esa MISMA pestaña en lugar de abrir otra. */
+  if(_waWin&&!_waWin.closed){
+    try{_waWin.location.href=url;_waWin.focus();return;}catch(e){}
+  }
+  _waWin=window.open(url,'cotizador_wsp_win');
+  if(_waWin){try{_waWin.focus();}catch(e){}}
 }
 
 /* ════════════════════════════════════════════════════════════════
