@@ -2124,7 +2124,29 @@ function descargarEML(){
     setTimeout(function(){URL.revokeObjectURL(url);},2000);
 
     toast('📥 Correo descargado — abre el archivo .eml para continuar en Outlook','ok','tpl-toast2');
-    avisoPegado('Outlook');
+    /* Aviso específico del flujo EML — NO usa avisoPegado() (compartida con Gmail/WhatsApp)
+       porque este flujo genera un archivo, no depende de pegar contenido.
+       Se restaura el título genérico al cerrar para no afectar los otros destinos. */
+    try{
+      var _pnTitle=document.getElementById('paste-notice');
+      var _pnTitleEl=_pnTitle?_pnTitle.querySelector('.pn-title'):null;
+      var _pnSub=document.getElementById('paste-notice-sub');
+      if(_pnTitleEl)_pnTitleEl.textContent='ARCHIVO CREADO';
+      if(_pnSub)_pnSub.innerHTML='ABRE EN <b>OUTLOOK</b>';
+      if(_pnTitle){
+        _pnTitle.classList.add('on');
+        clearTimeout(_pnTitle._t);
+        _pnTitle._t=setTimeout(function(){
+          _pnTitle.classList.remove('on');
+          if(_pnTitleEl)_pnTitleEl.textContent='MENSAJE COPIADO'; /* texto original fijo, usado por Gmail/WhatsApp */
+        },3000);
+      }
+      if(_sndOn&&('speechSynthesis'in window)){
+        var _u=new SpeechSynthesisUtterance('Archivo creado, abre en Outlook.');
+        _u.lang='es-CL';_u.rate=1.05;
+        window.speechSynthesis.cancel();window.speechSynthesis.speak(_u);
+      }
+    }catch(e){}
   }catch(e){
     alert('⚠ Error generando el archivo .eml: '+e.message);
   }
