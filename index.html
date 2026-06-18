@@ -646,7 +646,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
               <span class="ico">📋</span><span>Asunto</span>
             </button>
             <button class="pv-copy-btn sm btn-destacado" onclick="copHTMLGmail();playClick();" title="Copia el contenido del correo para pegarlo en Gmail">
-              <span class="ico">📋</span><span>COPIAR ASUNTO DESTACADO</span>
+              <span class="ico">📋</span><span>COPIAR ASUNTO</span>
             </button>
             <button class="pv-copy-btn sm" id="btn-abrir-gmail" onclick="abrirGmail();playClick();" title="Abre Gmail con destinatario y asunto, y copia el diseño al portapapeles: solo haz clic en el cuerpo y pega con Ctrl+V" style="border-color:#EA4335;color:#f28b82;">
               <span class="ico">📧</span><span>Abrir en Gmail</span>
@@ -667,7 +667,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
               <span class="ico">📋</span><span>Asunto</span>
             </button>
             <button class="pv-copy-btn sm btn-destacado" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
-              <span class="ico">📋</span><span>COPIAR ASUNTO DESTACADO</span>
+              <span class="ico">📋</span><span>COPIAR ASUNTO</span>
             </button>
             <button class="pv-copy-btn sm" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía">
               <span class="ico">📨</span><span>Abrir en Outlook</span>
@@ -1392,8 +1392,8 @@ function avisoPegado(destino){
   if(el){el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('on');},3000);}
   try{
     if(_sndOn&&('speechSynthesis'in window)){
-      var _voz=destino==='WhatsApp'?'Mensaje copiado. Pégalo ahora en la ventana del cliente.':('Mensaje copiado para '+destino+'.');
-      var u=new SpeechSynthesisUtterance(_voz);
+      var _voz={'WhatsApp':'Mensaje copiado. Pega en WhatsApp.','Gmail':'Mensaje copiado. Pega en Gmail.','Outlook':'Mensaje copiado. Pega en Outlook.'};
+      var u=new SpeechSynthesisUtterance(_voz[destino]||('Mensaje copiado. Pégalo en '+destino+'.'));
       u.lang='es-CL';u.rate=1.05;
       window.speechSynthesis.cancel();window.speechSynthesis.speak(u);
     }
@@ -1969,12 +1969,12 @@ function copHTML(){
 function copHTMLGmail(){
   var el=document.getElementById('tpl-rich-gmail');if(!el)return;
   _copHTMLEl(el,'📋 Plantilla Gmail copiada — pega directamente en el cuerpo del correo');
-  try{if(_sndOn&&'speechSynthesis'in window){var _u=new SpeechSynthesisUtterance('Mensaje copiado para Gmail.');_u.lang='es-CL';_u.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_u);}}catch(e){}
+  try{if(_sndOn&&'speechSynthesis'in window){var _ug=new SpeechSynthesisUtterance('Mensaje copiado para Gmail.');_ug.lang='es-CL';_ug.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_ug);}}catch(e){}
 }
 function copHTMLOutlook(){
   var el=document.getElementById('tpl-rich-outlook');if(!el)return;
   _copHTMLEl(el,'📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje');
-  try{if(_sndOn&&'speechSynthesis'in window){var _u=new SpeechSynthesisUtterance('Mensaje copiado para Outlook.');_u.lang='es-CL';_u.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_u);}}catch(e){}
+  try{if(_sndOn&&'speechSynthesis'in window){var _uo=new SpeechSynthesisUtterance('Mensaje copiado para Outlook.');_uo.lang='es-CL';_uo.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_uo);}}catch(e){}
 }
 function abrirGmail(){
   try{
@@ -2545,7 +2545,7 @@ function copImgPC(){
   preloadLogo(function(){
     captureCardPC().then(function(cv){
       handleCopy(cv,'tpl-toast2');
-      try{if(_sndOn&&'speechSynthesis'in window){var _u=new SpeechSynthesisUtterance('Vista previa copiada.');_u.lang='es-CL';_u.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_u);}}catch(e){}
+      try{if(_sndOn&&'speechSynthesis'in window){var _ui=new SpeechSynthesisUtterance('Vista previa copiada.');_ui.lang='es-CL';_ui.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_ui);}}catch(e){}
     }).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});
   });
 }
@@ -2760,14 +2760,12 @@ function abrirWspWeb(){
   var cel=celularNormalizado(gv('cli-tel'));
   var skip=$('skip-dest')&&$('skip-dest').checked;
   if(!cel||skip)return;
-  /* Fuente única: el mismo tpl-body que usa la vista previa.
-     Sin reconstrucción, sin variante, sin modificación de contenido. */
+  /* Fuente única: el mismo tpl-body que usa la vista previa. Sin reconstrucción. */
   var msg=(document.getElementById('tpl-body')||{}).value||'';
   if(!msg)return;
   /* 1. Copiar al portapapeles antes de abrir WhatsApp */
   navigator.clipboard.writeText(msg).catch(function(){});
-  /* 2. Abrir conversación del cliente SIN &text= en la URL.
-        El usuario pega (Ctrl+V) el mensaje ya copiado. */
+  /* 2. Abrir conversación del cliente SIN &text= en la URL */
   var url='https://web.whatsapp.com/send?phone='+encodeURIComponent(cel);
   if(_waWin&&!_waWin.closed){
     try{_waWin.location.href=url;_waWin.focus();}catch(e){_waWin=window.open(url,'cotizador_wsp_win');if(_waWin)try{_waWin.focus();}catch(e2){}}
