@@ -1392,7 +1392,8 @@ function avisoPegado(destino){
   if(el){el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('on');},3000);}
   try{
     if(_sndOn&&('speechSynthesis'in window)){
-      var u=new SpeechSynthesisUtterance('Mensaje copiado. Pégalo en '+destino+'.');
+      var _voz=destino==='WhatsApp'?'Mensaje copiado. Pégalo ahora en la ventana del cliente.':('Mensaje copiado para '+destino+'.');
+      var u=new SpeechSynthesisUtterance(_voz);
       u.lang='es-CL';u.rate=1.05;
       window.speechSynthesis.cancel();window.speechSynthesis.speak(u);
     }
@@ -1968,10 +1969,12 @@ function copHTML(){
 function copHTMLGmail(){
   var el=document.getElementById('tpl-rich-gmail');if(!el)return;
   _copHTMLEl(el,'📋 Plantilla Gmail copiada — pega directamente en el cuerpo del correo');
+  try{if(_sndOn&&'speechSynthesis'in window){var _u=new SpeechSynthesisUtterance('Mensaje copiado para Gmail.');_u.lang='es-CL';_u.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_u);}}catch(e){}
 }
 function copHTMLOutlook(){
   var el=document.getElementById('tpl-rich-outlook');if(!el)return;
   _copHTMLEl(el,'📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje');
+  try{if(_sndOn&&'speechSynthesis'in window){var _u=new SpeechSynthesisUtterance('Mensaje copiado para Outlook.');_u.lang='es-CL';_u.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_u);}}catch(e){}
 }
 function abrirGmail(){
   try{
@@ -2540,8 +2543,10 @@ function captureCardPC(){
 function copImgPC(){
   toast('⏳ Generando imagen...','info','tpl-toast2');
   preloadLogo(function(){
-    captureCardPC().then(function(cv){handleCopy(cv,'tpl-toast2');})
-                   .catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});
+    captureCardPC().then(function(cv){
+      handleCopy(cv,'tpl-toast2');
+      try{if(_sndOn&&'speechSynthesis'in window){var _u=new SpeechSynthesisUtterance('Vista previa copiada.');_u.lang='es-CL';_u.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_u);}}catch(e){}
+    }).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});
   });
 }
 function copImgWsp(){
@@ -2755,25 +2760,23 @@ function abrirWspWeb(){
   var cel=celularNormalizado(gv('cli-tel'));
   var skip=$('skip-dest')&&$('skip-dest').checked;
   if(!cel||skip)return;
-  /* Fuente única de verdad: el mismo texto que muestra la vista previa y que
-     usa "Copiar texto para WhatsApp" (copPlano). Lo que el vendedor ve es
-     exactamente lo que recibe el cliente. */
+  /* Fuente única: el mismo tpl-body que usa la vista previa.
+     Sin reconstrucción, sin variante, sin modificación de contenido. */
   var msg=(document.getElementById('tpl-body')||{}).value||'';
   if(!msg)return;
-  /* WhatsApp WEB directo (NO wa.me). En escritorio, wa.me reenvía el mensaje a
-     la app de WhatsApp y en ese traspaso los emojis se corrompen (UTF-8 leído
-     como Latin-1) y se abre una pestaña nueva en cada envío. Yendo directo a
-     web.whatsapp.com el texto se decodifica como UTF-8 en el navegador —idéntico
-     al copiado/pegado manual— y la pestaña sí se puede reutilizar. */
-  var url='https://web.whatsapp.com/send?phone='+encodeURIComponent(cel)+'&text='+encodeURIComponent(msg);
-  /* Reutilización real: si ya hay una pestaña viva, se navega y se enfoca; si el
-     navegador lo bloquea por ser otro origen, el nombre de target fijo hace que
-     window.open reutilice esa MISMA pestaña en lugar de abrir otra. */
+  /* 1. Copiar al portapapeles antes de abrir WhatsApp */
+  navigator.clipboard.writeText(msg).catch(function(){});
+  /* 2. Abrir conversación del cliente SIN &text= en la URL.
+        El usuario pega (Ctrl+V) el mensaje ya copiado. */
+  var url='https://web.whatsapp.com/send?phone='+encodeURIComponent(cel);
   if(_waWin&&!_waWin.closed){
-    try{_waWin.location.href=url;_waWin.focus();return;}catch(e){}
+    try{_waWin.location.href=url;_waWin.focus();}catch(e){_waWin=window.open(url,'cotizador_wsp_win');if(_waWin)try{_waWin.focus();}catch(e2){}}
+  }else{
+    _waWin=window.open(url,'cotizador_wsp_win');
+    if(_waWin){try{_waWin.focus();}catch(e){}}
   }
-  _waWin=window.open(url,'cotizador_wsp_win');
-  if(_waWin){try{_waWin.focus();}catch(e){}}
+  /* 3. Aviso visual + audio */
+  avisoPegado('WhatsApp');
 }
 
 /* ════════════════════════════════════════════════════════════════
