@@ -626,14 +626,14 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
             <button class="pv-copy-btn sm" onclick="copHTMLGmail();playClick();" title="Copiar texto para Gmail">
               <span class="ico">📋</span><span>Copiar Texto</span>
             </button>
-            <button class="pv-copy-btn sm" id="btn-abrir-gmail" onclick="abrirGmail();playClick();" title="Abre Gmail web con destinatario, asunto y cuerpo (texto) precargados" style="border-color:#EA4335;color:#f28b82;">
+            <button class="pv-copy-btn sm" id="btn-abrir-gmail" onclick="abrirGmail();playClick();" title="Abre Gmail con destinatario y asunto, y copia el diseño al portapapeles: solo haz clic en el cuerpo y pega con Ctrl+V" style="border-color:#EA4335;color:#f28b82;">
               <span class="ico">📧</span><span>Abrir en Gmail</span>
             </button>
           </div>
         </div>
         <div class="pv-frame"><div id="tpl-rich-gmail"></div></div>
         <div id="tpl-rich" style="display:none;"></div>
-        <div class="outlook-note">✉️ <b>Nota Gmail:</b> "Abrir en Gmail" abre la ventana de redacción con destinatario, asunto y cuerpo en <b>texto</b> (limitación propia de Gmail: no admite HTML enriquecido vía URL) y, en simultáneo, copia automáticamente la plantilla con diseño al portapapeles. Solo presiona <b>Ctrl+V</b> dentro del cuerpo del correo para reemplazarlo por la versión con formato.</div>
+        <div class="outlook-note">✉️ <b>Nota Gmail:</b> "Abrir en Gmail" abre la redacción con <b>destinatario y asunto</b> cargados y el <b>cuerpo vacío</b>, y copia el correo <b>con diseño</b> al portapapeles. Solo haz clic en el cuerpo y pega con <b>Ctrl+V</b> — sin borrar nada. (Gmail no permite cargar el diseño por enlace; por eso se pega.)</div>
       </div>
 
       <!-- OUTLOOK -->
@@ -1921,23 +1921,15 @@ function abrirGmail(){
   try{
     var asunto=((document.getElementById('tpl-asunto')||{}).textContent||'Propuesta Comercial Equifax').trim();
     var dest=((document.getElementById('cli-email')||{}).value||'').trim();
-    var bodyRaw=(document.getElementById('tpl-body')||{}).value||'';
-    var body=bodyRaw.replace(/[*_~]/g,''); // texto limpio (Gmail compose no admite HTML vía URL — limitación propia de Gmail)
+    /* Copiamos el HTML enriquecido ANTES de abrir Gmail (misma fuente que "Copiar Texto"). */
+    var elRich=document.getElementById('tpl-rich-gmail');
+    if(elRich) _copHTMLEl(elRich,'📧 Gmail abierto · Plantilla copiada — solo haz clic en el cuerpo y pega con Ctrl+V');
+    /* Gmail no admite HTML por URL y el cuerpo NO se precarga: se abre vacío
+       para que el usuario solo pegue (Ctrl+V) sin tener que borrar nada antes. */
     var url='https://mail.google.com/mail/?view=cm&fs=1&tf=1'+
             '&to='+encodeURIComponent(dest)+
-            '&su='+encodeURIComponent(asunto)+
-            '&body='+encodeURIComponent(body);
+            '&su='+encodeURIComponent(asunto);
     window.open(url,'_blank');
-    /* Gmail no admite precargar HTML enriquecido por URL (solo texto plano).
-       Por eso, en simultáneo, copiamos al portapapeles la versión HTML rica
-       ya generada para Gmail (misma fuente que "Copiar Texto"), reutilizando
-       _copHTMLEl — sin duplicar lógica de copiado. */
-    var elRich=document.getElementById('tpl-rich-gmail');
-    if(elRich){
-      _copHTMLEl(elRich,'📧 Gmail abierto · Plantilla copiada al portapapeles — use Ctrl+V dentro del cuerpo del correo');
-    }else{
-      toast('📧 Abriendo Gmail con destinatario, asunto y cuerpo…','ok','tpl-toast2');
-    }
   }catch(e){ alert('⚠ No se pudo abrir Gmail: '+e.message); }
 }
 function descargarEML(){
