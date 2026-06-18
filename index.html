@@ -2041,15 +2041,77 @@ function descargarEML(){
       // Codifica el asunto en UTF-8 (soporta tildes/ñ) según RFC 2047
       return '=?UTF-8?B?'+btoa(unescape(encodeURIComponent(s)))+'?=';
     }
-    var headers=[
-      'MIME-Version: 1.0',
-      'To: '+destinatario,
-      'Subject: '+mimeEncodeHeader(asunto),
-      'X-Unsent: 1', // hace que Outlook lo abra como borrador editable, no como recibido
-      'Content-Type: text/html; charset=UTF-8'
-    ].join('\r\n');
 
-    var emlContent=headers+'\r\n\r\n'+htmlBody;
+    /* ── Logo embebido como adjunto inline (CID) ──────────────────────
+       Único cambio: el logo deja de referenciarse por URL externa
+       (que no resuelve cuando el archivo corre como file://) y pasa a
+       viajar embebido dentro del propio .eml, referenciado por cid:.
+       Esto es compatible nativamente con Outlook y con Thunderbird.
+       No se toca _htmlOutlook, _htmlGmail, genMail() ni preloadLogo(). */
+    var _logoImg=(typeof STATE!=='undefined'&&STATE.logoImg&&STATE.logoImg.complete&&STATE.logoImg.naturalWidth>0)?STATE.logoImg:null;
+    var _logoCid='logo-equifax-cid';
+    var _logoB64='';
+    if(_logoImg){
+      try{
+        var _c=document.createElement('canvas');
+        _c.width=_logoImg.naturalWidth;_c.height=_logoImg.naturalHeight;
+        _c.getContext('2d').drawImage(_logoImg,0,0);
+        var _dataUrl=_c.toDataURL('image/png');
+        _logoB64=_dataUrl.split(',')[1]||'';
+      }catch(e){_logoB64='';} /* canvas tainted u otro error → se conserva URL externa como hoy */
+    }
+
+    var emlContent;
+    if(_logoB64){
+      /* Reemplaza el src del logo (URL externa) por cid: dentro del HTML del cuerpo.
+         Se obtiene la URL real directamente del DOM ya renderizado (elBody),
+         en vez de depender de _gmailLogoUrl (variable local de otra función,
+         fuera de alcance aquí — ese era el motivo de que el reemplazo no aplicara). */
+      var _htmlConCid=htmlBody;
+      try{
+        var _imgEnDom=elBody.querySelector('img[src*="logo-equifax"]');
+        if(_imgEnDom){
+          var _logoUrlActual=_imgEnDom.getAttribute('src');
+          if(_logoUrlActual) _htmlConCid=htmlBody.split(_logoUrlActual).join('cid:'+_logoCid);
+        }
+      }catch(e){}
+
+      var _boundary='----eqfx-'+Date.now().toString(36);
+      var headers=[
+        'MIME-Version: 1.0',
+        'To: '+destinatario,
+        'Subject: '+mimeEncodeHeader(asunto),
+        'X-Unsent: 1', // hace que Outlook lo abra como borrador editable, no como recibido
+        'Content-Type: multipart/related; boundary="'+_boundary+'"'
+      ].join('\r\n');
+
+      var _htmlPart=
+        '--'+_boundary+'\r\n'+
+        'Content-Type: text/html; charset=UTF-8\r\n'+
+        'Content-Transfer-Encoding: 8bit\r\n\r\n'+
+        _htmlConCid+'\r\n\r\n';
+
+      var _imgPart=
+        '--'+_boundary+'\r\n'+
+        'Content-Type: image/png; name="logo-equifax.png"\r\n'+
+        'Content-Transfer-Encoding: base64\r\n'+
+        'Content-ID: <'+_logoCid+'>\r\n'+
+        'Content-Disposition: inline; filename="logo-equifax.png"\r\n\r\n'+
+        _logoB64.replace(/(.{76})/g,'$1\r\n')+'\r\n\r\n';
+
+      emlContent=headers+'\r\n\r\n'+_htmlPart+_imgPart+'--'+_boundary+'--';
+    }else{
+      /* Fallback: si por algún motivo el logo no está disponible, se conserva
+         exactamente el comportamiento actual (texto/html simple con URL externa). */
+      var headers=[
+        'MIME-Version: 1.0',
+        'To: '+destinatario,
+        'Subject: '+mimeEncodeHeader(asunto),
+        'X-Unsent: 1',
+        'Content-Type: text/html; charset=UTF-8'
+      ].join('\r\n');
+      emlContent=headers+'\r\n\r\n'+htmlBody;
+    }
 
     var blob=new Blob([emlContent],{type:'message/rfc822'});
     var url=URL.createObjectURL(blob);
