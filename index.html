@@ -517,9 +517,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 <style id="sol-cat-styles">
 .sol-head2{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin:14px 2px 9px;}
 .sol-head2:first-child{margin-top:2px;}
-.sol-probs{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
-.sol-prob{text-align:left;background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--r);border-radius:8px;padding:9px 12px;color:var(--wa);font-family:inherit;font-size:.82rem;cursor:pointer;transition:.15s;}
-.sol-prob:hover{background:var(--g2);color:var(--w);}
 .sol-list{display:flex;flex-direction:column;gap:8px;}
 .sol-item{display:flex;align-items:center;gap:10px;background:var(--g2);border:1px solid var(--g3);border-radius:8px;padding:11px 13px;cursor:pointer;color:var(--w);font-size:.9rem;transition:.15s;}
 .sol-item:hover{border-color:var(--r);}
@@ -895,10 +892,7 @@ function dcSelect(id,vals){
 
 function cfgHTML(key){
   if(key==='soluciones'){
-    var probs=[['¿Entrega crédito sin saber el riesgo?','ri'],['¿Le dejaron facturas impagas?','mc'],['¿Necesita vigilar su cartera?','pfm'],['¿No logra ubicar a un cliente?','datafinder'],['¿Debe evaluar proveedores?','pc'],['¿No sabe quién está detrás de una empresa?','malla']];
-    var ph='<div class="sol-head2">¿Qué problema desea resolver?</div><div class="sol-probs">'+probs.map(function(p){return '<button type="button" class="sol-prob" onclick="solPick(\''+p[1]+'\')">'+p[0]+'</button>';}).join('')+'</div>';
-    var cb='<div class="sol-head2">Productos a incluir</div><div class="sol-list">'+SOL_LIST.map(function(p){return '<label class="sol-item"><input type="checkbox" value="'+p[0]+'"'+(p[2]?' checked':'')+' onchange="refresh()"><span>'+p[1]+'</span></label>';}).join('')+'</div>';
-    return ph+cb;
+    return '<div class="sol-head2">Productos a incluir</div><div class="sol-list">'+SOL_LIST.map(function(p){return '<label class="sol-item"><input type="checkbox" value="'+p[0]+'"'+(p[2]?' checked':'')+' onchange="refresh()"><span>'+p[1]+'</span></label>';}).join('')+'</div>';
   }
   if(key==='bundle')
     return '<div class="cfg-2">'+
@@ -1152,8 +1146,6 @@ var SOL_BULLETS={
 };
 var SOL_LIST=[['ri','Reporte Interactivo',1],['mc','Mora Control',1],['docunico','Mora Control Documento Único',0],['pfm','Portfolio Monitor',1],['pc','Partner Check',0],['datafinder','Data Finder',0],['malla','Malla Societaria',0],['iris','IRIS',0],['easycheck','Easy Check',0]];
 var SOL_NAMES={ri:'Reporte Interactivo',mc:'Mora Control',docunico:'Mora Control Documento Único',pfm:'Portfolio Monitor',pc:'Partner Check',datafinder:'Data Finder',malla:'Malla Societaria',iris:'IRIS',easycheck:'Easy Check'};
-
-function solPick(k){var i=document.querySelector('.sol-item input[value="'+k+'"]');if(i){i.checked=true;refresh();}}
 
 function renderSoluciones(){
   var sel=[],zone=document.getElementById('config-zone');
