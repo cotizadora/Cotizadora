@@ -514,6 +514,24 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   .snd-toggle{display:none;}
 }
 </style>
+<style id="sol-base-styles">
+/* ════════ SOLUCIONES EQUIFAX — base Fase 1 (módulo paralelo, NO toca el cotizador) ════════ */
+.mode-switch{display:flex;gap:4px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);
+  border-radius:10px;padding:4px;flex:0 0 auto;}
+.mode-btn{background:transparent;border:none;color:rgba(255,255,255,.80);font-family:inherit;
+  font-weight:700;font-size:.85rem;padding:8px 16px;border-radius:7px;cursor:pointer;white-space:nowrap;transition:.15s;}
+.mode-btn:hover{color:#fff;}
+.mode-btn.on{background:var(--w);color:var(--rd);box-shadow:0 1px 6px rgba(0,0,0,.25);}
+#soluciones-screen{position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:270;
+  background:var(--g0);color:var(--w);overflow:auto;display:none;}
+#soluciones-screen.on{display:block;}
+.sol-head{padding:22px 28px 14px;border-bottom:1px solid var(--g3);}
+.sol-head h1{margin:0;font-size:1.35rem;font-weight:800;color:var(--w);}
+.sol-head p{margin:5px 0 0;color:var(--wa);font-size:.9rem;}
+.sol-body{padding:24px 28px;}
+.sol-ph{border:1px dashed var(--g4);border-radius:12px;padding:42px;text-align:center;color:var(--wb);font-size:.95rem;}
+@media(max-width:760px){.mode-btn{padding:7px 10px;font-size:.78rem;}}
+</style>
 </head>
 <body>
 <header>
@@ -523,6 +541,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <div class="nm">CotizadorGo!</div>
       <div class="sb">Estación de Cotización · Equifax Chile</div>
     </div>
+  </div>
+  <div class="mode-switch" role="tablist" aria-label="Modo de la herramienta">
+    <button class="mode-btn on" id="mode-cot" role="tab" aria-selected="true" onclick="setMode('cotizador')">📋 Cotizador</button>
+    <button class="mode-btn" id="mode-sol" role="tab" aria-selected="false" onclick="setMode('soluciones')">🧩 Soluciones Equifax</button>
   </div>
   <div class="htools">
     <div id="auto-gen-status" class="hstatus">✔ Actualizado</div>
@@ -831,6 +853,17 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 <div id="global-toast" class="toast"></div>
 <div id="cp-toast" aria-live="polite"></div>
 <div id="paste-notice" onclick="this.classList.remove('on');"><div class="pn-card"><div class="pn-check">✅</div><div class="pn-title">MENSAJE COPIADO</div><div class="pn-sub" id="paste-notice-sub">Pégalo con <b>Ctrl+V</b></div></div></div>
+
+<!-- ════════ SOLUCIONES EQUIFAX — contenedor base (Fase 1) ════════ -->
+<section id="soluciones-screen" aria-label="Soluciones Equifax">
+  <div class="sol-head">
+    <h1>🧩 Soluciones Equifax</h1>
+    <p>Presentación corporativa multiproducto para prospección comercial.</p>
+  </div>
+  <div class="sol-body" id="sol-body">
+    <div class="sol-ph">Módulo en construcción — la capa "¿Qué problema desea resolver?", la selección de productos y la vista previa se montarán aquí en las próximas fases.</div>
+  </div>
+</section>
 
 <script>
 'use strict';
@@ -2947,6 +2980,31 @@ cUF();cCLP();cCom();
   intentarMindicador();
   /* refresco cada 30 minutos — la UF cambia una vez al día pero puede haber cambio de fecha */
   setInterval(intentarMindicador,30*60*1000);
+})();
+</script>
+<script>
+/* ════════ SOLUCIONES EQUIFAX — control de modo (Fase 1) ════════
+   Aditivo y aislado: solo muestra/oculta contenedores ya existentes.
+   No modifica el cotizador, sus funciones ni sus exportadores. */
+(function(){
+  function setMode(m){
+    var isSol=(m==='soluciones');
+    var ws =document.getElementById('workstation');
+    var pb =document.getElementById('prodbar');
+    var sol=document.getElementById('soluciones-screen');
+    var bCot=document.getElementById('mode-cot');
+    var bSol=document.getElementById('mode-sol');
+    if(ws)  ws.style.display  = isSol?'none':'';
+    if(pb)  pb.style.display  = isSol?'none':'';
+    if(sol) sol.classList.toggle('on', isSol);
+    if(bCot){bCot.classList.toggle('on',!isSol);bCot.setAttribute('aria-selected',(!isSol).toString());}
+    if(bSol){bSol.classList.toggle('on', isSol);bSol.setAttribute('aria-selected', isSol.toString());}
+    try{ if(typeof playClick==='function') playClick(); }catch(e){}
+  }
+  window.setMode=setMode;
+  /* Estado inicial: Cotizador (comportamiento idéntico al actual) */
+  if(document.readyState!=='loading') setMode('cotizador');
+  else document.addEventListener('DOMContentLoaded',function(){setMode('cotizador');});
 })();
 </script>
 </body>
