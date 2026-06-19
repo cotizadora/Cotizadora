@@ -515,11 +515,13 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 }
 </style>
 <style id="sol-cat-styles">
-/* ════════ SOLUCIONES EQUIFAX — lista de productos (columna izquierda) ════════ */
-.sol-head2{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin:4px 2px 10px;}
+.sol-head2{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin:14px 2px 9px;}
+.sol-head2:first-child{margin-top:2px;}
+.sol-probs{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+.sol-prob{text-align:left;background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--r);border-radius:8px;padding:9px 12px;color:var(--wa);font-family:inherit;font-size:.82rem;cursor:pointer;transition:.15s;}
+.sol-prob:hover{background:var(--g2);color:var(--w);}
 .sol-list{display:flex;flex-direction:column;gap:8px;}
-.sol-item{display:flex;align-items:center;gap:10px;background:var(--g2);border:1px solid var(--g3);
-  border-radius:8px;padding:11px 13px;cursor:pointer;color:var(--w);font-size:.9rem;transition:.15s;}
+.sol-item{display:flex;align-items:center;gap:10px;background:var(--g2);border:1px solid var(--g3);border-radius:8px;padding:11px 13px;cursor:pointer;color:var(--w);font-size:.9rem;transition:.15s;}
 .sol-item:hover{border-color:var(--r);}
 .sol-item input{width:17px;height:17px;accent-color:var(--r);cursor:pointer;flex:0 0 auto;}
 </style>
@@ -748,7 +750,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
           </button>
         </div>
         <div class="pv-frame dark">
-<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura · Carpeta Tributaria</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
+<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div id="cc-price-zone" style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div id="cc-contrato-zone" style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura · Carpeta Tributaria</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
         </div>
       </div>
 
@@ -893,9 +895,10 @@ function dcSelect(id,vals){
 
 function cfgHTML(key){
   if(key==='soluciones'){
-    return '<div class="sol-head2">Productos a incluir</div><div class="sol-list">'+
-      SOL_LIST.map(function(p){return '<label class="sol-item"><input type="checkbox" value="'+p[0]+'"'+(p[2]?' checked':'')+' onchange="refresh()"><span>'+p[1]+'</span></label>';}).join('')+
-      '</div>';
+    var probs=[['¿Entrega crédito sin saber el riesgo?','ri'],['¿Le dejaron facturas impagas?','mc'],['¿Necesita vigilar su cartera?','pfm'],['¿No logra ubicar a un cliente?','datafinder'],['¿Debe evaluar proveedores?','pc'],['¿No sabe quién está detrás de una empresa?','malla']];
+    var ph='<div class="sol-head2">¿Qué problema desea resolver?</div><div class="sol-probs">'+probs.map(function(p){return '<button type="button" class="sol-prob" onclick="solPick(\''+p[1]+'\')">'+p[0]+'</button>';}).join('')+'</div>';
+    var cb='<div class="sol-head2">Productos a incluir</div><div class="sol-list">'+SOL_LIST.map(function(p){return '<label class="sol-item"><input type="checkbox" value="'+p[0]+'"'+(p[2]?' checked':'')+' onchange="refresh()"><span>'+p[1]+'</span></label>';}).join('')+'</div>';
+    return ph+cb;
   }
   if(key==='bundle')
     return '<div class="cfg-2">'+
@@ -1109,7 +1112,7 @@ function lightUpdate(v){
 /* ════════ PUENTE → genMail() (motor original intacto) ════════ */
 function refresh(){
   if(CURRENT.key==='soluciones'){renderSoluciones();return;}
-  _restoreSolCard();
+  ['cc-price-zone','cc-contrato-zone'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='';});
   var c=computeCurrent();if(!c)return;LAST=c;
   setBridge('mt',c.tipo);
   setBridge('mu',c.ufVenta>0?c.ufVenta:'');
@@ -1122,7 +1125,7 @@ function refresh(){
 }
 function onConfigChange(){CURRENT.override=null;CURRENT.overrideLista=null;refresh();}
 function onSlide(v){v=parseFloat(v);if(isNaN(v)||v<0)return;CURRENT.override=v;lightUpdate(v);}
-function onClientChange(){genMail();syncWA();updateCRMWsp();}
+function onClientChange(){if(CURRENT.key==='soluciones'){renderSoluciones();return;}genMail();syncWA();updateCRMWsp();}
 function syncWA(){
   var t=$('tpl-body'),o=$('wa-text-view');if(t&&o)o.textContent=t.value;
   var tm=$('wa-shell-time');
@@ -1135,38 +1138,23 @@ function syncWA(){
 function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'none':'flex';onClientChange();}
 
 /* ════════ SELECCIÓN DE PRODUCTO (gobierna toda la interfaz) ════════ */
-/* ════════ SOLUCIONES EQUIFAX — catálogo multiproducto (sin precios) ════════
-   Reutiliza los mismos slots (#tpl-rich-gmail/outlook, #tpl-asunto(-outlook),
-   #tpl-body, #cot-card-pc) y exportadores que el cotizador. No los modifica. */
-var SOL_NEW={
-  docunico:['Gestiona la publicación de un documento específico en DICOM','Sin necesidad de contratar un plan mensual','Solución práctica para casos aislados de morosidad','Apoya la recuperación de deudas individuales','Ideal para empresas con necesidades de cobranza ocasionales'],
-  datafinder:['Obtén teléfonos, correos y direcciones asociados a personas y empresas','Mejora la localización de clientes para cobranza y gestión comercial','Actualiza bases de datos con información más vigente','Reduce tiempos de búsqueda y contacto manual','Potencia campañas de recuperación, ventas y fidelización'],
-  malla:['Identifica relaciones entre empresas, socios y representantes','Visualiza estructuras societarias y grupos empresariales','Detecta vínculos que pueden impactar el riesgo comercial','Apoya procesos de evaluación, compliance y due diligence','Facilita decisiones con una visión más completa del negocio'],
-  iris:['Procesa grandes volúmenes de evaluaciones de forma eficiente','Facilita integraciones para consultas automatizadas','Diseñado para empresas con alta demanda de análisis','Entrega información consistente para la toma de decisiones','Escala según las necesidades de crecimiento del negocio'],
-  easycheck:['Consulta información clave de manera rápida y sencilla','Ideal para validaciones comerciales de primera línea','Respuesta inmediata para decisiones operativas','Alternativa de entrada para empresas que comienzan a evaluar riesgo','Complementa procesos comerciales de bajo volumen']
+/* ════════ SOLUCIONES EQUIFAX — pestaña de catálogo (reusa #cot-card-pc y los slots de correo) ════════ */
+var SOL_BULLETS={
+  ri:['¿Entrega crédito sin saber el riesgo del cliente? Evalúe antes de vender','Detecte morosidades y protestos antes de que sean su problema','Decida líneas de crédito con datos, no con corazonadas'],
+  mc:['¿Le dejaron facturas impagas? Recupere con respaldo DICOM','Publicar en DICOM multiplica por 6 la probabilidad de cobro','Presione el pago sin perseguir al deudor'],
+  docunico:['¿Solo necesita cobrar una factura puntual? Publíquela sin plan mensual','Pague solo por el documento que necesita','La fuerza de DICOM para una deuda específica'],
+  pfm:['¿Sus buenos clientes siguen siendo buenos? Vigile su cartera','Reciba alertas cuando un cliente empieza a deteriorarse','Anticipe la morosidad antes de que ocurra'],
+  pc:['¿Conoce a sus proveedores antes de adjudicar? Evalúelos','Reduzca el riesgo de trabajar con empresas inestables','Respalde sus decisiones de compra y licitación'],
+  datafinder:['¿No logra ubicar a un cliente? Obtenga teléfonos y correos vigentes','Recupere el contacto perdido para cobrar o vender','Mejore la localización de su cartera'],
+  malla:['¿Sabe quién está detrás de la empresa con la que negocia?','Descubra socios, relaciones y empresas vinculadas','Detecte riesgos ocultos antes de cerrar el trato'],
+  iris:['¿Evalúa muchos clientes y pierde tiempo uno por uno? Hágalo a escala','Procese grandes volúmenes de evaluación de forma automatizada','Integre la evaluación a sus propios sistemas'],
+  easycheck:['¿Necesita decidir rápido y sin complicaciones? Consulte lo esencial al instante','Verificación crediticia ágil para el día a día','El primer paso para empezar a evaluar riesgo']
 };
-var SOL_LIST=[
-  ['ri','Reporte Interactivo',1],
-  ['mc','Mora Control',1],
-  ['docunico','Mora Control Documento Único',0],
-  ['pfm','Portfolio Monitor',1],
-  ['pc','Partner Check',0],
-  ['datafinder','Data Finder',0],
-  ['malla','Malla Societaria',0],
-  ['iris','IRIS',0],
-  ['easycheck','Easy Check',0]
-];
+var SOL_LIST=[['ri','Reporte Interactivo',1],['mc','Mora Control',1],['docunico','Mora Control Documento Único',0],['pfm','Portfolio Monitor',1],['pc','Partner Check',0],['datafinder','Data Finder',0],['malla','Malla Societaria',0],['iris','IRIS',0],['easycheck','Easy Check',0]];
 var SOL_NAMES={ri:'Reporte Interactivo',mc:'Mora Control',docunico:'Mora Control Documento Único',pfm:'Portfolio Monitor',pc:'Partner Check',datafinder:'Data Finder',malla:'Malla Societaria',iris:'IRIS',easycheck:'Easy Check'};
-function solBullets(key){
-  if(SOL_NEW[key]) return SOL_NEW[key];
-  var map={ri:'ri_plan',mc:'mc_solo',pfm:'pfm',pc:'pc'};
-  return (typeof PITEMS!=='undefined'&&PITEMS[map[key]])?PITEMS[map[key]]:[];
-}
-/* Guarda el esqueleto de cotización del #cot-card-pc para restaurarlo al volver a un tab de cotización */
-var _solSkeleton=null;
-function _restoreSolCard(){
-  if(_solSkeleton!==null){var el=document.getElementById('cot-card-pc');if(el)el.innerHTML=_solSkeleton;_solSkeleton=null;}
-}
+
+function solPick(k){var i=document.querySelector('.sol-item input[value="'+k+'"]');if(i){i.checked=true;refresh();}}
+
 function renderSoluciones(){
   var sel=[],zone=document.getElementById('config-zone');
   if(zone)Array.prototype.forEach.call(zone.querySelectorAll('.sol-item input:checked'),function(c){sel.push(c.value);});
@@ -1174,53 +1162,45 @@ function renderSoluciones(){
   var meEl=document.getElementById('me'),skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
   var emp=(!skip&&meEl&&meEl.value)?meEl.value.trim():'';
   var sub='Soluciones para evaluación, monitoreo y gestión de riesgo comercial';
-
-  /* En esta pestaña no hay resumen de precios */
   var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';
 
-  /* ── Tarjeta (#cot-card-pc) — misma estética que la cotización ── */
-  var card=document.getElementById('cot-card-pc');
-  if(card){
-    if(_solSkeleton===null)_solSkeleton=card.innerHTML;
-    var blocks=sel.map(function(k){
-      var bs=solBullets(k).map(function(b){return '<div style="display:flex;gap:8px;margin:5px 0;font-size:.8rem;color:#d8d8dc;line-height:1.35;"><span style="color:#f0c040;">✔</span><span>'+b+'</span></div>';}).join('');
-      return '<div style="margin-bottom:14px;"><div style="font-size:.95rem;font-weight:800;color:#fff;border-left:3px solid #9b1c2e;padding-left:9px;margin-bottom:6px;">'+SOL_NAMES[k]+'</div>'+bs+'</div>';
-    }).join('');
-    if(!sel.length)blocks='<div style="color:#777;font-size:.85rem;">Marca uno o más productos para incluirlos en la presentación.</div>';
-    card.innerHTML=
-      '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:120px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">PORTAFOLIO</div><div style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;">'+((typeof hoy==='function')?hoy():'')+'</div></div></div></div>'+
-      '<div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;">Soluciones Equifax</div><div style="font-size:.74rem;color:#9a9aa0;margin-top:3px;">'+sub+'</div>'+(emp?'<div style="font-size:.7rem;color:#666;margin-top:7px;">Preparado para: <b style="color:#bbb;">'+emp+'</b></div>':'')+'</div>'+
-      '<div style="background:#0d0a0e;padding:16px 22px;">'+blocks+'</div>';
-  }
+  /* ── Reusa la ficha #cot-card-pc: misma estructura, logo y footer. Solo cambia contenido y se ocultan precio/contrato. ── */
+  ['cc-price-zone','cc-contrato-zone'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
+  var dc=document.getElementById('cc-dcto-block');if(dc)dc.innerHTML='';
+  var st2=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  var sv2=function(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;};
+  st2('cc-badge','PORTAFOLIO DE SOLUCIONES');st2('cc-fecha',(typeof hoy==='function')?hoy():'');
+  st2('cc-emp',emp||'');st2('cc-rut','');
+  st2('cc-asesor',_ex.name||'');st2('cc-contacto',(_ex.wsp||'')+((_ex.wsp&&_ex.email)?' · ':'')+(_ex.email||''));
+  var _f=(typeof execPhoto==='function')?execPhoto():'';var cf=document.getElementById('cc-foto');if(cf)cf.src=_f;
+  var cardBlocks=sel.map(function(k){
+    var bs=SOL_BULLETS[k].map(function(b){return '<div style="font-size:.78rem;color:#ccc;padding:3px 0;display:flex;gap:7px;align-items:flex-start;"><span style="color:#9b1c2e;font-weight:900;flex-shrink:0;">✔</span><span>'+b+'</span></div>';}).join('');
+    return '<div style="margin-bottom:13px;"><div style="font-size:.98rem;font-weight:800;color:#fff;border-left:3px solid #9b1c2e;padding-left:9px;margin-bottom:6px;">'+SOL_NAMES[k]+'</div>'+bs+'</div>';
+  }).join('');
+  if(!sel.length)cardBlocks='<div style="color:#777;font-size:.85rem;">Marca uno o más productos para incluirlos en la presentación.</div>';
+  sv2('cc-prod-block','<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">'+sub+'</div>'+cardBlocks);
 
-  /* ── Correo enriquecido (Gmail y Outlook, mismo HTML) ── */
+  /* ── Correos: mismo cromado (logo img + header rojo + footer), multiproducto, sin precio ── */
   var sal=(typeof saludoChile==='function')?saludoChile():'Estimado/a';
   var mailBlocks=sel.map(function(k){
-    var bs=solBullets(k).map(function(b){return '<li style="margin:3px 0;color:#333;font-size:14px;">'+b+'</li>';}).join('');
-    return '<div style="margin:0 0 16px;"><div style="font-size:15px;font-weight:bold;color:#9b1c2e;border-bottom:2px solid #9b1c2e;padding-bottom:4px;margin-bottom:8px;">'+SOL_NAMES[k]+'</div><ul style="margin:0;padding-left:20px;">'+bs+'</ul></div>';
+    var bs=SOL_BULLETS[k].map(function(b){return '<table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="20" style="font-size:13px;color:#9b1c2e;font-weight:900;padding:4px 6px 4px 0;font-family:Arial,sans-serif;">&#10003;</td><td style="font-size:13px;color:#333;line-height:1.5;padding:4px 0;font-family:Arial,sans-serif;">'+b+'</td></tr></table>';}).join('');
+    return '<div style="margin:0 0 16px;"><div style="font-size:15px;font-weight:bold;color:#9b1c2e;border-bottom:2px solid #9b1c2e;padding-bottom:4px;margin-bottom:8px;font-family:Arial,sans-serif;">'+SOL_NAMES[k]+'</div>'+bs+'</div>';
   }).join('');
-  if(!sel.length)mailBlocks='<p style="color:#777;font-size:13px;">Selecciona productos para incluirlos.</p>';
-  var firma='<div style="margin-top:18px;padding-top:12px;border-top:1px solid #ddd;font-size:13px;color:#555;"><b>'+(_ex.name||'')+'</b>'+(_ex.cargo?' · '+_ex.cargo:'')+(_ex.wsp?'<br>'+_ex.wsp:'')+(_ex.email?'<br>'+_ex.email:'')+'</div>';
+  if(!sel.length)mailBlocks='<p style="color:#777;font-size:13px;font-family:Arial,sans-serif;">Selecciona productos para incluirlos.</p>';
+  var firma='<div style="margin-top:18px;padding-top:12px;border-top:1px solid #ddd;font-size:13px;color:#555;font-family:Arial,sans-serif;"><b>'+(_ex.name||'')+'</b>'+(_ex.cargo?' · '+_ex.cargo:'')+(_ex.wsp?'<br>'+_ex.wsp:'')+(_ex.email?'<br>'+_ex.email:'')+'</div>';
   var mailHTML=
-    '<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;">'+
-    '<div style="background:#9b1c2e;padding:16px 20px;"><span style="color:#fff;font-size:20px;font-weight:bold;letter-spacing:1px;">EQUIFAX</span><div style="color:rgba(255,255,255,.7);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">Chile · Soluciones Empresariales</div></div>'+
-    '<div style="padding:18px 20px;">'+
-    '<p style="font-size:14px;color:#333;margin:0 0 4px;">'+sal+'.</p>'+
-    '<h2 style="font-size:18px;color:#9b1c2e;margin:8px 0 2px;">Soluciones Equifax</h2>'+
-    '<p style="font-size:13px;color:#666;margin:0 0 16px;">'+sub+'</p>'+
-    mailBlocks+firma+'</div></div>';
-  var g=document.getElementById('tpl-rich-gmail');if(g)g.innerHTML=mailHTML;
-  var o=document.getElementById('tpl-rich-outlook');if(o)o.innerHTML=mailHTML;
+    '<div style="font-family:Arial,Helvetica,sans-serif;max-width:620px;margin:0 auto;border:1px solid #e0e0e0;border-radius:14px;overflow:hidden;">'+
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#9b1c2e" style="background-color:#9b1c2e;"><tr><td style="padding:22px 26px;"><img src="logo-equifax.png" alt="Equifax" width="300" style="display:block;max-height:96px;width:auto;"><div style="margin-top:6px;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.6);text-transform:uppercase;">Chile · Soluciones Empresariales</div></td><td valign="top" align="right" style="padding:22px 26px;"><span style="font-size:10px;font-weight:800;color:#f0c040;letter-spacing:1.5px;">PORTAFOLIO DE SOLUCIONES</span></td></tr></table>'+
+    '<div style="background:#1a1218;padding:18px 26px;border-bottom:3px solid #9b1c2e;">'+(emp?'<div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#9b4455;margin-bottom:6px;">Propuesta para</div><div style="font-size:21px;font-weight:800;color:#fff;line-height:1.2;">'+emp+'</div>':'<div style="font-size:21px;font-weight:800;color:#fff;">Soluciones Equifax</div>')+'<div style="margin-top:8px;font-size:13px;color:#ccbbbb;">'+sal+'. Le presento las soluciones Equifax recomendadas:</div></div>'+
+    '<div style="padding:20px 26px;background:#fff;"><div style="font-size:12px;color:#888;margin-bottom:14px;">'+sub+'</div>'+mailBlocks+firma+'</div></div>';
+  sv2('tpl-rich-gmail',mailHTML);sv2('tpl-rich-outlook',mailHTML);
 
-  /* ── Asunto ── */
-  var asunto='Soluciones Equifax — Portafolio de soluciones de riesgo comercial';
-  var a1=document.getElementById('tpl-asunto');if(a1)a1.textContent=asunto;
-  var a2=document.getElementById('tpl-asunto-outlook');if(a2)a2.textContent=asunto;
+  var asunto='Soluciones Equifax'+(emp?' — '+emp:' — Portafolio de soluciones de riesgo comercial');
+  st2('tpl-asunto',asunto);st2('tpl-asunto-outlook',asunto);
 
-  /* ── Texto plano (WhatsApp) ── */
   var txt='*Soluciones Equifax*\n'+sub+'\n';
-  sel.forEach(function(k){txt+='\n*'+SOL_NAMES[k].toUpperCase()+'*\n'+solBullets(k).map(function(b){return '• '+b;}).join('\n')+'\n';});
-  if(_ex.name)txt+='\n'+_ex.name+(_ex.cargo?' · '+_ex.cargo:'')+(_ex.wsp?'\n'+_ex.wsp:'')+(_ex.email?'\n'+_ex.email:'');
+  sel.forEach(function(k){txt+='\n*'+SOL_NAMES[k].toUpperCase()+'*\n'+SOL_BULLETS[k].map(function(b){return '✔️ '+b;}).join('\n')+'\n';});
+  if(_ex.name)txt+='\n—\n*'+_ex.name+'*'+(_ex.cargo?'\n_'+_ex.cargo+'_':'')+(_ex.wsp?'\n📱 '+_ex.wsp:'')+(_ex.email?'\n✉ '+_ex.email:'');
   var tb=document.getElementById('tpl-body');if(tb)tb.value=txt;
   if(typeof syncWA==='function')syncWA();
 }
@@ -2779,15 +2759,7 @@ function copImgWsp(){
 }
 function descImg(){
   toast('⏳ Generando PNG...','info','tpl-toast2');
-  if(CURRENT.key==='soluciones'){
-    preloadLogo(function(){
-      captureCardPC().then(function(cv){
-        var a=document.createElement('a');a.download=nombreArchivo('png');a.href=cv.toDataURL('image/png');a.click();
-        toast('⬇ PNG descargado','ok','tpl-toast2');
-      }).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});
-    });
-    return;
-  }
+  if(CURRENT.key==='soluciones'){preloadLogo(function(){captureCardPC().then(function(cv){var a=document.createElement('a');a.download=nombreArchivo('png');a.href=cv.toDataURL('image/png');a.click();toast('⬇ PNG descargado','ok','tpl-toast2');}).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});});return;}
   getCanvasPC().then(function(cv){
     var a=document.createElement('a');
     a.download=nombreArchivo('png');
