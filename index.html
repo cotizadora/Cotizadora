@@ -2132,13 +2132,30 @@ function abrirGmail(){
     avisoPegado('Gmail');
   }catch(e){ alert('⚠ No se pudo abrir Gmail: '+e.message); }
 }
-function descargarEML(){
+async function descargarEML(){
   try{
     var elBody=document.getElementById('tpl-rich-outlook');
     if(!elBody){alert('ERROR: no se encontró la plantilla de Outlook.');return;}
     var asunto=(document.getElementById('tpl-asunto-outlook')||{}).textContent||'Propuesta Comercial Equifax';
     var destinatario=(document.getElementById('cli-email')||{}).value||(document.getElementById('ml')||{}).value||'';
     var htmlBody=elBody.innerHTML;
+
+    /* ── ADJUNTO REAL ──────────────────────────────────────────────
+       Si hay documento seleccionado, se obtiene por fetch (mismo origen)
+       y se incrustará como parte application/pdf en el .eml (más abajo).
+       Si el fetch falla, se ABORTA con aviso: nunca se genera un .eml con
+       un adjunto ficticio. Sin documento, todo sigue exactamente igual. */
+    var _adjB64=null,_adjName=null,_adjDoc=(typeof adjuntoActual==='function')?adjuntoActual():null;
+    if(_adjDoc){
+      toast('⏳ Adjuntando '+_adjDoc.archivo+'…','info','adjuntar-toast');
+      try{
+        _adjB64=await obtenerAdjuntoB64(_adjDoc);
+        _adjName=_adjDoc.archivo;
+      }catch(e){
+        toast('⚠ No se pudo adjuntar '+_adjDoc.archivo+' ('+e.message+'). No se generó el correo.','err','adjuntar-toast');
+        return;
+      }
+    }
 
     /* Copiamos también el cuerpo al portapapeles (sin aviso extra) para que el
        mensaje "PÉGALO EN OUTLOOK CON CTRL+V" sea real: el usuario puede pegar el
@@ -2228,6 +2245,33 @@ function descargarEML(){
         'Content-Type: text/html; charset=UTF-8'
       ].join('\r\n');
       emlContent=headers+'\r\n\r\n'+htmlBody;
+    }
+
+    /* ── Si hay adjunto real, se envuelve el cuerpo YA construido (related o
+       text/html) en multipart/mixed y se añade la parte PDF. Sin adjunto,
+       emlContent queda EXACTAMENTE igual que hoy (cero cambios al flujo actual). */
+    if(_adjB64){
+      var _sp=emlContent.indexOf('\r\n\r\n');
+      var _hb=emlContent.slice(0,_sp), _bb=emlContent.slice(_sp+4);
+      var _ctOrig='', _env=[];
+      _hb.split('\r\n').forEach(function(L){
+        if(!_ctOrig && /^Content-Type:/i.test(L)) _ctOrig=L.replace(/^Content-Type:\s*/i,'');
+        else _env.push(L);
+      });
+      var _mix='----eqfx-mix-'+Date.now().toString(36);
+      emlContent=
+        _env.join('\r\n')+'\r\n'+
+        'Content-Type: multipart/mixed; boundary="'+_mix+'"\r\n\r\n'+
+        '--'+_mix+'\r\n'+
+        'Content-Type: '+_ctOrig+'\r\n\r\n'+
+        _bb+'\r\n\r\n'+
+        '--'+_mix+'\r\n'+
+        'Content-Type: application/pdf; name="'+_adjName+'"\r\n'+
+        'Content-Transfer-Encoding: base64\r\n'+
+        'Content-Disposition: attachment; filename="'+_adjName+'"\r\n\r\n'+
+        _adjB64.replace(/(.{76})/g,'$1\r\n')+'\r\n\r\n'+
+        '--'+_mix+'--';
+      toast('📎 '+_adjName+' adjuntado al correo','ok','adjuntar-toast');
     }
 
     var blob=new Blob([emlContent],{type:'message/rfc822'});
@@ -3029,21 +3073,23 @@ if(_ufg)_ufg.addEventListener('input',function(){if(CURRENT.override!==null)ligh
 cUF();cCLP();cCom();
 
 /* ════════════════════════════════════════════════════════════════
-   AYUDA VISUAL — RECORDATORIO DE ADJUNTO (100% ADITIVO · NO FUNCIONAL)
-   ÚNICA FUENTE DE VERDAD: para agregar/quitar un documento del selector,
-   edita SOLO este arreglo. (Ajusta los nombres de archivo a los reales.)
-   No modifica descargarEML(), el .eml, Gmail, WhatsApp ni ningún flujo.
+   ADJUNTO REAL EN EL .eml (fetch + base64 + multipart/mixed)
+   ÚNICA FUENTE DE VERDAD: para agregar/quitar un documento, edita SOLO
+   este arreglo. Cada entrada DEBE tener una URL real, accesible por el
+   navegador (mismo origen recomendado → sin CORS). El PDF se obtiene por
+   fetch y se incrusta físicamente en el .eml. Si el fetch falla, NO se
+   genera adjunto ficticio: se aborta con aviso (ver descargarEML()).
    ════════════════════════════════════════════════════════════════ */
 const DOCS_ADJUNTABLES = [
-  { label:'Mora Control',                 archivo:'MoraControl_Equifax.pdf' },
-  { label:'Mora Control Documento Único', archivo:'MoraControlDocUnico_Equifax.pdf' },
-  { label:'Reporte Interactivo',          archivo:'ReporteInteractivo_Equifax.pdf' },
-  { label:'Portfolio Monitor',            archivo:'PortfolioMonitor_Equifax.pdf' },
-  { label:'Partner Check',                archivo:'PartnerCheck_Equifax.pdf' },
-  { label:'Data Finder',                  archivo:'DataFinder_Equifax.pdf' },
-  { label:'Malla Societaria',             archivo:'MallaSocietaria_Equifax.pdf' },
-  { label:'IRIS',                         archivo:'IRIS_Equifax.pdf' },
-  { label:'Easy Check',                   archivo:'EasyCheck_Equifax.pdf' }
+  { label:'Mora Control',                 archivo:'MoraControl_Equifax.pdf',        url:'docs/MoraControl_Equifax.pdf' },
+  { label:'Mora Control Documento Único', archivo:'MoraControlDocUnico_Equifax.pdf', url:'docs/MoraControlDocUnico_Equifax.pdf' },
+  { label:'Reporte Interactivo',          archivo:'ReporteInteractivo_Equifax.pdf',  url:'docs/ReporteInteractivo_Equifax.pdf' },
+  { label:'Portfolio Monitor',            archivo:'PortfolioMonitor_Equifax.pdf',    url:'docs/PortfolioMonitor_Equifax.pdf' },
+  { label:'Partner Check',                archivo:'PartnerCheck_Equifax.pdf',        url:'docs/PartnerCheck_Equifax.pdf' },
+  { label:'Data Finder',                  archivo:'DataFinder_Equifax.pdf',          url:'docs/DataFinder_Equifax.pdf' },
+  { label:'Malla Societaria',             archivo:'MallaSocietaria_Equifax.pdf',     url:'docs/MallaSocietaria_Equifax.pdf' },
+  { label:'IRIS',                         archivo:'IRIS_Equifax.pdf',                url:'docs/IRIS_Equifax.pdf' },
+  { label:'Easy Check',                   archivo:'EasyCheck_Equifax.pdf',           url:'docs/EasyCheck_Equifax.pdf' }
 ];
 function buildAdjuntables(){
   var sel=document.getElementById('adjuntar-doc-sel');
@@ -3051,23 +3097,29 @@ function buildAdjuntables(){
   var none=document.createElement('option');
   none.value='';none.textContent='Ninguno';            /* primera opción */
   sel.appendChild(none);
-  DOCS_ADJUNTABLES.forEach(function(d){                 /* resto: solo desde el arreglo */
+  DOCS_ADJUNTABLES.forEach(function(d,i){               /* resto: solo desde el arreglo */
     var o=document.createElement('option');
-    o.value=d.archivo;o.textContent=d.label;
+    o.value=String(i);o.textContent=d.label;            /* value = índice → lookup en el arreglo */
     sel.appendChild(o);
   });
 }
-function recordarAdjuntoOutlook(){
+function adjuntoActual(){
   var sel=document.getElementById('adjuntar-doc-sel');
-  if(!sel||!sel.value)return;                           /* "Ninguno" => sin recordatorio */
-  toast('📎 Recuerde adjuntar: '+sel.value,'info','adjuntar-toast'); /* no bloqueante */
+  if(!sel||sel.value==='')return null;                  /* "Ninguno" => sin adjunto */
+  return DOCS_ADJUNTABLES[parseInt(sel.value,10)]||null;
+}
+function obtenerAdjuntoB64(d){
+  /* fetch real del PDF (mismo origen) → base64. Rechaza si falla; nunca devuelve ficticio. */
+  return fetch(d.url,{cache:'no-store'}).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.arrayBuffer();
+  }).then(function(buf){
+    var bytes=new Uint8Array(buf),bin='',CH=0x8000;     /* chunked: soporta PDFs de varios MB */
+    for(var i=0;i<bytes.length;i+=CH){bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+CH));}
+    return btoa(bin);
+  });
 }
 buildAdjuntables();
-(function(){
-  var b=document.getElementById('btn-abrir-outlook');
-  /* fase de captura: muestra el aviso antes de que continúe el flujo de descargarEML() */
-  if(b)b.addEventListener('click',recordarAdjuntoOutlook,true);
-})();
 
 /* ════════════════════════════════════════════════════════════════
    FETCH UF EN TIEMPO REAL — mindicador.cl (primaria) / CMF (fallback)
