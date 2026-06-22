@@ -688,11 +688,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <!-- OUTLOOK -->
       <div class="pv-pane on" id="pane-outlook">
         <div class="act-strip sticky-bar">
-          <div class="as-subject"><span class="as-lb">ASUNTO</span><span class="sv" id="tpl-asunto-outlook" contenteditable="true" spellcheck="false" title="Editable — puedes ajustarlo antes de copiar o descargar el .eml"></span></div>
+          <button class="pv-copy-btn btn-destacado btn-copiar-asunto" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
+            <span class="ico">📋</span><span>Copiar asunto…</span>
+          </button>
+          <span class="sv" id="tpl-asunto-outlook" style="display:none;"></span>
           <div class="as-actions" style="flex:1;display:flex;gap:7px;align-items:stretch;">
-            <button class="pv-copy-btn btn-destacado btn-copiar-asunto" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
-              <span class="ico">📋</span><span>COPIAR ASUNTO OUTLOOK</span>
-            </button>
             <button class="btn-envio-directo" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía">
               <span class="edir-txt">ENVÍO DIRECTO OUTLOOK</span><span class="edir-arrow">➜</span>
             </button>
