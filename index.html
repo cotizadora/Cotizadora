@@ -540,7 +540,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     </div>
     <button class="htool-btn" onclick="openUF()">⇄ UF</button>
     <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
-    <a class="ext-btn" href="https://drive.google.com/uc?export=download&id=1p_zfxeoZMO2Q9SEVCtmxZaeQ1YFR9XWl" target="_blank" rel="noopener" title="Descargar extensión CRM Extractor Pro — conecta el discador con el CRM (Chrome / Edge)">
+    <a class="ext-btn" href="https://cotizadora.github.io/Cotizadora/pluggin_v9.zip" target="_blank" rel="noopener" title="Descargar extensión CRM Extractor Pro — conecta el discador con el CRM (Chrome / Edge)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V19c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V21H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/></svg>
       <span class="ext-txt"><span class="ext-lb">Extensión CRM</span><span class="ext-sb">Discador ⇄ CRM</span></span>
       <span class="ext-dl">↓</span>
@@ -688,11 +688,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
       <!-- OUTLOOK -->
       <div class="pv-pane on" id="pane-outlook">
         <div class="act-strip sticky-bar">
-          <button class="pv-copy-btn btn-destacado" style="flex:0 0 auto;" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
+          <button class="pv-copy-btn btn-destacado" style="flex:0 1 60%;max-width:70%;justify-content:center;" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
             <span class="ico">📋</span><span>Copiar asunto…</span>
           </button>
           <span class="sv" id="tpl-asunto-outlook" style="display:none;"></span>
-          <div class="as-actions" style="flex:0 0 auto;display:flex;gap:7px;align-items:stretch;">
+          <div class="as-actions" style="flex:0 0 auto;display:flex;gap:7px;align-items:stretch;margin-left:auto;">
             <button class="btn-envio-directo" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía">
               <span class="edir-txt">ENVÍO DIRECTO OUTLOOK</span><span class="edir-arrow">➜</span>
             </button>
