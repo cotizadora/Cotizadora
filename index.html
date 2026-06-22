@@ -91,14 +91,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   margin-bottom:8px;padding:8px 0;
   box-shadow:0 4px 18px rgba(0,0,0,.6);}
 
-/* ▼ ESTILOS ADITIVOS — fila "ADJUNTAR ARCHIVO" + aviso de recordatorio (no modifican reglas existentes) ▼ */
-.adj-row{margin-bottom:10px;}
-.adj-select{flex:1;min-width:60px;background:var(--g3);color:var(--w);border:1px solid var(--g4);
-  border-radius:6px;padding:5px 8px;font-size:.85rem;font-weight:600;outline:none;cursor:pointer;}
-.adj-select:focus{border-color:var(--rl);}
-.toast.warn{background:rgba(240,192,64,.16);border-left:4px solid var(--y);color:var(--y);}
-/* ▲ fin estilos aditivos ▲ */
-
 /* stepper inline en resumen */
 .stepper-inline button{background:var(--g3);border:1px solid var(--g4);color:#fff;width:44px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:800;transition:.12s;}
 .stepper-inline button:hover{background:var(--r);border-color:var(--rl);}
@@ -654,6 +646,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
    <div class="pv-content">
     <div id="mail-toast" class="toast"></div>
     <div id="tpl-toast2" class="toast"></div>
+    <div id="adjuntar-toast" class="toast"></div><!-- AYUDA VISUAL: recordatorio de adjunto (aditivo) -->
 
     <!-- puentes ocultos: refresh() los escribe, genMail() original los lee -->
     <div style="display:none" aria-hidden="true">
@@ -664,14 +657,15 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
     <!-- contenedor que genMail() vuelve visible -->
     <div id="tpl-out">
 
-      <!-- ▼ AYUDA VISUAL ADITIVA — fila global "ADJUNTAR ARCHIVO" (recordatorio para el ejecutivo; no afecta ningún flujo) ▼ -->
-      <div class="act-strip adj-row" id="adj-row">
-        <div class="as-subject">
-          <span class="as-lb">ADJUNTAR ARCHIVO</span>
-          <select id="sel-adjunto" class="adj-select" title="Documento comercial que se te recordará adjuntar al abrir Outlook"></select>
-        </div>
+      <!-- ════ AYUDA VISUAL GLOBAL — ADJUNTAR ARCHIVO (aditivo · no funcional) ════
+           Fila única, fuera de los panes: siempre visible e idéntica en Outlook/Gmail/WhatsApp.
+           El <select> se llena SOLO desde DOCS_ADJUNTABLES (ver script). No altera ningún flujo. -->
+      <div class="act-strip" id="adj-row">
+        <span class="as-lb">ADJUNTAR ARCHIVO</span>
+        <select id="adjuntar-doc-sel" title="Documento sugerido para adjuntar manualmente en Outlook (solo recordatorio visual)"
+                style="flex:1;min-width:140px;background:var(--g0);border:2px solid var(--g4);color:var(--w);border-radius:8px;padding:6px 10px;font-size:.85rem;font-weight:600;cursor:pointer;"></select>
       </div>
-      <!-- ▲ fin ayuda visual aditiva ▲ -->
+
 
       <!-- GMAIL -->
       <div class="pv-pane" id="pane-gmail">
@@ -3035,6 +3029,47 @@ if(_ufg)_ufg.addEventListener('input',function(){if(CURRENT.override!==null)ligh
 cUF();cCLP();cCom();
 
 /* ════════════════════════════════════════════════════════════════
+   AYUDA VISUAL — RECORDATORIO DE ADJUNTO (100% ADITIVO · NO FUNCIONAL)
+   ÚNICA FUENTE DE VERDAD: para agregar/quitar un documento del selector,
+   edita SOLO este arreglo. (Ajusta los nombres de archivo a los reales.)
+   No modifica descargarEML(), el .eml, Gmail, WhatsApp ni ningún flujo.
+   ════════════════════════════════════════════════════════════════ */
+const DOCS_ADJUNTABLES = [
+  { label:'Mora Control',                 archivo:'MoraControl_Equifax.pdf' },
+  { label:'Mora Control Documento Único', archivo:'MoraControlDocUnico_Equifax.pdf' },
+  { label:'Reporte Interactivo',          archivo:'ReporteInteractivo_Equifax.pdf' },
+  { label:'Portfolio Monitor',            archivo:'PortfolioMonitor_Equifax.pdf' },
+  { label:'Partner Check',                archivo:'PartnerCheck_Equifax.pdf' },
+  { label:'Data Finder',                  archivo:'DataFinder_Equifax.pdf' },
+  { label:'Malla Societaria',             archivo:'MallaSocietaria_Equifax.pdf' },
+  { label:'IRIS',                         archivo:'IRIS_Equifax.pdf' },
+  { label:'Easy Check',                   archivo:'EasyCheck_Equifax.pdf' }
+];
+function buildAdjuntables(){
+  var sel=document.getElementById('adjuntar-doc-sel');
+  if(!sel)return;
+  var none=document.createElement('option');
+  none.value='';none.textContent='Ninguno';            /* primera opción */
+  sel.appendChild(none);
+  DOCS_ADJUNTABLES.forEach(function(d){                 /* resto: solo desde el arreglo */
+    var o=document.createElement('option');
+    o.value=d.archivo;o.textContent=d.label;
+    sel.appendChild(o);
+  });
+}
+function recordarAdjuntoOutlook(){
+  var sel=document.getElementById('adjuntar-doc-sel');
+  if(!sel||!sel.value)return;                           /* "Ninguno" => sin recordatorio */
+  toast('📎 Recuerde adjuntar: '+sel.value,'info','adjuntar-toast'); /* no bloqueante */
+}
+buildAdjuntables();
+(function(){
+  var b=document.getElementById('btn-abrir-outlook');
+  /* fase de captura: muestra el aviso antes de que continúe el flujo de descargarEML() */
+  if(b)b.addEventListener('click',recordarAdjuntoOutlook,true);
+})();
+
+/* ════════════════════════════════════════════════════════════════
    FETCH UF EN TIEMPO REAL — mindicador.cl (primaria) / CMF (fallback)
    Se ejecuta al cargar y se refresca cada 30 minutos.
    El usuario puede editar el campo manualmente en cualquier momento.
@@ -3077,60 +3112,6 @@ cUF();cCLP();cCom();
   intentarMindicador();
   /* refresco cada 30 minutos — la UF cambia una vez al día pero puede haber cambio de fecha */
   setInterval(intentarMindicador,30*60*1000);
-})();
-</script>
-<script>
-/* ════════════════════════════════════════════════════════════════════════
-   MÓDULO ADITIVO — Recordatorio de adjunto comercial
-   ------------------------------------------------------------------------
-   • NO modifica descargarEML(), MIME, asunto, destinatario, cuerpo, Gmail,
-     WhatsApp, CRM, historial, productos, cálculos ni automatizaciones.
-   • NO adjunta archivos, no accede a disco, no usa rutas ni APIs nativas.
-   • Solo: (1) pobla el selector global desde una única fuente de verdad y
-     (2) muestra un aviso visual NO bloqueante al abrir Outlook.
-   Para agregar un documento nuevo en el futuro: añade UNA entrada al arreglo.
-   ════════════════════════════════════════════════════════════════════════ */
-(function(){
-  var DOCS_ADJUNTABLES = [
-    { id:'ninguno',   etiqueta:'Ninguno',                          archivo:null },
-    { id:'mora',      etiqueta:'MoraControl_Equifax.pdf',          archivo:'MoraControl_Equifax.pdf' },
-    { id:'informes',  etiqueta:'InformesComerciales_Equifax.pdf',  archivo:'InformesComerciales_Equifax.pdf' },
-    { id:'portfolio', etiqueta:'PortfolioMonitor_Equifax.pdf',     archivo:'PortfolioMonitor_Equifax.pdf' },
-    { id:'ficha',     etiqueta:'FichaContratacion.pdf',            archivo:'FichaContratacion.pdf' },
-    { id:'corp',      etiqueta:'PresentacionCorporativa.pdf',      archivo:'PresentacionCorporativa.pdf' }
-  ];
-
-  function poblarSelector(){
-    var sel=document.getElementById('sel-adjunto');
-    if(!sel||sel._poblado)return;
-    DOCS_ADJUNTABLES.forEach(function(d){
-      var o=document.createElement('option');
-      o.value=d.id; o.textContent=d.etiqueta;
-      sel.appendChild(o);
-    });
-    sel._poblado=true;
-  }
-
-  function engancharRecordatorio(){
-    var btn=document.getElementById('btn-abrir-outlook');
-    if(!btn||btn._recAdj)return;
-    /* Listener ADICIONAL: el onclick inline existente (descargarEML();playClick();)
-       sigue ejecutándose intacto. Esto solo agrega un aviso visual encima. */
-    btn.addEventListener('click',function(){
-      var sel=document.getElementById('sel-adjunto'); if(!sel)return;
-      var d=DOCS_ADJUNTABLES.filter(function(x){return x.id===sel.value;})[0];
-      if(d&&d.archivo&&typeof toast==='function'){
-        toast('⚠ Recuerda adjuntar: '+d.archivo,'warn','mail-toast');
-      }
-    });
-    btn._recAdj=true;
-  }
-
-  function init(){ poblarSelector(); engancharRecordatorio(); }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',init);
-  }else{ init(); }
 })();
 </script>
 </body>
