@@ -1178,11 +1178,11 @@ function solBlocksInner(sel,theme){
   var dark=(theme==='dark');
   var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#333',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
   function sec(titulo,items,icon,iconColor){
-    return '<div style="margin:9px 0 3px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;font-family:Arial,sans-serif;">'+titulo+'</div>'+
+    return '<div style="margin:13px 0 3px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;font-family:Arial,sans-serif;">'+titulo+'</div>'+
       items.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:'+iconColor+';font-weight:bold;">'+icon+'</span> '+t+'</div>';}).join('');
   }
   return sel.map(function(k){
-    return '<div style="margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid '+cLine+';">'+
+    return '<div style="margin:0 0 26px;padding-bottom:18px;border-bottom:2px solid '+cLine+';">'+
       '<div style="font-size:15px;font-weight:800;color:'+cTit+';font-family:Arial,sans-serif;margin-bottom:2px;">'+SOL_NAMES[k]+'</div>'+
       sec('Situaciones',SOL_SIT[k]||[],'•','#c0392b')+
       sec('Características',solCarac(k),'✔','#9b1c2e')+
@@ -1846,10 +1846,10 @@ function genMail(){
   // Items de beneficios sobre fondo blanco — color oscuro, sin problema
   var _listaItemsOtl = itMail.map(function(item){
     return '<tr>'+
-      '<td valign="top" width="18" bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 6px 4px 0;font-family:Arial,sans-serif;">'+
+      '<td valign="top" width="18" bgcolor="#ffffff" style="background-color:#ffffff;padding:5px 6px 5px 0;font-family:Arial,sans-serif;">'+
         '<font color="#9b1c2e" style="font-size:13px;font-weight:bold;">&#10003;</font>'+
       '</td>'+
-      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 0;font-family:Arial,sans-serif;">'+
+      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:5px 0;font-family:Arial,sans-serif;">'+
         '<font color="#222222" style="font-size:13px;line-height:1.5;">'+item+'</font>'+
       '</td>'+
     '</tr>';
@@ -1861,22 +1861,22 @@ function genMail(){
     // ══════════════════════════════════════════
     // HEADER — fondo rojo sólido
     // ══════════════════════════════════════════
-    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;padding:22px 28px 18px 28px;">'+
+    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;padding:24px 28px 20px 28px;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;"><tr>'+
         // Columna logo
         '<td valign="middle" align="left" bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
-          '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="260" height="auto" style="display:block;width:260px;height:auto;border:0;" />'+
+          '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="360" height="auto" style="display:block;width:360px;height:auto;border:0;" />'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;"><tr>'+
             '<td align="left" bgcolor="#9b1c2e" style="background-color:#9b1c2e;color:#ffffff;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;"><span style="color:#ffffff;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></span></font>'+
+              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:9px;letter-spacing:1px;text-transform:uppercase;"><span style="color:#ffffff;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></span></font>'+
             '</td>'+
           '</tr></table>'+
         '</td>'+
         // Columna badge + fecha
         '<td valign="top" align="right" bgcolor="#9b1c2e" style="background-color:#9b1c2e;">'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr>'+
-            '<td bgcolor="#6e1220" align="center" style="background-color:#6e1220;color:#f0c040;padding:6px 14px;">'+
-              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:11px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
+            '<td bgcolor="#5e0f1b" align="center" style="background-color:#5e0f1b;border:1px solid #f0c040;color:#f0c040;padding:5px 16px;">'+
+              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:10px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
             '</td>'+
           '</tr></table>'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:8px;"><tr>'+
@@ -1934,7 +1934,7 @@ function genMail(){
           '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
             '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;font-size:2px;line-height:2px;height:2px;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
           '</table>'+
-          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:12px;">'+_listaItemsOtl+'</table>'+
+          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:14px;">'+_listaItemsOtl+'</table>'+
         '</td>'+
       '</tr></table>'+
     '</td></tr>'+
@@ -1959,7 +1959,7 @@ function genMail(){
             '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;text-transform:uppercase;"><span style="color:#ffffff;"><b>Precio ofrecido</b></span></font>'+
           '</td>'+
           '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:6px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:28px;font-weight:bold;line-height:1;"><span style="color:#ffffff;"><b>'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</b></span></font>'+
+            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:34px;font-weight:bold;line-height:1;"><span style="color:#ffffff;"><b>'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</b></span></font>'+
           '</td>'+
         '</tr>'+
         (clp
@@ -2016,7 +2016,7 @@ function genMail(){
     // ══════════════════════════════════════════
     // FIRMA — fondo gris claro, texto oscuro (garantizado Outlook)
     // ══════════════════════════════════════════
-    '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding:22px 28px;border-top:3px solid #9b1c2e;">'+
+    '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
         '<td valign="top" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
           '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
@@ -2062,7 +2062,7 @@ function genMail(){
     // ══════════════════════════════════════════
     // PIE — fondo gris medio, texto oscuro legible
     // ══════════════════════════════════════════
-    '<tr><td bgcolor="#cccccc" style="background-color:#cccccc;padding:8px 28px;text-align:center;">'+
+    '<tr><td bgcolor="#cccccc" style="background-color:#cccccc;padding:10px 28px;text-align:center;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
         '<td align="center" bgcolor="#cccccc" style="background-color:#cccccc;padding:0;">'+
           '<font face="Arial,sans-serif" color="#444444"><font style="font-size:9px;text-transform:uppercase;letter-spacing:1px;">Equifax Chile &middot; Informaci&oacute;n confidencial &middot; Solo para el destinatario autorizado</font></font>'+
