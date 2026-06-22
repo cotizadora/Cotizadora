@@ -3034,7 +3034,9 @@ cUF();cCLP();cCom();
     if(chip){chip.textContent='✔ UF '+Math.round(valor).toLocaleString('es-CL')+' · '+fuente;chip.style.color='#2ecc71';}
   }
   function intentarMindicador(){
-    fetch('https://mindicador.cl/api/uf',{cache:'no-store'})
+    var _hoyUF=new Date();
+    var _fUF=('0'+_hoyUF.getDate()).slice(-2)+'-'+('0'+(_hoyUF.getMonth()+1)).slice(-2)+'-'+_hoyUF.getFullYear();
+    fetch('https://mindicador.cl/api/uf/'+_fUF,{cache:'no-store'})
       .then(function(r){return r.ok?r.json():Promise.reject('status '+r.status);})
       .then(function(d){
         var v=d&&d.serie&&d.serie[0]&&d.serie[0].valor;
