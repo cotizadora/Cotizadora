@@ -179,13 +179,41 @@ body.uis-xl{--ui-scale:1.30;}
 #left-panel .chk-row{font-size:calc(.85rem * var(--ui-scale));}
 #left-panel .crm-paste-btn .crm-main{font-size:calc(1rem * var(--ui-scale));}
 #left-panel .crm-paste-btn .crm-sub{font-size:calc(.7rem * var(--ui-scale));}
-/* selector compacto en header — no desplaza acciones críticas (van en center/right-panel) */
-#ui-scale-bar{display:inline-flex;align-items:center;}
-#ui-scale-bar.uis-group{border:1px solid var(--g4);border-radius:8px;overflow:hidden;}
-#ui-scale-bar .uis-btn{background:var(--g0);color:var(--wa);border:0;padding:6px 9px;font-size:.74rem;font-weight:800;line-height:1;cursor:pointer;border-left:1px solid var(--g4);transition:.15s;}
-#ui-scale-bar .uis-btn:first-child{border-left:0;}
-#ui-scale-bar .uis-btn:hover{background:var(--g2);}
-#ui-scale-bar .uis-btn.on{background:var(--rl);color:#fff;}
+/* ════════ ACCESIBILIDAD — popover en header (Contraste · Texto · Distribución) ════════
+   TEMAS por clase global en <body>. Base (sin clase) = "Normal" = look actual (no se altera al cargar).
+   Solo recolorea estilos vía variables; no toca estructura ni las tarjetas de correo. */
+body.theme-light{
+  --g0:#eef0f3;--g1:#ffffff;--g2:#f3f4f7;--g3:#e3e5ea;--g4:#ccced6;--g5:#aeb1bb;
+  --w:#1a1c20;--wa:#55585f;--wb:#84878f;
+}
+body.theme-dark{
+  --g0:#000000;--g1:#0a0a0b;--g2:#101012;--g3:#1a1a1d;--g4:#2b2b30;--g5:#3c3c42;
+  --w:#ffffff;--wa:#c9c9d1;--wb:#9a9aa2;
+}
+/* paneles de preview hardcodeados → recolor por tema. Las tarjetas de correo NO cambian. */
+body.theme-light #center-panel{background:#e7e9ed;}
+body.theme-light #right-panel{background:#dcdee3;}
+body.theme-dark #center-panel{background:#000;}
+body.theme-dark #right-panel{background:#060607;}
+/* DISTRIBUCIÓN — solo #left-panel (sin scroll horizontal, sin mover acciones). Base = Normal. */
+body.dens-compact #left-panel .block{padding:10px 12px;margin-bottom:9px;}
+body.dens-compact #left-panel .cfg-grid,body.dens-compact #left-panel .cfg-2,body.dens-compact #left-panel .cfg-3{gap:8px;}
+body.dens-amplio #left-panel .block{padding:22px 24px;margin-bottom:20px;}
+body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.dens-amplio #left-panel .cfg-3{gap:18px;}
+/* botón + popover en header */
+#a11y-wrap{position:relative;display:inline-flex;}
+#a11y-btn{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;height:34px;min-width:38px;padding:0 9px;font-size:1rem;font-weight:800;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.15s;}
+#a11y-btn:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
+#a11y-pop{position:absolute;top:42px;right:0;z-index:400;display:none;min-width:236px;background:var(--g1);border:1px solid var(--g4);border-radius:12px;padding:14px;box-shadow:0 10px 34px rgba(0,0,0,.5);}
+#a11y-pop.on{display:block;}
+#a11y-pop .a11y-sec{margin-bottom:12px;}
+#a11y-pop .a11y-sec:last-child{margin-bottom:0;}
+#a11y-pop .a11y-lbl{display:block;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin-bottom:6px;}
+.uis-group{display:inline-flex;border:1px solid var(--g4);border-radius:8px;overflow:hidden;width:100%;}
+.uis-btn{flex:1;background:var(--g0);color:var(--wa);border:0;padding:8px 6px;font-size:.74rem;font-weight:800;line-height:1;cursor:pointer;border-left:1px solid var(--g4);transition:.15s;}
+.uis-btn:first-child{border-left:0;}
+.uis-btn:hover{background:var(--g2);}
+.uis-btn.on{background:var(--rl);color:#fff;}
 
 /* Resumen comercial */
 .sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
