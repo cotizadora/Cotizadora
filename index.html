@@ -513,6 +513,16 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   .price-big{font-size:2.2rem;}
   .snd-toggle{display:none;}
 }
+/* === Validación de correo en tiempo real (estado visual) === */
+.eml-status{font-size:.72rem;font-weight:600;letter-spacing:.3px;min-height:.9em;margin-top:2px;line-height:1.1;}
+.eml-status.s-ok{color:var(--gn);}
+.eml-status.s-bad{color:var(--rl);}
+.eml-status.s-wait{color:var(--y);}
+.eml-status.s-gris{color:var(--wb);}
+input#cli-email.eml-ok{border-color:var(--gn)!important;box-shadow:0 0 0 3px rgba(46,204,113,.18)!important;}
+input#cli-email.eml-bad{border-color:var(--rl)!important;box-shadow:0 0 0 3px rgba(192,38,59,.20)!important;}
+input#cli-email.eml-wait{border-color:var(--y)!important;box-shadow:0 0 0 3px rgba(240,192,64,.18)!important;}
+input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!important;}
 </style>
 <style id="sol-cat-styles">
 .sol-head2{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin:14px 2px 9px;}
@@ -573,7 +583,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
         <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
         <div class="cfg-2">
           <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="onClientChange()"></div>
-          <div class="fld"><label>Correo electrónico</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="onClientChange()"></div>
+          <div class="fld"><label>Correo electrónico</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="onClientChange();validarEmailCliente()"><span id="cli-email-status" class="eml-status"></span></div>
         </div>
         <!-- campos ocultos para compatibilidad -->
         <input type="hidden" id="mn"><input type="hidden" id="mr"><input type="hidden" id="cli-obs">
@@ -3008,6 +3018,7 @@ function mapearCRM(txt){
   if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
   /* El campo Contacto se mantiene intacto: la extensión no entrega nombre */
   onClientChange();
+  validarEmailCliente();
   if(ok)toast('✔ Datos CRM cargados','ok','global-toast');
 }
 function updateCRMWsp(){
@@ -3165,6 +3176,76 @@ buildAdjuntables();
   /* refresco cada 30 minutos — la UF cambia una vez al día pero puede haber cambio de fecha */
   setInterval(intentarMindicador,30*60*1000);
 })();
+
+/* ====================================================================
+   VALIDACIÓN DE CORREO EN TIEMPO REAL (formato local + dominio vía DoH)
+   - Aditivo: no toca lógica comercial, envíos ni catálogo.
+   - API pública sin key, con CORS: Google Public DNS (DoH JSON).
+   - Verifica que el DOMINIO exista y pueda recibir correo (registro MX).
+     NO comprueba la existencia del buzón (imposible desde el navegador).
+   - Si la API falla (red/timeout/respuesta inválida): estado "gris",
+     NO bloquea el flujo del cotizador.
+   ==================================================================== */
+var _EMLT=null, _EMLSEQ=0;
+function _emlSet(state,msg){
+  var inp=document.getElementById('cli-email');
+  var st=document.getElementById('cli-email-status');
+  if(inp){
+    inp.classList.remove('eml-ok','eml-bad','eml-wait','eml-gris');
+    if(state)inp.classList.add('eml-'+state);
+  }
+  if(st){
+    st.className='eml-status'+(state?(' s-'+state):'');
+    st.textContent=msg||'';
+  }
+}
+function validarEmailCliente(){
+  var inp=document.getElementById('cli-email'); if(!inp)return;
+  var v=(inp.value||'').trim();
+  if(_EMLT){clearTimeout(_EMLT);_EMLT=null;}
+  _EMLSEQ++; /* invalida cualquier consulta en vuelo */
+  if(!v){_emlSet('','');return;}                 /* vacío: sin indicador */
+  var re=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!re.test(v)){_emlSet('bad','✕ Formato de correo inválido');return;}
+  _emlSet('wait','⋯ Verificando dominio…');       /* amarillo */
+  var seq=_EMLSEQ;
+  _EMLT=setTimeout(function(){                     /* debounce 550ms */
+    var dom=v.split('@')[1].toLowerCase();
+    _emlMX(dom,seq);
+  },550);
+}
+function _emlFetch(name,type,cb,err){
+  var ctrl=('AbortController' in window)?new AbortController():null;
+  var to=setTimeout(function(){ if(ctrl)ctrl.abort(); },6000);
+  fetch('https://dns.google/resolve?name='+encodeURIComponent(name)+'&type='+type,
+        ctrl?{signal:ctrl.signal}:{})
+    .then(function(r){ if(!r.ok)throw new Error('http'); return r.json(); })
+    .then(function(d){ clearTimeout(to); cb(d); })
+    .catch(function(){ clearTimeout(to); err(); });
+}
+function _emlMX(dom,seq){
+  _emlFetch(dom,'MX',function(d){
+    if(seq!==_EMLSEQ)return;                        /* resultado obsoleto */
+    if(d&&d.Status===3){_emlSet('bad','✕ El dominio no existe');return;}
+    var hasMX=d&&d.Status===0&&Array.isArray(d.Answer)&&d.Answer.some(function(a){return a.type===15;});
+    if(hasMX){_emlSet('ok','✔ Dominio válido y con servidor de correo');return;}
+    _emlA(dom,seq);                                 /* sin MX: desambiguar */
+  },function(){
+    if(seq!==_EMLSEQ)return;
+    _emlSet('gris','• No verificado (sin conexión a la API)');
+  });
+}
+function _emlA(dom,seq){
+  _emlFetch(dom,'A',function(d){
+    if(seq!==_EMLSEQ)return;
+    var hasA=d&&d.Status===0&&Array.isArray(d.Answer)&&d.Answer.some(function(a){return a.type===1;});
+    if(hasA){_emlSet('bad','✕ El dominio no recibe correo (sin registro MX)');}
+    else{_emlSet('bad','✕ El dominio no existe');}
+  },function(){
+    if(seq!==_EMLSEQ)return;
+    _emlSet('gris','• No verificado (sin conexión a la API)');
+  });
+}
 </script>
 </body>
 </html>
