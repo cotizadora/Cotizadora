@@ -214,6 +214,8 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .uis-btn:first-child{border-left:0;}
 .uis-btn:hover{background:var(--g2);}
 .uis-btn.on{background:var(--rl);color:#fff;}
+.htools #ui-scale-bar,.htools #theme-bar{width:auto;flex:0 0 auto;}
+.htools #ui-scale-bar .uis-btn,.htools #theme-bar .uis-btn{flex:0 0 auto;padding:7px 10px;}
 
 /* Resumen comercial */
 .sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
@@ -602,6 +604,11 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
       <button type="button" class="uis-btn on" onclick="setUIScale('n',this)" title="Texto normal (100%)">A</button>
       <button type="button" class="uis-btn" onclick="setUIScale('g',this)" title="Texto grande (115%)">A+</button>
       <button type="button" class="uis-btn" onclick="setUIScale('xl',this)" title="Texto muy grande (130%)">A++</button>
+    </div>
+    <div id="theme-bar" class="uis-group" role="group" aria-label="Tema de color" title="Tema de color de la interfaz">
+      <button type="button" class="uis-btn" onclick="setTheme('light',this)" title="Tema claro">Claro</button>
+      <button type="button" class="uis-btn on" onclick="setTheme('normal',this)" title="Tema normal">Normal</button>
+      <button type="button" class="uis-btn" onclick="setTheme('dark',this)" title="Tema oscuro">Oscuro</button>
     </div>
     <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
     <a class="ext-btn" href="https://cotizadora.github.io/Cotizadora/pluggin_v9.zip" target="_blank" rel="noopener" title="Descargar extensión CRM Extractor Pro — conecta el discador con el CRM (Chrome / Edge)">
@@ -2999,6 +3006,14 @@ function setUIScale(level,btn){
   if(bar){var bs=bar.querySelectorAll('.uis-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('on');}
   if(btn)btn.classList.add('on');
 }
+function setTheme(mode,btn){
+  document.body.classList.remove('theme-light','theme-dark');
+  if(mode==='light')document.body.classList.add('theme-light');
+  else if(mode==='dark')document.body.classList.add('theme-dark');
+  var bar=document.getElementById('theme-bar');
+  if(bar){var bs=bar.querySelectorAll('.uis-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('on');}
+  if(btn)btn.classList.add('on');
+}
 
 /* ════════════════════════════════════════════════════════════════
    SALUDO NOMINAL — Estimado/Estimada/Estimado/a NOMBRE
@@ -3129,7 +3144,7 @@ function mapearCRM(txt){
   });
   var razon=libres.length?libres.slice().sort(function(a,b){return b.length-a.length;})[0]:'';
   var ok=false;
-  if(razon){var e=$('me');if(e){e.value=razon;ok=true;}}
+  if(razon){var e=$('me');if(e){e.value=razon;ok=true;} var _cc=$('cli-contacto');if(_cc)_cc.value='';}
   if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/[^\d+]/g,'');ok=true;}}
   if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
   /* CONTACTO — fuente única: el campo visible #cli-contacto.
