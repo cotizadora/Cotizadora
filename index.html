@@ -167,6 +167,26 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 @media(max-width:520px){.cfg-2{grid-template-columns:1fr;}}
 .cfg-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;}
 @media(max-width:520px){.cfg-3{grid-template-columns:1fr;}}
+/* ── ESCALADO DE TEXTO DEL PANEL DE TRABAJO (solo #left-panel) ──
+   Override LOCAL: re-declara los mismos tamaños base ×var(--ui-scale).
+   A escala 1 el render es idéntico. No toca CSS base, root ni vista previa. */
+:root{--ui-scale:1;}
+body.uis-g{--ui-scale:1.15;}
+body.uis-xl{--ui-scale:1.30;}
+#left-panel .block-t{font-size:calc(.72rem * var(--ui-scale));}
+#left-panel .fld label{font-size:calc(.74rem * var(--ui-scale));}
+#left-panel .fld select,#left-panel .fld input{font-size:calc(1.02rem * var(--ui-scale));}
+#left-panel .chk-row{font-size:calc(.85rem * var(--ui-scale));}
+#left-panel .crm-paste-btn .crm-main{font-size:calc(1rem * var(--ui-scale));}
+#left-panel .crm-paste-btn .crm-sub{font-size:calc(.7rem * var(--ui-scale));}
+/* selector compacto — no desplaza acciones críticas (van en center/right-panel) */
+#ui-scale-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px;}
+#ui-scale-bar .uis-lbl{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:700;opacity:.8;}
+#ui-scale-bar .uis-group{display:inline-flex;border:1px solid var(--g4);border-radius:8px;overflow:hidden;}
+#ui-scale-bar .uis-btn{background:var(--g0);color:var(--wa);border:0;padding:6px 11px;font-size:.72rem;font-weight:700;cursor:pointer;border-left:1px solid var(--g4);transition:.15s;}
+#ui-scale-bar .uis-btn:first-child{border-left:0;}
+#ui-scale-bar .uis-btn:hover{background:var(--g2);}
+#ui-scale-bar .uis-btn.on{background:var(--rl);color:#fff;}
 
 /* Resumen comercial */
 .sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
@@ -575,6 +595,16 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 
   <!-- ════════ PANEL IZQUIERDO — CLIENTE · PRODUCTO · CONFIG · RESUMEN ════════ -->
   <section id="left-panel">
+
+    <!-- 0 · Tamaño de texto del formulario (no afecta la vista previa) -->
+    <div id="ui-scale-bar" title="Ajusta el tamaño del texto del formulario. No afecta la vista previa.">
+      <span class="uis-lbl">Tamaño de texto</span>
+      <div class="uis-group" role="group" aria-label="Tamaño de texto">
+        <button type="button" class="uis-btn on" onclick="setUIScale('n',this)">Normal</button>
+        <button type="button" class="uis-btn" onclick="setUIScale('g',this)">Grande</button>
+        <button type="button" class="uis-btn" onclick="setUIScale('xl',this)">Muy grande</button>
+      </div>
+    </div>
 
     <!-- 1 · DATOS DEL CLIENTE (siempre arriba, lo que cambia en cada cotización) -->
     <div class="block">
@@ -2937,6 +2967,16 @@ setInterval(function(){
     try{onClientChange();}catch(e){}
   }
 },60000);
+
+/* Escala de texto del formulario: togglea clase en <body> (CSS hace el resto). */
+function setUIScale(level,btn){
+  document.body.classList.remove('uis-g','uis-xl');
+  if(level==='g')document.body.classList.add('uis-g');
+  else if(level==='xl')document.body.classList.add('uis-xl');
+  var bar=document.getElementById('ui-scale-bar');
+  if(bar){var bs=bar.querySelectorAll('.uis-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('on');}
+  if(btn)btn.classList.add('on');
+}
 
 /* ════════════════════════════════════════════════════════════════
    SALUDO NOMINAL — Estimado/Estimada/Estimado/a NOMBRE
