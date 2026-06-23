@@ -165,6 +165,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .fld select:focus,.fld input:focus{outline:none;border-color:var(--rl);box-shadow:0 0 0 3px rgba(155,28,46,.22);}
 .cfg-2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
 @media(max-width:520px){.cfg-2{grid-template-columns:1fr;}}
+.cfg-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;}
+@media(max-width:520px){.cfg-3{grid-template-columns:1fr;}}
 
 /* Resumen comercial */
 .sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
@@ -581,9 +583,10 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
       <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label>
       <div id="dest-fields" class="cfg-grid">
         <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
-        <div class="cfg-2">
+        <div class="cfg-3">
           <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="onClientChange()"></div>
           <div class="fld"><label>Correo electrónico</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="onClientChange();validarEmailCliente()"><span id="cli-email-status" class="eml-status"></span></div>
+          <div class="fld"><label>Contacto (opcional)</label><input type="text" id="cli-contacto" placeholder="Nombre del contacto" oninput="onClientChange()"></div>
         </div>
         <!-- campos ocultos para compatibilidad -->
         <input type="hidden" id="mn"><input type="hidden" id="mr"><input type="hidden" id="cli-obs">
@@ -1590,7 +1593,7 @@ function genMail(){
   /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
   var em=skip?'':gv('me')||'',ru=skip?'':gv('mr')||'';
   /* Saludo nominal: solo si hay CONTACTO pegado (Excel) y no es propuesta genérica. */
-  var _contactoNom=skip?'':(gv('mn')||'').trim();
+  var _contactoNom=skip?'':((gv('mn')||'').trim()||(gv('cli-contacto')||'').trim());
   var _salNom=_contactoNom?saludoNominal(_contactoNom):'';
   /* ── EJECUTIVO/A — FUENTE ÚNICA (localStorage vía getExecData) ── */
   var _ex=getExecData();
