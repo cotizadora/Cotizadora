@@ -179,11 +179,10 @@ body.uis-xl{--ui-scale:1.30;}
 #left-panel .chk-row{font-size:calc(.85rem * var(--ui-scale));}
 #left-panel .crm-paste-btn .crm-main{font-size:calc(1rem * var(--ui-scale));}
 #left-panel .crm-paste-btn .crm-sub{font-size:calc(.7rem * var(--ui-scale));}
-/* selector compacto — no desplaza acciones críticas (van en center/right-panel) */
-#ui-scale-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px;}
-#ui-scale-bar .uis-lbl{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:700;opacity:.8;}
-#ui-scale-bar .uis-group{display:inline-flex;border:1px solid var(--g4);border-radius:8px;overflow:hidden;}
-#ui-scale-bar .uis-btn{background:var(--g0);color:var(--wa);border:0;padding:6px 11px;font-size:.72rem;font-weight:700;cursor:pointer;border-left:1px solid var(--g4);transition:.15s;}
+/* selector compacto en header — no desplaza acciones críticas (van en center/right-panel) */
+#ui-scale-bar{display:inline-flex;align-items:center;}
+#ui-scale-bar.uis-group{border:1px solid var(--g4);border-radius:8px;overflow:hidden;}
+#ui-scale-bar .uis-btn{background:var(--g0);color:var(--wa);border:0;padding:6px 9px;font-size:.74rem;font-weight:800;line-height:1;cursor:pointer;border-left:1px solid var(--g4);transition:.15s;}
 #ui-scale-bar .uis-btn:first-child{border-left:0;}
 #ui-scale-bar .uis-btn:hover{background:var(--g2);}
 #ui-scale-bar .uis-btn.on{background:var(--rl);color:#fff;}
@@ -571,6 +570,11 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
       <input type="number" id="uf-global" value="40779" step="1">
     </div>
     <button class="htool-btn" onclick="openUF()">⇄ UF</button>
+    <div id="ui-scale-bar" class="uis-group" role="group" aria-label="Tamaño de texto del formulario" title="Tamaño de texto del formulario (no afecta la vista previa)">
+      <button type="button" class="uis-btn on" onclick="setUIScale('n',this)" title="Texto normal (100%)">A</button>
+      <button type="button" class="uis-btn" onclick="setUIScale('g',this)" title="Texto grande (115%)">A+</button>
+      <button type="button" class="uis-btn" onclick="setUIScale('xl',this)" title="Texto muy grande (130%)">A++</button>
+    </div>
     <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
     <a class="ext-btn" href="https://cotizadora.github.io/Cotizadora/pluggin_v9.zip" target="_blank" rel="noopener" title="Descargar extensión CRM Extractor Pro — conecta el discador con el CRM (Chrome / Edge)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V19c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V21H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/></svg>
@@ -595,16 +599,6 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 
   <!-- ════════ PANEL IZQUIERDO — CLIENTE · PRODUCTO · CONFIG · RESUMEN ════════ -->
   <section id="left-panel">
-
-    <!-- 0 · Tamaño de texto del formulario (no afecta la vista previa) -->
-    <div id="ui-scale-bar" title="Ajusta el tamaño del texto del formulario. No afecta la vista previa.">
-      <span class="uis-lbl">Tamaño de texto</span>
-      <div class="uis-group" role="group" aria-label="Tamaño de texto">
-        <button type="button" class="uis-btn on" onclick="setUIScale('n',this)">Normal</button>
-        <button type="button" class="uis-btn" onclick="setUIScale('g',this)">Grande</button>
-        <button type="button" class="uis-btn" onclick="setUIScale('xl',this)">Muy grande</button>
-      </div>
-    </div>
 
     <!-- 1 · DATOS DEL CLIENTE (siempre arriba, lo que cambia en cada cotización) -->
     <div class="block">
@@ -1623,7 +1617,7 @@ function genMail(){
   /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
   var em=skip?'':gv('me')||'',ru=skip?'':gv('mr')||'';
   /* Saludo nominal: solo si hay CONTACTO pegado (Excel) y no es propuesta genérica. */
-  var _contactoNom=skip?'':((gv('mn')||'').trim()||(gv('cli-contacto')||'').trim());
+  var _contactoNom=skip?'':(gv('cli-contacto')||'').trim();
   var _salNom=_contactoNom?saludoNominal(_contactoNom):'';
   /* ── EJECUTIVO/A — FUENTE ÚNICA (localStorage vía getExecData) ── */
   var _ex=getExecData();
@@ -3110,9 +3104,9 @@ function mapearCRM(txt){
   if(razon){var e=$('me');if(e){e.value=razon;ok=true;}}
   if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/[^\d+]/g,'');ok=true;}}
   if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
-  /* CONTACTO (solo Excel): celda posterior al EMAIL. La extensión no entrega nombre.
-     Se escribe SIEMPRE (valor o ''), para no arrastrar contactos previos. */
-  var _mnEl=$('mn');if(_mnEl)_mnEl.value=extraerContactoExcel(txt);
+  /* CONTACTO — fuente única: el campo visible #cli-contacto.
+     El pegado de Excel lo sobrescribe SOLO si trae contacto (no borra lo escrito a mano). */
+  var _ctExcel=extraerContactoExcel(txt);var _ctEl=$('cli-contacto');if(_ctEl&&_ctExcel)_ctEl.value=_ctExcel;
   onClientChange();
   validarEmailCliente();
   if(ok)toast('✔ Datos CRM cargados','ok','global-toast');
