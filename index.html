@@ -1589,6 +1589,9 @@ function genMail(){
   var sal=saludoChile(); /* saludo según hora real de Chile, calculado al generar */
   /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
   var em=skip?'':gv('me')||'',ru=skip?'':gv('mr')||'';
+  /* Saludo nominal: solo si hay CONTACTO pegado (Excel) y no es propuesta genérica. */
+  var _contactoNom=skip?'':(gv('mn')||'').trim();
+  var _salNom=_contactoNom?saludoNominal(_contactoNom):'';
   /* ── EJECUTIVO/A — FUENTE ÚNICA (localStorage vía getExecData) ── */
   var _ex=getExecData();
   var as2     = _ex.name   || '[Asesor]';
@@ -1756,6 +1759,7 @@ function genMail(){
       (em
         ? '<div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#9b4455;font-family:Arial,sans-serif;margin-bottom:6px;">Propuesta para</div>'+
           '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'+
+          (_salNom?'<div style="margin-top:6px;font-size:13px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+_salNom+'</div>':'')+
           '<div style="margin-top:8px;font-size:13px;color:#ccbbbb;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</div>'
         : '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;letter-spacing:1px;">Propuesta Comercial</div>'+
           '<div style="margin-top:6px;font-size:13px;color:#aaa;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</div>'
@@ -1925,6 +1929,9 @@ function genMail(){
             '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
               '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;line-height:1.2;">'+em+'</font></b></font>'+
             '</td></tr>'+
+            (_salNom?'<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
+              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:13px;">'+_salNom+'</font></b></font>'+
+            '</td></tr>':'')+
             '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
               '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
             '</td></tr>'
@@ -2929,6 +2936,50 @@ setInterval(function(){
 },60000);
 
 /* ════════════════════════════════════════════════════════════════
+   SALUDO NOMINAL — Estimado/Estimada/Estimado/a NOMBRE
+   Fuente ÚNICA: campo CONTACTO pegado desde Excel (hidden #mn).
+   No CRM · no extensión · no inferencia de origen.
+   Género: diccionario de alta certeza. Sin heurísticas por terminación.
+   Ambiguo o no encontrado → "Estimado/a".
+   ════════════════════════════════════════════════════════════════ */
+var NOMBRES_M={juan:1,jose:1,luis:1,carlos:1,jorge:1,miguel:1,francisco:1,javier:1,diego:1,pedro:1,pablo:1,sergio:1,manuel:1,ricardo:1,fernando:1,andres:1,felipe:1,cristian:1,christian:1,cristobal:1,rodrigo:1,gonzalo:1,mauricio:1,marcelo:1,patricio:1,hernan:1,alejandro:1,ignacio:1,sebastian:1,matias:1,benjamin:1,vicente:1,tomas:1,agustin:1,martin:1,joaquin:1,gabriel:1,daniel:1,david:1,gaspar:1,maximiliano:1,nicolas:1,esteban:1,eduardo:1,mario:1,raul:1,victor:1,hugo:1,oscar:1,alvaro:1,arturo:1,ramon:1,roberto:1,alberto:1,antonio:1,enrique:1,guillermo:1,marco:1,marcos:1,emilio:1,julio:1,cesar:1,ernesto:1,lucas:1,bruno:1,franco:1,ivan:1,claudio:1,leonardo:1,gerardo:1,rafael:1,ruben:1,salvador:1,santiago:1,simon:1,bastian:1,alonso:1,boris:1,dario:1,fabian:1,hector:1,jaime:1,lautaro:1,leandro:1,mateo:1,maximo:1,nelson:1,omar:1,orlando:1,rolando:1};
+var NOMBRES_F={maria:1,ana:1,carmen:1,rosa:1,isabel:1,patricia:1,paola:1,carolina:1,caroline:1,valentina:1,javiera:1,francisca:1,fernanda:1,camila:1,constanza:1,daniela:1,catalina:1,antonia:1,sofia:1,emilia:1,florencia:1,isidora:1,martina:1,josefa:1,magdalena:1,gabriela:1,paula:1,claudia:1,monica:1,veronica:1,alejandra:1,marcela:1,cecilia:1,gloria:1,sandra:1,lorena:1,jacqueline:1,soledad:1,ximena:1,pilar:1,beatriz:1,teresa:1,lucia:1,elena:1,laura:1,julia:1,victoria:1,agustina:1,amanda:1,antonella:1,belen:1,bianca:1,blanca:1,carla:1,cristina:1,denisse:1,elisa:1,esperanza:1,eugenia:1,fabiola:1,ingrid:1,ines:1,irene:1,karen:1,karina:1,leonor:1,liliana:1,luz:1,macarena:1,manuela:1,margarita:1,marisol:1,matilde:1,mercedes:1,michelle:1,millaray:1,miriam:1,natalia:1,nicole:1,olga:1,olivia:1,pamela:1,paulina:1,raquel:1,rocio:1,romina:1,sara:1,silvana:1,susana:1,tamara:1,tania:1,valeria:1,viviana:1,yolanda:1};
+function _normToken(s){return (''+s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function saludoNominal(nombre){
+  nombre=(''+nombre).trim();
+  if(!nombre)return '';
+  var primer=_normToken(nombre.split(/\s+/)[0]);
+  var trato=NOMBRES_M[primer]?'Estimado':(NOMBRES_F[primer]?'Estimada':'Estimado/a');
+  return trato+' '+nombre+':';
+}
+/* Extrae CONTACTO desde Excel tabulado: celda inmediatamente posterior al EMAIL.
+   Split CRUDO (sin filtrar vacíos) para conservar posiciones. No infiere. */
+function _limpiarContacto(s){
+  s=(''+s).replace(/[\u00a0\u2007\u202f\u2009\u200b]/g,' ').trim();
+  if(s.length>=2&&s.charAt(0)==='"'&&s.charAt(s.length-1)==='"')s=s.slice(1,-1).replace(/""/g,'"');
+  s=s.trim();
+  if(!s)return '';
+  if(s.indexOf('@')>-1)return '';                 /* email */
+  if(/^\+?[\d\s().\-]+$/.test(s))return '';        /* teléfono/numérico */
+  if(/\d{3}\.\d{3}/.test(s))return '';             /* rut con puntos */
+  if(!/[A-Za-z\u00C0-\u017F]/.test(s))return '';   /* sin letras → no es nombre */
+  return s;
+}
+function extraerContactoExcel(txt){
+  var lineas=(''+txt).split(/\r?\n/);
+  for(var i=0;i<lineas.length;i++){
+    var celdas=lineas[i].split('\t');
+    var emIdx=-1;
+    for(var j=0;j<celdas.length;j++){if(celdas[j].indexOf('@')>-1){emIdx=j;break;}}
+    if(emIdx>-1&&emIdx+1<celdas.length){
+      var c=_limpiarContacto(celdas[emIdx+1]);
+      if(c)return c;
+    }
+  }
+  return '';
+}
+
+/* ════════════════════════════════════════════════════════════════
    INTEGRACIÓN CRM EXTRACTOR PRO → COTIZADORGO
    Pegado desde portapapeles · mapeo Empresa/Teléfono ·
    detección celular chileno · WhatsApp Web contextualizado
@@ -3016,7 +3067,9 @@ function mapearCRM(txt){
   if(razon){var e=$('me');if(e){e.value=razon;ok=true;}}
   if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/[^\d+]/g,'');ok=true;}}
   if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
-  /* El campo Contacto se mantiene intacto: la extensión no entrega nombre */
+  /* CONTACTO (solo Excel): celda posterior al EMAIL. La extensión no entrega nombre.
+     Se escribe SIEMPRE (valor o ''), para no arrastrar contactos previos. */
+  var _mnEl=$('mn');if(_mnEl)_mnEl.value=extraerContactoExcel(txt);
   onClientChange();
   validarEmailCliente();
   if(ok)toast('✔ Datos CRM cargados','ok','global-toast');
