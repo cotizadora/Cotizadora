@@ -653,7 +653,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
     <!-- 1 · DATOS DEL CLIENTE (siempre arriba, lo que cambia en cada cotización) -->
     <div class="block">
       <div class="block-t">👤 Datos del cliente</div>
-      <button type="button" id="btn-crm-paste" class="crm-paste-btn" onclick="pegarCRM();playClick();" title="Pega los datos copiados desde CRM Extractor Pro"><span class="crm-ico">📋</span><span class="crm-txt"><span class="crm-main">Pegar datos del CRM</span><span class="crm-sub">Carga empresa, teléfono y correo automáticamente</span></span></button>
+      <button type="button" id="btn-crm-paste" class="crm-paste-btn" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span><span class="crm-sub">Pega manualmente desde tu planilla</span></span></button>
       <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label>
       <div id="dest-fields" class="cfg-grid">
         <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
@@ -1348,8 +1348,13 @@ function addToMulti(){
   if(!LAST||CURRENT.key==='soluciones'||CURRENT.key==='multi'){toast('Configura un producto primero','err','global-toast');return;}
   var c=LAST,tipo=c.tipo,pi=PINFO[tipo]||{n:'Producto'};
   var ufV=c.ufVenta,ufL=c.ufLista,hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
+  var pl=(c.plazo||'12'),cons=c.cons||0;
+  /* Duplicado EXACTO (mismo producto + config + precio + descuento + modalidad/plazo + consultas)
+     → se ignora en silencio (sin mensaje, sin animación). Variación real sí se agrega. */
+  var _dup=MULTI.some(function(s){return s.tipo===tipo&&s.ufV===ufV&&s.ufL===ufL&&s.dc===dc&&s.pl===pl&&s.cons===cons;});
+  if(_dup)return;
   MULTI.push({tipo:tipo,n:pi.n,ufV:ufV,ufL:ufL,hayDc:hayDc,dc:dc,
-    clp:ufV>0?ufc(ufV):0,pl:(c.plazo||'12'),cons:c.cons||0,
+    clp:ufV>0?ufc(ufV):0,pl:pl,cons:cons,
     items:(PITEMS[tipo]||[]).slice(),
     itemsMail:((typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:(PITEMS[tipo]||[])).slice(),
     docs:docsForTipo(tipo)});
@@ -1388,7 +1393,8 @@ function multiPanelHTML(){
     '</div>'+
     '<button type="button" class="exec-save" style="background:var(--rd);color:#fff;margin-top:10px;" onclick="clearMulti();playClick();">🗑 Limpiar todo</button>';
 }
-/* Animación: una mini factura corporativa vuela del botón Agregar a la pestaña Multiproducto (<1s). */
+/* Animación: una hoja-propuesta corporativa Equifax se "archiva" dentro del paquete
+   Multiproducto. Grande, lenta (~1.5s), clara. No anima el botón. */
 function flyToMulti(){
   try{
     var from=document.getElementById('btn-add-multi')||document.getElementById('summary-zone');
@@ -1397,25 +1403,39 @@ function flyToMulti(){
     var a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
     var nom=(LAST&&PINFO[LAST.tipo]&&PINFO[LAST.tipo].n)?PINFO[LAST.tipo].n:'Producto';
     var precio=(LAST&&LAST.ufVenta)?(ufd(LAST.ufVenta)+' UF'):'';
-    var W=240,H=104;
+    var W=300,H=176;
+    /* Hoja tipo documento: franja superior roja Equifax + cuerpo blanco con líneas y precio */
     var fly=document.createElement('div');
-    fly.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="display:inline-block;width:22px;height:22px;border:2px solid #f0c040;border-radius:5px;position:relative;flex-shrink:0;"><span style="position:absolute;left:3px;right:3px;top:4px;height:3px;background:#f0c040;"></span><span style="position:absolute;left:3px;right:3px;top:10px;height:2px;background:rgba(240,192,64,.6);"></span><span style="position:absolute;left:3px;right:7px;top:14px;height:2px;background:rgba(240,192,64,.6);"></span></span><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#f0c040;font-weight:800;">Agregado al paquete</span></div>'+
-      '<div style="font-size:14px;font-weight:800;line-height:1.2;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+nom+'</div>'+
-      (precio?'<div style="margin-top:7px;font-size:17px;font-weight:900;color:#f0c040;letter-spacing:.3px;">'+precio+' + IVA</div>':'');
+    fly.innerHTML=
+      '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 55%,#7a1425);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">'+
+        '<span style="font-size:13px;font-weight:900;letter-spacing:1px;color:#fff;">EQUIFAX</span>'+
+        '<span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#f0c040;font-weight:800;">Propuesta</span>'+
+      '</div>'+
+      '<div style="padding:14px 16px;">'+
+        '<div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:5px;">Producto cotizado</div>'+
+        '<div style="font-size:14px;font-weight:800;color:#1a1a1a;line-height:1.2;border-bottom:2px solid #9b1c2e;padding-bottom:8px;margin-bottom:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+nom+'</div>'+
+        '<div style="height:6px;background:#eee;border-radius:3px;margin-bottom:6px;width:90%;"></div>'+
+        '<div style="height:6px;background:#eee;border-radius:3px;margin-bottom:12px;width:70%;"></div>'+
+        (precio?'<div style="font-size:18px;font-weight:900;color:#9b1c2e;">'+precio+' + IVA</div>':'')+
+      '</div>';
     fly.style.cssText='position:fixed;z-index:9999;left:'+(a.left+a.width/2-W/2)+'px;top:'+(a.top+a.height/2-H/2)+'px;'+
-      'width:'+W+'px;min-height:'+H+'px;padding:14px 18px;box-sizing:border-box;text-align:left;'+
-      'background:linear-gradient(135deg,#5a0e1a 0%,#7a1425 55%,#9b1c2e 100%);color:#fff;'+
-      'border:1px solid rgba(240,192,64,.35);border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.65),0 0 0 1px rgba(192,38,59,.5);'+
-      'transition:transform .9s cubic-bezier(.34,1.15,.4,1),opacity .9s ease;opacity:0;pointer-events:none;transform:translate(0,18px) scale(.85);';
+      'width:'+W+'px;min-height:'+H+'px;box-sizing:border-box;text-align:left;overflow:hidden;'+
+      'background:#ffffff;border:1px solid rgba(0,0,0,.15);border-radius:12px;'+
+      'box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(155,28,46,.25);'+
+      'transform-origin:center center;opacity:0;pointer-events:none;'+
+      'transition:transform 1.5s cubic-bezier(.45,.05,.2,1),opacity 1.5s ease;transform:translate(0,24px) scale(.96) rotate(0deg);';
     document.body.appendChild(fly);
     var dx=(b.left+b.width/2)-(a.left+a.width/2),dy=(b.top+b.height/2)-(a.top+a.height/2);
     requestAnimationFrame(function(){
-      fly.style.opacity='1';fly.style.transform='translate(0,0) scale(1.04)';
-      setTimeout(function(){fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.1)';fly.style.opacity='0';},240);
+      /* 1) aparece la hoja */
+      fly.style.opacity='1';fly.style.transform='translate(0,0) scale(1) rotate(0deg)';
+      /* 2) se desliza y se "archiva" (encoge y rota levemente como guardándose) */
+      setTimeout(function(){
+        fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.06) rotate(-8deg)';
+        fly.style.opacity='0';
+      },420);
     });
-    setTimeout(function(){if(fly.parentNode)fly.parentNode.removeChild(fly);
-      if(to){to.style.transition='transform .2s';to.style.transform='scale(1.16)';setTimeout(function(){to.style.transform='';},200);}
-    },1100);
+    setTimeout(function(){if(fly.parentNode)fly.parentNode.removeChild(fly);updateMultiBadge();},1620);
   }catch(e){}
 }
 /* ── Render del contenido central Multiproducto (mismos estilos que producto único) ── */
@@ -3396,7 +3416,9 @@ function mapearCRM(txt){
     if(!fono&&esFono(c)){fono=c;return;}
     libres.push(c);
   });
-  var razon=libres.length?libres.slice().sort(function(a,b){return b.length-a.length;})[0]:'';
+  /* Razón social = PRIMER campo libre (la empresa va antes del email en la fila;
+     el representante va DESPUÉS del email → se toma como contacto, no como empresa). */
+  var razon=libres.length?libres[0]:'';
   var ok=false;
   if(razon){var e=$('me');if(e){e.value=razon;ok=true;} var _cc=$('cli-contacto');if(_cc)_cc.value='';}
   if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/[^\d+]/g,'');ok=true;}}
