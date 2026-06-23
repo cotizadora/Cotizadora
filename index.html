@@ -1093,17 +1093,17 @@ function renderSummary(c){
   var clp=ufV>0?ufc(ufV):0;
 
   /* tarjeta PRECIO VENTA — misma forma que las otras métricas, con ▲▼ integrados */
+  /* MEJORA: aumentar jerarquía visual, eliminar descuento duplicado */
   var ventaCtrl=
     '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
-      '<div style="flex:1;min-width:0;">'+
-        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:2px;font-weight:800;line-height:1.1;">Precio venta</label>'+
-        '<div class="v g" style="font-size:1.05rem;font-weight:800;">'+
+      '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;">'+
+        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:6px;font-weight:800;line-height:1.1;">Precio venta</label>'+
+        '<div class="v g" style="font-size:1.45rem;font-weight:800;line-height:1.2;">'+
           '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)"'+
-            ' style="background:none;border:none;color:var(--gn);font-size:1.05rem;font-weight:800;font-family:inherit;width:70px;padding:0;outline:none;cursor:text;">'+
-          '<span style="font-size:.75rem;font-weight:600;color:var(--wa);margin-left:2px;">UF</span>'+
+            ' style="background:none;border:none;color:var(--gn);font-size:1.45rem;font-weight:800;font-family:inherit;width:90px;padding:0;outline:none;cursor:text;">'+
+          '<span style="font-size:.8rem;font-weight:600;color:var(--wa);margin-left:3px;">UF</span>'+
         '</div>'+
-        '<div id="s-price-clp" style="font-size:.68rem;color:var(--wb);margin-top:1px;">'+(clp>0?'≈ '+fmtN(clp):'')+'</div>'+
-        '<div id="s-disc">'+(hayDc?discHTML(dc,ufL,ufV):'')+'</div>'+
+        '<div id="s-price-clp" style="font-size:.68rem;color:var(--wb);margin-top:5px;">'+(clp>0?'≈ '+fmtN(clp):'')+'</div>'+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">'+
         '<button type="button" onclick="stepPrice(0.1)"'+
@@ -1117,12 +1117,12 @@ function renderSummary(c){
 
   var listaCtrl=
     '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
-      '<div style="flex:1;min-width:0;">'+
-        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:2px;font-weight:800;line-height:1.1;">Precio lista</label>'+
-        '<div class="v y" style="font-size:1.05rem;font-weight:800;">'+
+      '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;">'+
+        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:6px;font-weight:800;line-height:1.1;">Precio lista</label>'+
+        '<div class="v y" style="font-size:1.45rem;font-weight:800;line-height:1.2;">'+
           '<input type="number" id="sln-lista" value="'+(ufL>0?ufd(ufL):'0')+'" min="0" step="0.1" oninput="onListaInput(this.value)"'+
-            ' style="background:none;border:none;color:var(--y);font-size:1.05rem;font-weight:800;font-family:inherit;width:70px;padding:0;outline:none;cursor:text;">'+
-          '<span style="font-size:.75rem;font-weight:600;color:var(--wa);margin-left:2px;">UF</span>'+
+            ' style="background:none;border:none;color:var(--y);font-size:1.45rem;font-weight:800;font-family:inherit;width:90px;padding:0;outline:none;cursor:text;">'+
+          '<span style="font-size:.8rem;font-weight:600;color:var(--wa);margin-left:3px;">UF</span>'+
         '</div>'+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">'+
@@ -1182,9 +1182,9 @@ function metric(lbl,id,cls,val){
   return '<div class="metric"><label>'+lbl+'</label><div class="v '+cls+'" id="'+id+'">'+val+'</div></div>';
 }
 function metricBig(lbl,id,cls,val){
-  return '<div class="metric" style="padding:8px 11px;">'+
-    '<label style="font-size:.86rem;font-weight:800;letter-spacing:.2px;color:#cbcbd0;line-height:1.1;">'+lbl+'</label>'+
-    '<div class="v '+cls+'" id="'+id+'" style="font-size:1.25rem;margin-top:3px;line-height:1.15;">'+val+'</div>'+
+  return '<div class="metric" style="padding:8px 11px;display:flex;flex-direction:column;justify-content:center;">'+
+    '<label style="font-size:.86rem;font-weight:800;letter-spacing:.2px;color:#cbcbd0;line-height:1.1;margin-bottom:6px;">'+lbl+'</label>'+
+    '<div class="v '+cls+'" id="'+id+'" style="font-size:1.45rem;margin-top:0;line-height:1.2;font-weight:800;">'+val+'</div>'+
   '</div>';
 }
 function discHTML(dc,ufL,ufV){
@@ -1200,7 +1200,6 @@ function lightUpdate(v){
   var sn=$('sln-main');if(sn&&document.activeElement!==sn)sn.value=ufd(ufV);
   var sl=$('sln-lista');if(sl&&document.activeElement!==sl)sl.value=ufd(ufL);
   st('s-price-clp',clp>0?'≈ '+fmtN(clp)+' c/IVA':'—');
-  sv('s-disc',hayDc?discHTML(dc,ufL,ufV):'');
   var md=$('m-desc');if(md){md.textContent=hayDc?'−'+dc+'%':'—';md.className='v '+(hayDc?'g':'wa');}
   st('m-mes',clp>0?fmtN(clp):'—');
   st('m-anu-uf',ufV>0?ufd(ufV*12)+' UF':'—');
