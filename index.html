@@ -120,6 +120,17 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pbtn .su{display:none;}
 .pbtn-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--r);color:#fff;font-size:.66rem;font-weight:900;line-height:18px;text-align:center;border:1.5px solid var(--g0);box-shadow:0 1px 4px rgba(0,0,0,.5);display:none;}
 .pbtn-badge.on{display:block;}
+/* Multiproducto "se llena": intensidad por nivel, sin cambiar tamaño ni layout */
+.pbtn[data-key="multi"].fill1{background:linear-gradient(135deg,rgba(155,28,46,.20),rgba(155,28,46,.06));border-color:rgba(192,38,59,.55);}
+.pbtn[data-key="multi"].fill2{background:linear-gradient(135deg,rgba(155,28,46,.34),rgba(155,28,46,.12));border-color:var(--rl);box-shadow:0 0 10px rgba(192,38,59,.35);}
+.pbtn[data-key="multi"].fill3{background:linear-gradient(135deg,rgba(155,28,46,.5),rgba(120,18,32,.28));border-color:var(--r);box-shadow:0 0 16px rgba(192,38,59,.55),0 0 0 1px var(--r) inset;}
+.pbtn[data-key="multi"].fill3 .ic{filter:drop-shadow(0 0 4px rgba(240,192,64,.7));}
+/* ── ESTABILIDAD VISUAL (geometría fija, sin scroll para descubrir funciones) ── */
+#btn-add-multi{position:sticky;bottom:0;z-index:6;margin-bottom:0!important;box-shadow:0 -10px 18px 6px var(--g0);}
+#s-disc{min-height:20px;}
+#multi-list{max-height:46vh;overflow-y:auto;overflow-x:hidden;}
+#prodbar{position:fixed;}
+#prodbar::after{content:"";position:fixed;top:var(--headH);right:0;height:var(--barH);width:26px;pointer-events:none;z-index:281;background:linear-gradient(to right,rgba(20,20,22,0),var(--g1));}
 .pbtn:hover{border-color:var(--rl);background:rgba(155,28,46,.22);
   box-shadow:0 0 12px rgba(192,38,59,.5),0 0 24px rgba(155,28,46,.2),0 0 1px rgba(255,80,100,.4) inset;
   color:#fff;transform:translateY(-2px);}
@@ -185,8 +196,8 @@ body.uis-xl{--ui-scale:1.30;}
    TEMAS por clase global en <body>. Base (sin clase) = "Normal" = look actual (no se altera al cargar).
    Solo recolorea estilos vía variables; no toca estructura ni las tarjetas de correo. */
 body.theme-light{
-  --g0:#e7e9ee;--g1:#ffffff;--g2:#eef0f4;--g3:#cdd1da;--g4:#b1b6c2;--g5:#9398a4;
-  --w:#14161a;--wa:#474b54;--wb:#6a6e78;
+  --g0:#dfe2e8;--g1:#ffffff;--g2:#eceef2;--g3:#c1c5cf;--g4:#a2a7b4;--g5:#868c9a;
+  --w:#0f1116;--wa:#3b3f48;--wb:#5a5f6a;
 }
 body.theme-dark{
   --g0:#000000;--g1:#0a0a0b;--g2:#101012;--g3:#1a1a1d;--g4:#2b2b30;--g5:#3c3c42;
@@ -969,8 +980,10 @@ function buildProdbar(){
   updateMultiBadge();
 }
 function updateMultiBadge(){
-  var el=document.getElementById('multi-badge');if(!el)return;
-  el.textContent=MULTI.length;el.classList.toggle('on',MULTI.length>0);
+  var el=document.getElementById('multi-badge');if(el){el.textContent=MULTI.length;el.classList.toggle('on',MULTI.length>0);}
+  var tab=document.querySelector('.pbtn[data-key="multi"]');
+  if(tab){tab.classList.remove('fill1','fill2','fill3');
+    var n=MULTI.length;if(n>=6)tab.classList.add('fill3');else if(n>=3)tab.classList.add('fill2');else if(n>=1)tab.classList.add('fill1');}
 }
 
 /* ════════ CONFIGURACIÓN POR PRODUCTO (inputs del panel izquierdo) ════════ */
@@ -1367,7 +1380,7 @@ function multiPanelHTML(){
     '</div>';
   }).join('');
   return '<div class="sol-head2">Productos en el paquete ('+MULTI.length+')</div>'+
-    '<div class="metrics" style="margin-bottom:10px;">'+rows+'</div>'+
+    '<div id="multi-list" class="metrics" style="margin-bottom:10px;">'+rows+'</div>'+
     '<div class="metric" style="padding:10px 12px;display:flex;align-items:baseline;justify-content:space-between;">'+
       '<label style="font-size:.86rem;font-weight:800;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;">Total</label>'+
       '<div style="text-align:right;"><div class="v g" style="font-size:1.25rem;font-weight:900;">'+ufd(t.uf)+' UF + IVA</div>'+
@@ -1384,22 +1397,25 @@ function flyToMulti(){
     var a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
     var nom=(LAST&&PINFO[LAST.tipo]&&PINFO[LAST.tipo].n)?PINFO[LAST.tipo].n:'Producto';
     var precio=(LAST&&LAST.ufVenta)?(ufd(LAST.ufVenta)+' UF'):'';
-    var W=210,H=92;
+    var W=240,H=104;
     var fly=document.createElement('div');
-    fly.innerHTML='<div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#f0c040;font-weight:800;margin-bottom:4px;">📦 Agregado al paquete</div>'+
-      '<div style="font-size:13px;font-weight:800;line-height:1.2;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+nom+'</div>'+
-      (precio?'<div style="margin-top:6px;font-size:15px;font-weight:900;color:#f0c040;">'+precio+' + IVA</div>':'');
+    fly.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="display:inline-block;width:22px;height:22px;border:2px solid #f0c040;border-radius:5px;position:relative;flex-shrink:0;"><span style="position:absolute;left:3px;right:3px;top:4px;height:3px;background:#f0c040;"></span><span style="position:absolute;left:3px;right:3px;top:10px;height:2px;background:rgba(240,192,64,.6);"></span><span style="position:absolute;left:3px;right:7px;top:14px;height:2px;background:rgba(240,192,64,.6);"></span></span><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#f0c040;font-weight:800;">Agregado al paquete</span></div>'+
+      '<div style="font-size:14px;font-weight:800;line-height:1.2;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+nom+'</div>'+
+      (precio?'<div style="margin-top:7px;font-size:17px;font-weight:900;color:#f0c040;letter-spacing:.3px;">'+precio+' + IVA</div>':'');
     fly.style.cssText='position:fixed;z-index:9999;left:'+(a.left+a.width/2-W/2)+'px;top:'+(a.top+a.height/2-H/2)+'px;'+
-      'width:'+W+'px;min-height:'+H+'px;padding:12px 16px;box-sizing:border-box;text-align:left;'+
-      'background:linear-gradient(135deg,#5a0e1a 0%,#7a1425 60%,#9b1c2e 100%);color:#fff;'+
-      'border:1px solid rgba(255,255,255,.18);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 0 1px rgba(192,38,59,.4);'+
-      'transition:transform .8s cubic-bezier(.34,1.2,.4,1),opacity .8s ease;opacity:1;pointer-events:none;transform:translate(0,0) scale(1);';
+      'width:'+W+'px;min-height:'+H+'px;padding:14px 18px;box-sizing:border-box;text-align:left;'+
+      'background:linear-gradient(135deg,#5a0e1a 0%,#7a1425 55%,#9b1c2e 100%);color:#fff;'+
+      'border:1px solid rgba(240,192,64,.35);border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.65),0 0 0 1px rgba(192,38,59,.5);'+
+      'transition:transform .9s cubic-bezier(.34,1.15,.4,1),opacity .9s ease;opacity:0;pointer-events:none;transform:translate(0,18px) scale(.85);';
     document.body.appendChild(fly);
     var dx=(b.left+b.width/2)-(a.left+a.width/2),dy=(b.top+b.height/2)-(a.top+a.height/2);
-    requestAnimationFrame(function(){fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.12)';fly.style.opacity='0';});
+    requestAnimationFrame(function(){
+      fly.style.opacity='1';fly.style.transform='translate(0,0) scale(1.04)';
+      setTimeout(function(){fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.1)';fly.style.opacity='0';},240);
+    });
     setTimeout(function(){if(fly.parentNode)fly.parentNode.removeChild(fly);
-      if(to){to.style.transition='transform .18s';to.style.transform='scale(1.14)';setTimeout(function(){to.style.transform='';},180);}
-    },820);
+      if(to){to.style.transition='transform .2s';to.style.transform='scale(1.16)';setTimeout(function(){to.style.transform='';},200);}
+    },1100);
   }catch(e){}
 }
 /* ── Render del contenido central Multiproducto (mismos estilos que producto único) ── */
@@ -1970,7 +1986,10 @@ function genMail(){
   var _waSaludo = _contactoNom
     ? saludoNominal(_contactoNom)
     : ((!skip && em) ? "Se\u00f1ores *" + em + "*:" : "Estimados:");
-  var _waEncab = _waSaludo + "\nAdjunto la propuesta comercial solicitada para el servicio *" + pi.n + "*.\n\n";
+  /* Conserva contacto Y razón social: si el saludo es por contacto y hay empresa,
+     se agrega la línea de empresa (como Gmail/Outlook muestran ambos). Sin duplicar. */
+  var _waEmpLn = (_contactoNom && !skip && em) ? ("Cotizaci\u00f3n para *" + em + "*.\n") : "";
+  var _waEncab = _waSaludo + "\nAdjunto la propuesta comercial solicitada para el servicio *" + pi.n + "*.\n" + _waEmpLn + "\n";
   var txt = _waEncab +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*" + pi.n + "*\n" +
