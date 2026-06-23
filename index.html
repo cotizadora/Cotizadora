@@ -120,11 +120,14 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pbtn .su{display:none;}
 .pbtn-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--r);color:#fff;font-size:.66rem;font-weight:900;line-height:18px;text-align:center;border:1.5px solid var(--g0);box-shadow:0 1px 4px rgba(0,0,0,.5);display:none;}
 .pbtn-badge.on{display:block;}
-/* Multiproducto "se llena": intensidad por nivel, sin cambiar tamaño ni layout */
-.pbtn[data-key="multi"].fill1{background:linear-gradient(135deg,rgba(155,28,46,.20),rgba(155,28,46,.06));border-color:rgba(192,38,59,.55);}
-.pbtn[data-key="multi"].fill2{background:linear-gradient(135deg,rgba(155,28,46,.34),rgba(155,28,46,.12));border-color:var(--rl);box-shadow:0 0 10px rgba(192,38,59,.35);}
-.pbtn[data-key="multi"].fill3{background:linear-gradient(135deg,rgba(155,28,46,.5),rgba(120,18,32,.28));border-color:var(--r);box-shadow:0 0 16px rgba(192,38,59,.55),0 0 0 1px var(--r) inset;}
-.pbtn[data-key="multi"].fill3 .ic{filter:drop-shadow(0 0 4px rgba(240,192,64,.7));}
+/* Multiproducto "se llena": intensidad por nivel, con efecto neón corporativo visible */
+.pbtn[data-key="multi"].fill1{background:linear-gradient(135deg,rgba(155,28,46,.25),rgba(155,28,46,.08));border-color:rgba(192,38,59,.6);box-shadow:0 0 8px rgba(192,38,59,.25);}
+.pbtn[data-key="multi"].fill2{background:linear-gradient(135deg,rgba(155,28,46,.40),rgba(155,28,46,.15));border-color:var(--rl);box-shadow:0 0 16px rgba(192,38,59,.48),0 0 24px rgba(155,28,46,.2);}
+.pbtn[data-key="multi"].fill3{background:linear-gradient(135deg,rgba(155,28,46,.55),rgba(120,18,32,.32));border-color:var(--r);box-shadow:0 0 24px rgba(192,38,59,.65),0 0 32px rgba(155,28,46,.3),0 0 0 1.5px var(--r) inset;animation:multi-pulse 2.8s ease-in-out infinite;}
+.pbtn[data-key="multi"].fill3 .ic{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));animation:multi-icon-pulse 2.8s ease-in-out infinite;}
+.pbtn[data-key="multi"].fill2 .ic,.pbtn[data-key="multi"].fill1 .ic{filter:drop-shadow(0 0 3px rgba(240,192,64,.6));}
+@keyframes multi-pulse{0%{box-shadow:0 0 24px rgba(192,38,59,.65),0 0 32px rgba(155,28,46,.3),0 0 0 1.5px var(--r) inset;}50%{box-shadow:0 0 28px rgba(192,38,59,.75),0 0 40px rgba(155,28,46,.4),0 0 0 1.5px var(--r) inset;}100%{box-shadow:0 0 24px rgba(192,38,59,.65),0 0 32px rgba(155,28,46,.3),0 0 0 1.5px var(--r) inset;}}
+@keyframes multi-icon-pulse{0%{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));}50%{filter:drop-shadow(0 0 8px rgba(240,192,64,1));}100%{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));}}
 /* ── ESTABILIDAD VISUAL (geometría fija, sin scroll para descubrir funciones) ── */
 #btn-add-multi{position:sticky;bottom:0;z-index:6;margin-bottom:0!important;box-shadow:0 -10px 18px 6px var(--g0);}
 #s-disc{min-height:20px;}
@@ -1370,17 +1373,13 @@ function multiPanelHTML(){
   if(!MULTI.length)return '<div class="note-inline" style="margin:0;">🧾 Aún no agregas productos. Ve a un producto, configúralo y pulsa <b>“Agregar a Multiproducto”</b>.</div>';
   var t=multiTotals();
   var rows=MULTI.map(function(s,i){
-    return '<div class="metric" style="padding:9px 11px;display:flex;align-items:center;gap:8px;">'+
+    return '<div class="metric" style="padding:12px 11px;display:flex;align-items:center;justify-content:space-between;gap:10px;">'+
       '<div style="flex:1;min-width:0;">'+
-        '<div style="font-weight:800;color:#fff;font-size:.92rem;line-height:1.2;">'+s.n+'</div>'+
-        '<div style="font-size:.74rem;color:var(--gn);font-weight:700;margin-top:2px;">'+ufd(s.ufV)+' UF + IVA'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+'</div>'+
-        '<div style="font-size:.68rem;color:var(--wb);">'+(s.hayDc?'−'+s.dc+'% · lista '+ufd(s.ufL)+' UF · ':'')+s.pl+' meses · POSTPAGO</div>'+
+        '<div style="font-weight:900;color:#fff;font-size:1.08rem;line-height:1.3;margin-bottom:5px;">'+s.n+'</div>'+
+        '<div style="font-size:.76rem;color:var(--gn);font-weight:700;">'+ufd(s.ufV)+' UF + IVA'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+'</div>'+
+        '<div style="font-size:.70rem;color:var(--wb);margin-top:3px;">'+(s.hayDc?'−'+s.dc+'% · lista '+ufd(s.ufL)+' UF · ':'')+s.pl+' meses · POSTPAGO</div>'+
       '</div>'+
-      '<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">'+
-        '<button type="button" title="Subir" onclick="moveMulti('+i+',-1)" style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:24px;height:20px;border-radius:5px;cursor:pointer;font-size:.62rem;font-weight:900;line-height:1;padding:0;">▲</button>'+
-        '<button type="button" title="Bajar" onclick="moveMulti('+i+',1)" style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:24px;height:20px;border-radius:5px;cursor:pointer;font-size:.62rem;font-weight:900;line-height:1;padding:0;">▼</button>'+
-      '</div>'+
-      '<button type="button" title="Eliminar" onclick="removeMulti('+i+')" style="background:var(--rd);border:1px solid var(--rl);color:#fff;width:28px;height:44px;border-radius:6px;cursor:pointer;font-size:.85rem;font-weight:900;flex-shrink:0;">✕</button>'+
+      '<button type="button" title="Eliminar producto" onclick="removeMulti('+i+')" style="background:var(--rd);border:1px solid var(--rl);color:#fff;width:32px;height:44px;border-radius:6px;cursor:pointer;font-size:.95rem;font-weight:900;flex-shrink:0;transition:.12s;padding:0;" onmouseover="this.style.background=\'var(--rl)\'" onmouseout="this.style.background=\'var(--rd)\'">✕</button>'+
     '</div>';
   }).join('');
   return '<div class="sol-head2">Productos en el paquete ('+MULTI.length+')</div>'+
@@ -1390,7 +1389,7 @@ function multiPanelHTML(){
       '<div style="text-align:right;"><div class="v g" style="font-size:1.25rem;font-weight:900;">'+ufd(t.uf)+' UF + IVA</div>'+
       '<div style="font-size:.72rem;color:var(--wb);">'+(t.clp>0?'≈ '+fmtN(t.clp)+' mensual c/IVA':'')+'</div></div>'+
     '</div>'+
-    '<button type="button" class="exec-save" style="background:var(--rd);color:#fff;margin-top:10px;" onclick="clearMulti();playClick();">🗑 Limpiar todo</button>';
+    '<button type="button" class="exec-save" style="background:var(--rd);color:#fff;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:700;padding:14px 16px;" onclick="clearMulti();playClick();" title="Vaciar propuesta completa"><span style="font-size:1.3rem;">🗑</span><span>Vaciar propuesta</span></button>';
 }
 /* Animación: una hoja-propuesta corporativa Equifax se "archiva" dentro del paquete
    Multiproducto. Grande, lenta (~1.5s), clara. No anima el botón. */
