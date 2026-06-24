@@ -792,7 +792,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
       <!-- OUTLOOK -->
       <div class="pv-pane on" id="pane-outlook">
         <div class="act-strip sticky-bar">
-          <button class="pv-copy-btn btn-destacado" style="flex:0 1 60%;max-width:70%;justify-content:center;" onclick="copHTMLOutlook();playClick();" title="Copia el contenido del correo para pegarlo en Outlook">
+          <button class="pv-copy-btn btn-destacado" style="flex:0 1 60%;max-width:70%;justify-content:center;" onclick="copAsunto();playClick();" title="Copia solo el asunto del correo">
             <span class="ico">📋</span><span>Copiar asunto…</span>
           </button>
           <span class="sv" id="tpl-asunto-outlook" style="display:none;"></span>
@@ -1639,24 +1639,7 @@ function flashCopyOn(which){
 }
 function pvTab(which){
   setPreview(which);
-  playClick();
   autoCopy(which);
-  /* Confirmación auditiva específica por vista — una sola reproducción por clic */
-  try{
-    if(_sndOn&&'speechSynthesis'in window){
-      var _pvMsg='';
-      if(which==='outlook') _pvMsg='Mensaje copiado para Outlook';
-      else if(which==='gmail')   _pvMsg='Mensaje copiado para Gmail';
-      else if(which==='wsp')     _pvMsg='Mensaje copiado para WhatsApp';
-      else if(which==='img')     _pvMsg='Vista previa copiada';
-      if(_pvMsg){
-        var _pvu=new SpeechSynthesisUtterance(_pvMsg);
-        _pvu.lang='es-CL';_pvu.rate=1.05;
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(_pvu);
-      }
-    }
-  }catch(e){}
 }
 /* Copia inteligente — delega al copiador específico de la vista activa */
 function smartCopy(){
@@ -2463,7 +2446,7 @@ function updWspLink(){
   if(v.ok&&v.normalizado){lnk.href='https://wa.me/'+v.normalizado.replace(/^\+/,'');row.style.display='block';}
   else row.style.display='none';
 }
-function copAsunto(){navigator.clipboard.writeText(document.getElementById('tpl-asunto').textContent).then(function(){toast('✔ Asunto copiado','ok','tpl-toast2');});}
+function copAsunto(){navigator.clipboard.writeText(document.getElementById('tpl-asunto-outlook').textContent).then(function(){toast('✔ Asunto copiado','ok','tpl-toast2');});}
 function copPlano(){navigator.clipboard.writeText(document.getElementById('tpl-body').value).then(function(){toast('✔ Texto copiado','ok','tpl-toast2');}).catch(function(){toast('✖ Copia manualmente','err','tpl-toast2');});}
 function copHTML(){
   var el=document.getElementById('tpl-rich-gmail')||document.getElementById('tpl-rich');if(!el)return;
@@ -3483,8 +3466,8 @@ function abrirWspWeb(){
   if(!msg)return;
   /* 1. Copiar al portapapeles antes de abrir WhatsApp */
   navigator.clipboard.writeText(msg).catch(function(){});
-  /* 2. Abrir conversación del cliente SIN &text= en la URL */
-  var url='https://web.whatsapp.com/send?phone='+encodeURIComponent(cel);
+  /* 2. Abrir conversación del cliente con el texto de la cotización prellenado (forma histórica que funciona) */
+  var url='https://web.whatsapp.com/send?phone='+encodeURIComponent(cel)+'&text='+encodeURIComponent(msg);
   if(_waWin&&!_waWin.closed){
     try{_waWin.location.href=url;_waWin.focus();}catch(e){_waWin=window.open(url,'cotizador_wsp_win');if(_waWin)try{_waWin.focus();}catch(e2){}}
   }else{
