@@ -118,16 +118,19 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pbtn .ic{font-size:.95rem;line-height:1;flex-shrink:0;}
 .pbtn .lb{font-size:.85rem;font-weight:700;}
 .pbtn .su{display:none;}
-.pbtn-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--r);color:#fff;font-size:.66rem;font-weight:900;line-height:18px;text-align:center;border:1.5px solid var(--g0);box-shadow:0 1px 4px rgba(0,0,0,.5);display:none;}
+.pbtn-badge{position:absolute;top:-9px;right:-9px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--r);color:#fff;font-size:.8rem;font-weight:900;line-height:22px;text-align:center;border:2px solid var(--g0);box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 10px rgba(192,38,59,.65);display:none;}
 .pbtn-badge.on{display:block;}
 /* Multiproducto "se llena": intensidad por nivel, con efecto neón corporativo visible */
-.pbtn[data-key="multi"].fill1{background:linear-gradient(135deg,rgba(155,28,46,.25),rgba(155,28,46,.08));border-color:rgba(192,38,59,.6);box-shadow:0 0 8px rgba(192,38,59,.25);}
-.pbtn[data-key="multi"].fill2{background:linear-gradient(135deg,rgba(155,28,46,.40),rgba(155,28,46,.15));border-color:var(--rl);box-shadow:0 0 16px rgba(192,38,59,.48),0 0 24px rgba(155,28,46,.2);}
-.pbtn[data-key="multi"].fill3{background:linear-gradient(135deg,rgba(155,28,46,.55),rgba(120,18,32,.32));border-color:var(--r);box-shadow:0 0 24px rgba(192,38,59,.65),0 0 32px rgba(155,28,46,.3),0 0 0 1.5px var(--r) inset;animation:multi-pulse 2.8s ease-in-out infinite;}
-.pbtn[data-key="multi"].fill3 .ic{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));animation:multi-icon-pulse 2.8s ease-in-out infinite;}
-.pbtn[data-key="multi"].fill2 .ic,.pbtn[data-key="multi"].fill1 .ic{filter:drop-shadow(0 0 3px rgba(240,192,64,.6));}
-@keyframes multi-pulse{0%{box-shadow:0 0 24px rgba(192,38,59,.65),0 0 32px rgba(155,28,46,.3),0 0 0 1.5px var(--r) inset;}50%{box-shadow:0 0 28px rgba(192,38,59,.75),0 0 40px rgba(155,28,46,.4),0 0 0 1.5px var(--r) inset;}100%{box-shadow:0 0 24px rgba(192,38,59,.65),0 0 32px rgba(155,28,46,.3),0 0 0 1.5px var(--r) inset;}}
-@keyframes multi-icon-pulse{0%{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));}50%{filter:drop-shadow(0 0 8px rgba(240,192,64,1));}100%{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));}}
+.pbtn[data-key="multi"].fill1{background:linear-gradient(135deg,rgba(155,28,46,.32),rgba(155,28,46,.12));border-color:var(--rl);box-shadow:0 0 18px rgba(192,38,59,.5),0 0 28px rgba(155,28,46,.25);}
+.pbtn[data-key="multi"].fill2{background:linear-gradient(135deg,rgba(155,28,46,.45),rgba(155,28,46,.18));border-color:var(--rl);box-shadow:0 0 22px rgba(192,38,59,.6),0 0 32px rgba(155,28,46,.3);}
+.pbtn[data-key="multi"].fill3{background:linear-gradient(135deg,rgba(155,28,46,.58),rgba(120,18,32,.34));border-color:var(--r);box-shadow:0 0 26px rgba(192,38,59,.7),0 0 38px rgba(155,28,46,.35),0 0 0 1.5px var(--r) inset;}
+.pbtn[data-key="multi"].fill1,.pbtn[data-key="multi"].fill2,.pbtn[data-key="multi"].fill3{animation:multi-pulse 2.2s ease-in-out infinite;}
+.pbtn[data-key="multi"].fill1 .ic,.pbtn[data-key="multi"].fill2 .ic,.pbtn[data-key="multi"].fill3 .ic{filter:drop-shadow(0 0 6px rgba(240,192,64,.9));animation:multi-icon-pulse 2.2s ease-in-out infinite;}
+@keyframes multi-pulse{0%{box-shadow:0 0 18px rgba(192,38,59,.55),0 0 28px rgba(155,28,46,.28),0 0 0 1px var(--rl) inset;}50%{box-shadow:0 0 30px rgba(192,38,59,.85),0 0 46px rgba(155,28,46,.5),0 0 0 1.5px var(--r) inset;}100%{box-shadow:0 0 18px rgba(192,38,59,.55),0 0 28px rgba(155,28,46,.28),0 0 0 1px var(--rl) inset;}}
+@keyframes multi-icon-pulse{0%{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));}50%{filter:drop-shadow(0 0 10px rgba(240,192,64,1));}100%{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));}}
+.multi-clear-btn:hover{background:var(--r);box-shadow:0 0 16px rgba(192,38,59,.55);}
+@keyframes multi-recv{0%{transform:scale(1);}35%{transform:scale(1.18);}100%{transform:scale(1);}}
+.pbtn[data-key="multi"].recv{animation:multi-recv .55s cubic-bezier(.34,1.56,.64,1);}
 /* ── ESTABILIDAD VISUAL (geometría fija, sin scroll para descubrir funciones) ── */
 #btn-add-multi{position:sticky;bottom:0;z-index:6;margin-bottom:0!important;box-shadow:0 -10px 18px 6px var(--g0);}
 #s-disc{min-height:20px;}
@@ -245,11 +248,6 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .price-lbl{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);margin-bottom:4px;}
 .price-big{font-size:2.7rem;font-weight:900;color:var(--y);line-height:1;}
 .price-clp{font-size:1rem;color:#cfcfcf;margin-top:7px;font-weight:600;}
-.price-disc{display:inline-flex;align-items:center;gap:10px;margin-top:11px;background:rgba(46,204,113,.1);
-  border:1px solid rgba(46,204,113,.4);border-radius:9px;padding:7px 13px;}
-.price-disc .pct{font-size:1.5rem;font-weight:900;color:var(--gn);}
-.price-disc .det{font-size:.78rem;color:#bbb;}
-.price-disc .det s{color:var(--wb);}
 .slider-box{background:rgba(0,0,0,.32);border-radius:10px;padding:13px 15px;margin-bottom:12px;}
 .slider-box .st{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);margin-bottom:9px;font-weight:600;}
 .slider-row{display:flex;gap:12px;align-items:center;}
@@ -1206,9 +1204,7 @@ function metricBig(lbl,id,cls,val){
     '<div class="v '+cls+'" id="'+id+'" style="font-size:1.45rem;margin-top:0;line-height:1.2;font-weight:800;">'+val+'</div>'+
   '</div>';
 }
-function discHTML(dc,ufL,ufV){
-  return '<div class="price-disc"><span class="pct">−'+dc+'%</span><div class="det"><s>Lista: '+ufd(ufL)+' UF</s><br>Final: '+ufd(ufV)+' UF</div></div>';
-}
+
 
 /* Actualización ligera al mover el precio (sin reconstruir el resumen) */
 function lightUpdate(v){
@@ -1391,9 +1387,9 @@ function multiPanelHTML(){
   var rows=MULTI.map(function(s,i){
     return '<div class="metric" style="padding:12px 11px;display:flex;align-items:center;justify-content:space-between;gap:10px;">'+
       '<div style="flex:1;min-width:0;">'+
-        '<div style="font-weight:900;color:#fff;font-size:1.08rem;line-height:1.3;margin-bottom:5px;">'+s.n+'</div>'+
-        '<div style="font-size:.76rem;color:var(--gn);font-weight:700;">'+ufd(s.ufV)+' UF + IVA'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+'</div>'+
-        '<div style="font-size:.70rem;color:var(--wb);margin-top:3px;">'+(s.hayDc?'−'+s.dc+'% · lista '+ufd(s.ufL)+' UF · ':'')+s.pl+' meses · POSTPAGO</div>'+
+        '<div style="font-weight:900;color:#fff;font-size:1.08rem;line-height:1.25;margin-bottom:3px;">'+s.n+'</div>'+
+        (s.cons?'<div style="font-size:.82rem;color:#f0c040;font-weight:800;letter-spacing:.3px;margin-bottom:4px;">'+s.cons+' consultas</div>':'')+
+        '<div style="font-size:.8rem;color:var(--gn);font-weight:700;">'+ufd(s.ufV)+' UF + IVA'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' <span style="color:#2ecc71;font-weight:800;">· −'+s.dc+'%</span>':'')+'</div>'+
       '</div>'+
       '<button type="button" title="Eliminar producto" onclick="removeMulti('+i+')" style="background:var(--rd);border:1px solid var(--rl);color:#fff;width:32px;height:44px;border-radius:6px;cursor:pointer;font-size:.95rem;font-weight:900;flex-shrink:0;transition:.12s;padding:0;" onmouseover="this.style.background=\'var(--rl)\'" onmouseout="this.style.background=\'var(--rd)\'">✕</button>'+
     '</div>';
@@ -1405,7 +1401,7 @@ function multiPanelHTML(){
       '<div style="text-align:right;"><div class="v g" style="font-size:1.25rem;font-weight:900;">'+ufd(t.uf)+' UF + IVA</div>'+
       '<div style="font-size:.72rem;color:var(--wb);">'+(t.clp>0?'≈ '+fmtN(t.clp)+' mensual c/IVA':'')+'</div></div>'+
     '</div>'+
-    '<button type="button" class="exec-save" style="background:var(--rd);color:#fff;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:700;padding:14px 16px;" onclick="clearMulti();playClick();" title="Vaciar propuesta completa"><span style="font-size:1.3rem;">🗑</span><span>Vaciar propuesta</span></button>';
+    '<button type="button" class="exec-save multi-clear-btn" style="background:var(--rd);color:#fff;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:1.02rem;font-weight:800;letter-spacing:.3px;padding:15px 16px;" onclick="clearMulti();playClick();" title="Vaciar toda la propuesta multiproducto"><span style="font-size:1.9rem;line-height:1;">🗑️</span><span>Vaciar propuesta completa</span></button>';
 }
 /* Animación: una hoja-propuesta corporativa Equifax se "archiva" dentro del paquete
    Multiproducto. Grande, lenta (~1.5s), clara. No anima el botón. */
@@ -1434,22 +1430,30 @@ function flyToMulti(){
       '</div>';
     fly.style.cssText='position:fixed;z-index:9999;left:'+(a.left+a.width/2-W/2)+'px;top:'+(a.top+a.height/2-H/2)+'px;'+
       'width:'+W+'px;min-height:'+H+'px;box-sizing:border-box;text-align:left;overflow:hidden;'+
-      'background:#ffffff;border:1px solid rgba(0,0,0,.15);border-radius:12px;'+
-      'box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(155,28,46,.25);'+
+      'background:#ffffff;border:1px solid rgba(155,28,46,.18);border-radius:12px;'+
+      'box-shadow:0 28px 64px rgba(0,0,0,.5),0 0 0 1px rgba(155,28,46,.22);'+
       'transform-origin:center center;opacity:0;pointer-events:none;'+
-      'transition:transform 1.5s cubic-bezier(.45,.05,.2,1),opacity 1.5s ease;transform:translate(0,24px) scale(.96) rotate(0deg);';
+      'transition:transform .35s ease-out,opacity .35s ease-out;transform:translate(0,28px) scale(.92);';
     document.body.appendChild(fly);
     var dx=(b.left+b.width/2)-(a.left+a.width/2),dy=(b.top+b.height/2)-(a.top+a.height/2);
     requestAnimationFrame(function(){
-      /* 1) aparece la hoja */
-      fly.style.opacity='1';fly.style.transform='translate(0,0) scale(1) rotate(0deg)';
-      /* 2) se desliza y se "archiva" (encoge y rota levemente como guardándose) */
+      /* 1) aparece la hoja-documento blanca */
+      fly.style.opacity='1';fly.style.transform='translate(0,0) scale(1)';
+      /* 2) recorrido legible: viaja a media escala, totalmente visible */
       setTimeout(function(){
-        fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.06) rotate(-8deg)';
+        fly.style.transition='transform .85s cubic-bezier(.4,.05,.25,1),opacity .85s ease';
+        fly.style.transform='translate('+(dx*0.55)+'px,'+(dy*0.55)+'px) scale(.62)';
+      },470);
+      /* 3) recepción: el documento ingresa al paquete y la pestaña Multiproducto "recibe" */
+      setTimeout(function(){
+        fly.style.transition='transform .42s cubic-bezier(.5,0,.9,.4),opacity .4s ease';
+        fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.08) rotate(-6deg)';
         fly.style.opacity='0';
-      },420);
+        if(to){to.classList.remove('recv');void to.offsetWidth;to.classList.add('recv');}
+        updateMultiBadge();
+      },1180);
     });
-    setTimeout(function(){if(fly.parentNode)fly.parentNode.removeChild(fly);updateMultiBadge();},1620);
+    setTimeout(function(){if(fly.parentNode)fly.parentNode.removeChild(fly);if(to)to.classList.remove('recv');},1720);
   }catch(e){}
 }
 /* ── Render del contenido central Multiproducto (mismos estilos que producto único) ── */
