@@ -282,6 +282,13 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 
 .chk-row{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:.85rem;color:var(--wa);margin-bottom:11px;}
 .chk-row input{accent-color:var(--r);width:18px;height:18px;}
+/* P1 · cabecera compacta + botón Pegar inline junto a Empresa */
+.dc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.chk-inline{margin-bottom:0;text-transform:none;letter-spacing:0;font-weight:600;color:var(--wa);font-size:.8rem;}
+.chk-inline input{width:16px;height:16px;}
+.me-row{display:flex;gap:10px;align-items:stretch;}
+.me-row input{flex:1;min-width:0;}
+@media(max-width:520px){.me-row{flex-direction:column;}}
 
 /* ── INTEGRACIÓN CRM EXTRACTOR PRO ── */
 .crm-paste-btn{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;background:var(--g2);border:1px solid var(--g4);
@@ -341,6 +348,12 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
   box-shadow:0 0 18px rgba(37,211,102,.7),0 0 36px rgba(37,211,102,.3)!important;
   transform:translateY(-1px);
   animation:none;}
+/* P1 · variante inline: ancho contenido, una línea, alto igual al input Empresa */
+.crm-paste-btn.crm-inline{width:auto;flex:0 0 auto;margin-bottom:0;padding:0 16px;min-height:46px;white-space:nowrap;gap:9px;border-radius:9px;}
+.crm-paste-btn.crm-inline .crm-sub{display:none;}
+.crm-paste-btn.crm-inline .crm-ico{font-size:1.25rem;}
+.crm-paste-btn.crm-inline .crm-main{font-size:.92rem;}
+@media(max-width:520px){.crm-paste-btn.crm-inline{width:100%;}}
 
 /* ── NIVEL 2: Abrir Outlook — prioridad contextual (azul Outlook) ── */
 @keyframes outlookGlow{
@@ -655,11 +668,14 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 
     <!-- 1 · DATOS DEL CLIENTE (siempre arriba, lo que cambia en cada cotización) -->
     <div class="block">
-      <div class="block-t">👤 Datos del cliente</div>
-      <button type="button" id="btn-crm-paste" class="crm-paste-btn" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span><span class="crm-sub">Pega manualmente desde tu planilla</span></span></button>
-      <label class="chk-row"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label>
+      <div class="block-t dc-head"><span>👤 Datos del cliente</span><label class="chk-row chk-inline"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label></div>
       <div id="dest-fields" class="cfg-grid">
-        <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
+        <div class="fld"><label>Empresa / Razón Social</label>
+          <div class="me-row">
+            <input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()">
+            <button type="button" id="btn-crm-paste" class="crm-paste-btn crm-inline" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span><span class="crm-sub">Pega manualmente desde tu planilla</span></span></button>
+          </div>
+        </div>
         <div class="cfg-3">
           <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="onClientChange()"></div>
           <div class="fld"><label>Correo electrónico</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="onClientChange();validarEmailCliente()"><span id="cli-email-status" class="eml-status"></span></div>
@@ -1099,14 +1115,14 @@ function renderSummary(c){
   /* MEJORA: aumentar jerarquía visual, eliminar descuento duplicado */
   var ventaCtrl=
     '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
-      '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;">'+
-        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:6px;font-weight:800;line-height:1.1;">Precio venta</label>'+
+      '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">'+
+        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:4px;font-weight:800;line-height:1.1;">Precio venta</label>'+
         '<div class="v g" style="font-size:1.45rem;font-weight:800;line-height:1.2;">'+
           '<input type="number" id="sln-main" value="'+ufd(ufV)+'" min="0" step="0.1" oninput="onSlide(this.value)"'+
-            ' style="background:none;border:none;color:var(--gn);font-size:1.45rem;font-weight:800;font-family:inherit;width:90px;padding:0;outline:none;cursor:text;">'+
+            ' style="background:none;border:none;color:var(--gn);font-size:1.45rem;font-weight:800;font-family:inherit;width:72px;padding:0;outline:none;cursor:text;text-align:center;">'+
           '<span style="font-size:.8rem;font-weight:600;color:var(--wa);margin-left:3px;">UF</span>'+
         '</div>'+
-        '<div id="s-price-clp" style="font-size:.68rem;color:var(--wb);margin-top:5px;">'+(clp>0?'≈ '+fmtN(clp):'')+'</div>'+
+        '<div id="s-price-clp" style="font-size:1.05rem;font-weight:800;color:var(--bl);line-height:1.15;margin-top:3px;">'+(clp>0?'≈ '+fmtN(clp):'')+'</div>'+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">'+
         '<button type="button" onclick="stepPrice(0.1)"'+
@@ -1120,11 +1136,11 @@ function renderSummary(c){
 
   var listaCtrl=
     '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
-      '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;">'+
-        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:6px;font-weight:800;line-height:1.1;">Precio lista</label>'+
+      '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">'+
+        '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:4px;font-weight:800;line-height:1.1;">Precio lista</label>'+
         '<div class="v y" style="font-size:1.45rem;font-weight:800;line-height:1.2;">'+
           '<input type="number" id="sln-lista" value="'+(ufL>0?ufd(ufL):'0')+'" min="0" step="0.1" oninput="onListaInput(this.value)"'+
-            ' style="background:none;border:none;color:var(--y);font-size:1.45rem;font-weight:800;font-family:inherit;width:90px;padding:0;outline:none;cursor:text;">'+
+            ' style="background:none;border:none;color:var(--y);font-size:1.45rem;font-weight:800;font-family:inherit;width:72px;padding:0;outline:none;cursor:text;text-align:center;">'+
           '<span style="font-size:.8rem;font-weight:600;color:var(--wa);margin-left:3px;">UF</span>'+
         '</div>'+
       '</div>'+
@@ -2038,7 +2054,7 @@ function genMail(){
     (fo ? "\ud83d\udcf1 " + fo + "\n" : "") +
     (ml ? "\u2709 " + ml + "\n" : "") +
     "";
-  document.getElementById('tpl-body').value=isSol?renderPortafolioSoluciones('wa'):(isMulti?renderMultiproducto('wa'):txt);
+  document.getElementById('tpl-body').value=isSol?renderPortafolioSoluciones('wa'):(isMulti?(_waSaludo+"\n"+_waEmpLn+"\n"+renderMultiproducto('wa')):txt);
 
   // ── HTML ENRIQUECIDO — Diseño corporativo completo ──
   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
@@ -2202,6 +2218,39 @@ function genMail(){
     '</tr>';
   }).join('');
 
+  /* P2 · DESTINATARIO Outlook — fuente única reutilizada por individual, multi y soluciones
+     (mismo mecanismo que ya emite Gmail fuera de la rama). No duplica lógica. */
+  var _destOutlook =
+    '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:0;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
+        '<td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:22px 28px 20px 28px;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+        (em
+          ? '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:5px;">'+
+              '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:10px;letter-spacing:1px;">PROPUESTA PARA</font></b></font>'+
+            '</td></tr>'+
+            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
+              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;line-height:1.2;">'+em+'</font></b></font>'+
+            '</td></tr>'+
+            (_salNom?'<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
+              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:13px;">'+_salNom+'</font></b></font>'+
+            '</td></tr>':'')+
+            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
+              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
+            '</td></tr>'
+          : '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
+              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;">Propuesta Comercial</font></b></font>'+
+            '</td></tr>'+
+            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
+              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
+            '</td></tr>'
+        )+
+      '</table>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>';
+
   var _htmlOutlook =
     '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:600px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">'+
 
@@ -2238,36 +2287,8 @@ function genMail(){
     // ══════════════════════════════════════════
     // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
     // ══════════════════════════════════════════
+    _destOutlook+
     (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
-    '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:0;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-        '<td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:22px 28px 20px 28px;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-        (em
-          ? '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:5px;">'+
-              '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:10px;letter-spacing:1px;">PROPUESTA PARA</font></b></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;line-height:1.2;">'+em+'</font></b></font>'+
-            '</td></tr>'+
-            (_salNom?'<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:13px;">'+_salNom+'</font></b></font>'+
-            '</td></tr>':'')+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
-              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
-            '</td></tr>'
-          : '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;">Propuesta Comercial</font></b></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
-              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
-            '</td></tr>'
-        )+
-      '</table>'+
-        '</td>'+
-      '</tr></table>'+
-    '</td></tr>'+
     // ══════════════════════════════════════════
     '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
