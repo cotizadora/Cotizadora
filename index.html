@@ -612,6 +612,29 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 .sol-item:hover{border-color:var(--r);}
 .sol-item input{width:17px;height:17px;accent-color:var(--r);cursor:pointer;flex:0 0 auto;}
 </style>
+<style id="fix-preview-styles">
+/* ════════ REQ 1 — BARRA DE CONTROL FIJA EN LA VISTA PREVIA (escritorio) ════════
+   El correo se desplaza DENTRO del marco; la barra de control y la fila
+   ADJUNTAR permanecen siempre visibles, fijas dentro del área de vista previa.
+   Sin fuga lateral: la barra es hermana superior del marco, no se superpone. */
+@media(min-width:881px){
+  #right-panel{flex-direction:column;}
+  .pv-content{display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+  .pv-content > #tpl-out{flex:1;min-height:0;display:flex;flex-direction:column;}
+  #tpl-out > #adj-row{flex:0 0 auto;}
+  #tpl-out > .pv-pane.on{flex:1;min-height:0;display:flex;flex-direction:column;}
+  .pv-pane.on > .act-strip.sticky-bar,.pv-pane.on > .pv-toolbar{position:static;flex:0 0 auto;}
+  .pv-pane.on > .pv-frame{flex:1;min-height:0;overflow:auto;}
+  .pv-pane.on > .outlook-note{flex:0 0 auto;}
+  #pane-wsp.on > .wa-phone-shell{flex:1;min-height:0;max-height:none;}
+}
+/* ════════ REQ 3 — X DE ELIMINAR PRODUCTO (solo edición; nunca se copia/envía) ════════ */
+.mp-x{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;
+  background:#c0263b;color:#fff;font-size:14px;font-weight:900;line-height:24px;text-align:center;
+  cursor:pointer;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.5);border:2px solid #fff;
+  user-select:none;-webkit-user-select:none;transition:transform .12s,background .12s;}
+.mp-x:hover{background:#e23a52;transform:scale(1.12);}
+</style>
 </head>
 <body>
 <header>
@@ -675,13 +698,15 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
           </div>
         </div>
         <div class="cfg-3">
-          <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="onClientChange()"></div>
-          <div class="fld"><label>Correo electrónico</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="onClientChange();validarEmailCliente()"><span id="cli-email-status" class="eml-status"></span></div>
-          <div class="fld"><label>Contacto (opcional)</label><input type="text" id="cli-contacto" placeholder="Nombre del contacto" oninput="onClientChange()"></div>
+          <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="normTelInput(this);onClientChange()"></div>
+          <div class="fld"><label>Correo electrónico</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="normEmailInput(this);onClientChange();validarEmailCliente()"><span id="cli-email-status" class="eml-status"></span></div>
+          <div class="fld"><label>Contacto (opcional)</label><input type="text" id="cli-contacto" placeholder="Nombre del contacto" oninput="normContactoInput(this);onClientChange()"></div>
         </div>
         <!-- campos ocultos para compatibilidad -->
-        <input type="hidden" id="mn"><input type="hidden" id="mr"><input type="hidden" id="cli-obs">
+        <input type="hidden" id="mn"><input type="hidden" id="mr"><input type="hidden" id="cli-obs"><input type="hidden" id="cli-rut">
       </div>
+      <!-- REQ 4 · Copiar datos del cliente con la estructura exacta de la planilla -->
+      <button type="button" id="btn-copy-excel" onclick="copiarParaExcel();playClick();" title="Copia FECHA · EMPRESA · RUT · TELÉFONO · CORREO · CONTACTO en una sola línea, lista para pegar desde la columna A" style="width:100%;margin-top:12px;background:#1d6fb8;color:#fff;border:1px solid #2a8fe0;border-radius:10px;padding:13px 16px;cursor:pointer;font-family:inherit;font-weight:800;font-size:.95rem;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:10px;transition:.15s;" onmouseover="this.style.background='#2a8fe0'" onmouseout="this.style.background='#1d6fb8'"><span style="font-size:1.1rem;">📋</span><span>COPIAR PARA EXCEL →</span></button>
     </div>
 
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
@@ -1305,7 +1330,8 @@ function solBlocksInner(sel,theme){
       items.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:'+iconColor+';font-weight:bold;">'+icon+'</span> '+t+'</div>';}).join('');
   }
   return sel.map(function(k){
-    return '<div style="margin:0 0 26px;padding-bottom:18px;border-bottom:2px solid '+cLine+';">'+
+    return '<div style="position:relative;margin:0 0 26px;padding-bottom:18px;border-bottom:2px solid '+cLine+';">'+
+      mpDelBtn("removeSol('"+k+"')")+
       '<div style="font-size:15px;font-weight:800;color:'+cTit+';font-family:Arial,sans-serif;margin-bottom:2px;">'+SOL_NAMES[k]+'</div>'+
       sec('Situaciones',SOL_SIT[k]||[],'•','#c0392b')+
       sec('Características',solCarac(k),'✔','#9b1c2e')+
@@ -1457,12 +1483,13 @@ function flyToMulti(){
   }catch(e){}
 }
 /* ── Render del contenido central Multiproducto (mismos estilos que producto único) ── */
-function _multiGmailProduct(s){
+function _multiGmailProduct(s,i){
   var lista=s.itemsMail.map(function(item){
     return '<tr><td valign="top" style="padding:5px 8px 5px 0;font-family:Arial,sans-serif;color:#9b1c2e;font-weight:900;font-size:13px;width:14px;">&#10004;</td>'+
       '<td valign="top" style="padding:5px 0;font-family:Arial,sans-serif;color:#333;font-size:13px;line-height:1.4;">'+item+'</td></tr>';
   }).join('');
-  var blanco='<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
+  var blanco='<div style="position:relative;background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
+    mpDelBtn('removeMulti('+i+')')+
     '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
     '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+s.n+'</div>'+
     '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+lista+'</table>'+
@@ -1489,7 +1516,7 @@ function _multiGmailTotal(){
     '</table>'+
   '</div>';
 }
-function _multiOutlookProduct(s){
+function _multiOutlookProduct(s,i){
   var lista=s.itemsMail.map(function(item){
     return '<tr><td valign="top" width="16" bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 6px 4px 0;"><font face="Arial,sans-serif" color="#9b1c2e" style="font-size:13px;"><b>&#10004;</b></font></td>'+
       '<td valign="top" bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 0;"><font face="Arial,sans-serif" color="#333333" style="font-size:13px;">'+item+'</font></td></tr>';
@@ -1497,7 +1524,8 @@ function _multiOutlookProduct(s){
   var blanco='<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
       '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:20px 28px;">'+
+      '<td bgcolor="#ffffff" style="position:relative;background-color:#ffffff;padding:20px 28px;">'+
+        mpDelBtn('removeMulti('+i+')')+
         '<font face="Arial,sans-serif" color="#777777" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font><br>'+
         '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;"><b>'+s.n+'</b></font>'+
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;">'+
@@ -1527,8 +1555,9 @@ function _multiOutlookTotal(){
     '</table>'+
   '</td></tr>';
 }
-function _multiCardProduct(s){
-  return '<div style="margin-bottom:16px;">'+
+function _multiCardProduct(s,i){
+  return '<div style="position:relative;margin-bottom:16px;">'+
+    mpDelBtn('removeMulti('+i+')')+
     '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Producto cotizado</div>'+
     '<div style="font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.3;border-bottom:2px solid rgba(155,28,46,.5);padding-bottom:8px;">'+s.n+'</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;margin-bottom:8px;">'+
@@ -1545,15 +1574,10 @@ function renderMultiproducto(target){
     return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Agregue productos al paquete comercial.</div>';
   }
   if(target==='card'){
-    var t=multiTotals();
-    return MULTI.map(_multiCardProduct).join('')+
-      '<div style="margin-top:6px;padding-top:12px;border-top:2px solid #9b1c2e;display:flex;justify-content:space-between;align-items:baseline;">'+
-        '<span style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:#888;">Total propuesta</span>'+
-        '<span style="font-size:1.4rem;font-weight:900;color:#f0c040;">'+ufd(t.uf)+' UF + IVA</span>'+
-      '</div>'+(t.clp>0?'<div style="text-align:right;font-size:.78rem;color:#fff;">≈ '+fmtN(t.clp)+' mensual c/IVA</div>':'');
+    return MULTI.map(_multiCardProduct).join('');
   }
-  if(target==='gmail')return MULTI.map(_multiGmailProduct).join('')+_multiGmailTotal();
-  if(target==='outlook')return MULTI.map(_multiOutlookProduct).join('')+_multiOutlookTotal();
+  if(target==='gmail')return MULTI.map(_multiGmailProduct).join('');
+  if(target==='outlook')return MULTI.map(_multiOutlookProduct).join('');
   if(target==='wa'){
     var tx='*Propuesta Multiproducto Equifax*\n';
     MULTI.forEach(function(s){
@@ -1561,8 +1585,6 @@ function renderMultiproducto(target){
       tx+=s.items.map(function(x){return '\u2714\ufe0f '+x;}).join('\n')+'\n';
       tx+='💰 *'+ufd(s.ufV)+' UF + IVA*'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' · −'+s.dc+'%':'')+' · '+s.pl+' meses POSTPAGO\n';
     });
-    var t2=multiTotals();
-    tx+='\n*TOTAL: '+ufd(t2.uf)+' UF + IVA*'+(t2.clp>0?' · ≈'+fmtN(t2.clp)+'/mes':'')+'\n';
     return tx;
   }
   return '';
@@ -1595,11 +1617,26 @@ function cpToast(msg){
   flashCopyOn(CURRENT_PV);
   playSound('copy');
 }
+/* ════════ REQ 3 — ELIMINAR PRODUCTO DESDE LA VISTA PREVIA ════════
+   La X es solo del entorno de edición (clase .mp-x). Se retira de TODO
+   contenido que se copia, se envía por correo o se exporta a imagen. */
+function mpDelBtn(js){return '<div class="mp-x" title="Eliminar este producto (solo edición — el cliente no lo ve)" onclick="event.stopPropagation();'+js+'">\u2715</div>';}
+function removeSol(k){
+  var zone=document.getElementById('config-zone');if(!zone)return;
+  var cb=zone.querySelector('.sol-item input[value="'+k+'"]');
+  if(cb){cb.checked=false;refresh();}
+}
+function _mpDetach(el){var rem=[];if(el)Array.prototype.forEach.call(el.querySelectorAll('.mp-x'),function(n){rem.push([n,n.nextSibling,n.parentNode]);n.parentNode.removeChild(n);});return rem;}
+function _mpReattach(rem){for(var i=0;i<rem.length;i++){try{rem[i][2].insertBefore(rem[i][0],rem[i][1]);}catch(_){}}}
+function _cleanEl(el){var c=el.cloneNode(true);Array.prototype.forEach.call(c.querySelectorAll('.mp-x'),function(n){n.parentNode&&n.parentNode.removeChild(n);});return c;}
 function _copyRich(el,msg){
-  function fb(){try{var s=window.getSelection(),r=document.createRange();r.selectNodeContents(el);s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges();}catch(_){}cpToast(msg);}
+  var rem=_mpDetach(el);
+  var _html=el.innerHTML,_text=el.innerText||'';
+  _mpReattach(rem);
+  function fb(){var r=_mpDetach(el);try{var s=window.getSelection(),rg=document.createRange();rg.selectNodeContents(el);s.removeAllRanges();s.addRange(rg);document.execCommand('copy');s.removeAllRanges();}catch(_){}_mpReattach(r);cpToast(msg);}
   try{
     if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
-      var bH=new Blob([el.innerHTML],{type:'text/html'}),bT=new Blob([el.innerText||''],{type:'text/plain'});
+      var bH=new Blob([_html],{type:'text/html'}),bT=new Blob([_text],{type:'text/plain'});
       navigator.clipboard.write([new ClipboardItem({'text/html':bH,'text/plain':bT})]).then(function(){cpToast(msg);}).catch(fb);
     }else fb();
   }catch(e){fb();}
@@ -1659,10 +1696,10 @@ function setMobileView(v){
 /* ════════ AMPLIAR (modal por formato) ════════ */
 function ampliar(which){
   var body=$('ampliar-body'),title=$('ampliar-title'),html='',light=false;
-  if(which==='gmail'){title.textContent='📧 Vista ampliada — Gmail';html='<div style="background:#f8f9fa;border-radius:8px;padding:12px;">'+($('tpl-rich-gmail').innerHTML)+'</div>';light=true;}
-  else if(which==='outlook'){title.textContent='📨 Vista ampliada — Outlook';html='<div style="background:#fff;border-radius:8px;padding:12px;overflow-x:auto;">'+($('tpl-rich-outlook').innerHTML)+'</div>';light=true;}
+  if(which==='gmail'){title.textContent='📧 Vista ampliada — Gmail';html='<div style="background:#f8f9fa;border-radius:8px;padding:12px;">'+(_cleanEl($('tpl-rich-gmail')).innerHTML)+'</div>';light=true;}
+  else if(which==='outlook'){title.textContent='📨 Vista ampliada — Outlook';html='<div style="background:#fff;border-radius:8px;padding:12px;overflow-x:auto;">'+(_cleanEl($('tpl-rich-outlook')).innerHTML)+'</div>';light=true;}
   else if(which==='wsp'){title.textContent='💬 Vista ampliada — WhatsApp';html='<div style="background:var(--g1);border-radius:8px;padding:16px;font-family:\'Courier New\',monospace;font-size:.88rem;line-height:1.65;color:#cfcfcf;white-space:pre-wrap;">'+($('wa-text-view').textContent)+'</div>';}
-  else if(which==='img'){title.textContent='🖼 Vista ampliada — Imagen';html='<div style="display:flex;justify-content:center;">'+($('cot-card-pc').outerHTML)+'</div>';}
+  else if(which==='img'){title.textContent='🖼 Vista ampliada — Imagen';html='<div style="display:flex;justify-content:center;">'+(_cleanEl($('cot-card-pc')).outerHTML)+'</div>';}
   body.className='modal-body'+(light?' light':'');
   body.innerHTML=html;
   $('ampliar-modal').classList.add('on');
@@ -2485,7 +2522,7 @@ async function descargarEML(){
     if(!elBody){alert('ERROR: no se encontró la plantilla de Outlook.');return;}
     var asunto=(document.getElementById('tpl-asunto-outlook')||{}).textContent||'Propuesta Comercial Equifax';
     var destinatario=(document.getElementById('cli-email')||{}).value||(document.getElementById('ml')||{}).value||'';
-    var htmlBody=elBody.innerHTML;
+    var htmlBody=_cleanEl(elBody).innerHTML;
 
     /* ── ADJUNTO REAL ──────────────────────────────────────────────
        Si hay documento seleccionado, se obtiene por fetch (mismo origen)
@@ -2518,8 +2555,10 @@ async function descargarEML(){
        contenido si lo prefiere a abrir el .eml. No altera la descarga del .eml. */
     try{
       if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+        var _remEml=_mpDetach(elBody);
         var _bH=new Blob([elBody.innerHTML],{type:'text/html'});
         var _bT=new Blob([elBody.innerText||''],{type:'text/plain'});
+        _mpReattach(_remEml);
         navigator.clipboard.write([new ClipboardItem({'text/html':_bH,'text/plain':_bT})]).catch(function(){});
       }
     }catch(e){}
@@ -2716,14 +2755,18 @@ function diagClipboard(){
     });
 }
 function _copHTMLEl(el,msg){
+  var rem=_mpDetach(el);
+  var _html=el.innerHTML,_text=el.innerText||'';
+  _mpReattach(rem);
+  function fb(){var r=_mpDetach(el);_copHTMLFallback(el,msg);_mpReattach(r);}
   try{
     if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
-      var bH=new Blob([el.innerHTML],{type:'text/html'}),bT=new Blob([el.innerText||''],{type:'text/plain'});
+      var bH=new Blob([_html],{type:'text/html'}),bT=new Blob([_text],{type:'text/plain'});
       navigator.clipboard.write([new ClipboardItem({'text/html':bH,'text/plain':bT})])
         .then(function(){toast(msg,'ok','tpl-toast2');})
-        .catch(function(){_copHTMLFallback(el,msg);});
-    }else _copHTMLFallback(el,msg);
-  }catch(e){_copHTMLFallback(el,msg);}
+        .catch(fb);
+    }else fb();
+  }catch(e){fb();}
 }
 function _copHTMLFallback(el,msg){
   var sel=window.getSelection(),r=document.createRange();r.selectNodeContents(el);sel.removeAllRanges();sel.addRange(r);document.execCommand('copy');sel.removeAllRanges();
@@ -3126,6 +3169,7 @@ function captureCardPC(){
     var _ch=Math.ceil(el.getBoundingClientRect().height)||800;
     while(sc>2&&(baseW*sc>16000||_ch*sc>16000))sc--;
     var clone=el.cloneNode(true);
+    Array.prototype.forEach.call(clone.querySelectorAll('.mp-x'),function(n){n.parentNode&&n.parentNode.removeChild(n);});
     clone.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
     // Recorte EXACTO al contenido: sin borde externo, sin radio (esquinas
     // transparentes), sin sombra, sin margen y sin max-width del contenedor.
@@ -3392,6 +3436,26 @@ function pegarCRM(){
     .then(function(txt){mapearCRM(txt||'');})
     .catch(function(){toast('✖ Permite el acceso al portapapeles e intenta de nuevo','err','global-toast');});
 }
+/* ════════ REQ 5 — NORMALIZACIÓN AUTOMÁTICA (al escribir y al pegar) ════════ */
+function _titleCase(s){return (''+s).toLowerCase().replace(/(^|[\s\-'/])([a-z\u00e0-\u00ff\u00f1])/g,function(m,p,c){return p+c.toUpperCase();});}
+function normEmailInput(el){if(!el)return;var v=el.value,nv=v.toLowerCase();if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
+function normContactoInput(el){if(!el)return;var v=el.value,nv=_titleCase(v);if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
+function normTelInput(el){if(!el)return;var v=el.value,nv=v.replace(/[\s\u00a0]/g,'');if(nv!==v){var keep=v.slice(0,el.selectionStart).replace(/[\s\u00a0]/g,'').length;el.value=nv;try{el.setSelectionRange(keep,keep);}catch(_){}}}
+/* Fecha dd-mm-yyyy (idéntica a la columna FECHA de la planilla) */
+function _fechaDMY(){var d=new Date(),p=function(n){return(n<10?'0':'')+n;};return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear();}
+/* ════════ REQ 4 — COPIAR PARA EXCEL (estructura exacta de la planilla) ════════
+   FECHA · EMPRESA · RUT · TELÉFONO · CORREO · CONTACTO — una sola línea (TAB). */
+function copiarParaExcel(){
+  var emp=(gv('me')||'');
+  var rut=(gv('cli-rut')||'');
+  var tel=(gv('cli-tel')||'').replace(/[\s\u00a0]/g,'');
+  var email=(gv('cli-email')||'').toLowerCase();
+  var cont=_titleCase(gv('cli-contacto')||'');
+  var fila=[_fechaDMY(),emp,rut,tel,email,cont].join('\t');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(fila).then(function(){toast('✔ Copiado para Excel — pega desde la columna A','ok','global-toast');}).catch(function(){toast('✖ Copia manualmente','err','global-toast');});
+  }else{toast('✖ Este navegador no permite copiar al portapapeles','err','global-toast');}
+}
 function mapearCRM(txt){
   /* Busca la primera línea con campos separados por tabulación:
      FECHA · RAZÓN SOCIAL · RUT · TELÉFONO · EMAIL */
@@ -3415,9 +3479,11 @@ function mapearCRM(txt){
   var esRut=function(s){return /^\d{1,3}(\.\d{3}){1,2}-[\dkK]$/.test(s)||/^\d{7,9}-[\dkK]$/.test(s);};
   var esEmail=function(s){return s.indexOf('@')>-1;};
   var esFono=function(s){if(!/^\+?[\d\s().\-]{7,20}$/.test(s))return false;var d=s.replace(/[^\d]/g,'');return d.length>=7&&d.length<=15;};
-  var fono='',email='',libres=[];
+  var fono='',email='',rut='',libres=[];
   campos.forEach(function(c){
-    if(esFecha(c)||esRut(c))return;      /* FECHA y RUT se ignoran */
+    if(esFecha(c))return;                 /* FECHA se ignora */
+    if(!rut&&esRut(c)){rut=c;return;}     /* RUT: se captura (oculto) y se excluye del mapeo de campos */
+    if(esRut(c))return;
     if(!email&&esEmail(c)){email=c;return;}
     if(!fono&&esFono(c)){fono=c;return;}
     libres.push(c);
@@ -3429,9 +3495,14 @@ function mapearCRM(txt){
   if(razon){var e=$('me');if(e){e.value=razon;ok=true;} var _cc=$('cli-contacto');if(_cc)_cc.value='';}
   if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/[^\d+]/g,'');ok=true;}}
   if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
+  var _rutEl=$('cli-rut');if(_rutEl)_rutEl.value=rut||'';
   /* CONTACTO — fuente única: el campo visible #cli-contacto.
      El pegado de Excel lo sobrescribe SOLO si trae contacto (no borra lo escrito a mano). */
   var _ctExcel=extraerContactoExcel(txt);var _ctEl=$('cli-contacto');if(_ctEl&&_ctExcel)_ctEl.value=_ctExcel;
+  /* Normalización automática también al pegar (REQ 5) */
+  var _ne=$('cli-email');if(_ne)_ne.value=_ne.value.toLowerCase();
+  var _nc=$('cli-contacto');if(_nc)_nc.value=_titleCase(_nc.value);
+  var _nt=$('cli-tel');if(_nt)_nt.value=_nt.value.replace(/[\s\u00a0]/g,'');
   onClientChange();
   validarEmailCliente();
   if(ok)toast('✔ Datos CRM cargados','ok','global-toast');
