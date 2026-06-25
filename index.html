@@ -1276,8 +1276,8 @@ function lightUpdate(v){
 
 /* ════════ PUENTE → genMail() (motor original intacto) ════════ */
 function refresh(){
-  if(CURRENT.key==='multi'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();return;}
-  if(CURRENT.key==='soluciones'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();return;}
+  if(CURRENT.key==='multi'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
+  if(CURRENT.key==='soluciones'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   var c=computeCurrent();if(!c)return;LAST=c;
   setBridge('mt',c.tipo);
   setBridge('mu',c.ufVenta>0?c.ufVenta:'');
@@ -1424,11 +1424,11 @@ function addToMulti(){
   updateMultiBadge();
   flyToMulti();
   toast('✔ Agregado a Multiproducto ('+MULTI.length+')','ok','global-toast');
-  if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();}
+  if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}
 }
-function removeMulti(i){MULTI.splice(i,1);updateMultiBadge();if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();}}
-function moveMulti(i,d){var j=i+d;if(j<0||j>=MULTI.length)return;var t=MULTI[i];MULTI[i]=MULTI[j];MULTI[j]=t;if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();}}
-function clearMulti(){if(!MULTI.length)return;MULTI=[];updateMultiBadge();if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();}}
+function removeMulti(i){MULTI.splice(i,1);updateMultiBadge();if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}}
+function moveMulti(i,d){var j=i+d;if(j<0||j>=MULTI.length)return;var t=MULTI[i];MULTI[i]=MULTI[j];MULTI[j]=t;if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}}
+function clearMulti(){if(!MULTI.length)return;MULTI=[];updateMultiBadge();if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}}
 /* Panel izquierdo de la pestaña Multiproducto (lista de snapshots).
    Misma lógica estructural que Soluciones Equifax: encabezado (sol-head2) +
    lista (sol-list) + filas (sol-item). Diferencia única: aquí cada fila
