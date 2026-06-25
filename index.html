@@ -357,6 +357,13 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .crm-paste-btn.crm-excel-blue:hover{background:rgba(45,140,224,.18)!important;border-color:#2a8fe0!important;box-shadow:0 0 16px rgba(45,140,224,.6)!important;transform:translateY(-1px);}
 .crm-paste-btn.crm-excel-green{border-color:rgba(33,115,70,.85)!important;color:#34c172!important;background:rgba(33,115,70,.12)!important;animation:none!important;margin-top:12px;}
 .crm-paste-btn.crm-excel-green:hover{background:rgba(33,115,70,.20)!important;border-color:#2a9d5c!important;box-shadow:0 0 16px rgba(33,115,70,.55)!important;transform:translateY(-1px);}
+/* REQ 3+4 — grid compacto del bloque cliente: columna izq (Empresa↕RUT) + columna der (Pegar↕Copiar) */
+.dc-top-grid{display:grid;grid-template-columns:1fr minmax(168px,auto);gap:9px 12px;align-items:end;}
+.crm-paste-btn.crm-grid{width:100%;align-self:end;height:40px;min-height:40px;margin:0;padding:0 14px;flex:0 0 auto;white-space:nowrap;gap:9px;border-radius:9px;animation:none!important;}
+.crm-paste-btn.crm-grid .crm-sub{display:none;}
+.crm-paste-btn.crm-grid .crm-ico{font-size:1.2rem;}
+.crm-paste-btn.crm-grid .crm-main{font-size:.9rem;}
+@media(max-width:560px){.dc-top-grid{grid-template-columns:1fr;}.crm-paste-btn.crm-grid{height:44px;}}
 
 /* ── NIVEL 2: Abrir Outlook — prioridad contextual (azul Outlook) ── */
 @keyframes outlookGlow{
@@ -624,15 +631,22 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 .mp-del-row:hover{background:var(--rl);box-shadow:0 0 12px rgba(192,38,59,.5);}
 </style>
 <style id="fix-preview-styles">
-/* ════════ REQ 1 — BARRA DE CONTROL FIJA + SCROLL FUNCIONAL (escritorio) ════════
-   .pv-content conserva su scroll original (overflow-y:auto): el usuario recorre
-   el documento de principio a fin. La barra de control queda fija arriba (sticky)
-   y se extiende a todo el ancho del scroller, de modo que el contenido pasa por
-   debajo SIN asomar por los costados. Scroll + barra fija, ambos a la vez. */
+/* ════════ REQ 1 — BARRA SUPERIOR COMPLETA FIJA + SCROLL FUNCIONAL (escritorio) ════════
+   .pv-content conserva su scroll (overflow-y:auto): el documento se recorre entero.
+   Toda la barra superior queda fija mientras el contenido se desplaza por debajo:
+     · #adj-row ("ADJUNTAR ARCHIVO")  → sticky en top:0
+     · barra de acción / toolbar       → sticky justo debajo (top:var(--adjH))
+   Ambas opacas y a todo el ancho del scroller (sin fuga lateral). El offset --adjH
+   lo calcula syncAdjOffset() según la altura real de #adj-row. */
 @media(min-width:881px){
+  .pv-content > #tpl-out > #adj-row{
+    position:sticky;top:0;z-index:62;
+    margin-left:-16px;margin-right:-16px;
+    padding-left:16px;padding-right:16px;
+    background:var(--g2);}
   .pv-content > #tpl-out .act-strip.sticky-bar,
   .pv-content > #tpl-out .pv-toolbar.sticky-bar{
-    position:sticky;top:0;z-index:60;
+    position:sticky;top:var(--adjH,56px);z-index:60;
     margin-left:-16px;margin-right:-16px;
     padding-left:16px;padding-right:16px;}
 }
@@ -693,11 +707,12 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
     <div class="block">
       <div class="block-t dc-head"><span>👤 Datos del cliente</span><label class="chk-row chk-inline"><input type="checkbox" id="skip-dest" onchange="toggleDest(this.checked)">Propuesta genérica (sin destinatario)</label></div>
       <div id="dest-fields" class="cfg-grid">
-        <div class="fld"><label>Empresa / Razón Social</label>
-          <div class="me-row">
-            <input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()">
-            <button type="button" id="btn-crm-paste" class="crm-paste-btn crm-inline crm-excel-blue" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span><span class="crm-sub">Pega manualmente desde tu planilla</span></span></button>
-          </div>
+        <!-- REQ 3+4 · Empresa↕RUT a la izquierda · Pegar↕Copiar apilados en la misma columna derecha -->
+        <div class="dc-top-grid">
+          <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
+          <button type="button" id="btn-crm-paste" class="crm-paste-btn crm-grid crm-excel-blue" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span></span></button>
+          <div class="fld"><label>RUT</label><input type="text" id="mr" placeholder="76.123.456-7" oninput="normRutInput(this);onClientChange()"></div>
+          <button type="button" id="btn-copy-excel" class="crm-paste-btn crm-grid crm-excel-green" onclick="copiarParaExcel();playClick();" title="Copia FECHA · EMPRESA · RUT · TELÉFONO · CORREO · CONTACTO en una sola línea, lista para pegar desde la columna A"><span class="crm-ico">📋</span><span class="crm-txt"><span class="crm-main">Copiar para Excel →</span></span></button>
         </div>
         <div class="cfg-3">
           <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="normTelInput(this);onClientChange()"></div>
@@ -705,10 +720,8 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
           <div class="fld"><label>Contacto (opcional)</label><input type="text" id="cli-contacto" placeholder="Nombre del contacto" oninput="normContactoInput(this);onClientChange()"></div>
         </div>
         <!-- campos ocultos para compatibilidad -->
-        <input type="hidden" id="mn"><input type="hidden" id="mr"><input type="hidden" id="cli-obs">
+        <input type="hidden" id="mn"><input type="hidden" id="cli-obs">
       </div>
-      <!-- REQ 4 · Exportar datos del cliente con la estructura exacta de la planilla (gemelo verde de "Pegar desde Excel") -->
-      <button type="button" id="btn-copy-excel" class="crm-paste-btn crm-inline crm-excel-green" onclick="copiarParaExcel();playClick();" title="Copia FECHA · EMPRESA · RUT · TELÉFONO · CORREO · CONTACTO en una sola línea, lista para pegar desde la columna A"><span class="crm-ico">📋</span><span class="crm-txt"><span class="crm-main">Copiar para Excel →</span><span class="crm-sub">Una línea lista para pegar</span></span></button>
     </div>
 
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
@@ -1602,6 +1615,23 @@ function setPreview(which){
   document.querySelectorAll('.cv-btn.tab').forEach(function(t){t.classList.toggle('on',t.dataset.pv===which);});
   /* paneles */
   ['gmail','outlook','wsp','img'].forEach(function(p){var e=$('pane-'+p);if(e)e.classList.toggle('on',p===which);});
+  syncAdjOffset();
+}
+/* REQ 1 — mide la altura real de #adj-row y la publica como --adjH para que la
+   barra de acción quede fija justo debajo (barra superior completa siempre visible). */
+function syncAdjOffset(){
+  try{
+    var adj=document.getElementById('adj-row');
+    var pc=document.querySelector('.pv-content');
+    if(!adj||!pc)return;
+    /* Altura de la caja SIN margen: la barra de acción se fija a ras del borde
+       inferior de #adj-row, sin franja transparente intermedia. */
+    var h=adj.getBoundingClientRect().height;
+    pc.style.setProperty('--adjH',Math.round(h)+'px');
+  }catch(_){}
+}
+if(typeof window!=='undefined'){
+  window.addEventListener('resize',function(){syncAdjOffset();});
 }
 /* ── Confirmación flotante (overlay, no mueve el layout) ── */
 function cpToast(msg){
@@ -1975,7 +2005,7 @@ function genMail(){
 
   // ── TARJETA PC ──────────────────────────────
   st('cc-badge',pi.badge);st('cc-fecha',hoy());
-  st('cc-emp',em||'');st('cc-rut','');
+  st('cc-emp',em||'');st('cc-rut',ru?('RUT '+ru):'');
   st('cc-precio',ufV?ufV+' UF + IVA':'[precio] UF + IVA'); /* espaciado extra */
   st('cc-clp',clp?'aprox. '+fmtN(clp)+' mensual con IVA incluido':'—');
   st('cc-plazo',pl+' meses');st('cc-asesor',as2);
@@ -2041,7 +2071,9 @@ function genMail(){
   /* Conserva contacto Y razón social: si el saludo es por contacto y hay empresa,
      se agrega la línea de empresa (como Gmail/Outlook muestran ambos). Sin duplicar. */
   var _waEmpLn = (_contactoNom && !skip && em) ? ("Cotizaci\u00f3n para *" + em + "*.\n") : "";
-  var _waEncab = _waSaludo + "\nAdjunto la propuesta comercial solicitada para el servicio *" + pi.n + "*.\n" + _waEmpLn + "\n";
+  var _waRut = (!skip && ru) ? ("RUT: " + ru + "\n") : "";
+  var _waEncab = _waSaludo + "\n" + (_contactoNom?"":_waRut) +
+    "Adjunto la propuesta comercial solicitada para el servicio *" + pi.n + "*.\n" + _waEmpLn + (_contactoNom?_waRut:"") + "\n";
   var txt = _waEncab +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*" + pi.n + "*\n" +
@@ -2115,6 +2147,7 @@ function genMail(){
       (em
         ? '<div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#9b4455;font-family:Arial,sans-serif;margin-bottom:6px;">Propuesta para</div>'+
           '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'+
+          (ru?'<div style="margin-top:3px;font-size:11px;letter-spacing:.4px;color:#9b8a8a;font-family:Arial,sans-serif;">RUT '+ru+'</div>':'')+
           (_salNom?'<div style="margin-top:6px;font-size:13px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+_salNom+'</div>':'')+
           '<div style="margin-top:8px;font-size:13px;color:#ccbbbb;font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</div>'
         : '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;letter-spacing:1px;">Propuesta Comercial</div>'+
@@ -2251,6 +2284,9 @@ function genMail(){
             '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
               '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;line-height:1.2;">'+em+'</font></b></font>'+
             '</td></tr>'+
+            (ru?'<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
+              '<font face="Arial,sans-serif" color="#8a7a7a"><font style="font-size:11px;letter-spacing:.4px;">RUT '+ru+'</font></font>'+
+            '</td></tr>':'')+
             (_salNom?'<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
               '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:13px;">'+_salNom+'</font></b></font>'+
             '</td></tr>':'')+
@@ -2854,7 +2890,7 @@ function getCanvasPC(){
       }
 
       var empLines=d.emp?measureLines(d.emp,'bold 20px Arial',W-P*2):0;
-      var hEmp=d.emp?(32+empLines*26+16):0;
+      var hEmp=d.emp?(32+empLines*26+16+(d.rut?16:0)):0;
 
       var prodLines=measureLines(prodName,'bold 16px Arial',W-P*2);
       var hProd=14+16+(prodLines*22)+14+(Math.ceil(benef.length/2)*lh)+18;
@@ -2904,6 +2940,7 @@ function getCanvasPC(){
         ctx.font='8px Arial';ctx.fillStyle='#555';ctx.fillText('PROPUESTA PARA',P,ey);ey+=16;
         ctx.font='bold 20px Segoe UI,Arial';ctx.fillStyle='#fff';
         ey=wt(ctx,d.emp,P,ey,W-P*2,26)+4;
+        if(d.rut){ctx.font='11px Arial';ctx.fillStyle='#8a7a7a';ctx.fillText(d.rut,P,ey);ey+=14;}
         y+=hEmp;
       }
 
@@ -2993,7 +3030,7 @@ function getCanvasWsp(){
       }
 
       var hh=420;      // header rojo
-      var hDest=d.emp?(40+mLines(d.emp,'bold 52px Arial',W-P*2)*62+32):0;
+      var hDest=d.emp?(40+mLines(d.emp,'bold 52px Arial',W-P*2)*62+32+(d.rut?34:0)):0;
       var prodL=mLines(prodName,'bold 36px Arial',W-P*2);
       var hProd=32+52+(prodL*46)+24+(benef.length*46)+28;
       var hPrec=32+50+130+(d.clpText&&d.clpText!=='—'?50:0)+(dc.pct?96:0)+24;
@@ -3053,6 +3090,7 @@ function getCanvasWsp(){
         ctx.fillText('PROPUESTA PARA',P,ey);ey+=28;
         ctx.font='bold 52px Arial';ctx.fillStyle=WHITE;
         ey=wt(ctx,d.emp,P,ey,W-P*2,62)+16;
+        if(d.rut){ctx.font='26px Arial';ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillText(d.rut,P,ey);ey+=30;}
         y+=hDest;
       }
 
@@ -3442,6 +3480,7 @@ function _titleCase(s){return (''+s).toLowerCase().replace(/(^|[\s\-'/])([a-z\u0
 function normEmailInput(el){if(!el)return;var v=el.value,nv=v.toLowerCase();if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
 function normContactoInput(el){if(!el)return;var v=el.value,nv=_titleCase(v);if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
 function normTelInput(el){if(!el)return;var v=el.value,nv=v.replace(/[\s\u00a0]/g,'');if(nv!==v){var keep=v.slice(0,el.selectionStart).replace(/[\s\u00a0]/g,'').length;el.value=nv;try{el.setSelectionRange(keep,keep);}catch(_){}}}
+function normRutInput(el){if(!el)return;var v=el.value,nv=v.replace(/[\s\u00a0]/g,'').toUpperCase();if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
 /* Fecha dd-mm-yyyy (idéntica a la columna FECHA de la planilla) */
 function _fechaDMY(){var d=new Date(),p=function(n){return(n<10?'0':'')+n;};return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear();}
 /* ════════ REQ 4 — COPIAR PARA EXCEL (estructura exacta de la planilla) ════════
@@ -3498,7 +3537,7 @@ function mapearCRM(txt){
   if(razon){var e=$('me');if(e){e.value=razon;ok=true;} var _cc=$('cli-contacto');if(_cc)_cc.value='';}
   if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/[^\d+]/g,'');ok=true;}}
   if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
-  var _rutEl=$('mr');if(_rutEl)_rutEl.value=rut||'';
+  var _rutEl=$('mr');if(_rutEl)_rutEl.value=(rut||'').replace(/[\s\u00a0]/g,'').toUpperCase();
   /* CONTACTO — fuente única: el campo visible #cli-contacto.
      El pegado de Excel lo sobrescribe SOLO si trae contacto (no borra lo escrito a mano). */
   var _ctExcel=extraerContactoExcel(txt);var _ctEl=$('cli-contacto');if(_ctEl&&_ctExcel)_ctEl.value=_ctExcel;
@@ -3564,6 +3603,7 @@ refreshUserBtn();
 setProduct('bundle');     // PRODUCTO PREDETERMINADO OBLIGATORIO — valores mínimos cargados
 setPreview('outlook');      // primera vista lista
 updateCRMWsp();           // estado inicial integración CRM/WhatsApp
+setTimeout(syncAdjOffset,0); setTimeout(syncAdjOffset,300); /* REQ 1 — offset de barra fija tras render completo */
 
 /* La UF global recalcula precios al instante */
 var _ufg=$('uf-global');
