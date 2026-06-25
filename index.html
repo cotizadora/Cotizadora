@@ -619,6 +619,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 <style id="sol-cat-styles">
 .sol-head2{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin:14px 2px 9px;}
 .sol-head2:first-child{margin-top:2px;}
+.bdd-grp-t{font-size:.66rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--y);font-weight:800;margin:13px 2px 7px;opacity:.92;}
 .sol-list{display:flex;flex-direction:column;gap:8px;}
 .sol-item{display:flex;align-items:center;gap:10px;background:var(--g2);border:1px solid var(--g3);border-radius:8px;padding:11px 13px;cursor:pointer;color:var(--w);font-size:.9rem;transition:.15s;}
 .sol-item:hover{border-color:var(--r);}
@@ -1030,6 +1031,7 @@ var PRODUCTS=[
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
   {key:'soluciones',ic:'🧩',lb:'Soluciones Equifax',su:'Catálogo'},
+  {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
   {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'}
 ];
 
@@ -1066,6 +1068,23 @@ function cfgHTML(key){
   if(key==='multi'){return multiPanelHTML();}
   if(key==='soluciones'){
     return '<div class="sol-head2">Productos a incluir</div><div class="sol-list">'+SOL_LIST.map(function(p){return '<label class="sol-item"><input type="checkbox" value="'+p[0]+'"'+(p[2]?' checked':'')+' onchange="refresh()"><span>'+p[1]+'</span></label>';}).join('')+'</div>';
+  }
+  if(key==='bdd'){
+    var grupos=BDD_GROUPS.map(function(g){
+      return '<div class="bdd-grp-t">'+g.t+'</div><div class="sol-list">'+
+        g.items.map(function(it){return '<label class="sol-item"><input type="checkbox" data-bdd="1" value="'+it[0]+'" data-lb="'+it[1]+'"'+(it[2]?' checked':'')+' onchange="refresh()"><span>'+it[1]+'</span></label>';}).join('')+
+      '</div>';
+    }).join('');
+    return '<div class="sol-head2">Atributos de la Base de Datos</div>'+grupos+
+      '<div class="bdd-grp-t">Servicio adicional</div><div class="sol-list">'+
+        '<label class="sol-item"><input type="checkbox" id="bdd-enrich" onchange="refresh()"><span>Enrichment — actualizar y complementar base existente del cliente</span></label>'+
+      '</div>'+
+      '<div class="bdd-grp-t">Volumen y valor</div>'+
+      '<div class="cfg-2">'+
+        '<div class="fld"><label>Cantidad de RUT solicitados</label><input type="number" id="bdd-vol" value="1000" min="1" step="100" oninput="refresh()"></div>'+
+        '<div class="fld"><label>Valor BackOffice (UF)</label><input type="number" id="bdd-val" placeholder="Por evaluar" min="0" step="0.1" oninput="refresh()"></div>'+
+      '</div>'+
+      '<div class="note-inline" style="margin-top:10px;">🗄️ <b>Base de Datos:</b> solicitud a medida para evaluación de BackOffice. Referencia comercial: <b>desde 1.000 RUT por 10 UF</b>. El valor final lo define BackOffice; regístralo arriba cuando lo informen.</div>';
   }
   if(key==='bundle')
     return '<div class="cfg-2">'+
@@ -1278,6 +1297,7 @@ function lightUpdate(v){
 function refresh(){
   if(CURRENT.key==='multi'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='soluciones'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
+  if(CURRENT.key==='bdd'){var szb=document.getElementById('summary-zone');if(szb)szb.innerHTML='';genMail();syncWA();return;}
   var c=computeCurrent();if(!c)return;LAST=c;
   setBridge('mt',c.tipo);
   setBridge('mu',c.ufVenta>0?c.ufVenta:'');
@@ -1386,6 +1406,76 @@ function renderPortafolioSoluciones(target){
 }
 
 /* ════════════════════════════════════════════════════════════════
+   BASE DE DATOS — solicitud comercial a medida (sin precio fijo; el valor
+   lo informa BackOffice). Reutiliza genMail, la ficha y los exportadores,
+   igual que Soluciones. Aislado tras CURRENT.key==='bdd'. Rutas existentes
+   intactas (guardas isBdd, espejo de isSol/isMulti).
+   ════════════════════════════════════════════════════════════════ */
+var BDD_GROUPS=[
+  {t:'Identificación',items:[['nombre','Nombre completo',1],['rut','RUT',1],['edad','Edad',0],['genero','Género',0],['empresa','Empresa',0],['tipoemp','Tipo de empresa',0],['rubro','Rubro',0],['replegal','Representante legal',0]]},
+  {t:'Información de contacto',items:[['email','Correo electrónico',1],['telpart','Teléfono particular',0],['telcom','Teléfono comercial',0],['telcel','Teléfono celular',1],['dircom','Dirección comercial',0]]},
+  {t:'Ubicación',items:[['region','Región',1],['sector','Sector',0],['cobnac','Cobertura nacional',0]]},
+  {t:'Información comercial y de riesgo',items:[['renta','Renta',0],['score','Score',1],['riesgo','Puntuación de riesgo crediticio',0]]}
+];
+function bddSelected(){var s={},zone=document.getElementById('config-zone');if(zone)Array.prototype.forEach.call(zone.querySelectorAll('.sol-item input[data-bdd]:checked'),function(c){s[c.value]=c.getAttribute('data-lb')||c.value;});return s;}
+function bddEnrich(){var e=document.getElementById('bdd-enrich');return !!(e&&e.checked);}
+function bddVol(){var e=document.getElementById('bdd-vol');var n=e?parseInt(e.value):0;return (n&&n>0)?n:0;}
+function bddVal(){var e=document.getElementById('bdd-val');var v=e?parseFloat(e.value):NaN;return (!isNaN(v)&&v>0)?v:null;}
+function bddBlocksInner(theme){
+  var dark=(theme==='dark');
+  var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#333',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
+  var cBox=dark?'rgba(240,192,64,.08)':'#f7eef0';
+  var sel=bddSelected(),vol=bddVol(),enr=bddEnrich(),val=bddVal();
+  function sec(titulo,items){
+    if(!items.length)return '';
+    return '<div style="margin:13px 0 3px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;font-family:Arial,sans-serif;">'+titulo+'</div>'+
+      items.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
+  }
+  var attrs=BDD_GROUPS.map(function(g){return sec(g.t,g.items.filter(function(it){return sel[it[0]];}).map(function(it){return it[1];}));}).join('');
+  if(enr)attrs+=sec('Servicio adicional',['Enrichment — actualización y complemento de la base de datos existente del cliente']);
+  /* Resumen de la solicitud: volumen y valor (el valor lo define BackOffice) */
+  var valLine = (val!=null) ? (ufd(val)+' UF + IVA'+( (function(){var c=ufc(val);return c>0?(' · ≈'+fmtN(c)):'';})() )) : 'Por evaluar por BackOffice · referencia: desde 1.000 RUT por 10 UF';
+  var resumen='<div style="margin-top:16px;padding:14px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Resumen de la solicitud</div>'+
+    (vol?'<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Volumen solicitado:</b> '+fmtN(vol)+' RUT</div>':'')+
+    '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Enrichment:</b> '+(enr?'Incluido':'No incluido')+'</div>'+
+    '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Valor:</b> '+valLine+'</div>'+
+  '</div>';
+  return '<div style="margin:0;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:15px;font-weight:800;color:'+cTit+';margin-bottom:2px;">Especificación de Base de Datos solicitada</div>'+
+    '<div style="font-size:12px;color:'+cTxt+';line-height:1.5;margin-bottom:4px;">Bases de datos altamente segmentables. Atributos a incluir según la necesidad del cliente:</div>'+
+    attrs+resumen+
+  '</div>';
+}
+function renderBaseDatos(target){
+  var sel=bddSelected(),nSel=Object.keys(sel).length,enr=bddEnrich();
+  if(!nSel && !enr){
+    if(target==='wa')return '*Solicitud Base de Datos Equifax*\nSeleccione atributos para construir la solicitud.';
+    if(target==='outlook')return '<tr><td style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Seleccione atributos para construir la solicitud de Base de Datos.</td></tr>';
+    return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Seleccione atributos para construir la solicitud de Base de Datos.</div>';
+  }
+  if(target==='card')return bddBlocksInner('dark');
+  if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+bddBlocksInner('light')+'</div>';
+  if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+bddBlocksInner('light')+'</td></tr>';
+  if(target==='wa'){
+    var vol=bddVol(),val=bddVal();
+    var t='*Solicitud Base de Datos Equifax*\nBases de datos altamente segmentables — atributos a incluir:\n';
+    BDD_GROUPS.forEach(function(g){
+      var its=g.items.filter(function(it){return sel[it[0]];});
+      if(!its.length)return;
+      t+='\n*'+g.t.toUpperCase()+'*\n'+its.map(function(it){return '\u2714\ufe0f '+it[1];}).join('\n')+'\n';
+    });
+    if(enr)t+='\n*SERVICIO ADICIONAL*\n\u2714\ufe0f Enrichment — actualización y complemento de la base existente\n';
+    t+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
+    if(vol)t+='\ud83d\udcca *Volumen solicitado:* '+fmtN(vol)+' RUT\n';
+    t+='\ud83d\udd04 *Enrichment:* '+(enr?'Incluido':'No incluido')+'\n';
+    t+='\ud83d\udcb0 *Valor:* '+(val!=null?('*'+ufd(val)+' UF* + IVA'+((function(){var c=ufc(val);return c>0?(' · \u2248'+fmtN(c)):'';})())):'Por evaluar por BackOffice · referencia: desde 1.000 RUT por 10 UF')+'\n';
+    return t;
+  }
+  return '';
+}
+
+/* ════════════════════════════════════════════════════════════════
    MULTIPRODUCTO COMERCIAL — snapshots congelados + render reutilizando
    la MISMA estética (header/logo/plantilla/Gmail/Outlook/PNG/WhatsApp).
    Aislado tras CURRENT.key==='multi'. Ruta de producto único intacta.
@@ -1408,7 +1498,7 @@ function multiTotals(){
   return {uf:Math.round(uf*10000)/10000,clp:clp};
 }
 function addToMulti(){
-  if(!LAST||CURRENT.key==='soluciones'||CURRENT.key==='multi'){toast('Configura un producto primero','err','global-toast');return;}
+  if(!LAST||CURRENT.key==='soluciones'||CURRENT.key==='multi'||CURRENT.key==='bdd'){toast('Configura un producto primero','err','global-toast');return;}
   var c=LAST,tipo=c.tipo,pi=PINFO[tipo]||{n:'Producto'};
   var ufV=c.ufVenta,ufL=c.ufLista,hayDc=ufL>0&&ufV<ufL,dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var pl=(c.plazo||'12'),cons=c.cons||0;
@@ -1971,8 +2061,9 @@ function loadExecutivo(){
 function genMail(){
   var isSol=(typeof CURRENT!=='undefined'&&CURRENT.key==='soluciones');
   var isMulti=(typeof CURRENT!=='undefined'&&CURRENT.key==='multi');
+  var isBdd=(typeof CURRENT!=='undefined'&&CURRENT.key==='bdd');
   var tipo=gv('mt');
-  if(!isSol && !isMulti && !tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
+  if(!isSol && !isMulti && !isBdd && !tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
   var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
   var sal=saludoChile(); /* saludo según hora real de Chile, calculado al generar */
   /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
@@ -1998,6 +2089,7 @@ function genMail(){
   var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'[Producto]'};
   if(isSol){pi={badge:'PORTAFOLIO DE SOLUCIONES',n:'Soluciones Equifax'};}
   if(isMulti){pi={badge:'PROPUESTA MULTIPRODUCTO',n:'Multiproducto Comercial'};}
+  if(isBdd){pi={badge:'SOLICITUD BASE DE DATOS',n:'Base de Datos Comercial'};}
   /* ── Enlace de WhatsApp para la firma (cliente → ejecutivo) con mensaje contextual ── */
   var _execNm=(as2&&as2!=='[Asesor]')?as2:'';
   var _prodNm=(pi&&pi.n&&pi.n!=='[Producto]')?pi.n:'';
@@ -2010,7 +2102,8 @@ function genMail(){
   var clp=ufV?ufc(ufV):null;
   if(isSol){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
   if(isMulti){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
-  (function(){var _pz=document.getElementById('cc-price-zone'),_cz=document.getElementById('cc-contrato-zone');var _hide=isSol||isMulti;if(_pz)_pz.style.display=_hide?'none':'';if(_cz)_cz.style.display=_hide?'none':'';})();
+  if(isBdd){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
+  (function(){var _pz=document.getElementById('cc-price-zone'),_cz=document.getElementById('cc-contrato-zone');var _hide=isSol||isMulti||isBdd;if(_pz)_pz.style.display=_hide?'none':'';if(_cz)_cz.style.display=_hide?'none':'';})();
 
   // ── TARJETA PC ──────────────────────────────
   st('cc-badge',pi.badge);st('cc-fecha',hoy());
@@ -2068,8 +2161,9 @@ function genMail(){
   // Asunto
   if(isSol){sv('cc-prod-block',renderPortafolioSoluciones('card'));sv('cc-dcto-block','');var _wpb=document.getElementById('wcc-prod-block');if(_wpb)_wpb.innerHTML=renderPortafolioSoluciones('card');var _wdb=document.getElementById('wcc-dcto-block');if(_wdb)_wdb.innerHTML='';}
   if(isMulti){sv('cc-prod-block',renderMultiproducto('card'));sv('cc-dcto-block','');var _wpbM=document.getElementById('wcc-prod-block');if(_wpbM)_wpbM.innerHTML=renderMultiproducto('card');var _wdbM=document.getElementById('wcc-dcto-block');if(_wdbM)_wdbM.innerHTML='';}
+  if(isBdd){sv('cc-prod-block',renderBaseDatos('card'));sv('cc-dcto-block','');var _wpbB=document.getElementById('wcc-prod-block');if(_wpbB)_wpbB.innerHTML=renderBaseDatos('card');var _wdbB=document.getElementById('wcc-dcto-block');if(_wdbB)_wdbB.innerHTML='';}
   var aEmp=(em?' | '+em:'');
-  var _asuntoSol=isSol?('Soluciones Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):null);
+  var _asuntoSol=isSol?('Soluciones Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):null));
   st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
   st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
 
@@ -2113,7 +2207,7 @@ function genMail(){
     (fo ? "\ud83d\udcf1 " + fo + "\n" : "") +
     (ml ? "\u2709 " + ml + "\n" : "") +
     "";
-  document.getElementById('tpl-body').value=isSol?renderPortafolioSoluciones('wa'):(isMulti?(_waSaludo+"\n"+_waEmpLn+"\n"+renderMultiproducto('wa')):txt);
+  document.getElementById('tpl-body').value=isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')):(isSol?renderPortafolioSoluciones('wa'):(isMulti?(_waSaludo+"\n"+_waEmpLn+"\n"+renderMultiproducto('wa')):txt));
 
   // ── HTML ENRIQUECIDO — Diseño corporativo completo ──
   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
@@ -2165,7 +2259,7 @@ function genMail(){
     '</div>'+
 
     // PRODUCTO/PRECIO/DOCS (soluciones: contenido multiproducto sin precio)
-    (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
+    (isBdd ? renderBaseDatos('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
     '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
       '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+'</div>'+
@@ -2210,7 +2304,7 @@ function genMail(){
     '<div style="background:#fffdf5;padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
       '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</div>'+
-    '</div>')))+
+    '</div>'))))+
 
     // FIRMA — fondo oscuro corporativo
     '<div style="background:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
@@ -2351,7 +2445,7 @@ function genMail(){
     // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
     // ══════════════════════════════════════════
     _destOutlook+
-    (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
+    (isBdd ? renderBaseDatos('outlook') : (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
     // ══════════════════════════════════════════
     '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
@@ -2445,7 +2539,7 @@ function genMail(){
           '</table>'+
         '</td>'+
       '</tr></table>'+
-    '</td></tr>')))+
+    '</td></tr>'))))+
 
     // ══════════════════════════════════════════
     // FIRMA — fondo gris claro, texto oscuro (garantizado Outlook)
@@ -3281,7 +3375,7 @@ function copImgWsp(){
 }
 function descImg(){
   toast('⏳ Generando PNG...','info','tpl-toast2');
-  if(CURRENT.key==='soluciones'||CURRENT.key==='multi'){preloadLogo(function(){captureCardPC().then(function(cv){var a=document.createElement('a');a.download=nombreArchivo('png');a.href=cv.toDataURL('image/png');a.click();toast('⬇ PNG descargado','ok','tpl-toast2');}).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});});return;}
+  if(CURRENT.key==='soluciones'||CURRENT.key==='multi'||CURRENT.key==='bdd'){preloadLogo(function(){captureCardPC().then(function(cv){var a=document.createElement('a');a.download=nombreArchivo('png');a.href=cv.toDataURL('image/png');a.click();toast('⬇ PNG descargado','ok','tpl-toast2');}).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});});return;}
   getCanvasPC().then(function(cv){
     var a=document.createElement('a');
     a.download=nombreArchivo('png');
