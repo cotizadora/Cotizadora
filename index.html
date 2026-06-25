@@ -620,6 +620,9 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 .sol-head2{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin:14px 2px 9px;}
 .sol-head2:first-child{margin-top:2px;}
 .bdd-grp-t{font-size:.66rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--y);font-weight:800;margin:13px 2px 7px;opacity:.92;}
+.sol-list.bdd-cols{display:grid;grid-template-columns:1fr 1fr;gap:7px 10px;}
+.sol-list.bdd-cols .sol-item{padding:9px 11px;font-size:.84rem;}
+@media(max-width:520px){.sol-list.bdd-cols{grid-template-columns:1fr;}}
 .sol-list{display:flex;flex-direction:column;gap:8px;}
 .sol-item{display:flex;align-items:center;gap:10px;background:var(--g2);border:1px solid var(--g3);border-radius:8px;padding:11px 13px;cursor:pointer;color:var(--w);font-size:.9rem;transition:.15s;}
 .sol-item:hover{border-color:var(--r);}
@@ -1030,8 +1033,8 @@ var PRODUCTS=[
   {key:'bolsa', ic:'🎒',lb:'Informes Comerciales Bolsa',      su:'Pago único 12m'},
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
-  {key:'soluciones',ic:'🧩',lb:'Soluciones Equifax',su:'Catálogo'},
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
+  {key:'soluciones',ic:'🧩',lb:'Soluciones Equifax',su:'Catálogo'},
   {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'}
 ];
 
@@ -1071,7 +1074,7 @@ function cfgHTML(key){
   }
   if(key==='bdd'){
     var grupos=BDD_GROUPS.map(function(g){
-      return '<div class="bdd-grp-t">'+g.t+'</div><div class="sol-list">'+
+      return '<div class="bdd-grp-t">'+g.t+'</div><div class="sol-list bdd-cols">'+
         g.items.map(function(it){return '<label class="sol-item"><input type="checkbox" data-bdd="1" value="'+it[0]+'" data-lb="'+it[1]+'"'+(it[2]?' checked':'')+' onchange="refresh()"><span>'+it[1]+'</span></label>';}).join('')+
       '</div>';
     }).join('');
@@ -1084,7 +1087,8 @@ function cfgHTML(key){
         '<div class="fld"><label>Cantidad de RUT solicitados</label><input type="number" id="bdd-vol" value="1000" min="1" step="100" oninput="refresh()"></div>'+
         '<div class="fld"><label>Valor BackOffice (UF)</label><input type="number" id="bdd-val" placeholder="Por evaluar" min="0" step="0.1" oninput="refresh()"></div>'+
       '</div>'+
-      '<div class="note-inline" style="margin-top:10px;">🗄️ <b>Base de Datos:</b> solicitud a medida para evaluación de BackOffice. Referencia comercial: <b>desde 1.000 RUT por 10 UF</b>. El valor final lo define BackOffice; regístralo arriba cuando lo informen.</div>';
+      '<div class="note-inline" style="margin-top:10px;">🗄️ <b>Base de Datos:</b> solicitud a medida para evaluación de BackOffice. Referencia comercial: <b>desde 1.000 RUT por 10 UF</b>. El valor final lo define BackOffice; regístralo arriba cuando lo informen.</div>'+
+      '<button type="button" id="btn-add-bdd-multi" class="exec-save" style="background:var(--rd);color:#fff;margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 16px;" onclick="addBddToMulti();playClick();" title="Agrega esta Base de Datos a la propuesta Multiproducto"><span style="font-size:1.4rem;line-height:1;">📦</span><span>Agregar a Multiproducto</span></button>';
   }
   if(key==='bundle')
     return '<div class="cfg-2">'+
@@ -1325,15 +1329,16 @@ function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'n
 /* ════════ SELECCIÓN DE PRODUCTO (gobierna toda la interfaz) ════════ */
 /* ════════ SOLUCIONES EQUIFAX — catálogo (reutiliza genMail, la ficha y los exportadores) ════════ */
 var BCC_FIJO='eduranb@geoinfobusiness.cl';
-var SOL_LIST=[['ri','Reporte Interactivo',1],['mc','Mora Control',1],['docunico','Mora Control Documento Único',0],['pfm','Portfolio Monitor',1],['pc','Partner Check',0],['datafinder','Data Finder',0],['malla','Malla Societaria',0],['iris','IRIS',0],['easycheck','Easy Check',0]];
-var SOL_NAMES={ri:'Reporte Interactivo',mc:'Mora Control',docunico:'Mora Control Documento Único',pfm:'Portfolio Monitor',pc:'Partner Check',datafinder:'Data Finder',malla:'Malla Societaria',iris:'IRIS',easycheck:'Easy Check'};
+var SOL_LIST=[['ri','Reporte Interactivo',1],['mc','Mora Control',1],['docunico','Mora Control Documento Único',0],['pfm','Portfolio Monitor',1],['pc','Partner Check',0],['datafinder','Data Finder',0],['malla','Malla Societaria',0],['iris','IRIS',0],['easycheck','Easy Check',0],['basedatos','Base de Datos',0]];
+var SOL_NAMES={ri:'Reporte Interactivo',mc:'Mora Control',docunico:'Mora Control Documento Único',pfm:'Portfolio Monitor',pc:'Partner Check',datafinder:'Data Finder',malla:'Malla Societaria',iris:'IRIS',easycheck:'Easy Check',basedatos:'Base de Datos'};
 var SOL_MAP={ri:'ri_plan',mc:'mc_solo',pfm:'pfm',pc:'pc'};
 var SOL_CARAC={
   docunico:['Publicación de un documento puntual en DICOM','Sin contratar plan mensual','Pago único asociado al documento','Misma marca DICOM de presión de pago','Gestión individual del documento'],
   datafinder:['Búsqueda de teléfonos, correos y direcciones','Datos de personas y empresas','Múltiples fuentes consolidadas','Información de contacto actualizada','Enriquecimiento de bases de datos'],
   malla:['Relaciones entre empresas, socios y representantes','Estructuras societarias y grupos','Vínculos relevantes para el riesgo','Insumo para compliance y due diligence','Visión consolidada de la propiedad'],
   iris:['Evaluación crediticia a gran volumen','Consultas automatizadas por integración','Tarifa por tramos según volumen','Resultados consistentes en cada consulta','Escalable para alta demanda'],
-  easycheck:['Consulta crediticia básica y rápida','Respuesta inmediata','Planes flexibles de bajo volumen','Pensado para microempresa y comercio','Primer nivel de evaluación de riesgo']
+  easycheck:['Consulta crediticia básica y rápida','Respuesta inmediata','Planes flexibles de bajo volumen','Pensado para microempresa y comercio','Primer nivel de evaluación de riesgo'],
+  basedatos:['Bases de datos altamente segmentables','Atributos a medida: identificación, contacto, ubicación, renta y score','Servicio de Enrichment para actualizar bases existentes','Cobertura nacional o por región y sector','Valorización a medida según volumen y atributos']
 };
 var SOL_SIT={
   ri:['¿Entrega crédito sin conocer el comportamiento financiero del cliente?','Morosidades y protestos detectados después de la venta.','Decisiones comerciales tomadas con información incompleta.'],
@@ -1344,7 +1349,8 @@ var SOL_SIT={
   datafinder:['Clientes imposibles de ubicar para cobrar o vender.','Bases de datos con contactos desactualizados.','Tiempo perdido buscando teléfonos y correos.'],
   malla:['No sabe quién está realmente detrás de una empresa.','Riesgos ocultos por vínculos entre sociedades.','Negocios cerrados sin ver la estructura completa.'],
   iris:['Cientos de clientes por evaluar uno a uno.','Procesos de evaluación lentos y manuales.','Necesidad de integrar la evaluación a sus sistemas.'],
-  easycheck:['Decisiones que requieren respuesta inmediata.','Validaciones comerciales de primera línea.','Volumen bajo que no justifica un plan grande.']
+  easycheck:['Decisiones que requieren respuesta inmediata.','Validaciones comerciales de primera línea.','Volumen bajo que no justifica un plan grande.'],
+  basedatos:['Campañas masivas que llegan a público equivocado.','Inversión en marketing con bajo retorno.','Bases de contactos desactualizadas o incompletas.']
 };
 var SOL_BENE={
   ri:['Detecte riesgos antes de vender.','Reduzca incobrables.','Decida líneas de crédito con respaldo.'],
@@ -1355,7 +1361,8 @@ var SOL_BENE={
   datafinder:['Recupere contacto para cobrar o vender.','Mejore la localización de su cartera.','Aumente la efectividad de sus campañas.'],
   malla:['Detecte riesgo oculto antes de cerrar.','Decida con la estructura completa a la vista.','Refuerce su compliance.'],
   iris:['Evalúe a escala sin cuellos de botella.','Automatice decisiones.','Mantenga criterios consistentes.'],
-  easycheck:['Decida rápido y sin complicaciones.','Empiece a evaluar riesgo hoy.','Cubra validaciones de bajo volumen.']
+  easycheck:['Decida rápido y sin complicaciones.','Empiece a evaluar riesgo hoy.','Cubra validaciones de bajo volumen.'],
+  basedatos:['Llegue directo a su público objetivo.','Reduzca el desperdicio publicitario.','Aumente la conversión y el retorno de la inversión.']
 };
 function solSelected(){
   var sel=[],zone=document.getElementById('config-zone');
