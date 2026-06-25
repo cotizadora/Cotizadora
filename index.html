@@ -639,9 +639,13 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
    Ambas opacas y a todo el ancho del scroller (sin fuga lateral). El offset --adjH
    lo calcula syncAdjOffset() según la altura real de #adj-row. */
 @media(min-width:881px){
+  /* El scroller recorta en su caja de relleno: un padding-top dejaría una franja
+     superior por la que el contenido asomaría POR ENCIMA de la barra fija. Se anula
+     para que #adj-row quede a ras del borde del panel y oculte todo lo que pase. */
+  .pv-content{padding-top:0;}
   .pv-content > #tpl-out > #adj-row{
     position:sticky;top:0;z-index:62;
-    margin-left:-16px;margin-right:-16px;
+    margin-left:-16px;margin-right:-16px;margin-bottom:0;
     padding-left:16px;padding-right:16px;
     background:var(--g2);
     border-radius:0;border-left:none;border-right:none;border-top:none;
@@ -649,7 +653,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
     box-shadow:0 6px 14px -4px rgba(0,0,0,.55);}
   .pv-content > #tpl-out .act-strip.sticky-bar,
   .pv-content > #tpl-out .pv-toolbar.sticky-bar{
-    position:sticky;top:var(--adjH,56px);z-index:60;
+    position:sticky;top:calc(var(--adjH,56px) - 1px);z-index:60;
     margin-left:-16px;margin-right:-16px;
     padding-left:16px;padding-right:16px;}
 }
