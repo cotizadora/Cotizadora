@@ -611,29 +611,26 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 .sol-item{display:flex;align-items:center;gap:10px;background:var(--g2);border:1px solid var(--g3);border-radius:8px;padding:11px 13px;cursor:pointer;color:var(--w);font-size:.9rem;transition:.15s;}
 .sol-item:hover{border-color:var(--r);}
 .sol-item input{width:17px;height:17px;accent-color:var(--r);cursor:pointer;flex:0 0 auto;}
+/* Multiproducto: misma fila que Soluciones, con valor comercial + Eliminar producto a la derecha */
+.sol-item.mp-item{justify-content:space-between;align-items:center;gap:12px;cursor:default;}
+.mp-del-row{flex:0 0 auto;background:var(--rd);border:1px solid var(--rl);color:#fff;border-radius:8px;
+  padding:9px 14px;font-family:inherit;font-size:.78rem;font-weight:800;letter-spacing:.3px;cursor:pointer;
+  white-space:nowrap;transition:background .12s,box-shadow .12s;}
+.mp-del-row:hover{background:var(--rl);box-shadow:0 0 12px rgba(192,38,59,.5);}
 </style>
 <style id="fix-preview-styles">
-/* ════════ REQ 1 — BARRA DE CONTROL FIJA EN LA VISTA PREVIA (escritorio) ════════
-   El correo se desplaza DENTRO del marco; la barra de control y la fila
-   ADJUNTAR permanecen siempre visibles, fijas dentro del área de vista previa.
-   Sin fuga lateral: la barra es hermana superior del marco, no se superpone. */
+/* ════════ REQ 1 — BARRA DE CONTROL FIJA + SCROLL FUNCIONAL (escritorio) ════════
+   .pv-content conserva su scroll original (overflow-y:auto): el usuario recorre
+   el documento de principio a fin. La barra de control queda fija arriba (sticky)
+   y se extiende a todo el ancho del scroller, de modo que el contenido pasa por
+   debajo SIN asomar por los costados. Scroll + barra fija, ambos a la vez. */
 @media(min-width:881px){
-  #right-panel{flex-direction:column;}
-  .pv-content{display:flex;flex-direction:column;overflow:hidden;min-height:0;}
-  .pv-content > #tpl-out{flex:1;min-height:0;display:flex;flex-direction:column;}
-  #tpl-out > #adj-row{flex:0 0 auto;}
-  #tpl-out > .pv-pane.on{flex:1;min-height:0;display:flex;flex-direction:column;}
-  .pv-pane.on > .act-strip.sticky-bar,.pv-pane.on > .pv-toolbar{position:static;flex:0 0 auto;}
-  .pv-pane.on > .pv-frame{flex:1;min-height:0;overflow:auto;}
-  .pv-pane.on > .outlook-note{flex:0 0 auto;}
-  #pane-wsp.on > .wa-phone-shell{flex:1;min-height:0;max-height:none;}
+  .pv-content > #tpl-out .act-strip.sticky-bar,
+  .pv-content > #tpl-out .pv-toolbar.sticky-bar{
+    position:sticky;top:0;z-index:60;
+    margin-left:-16px;margin-right:-16px;
+    padding-left:16px;padding-right:16px;}
 }
-/* ════════ REQ 3 — X DE ELIMINAR PRODUCTO (solo edición; nunca se copia/envía) ════════ */
-.mp-x{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;
-  background:#c0263b;color:#fff;font-size:14px;font-weight:900;line-height:24px;text-align:center;
-  cursor:pointer;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.5);border:2px solid #fff;
-  user-select:none;-webkit-user-select:none;transition:transform .12s,background .12s;}
-.mp-x:hover{background:#e23a52;transform:scale(1.12);}
 </style>
 </head>
 <body>
@@ -694,7 +691,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
         <div class="fld"><label>Empresa / Razón Social</label>
           <div class="me-row">
             <input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()">
-            <button type="button" id="btn-crm-paste" class="crm-paste-btn crm-inline" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span><span class="crm-sub">Pega manualmente desde tu planilla</span></span></button>
+            <button type="button" id="btn-crm-paste" class="crm-paste-btn crm-inline crm-excel-blue" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span><span class="crm-sub">Pega manualmente desde tu planilla</span></span></button>
           </div>
         </div>
         <div class="cfg-3">
@@ -1330,8 +1327,7 @@ function solBlocksInner(sel,theme){
       items.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:'+iconColor+';font-weight:bold;">'+icon+'</span> '+t+'</div>';}).join('');
   }
   return sel.map(function(k){
-    return '<div style="position:relative;margin:0 0 26px;padding-bottom:18px;border-bottom:2px solid '+cLine+';">'+
-      mpDelBtn("removeSol('"+k+"')")+
+    return '<div style="margin:0 0 26px;padding-bottom:18px;border-bottom:2px solid '+cLine+';">'+
       '<div style="font-size:15px;font-weight:800;color:'+cTit+';font-family:Arial,sans-serif;margin-bottom:2px;">'+SOL_NAMES[k]+'</div>'+
       sec('Situaciones',SOL_SIT[k]||[],'•','#c0392b')+
       sec('Características',solCarac(k),'✔','#9b1c2e')+
@@ -1406,27 +1402,23 @@ function addToMulti(){
 function removeMulti(i){MULTI.splice(i,1);updateMultiBadge();if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();}}
 function moveMulti(i,d){var j=i+d;if(j<0||j>=MULTI.length)return;var t=MULTI[i];MULTI[i]=MULTI[j];MULTI[j]=t;if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();}}
 function clearMulti(){if(!MULTI.length)return;MULTI=[];updateMultiBadge();if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();}}
-/* Panel izquierdo de la pestaña Multiproducto (lista de snapshots) */
+/* Panel izquierdo de la pestaña Multiproducto (lista de snapshots).
+   Misma lógica estructural que Soluciones Equifax: encabezado (sol-head2) +
+   lista (sol-list) + filas (sol-item). Diferencia única: aquí cada fila
+   incorpora valores comerciales. Sin total acumulado (no es un carrito). */
 function multiPanelHTML(){
-  if(!MULTI.length)return '<div class="note-inline" style="margin:0;">🧾 Aún no agregas productos. Ve a un producto, configúralo y pulsa <b>“Agregar a Multiproducto”</b>.</div>';
-  var t=multiTotals();
+  if(!MULTI.length)return '<div class="sol-head2">Productos en el paquete (0)</div><div class="note-inline" style="margin:0;">🧾 Aún no agregas productos. Ve a un producto, configúralo y pulsa <b>“Agregar a Multiproducto”</b>.</div>';
   var rows=MULTI.map(function(s,i){
-    return '<div class="metric" style="padding:12px 11px;display:flex;align-items:center;justify-content:space-between;gap:10px;">'+
+    return '<div class="sol-item mp-item">'+
       '<div style="flex:1;min-width:0;">'+
-        '<div style="font-weight:900;color:#fff;font-size:1.08rem;line-height:1.25;margin-bottom:3px;">'+s.n+'</div>'+
-        (s.cons?'<div style="font-size:.82rem;color:#f0c040;font-weight:800;letter-spacing:.3px;margin-bottom:4px;">'+s.cons+' consultas</div>':'')+
-        '<div style="font-size:.8rem;color:var(--gn);font-weight:700;">'+ufd(s.ufV)+' UF + IVA'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' <span style="color:#2ecc71;font-weight:800;">· −'+s.dc+'%</span>':'')+'</div>'+
+        '<div style="font-weight:800;color:#fff;font-size:.95rem;line-height:1.25;">'+s.n+'</div>'+
+        '<div style="font-size:.78rem;color:var(--gn);font-weight:700;margin-top:3px;">'+ufd(s.ufV)+' UF + IVA'+(s.cons?' · '+s.cons+' consultas':'')+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' <span style="color:#2ecc71;font-weight:800;">· −'+s.dc+'%</span>':'')+'</div>'+
       '</div>'+
-      '<button type="button" title="Eliminar producto" onclick="removeMulti('+i+')" style="background:var(--rd);border:1px solid var(--rl);color:#fff;width:32px;height:44px;border-radius:6px;cursor:pointer;font-size:.95rem;font-weight:900;flex-shrink:0;transition:.12s;padding:0;" onmouseover="this.style.background=\'var(--rl)\'" onmouseout="this.style.background=\'var(--rd)\'">✕</button>'+
+      '<button type="button" class="mp-del-row" onclick="removeMulti('+i+');playClick();" title="Eliminar este producto del paquete">Eliminar producto</button>'+
     '</div>';
   }).join('');
   return '<div class="sol-head2">Productos en el paquete ('+MULTI.length+')</div>'+
-    '<div id="multi-list" class="metrics" style="margin-bottom:10px;">'+rows+'</div>'+
-    '<div class="metric" style="padding:10px 12px;display:flex;align-items:baseline;justify-content:space-between;">'+
-      '<label style="font-size:.86rem;font-weight:800;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;">Total</label>'+
-      '<div style="text-align:right;"><div class="v g" style="font-size:1.25rem;font-weight:900;">'+ufd(t.uf)+' UF + IVA</div>'+
-      '<div style="font-size:.72rem;color:var(--wb);">'+(t.clp>0?'≈ '+fmtN(t.clp)+' mensual c/IVA':'')+'</div></div>'+
-    '</div>'+
+    '<div class="sol-list" id="multi-list">'+rows+'</div>'+
     '<button type="button" class="exec-save multi-clear-btn" style="background:var(--rd);color:#fff;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:1.02rem;font-weight:800;letter-spacing:.3px;padding:15px 16px;" onclick="clearMulti();playClick();" title="Vaciar toda la propuesta multiproducto"><span style="font-size:1.9rem;line-height:1;">🗑️</span><span>Vaciar propuesta completa</span></button>';
 }
 /* Animación: una hoja-propuesta corporativa Equifax se "archiva" dentro del paquete
@@ -1488,8 +1480,7 @@ function _multiGmailProduct(s,i){
     return '<tr><td valign="top" style="padding:5px 8px 5px 0;font-family:Arial,sans-serif;color:#9b1c2e;font-weight:900;font-size:13px;width:14px;">&#10004;</td>'+
       '<td valign="top" style="padding:5px 0;font-family:Arial,sans-serif;color:#333;font-size:13px;line-height:1.4;">'+item+'</td></tr>';
   }).join('');
-  var blanco='<div style="position:relative;background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
-    mpDelBtn('removeMulti('+i+')')+
+  var blanco='<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
     '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
     '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+s.n+'</div>'+
     '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+lista+'</table>'+
@@ -1524,8 +1515,7 @@ function _multiOutlookProduct(s,i){
   var blanco='<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
       '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-      '<td bgcolor="#ffffff" style="position:relative;background-color:#ffffff;padding:20px 28px;">'+
-        mpDelBtn('removeMulti('+i+')')+
+      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:20px 28px;">'+
         '<font face="Arial,sans-serif" color="#777777" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font><br>'+
         '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;"><b>'+s.n+'</b></font>'+
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;">'+
@@ -1556,8 +1546,7 @@ function _multiOutlookTotal(){
   '</td></tr>';
 }
 function _multiCardProduct(s,i){
-  return '<div style="position:relative;margin-bottom:16px;">'+
-    mpDelBtn('removeMulti('+i+')')+
+  return '<div style="margin-bottom:16px;">'+
     '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Producto cotizado</div>'+
     '<div style="font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.3;border-bottom:2px solid rgba(155,28,46,.5);padding-bottom:8px;">'+s.n+'</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;margin-bottom:8px;">'+
