@@ -331,7 +331,7 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .slider-row input[type=number]{background:var(--g0);border:2px solid var(--g4);color:var(--y);
   padding:9px 10px;font-size:1.05rem;font-weight:800;border-radius:8px;width:120px;text-align:center;}
 .slider-row input[type=number]:focus{outline:none;border-color:var(--rl);}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;align-items:start;}
 @media(max-width:520px){.metrics{grid-template-columns:1fr 1fr;}}
 .metric{background:var(--g2);border:1px solid var(--g3);border-radius:9px;padding:8px 10px;text-align:center;}
 .metric label{display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:2px;font-weight:800;line-height:1.1;}
@@ -1263,6 +1263,7 @@ function renderSummary(c){
   /* MEJORA: aumentar jerarquía visual, eliminar descuento duplicado */
   var ventaCtrl=
     '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
+      '<div style="width:26px;flex-shrink:0;" aria-hidden="true"></div>'+
       '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">'+
         '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:4px;font-weight:800;line-height:1.1;">Precio venta</label>'+
         '<div class="v g" style="font-size:1.45rem;font-weight:800;line-height:1.2;">'+
@@ -1284,6 +1285,7 @@ function renderSummary(c){
 
   var listaCtrl=
     '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
+      '<div style="width:26px;flex-shrink:0;" aria-hidden="true"></div>'+
       '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">'+
         '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:4px;font-weight:800;line-height:1.1;">Precio lista</label>'+
         '<div class="v y" style="font-size:1.45rem;font-weight:800;line-height:1.2;">'+
@@ -2611,16 +2613,16 @@ function genMail(){
             '</td>'+
           '</tr></table>'+
         '</td>'+
-        // Columna badge + fecha
+        // Columna fecha + badge (jerarquía vertical: fecha discreta arriba, etiqueta con su propio espacio)
         '<td valign="top" align="right" bgcolor="#6e1220" style="background-color:#6e1220;">'+
           '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr>'+
-            '<td bgcolor="#5e0f1b" align="center" style="background-color:#5e0f1b;border:1px solid #f0c040;color:#f0c040;padding:5px 16px;">'+
-              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:10px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
+            '<td bgcolor="#6e1220" align="right" style="background-color:#6e1220;color:#ffffff;">'+
+              '<font face="Arial,sans-serif" color="#f3dadf" style="font-size:10px;letter-spacing:.5px;"><span style="color:#f3dadf;">'+hoy()+'</span></font>'+
             '</td>'+
           '</tr></table>'+
-          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:8px;"><tr>'+
-            '<td bgcolor="#6e1220" style="background-color:#6e1220;color:#ffffff;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;"><span style="color:#ffffff;">'+hoy()+'</span></font>'+
+          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:11px;"><tr>'+
+            '<td bgcolor="#5e0f1b" align="center" style="background-color:#5e0f1b;border:1px solid #f0c040;color:#f0c040;padding:5px 16px;">'+
+              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:10px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
             '</td>'+
           '</tr></table>'+
         '</td>'+
