@@ -221,9 +221,66 @@ body.uis-xl{--ui-scale:1.30;}
    TEMAS por clase global en <body>. Base (sin clase) = "Normal" = look actual (no se altera al cargar).
    Solo recolorea estilos vía variables; no toca estructura ni las tarjetas de correo. */
 body.theme-light{
-  --g0:#dfe2e8;--g1:#ffffff;--g2:#eceef2;--g3:#c1c5cf;--g4:#a2a7b4;--g5:#868c9a;
-  --w:#0f1116;--wa:#3b3f48;--wb:#5a5f6a;
+  --g0:#e7e9ed;--g1:#ffffff;--g2:#eef0f4;--g3:#d6d9e0;--g4:#9aa0ad;--g5:#737a88;
+  --w:#15171c;--wa:#33373f;--wb:#52565f;
+  --yL:#7a5400;
 }
+/* ── Tema Claro — correcciones de contraste (premium, accesible) ──
+   Solo recolorea texto/bordes en elementos cuyo color quedaba fijo en
+   blanco u otros tonos pensados para fondos oscuros. No toca estructura,
+   tamaños, lógica ni los demás temas. */
+body.theme-light .stepper-inline button,
+body.theme-light .sum-name,
+body.theme-light .cond-row .ci .cv,
+body.theme-light .cv-btn,
+body.theme-light .pv-copy-btn,
+body.theme-light .modal-x,
+body.theme-light .qrow .qp,
+body.theme-light #mtoggle button.on,
+body.theme-light .benefits li{color:var(--w);}
+body.theme-light .metric label{color:var(--wa);}
+body.theme-light .note-inline{color:var(--wa);background:rgba(122,84,0,.09);}
+body.theme-light .note-inline b{color:var(--yL);}
+body.theme-light .outlook-note{color:var(--wa);background:rgba(0,90,160,.08);border-color:rgba(0,90,160,.35);}
+body.theme-light .outlook-note b{color:#1a5fa0;}
+body.theme-light .subject-bar .sv,
+body.theme-light .bdd-grp-t,
+body.theme-light .qrow .qpr,
+body.theme-light .uf-tool .res,
+body.theme-light .eml-status.s-wait{color:var(--yL);}
+body.theme-light .act-strip.sticky-bar .as-lb,
+body.theme-light .pv-toolbar.sticky-bar .as-lb{color:#9aa0ad;}
+body.theme-light .act-strip .as-lb,
+body.theme-light .subject-bar .sl,
+body.theme-light .price-lbl,
+body.theme-light .slider-box .st,
+body.theme-light #a11y-pop .a11y-lbl,
+body.theme-light .fld label{color:var(--wb);}
+/* botones de acento con !important en su definición base: se oscurecen
+   levemente para mantener contraste AA sobre fondos claros */
+body.theme-light .crm-paste-btn{color:#0e6b35!important;background:rgba(14,107,53,.08)!important;}
+body.theme-light .crm-paste-btn:hover{background:rgba(14,107,53,.14)!important;}
+body.theme-light .crm-paste-btn.crm-excel-blue{color:#155a96!important;background:rgba(21,90,150,.08)!important;}
+body.theme-light .crm-paste-btn.crm-excel-blue:hover{background:rgba(21,90,150,.16)!important;}
+body.theme-light .crm-paste-btn.crm-excel-green{color:#0e6b35!important;background:rgba(14,107,53,.1)!important;}
+body.theme-light .crm-paste-btn.crm-excel-green:hover{background:rgba(14,107,53,.18)!important;}
+body.theme-light #btn-abrir-outlook.otl-active{color:#155a96!important;background:rgba(21,90,150,.08)!important;}
+body.theme-light .pv-copy-btn.wsp-open,
+body.theme-light .pv-copy-btn.wsp-open.wsp-neon,
+body.theme-light .btn-envio-directo{color:#0e6b35!important;}
+body.theme-light .wsp-link-row a{color:#0e6b35;}
+body.theme-light .wsp-fmt-warn{color:#8a2a1c;background:rgba(180,50,30,.08);}
+body.theme-light .wsp-fmt-warn b{color:#7a2113;}
+body.theme-light .pv-copy-btn.btn-destacado{color:#241a04!important;}
+/* bordes más definidos para inputs/selects/paneles en tema claro */
+body.theme-light .fld select,body.theme-light .fld input{border-color:var(--g4);}
+body.theme-light .fld select:hover,body.theme-light .fld input[type=text]:hover,
+body.theme-light .fld input[type=email]:hover,body.theme-light .fld input[type=number]:hover{border-color:var(--g5);}
+body.theme-light input::placeholder,body.theme-light select::placeholder,body.theme-light textarea::placeholder{color:#767c89;opacity:1;}
+body.theme-light .crm-paste-btn .crm-sub{opacity:.85;}
+body.theme-light .pbtn{border-color:var(--g4);}
+body.theme-light .pbtn:hover{color:var(--w);}
+body.theme-light .pbtn.on,body.theme-light .cv-btn.on{color:var(--w);}
 body.theme-dark{
   --g0:#000000;--g1:#0a0a0b;--g2:#101012;--g3:#1a1a1d;--g4:#2b2b30;--g5:#3c3c42;
   --w:#ffffff;--wa:#c9c9d1;--wb:#9a9aa2;
