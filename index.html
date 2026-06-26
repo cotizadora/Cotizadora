@@ -2601,33 +2601,37 @@ function genMail(){
     // ══════════════════════════════════════════
     // HEADER — fondo rojo sólido
     // ══════════════════════════════════════════
-    '<tr><td style="padding:24px 28px 20px 28px;mso-padding-alt:24px 28px 20px 28px;">'+
-    '<!--[if mso]><v:rect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" fill="t" stroked="f" style="position:absolute;left:0;top:0;width:100%;height:100%;" o:allowincell="t" fillcolor="#9b1c2e"><v:fill type="gradient" angle="45" color="#6e1220" color2="#c0263b" /></v:rect><![endif]-->'+
-    '<div style="background-color:#9b1c2e;background-image:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:0;margin:0;mso-padding-alt:0;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;mso-table-lspace:0;mso-table-rspace:0;"><tr>'+
-        '<td valign="middle" style="padding:0;mso-padding-alt:0;">'+
-          '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="360" height="auto" style="display:block;width:360px;height:auto;border:0;" />'+
-          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:6px;mso-table-lspace:0;mso-table-rspace:0;"><tr>'+
-            '<td style="font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.55);text-transform:uppercase;font-family:Arial,sans-serif;padding:0;mso-padding-alt:0;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:9px;letter-spacing:3px;"><span style="color:#ffffff;opacity:.55;">CHILE &middot; SOLUCIONES EMPRESARIALES</span></font>'+
+    '<tr><td bgcolor="#6e1220" style="background-color:#6e1220;padding:10px 28px 8px 28px;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;"><tr>'+
+        // Columna logo
+        '<td valign="middle" align="left" bgcolor="#6e1220" style="background-color:#6e1220;">'+
+          '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="280" height="auto" style="display:block;width:280px;height:auto;border:0;" />'+
+          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;"><tr>'+
+            '<td align="left" bgcolor="#6e1220" style="background-color:#6e1220;color:#ffffff;">'+
+              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:9px;letter-spacing:1px;text-transform:uppercase;"><span style="color:#ffffff;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></span></font>'+
             '</td>'+
           '</tr></table>'+
         '</td>'+
-        '<td valign="top" align="right" style="padding:0;mso-padding-alt:0;">'+
-          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0;"><tr>'+
-            '<td align="center" style="background:rgba(0,0,0,.35);border:1px solid rgba(240,192,64,.6);border-radius:20px;padding:5px 16px;mso-padding-alt:5px 16px;">'+
-              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:10px;font-weight:bold;letter-spacing:1.5px;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
+        // Columna badge + fecha
+        '<td valign="top" align="right" bgcolor="#6e1220" style="background-color:#6e1220;">'+
+          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;"><tr>'+
+            '<td bgcolor="#5e0f1b" align="center" style="background-color:#5e0f1b;border:1px solid #f0c040;color:#f0c040;padding:5px 16px;">'+
+              '<font face="Arial,sans-serif" color="#f0c040" style="font-size:10px;font-weight:bold;letter-spacing:1px;white-space:nowrap;"><span style="color:#f0c040;"><b>'+pi.badge+'</b></span></font>'+
             '</td>'+
           '</tr></table>'+
-          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:8px;mso-table-lspace:0;mso-table-rspace:0;"><tr>'+
-            '<td align="right" style="font-size:10px;color:rgba(255,255,255,.5);font-family:Arial,sans-serif;padding:0;mso-padding-alt:0;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;"><span style="color:#ffffff;opacity:.5;">'+hoy()+'</span></font>'+
+          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;margin-top:8px;"><tr>'+
+            '<td bgcolor="#6e1220" style="background-color:#6e1220;color:#ffffff;">'+
+              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:10px;"><span style="color:#ffffff;">'+hoy()+'</span></font>'+
             '</td>'+
           '</tr></table>'+
         '</td>'+
       '</tr></table>'+
-    '</div>'+
     '</td></tr>'+
+
+    // ══════════════════════════════════════════
+    // LÍNEA DE SEPARACIÓN — degradado visual superior
+    // ══════════════════════════════════════════
+    '<tr><td bgcolor="#4a0a14" style="background-color:#4a0a14;font-size:2px;line-height:2px;height:2px;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
 
     // ══════════════════════════════════════════
     // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
