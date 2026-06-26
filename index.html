@@ -118,19 +118,38 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pbtn .ic{font-size:.95rem;line-height:1;flex-shrink:0;}
 .pbtn .lb{font-size:.85rem;font-weight:700;}
 .pbtn .su{display:none;}
-.pbtn-badge{position:absolute;top:-9px;right:-9px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--r);color:#fff;font-size:.8rem;font-weight:900;line-height:22px;text-align:center;border:2px solid var(--g0);box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 10px rgba(192,38,59,.65);display:none;}
+.pbtn-badge{position:absolute;top:-10px;right:-10px;min-width:24px;height:24px;padding:0 5px;border-radius:50%;background:linear-gradient(135deg,#e0394f,#9b1c2e);color:#fff;font-size:.92rem;font-weight:900;line-height:24px;text-align:center;border:2px solid var(--g0);box-shadow:0 2px 10px rgba(0,0,0,.6),0 0 12px rgba(240,80,110,.7);display:none;letter-spacing:0;box-sizing:border-box;}
 .pbtn-badge.on{display:block;}
-/* Multiproducto "se llena": intensidad por nivel, con efecto neón corporativo visible */
-.pbtn[data-key="multi"].fill1{background:linear-gradient(135deg,rgba(155,28,46,.32),rgba(155,28,46,.12));border-color:var(--rl);box-shadow:0 0 18px rgba(192,38,59,.5),0 0 28px rgba(155,28,46,.25);}
-.pbtn[data-key="multi"].fill2{background:linear-gradient(135deg,rgba(155,28,46,.45),rgba(155,28,46,.18));border-color:var(--rl);box-shadow:0 0 22px rgba(192,38,59,.6),0 0 32px rgba(155,28,46,.3);}
-.pbtn[data-key="multi"].fill3{background:linear-gradient(135deg,rgba(155,28,46,.58),rgba(120,18,32,.34));border-color:var(--r);box-shadow:0 0 26px rgba(192,38,59,.7),0 0 38px rgba(155,28,46,.35),0 0 0 1.5px var(--r) inset;}
-.pbtn[data-key="multi"].fill1,.pbtn[data-key="multi"].fill2,.pbtn[data-key="multi"].fill3{animation:multi-pulse 2.2s ease-in-out infinite;}
-.pbtn[data-key="multi"].fill1 .ic,.pbtn[data-key="multi"].fill2 .ic,.pbtn[data-key="multi"].fill3 .ic{filter:drop-shadow(0 0 6px rgba(240,192,64,.9));animation:multi-icon-pulse 2.2s ease-in-out infinite;}
-@keyframes multi-pulse{0%{box-shadow:0 0 18px rgba(192,38,59,.55),0 0 28px rgba(155,28,46,.28),0 0 0 1px var(--rl) inset;}50%{box-shadow:0 0 30px rgba(192,38,59,.85),0 0 46px rgba(155,28,46,.5),0 0 0 1.5px var(--r) inset;}100%{box-shadow:0 0 18px rgba(192,38,59,.55),0 0 28px rgba(155,28,46,.28),0 0 0 1px var(--rl) inset;}}
-@keyframes multi-icon-pulse{0%{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));}50%{filter:drop-shadow(0 0 10px rgba(240,192,64,1));}100%{filter:drop-shadow(0 0 5px rgba(240,192,64,.8));}}
+.pbtn-badge.pop{animation:mp-badge-pop .44s cubic-bezier(.34,1.56,.64,1);}
+@keyframes mp-badge-pop{0%{transform:scale(1);}35%{transform:scale(1.45);}65%{transform:scale(.9);}100%{transform:scale(1);}}
+/* Multiproducto "se llena": estado activo premium — halo neón que respira (::after),
+   latido sutil (escala) e intensidad por nivel. Solo experiencia visual. */
+.pbtn[data-key="multi"]{transition:transform .4s ease,background .25s ease,border-color .25s ease;}
+.pbtn[data-key="multi"].fill1{background:linear-gradient(135deg,rgba(155,28,46,.30),rgba(155,28,46,.12));border-color:var(--rl);}
+.pbtn[data-key="multi"].fill2{background:linear-gradient(135deg,rgba(155,28,46,.42),rgba(155,28,46,.18));border-color:var(--rl);}
+.pbtn[data-key="multi"].fill3{background:linear-gradient(135deg,rgba(155,28,46,.56),rgba(120,18,32,.34));border-color:var(--r);}
+.pbtn[data-key="multi"]::after{content:"";position:absolute;inset:-2px;border-radius:10px;pointer-events:none;opacity:0;transition:opacity .6s ease;box-shadow:0 0 0 rgba(192,38,59,0);}
+.pbtn[data-key="multi"].fill1::after,.pbtn[data-key="multi"].fill2::after,.pbtn[data-key="multi"].fill3::after{opacity:1;}
+.pbtn[data-key="multi"].fill1::after{animation:mp-glow1 3.6s ease-in-out infinite;}
+.pbtn[data-key="multi"].fill2::after{animation:mp-glow2 3.2s ease-in-out infinite;}
+.pbtn[data-key="multi"].fill3::after{animation:mp-glow3 2.8s ease-in-out infinite;}
+.pbtn[data-key="multi"].fill1{animation:mp-beat1 3.6s ease-in-out infinite;}
+.pbtn[data-key="multi"].fill2{animation:mp-beat2 3.2s ease-in-out infinite;}
+.pbtn[data-key="multi"].fill3{animation:mp-beat3 2.8s ease-in-out infinite;}
+@keyframes mp-glow1{0%,100%{box-shadow:0 0 8px rgba(192,38,59,.32),0 0 15px rgba(155,28,46,.16);}50%{box-shadow:0 0 14px rgba(192,38,59,.46),0 0 24px rgba(155,28,46,.26);}}
+@keyframes mp-glow2{0%,100%{box-shadow:0 0 12px rgba(192,38,59,.42),0 0 22px rgba(155,28,46,.24);}50%{box-shadow:0 0 20px rgba(192,38,59,.62),0 0 36px rgba(155,28,46,.38);}}
+@keyframes mp-glow3{0%,100%{box-shadow:0 0 16px rgba(192,38,59,.5),0 0 30px rgba(155,28,46,.3),0 0 0 1px rgba(192,38,59,.4);}50%{box-shadow:0 0 28px rgba(240,84,114,.82),0 0 48px rgba(192,38,59,.5),0 0 0 1.5px var(--r);}}
+@keyframes mp-beat1{0%,100%{transform:scale(1);}50%{transform:scale(1.012);}}
+@keyframes mp-beat2{0%,100%{transform:scale(1);}50%{transform:scale(1.02);}}
+@keyframes mp-beat3{0%,100%{transform:scale(1);}50%{transform:scale(1.03);}}
+.pbtn[data-key="multi"] .ic{transition:filter .5s ease;}
+.pbtn[data-key="multi"].fill2 .ic,.pbtn[data-key="multi"].fill3 .ic{filter:drop-shadow(0 0 7px rgba(240,192,64,.85));}
 .multi-clear-btn:hover{background:var(--r);box-shadow:0 0 16px rgba(192,38,59,.55);}
-@keyframes multi-recv{0%{transform:scale(1);}35%{transform:scale(1.18);}100%{transform:scale(1);}}
-.pbtn[data-key="multi"].recv{animation:multi-recv .55s cubic-bezier(.34,1.56,.64,1);}
+/* Llegada de un producto: ráfaga coordinada (pop + destello del halo), con prioridad sobre el latido */
+.pbtn[data-key="multi"].mp-arrive{animation:mp-arrive-pop .6s cubic-bezier(.34,1.56,.64,1);}
+.pbtn[data-key="multi"].mp-arrive::after{animation:mp-arrive-glow .62s ease-out;opacity:1;}
+@keyframes mp-arrive-pop{0%{transform:scale(1);}28%{transform:scale(1.11);}52%{transform:scale(.975);}74%{transform:scale(1.035);}100%{transform:scale(1);}}
+@keyframes mp-arrive-glow{0%{box-shadow:0 0 10px rgba(192,38,59,.4);}38%{box-shadow:0 0 30px rgba(255,120,150,.95),0 0 54px rgba(192,38,59,.6),0 0 0 2px rgba(255,150,170,.5);}100%{box-shadow:0 0 14px rgba(192,38,59,.45);}}
 /* ── ESTABILIDAD VISUAL (geometría fija, sin scroll para descubrir funciones) ── */
 #btn-add-multi{position:sticky;bottom:0;z-index:6;margin-bottom:0!important;box-shadow:0 -10px 18px 6px var(--g0);}
 #s-disc{min-height:20px;}
@@ -1054,8 +1073,10 @@ function updateMultiBadge(){
   var el=document.getElementById('multi-badge');if(el){el.textContent=MULTI.length;el.classList.toggle('on',MULTI.length>0);}
   var tab=document.querySelector('.pbtn[data-key="multi"]');
   if(tab){tab.classList.remove('fill1','fill2','fill3');
-    var n=MULTI.length;if(n>=6)tab.classList.add('fill3');else if(n>=3)tab.classList.add('fill2');else if(n>=1)tab.classList.add('fill1');}
+    var n=MULTI.length;if(n>=5)tab.classList.add('fill3');else if(n>=2)tab.classList.add('fill2');else if(n>=1)tab.classList.add('fill1');}
 }
+/* Rebote del contador (solo visual) */
+function popBadge(){var el=document.getElementById('multi-badge');if(!el)return;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');setTimeout(function(){el.classList.remove('pop');},460);}
 
 /* ════════ CONFIGURACIÓN POR PRODUCTO (inputs del panel izquierdo) ════════ */
 function optsFrom(arr,valFn,labFn,dataFn){
@@ -1629,23 +1650,12 @@ function flyToMulti(meta){
     var dx=(b.left+b.width/2)-(a.left+a.width/2),dy=(b.top+b.height/2)-(a.top+a.height/2);
     var lift=-38; /* arco de elevación */
     function finishPop(){
-      try{
-        if(to.animate){
-          to.animate([
-            {transform:'scale(1)'},
-            {transform:'scale(1.16)',offset:.35},
-            {transform:'scale(.95)',offset:.62},
-            {transform:'scale(1.04)',offset:.82},
-            {transform:'scale(1)'}
-          ],{duration:500,easing:'cubic-bezier(.34,1.56,.64,1)'});
-          to.animate([
-            {boxShadow:'0 0 0 0 rgba(240,192,64,0)'},
-            {boxShadow:'0 0 22px 7px rgba(240,192,64,.6)',offset:.4},
-            {boxShadow:'0 0 0 0 rgba(240,192,64,0)'}
-          ],{duration:640,easing:'ease-out'});
-        }
-      }catch(_){}
       updateMultiBadge();
+      try{
+        if(to){to.classList.remove('mp-arrive');void to.offsetWidth;to.classList.add('mp-arrive');
+          setTimeout(function(){if(to)to.classList.remove('mp-arrive');},640);}
+      }catch(_){}
+      popBadge();
     }
     if(fly.animate){
       /* Trayectoria orgánica tipo pluma: curva (componente perpendicular), leve
