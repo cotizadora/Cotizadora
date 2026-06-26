@@ -2564,40 +2564,38 @@ function genMail(){
   /* P2 · DESTINATARIO Outlook — fuente única reutilizada por individual, multi y soluciones
      (mismo mecanismo que ya emite Gmail fuera de la rama). No duplica lógica. */
   var _destOutlook =
-    '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:0;">'+
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-        '<td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding:22px 28px 20px 28px;">'+
+    '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding:20px 28px;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
         (em
-          ? '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:5px;">'+
-              '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:10px;letter-spacing:1px;">PROPUESTA PARA</font></b></font>'+
+          ? '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:6px;">'+
+              '<font face="Arial,sans-serif" color="#9b4455"><b><font style="font-size:9px;letter-spacing:2.5px;">PROPUESTA PARA</font></b></font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;line-height:1.2;">'+em+'</font></b></font>'+
+            '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:3px;">'+
+              '<font face="Arial,sans-serif" color="#ffffff"><b><font style="font-size:22px;line-height:1.2;"><span style="color:#ffffff;">'+em+'</span></font></b></font>'+
             '</td></tr>'+
-            (ru?'<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:8px;">'+
-              '<font face="Arial,sans-serif" color="#8a7a7a"><font style="font-size:11px;letter-spacing:.4px;">RUT '+ru+'</font></font>'+
+            (ru?'<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:8px;">'+
+              '<font face="Arial,sans-serif" color="#9b8a8a"><font style="font-size:11px;letter-spacing:.4px;">RUT '+ru+'</font></font>'+
             '</td></tr>':'')+
-            (_salNom?'<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:13px;">'+_salNom+'</font></b></font>'+
+            (_salNom?'<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:8px;">'+
+              '<font face="Arial,sans-serif" color="#ffffff"><b><font style="font-size:13px;"><span style="color:#ffffff;">'+_salNom+'</span></font></b></font>'+
             '</td></tr>':'')+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
-              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
+            '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;">'+
+              '<font face="Arial,sans-serif" color="#ccbbbb"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
             '</td></tr>'
-          : '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;padding-bottom:6px;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:22px;">Propuesta Comercial</font></b></font>'+
+          : '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:8px;">'+
+              '<font face="Arial,sans-serif" color="#ffffff"><b><font style="font-size:22px;letter-spacing:1px;"><span style="color:#ffffff;">Propuesta Comercial</span></font></b></font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#f5f0f2" style="background-color:#f5f0f2;">'+
-              '<font face="Arial,sans-serif" color="#444444"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
+            '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;">'+
+              '<font face="Arial,sans-serif" color="#aaaaaa"><font style="font-size:13px;">'+sal+'. Le presento la siguiente propuesta comercial:</font></font>'+
             '</td></tr>'
         )+
       '</table>'+
-        '</td>'+
-      '</tr></table>'+
-    '</td></tr>';
+    '</td></tr>'+
+    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;mso-line-height-rule:exactly;line-height:3px;font-size:3px;" height="3">&nbsp;</td></tr>';
 
   var _htmlOutlook =
+    '<table role="presentation" width="602" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#e0e0e0" style="background-color:#e0e0e0;border-collapse:collapse;">'+
+    '<tr><td style="padding:1px;">'+
     '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:600px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">'+
 
     // ══════════════════════════════════════════
@@ -2787,7 +2785,8 @@ function genMail(){
       '</tr></table>'+
     '</td></tr>'+
 
-    '</table>';
+    '</table>'+
+    '</td></tr></table>';
 
   sv('tpl-rich-outlook', _htmlOutlook);
 
