@@ -1648,18 +1648,37 @@ function flyToMulti(meta){
       updateMultiBadge();
     }
     if(fly.animate){
-      var anim=fly.animate([
-        {transform:'translate(0px,0px) rotate(0deg) scale(1)',opacity:0,offset:0},
-        {opacity:1,offset:.05},
-        {transform:'translate('+(dx*0.20)+'px,'+(dy*0.20+lift)+'px) rotate(-4deg) scale(.92)',opacity:1,offset:.25},
-        {transform:'translate('+(dx*0.50)+'px,'+(dy*0.50+lift*0.7)+'px) rotate(5deg) scale(.74)',opacity:1,offset:.50},
-        {transform:'translate('+(dx*0.75)+'px,'+(dy*0.75+lift*0.3)+'px) rotate(-3deg) scale(.50)',opacity:1,offset:.74},
-        {transform:'translate('+(dx*0.92)+'px,'+(dy*0.92)+'px) rotate(2deg) scale(.28)',opacity:1,offset:.90},
-        {transform:'translate('+dx+'px,'+dy+'px) rotate(0deg) scale(.08)',opacity:0,offset:1}
-      ],{duration:1500,easing:'cubic-bezier(.42,.04,.28,1)',fill:'forwards'});
+      /* Trayectoria orgánica tipo pluma: curva (componente perpendicular), leve
+         deriva, balanceo y flexión de bordes que se amortiguan al acercarse al
+         cajón; velocidad no constante (easing por tramo) y desaceleración final. */
+      var len=Math.sqrt(dx*dx+dy*dy)||1;
+      var pxn=-dy/len, pyn=dx/len;              /* unitario perpendicular */
+      var amp=Math.min(64,len*0.16);            /* amplitud del arco */
+      var offs  =[0,   .06, .18, .34, .50, .66, .80, .90, .96, 1];
+      var rots  =[0,  -3,  -5,   4,   6,  -3,  -4,   2,   1,  0];   /* balanceo amortiguado → 0 */
+      var skx   =[0,   2,   3,  -2,  -3,   2,   2,  -1,   0,  0];   /* flexión de bordes */
+      var sky   =[0,   1,  -1,   2,  -1,   1,  -1,   0,   0,  0];
+      var scs   =[1,   1, .95, .86, .74, .60, .46, .32, .18, .08];
+      var ops   =[0,   1,   1,   1,   1,   1,   1,   1,   1,  0];   /* visible todo el trayecto; se va solo al entrar */
+      var eas   =['cubic-bezier(.25,.7,.35,1)','cubic-bezier(.4,0,.5,1)','linear','linear','linear','linear','cubic-bezier(.3,0,.2,1)','cubic-bezier(.3,0,.25,1)','cubic-bezier(.25,.1,.25,1)','ease-out'];
+      var kf=offs.map(function(p,idx){
+        var bow=Math.sin(p*Math.PI)*amp;                 /* curva: máx al centro */
+        var wander=Math.sin(p*Math.PI*3)*amp*0.16;       /* leve deriva tipo pluma */
+        var off=(idx>=offs.length-2)?0:(bow+wander);     /* alinea con el cajón al final */
+        var liftY=-Math.sin(p*Math.PI)*30;               /* se eleva antes de avanzar y baja al llegar */
+        var tx=dx*p + pxn*off;
+        var ty=dy*p + pyn*off + liftY;
+        return {
+          offset:p,
+          opacity:ops[idx],
+          transform:'translate('+tx.toFixed(1)+'px,'+ty.toFixed(1)+'px) rotate('+rots[idx]+'deg) skew('+skx[idx]+'deg,'+sky[idx]+'deg) scale('+scs[idx]+')',
+          easing:eas[idx]
+        };
+      });
+      var anim=fly.animate(kf,{duration:1750,fill:'forwards'});
       anim.onfinish=function(){if(fly.parentNode)fly.parentNode.removeChild(fly);finishPop();};
       /* salvaguarda por si onfinish no dispara */
-      setTimeout(function(){if(fly.parentNode){fly.parentNode.removeChild(fly);finishPop();}},1700);
+      setTimeout(function(){if(fly.parentNode){fly.parentNode.removeChild(fly);finishPop();}},1950);
     }else{
       /* navegador sin Web Animations: aparición/desaparición simple */
       fly.style.transition='transform .9s ease,opacity .9s ease';fly.style.opacity='1';
