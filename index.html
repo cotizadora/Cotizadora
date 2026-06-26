@@ -1506,6 +1506,22 @@ var BDD_GROUPS=[
 var BDD_EJEMPLOS={nombre:'Juan Pérez González',rut:'12.345.678-9',edad:'42',genero:'Femenino / Masculino',empresa:'Empresa Ejemplo SpA',tipoemp:'Sociedad por Acciones',rubro:'Comercio / Servicios',replegal:'María Soto Reyes',email:'contacto@empresa.cl',telpart:'+56 2 2345 6789',telcom:'+56 2 2987 6543',telcel:'+56 9 8765 4321',dircom:'Av. Ejemplo 1234, Of. 56',region:'Región Metropolitana',sector:'Providencia',cobnac:'Nacional',renta:'$1.500.000 (tramo ref.)',score:'720 (ref.)',riesgo:'Bajo (ref.)'};
 /* Valor comercial de una base segmentada (punto 6) */
 var BDD_VALOR=['Campañas altamente segmentadas que llegan directo al público objetivo','Menos desperdicio publicitario y mayor tasa de conversión','Decisiones comerciales basadas en información real','Mejor retorno de la inversión (ROI) en marketing'];
+/* Descripción comercial única de Base de Datos — fuente compartida por todas las
+   vistas (Ficha/Card, Gmail, Outlook, PDF y WhatsApp). Si se necesita ajustar el
+   discurso comercial del producto, se edita aquí una sola vez. */
+var BDD_DESC_P=[
+  'Una Base de Datos Equifax le entrega información comercial validada y actualizada —de personas y empresas— construida exactamente según los atributos, el segmento, la industria, la ubicación y el volumen que usted defina.',
+  'En lugar de prospectar a ciegas, su equipo comercial trabaja con un universo de contactos calificados y verificados: se reduce el tiempo de gestión, mejora la tasa de contacto y aumenta la conversión de cada campaña.',
+  'Es la base sobre la que se construyen campañas de marketing dirigido, prospección comercial y modelos de evaluación de riesgo: usted define qué información necesita y la recibe lista para usar, en el formato y volumen acordados.'
+];
+function bddDescHTML(cTxt){
+  return BDD_DESC_P.map(function(p,i){
+    return '<div style="font-size:12px;color:'+cTxt+';line-height:1.55;margin-bottom:'+(i===BDD_DESC_P.length-1?12:8)+'px;">'+p+'</div>';
+  }).join('');
+}
+function bddDescWA(){
+  return BDD_DESC_P.join('\n\n')+'\n';
+}
 function bddSelected(){var s={},zone=document.getElementById('config-zone');if(zone)Array.prototype.forEach.call(zone.querySelectorAll('.sol-item input[data-bdd]:checked'),function(c){s[c.value]=c.getAttribute('data-lb')||c.value;});return s;}
 function bddEnrich(){var e=document.getElementById('bdd-enrich');return !!(e&&e.checked);}
 function bddVol(){var e=document.getElementById('bdd-vol');var n=e?parseInt(e.value):0;return (n&&n>0)?n:0;}
@@ -1545,7 +1561,7 @@ function bddBlocksInner(theme){
   '</div>';
   return '<div style="margin:0;font-family:Arial,sans-serif;">'+
     '<div style="font-size:15px;font-weight:800;color:'+cTit+';margin-bottom:2px;">Propuesta de Base de Datos a medida</div>'+
-    '<div style="font-size:12px;color:'+cTxt+';line-height:1.5;margin-bottom:12px;">Bases de datos altamente segmentables. Esta propuesta detalla el servicio y los atributos a incluir; al confirmar sus requerimientos, sirve como solicitud de evaluación para entregar el valor final.</div>'+
+    bddDescHTML(cTxt)+
     valor+
     '<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;border-bottom:2px solid '+cLine+';padding-bottom:6px;margin-bottom:2px;">Atributos a incluir en la Base de Datos</div>'+
     attrs+ejemplo+resumen+
@@ -1563,7 +1579,7 @@ function renderBaseDatos(target){
   if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+bddBlocksInner('light')+'</td></tr>';
   if(target==='wa'){
     var vol=bddVol(),val=bddVal();
-    var t='*Propuesta Base de Datos Equifax*\nBases de datos altamente segmentables.\n';
+    var t='*Propuesta Base de Datos Equifax*\n\n'+bddDescWA();
     t+='\n*POR QUÉ UNA BASE SEGMENTADA*\n'+BDD_VALOR.map(function(x){return '\u203a '+x;}).join('\n')+'\n';
     t+='\n*ATRIBUTOS A INCLUIR*\n';
     BDD_GROUPS.forEach(function(g){
