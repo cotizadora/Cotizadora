@@ -1556,16 +1556,21 @@ function addBddToMulti(){
   var sel=bddSelected(),nSel=Object.keys(sel).length,enr=bddEnrich();
   if(!nSel && !enr){toast('Selecciona atributos primero','err','global-toast');return;}
   var vol=bddVol(),val=bddVal();
+  /* Regla de duplicidad SOLO para Base de Datos: bloquea si TODOS los parámetros
+     relevantes coinciden (atributos, enrichment, volumen y valor). Cualquier
+     diferencia real (segmentación, volumen, valor, etc.) sí se permite agregar. */
+  var sig=Object.keys(sel).sort().join(',')+'|enr:'+(enr?1:0)+'|vol:'+vol+'|val:'+(val!=null?val:'');
+  if(MULTI.some(function(s){return s.bdd&&s.bddSig===sig;})){toast('Esa Base de Datos ya está en el Multiproducto','err','global-toast');return;}
   var labels=[];
   BDD_GROUPS.forEach(function(g){g.items.forEach(function(it){if(sel[it[0]])labels.push(it[1]);});});
   if(enr)labels.push('Enrichment — actualización y complemento de la base existente');
   if(vol)labels.push('Volumen solicitado: '+fmtN(vol)+' RUT');
   var valTxt=(val!=null)?(ufd(val)+' UF + IVA'):'Por evaluar por BackOffice · desde 1.000 RUT por 10 UF';
-  MULTI.push({bdd:true,tipo:'bdd',n:'Base de Datos Comercial',
+  MULTI.push({bdd:true,bddSig:sig,tipo:'bdd',n:'Base de Datos Comercial',
     ufV:(val!=null?val:0),ufL:0,hayDc:false,dc:0,
     clp:(val!=null?ufc(val):0),pl:'—',cons:0,valTxt:valTxt,
     items:labels.slice(),itemsMail:labels.slice(),docs:[]});
-  updateMultiBadge();flyToMulti();
+  updateMultiBadge();flyToMulti({nom:'Base de Datos Comercial',precio:(val!=null?(ufd(val)+' UF'):'')});
   toast('✔ Base de Datos agregada a Multiproducto ('+MULTI.length+')','ok','global-toast');
   if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}
 }
@@ -1588,58 +1593,80 @@ function multiPanelHTML(){
     '<div class="sol-list" id="multi-list">'+rows+'</div>'+
     '<button type="button" class="exec-save multi-clear-btn" style="background:var(--rd);color:#fff;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:1.02rem;font-weight:800;letter-spacing:.3px;padding:15px 16px;" onclick="clearMulti();playClick();" title="Vaciar toda la propuesta multiproducto"><span style="font-size:1.9rem;line-height:1;">🗑️</span><span>Vaciar propuesta completa</span></button>';
 }
-/* Animación: una hoja-propuesta corporativa Equifax se "archiva" dentro del paquete
-   Multiproducto. Grande, lenta (~1.5s), clara. No anima el botón. */
-function flyToMulti(){
+/* Animación: una hoja-propuesta blanca (tamaño carta horizontal) viaja completa
+   hasta el cajón Multiproducto, con elevación, inclinación y leve balanceo, y
+   solo desaparece al entrar al cajón, que responde con pop + rebote + destello.
+   No modifica ninguna lógica: solo experiencia visual. */
+function flyToMulti(meta){
   try{
-    var from=document.getElementById('btn-add-multi')||document.getElementById('summary-zone');
+    var from=document.getElementById('btn-add-bdd-multi')||document.getElementById('btn-add-multi')||document.getElementById('summary-zone');
     var to=document.querySelector('.pbtn[data-key="multi"]');
-    if(!from||!to)return;
+    if(!from||!to){updateMultiBadge();return;}
     var a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
-    var nom=(LAST&&PINFO[LAST.tipo]&&PINFO[LAST.tipo].n)?PINFO[LAST.tipo].n:'Producto';
-    var precio=(LAST&&LAST.ufVenta)?(ufd(LAST.ufVenta)+' UF'):'';
-    var W=300,H=176;
-    /* Hoja tipo documento: franja superior roja Equifax + cuerpo blanco con líneas y precio */
+    var nom=(meta&&meta.nom)?meta.nom:((LAST&&PINFO[LAST.tipo]&&PINFO[LAST.tipo].n)?PINFO[LAST.tipo].n:'Producto');
+    var precio=(meta&&typeof meta.precio!=='undefined')?meta.precio:((LAST&&LAST.ufVenta)?(ufd(LAST.ufVenta)+' UF'):'');
+    var W=300,H=232; /* proporción carta horizontal */
     var fly=document.createElement('div');
     fly.innerHTML=
-      '<div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 55%,#7a1425);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">'+
-        '<span style="font-size:13px;font-weight:900;letter-spacing:1px;color:#fff;">EQUIFAX</span>'+
-        '<span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#f0c040;font-weight:800;">Propuesta</span>'+
-      '</div>'+
-      '<div style="padding:14px 16px;">'+
-        '<div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:5px;">Producto cotizado</div>'+
-        '<div style="font-size:14px;font-weight:800;color:#1a1a1a;line-height:1.2;border-bottom:2px solid #9b1c2e;padding-bottom:8px;margin-bottom:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+nom+'</div>'+
-        '<div style="height:6px;background:#eee;border-radius:3px;margin-bottom:6px;width:90%;"></div>'+
-        '<div style="height:6px;background:#eee;border-radius:3px;margin-bottom:12px;width:70%;"></div>'+
-        (precio?'<div style="font-size:18px;font-weight:900;color:#9b1c2e;">'+precio+' + IVA</div>':'')+
+      '<div style="height:5px;background:linear-gradient(90deg,#9b1c2e,#c0263b);"></div>'+
+      '<div style="padding:16px 20px;">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;">'+
+          '<span style="font-size:12px;font-weight:900;letter-spacing:1.5px;color:#9b1c2e;">EQUIFAX</span>'+
+          '<span style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#bcbcbc;font-weight:700;">Propuesta comercial</span>'+
+        '</div>'+
+        '<div style="font-size:13px;font-weight:800;color:#1a1a1a;line-height:1.25;border-bottom:1.5px solid #ecdfe1;padding-bottom:9px;margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+nom+'</div>'+
+        '<div style="height:6px;background:#f0f0f0;border-radius:3px;margin-bottom:7px;width:92%;"></div>'+
+        '<div style="height:6px;background:#f0f0f0;border-radius:3px;margin-bottom:7px;width:78%;"></div>'+
+        '<div style="height:6px;background:#f0f0f0;border-radius:3px;margin-bottom:14px;width:86%;"></div>'+
+        (precio?'<div style="font-size:17px;font-weight:900;color:#9b1c2e;">'+precio+' + IVA</div>':'<div style="height:6px;background:#f0f0f0;border-radius:3px;width:48%;"></div>')+
       '</div>';
     fly.style.cssText='position:fixed;z-index:9999;left:'+(a.left+a.width/2-W/2)+'px;top:'+(a.top+a.height/2-H/2)+'px;'+
-      'width:'+W+'px;min-height:'+H+'px;box-sizing:border-box;text-align:left;overflow:hidden;'+
-      'background:#ffffff;border:1px solid rgba(155,28,46,.18);border-radius:12px;'+
-      'box-shadow:0 28px 64px rgba(0,0,0,.5),0 0 0 1px rgba(155,28,46,.22);'+
-      'transform-origin:center center;opacity:0;pointer-events:none;'+
-      'transition:transform .35s ease-out,opacity .35s ease-out;transform:translate(0,28px) scale(.92);';
+      'width:'+W+'px;height:'+H+'px;box-sizing:border-box;overflow:hidden;text-align:left;'+
+      'background:#ffffff;border-radius:6px;'+
+      'box-shadow:0 18px 40px rgba(0,0,0,.26),0 2px 6px rgba(0,0,0,.12);'+
+      'transform-origin:center center;will-change:transform,opacity;pointer-events:none;';
     document.body.appendChild(fly);
     var dx=(b.left+b.width/2)-(a.left+a.width/2),dy=(b.top+b.height/2)-(a.top+a.height/2);
-    requestAnimationFrame(function(){
-      /* 1) aparece la hoja-documento blanca */
-      fly.style.opacity='1';fly.style.transform='translate(0,0) scale(1)';
-      /* 2) recorrido legible: viaja a media escala, totalmente visible */
-      setTimeout(function(){
-        fly.style.transition='transform .85s cubic-bezier(.4,.05,.25,1),opacity .85s ease';
-        fly.style.transform='translate('+(dx*0.55)+'px,'+(dy*0.55)+'px) scale(.62)';
-      },470);
-      /* 3) recepción: el documento ingresa al paquete y la pestaña Multiproducto "recibe" */
-      setTimeout(function(){
-        fly.style.transition='transform .42s cubic-bezier(.5,0,.9,.4),opacity .4s ease';
-        fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.08) rotate(-6deg)';
-        fly.style.opacity='0';
-        if(to){to.classList.remove('recv');void to.offsetWidth;to.classList.add('recv');}
-        updateMultiBadge();
-      },1180);
-    });
-    setTimeout(function(){if(fly.parentNode)fly.parentNode.removeChild(fly);if(to)to.classList.remove('recv');},1720);
-  }catch(e){}
+    var lift=-38; /* arco de elevación */
+    function finishPop(){
+      try{
+        if(to.animate){
+          to.animate([
+            {transform:'scale(1)'},
+            {transform:'scale(1.16)',offset:.35},
+            {transform:'scale(.95)',offset:.62},
+            {transform:'scale(1.04)',offset:.82},
+            {transform:'scale(1)'}
+          ],{duration:500,easing:'cubic-bezier(.34,1.56,.64,1)'});
+          to.animate([
+            {boxShadow:'0 0 0 0 rgba(240,192,64,0)'},
+            {boxShadow:'0 0 22px 7px rgba(240,192,64,.6)',offset:.4},
+            {boxShadow:'0 0 0 0 rgba(240,192,64,0)'}
+          ],{duration:640,easing:'ease-out'});
+        }
+      }catch(_){}
+      updateMultiBadge();
+    }
+    if(fly.animate){
+      var anim=fly.animate([
+        {transform:'translate(0px,0px) rotate(0deg) scale(1)',opacity:0,offset:0},
+        {opacity:1,offset:.05},
+        {transform:'translate('+(dx*0.20)+'px,'+(dy*0.20+lift)+'px) rotate(-4deg) scale(.92)',opacity:1,offset:.25},
+        {transform:'translate('+(dx*0.50)+'px,'+(dy*0.50+lift*0.7)+'px) rotate(5deg) scale(.74)',opacity:1,offset:.50},
+        {transform:'translate('+(dx*0.75)+'px,'+(dy*0.75+lift*0.3)+'px) rotate(-3deg) scale(.50)',opacity:1,offset:.74},
+        {transform:'translate('+(dx*0.92)+'px,'+(dy*0.92)+'px) rotate(2deg) scale(.28)',opacity:1,offset:.90},
+        {transform:'translate('+dx+'px,'+dy+'px) rotate(0deg) scale(.08)',opacity:0,offset:1}
+      ],{duration:1500,easing:'cubic-bezier(.42,.04,.28,1)',fill:'forwards'});
+      anim.onfinish=function(){if(fly.parentNode)fly.parentNode.removeChild(fly);finishPop();};
+      /* salvaguarda por si onfinish no dispara */
+      setTimeout(function(){if(fly.parentNode){fly.parentNode.removeChild(fly);finishPop();}},1700);
+    }else{
+      /* navegador sin Web Animations: aparición/desaparición simple */
+      fly.style.transition='transform .9s ease,opacity .9s ease';fly.style.opacity='1';
+      requestAnimationFrame(function(){fly.style.transform='translate('+dx+'px,'+dy+'px) scale(.1)';fly.style.opacity='0';});
+      setTimeout(function(){if(fly.parentNode)fly.parentNode.removeChild(fly);finishPop();},950);
+    }
+  }catch(e){updateMultiBadge();}
 }
 /* ── Render del contenido central Multiproducto (mismos estilos que producto único) ── */
 function _multiGmailProduct(s,i){
