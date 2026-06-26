@@ -1424,6 +1424,10 @@ var BDD_GROUPS=[
   {t:'Ubicación',items:[['region','Región',1],['sector','Sector',0],['cobnac','Cobertura nacional',0]]},
   {t:'Información comercial y de riesgo',items:[['renta','Renta',0],['score','Score',1],['riesgo','Puntuación de riesgo crediticio',0]]}
 ];
+/* Valores de ejemplo NEUTROS y claramente referenciales (punto 5) */
+var BDD_EJEMPLOS={nombre:'Juan Pérez González',rut:'12.345.678-9',edad:'42',genero:'Femenino / Masculino',empresa:'Empresa Ejemplo SpA',tipoemp:'Sociedad por Acciones',rubro:'Comercio / Servicios',replegal:'María Soto Reyes',email:'contacto@empresa.cl',telpart:'+56 2 2345 6789',telcom:'+56 2 2987 6543',telcel:'+56 9 8765 4321',dircom:'Av. Ejemplo 1234, Of. 56',region:'Región Metropolitana',sector:'Providencia',cobnac:'Nacional',renta:'$1.500.000 (tramo ref.)',score:'720 (ref.)',riesgo:'Bajo (ref.)'};
+/* Valor comercial de una base segmentada (punto 6) */
+var BDD_VALOR=['Campañas altamente segmentadas que llegan directo al público objetivo','Menos desperdicio publicitario y mayor tasa de conversión','Decisiones comerciales basadas en información real','Mejor retorno de la inversión (ROI) en marketing'];
 function bddSelected(){var s={},zone=document.getElementById('config-zone');if(zone)Array.prototype.forEach.call(zone.querySelectorAll('.sol-item input[data-bdd]:checked'),function(c){s[c.value]=c.getAttribute('data-lb')||c.value;});return s;}
 function bddEnrich(){var e=document.getElementById('bdd-enrich');return !!(e&&e.checked);}
 function bddVol(){var e=document.getElementById('bdd-vol');var n=e?parseInt(e.value):0;return (n&&n>0)?n:0;}
@@ -1432,15 +1436,28 @@ function bddBlocksInner(theme){
   var dark=(theme==='dark');
   var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#333',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
   var cBox=dark?'rgba(240,192,64,.08)':'#f7eef0';
+  var cEj=dark?'rgba(255,255,255,.05)':'#f4f6f8',cEjB=dark?'rgba(255,255,255,.12)':'#e2e6ea';
   var sel=bddSelected(),vol=bddVol(),enr=bddEnrich(),val=bddVal();
   function sec(titulo,items){
     if(!items.length)return '';
     return '<div style="margin:13px 0 3px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;font-family:Arial,sans-serif;">'+titulo+'</div>'+
       items.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
   }
+  /* Punto 6 — valor comercial de una base segmentada (breve y profesional) */
+  var valor='<div style="margin:0 0 14px;padding:13px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:6px;">Por qué una Base de Datos segmentada</div>'+
+    BDD_VALOR.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;line-height:1.4;"><span style="color:#1f9d55;font-weight:bold;">›</span> '+t+'</div>';}).join('')+
+  '</div>';
+  /* Atributos solicitados */
   var attrs=BDD_GROUPS.map(function(g){return sec(g.t,g.items.filter(function(it){return sel[it[0]];}).map(function(it){return it[1];}));}).join('');
   if(enr)attrs+=sec('Servicio adicional',['Enrichment — actualización y complemento de la base de datos existente del cliente']);
-  /* Resumen de la solicitud: volumen y valor (el valor lo define BackOffice) */
+  /* Punto 5 — ejemplo referencial neutro de cómo quedará estructurado cada registro */
+  var ejItems=[];BDD_GROUPS.forEach(function(g){g.items.forEach(function(it){if(sel[it[0]])ejItems.push('<div style="font-size:11px;color:'+cTxt+';padding:3px 0;font-family:Arial,sans-serif;"><b style="color:'+cSub+';">'+it[1]+':</b> '+(BDD_EJEMPLOS[it[0]]||'—')+'</div>');});});
+  var ejemplo=ejItems.length?('<div style="margin:14px 0 0;padding:13px 16px;background:'+cEj+';border:1px dashed '+cEjB+';border-radius:6px;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:7px;">Ejemplo referencial de un registro <span style="color:#999;font-weight:600;text-transform:none;letter-spacing:0;">(datos genéricos, se reemplazan por los reales)</span></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px;">'+ejItems.join('')+'</div>'+
+  '</div>'):'';
+  /* Punto 7 — resumen + encadenamiento cliente → BackOffice → propuesta final */
   var valLine = (val!=null) ? (ufd(val)+' UF + IVA'+( (function(){var c=ufc(val);return c>0?(' · ≈'+fmtN(c)):'';})() )) : 'Por evaluar por BackOffice · referencia: desde 1.000 RUT por 10 UF';
   var resumen='<div style="margin-top:16px;padding:14px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
     '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Resumen de la solicitud</div>'+
@@ -1449,9 +1466,11 @@ function bddBlocksInner(theme){
     '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Valor:</b> '+valLine+'</div>'+
   '</div>';
   return '<div style="margin:0;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:15px;font-weight:800;color:'+cTit+';margin-bottom:2px;">Especificación de Base de Datos solicitada</div>'+
-    '<div style="font-size:12px;color:'+cTxt+';line-height:1.5;margin-bottom:4px;">Bases de datos altamente segmentables. Atributos a incluir según la necesidad del cliente:</div>'+
-    attrs+resumen+
+    '<div style="font-size:15px;font-weight:800;color:'+cTit+';margin-bottom:2px;">Propuesta de Base de Datos a medida</div>'+
+    '<div style="font-size:12px;color:'+cTxt+';line-height:1.5;margin-bottom:12px;">Bases de datos altamente segmentables. Esta propuesta detalla el servicio y los atributos a incluir; al confirmar sus requerimientos, sirve como solicitud de evaluación para entregar el valor final.</div>'+
+    valor+
+    '<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;border-bottom:2px solid '+cLine+';padding-bottom:6px;margin-bottom:2px;">Atributos a incluir en la Base de Datos</div>'+
+    attrs+ejemplo+resumen+
   '</div>';
 }
 function renderBaseDatos(target){
@@ -1466,13 +1485,17 @@ function renderBaseDatos(target){
   if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+bddBlocksInner('light')+'</td></tr>';
   if(target==='wa'){
     var vol=bddVol(),val=bddVal();
-    var t='*Solicitud Base de Datos Equifax*\nBases de datos altamente segmentables — atributos a incluir:\n';
+    var t='*Propuesta Base de Datos Equifax*\nBases de datos altamente segmentables.\n';
+    t+='\n*POR QUÉ UNA BASE SEGMENTADA*\n'+BDD_VALOR.map(function(x){return '\u203a '+x;}).join('\n')+'\n';
+    t+='\n*ATRIBUTOS A INCLUIR*\n';
     BDD_GROUPS.forEach(function(g){
       var its=g.items.filter(function(it){return sel[it[0]];});
       if(!its.length)return;
-      t+='\n*'+g.t.toUpperCase()+'*\n'+its.map(function(it){return '\u2714\ufe0f '+it[1];}).join('\n')+'\n';
+      t+='_'+g.t+':_ '+its.map(function(it){return it[1];}).join(', ')+'\n';
     });
-    if(enr)t+='\n*SERVICIO ADICIONAL*\n\u2714\ufe0f Enrichment — actualización y complemento de la base existente\n';
+    if(enr)t+='_Servicio adicional:_ Enrichment (actualización y complemento)\n';
+    var ej=[];BDD_GROUPS.forEach(function(g){g.items.forEach(function(it){if(sel[it[0]])ej.push(it[1]+': '+(BDD_EJEMPLOS[it[0]]||'—'));});});
+    if(ej.length)t+='\n*EJEMPLO REFERENCIAL* _(datos genéricos)_\n'+ej.map(function(x){return '• '+x;}).join('\n')+'\n';
     t+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
     if(vol)t+='\ud83d\udcca *Volumen solicitado:* '+fmtN(vol)+' RUT\n';
     t+='\ud83d\udd04 *Enrichment:* '+(enr?'Incluido':'No incluido')+'\n';
@@ -1526,6 +1549,26 @@ function addToMulti(){
 function removeMulti(i){MULTI.splice(i,1);updateMultiBadge();if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}}
 function moveMulti(i,d){var j=i+d;if(j<0||j>=MULTI.length)return;var t=MULTI[i];MULTI[i]=MULTI[j];MULTI[j]=t;if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}}
 function clearMulti(){if(!MULTI.length)return;MULTI=[];updateMultiBadge();if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}}
+/* Base de Datos → Multiproducto: mismo flujo/estructura que los demás productos.
+   El snapshot lleva flag bdd y valTxt (valor BackOffice o "Por evaluar"); el render
+   reutiliza _multiX con sustituciones mínimas (valTxt) y guarda de plazo (s.bdd). */
+function addBddToMulti(){
+  var sel=bddSelected(),nSel=Object.keys(sel).length,enr=bddEnrich();
+  if(!nSel && !enr){toast('Selecciona atributos primero','err','global-toast');return;}
+  var vol=bddVol(),val=bddVal();
+  var labels=[];
+  BDD_GROUPS.forEach(function(g){g.items.forEach(function(it){if(sel[it[0]])labels.push(it[1]);});});
+  if(enr)labels.push('Enrichment — actualización y complemento de la base existente');
+  if(vol)labels.push('Volumen solicitado: '+fmtN(vol)+' RUT');
+  var valTxt=(val!=null)?(ufd(val)+' UF + IVA'):'Por evaluar por BackOffice · desde 1.000 RUT por 10 UF';
+  MULTI.push({bdd:true,tipo:'bdd',n:'Base de Datos Comercial',
+    ufV:(val!=null?val:0),ufL:0,hayDc:false,dc:0,
+    clp:(val!=null?ufc(val):0),pl:'—',cons:0,valTxt:valTxt,
+    items:labels.slice(),itemsMail:labels.slice(),docs:[]});
+  updateMultiBadge();flyToMulti();
+  toast('✔ Base de Datos agregada a Multiproducto ('+MULTI.length+')','ok','global-toast');
+  if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}
+}
 /* Panel izquierdo de la pestaña Multiproducto (lista de snapshots).
    Misma lógica estructural que Soluciones Equifax: encabezado (sol-head2) +
    lista (sol-list) + filas (sol-item). Diferencia única: aquí cada fila
@@ -1536,7 +1579,7 @@ function multiPanelHTML(){
     return '<div class="sol-item mp-item">'+
       '<div style="flex:1;min-width:0;">'+
         '<div style="font-weight:800;color:#fff;font-size:.95rem;line-height:1.25;">'+s.n+'</div>'+
-        '<div style="font-size:.78rem;color:var(--gn);font-weight:700;margin-top:3px;">'+ufd(s.ufV)+' UF + IVA'+(s.cons?' · '+s.cons+' consultas':'')+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' <span style="color:#2ecc71;font-weight:800;">· −'+s.dc+'%</span>':'')+'</div>'+
+        '<div style="font-size:.78rem;color:var(--gn);font-weight:700;margin-top:3px;">'+(s.valTxt||(ufd(s.ufV)+' UF + IVA'))+(s.cons?' · '+s.cons+' consultas':'')+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' <span style="color:#2ecc71;font-weight:800;">· −'+s.dc+'%</span>':'')+'</div>'+
       '</div>'+
       '<button type="button" class="mp-del-row" onclick="removeMulti('+i+');playClick();" title="Eliminar este producto del paquete">Eliminar producto</button>'+
     '</div>';
@@ -1613,10 +1656,10 @@ function _multiGmailProduct(s,i){
     '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
       (s.hayDc?'<tr><td style="font-size:11px;color:#ddaaaa;font-family:Arial,sans-serif;padding:3px 0;">Precio lista</td><td align="right" style="font-size:11px;color:#ddaaaa;text-decoration:line-through;font-family:Arial,sans-serif;padding:3px 0;">'+s.ufL+' UF + IVA</td></tr>':'')+
       '<tr><td style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,220,220,.9);font-family:Arial,sans-serif;padding:6px 0 4px;vertical-align:bottom;">Precio ofrecido</td>'+
-        '<td align="right" style="padding:6px 0 4px;vertical-align:bottom;"><span style="font-size:26px;font-weight:900;color:#f0c040;font-family:Arial,sans-serif;line-height:1;">'+s.ufV+' UF + IVA</span></td></tr>'+
+        '<td align="right" style="padding:6px 0 4px;vertical-align:bottom;"><span style="font-size:26px;font-weight:900;color:#f0c040;font-family:Arial,sans-serif;line-height:1;">'+(s.valTxt||(s.ufV+' UF + IVA'))+'</span></td></tr>'+
       (s.clp>0?'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Aprox. mensual con IVA</td><td align="right" style="font-size:14px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;padding:2px 0;">'+fmtN(s.clp)+'</td></tr>':'')+
       (s.hayDc?'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Descuento aplicado</td><td align="right" style="font-size:14px;font-weight:800;color:#4ade80;font-family:Arial,sans-serif;padding:2px 0;">&#8722;'+s.dc+'% sobre precio lista</td></tr>':'')+
-      '<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td><td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+s.pl+' meses &middot; POSTPAGO 30 d&iacute;as</td></tr>'+
+      (s.bdd?'':'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td><td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+s.pl+' meses &middot; POSTPAGO 30 d&iacute;as</td></tr>')+
     '</table>'+
   '</div>';
   return blanco+precio;
@@ -1651,10 +1694,10 @@ function _multiOutlookProduct(s,i){
     '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;">'+
       (s.hayDc?'<tr><td bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;"><font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;">Precio lista</font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;"><font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;text-decoration:line-through;">'+s.ufL+' UF + IVA</font></td></tr>':'')+
       '<tr><td align="left" bgcolor="#7a1425" style="background-color:#7a1425;padding:6px 0 4px;vertical-align:bottom;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;text-transform:uppercase;"><b>Precio ofrecido</b></font></td>'+
-        '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:6px 0 4px;vertical-align:bottom;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:26px;line-height:1;"><b>'+s.ufV+' UF + IVA</b></font></td></tr>'+
+        '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:6px 0 4px;vertical-align:bottom;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:26px;line-height:1;"><b>'+(s.valTxt||(s.ufV+' UF + IVA'))+'</b></font></td></tr>'+
       (s.clp>0?'<tr><td align="left" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><b>Aprox. mensual con IVA</b></font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:14px;"><b>'+fmtN(s.clp)+'</b></font></td></tr>':'')+
       (s.hayDc?'<tr><td bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;"><font face="Arial,sans-serif" color="#f5e5e5" style="font-size:11px;">Descuento aplicado</font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;"><font face="Arial,sans-serif" color="#50e870" style="font-size:14px;"><b>&#8722;'+s.dc+'% sobre precio lista</b></font></td></tr>':'')+
-      '<tr><td align="left" bgcolor="#7a1425" style="background-color:#7a1425;padding:4px 0;"><font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;">Plazo / Modalidad</font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:4px 0;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;"><b>'+s.pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></font></td></tr>'+
+      (s.bdd?'':'<tr><td align="left" bgcolor="#7a1425" style="background-color:#7a1425;padding:4px 0;"><font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;">Plazo / Modalidad</font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:4px 0;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;"><b>'+s.pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></font></td></tr>')+
     '</table>'+
   '</td></tr>';
   return blanco+precio;
@@ -1676,8 +1719,8 @@ function _multiCardProduct(s,i){
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;margin-bottom:8px;">'+
     s.items.map(function(i){return'<div style="font-size:.78rem;color:#ccc;padding:4px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;flex-shrink:0;">✔</span><span>'+i+'</span></div>';}).join('')+
     '</div>'+
-    '<div style="font-size:.95rem;color:#f0c040;font-weight:800;">'+ufd(s.ufV)+' UF + IVA'+(s.clp>0?' <span style="color:#fff;font-weight:600;font-size:.8rem;">· ≈'+fmtN(s.clp)+'/mes</span>':'')+'</div>'+
-    '<div style="font-size:.72rem;color:'+(s.hayDc?'#2ecc71':'#999')+';">'+(s.hayDc?'−'+s.dc+'% · lista '+ufd(s.ufL)+' UF · ':'')+s.pl+' meses · POSTPAGO 30 días</div>'+
+    '<div style="font-size:.95rem;color:#f0c040;font-weight:800;">'+(s.valTxt||(ufd(s.ufV)+' UF + IVA'))+(s.clp>0?' <span style="color:#fff;font-weight:600;font-size:.8rem;">· ≈'+fmtN(s.clp)+'/mes</span>':'')+'</div>'+
+    (s.bdd?'':'<div style="font-size:.72rem;color:'+(s.hayDc?'#2ecc71':'#999')+';">'+(s.hayDc?'−'+s.dc+'% · lista '+ufd(s.ufL)+' UF · ':'')+s.pl+' meses · POSTPAGO 30 días</div>')+
   '</div>';
 }
 function renderMultiproducto(target){
@@ -1696,7 +1739,7 @@ function renderMultiproducto(target){
     MULTI.forEach(function(s){
       tx+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n*'+s.n+'*\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
       tx+=s.items.map(function(x){return '\u2714\ufe0f '+x;}).join('\n')+'\n';
-      tx+='💰 *'+ufd(s.ufV)+' UF + IVA*'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' · −'+s.dc+'%':'')+' · '+s.pl+' meses POSTPAGO\n';
+      tx+='💰 *'+(s.valTxt||(ufd(s.ufV)+' UF + IVA'))+'*'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' · −'+s.dc+'%':'')+(s.bdd?'':' · '+s.pl+' meses POSTPAGO')+'\n';
     });
     return tx;
   }
