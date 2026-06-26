@@ -2370,7 +2370,17 @@ function genMail(){
     (fo ? "\ud83d\udcf1 " + fo + "\n" : "") +
     (ml ? "\u2709 " + ml + "\n" : "") +
     "";
-  document.getElementById('tpl-body').value=isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')):(isSol?renderPortafolioSoluciones('wa'):(isMulti?(_waSaludo+"\n"+_waEmpLn+"\n"+renderMultiproducto('wa')):txt));
+  /* Firma WA — misma firma/datos de contacto del ejecutivo usados en Gmail/Outlook,
+     reutilizada para que Soluciones, Multiproducto y Base de Datos también la incluyan. */
+  var _waFirma = "\n" +
+    "Quedo a su disposici\u00f3n \ud83e\udd1d\n\n" +
+    "\u2014\n" +
+    "*" + as2 + "*\n" +
+    "_" + exCargo + " \u00b7 " + exEmpresa + "_\n" +
+    (exFirma ? "_" + exFirma + "_\n" : "") +
+    (fo ? "\ud83d\udcf1 " + fo + "\n" : "") +
+    (ml ? "\u2709 " + ml + "\n" : "");
+  document.getElementById('tpl-body').value=isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')+_waFirma):(isSol?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPortafolioSoluciones('wa')+_waFirma):(isMulti?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderMultiproducto('wa')+_waFirma):txt));
 
   // ── HTML ENRIQUECIDO — Diseño corporativo completo ──
   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
