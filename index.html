@@ -10,7 +10,7 @@
   --g0:#0d0d0e;--g1:#141416;--g2:#1c1c1f;--g3:#26262a;--g4:#34343a;--g5:#46464d;
   --w:#f2f2f2;--wa:#a6a6ad;--wb:#7a7a82;
   --y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
-  --headH:84px;--barH:50px;
+  --headH:84px;--barH:92px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
@@ -107,8 +107,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 /* ── BARRA DE PRODUCTOS (gobierna todo) ───────────── */
 #prodbar{position:fixed;top:var(--headH);left:0;right:0;z-index:280;height:var(--barH);
-  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;align-items:center;gap:7px;
-  padding:0 14px;overflow-x:auto;scrollbar-width:thin;}
+  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;column-gap:7px;row-gap:8px;
+  padding:8px 14px;overflow:hidden;scrollbar-width:thin;}
 #prodbar::-webkit-scrollbar{height:4px;}
 #prodbar::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px;}
 .pbtn{flex:0 0 auto;background:var(--g2);border:1px solid var(--g3);border-radius:8px;
@@ -155,7 +155,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 #s-disc{min-height:20px;}
 #multi-list{max-height:46vh;overflow-y:auto;overflow-x:hidden;}
 #prodbar{position:fixed;}
-#prodbar::after{content:"";position:fixed;top:var(--headH);right:0;height:var(--barH);width:26px;pointer-events:none;z-index:281;background:linear-gradient(to right,rgba(20,20,22,0),var(--g1));}
+#prodbar::after{content:"";position:fixed;top:var(--headH);right:0;height:var(--barH);width:26px;pointer-events:none;z-index:281;background:linear-gradient(to right,rgba(20,20,22,0),var(--g1));display:none;}
 .pbtn:hover{border-color:var(--rl);background:rgba(155,28,46,.22);
   box-shadow:0 0 12px rgba(192,38,59,.5),0 0 24px rgba(155,28,46,.2),0 0 1px rgba(255,80,100,.4) inset;
   color:#fff;transform:translateY(-2px);}
@@ -657,6 +657,8 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 @media(max-width:880px){
   body{overflow:auto;}
   :root{--barH:48px;}
+  #prodbar{flex-wrap:nowrap;justify-content:flex-start;align-content:center;column-gap:7px;row-gap:0;padding:0 14px;overflow-x:auto;overflow-y:hidden;}
+  #prodbar::after{display:block;}
   #workstation{position:static;display:block;height:auto;margin-top:calc(var(--headH) + var(--barH) + 52px);}
   #left-panel{border-right:none;border-bottom:3px solid var(--g4);overflow:visible;min-height:auto;}
   #center-panel{flex-direction:row;flex-wrap:wrap;gap:6px;padding:10px;border-right:none;border-bottom:2px solid var(--g3);}
@@ -1110,6 +1112,7 @@ var PRODUCTS=[
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
+  {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM'},
   {key:'soluciones',ic:'🧩',lb:'Soluciones Equifax',su:'Catálogo'},
   {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'}
 ];
@@ -1167,6 +1170,12 @@ function cfgHTML(key){
       '</div>'+
       '<div class="note-inline" style="margin-top:10px;">🗄️ <b>Base de Datos:</b> solicitud a medida para evaluación de BackOffice. Referencia comercial: <b>desde 1.000 RUT por 10 UF + IVA</b>. El valor final lo define BackOffice; regístralo arriba cuando lo informen.</div>'+
       '<button type="button" id="btn-add-bdd-multi" class="exec-save" style="background:var(--rd);color:#fff;margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 16px;" onclick="addBddToMulti();playClick();" title="Agrega esta Base de Datos a la propuesta Multiproducto"><span style="font-size:1.4rem;line-height:1;">📦</span><span>Agregar a Multiproducto</span></button>';
+  }
+  if(key==='pub'){
+    return '<div class="sol-head2">Valor de la factura</div>'+
+      '<div class="fld"><label>Valor de la factura (documento a publicar)</label><input type="number" id="pub-monto" placeholder="Ej: 2615263" min="0" step="1000" oninput="refresh()"></div>'+
+      '<div class="note-inline" style="margin-top:10px;">📰 <b>Publicación Única:</b> el valor a cobrar es referencial y corresponde aproximadamente al <b>15% del monto del documento</b> (neto) más IVA. Sin tarifa fija; el valor final puede ajustarse al contratar.</div>'+
+      '<button type="button" id="btn-add-pub-multi" class="exec-save" style="background:var(--rd);color:#fff;margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 16px;" onclick="addPubToMulti();playClick();" title="Agrega esta Publicación Única a la propuesta Multiproducto"><span style="font-size:1.4rem;line-height:1;">📦</span><span>Agregar a Multiproducto</span></button>';
   }
   if(key==='bundle')
     return '<div class="cfg-2">'+
@@ -1382,6 +1391,7 @@ function refresh(){
   if(CURRENT.key==='multi'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='soluciones'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='bdd'){var szb=document.getElementById('summary-zone');if(szb)szb.innerHTML='';genMail();syncWA();return;}
+  if(CURRENT.key==='pub'){var szp=document.getElementById('summary-zone');if(szp)szp.innerHTML='';genMail();syncWA();return;}
   var c=computeCurrent();if(!c)return;LAST=c;
   setBridge('mt',c.tipo);
   setBridge('mu',c.ufVenta>0?c.ufVenta:'');
@@ -1602,6 +1612,111 @@ function renderBaseDatos(target){
 }
 
 /* ════════════════════════════════════════════════════════════════
+   PUBLICACIÓN ÚNICA — espejo EXACTO del patrón Base de Datos (isPub).
+   Producto de valor a medida en CLP (no UF): publicación puntual de un
+   documento impago en DICOM (Mora Control D.U.). Motor UF neutralizado
+   igual que BDD. Fuente comercial: PPTX Mora Control (publicación DICOM).
+   Fuente tarifa: hoja "COTIZADOR DOCUMENTO UNICO": neto = 15% del monto,
+   IVA 19%, total = neto × 1,19. Sin tarifa fija: cálculo referencial.
+   ════════════════════════════════════════════════════════════════ */
+var PUB_DESC=[
+  'La Publicación Única permite publicar en DICOM un documento impago puntual —por ejemplo, una factura— sin necesidad de contratar un plan mensual de Mora Control.',
+  'La publicación queda registrada de inmediato en el informe comercial del deudor, que recibe la notificación correspondiente. Esto produce un bloqueo comercial que incentiva el pago de la deuda.',
+  'Es la vía adecuada cuando el cliente necesita gestionar un documento específico y no una cartera completa: se cobra una sola vez, de forma referencial, según el monto del documento a publicar.'
+];
+var PUB_BENE=[
+  'Publicación inmediata del documento en DICOM, registrada en el informe comercial del deudor',
+  'El deudor recibe la notificación de su publicación en DICOM',
+  'Genera un bloqueo comercial del deudor moroso que incentiva el pago de la deuda',
+  'Las acciones de cobranza que acompañan la publicación aumentan hasta 6 veces las probabilidades de recuperación',
+  'Ideal para documentos puntuales, sin comprometer un plan mensual'
+];
+var PUB_REQ=[
+  'Documento con antigüedad máxima de 7 años desde el vencimiento (empresas) o 5 años (personas naturales)',
+  'Facturas aceptadas por el SII',
+  'No debe existir demanda judicial sobre el documento',
+  'Personas naturales: autorización según Ley 19.628'
+];
+function pubMonto(){var e=document.getElementById('pub-monto');var n=e?parseFloat((''+e.value).replace(/[^\d.]/g,'')):NaN;return (!isNaN(n)&&n>0)?n:0;}
+function pubCalc(){var m=pubMonto();if(!m)return null;var neto=m*0.15,iva=neto*0.19,total=neto+iva;return {monto:m,neto:neto,iva:iva,total:total};}
+function pubBlocksInner(theme){
+  var dark=(theme==='dark');
+  var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#333',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
+  var cBox=dark?'rgba(240,192,64,.08)':'#f7eef0';
+  var cReq=dark?'rgba(255,255,255,.05)':'#f4f6f8',cReqB=dark?'rgba(255,255,255,.12)':'#e2e6ea';
+  var c=pubCalc();
+  var desc=PUB_DESC.map(function(p,i){return '<div style="font-size:12px;color:'+cTxt+';line-height:1.55;margin-bottom:'+(i===PUB_DESC.length-1?12:8)+'px;">'+p+'</div>';}).join('');
+  var bene='<div style="margin:0 0 14px;padding:13px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:6px;">Por qué publicar el documento</div>'+
+    PUB_BENE.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;line-height:1.4;"><span style="color:#1f9d55;font-weight:bold;">›</span> '+t+'</div>';}).join('')+
+  '</div>';
+  var req='<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;border-bottom:2px solid '+cLine+';padding-bottom:6px;margin-bottom:2px;">Requisitos de publicación</div>'+
+    PUB_REQ.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
+  var precioTxt = c
+    ? ('<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Monto del documento a publicar (aprox.):</b> '+fmtN(c.monto)+'</div>'+
+       '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Precio a cobrar (neto, 15%):</b> '+fmtN(c.neto)+'</div>'+
+       '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>IVA (19%):</b> '+fmtN(c.iva)+'</div>'+
+       '<div style="font-size:13px;color:'+cSub+';padding:5px 0 0;font-weight:800;">Total a pagar: '+fmtN(c.total)+'</div>')
+    : '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;">Ingrese el valor de la factura para calcular el valor referencial (15% del documento + IVA).</div>';
+  var resumen='<div style="margin-top:16px;padding:14px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Valor referencial de la publicación</div>'+
+    precioTxt+
+    '<div style="font-size:10px;color:#999;padding:8px 0 0;line-height:1.4;">Valor referencial equivalente al 15% del monto del documento. El valor final puede ajustarse al momento de la contratación.</div>'+
+  '</div>';
+  return '<div style="margin:0;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:15px;font-weight:800;color:'+cTit+';margin-bottom:2px;">Publicación Única en DICOM</div>'+
+    desc+bene+req+resumen+
+  '</div>';
+}
+function renderPublicacion(target){
+  var c=pubCalc();
+  if(!c){
+    if(target==='wa')return '*Publicación Única Equifax*\nIngrese el valor de la factura para calcular la propuesta.';
+    if(target==='outlook')return '<tr><td style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Ingrese el valor de la factura para construir la propuesta de Publicación Única.</td></tr>';
+    return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Ingrese el valor de la factura para construir la propuesta de Publicación Única.</div>';
+  }
+  if(target==='card')return pubBlocksInner('dark');
+  if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+pubBlocksInner('light')+'</div>';
+  if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+pubBlocksInner('light')+'</td></tr>';
+  if(target==='wa'){
+    var t='*Publicación Única Equifax*\n\n'+PUB_DESC.join('\n\n')+'\n';
+    t+='\n*POR QUÉ PUBLICAR EL DOCUMENTO*\n'+PUB_BENE.map(function(x){return '\u203a '+x;}).join('\n')+'\n';
+    t+='\n*REQUISITOS DE PUBLICACIÓN*\n'+PUB_REQ.map(function(x){return '\u2714\ufe0f '+x;}).join('\n')+'\n';
+    t+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
+    t+='\ud83e\uddfe *Monto del documento (aprox.):* '+fmtN(c.monto)+'\n';
+    t+='\ud83d\udcb0 *Precio a cobrar (neto, 15%):* '+fmtN(c.neto)+'\n';
+    t+='\u2795 *IVA (19%):* '+fmtN(c.iva)+'\n';
+    t+='\u2705 *Total a pagar:* *'+fmtN(c.total)+'*\n';
+    t+='_Valor referencial (15% del documento). El valor final puede ajustarse al contratar._\n';
+    return t;
+  }
+  return '';
+}
+/* Publicación Única → Multiproducto: mismo flujo/estructura que Base de Datos.
+   Snapshot con flag pub y valTxt (total CLP). Valor en CLP puntual: no suma al
+   total UF/CLP mensual del paquete (ufV/ufL/clp = 0) para no falsear el total. */
+function addPubToMulti(){
+  var c=pubCalc();
+  if(!c){toast('Ingresa el valor de la factura primero','err','global-toast');return;}
+  var sig='monto:'+c.monto;
+  if(MULTI.some(function(s){return s.pub&&s.pubSig===sig;})){toast('Esa Publicación Única ya está en el Multiproducto','err','global-toast');return;}
+  var labels=[
+    'Publicación del documento en DICOM, registrada en el informe comercial del deudor',
+    'Notificación al deudor y bloqueo comercial que incentiva el pago',
+    'Monto del documento (aprox.): '+fmtN(c.monto),
+    'Precio a cobrar (neto, 15%): '+fmtN(c.neto)+' · IVA: '+fmtN(c.iva)
+  ];
+  var valTxt=fmtN(c.total)+' total (15% + IVA)';
+  MULTI.push({pub:true,pubSig:sig,tipo:'pub',n:'Publicación Única',
+    ufV:0,ufL:0,hayDc:false,dc:0,
+    clp:0,pl:'—',cons:0,valTxt:valTxt,
+    items:labels.slice(),itemsMail:labels.slice(),docs:[]});
+  flyToMulti({nom:'Publicación Única',precio:fmtN(c.neto)});
+  toast('✔ Publicación Única agregada a Multiproducto ('+MULTI.length+')','ok','global-toast');
+  if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}
+}
+
+/* ════════════════════════════════════════════════════════════════
    MULTIPRODUCTO COMERCIAL — snapshots congelados + render reutilizando
    la MISMA estética (header/logo/plantilla/Gmail/Outlook/PNG/WhatsApp).
    Aislado tras CURRENT.key==='multi'. Ruta de producto único intacta.
@@ -1789,7 +1904,7 @@ function _multiGmailProduct(s,i){
         '<td align="right" style="padding:6px 0 4px;vertical-align:bottom;"><span style="font-size:26px;font-weight:900;color:#f0c040;font-family:Arial,sans-serif;line-height:1;">'+(s.valTxt||(s.ufV+' UF + IVA'))+'</span></td></tr>'+
       (s.clp>0?'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Aprox. mensual con IVA</td><td align="right" style="font-size:14px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;padding:2px 0;">'+fmtN(s.clp)+'</td></tr>':'')+
       (s.hayDc?'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Descuento aplicado</td><td align="right" style="font-size:14px;font-weight:800;color:#4ade80;font-family:Arial,sans-serif;padding:2px 0;">&#8722;'+s.dc+'% sobre precio lista</td></tr>':'')+
-      (s.bdd?'':'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td><td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+s.pl+' meses &middot; POSTPAGO 30 d&iacute;as</td></tr>')+
+      ((s.bdd||s.pub)?'':'<tr><td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td><td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+s.pl+' meses &middot; POSTPAGO 30 d&iacute;as</td></tr>')+
     '</table>'+
   '</div>';
   return blanco+precio;
@@ -1827,7 +1942,7 @@ function _multiOutlookProduct(s,i){
         '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:6px 0 4px;vertical-align:bottom;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:26px;line-height:1;"><b>'+(s.valTxt||(s.ufV+' UF + IVA'))+'</b></font></td></tr>'+
       (s.clp>0?'<tr><td align="left" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><b>Aprox. mensual con IVA</b></font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:14px;"><b>'+fmtN(s.clp)+'</b></font></td></tr>':'')+
       (s.hayDc?'<tr><td bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;"><font face="Arial,sans-serif" color="#f5e5e5" style="font-size:11px;">Descuento aplicado</font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;"><font face="Arial,sans-serif" color="#50e870" style="font-size:14px;"><b>&#8722;'+s.dc+'% sobre precio lista</b></font></td></tr>':'')+
-      (s.bdd?'':'<tr><td align="left" bgcolor="#7a1425" style="background-color:#7a1425;padding:4px 0;"><font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;">Plazo / Modalidad</font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:4px 0;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;"><b>'+s.pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></font></td></tr>')+
+      ((s.bdd||s.pub)?'':'<tr><td align="left" bgcolor="#7a1425" style="background-color:#7a1425;padding:4px 0;"><font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;">Plazo / Modalidad</font></td><td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:4px 0;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;"><b>'+s.pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></font></td></tr>')+
     '</table>'+
   '</td></tr>';
   return blanco+precio;
@@ -1850,7 +1965,7 @@ function _multiCardProduct(s,i){
     s.items.map(function(i){return'<div style="font-size:.78rem;color:#ccc;padding:4px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;flex-shrink:0;">✔</span><span>'+i+'</span></div>';}).join('')+
     '</div>'+
     '<div style="font-size:.95rem;color:#f0c040;font-weight:800;">'+(s.valTxt||(ufd(s.ufV)+' UF + IVA'))+(s.clp>0?' <span style="color:#fff;font-weight:600;font-size:.8rem;">· ≈'+fmtN(s.clp)+'/mes</span>':'')+'</div>'+
-    (s.bdd?'':'<div style="font-size:.72rem;color:'+(s.hayDc?'#2ecc71':'#999')+';">'+(s.hayDc?'−'+s.dc+'% · lista '+ufd(s.ufL)+' UF · ':'')+s.pl+' meses · POSTPAGO 30 días</div>')+
+    ((s.bdd||s.pub)?'':'<div style="font-size:.72rem;color:'+(s.hayDc?'#2ecc71':'#999')+';">'+(s.hayDc?'−'+s.dc+'% · lista '+ufd(s.ufL)+' UF · ':'')+s.pl+' meses · POSTPAGO 30 días</div>')+
   '</div>';
 }
 function renderMultiproducto(target){
@@ -1869,7 +1984,7 @@ function renderMultiproducto(target){
     MULTI.forEach(function(s){
       tx+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n*'+s.n+'*\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
       tx+=s.items.map(function(x){return '\u2714\ufe0f '+x;}).join('\n')+'\n';
-      tx+='💰 *'+(s.valTxt||(ufd(s.ufV)+' UF + IVA'))+'*'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' · −'+s.dc+'%':'')+(s.bdd?'':' · '+s.pl+' meses POSTPAGO')+'\n';
+      tx+='💰 *'+(s.valTxt||(ufd(s.ufV)+' UF + IVA'))+'*'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' · −'+s.dc+'%':'')+((s.bdd||s.pub)?'':' · '+s.pl+' meses POSTPAGO')+'\n';
     });
     return tx;
   }
@@ -2242,8 +2357,9 @@ function genMail(){
   var isSol=(typeof CURRENT!=='undefined'&&CURRENT.key==='soluciones');
   var isMulti=(typeof CURRENT!=='undefined'&&CURRENT.key==='multi');
   var isBdd=(typeof CURRENT!=='undefined'&&CURRENT.key==='bdd');
+  var isPub=(typeof CURRENT!=='undefined'&&CURRENT.key==='pub');
   var tipo=gv('mt');
-  if(!isSol && !isMulti && !isBdd && !tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
+  if(!isSol && !isMulti && !isBdd && !isPub && !tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
   var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
   var sal=saludoChile(); /* saludo según hora real de Chile, calculado al generar */
   /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
@@ -2270,6 +2386,7 @@ function genMail(){
   if(isSol){pi={badge:'PORTAFOLIO DE SOLUCIONES',n:'Soluciones Equifax'};}
   if(isMulti){pi={badge:'PROPUESTA MULTIPRODUCTO',n:'Multiproducto Comercial'};}
   if(isBdd){pi={badge:'SOLICITUD BASE DE DATOS',n:'Base de Datos Comercial'};}
+  if(isPub){pi={badge:'PUBLICACIÓN ÚNICA',n:'Publicación Única'};}
   /* ── Enlace de WhatsApp para la firma (cliente → ejecutivo) con mensaje contextual ── */
   var _execNm=(as2&&as2!=='[Asesor]')?as2:'';
   var _prodNm=(pi&&pi.n&&pi.n!=='[Producto]')?pi.n:'';
@@ -2283,7 +2400,8 @@ function genMail(){
   if(isSol){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
   if(isMulti){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
   if(isBdd){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
-  (function(){var _pz=document.getElementById('cc-price-zone'),_cz=document.getElementById('cc-contrato-zone');var _hide=isSol||isMulti||isBdd;if(_pz)_pz.style.display=_hide?'none':'';if(_cz)_cz.style.display=_hide?'none':'';})();
+  if(isPub){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
+  (function(){var _pz=document.getElementById('cc-price-zone'),_cz=document.getElementById('cc-contrato-zone');var _hide=isSol||isMulti||isBdd||isPub;if(_pz)_pz.style.display=_hide?'none':'';if(_cz)_cz.style.display=_hide?'none':'';})();
 
   // ── TARJETA PC ──────────────────────────────
   st('cc-badge',pi.badge);st('cc-fecha',hoy());
@@ -2342,8 +2460,9 @@ function genMail(){
   if(isSol){sv('cc-prod-block',renderPortafolioSoluciones('card'));sv('cc-dcto-block','');var _wpb=document.getElementById('wcc-prod-block');if(_wpb)_wpb.innerHTML=renderPortafolioSoluciones('card');var _wdb=document.getElementById('wcc-dcto-block');if(_wdb)_wdb.innerHTML='';}
   if(isMulti){sv('cc-prod-block',renderMultiproducto('card'));sv('cc-dcto-block','');var _wpbM=document.getElementById('wcc-prod-block');if(_wpbM)_wpbM.innerHTML=renderMultiproducto('card');var _wdbM=document.getElementById('wcc-dcto-block');if(_wdbM)_wdbM.innerHTML='';}
   if(isBdd){sv('cc-prod-block',renderBaseDatos('card'));sv('cc-dcto-block','');var _wpbB=document.getElementById('wcc-prod-block');if(_wpbB)_wpbB.innerHTML=renderBaseDatos('card');var _wdbB=document.getElementById('wcc-dcto-block');if(_wdbB)_wdbB.innerHTML='';}
+  if(isPub){sv('cc-prod-block',renderPublicacion('card'));sv('cc-dcto-block','');var _wpbP=document.getElementById('wcc-prod-block');if(_wpbP)_wpbP.innerHTML=renderPublicacion('card');var _wdbP=document.getElementById('wcc-dcto-block');if(_wdbP)_wdbP.innerHTML='';}
   var aEmp=(em?' | '+em:'');
-  var _asuntoSol=isSol?('Soluciones Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):null));
+  var _asuntoSol=isSol?('Soluciones Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):null)));
   st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
   st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
 
@@ -2397,7 +2516,7 @@ function genMail(){
     (exFirma ? "_" + exFirma + "_\n" : "") +
     (fo ? "\ud83d\udcf1 " + fo + "\n" : "") +
     (ml ? "\u2709 " + ml + "\n" : "");
-  document.getElementById('tpl-body').value=isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')+_waFirma):(isSol?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPortafolioSoluciones('wa')+_waFirma):(isMulti?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderMultiproducto('wa')+_waFirma):txt));
+  document.getElementById('tpl-body').value=isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')+_waFirma):(isPub?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPublicacion('wa')+_waFirma):(isSol?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPortafolioSoluciones('wa')+_waFirma):(isMulti?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderMultiproducto('wa')+_waFirma):txt)));
 
   // ── HTML ENRIQUECIDO — Diseño corporativo completo ──
   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
@@ -2449,7 +2568,7 @@ function genMail(){
     '</div>'+
 
     // PRODUCTO/PRECIO/DOCS (soluciones: contenido multiproducto sin precio)
-    (isBdd ? renderBaseDatos('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
+    (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
     '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
       '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+'</div>'+
@@ -2494,7 +2613,7 @@ function genMail(){
     '<div style="background:#fffdf5;padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
       '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</div>'+
-    '</div>'))))+
+    '</div>')))))+
 
     // FIRMA — fondo oscuro corporativo
     '<div style="background:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
@@ -2641,7 +2760,7 @@ function genMail(){
     // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
     // ══════════════════════════════════════════
     _destOutlook+
-    (isBdd ? renderBaseDatos('outlook') : (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
+    (isBdd ? renderBaseDatos('outlook') : (isPub ? renderPublicacion('outlook') : (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
     // ══════════════════════════════════════════
     '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
@@ -2735,7 +2854,7 @@ function genMail(){
           '</table>'+
         '</td>'+
       '</tr></table>'+
-    '</td></tr>'))))+
+    '</td></tr>')))))+
 
     // ══════════════════════════════════════════
     // FIRMA — fondo gris claro, texto oscuro (garantizado Outlook)
