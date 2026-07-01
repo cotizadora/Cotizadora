@@ -1113,8 +1113,8 @@ function ufd(x){return (Math.round(x*10000)/10000).toString();}
 var PRODUCTS=[
   {key:'bundle',ic:'📦',lb:'BUNDLE: Mora Control + Informes Comerciales',su:'4100 / Ilimitado'},
   {key:'mc',    ic:'🚨',lb:'Mora Control',  su:'Gestión de cartera'},
-  {key:'ri',    ic:'📊',lb:'Informes Comerciales Mensual',    su:'12 meses'},
-  {key:'bolsa', ic:'🎒',lb:'Informes Comerciales Bolsa',      su:'Pago único 12m'},
+  {key:'ri',    ic:'📊',lb:'Informes Comerciales Mensual',    su:'Reporte Interactivo'},
+  {key:'bolsa', ic:'🎒',lb:'Informes Comerciales Bolsa',      su:'Reporte Interactivo'},
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
@@ -1242,7 +1242,7 @@ function computeCurrent(){
   }else if(k==='bolsa'){
     var sB=$('c-cons'),uB=parseFloat(gv('c-cons'));
     var cB=sB?parseInt(sB.options[sB.selectedIndex].dataset.c):0;
-    c.tipo='ri_plan';c.ufLista=uB;c.base=uB;c.cons=cB;
+    c.tipo='ri_bolsa';c.ufLista=uB;c.base=uB;c.cons=cB;
     c.note='Bolsa de pago único para 12 meses, sin cargo mensual · UF/consulta: <b>'+(uB/cB).toFixed(4)+'</b>';
   }else if(k==='pfm'){
     var fr=gv('c-fr'),ruts=parseInt(gv('c-ruts'))||10,dcP=parseInt(gv('c-dc'))||0;
@@ -1320,7 +1320,7 @@ function renderSummary(c){
     '</div>';
 
   var html=
-    '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
+    '<div class="sum-head"><div><div class="sum-name" id="s-name">'+pi.n+'</div>'+(pi.sub?'<div class="sum-name" id="s-name-sub" style="font-size:.72rem;font-weight:700;color:var(--wa);letter-spacing:.3px;margin-top:1px;">'+pi.sub+'</div>':'')+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
     '<div class="metrics">'+
       ventaCtrl+
       listaCtrl+
@@ -1749,7 +1749,7 @@ var MULTI=[];
 function docsForTipo(tipo){
   var byLabel=function(lbl){return DOCS_ADJUNTABLES.filter(function(d){return d.label===lbl;})[0]||null;};
   var map={bundle4100:['Mora Control','Reporte Interactivo'],bundleIlim:['Mora Control','Reporte Interactivo'],
-    mc_solo:['Mora Control'],ri_plan:['Reporte Interactivo'],pfm:['Portfolio Monitor'],pc:['Partner Check'],
+    mc_solo:['Mora Control'],ri_plan:['Reporte Interactivo'],ri_bolsa:['Reporte Interactivo'],pfm:['Portfolio Monitor'],pc:['Partner Check'],
     combo3:['Reporte Interactivo','Mora Control','Portfolio Monitor']};
   return (map[tipo]||[]).map(byLabel).filter(Boolean);
 }
@@ -2019,7 +2019,7 @@ function setProduct(key){
   CURRENT.key=key;CURRENT.override=null;CURRENT.overrideLista=null;
   document.querySelectorAll('.pbtn').forEach(function(b){b.classList.toggle('on',b.dataset.key===key);});
   var p=PRODUCTS.find(function(x){return x.key===key;});
-  $('cfg-prod-name').textContent=p?'· '+p.lb:'';
+  $('cfg-prod-name').textContent=p?'· '+p.lb+((key==='ri'||key==='bolsa')?' — Reporte Interactivo':''):'';
   $('config-zone').innerHTML=cfgHTML(key);
   refresh();
   if(window.matchMedia('(max-width:880px)').matches)setMobileView('config');
@@ -2353,14 +2353,15 @@ var PFM_S={1:0.0725,2:0.0711,3:0.0697,5:0.0683,10:0.067,20:0.065,30:0.063,40:0.0
 var PFM_Q={1:0.0563,2:0.0554,3:0.0546,5:0.0538,10:0.053,20:0.051,30:0.050,40:0.048,50:0.046,60:0.045,70:0.043,80:0.041,90:0.039,100:0.038,200:0.029,300:0.025,500:0.021,1000:0.017};
 var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.039,50:0.038,60:0.036,70:0.035,80:0.033,90:0.032,100:0.030,200:0.023,300:0.020,500:0.017,1000:0.013};
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
-var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
-var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
+var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Informes Comerciales Mensual',sub:'Reporte Interactivo'},ri_bolsa:{badge:'EVALUACIÓN CREDITICIA',n:'Informes Comerciales Bolsa',sub:'Reporte Interactivo'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
+var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Score de riesgo crediticio Equifax','Bolsa de consultas para usar durante 12 meses','Sin cargo mensual: pago único anticipado','Activación mediante transferencia bancaria','Proceso de contratación con documentación propia'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
 /* ── BULLETS ENRIQUECIDOS — SOLO Gmail/Outlook (WhatsApp usa PITEMS) ── */
 var PITEMS_MAIL={
   bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda','Acciones de cobranza 6× más eficaces','Bloqueo comercial que promueve el pago','Score de riesgo Equifax para evaluar','Portal de autogestión disponible 24/7','Evalúa antes de dar crédito y cobra después'],
   bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda','Publica facturas, cheques y documentos impagos','Acciones de cobranza 6× más eficaces','Bloqueo comercial del deudor moroso','Score de riesgo Equifax incluido','Gestión de abonos y pagos parciales'],
   mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda','Gestión integral de cobranza en una plataforma','Agrupa deudores por monto y fecha','Carga masiva o individual de documentos','Bloqueo comercial que promueve el pago','Publica facturas, cheques y otros impagos','Contratable por personas y empresas'],
   ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral','Análisis de riesgo, crédito y contactabilidad','Identificación de consultas en línea','Antecedentes FONASA y tributarios','Reduce el riesgo de incobrabilidad','Mejor evaluación de nuevos prospectos'],
+  ri_bolsa:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Bolsa de consultas disponible durante 12 meses','Sin cargo mensual: pago único y anticipado','Activación mediante transferencia bancaria','Ficha de contratación y documentación específica','Flexibilidad para usar las consultas cuando las necesite','Ideal para evaluaciones puntuales de clientes o prospectos','Respaldo de la marca Equifax','Reduce el riesgo de incobrabilidad'],
   pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual','Revisión periódica de toda la cartera','Potencia buenos clientes, limita los riesgosos','Detección temprana de deterioro financiero','Seguimiento de personas y empresas','Reevaluación al renovar líneas de crédito'],
   pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7','Validación de antecedentes de cada proveedor','Reduce el riesgo de contraparte','Centraliza la gestión de proveedores','Respaldo de la marca Equifax'],
   combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio','Score de riesgo Equifax para cada decisión','Acciones de cobranza 6× más eficaces','Alertas tempranas de deterioro financiero','Potencia buenos clientes y limita riesgos','Una plataforma para evaluar, cobrar y monitorear']
@@ -2429,6 +2430,17 @@ function genMail(){
       it=_pfmRw(it);itMail=_pfmRw(itMail);
     }
   }
+  /* Reporte Interactivo / Bolsa: reflejar en el contenido del cliente la cantidad de
+     consultas configurada en la calculadora. Se reutiliza EXACTAMENTE la misma fuente
+     que ya usa el cálculo (bridge #mc2 → c.cons, misma fuente única de verdad); sin
+     variables nuevas ni recálculo. Solo se agrega un bullet adicional (no se muta
+     PITEMS ni PITEMS_MAIL), igual que el patrón usado arriba para Portfolio Monitor. */
+  if((tipo==='ri_plan'||tipo==='ri_bolsa')&&co){
+    var _consTxt=(tipo==='ri_bolsa')
+      ? ('Bolsa de '+co+' consultas para usar durante 12 meses')
+      : (co+' consultas incluidas por mes');
+    it=it.concat([_consTxt]);itMail=itMail.concat([_consTxt]);
+  }
   var hayDc=ufL&&ufV&&ufV<ufL;
   var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV?ufc(ufV):null;
@@ -2458,7 +2470,8 @@ function genMail(){
   var _wccf=$('wcc-foto');if(_wccf)_wccf.src=_fsrc;
   sv('wcc-prod-block',
     '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">Producto cotizado</div>'+
-    '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+'</div>'+
+    '<div style="font-size:1.1rem;font-weight:800;color:#fff;line-height:1.3;'+(pi.sub?'margin-bottom:2px;':'margin-bottom:14px;')+'">'+pi.n+'</div>'+
+    (pi.sub?'<div style="font-size:.72rem;font-weight:600;color:#f0c040;margin-bottom:14px;">'+pi.sub+'</div>':'')+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;">'+
     it.map(function(i){return'<div style="font-size:.8rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;font-size:.85rem;flex-shrink:0;margin-top:1px;">✔</span><span>'+i+'</span></div>';}).join('')+
     '</div>'
@@ -2476,7 +2489,8 @@ function genMail(){
   var col1=itMail.slice(0,mid),col2=itMail.slice(mid);
   sv('cc-prod-block',
     '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">Producto cotizado</div>'+
-    '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+'</div>'+
+    '<div style="font-size:1.1rem;font-weight:800;color:#fff;line-height:1.3;'+(pi.sub?'margin-bottom:2px;':'margin-bottom:14px;')+'">'+pi.n+'</div>'+
+    (pi.sub?'<div style="font-size:.72rem;font-weight:600;color:#f0c040;margin-bottom:14px;">'+pi.sub+'</div>':'')+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;">'+
     itMail.map(function(i){return'<div style="font-size:.8rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;font-size:.85rem;flex-shrink:0;margin-top:1px;">✔</span><span>'+i+'</span></div>';}).join('')+
     '</div>'
@@ -2498,8 +2512,9 @@ function genMail(){
   if(isPub){sv('cc-prod-block',renderPublicacion('card'));sv('cc-dcto-block','');var _wpbP=document.getElementById('wcc-prod-block');if(_wpbP)_wpbP.innerHTML=renderPublicacion('card');var _wdbP=document.getElementById('wcc-dcto-block');if(_wdbP)_wdbP.innerHTML='';}
   var aEmp=(em?' | '+em:'');
   var _asuntoSol=isSol?('Información de productos Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):null)));
-  st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
-  st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
+  var _prodAsunto=pi.n+(pi.sub?' · '+pi.sub:'');
+  st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+_prodAsunto+aEmp));
+  st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+_prodAsunto+aEmp));
 
   // ── TEXTO WA (formato markdown WhatsApp) ──
   var _waSaludo = _contactoNom
@@ -2514,6 +2529,7 @@ function genMail(){
   var txt = _waEncab +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*" + pi.n + "*\n" +
+    (pi.sub ? "_" + pi.sub + "_\n" : "") +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n" +
     it.map(function(x){ return "\u2714\ufe0f " + x; }).join("\n") + "\n\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
@@ -2525,7 +2541,7 @@ function genMail(){
     (hayDc ? "\ud83c\udfaf *Descuento: \u2212" + dc + "%*\n" : "") +
     "\ud83d\udcc5 Plazo: *" + pl + " meses*\n" +
     "\ud83d\udcb3 Modalidad: _POSTPAGO \u00b7 30 d\u00edas_\n" +
-    (co && (tipo.indexOf("ri") >= 0 || tipo.indexOf("bundle") >= 0) ? "\ud83d\udcca Consultas RI/mes: *" + co + "*\n" : "") +
+    (co && tipo.indexOf("bundle") >= 0 ? "\ud83d\udcca Consultas RI/mes: *" + co + "*\n" : "") +
     "\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*DOCUMENTOS*\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n" +
@@ -2606,7 +2622,8 @@ function genMail(){
     (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
     '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
-      '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+'</div>'+
+      '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;'+(pi.sub?'margin-bottom:2px;':'padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;')+'">'+pi.n+'</div>'+
+      (pi.sub?'<div style="font-size:12px;font-weight:700;color:#9b1c2e;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.sub+'</div>':'')+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+_listaItems+'</table>'+
     '</div>'+
 
@@ -2805,9 +2822,12 @@ function genMail(){
             '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:5px;">'+
               '<font face="Arial,sans-serif" color="#777777" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:10px;">'+
+            '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:'+(pi.sub?'2':'10')+'px;">'+
               '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;font-weight:bold;"><b>'+pi.n+'</b></font>'+
             '</td></tr>'+
+            (pi.sub?('<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:10px;">'+
+              '<font face="Arial,sans-serif" color="#9b1c2e" style="font-size:12px;font-weight:bold;"><b>'+pi.sub+'</b></font>'+
+            '</td></tr>'):'')+
           '</table>'+
           '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
             '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;font-size:2px;line-height:2px;height:2px;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
