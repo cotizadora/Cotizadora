@@ -1105,7 +1105,7 @@ function ufd(x){return (Math.round(x*10000)/10000).toString();}
 
 /* ── Catálogo: EXACTAMENTE los productos del index (fuente de verdad) ── */
 var PRODUCTS=[
-  {key:'bundle',ic:'📦',lb:'Mora Control + Informes Comerciales',su:'4100 / Ilimitado'},
+  {key:'bundle',ic:'📦',lb:'BUNDLE: Mora Control + Informes Comerciales',su:'4100 / Ilimitado'},
   {key:'mc',    ic:'🚨',lb:'Mora Control',  su:'Gestión de cartera'},
   {key:'ri',    ic:'📊',lb:'Informes Comerciales Mensual',    su:'12 meses'},
   {key:'bolsa', ic:'🎒',lb:'Informes Comerciales Bolsa',      su:'Pago único 12m'},
@@ -1564,10 +1564,10 @@ function bddBlocksInner(theme){
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px;">'+ejItems.join('')+'</div>'+
   '</div>'):'';
   /* Punto 7 — resumen + encadenamiento cliente → BackOffice → propuesta final */
-  var valLine = (val!=null) ? (ufd(val)+' UF + IVA'+( (function(){var c=ufc(val);return c>0?(' · ≈'+fmtN(c)):'';})() )) : 'Por evaluar por BackOffice · referencia: desde 1.000 RUT por 10 UF';
+  var valLine = (val!=null) ? (ufd(val)+' UF + IVA'+( (function(){var c=ufc(val);return c>0?(' · ≈'+fmtN(c)):'';})() )) : 'Por evaluar por BackOffice · referencia: desde 1.000 RUT por 10 UF + IVA';
   var resumen='<div style="margin-top:16px;padding:14px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
     '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Resumen de la solicitud</div>'+
-    (vol?'<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Volumen solicitado:</b> '+fmtN(vol)+' RUT</div>':'')+
+    (vol?'<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Volumen solicitado:</b> '+Math.round(vol).toLocaleString('es-CL')+' RUT</div>':'')+
     '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Enrichment:</b> '+(enr?'Incluido':'No incluido')+'</div>'+
     '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Valor:</b> '+valLine+'</div>'+
   '</div>';
@@ -1603,9 +1603,9 @@ function renderBaseDatos(target){
     var ej=[];BDD_GROUPS.forEach(function(g){g.items.forEach(function(it){if(sel[it[0]])ej.push(it[1]+': '+(BDD_EJEMPLOS[it[0]]||'—'));});});
     if(ej.length)t+='\n*EJEMPLO REFERENCIAL* _(datos genéricos)_\n'+ej.map(function(x){return '• '+x;}).join('\n')+'\n';
     t+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
-    if(vol)t+='\ud83d\udcca *Volumen solicitado:* '+fmtN(vol)+' RUT\n';
+    if(vol)t+='\ud83d\udcca *Volumen solicitado:* '+Math.round(vol).toLocaleString('es-CL')+' RUT\n';
     t+='\ud83d\udd04 *Enrichment:* '+(enr?'Incluido':'No incluido')+'\n';
-    t+='\ud83d\udcb0 *Valor:* '+(val!=null?('*'+ufd(val)+' UF* + IVA'+((function(){var c=ufc(val);return c>0?(' · \u2248'+fmtN(c)):'';})())):'Por evaluar por BackOffice · referencia: desde 1.000 RUT por 10 UF')+'\n';
+    t+='\ud83d\udcb0 *Valor:* '+(val!=null?('*'+ufd(val)+' UF* + IVA'+((function(){var c=ufc(val);return c>0?(' · \u2248'+fmtN(c)):'';})())):'Por evaluar por BackOffice · referencia: desde 1.000 RUT por 10 UF + IVA')+'\n';
     return t;
   }
   return '';
@@ -1792,8 +1792,8 @@ function addBddToMulti(){
   var labels=[];
   BDD_GROUPS.forEach(function(g){g.items.forEach(function(it){if(sel[it[0]])labels.push(it[1]);});});
   if(enr)labels.push('Enrichment — actualización y complemento de la base existente');
-  if(vol)labels.push('Volumen solicitado: '+fmtN(vol)+' RUT');
-  var valTxt=(val!=null)?(ufd(val)+' UF + IVA'):'Por evaluar por BackOffice · desde 1.000 RUT por 10 UF';
+  if(vol)labels.push('Volumen solicitado: '+Math.round(vol).toLocaleString('es-CL')+' RUT');
+  var valTxt=(val!=null)?(ufd(val)+' UF + IVA'):'Por evaluar por BackOffice · desde 1.000 RUT por 10 UF + IVA';
   MULTI.push({bdd:true,bddSig:sig,tipo:'bdd',n:'Base de Datos Comercial',
     ufV:(val!=null?val:0),ufL:0,hayDc:false,dc:0,
     clp:(val!=null?ufc(val):0),pl:'—',cons:0,valTxt:valTxt,
@@ -4058,6 +4058,7 @@ cUF();cCLP();cCom();
    genera adjunto ficticio: se aborta con aviso (ver descargarEML()).
    ════════════════════════════════════════════════════════════════ */
 const DOCS_ADJUNTABLES = [
+  { label:'📦 BUNDLE: Mora Control + Informes Comerciales', archivo:'BUNDLE_Mora_Control_mas_Informes_Comerciales.pdf', url:'BUNDLE_Mora_Control_mas_Informes_Comerciales.pdf' },
   { label:'Mora Control',                 archivo:'MoraControl_Equifax.pdf',        url:'MoraControl_Equifax.pdf' },
   { label:'Mora Control Documento Único', archivo:'MoraControlDocUnico_Equifax.pdf', url:'MoraControlDocUnico_Equifax.pdf' },
   { label:'Reporte Interactivo',          archivo:'ReporteInteractivo_Equifax.pdf',  url:'ReporteInteractivo_Equifax.pdf' },
