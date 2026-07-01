@@ -124,7 +124,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 @keyframes mp-badge-pop{0%{transform:scale(1);}35%{transform:scale(1.45);}65%{transform:scale(.9);}100%{transform:scale(1);}}
 /* Multiproducto "se llena": estado activo premium — halo neón que respira (::after),
    latido sutil (escala) e intensidad por nivel. Solo experiencia visual. */
-.pbtn[data-key="multi"]{transition:transform .4s ease,background .25s ease,border-color .25s ease;}
+.pbtn[data-key="multi"]{transition:transform .4s ease,background .25s ease,border-color .25s ease;background:linear-gradient(135deg,rgba(155,28,46,.17),rgba(155,28,46,.05));border-color:var(--rl);box-shadow:inset 0 0 0 1px rgba(240,192,64,.16);}
+/* Información de productos Equifax: pestaña informativa/de consulta (no cotiza).
+   Carácter institucional (acento azul sobrio), distinto de las pestañas comerciales. */
+.pbtn[data-key="soluciones"]{background:linear-gradient(135deg,rgba(52,152,219,.13),rgba(52,152,219,.04));border-color:rgba(52,152,219,.42);box-shadow:inset 0 0 0 1px rgba(52,152,219,.10);}
 .pbtn[data-key="multi"].fill1{background:linear-gradient(135deg,rgba(155,28,46,.30),rgba(155,28,46,.12));border-color:var(--rl);}
 .pbtn[data-key="multi"].fill2{background:linear-gradient(135deg,rgba(155,28,46,.42),rgba(155,28,46,.18));border-color:var(--rl);}
 .pbtn[data-key="multi"].fill3{background:linear-gradient(135deg,rgba(155,28,46,.56),rgba(120,18,32,.34));border-color:var(--r);}
@@ -162,6 +165,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pbtn.on{border-color:var(--r);background:linear-gradient(135deg,rgba(155,28,46,.32),rgba(155,28,46,.12));
   box-shadow:0 0 0 1px var(--r) inset,0 0 14px rgba(155,28,46,.45),0 0 28px rgba(155,28,46,.2);
   color:#fff;}
+/* Identidad institucional de "Información de productos Equifax" también al pasar el mouse y al estar activa */
+.pbtn[data-key="soluciones"]:hover{border-color:#3498db;background:rgba(52,152,219,.20);box-shadow:0 0 12px rgba(52,152,219,.35),inset 0 0 0 1px rgba(52,152,219,.25);}
+.pbtn[data-key="soluciones"].on{border-color:#3498db;background:linear-gradient(135deg,rgba(52,152,219,.30),rgba(52,152,219,.10));box-shadow:0 0 0 1px #3498db inset,0 0 14px rgba(52,152,219,.40),0 0 28px rgba(52,152,219,.18);color:#fff;}
 
 /* ── ESTACIÓN DE TRABAJO — 3 COLUMNAS ─────────────── */
 #workstation{position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;bottom:0;
@@ -1113,8 +1119,8 @@ var PRODUCTS=[
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
   {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM'},
-  {key:'soluciones',ic:'🧩',lb:'Soluciones Equifax',su:'Catálogo'},
-  {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'}
+  {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'},
+  {key:'soluciones',ic:'🧩',lb:'Información de productos Equifax',su:'Catálogo'}
 ];
 
 function buildProdbar(){
@@ -1482,7 +1488,7 @@ function solBlocksInner(sel,theme){
 function renderPortafolioSoluciones(target){
   var sel=solSelected();
   if(!sel.length){
-    if(target==='wa')return '*Soluciones Equifax*\nSeleccione productos para incluir.';
+    if(target==='wa')return '*Información de productos Equifax*\nSeleccione productos para incluir.';
     if(target==='outlook')return '<tr><td style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Seleccione productos para incluir.</td></tr>';
     return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Seleccione productos para incluir en la presentación.</div>';
   }
@@ -1490,7 +1496,7 @@ function renderPortafolioSoluciones(target){
   if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,'light')+'</div>';
   if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,'light')+'</td></tr>';
   if(target==='wa'){
-    var t='*Soluciones Equifax*\nSoluciones para evaluación, monitoreo y gestión de riesgo comercial\n';
+    var t='*Información de productos Equifax*\nSoluciones para evaluación, monitoreo y gestión de riesgo comercial\n';
     sel.forEach(function(k){
       t+='\n*'+SOL_NAMES[k].toUpperCase()+'*\n';
       t+='_Situaciones:_\n'+(SOL_SIT[k]||[]).map(function(x){return '• '+x;}).join('\n')+'\n';
@@ -2401,7 +2407,7 @@ function genMail(){
   var ufV=parseFloat(gv('mu'))||null,ufL=parseFloat(gv('mula'))||ufV;
   var co=parseInt(gv('mc2'))||10,pl=gv('mp')||'12';
   var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'[Producto]'};
-  if(isSol){pi={badge:'PORTAFOLIO DE SOLUCIONES',n:'Soluciones Equifax'};}
+  if(isSol){pi={badge:'PORTAFOLIO DE SOLUCIONES',n:'Información de productos Equifax'};}
   if(isMulti){pi={badge:'PROPUESTA MULTIPRODUCTO',n:'Multiproducto Comercial'};}
   if(isBdd){pi={badge:'SOLICITUD BASE DE DATOS',n:'Base de Datos Comercial'};}
   if(isPub){pi={badge:'PUBLICACIÓN ÚNICA',n:'Publicación Única'};}
@@ -2412,6 +2418,17 @@ function genMail(){
   var wspSigHref=telNum?'https://wa.me/'+telNum+'?text='+encodeURIComponent(_sigMsg):'';
   var it=PITEMS[tipo]||[];
   var itMail=(typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:it; /* enriquecido solo Gmail/Outlook */
+  /* Portfolio Monitor: reflejar en el contenido del cliente la periodicidad elegida
+     en la calculadora. Se reutiliza EXACTAMENTE la misma fuente que usa el cálculo
+     (select #c-fr); sin variables nuevas ni almacenamiento adicional. Solo se
+     especializa el bullet genérico de frecuencia (no muta los arreglos globales). */
+  if(tipo==='pfm'){
+    var _pfmFr={s:'Semanal',q:'Quincenal',m:'Mensual'}[gv('c-fr')]||'';
+    if(_pfmFr){
+      var _pfmRw=function(arr){return arr.map(function(x){return /Actualizaci[oó]n\s+semanal,\s*quincenal\s+o\s+mensual/i.test(x)?('Actualización '+_pfmFr.toLowerCase()+' de toda la cartera'):x;});};
+      it=_pfmRw(it);itMail=_pfmRw(itMail);
+    }
+  }
   var hayDc=ufL&&ufV&&ufV<ufL;
   var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV?ufc(ufV):null;
@@ -2480,7 +2497,7 @@ function genMail(){
   if(isBdd){sv('cc-prod-block',renderBaseDatos('card'));sv('cc-dcto-block','');var _wpbB=document.getElementById('wcc-prod-block');if(_wpbB)_wpbB.innerHTML=renderBaseDatos('card');var _wdbB=document.getElementById('wcc-dcto-block');if(_wdbB)_wdbB.innerHTML='';}
   if(isPub){sv('cc-prod-block',renderPublicacion('card'));sv('cc-dcto-block','');var _wpbP=document.getElementById('wcc-prod-block');if(_wpbP)_wpbP.innerHTML=renderPublicacion('card');var _wdbP=document.getElementById('wcc-dcto-block');if(_wdbP)_wdbP.innerHTML='';}
   var aEmp=(em?' | '+em:'');
-  var _asuntoSol=isSol?('Soluciones Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):null)));
+  var _asuntoSol=isSol?('Información de productos Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):null)));
   st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
   st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
 
