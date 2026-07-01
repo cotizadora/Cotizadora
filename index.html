@@ -107,7 +107,7 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 /* ── BARRA DE PRODUCTOS (gobierna todo) ───────────── */
 #prodbar{position:fixed;top:var(--headH);left:0;right:0;z-index:280;height:var(--barH);
-  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;column-gap:7px;row-gap:8px;
+  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;flex-wrap:wrap;align-items:center;align-content:center;justify-content:flex-start;column-gap:7px;row-gap:8px;
   padding:8px 14px;overflow:hidden;scrollbar-width:thin;}
 #prodbar::-webkit-scrollbar{height:4px;}
 #prodbar::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px;}
@@ -1391,7 +1391,7 @@ function refresh(){
   if(CURRENT.key==='multi'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='soluciones'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='bdd'){var szb=document.getElementById('summary-zone');if(szb)szb.innerHTML='';genMail();syncWA();return;}
-  if(CURRENT.key==='pub'){var szp=document.getElementById('summary-zone');if(szp)szp.innerHTML='';genMail();syncWA();return;}
+  if(CURRENT.key==='pub'){var szp=document.getElementById('summary-zone');if(szp)szp.innerHTML=pubResumenHTML();genMail();syncWA();return;}
   var c=computeCurrent();if(!c)return;LAST=c;
   setBridge('mt',c.tipo);
   setBridge('mu',c.ufVenta>0?c.ufVenta:'');
@@ -1419,8 +1419,8 @@ function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'n
 /* ════════ SELECCIÓN DE PRODUCTO (gobierna toda la interfaz) ════════ */
 /* ════════ SOLUCIONES EQUIFAX — catálogo (reutiliza genMail, la ficha y los exportadores) ════════ */
 var BCC_FIJO='eduranb@geoinfobusiness.cl';
-var SOL_LIST=[['ri','Reporte Interactivo',1],['mc','Mora Control',1],['docunico','Mora Control Documento Único',0],['pfm','Portfolio Monitor',1],['pc','Partner Check',0],['datafinder','Data Finder',0],['malla','Malla Societaria',0],['iris','IRIS',0],['easycheck','Easy Check',0],['basedatos','Base de Datos',0]];
-var SOL_NAMES={ri:'Reporte Interactivo',mc:'Mora Control',docunico:'Mora Control Documento Único',pfm:'Portfolio Monitor',pc:'Partner Check',datafinder:'Data Finder',malla:'Malla Societaria',iris:'IRIS',easycheck:'Easy Check',basedatos:'Base de Datos'};
+var SOL_LIST=[['ri','Reporte Interactivo',1],['mc','Mora Control',1],['docunico','Publicación Única',0],['pfm','Portfolio Monitor',1],['pc','Partner Check',0],['datafinder','Data Finder',0],['malla','Malla Societaria',0],['iris','IRIS',0],['easycheck','Easy Check',0],['basedatos','Base de Datos',0]];
+var SOL_NAMES={ri:'Reporte Interactivo',mc:'Mora Control',docunico:'Publicación Única',pfm:'Portfolio Monitor',pc:'Partner Check',datafinder:'Data Finder',malla:'Malla Societaria',iris:'IRIS',easycheck:'Easy Check',basedatos:'Base de Datos'};
 var SOL_MAP={ri:'ri_plan',mc:'mc_solo',pfm:'pfm',pc:'pc'};
 var SOL_CARAC={
   docunico:['Publicación de un documento puntual en DICOM','Sin contratar plan mensual','Pago único asociado al documento','Misma marca DICOM de presión de pago','Gestión individual del documento'],
@@ -1639,6 +1639,24 @@ var PUB_REQ=[
 ];
 function pubMonto(){var e=document.getElementById('pub-monto');var n=e?parseFloat((''+e.value).replace(/[^\d.]/g,'')):NaN;return (!isNaN(n)&&n>0)?n:0;}
 function pubCalc(){var m=pubMonto();if(!m)return null;var neto=m*0.15,iva=neto*0.19,total=neto+iva;return {monto:m,neto:neto,iva:iva,total:total};}
+/* Resumen de precio en el panel izquierdo (bloque summary-zone), MISMA fuente de
+   datos que la vista previa: pubCalc(). No hay segundo motor. Se re-renderiza en
+   la rama 'pub' de refresh() cada vez que cambia el monto → ambos lados sincronizados. */
+function pubResumenHTML(){
+  var c=pubCalc();
+  var html='<div class="sum-head"><div class="sum-name">Publicación Única</div><div class="sum-badge">DOCUMENTO EN DICOM</div></div>';
+  if(!c){
+    return html+'<div class="note-inline" style="margin:0;">🧾 Ingresa el <b>valor de la factura</b> para ver el cálculo referencial (15% + IVA).</div>';
+  }
+  return html+
+    '<div class="metrics">'+
+      metric('Monto documento','m-pub-monto','b',fmtN(c.monto))+
+      metric('Precio 15% (neto)','m-pub-neto','g',fmtN(c.neto))+
+      metric('IVA (19%)','m-pub-iva','wa',fmtN(c.iva))+
+      metricBig('Total aprox. a cobrar','m-pub-total','y',fmtN(c.total))+
+    '</div>'+
+    '<div class="note-inline" style="margin-top:10px;">Valor referencial (15% del documento + IVA). El valor final puede ajustarse al contratar.</div>';
+}
 function pubBlocksInner(theme){
   var dark=(theme==='dark');
   var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#333',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
