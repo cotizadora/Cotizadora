@@ -1111,7 +1111,7 @@ function ufd(x){return (Math.round(x*10000)/10000).toString();}
 
 /* ── Catálogo: EXACTAMENTE los productos del index (fuente de verdad) ── */
 var PRODUCTS=[
-  {key:'bundle',ic:'📦',lb:'BUNDLE: Mora Control + Informes Comerciales',su:'4100 / Ilimitado'},
+  {key:'bundle',ic:'📦',lb:'BUNDLE: Mora Control + Reporte Interactivo',su:'4100 / Ilimitado'},
   {key:'mc',    ic:'🚨',lb:'Mora Control',  su:'Gestión de cartera'},
   {key:'ri',    ic:'📊',lb:'Reporte Interactivo',    su:'12 meses'},
   {key:'bolsa', ic:'🎒',lb:'Reporte Interactivo Bolsa',      su:'Pago único 12m'},
@@ -2353,7 +2353,7 @@ var PFM_S={1:0.0725,2:0.0711,3:0.0697,5:0.0683,10:0.067,20:0.065,30:0.063,40:0.0
 var PFM_Q={1:0.0563,2:0.0554,3:0.0546,5:0.0538,10:0.053,20:0.051,30:0.050,40:0.048,50:0.046,60:0.045,70:0.043,80:0.041,90:0.039,100:0.038,200:0.029,300:0.025,500:0.021,1000:0.017};
 var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.039,50:0.038,60:0.036,70:0.035,80:0.033,90:0.032,100:0.030,200:0.023,300:0.020,500:0.017,1000:0.013};
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
-var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA 12 MESES',n:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
+var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Reporte Interactivo'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Reporte Interactivo'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA 12 MESES',n:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
 var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de consultas para usar durante 12 meses','Pago único anticipado, sin cargo mensual','Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Consulta cuando lo necesites, sin plan fijo'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
 /* ── BULLETS ENRIQUECIDOS — SOLO Gmail/Outlook (WhatsApp usa PITEMS) ── */
 var PITEMS_MAIL={
@@ -4090,7 +4090,7 @@ cUF();cCLP();cCom();
    genera adjunto ficticio: se aborta con aviso (ver descargarEML()).
    ════════════════════════════════════════════════════════════════ */
 const DOCS_ADJUNTABLES = [
-  { label:'📦 BUNDLE: Mora Control + Informes Comerciales', archivo:'BUNDLE_Mora_Control_mas_Informes_Comerciales.pdf', url:'BUNDLE_Mora_Control_mas_Informes_Comerciales.pdf' },
+  { label:'📦 BUNDLE: Mora Control + Reporte Interactivo', archivo:'BUNDLE_Mora_Control_mas_Reporte_Interactivo.pdf', url:'BUNDLE_Mora_Control_mas_Reporte_Interactivo.pdf' },
   { label:'Mora Control',                 archivo:'MoraControl_Equifax.pdf',        url:'MoraControl_Equifax.pdf' },
   { label:'Mora Control Documento Único', archivo:'MoraControlDocUnico_Equifax.pdf', url:'MoraControlDocUnico_Equifax.pdf' },
   { label:'Reporte Interactivo',          archivo:'ReporteInteractivo_Equifax.pdf',  url:'ReporteInteractivo_Equifax.pdf' },
