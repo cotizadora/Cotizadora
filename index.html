@@ -2430,6 +2430,14 @@ function genMail(){
       it=_pfmRw(it);itMail=_pfmRw(itMail);
     }
   }
+  /* Reporte Interactivo / Reporte Interactivo Bolsa / Bundle: reflejar dentro del
+     bloque de características la cantidad de consultas realmente cotizada.
+     Se reutiliza EXACTAMENTE el mismo dato "co" que ya usa la calculadora
+     (mismo origen que Outlook/Gmail/WhatsApp); no muta los arreglos globales. */
+  if(co && (tipo==='ri_plan' || tipo==='ri_bolsa' || tipo==='bundle4100' || tipo==='bundleIlim')){
+    var _riLinea=co+' Reportes Interactivos incluidos';
+    it=it.concat([_riLinea]);itMail=itMail.concat([_riLinea]);
+  }
   var hayDc=ufL&&ufV&&ufV<ufL;
   var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV?ufc(ufV):null;
