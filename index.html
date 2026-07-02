@@ -748,6 +748,89 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
   #adj-row .as-lb{font-size:.8rem;letter-spacing:1.5px;}
 }
 </style>
+<style>
+/* ════════════════════════════════════════════════════════════════
+   🎙 BIBLIOTECA DE AUDIOS DE VENDEDORES EXITOSOS — bloque aislado
+   Prefijo "al-" en todas las clases para no colisionar con nada
+   existente. No modifica ni reutiliza estilos globales del cotizador.
+   ════════════════════════════════════════════════════════════════ */
+#audlib-modal .modal-card{max-width:1180px;}
+#audlib-modal .modal-body{padding:16px 18px 22px;}
+
+.al-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;
+  padding:12px 14px;background:var(--g2);border:1px solid var(--g3);border-radius:12px;}
+.al-toolbar .al-fld{display:flex;flex-direction:column;gap:4px;flex:1 1 180px;min-width:150px;}
+.al-toolbar label{font-size:.62rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--wa);font-weight:700;}
+.al-toolbar input[type="text"],.al-toolbar select{
+  background:var(--g0);border:1px solid var(--g4);color:var(--w);border-radius:8px;
+  padding:9px 11px;font-family:inherit;font-size:.86rem;font-weight:600;}
+.al-toolbar input[type="text"]:focus,.al-toolbar select:focus{outline:none;border-color:var(--y);}
+.al-chk{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--w);font-weight:600;
+  flex:0 0 auto;padding-top:16px;white-space:nowrap;cursor:pointer;user-select:none;}
+.al-chk input{accent-color:var(--y);width:15px;height:15px;cursor:pointer;}
+.al-count{flex:0 0 auto;margin-left:auto;font-size:.72rem;color:var(--wa);font-weight:700;padding-top:16px;white-space:nowrap;}
+
+.al-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.al-empty{grid-column:1/-1;text-align:center;padding:40px 14px;color:var(--wa);font-size:.9rem;}
+
+.al-card{background:var(--g2);border:1px solid var(--g3);border-radius:14px;padding:16px;
+  display:flex;flex-direction:column;gap:10px;transition:.18s;position:relative;overflow:hidden;}
+.al-card:hover{border-color:var(--g5);box-shadow:0 6px 20px rgba(0,0,0,.4);}
+.al-card.al-playing{border-color:var(--y);box-shadow:0 0 0 1px var(--y),0 8px 24px rgba(240,192,64,.15);}
+
+.al-card-top{display:flex;align-items:flex-start;gap:12px;}
+.al-ic{flex:0 0 auto;width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,var(--rd),var(--rdd));
+  display:flex;align-items:center;justify-content:center;font-size:1.35rem;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);}
+.al-meta{min-width:0;flex:1;}
+.al-title{font-size:.92rem;font-weight:800;color:#fff;line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.al-cat{display:inline-block;margin-top:5px;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;
+  font-weight:800;color:var(--y);background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.3);
+  border-radius:6px;padding:2px 8px;}
+.al-desc{font-size:.78rem;color:var(--wa);line-height:1.45;
+  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+
+/* ── reproductor personalizado ── */
+.al-player{background:var(--g0);border:1px solid var(--g3);border-radius:11px;padding:10px 12px;
+  display:flex;flex-direction:column;gap:8px;margin-top:auto;}
+.al-p-row{display:flex;align-items:center;gap:9px;}
+.al-btn{background:var(--g3);border:none;color:#fff;width:34px;height:34px;border-radius:9px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex:0 0 auto;transition:.15s;}
+.al-btn:hover{background:var(--g4);}
+.al-btn.al-play{background:var(--r);width:38px;height:38px;font-size:1.1rem;}
+.al-btn.al-play:hover{background:var(--rl);}
+.al-btn.al-play.on{background:var(--y);color:#241a00;}
+.al-time{font-size:.68rem;color:var(--wa);font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto;}
+.al-seek{flex:1;position:relative;height:16px;display:flex;align-items:center;cursor:pointer;}
+.al-seek-track{position:relative;width:100%;height:5px;background:var(--g3);border-radius:3px;overflow:hidden;}
+.al-seek-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--y),var(--rl));border-radius:3px;}
+.al-seek input[type="range"]{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;}
+
+/* ── visualizador / ecualizador (solo mientras suena) ── */
+.al-eq{display:flex;align-items:flex-end;gap:2.5px;height:16px;flex:0 0 auto;opacity:.35;transition:.2s;}
+.al-card.al-playing .al-eq{opacity:1;}
+.al-eq span{display:block;width:3px;background:var(--y);border-radius:2px;height:4px;}
+.al-card.al-playing .al-eq span{animation:al-eqbar .9s ease-in-out infinite;}
+.al-eq span:nth-child(1){animation-delay:-.6s;}
+.al-eq span:nth-child(2){animation-delay:-.3s;}
+.al-eq span:nth-child(3){animation-delay:-.8s;}
+.al-eq span:nth-child(4){animation-delay:-.15s;}
+@keyframes al-eqbar{0%,100%{height:4px;}50%{height:16px;}}
+
+.al-badge-playing{position:absolute;top:10px;right:12px;font-size:.6rem;font-weight:800;letter-spacing:1px;
+  color:var(--y);text-transform:uppercase;display:none;align-items:center;gap:5px;}
+.al-card.al-playing .al-badge-playing{display:flex;}
+.al-badge-playing .al-dot{width:6px;height:6px;border-radius:50%;background:var(--y);animation:al-pulse 1.1s ease-in-out infinite;}
+@keyframes al-pulse{0%,100%{opacity:.35;transform:scale(.8);}50%{opacity:1;transform:scale(1.15);}}
+
+@media(max-width:560px){
+  .al-toolbar{flex-direction:column;align-items:stretch;}
+  .al-toolbar .al-fld{flex:1 1 auto;}
+  .al-count{margin-left:0;padding-top:0;}
+  .al-chk{padding-top:0;}
+  .al-grid{grid-template-columns:1fr;}
+}
+</style>
 </head>
 <body>
 <header>
@@ -781,6 +864,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
       <span class="ext-txt"><span class="ext-lb">Extensión CRM</span><span class="ext-sb">Discador ⇄ CRM</span></span>
       <span class="ext-dl">↓</span>
     </a>
+    <button class="htool-btn" id="audlib-btn" onclick="openAudioLib()" title="Biblioteca de audios de capacitación — vendedores exitosos">🎧 Audios</button>
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
       <span id="user-name">Ejecutivo/a</span>
@@ -1009,6 +1093,40 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 </div>
 
 <!-- ════════ MODALES ════════ -->
+<div class="modal" id="audlib-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>🎙 Audios de Vendedores Exitosos</h3>
+      <button class="modal-x" onclick="closeAudioLib()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="al-toolbar">
+        <div class="al-fld">
+          <label>Buscar por título</label>
+          <input type="text" id="al-search" placeholder="Ej: cierre, objeción, bienvenida…" oninput="alRender()">
+        </div>
+        <div class="al-fld" style="flex:0 0 190px;">
+          <label>Categoría</label>
+          <select id="al-cat" onchange="alRender()"><option value="">Todas</option></select>
+        </div>
+        <div class="al-fld" style="flex:0 0 170px;">
+          <label>Ordenar</label>
+          <select id="al-sort" onchange="alRender()">
+            <option value="reciente">Más recientes</option>
+            <option value="az">Título A-Z</option>
+            <option value="za">Título Z-A</option>
+          </select>
+        </div>
+        <label class="al-chk" title="Al terminar un audio, reproduce automáticamente el siguiente de la lista">
+          <input type="checkbox" id="al-continuo"> Reproducción continua
+        </label>
+        <div class="al-count" id="al-count"></div>
+      </div>
+      <div class="al-grid" id="audlib-grid"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="ampliar-modal">
   <div class="modal-card" style="max-width:680px;">
     <div class="modal-head"><h3 id="ampliar-title">Vista ampliada</h3><button class="modal-x" onclick="closeModal('ampliar-modal')">✕</button></div>
@@ -4263,6 +4381,221 @@ function _emlA(dom,seq){
     _emlSet('gris','• No verificado (sin conexión a la API)');
   });
 }
+
+/* ════════════════════════════════════════════════════════════════
+   🎙 BIBLIOTECA DE AUDIOS DE VENDEDORES EXITOSOS
+   Módulo 100% aislado — no toca variables, funciones ni IDs del
+   cotizador existente. Prefijo "al" (Audio Library) en todo.
+
+   Para agregar un audio nuevo:
+     1) Sube el .wav a la carpeta /audios/ del repo.
+     2) Agrega una línea al arreglo AL_AUDIOS de abajo.
+   Nada más — la tarjeta y el reproductor se generan solos.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Única constante de ruta — si el repo cambia de estructura, se edita SOLO aquí. */
+var AL_AUDIO_BASE = 'audios/';
+
+var AL_AUDIOS = [
+  {
+    titulo:'Llamada destacada — Ejecutivo 1',
+    categoria:'Llamadas destacadas',
+    descripcion:'Grabación real de una llamada comercial exitosa, útil como referencia de tono y manejo de objeciones.',
+    archivo:'s3__010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1000_1000#20260526#145456#11066#342421876.wav'
+  },
+  {
+    titulo:'Llamada destacada — Ejecutivo 2',
+    categoria:'Llamadas destacadas',
+    descripcion:'Grabación real de una llamada comercial exitosa, útil como referencia de tono y manejo de objeciones.',
+    archivo:'s3__010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1003_1003#20260526#134229#5863#56226224124.wav'
+  },
+  {
+    titulo:'Llamada destacada — Ejecutivo 3',
+    categoria:'Llamadas destacadas',
+    descripcion:'Grabación real de una llamada comercial exitosa, útil como referencia de tono y manejo de objeciones.',
+    archivo:'s3__010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1008_1008#20260526#125526#11785#56412454174.wav'
+  }
+];
+
+(function(){
+  'use strict';
+  var LS_LAST='al_last_played';                 // recuerda el último audio reproducido
+  var current=null;                              // {audio, card} actualmente sonando
+  var built=false;
+
+  function alFmt(s){
+    if(!isFinite(s)||s<0)s=0;
+    var m=Math.floor(s/60),ss=Math.floor(s%60);
+    return m+':'+(ss<10?'0':'')+ss;
+  }
+
+  function alPopulateCats(){
+    var sel=document.getElementById('al-cat');if(!sel)return;
+    var cats=[];
+    AL_AUDIOS.forEach(function(a){if(cats.indexOf(a.categoria)===-1)cats.push(a.categoria);});
+    sel.innerHTML='<option value="">Todas</option>'+cats.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+  }
+
+  function alCardHTML(item,idx){
+    return ''+
+    '<div class="al-card" data-idx="'+idx+'">'+
+      '<div class="al-badge-playing"><span class="al-dot"></span>En reproducción</div>'+
+      '<div class="al-card-top">'+
+        '<div class="al-ic">🎙️</div>'+
+        '<div class="al-meta">'+
+          '<div class="al-title">'+item.titulo+'</div>'+
+          '<span class="al-cat">'+item.categoria+'</span>'+
+        '</div>'+
+        '<div class="al-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></div>'+
+      '</div>'+
+      '<div class="al-desc">'+item.descripcion+'</div>'+
+      '<div class="al-player">'+
+        '<div class="al-p-row">'+
+          '<button type="button" class="al-btn al-play" title="Reproducir / pausar" onclick="alToggle('+idx+')">▶</button>'+
+          '<button type="button" class="al-btn" title="Reiniciar" onclick="alRestart('+idx+')">⟲</button>'+
+          '<span class="al-time" data-role="cur">0:00</span>'+
+          '<div class="al-seek">'+
+            '<div class="al-seek-track"><div class="al-seek-fill" data-role="fill"></div></div>'+
+            '<input type="range" min="0" max="1000" value="0" data-role="range" oninput="alSeek('+idx+',this.value)">'+
+          '</div>'+
+          '<span class="al-time" data-role="dur">--:--</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function alGetFiltered(){
+    var q=(document.getElementById('al-search')||{}).value||'';
+    q=q.toLowerCase().trim();
+    var cat=(document.getElementById('al-cat')||{}).value||'';
+    var sort=(document.getElementById('al-sort')||{}).value||'reciente';
+    var list=AL_AUDIOS.map(function(a,i){return {item:a,idx:i};});
+    if(q)list=list.filter(function(x){return x.item.titulo.toLowerCase().indexOf(q)!==-1;});
+    if(cat)list=list.filter(function(x){return x.item.categoria===cat;});
+    if(sort==='az')list.sort(function(a,b){return a.item.titulo.localeCompare(b.item.titulo);});
+    else if(sort==='za')list.sort(function(a,b){return b.item.titulo.localeCompare(a.item.titulo);});
+    else list=list.slice().reverse();            // "recientes" = orden inverso al arreglo (últimos agregados primero)
+    return list;
+  }
+
+  window.alRender=function(){
+    var grid=document.getElementById('audlib-grid');if(!grid)return;
+    var list=alGetFiltered();
+    var cnt=document.getElementById('al-count');
+    if(cnt)cnt.textContent=list.length+(list.length===1?' audio':' audios');
+    if(!list.length){grid.innerHTML='<div class="al-empty">🔍 No se encontraron audios con ese criterio.</div>';return;}
+    grid.innerHTML=list.map(function(x){return alCardHTML(x.item,x.idx);}).join('');
+    // si hay un audio sonando, re-marca su tarjeta tras el re-render
+    if(current){
+      var c=grid.querySelector('.al-card[data-idx="'+current.idx+'"]');
+      if(c){c.classList.add('al-playing');var b=c.querySelector('.al-play');if(b){b.textContent='⏸';b.classList.add('on');}}
+    }
+  };
+
+  function alCardEls(idx){
+    var card=document.querySelector('.al-card[data-idx="'+idx+'"]');
+    if(!card)return null;
+    return {
+      card:card,
+      playBtn:card.querySelector('.al-play'),
+      cur:card.querySelector('[data-role="cur"]'),
+      dur:card.querySelector('[data-role="dur"]'),
+      fill:card.querySelector('[data-role="fill"]'),
+      range:card.querySelector('[data-role="range"]')
+    };
+  }
+
+  function alStopCurrent(){
+    if(!current)return;
+    current.audio.pause();
+    if(current.els&&current.els.card){current.els.card.classList.remove('al-playing');}
+    if(current.els&&current.els.playBtn){current.els.playBtn.textContent='▶';current.els.playBtn.classList.remove('on');}
+    current=null;
+  }
+
+  function alPlayIndex(idx){
+    var item=AL_AUDIOS[idx];if(!item)return;
+    var els=alCardEls(idx);if(!els)return;
+
+    // si ya hay uno sonando y es distinto, se detiene primero (solo un audio a la vez)
+    if(current&&current.idx!==idx)alStopCurrent();
+
+    var audio=(current&&current.idx===idx)?current.audio:new Audio();
+    if(!audio.src){                                  // carga perezosa: solo al presionar Play
+      audio.preload='none';
+      audio.src=AL_AUDIO_BASE+item.archivo;
+    }
+
+    audio.ontimeupdate=function(){
+      if(els.cur)els.cur.textContent=alFmt(audio.currentTime);
+      if(audio.duration&&isFinite(audio.duration)){
+        var pct=(audio.currentTime/audio.duration)*1000;
+        if(els.fill)els.fill.style.width=(pct/10)+'%';
+        if(els.range)els.range.value=pct;
+      }
+    };
+    audio.onloadedmetadata=function(){
+      if(els.dur)els.dur.textContent=alFmt(audio.duration);
+    };
+    audio.onended=function(){
+      els.card.classList.remove('al-playing');
+      els.playBtn.textContent='▶';els.playBtn.classList.remove('on');
+      if(els.fill)els.fill.style.width='0%';
+      if(els.range)els.range.value=0;
+      if(els.cur)els.cur.textContent='0:00';
+      var wasIdx=idx;current=null;
+      var contChk=document.getElementById('al-continuo');
+      if(contChk&&contChk.checked){
+        var list=alGetFiltered().map(function(x){return x.idx;});
+        var pos=list.indexOf(wasIdx);
+        if(pos!==-1&&pos<list.length-1)alPlayIndex(list[pos+1]);
+      }
+    };
+
+    audio.play().then(function(){
+      els.card.classList.add('al-playing');
+      els.playBtn.textContent='⏸';els.playBtn.classList.add('on');
+      current={idx:idx,audio:audio,els:els};
+      try{localStorage.setItem(LS_LAST,String(idx));}catch(_){}
+    }).catch(function(){/* reproducción bloqueada por el navegador — silencioso */});
+  }
+
+  window.alToggle=function(idx){
+    if(current&&current.idx===idx){
+      if(current.audio.paused){
+        current.audio.play();
+        current.els.playBtn.textContent='⏸';current.els.playBtn.classList.add('on');
+        current.els.card.classList.add('al-playing');
+      }else{
+        current.audio.pause();
+        current.els.playBtn.textContent='▶';current.els.playBtn.classList.remove('on');
+        current.els.card.classList.remove('al-playing');
+      }
+      return;
+    }
+    alPlayIndex(idx);
+  };
+
+  window.alRestart=function(idx){
+    if(current&&current.idx===idx){current.audio.currentTime=0;if(current.audio.paused)current.audio.play();}
+    else alPlayIndex(idx);
+  };
+
+  window.alSeek=function(idx,val){
+    if(!current||current.idx!==idx)return;          // solo permite adelantar/retroceder el audio activo
+    var a=current.audio;
+    if(a.duration&&isFinite(a.duration))a.currentTime=(val/1000)*a.duration;
+  };
+
+  window.openAudioLib=function(){
+    if(!built){alPopulateCats();built=true;}
+    alRender();
+    document.getElementById('audlib-modal').classList.add('on');
+  };
+  window.closeAudioLib=function(){
+    document.getElementById('audlib-modal').classList.remove('on');
+  };
+})();
 </script>
 </body>
 </html>
