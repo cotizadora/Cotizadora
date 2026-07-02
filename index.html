@@ -658,22 +658,139 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .uf-tool .uf-r{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
 .uf-tool .res{font-size:1.05rem;font-weight:800;color:var(--y);padding-top:6px;}
 
-/* ── BIBLIOTECA DE CONOCIMIENTO COMERCIAL (audios) ── */
-.bib-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-.bib-chip{background:var(--g2);border:1px solid var(--g4);color:var(--wa);border-radius:20px;
-  padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
-.bib-chip:hover{border-color:var(--rl);color:#fff;}
-.bib-chip.on{background:var(--r);border-color:var(--rl);color:#fff;}
-.bib-list{display:flex;flex-direction:column;gap:14px;}
-.bib-card{background:var(--g2);border:1px solid var(--g3);border-radius:12px;padding:16px 18px;}
-.bib-card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:2px;flex-wrap:wrap;}
-.bib-title{font-size:1rem;font-weight:800;color:#fff;line-height:1.3;flex:1;min-width:220px;}
-.bib-cat{display:inline-block;background:rgba(52,152,219,.16);border:1px solid rgba(52,152,219,.45);
-  color:#7ec8f0;border-radius:20px;padding:3px 11px;font-size:.68rem;font-weight:800;letter-spacing:.5px;
-  text-transform:uppercase;white-space:nowrap;}
-.bib-meta{font-size:.7rem;color:var(--wb);margin-bottom:10px;}
-.bib-desc{font-size:.85rem;color:var(--wa);line-height:1.5;margin:6px 0 12px;}
-.bib-audio{width:100%;}
+/* ── BIBLIOTECA DE CONOCIMIENTO COMERCIAL — vista completa (no modal) ── */
+body.bib-open #prodbar,body.bib-open #workstation,body.bib-open #mtoggle{display:none !important;}
+#biblioteca-view{display:none;position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:275;
+  background:var(--g0);flex-direction:column;opacity:0;transform:translateY(14px);
+  transition:opacity .22s ease,transform .22s ease;}
+body.bib-open #biblioteca-view{display:flex;}
+body.bib-open #biblioteca-view.in{opacity:1;transform:translateY(0);}
+
+.bib-top{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:14px 22px;
+  background:var(--g1);border-bottom:2px solid var(--g4);}
+.bib-back{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:9px;
+  padding:9px 15px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;}
+.bib-back:hover{background:var(--r);border-color:var(--rl);}
+.bib-top h2{font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:.3px;flex:1;min-width:0;}
+.bib-top .bib-sub{font-size:.78rem;color:var(--wa);font-weight:600;}
+
+.bib-body{flex:1;min-height:0;overflow:auto;position:relative;}
+.bib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px;padding:24px;}
+.bib-gcard{background:var(--g2);border:1px solid var(--g3);border-radius:14px;padding:20px;cursor:pointer;
+  transition:.15s;display:flex;flex-direction:column;gap:10px;}
+.bib-gcard:hover{border-color:var(--rl);box-shadow:0 6px 22px rgba(0,0,0,.4);transform:translateY(-2px);}
+.bib-gcard-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+.bib-cat{background:rgba(52,152,219,.16);border:1px solid rgba(52,152,219,.45);color:#7ec8f0;
+  border-radius:20px;padding:3px 11px;font-size:.68rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;}
+.bib-gcard .bib-gtitle{font-size:1.05rem;font-weight:800;color:#fff;line-height:1.35;}
+.bib-gcard .bib-gmeta{font-size:.78rem;color:var(--wa);display:flex;flex-wrap:wrap;gap:10px;}
+.bib-gcard .bib-gscore{font-size:1.6rem;font-weight:900;flex-shrink:0;}
+.bib-gcard .bib-gdesc{font-size:.85rem;color:var(--wa);line-height:1.5;}
+
+.bib-detail{display:none;}
+.bib-detail.on{display:flex;position:absolute;inset:0;}
+.bib-left{flex:0 0 40%;max-width:40%;min-height:0;border-right:3px solid var(--g4);overflow-y:auto;padding:26px 28px 60px;}
+.bib-rightp{flex:1;min-width:0;min-height:0;overflow-y:auto;padding:26px 28px 60px;background:var(--g1);}
+
+.bib-d-title{font-size:1.35rem;font-weight:900;color:#fff;line-height:1.35;margin-bottom:12px;}
+.bib-d-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.bib-d-chip{background:var(--g3);border:1px solid var(--g4);border-radius:20px;padding:5px 13px;
+  font-size:.8rem;color:var(--w);font-weight:700;display:flex;align-items:center;gap:6px;}
+.bib-d-chip b{color:var(--y);font-weight:800;}
+
+.bib-player{background:var(--g2);border:1px solid var(--g3);border-radius:14px;padding:18px 20px;margin-bottom:26px;}
+.bib-p-row{display:flex;align-items:center;gap:14px;}
+.bib-p-play{flex-shrink:0;width:56px;height:56px;border-radius:50%;background:var(--r);border:none;color:#fff;
+  font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
+.bib-p-play:hover{background:var(--rl);box-shadow:0 0 18px rgba(192,38,59,.5);}
+.bib-p-seekwrap{flex:1;display:flex;flex-direction:column;gap:4px;}
+.bib-p-seek{width:100%;accent-color:var(--r);cursor:pointer;}
+.bib-p-times{display:flex;justify-content:space-between;font-size:.75rem;color:var(--wa);font-variant-numeric:tabular-nums;}
+.bib-p-extra{display:flex;align-items:center;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.bib-p-btn{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:8px;padding:7px 12px;
+  cursor:pointer;font-family:inherit;font-weight:700;font-size:.82rem;}
+.bib-p-btn:hover{background:var(--g4);border-color:var(--rl);}
+.bib-p-speed{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:8px;padding:7px 10px;
+  font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;}
+.bib-p-vol{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--wa);}
+.bib-p-vol input{accent-color:var(--bl);cursor:pointer;}
+
+.bib-transcript-h{font-size:.78rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);font-weight:800;margin-bottom:12px;}
+.bib-transcript{display:flex;flex-direction:column;gap:4px;}
+.bib-seg{font-size:1.28rem;line-height:1.75;color:var(--wa);padding:8px 14px;border-radius:10px;
+  border-left:4px solid transparent;cursor:pointer;transition:background .2s ease,color .2s ease,border-color .2s ease;}
+.bib-seg:hover{background:rgba(255,255,255,.04);color:#fff;}
+.bib-seg.active{background:rgba(192,38,59,.16);border-left-color:var(--rl);color:#fff;font-weight:700;}
+
+.bib-card{background:var(--g2);border:1px solid var(--g3);border-radius:14px;padding:20px 22px;margin-bottom:20px;}
+.bib-card-t{font-size:.78rem;letter-spacing:2px;text-transform:uppercase;color:var(--wb);font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.bib-resumen-txt{font-size:1.02rem;line-height:1.65;color:var(--w);}
+.bib-motivo{font-size:.92rem;color:var(--wa);margin-bottom:10px;line-height:1.5;}
+.bib-sent{display:inline-block;margin-top:12px;background:rgba(240,192,64,.14);border:1px solid rgba(240,192,64,.4);
+  color:#f0c040;border-radius:20px;padding:5px 13px;font-size:.78rem;font-weight:800;}
+.bib-kw{display:flex;flex-wrap:wrap;gap:8px;}
+.bib-kw span{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:20px;padding:5px 13px;font-size:.82rem;font-weight:700;}
+
+.bib-mom{display:flex;flex-direction:column;gap:2px;}
+.bib-mom-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;cursor:pointer;transition:.15s;}
+.bib-mom-item:hover{background:rgba(255,255,255,.05);}
+.bib-mom-t{flex-shrink:0;background:var(--g3);border:1px solid var(--g4);color:var(--y);border-radius:7px;
+  padding:4px 9px;font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums;}
+.bib-mom-lb{font-size:.92rem;color:var(--w);}
+
+.bib-score-wrap{display:flex;align-items:center;gap:24px;margin-bottom:6px;}
+.bib-score-num{font-size:2.6rem;font-weight:900;line-height:1;}
+.bib-score-num.g{color:var(--gn);}
+.bib-score-num.y{color:var(--y);}
+.bib-score-num.r{color:var(--rl);}
+.bib-score-lb{font-size:.85rem;color:var(--wa);margin-top:4px;}
+.bib-score-bar{flex:1;height:14px;background:var(--g3);border-radius:8px;overflow:hidden;}
+.bib-score-fill{height:100%;border-radius:8px;transition:width .5s ease;}
+
+.bib-crit{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+.bib-crit-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
+.bib-crit-name{font-size:.85rem;color:var(--w);font-weight:700;}
+.bib-crit-peso{font-size:.7rem;color:var(--wb);font-weight:600;}
+.bib-crit-bar{grid-column:1/-1;height:8px;background:var(--g3);border-radius:5px;overflow:hidden;}
+.bib-crit-fill{height:100%;border-radius:5px;}
+
+.bib-rub-item{border:1px solid var(--g3);border-radius:12px;padding:16px 18px;margin-bottom:12px;background:var(--g0);}
+.bib-rub-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.bib-rub-name{font-weight:800;color:#fff;font-size:.92rem;}
+.bib-rub-peso{font-size:.72rem;color:var(--wb);font-weight:700;margin-left:6px;}
+.bib-badge{border-radius:20px;padding:4px 12px;font-size:.7rem;font-weight:900;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;}
+.bib-badge.cumple{background:rgba(46,204,113,.16);border:1px solid rgba(46,204,113,.5);color:var(--gn);}
+.bib-badge.obs{background:rgba(240,192,64,.16);border:1px solid rgba(240,192,64,.5);color:#f0c040;}
+.bib-badge.no{background:rgba(231,76,60,.16);border:1px solid rgba(231,76,60,.5);color:#e74c3c;}
+.bib-badge.na{background:rgba(255,255,255,.08);border:1px solid var(--g4);color:var(--wb);}
+.bib-rub-def{font-size:.78rem;color:var(--wb);line-height:1.5;margin-bottom:8px;}
+.bib-rub-cita{border-left:3px solid var(--g4);padding:6px 12px;margin:8px 0;font-size:.88rem;color:var(--wa);
+  font-style:italic;line-height:1.5;display:flex;justify-content:space-between;gap:10px;align-items:flex-start;cursor:pointer;}
+.bib-rub-cita:hover{border-left-color:var(--rl);background:rgba(255,255,255,.03);}
+.bib-rub-cita .go{flex-shrink:0;color:var(--rl);font-weight:800;font-size:.8rem;white-space:nowrap;}
+.bib-rub-com{font-size:.86rem;color:var(--w);line-height:1.55;}
+
+.bib-fo-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:1100px){.bib-fo-cols{grid-template-columns:1fr;}}
+.bib-fo-t{font-size:.82rem;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.bib-fo-t.fort{color:var(--gn);}
+.bib-fo-t.opor{color:var(--y);}
+.bib-fo ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.bib-fo li{font-size:.86rem;color:var(--wa);line-height:1.5;padding-left:16px;position:relative;}
+.bib-fo li::before{content:"•";position:absolute;left:0;color:var(--wb);}
+
+.bib-final{display:flex;align-items:center;gap:26px;flex-wrap:wrap;}
+.bib-final-num{font-size:3rem;font-weight:900;line-height:1;text-align:center;}
+.bib-final-info{flex:1;min-width:200px;}
+.bib-final-res{font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:6px;}
+.bib-final-accion{font-size:.85rem;color:var(--wa);}
+.bib-final-accion b{color:var(--y);}
+
+@media(max-width:980px){
+  .bib-left{flex:0 0 100%;max-width:100%;border-right:none;border-bottom:3px solid var(--g4);}
+  .bib-detail.on{flex-direction:column;overflow-y:auto;}
+  .bib-left,.bib-rightp{overflow-y:visible;}
+}
 
 /* ── ALTERNADOR MÓVIL ─────────────────────────────── */
 #mtoggle{display:none;}
@@ -798,7 +915,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
       <span class="ext-txt"><span class="ext-lb">Extensión CRM</span><span class="ext-sb">Discador ⇄ CRM</span></span>
       <span class="ext-dl">↓</span>
     </a>
-    <button class="htool-btn" onclick="openBiblioteca()" title="Biblioteca de conocimiento comercial: audios de llamadas reales, categorizados por tema">🎧 Biblioteca</button>
+    <button class="htool-btn" onclick="openBibliotecaView()" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad">🎧 Biblioteca</button>
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
       <span id="user-name">Ejecutivo/a</span>
@@ -1106,12 +1223,76 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
   </div>
 </div>
 
-<div class="modal" id="biblioteca-modal">
-  <div class="modal-card" style="max-width:920px;">
-    <div class="modal-head"><h3>🎧 Biblioteca de Conocimiento Comercial</h3><button class="modal-x" onclick="closeModal('biblioteca-modal')">✕</button></div>
-    <div class="modal-body">
-      <div class="bib-filters" id="bib-filters"></div>
-      <div class="bib-list" id="bib-list"></div>
+<div id="biblioteca-view">
+  <div class="bib-top">
+    <button class="bib-back" id="bib-back-btn" onclick="bibBack()">← Volver al Cotizador</button>
+    <h2>🎧 Biblioteca de Conocimiento Comercial</h2>
+    <span class="bib-sub" id="bib-top-sub"></span>
+  </div>
+  <div class="bib-body">
+    <div class="bib-grid" id="bib-grid"></div>
+    <div class="bib-detail" id="bib-detail">
+      <section class="bib-left">
+        <div class="bib-d-title" id="bd-title"></div>
+        <div class="bib-d-chips" id="bd-chips"></div>
+        <div class="bib-player">
+          <audio id="bd-audio" preload="metadata"></audio>
+          <div class="bib-p-row">
+            <button class="bib-p-play" id="bd-play" onclick="bibTogglePlay()">▶</button>
+            <div class="bib-p-seekwrap">
+              <input type="range" class="bib-p-seek" id="bd-seek" min="0" max="1000" value="0" step="1" oninput="bibSeekInput(this.value)">
+              <div class="bib-p-times"><span id="bd-cur">0:00</span><span id="bd-dur">0:00</span></div>
+            </div>
+          </div>
+          <div class="bib-p-extra">
+            <button class="bib-p-btn" onclick="bibSkip(-10)" title="Retroceder 10 segundos">⏮ 10s</button>
+            <button class="bib-p-btn" onclick="bibSkip(10)" title="Avanzar 10 segundos">10s ⏭</button>
+            <select class="bib-p-speed" id="bd-speed" onchange="bibSetSpeed(this.value)" title="Velocidad de reproducción">
+              <option value="0.75">0.75×</option><option value="1" selected>1×</option>
+              <option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option>
+            </select>
+            <div class="bib-p-vol">🔊<input type="range" id="bd-vol" min="0" max="1" step="0.05" value="1" oninput="bibSetVol(this.value)" title="Volumen"></div>
+          </div>
+        </div>
+        <div class="bib-transcript-h">📜 Transcripción sincronizada</div>
+        <div class="bib-transcript" id="bd-transcript"></div>
+      </section>
+      <section class="bib-rightp">
+        <div class="bib-card">
+          <div class="bib-card-t">🎯 Motivo del llamado</div>
+          <div class="bib-motivo" id="bd-motivo"></div>
+          <div class="bib-card-t" style="margin-top:14px;">📝 Resumen ejecutivo</div>
+          <div class="bib-resumen-txt" id="bd-resumen"></div>
+          <span class="bib-sent" id="bd-sent"></span>
+        </div>
+        <div class="bib-card">
+          <div class="bib-card-t">🔑 Palabras clave</div>
+          <div class="bib-kw" id="bd-kw"></div>
+        </div>
+        <div class="bib-card">
+          <div class="bib-card-t">⏱ Momentos relevantes</div>
+          <div class="bib-mom" id="bd-mom"></div>
+        </div>
+        <div class="bib-card">
+          <div class="bib-card-t">📊 Análisis cuantitativo</div>
+          <div class="bib-score-wrap">
+            <div><div class="bib-score-num" id="bd-score"></div><div class="bib-score-lb">Cumplimiento total</div></div>
+            <div class="bib-score-bar"><div class="bib-score-fill" id="bd-score-fill"></div></div>
+          </div>
+          <div class="bib-crit" id="bd-crit"></div>
+        </div>
+        <div class="bib-card">
+          <div class="bib-card-t">✅ Cruce con Pauta de Calidad</div>
+          <div id="bd-rubrica"></div>
+        </div>
+        <div class="bib-card">
+          <div class="bib-fo-cols">
+            <div class="bib-fo"><div class="bib-fo-t fort">💪 Fortalezas</div><ul id="bd-fort"></ul></div>
+            <div class="bib-fo"><div class="bib-fo-t opor">📈 Oportunidades de mejora</div><ul id="bd-opor"></ul></div>
+          </div>
+        </div>
+        <div class="bib-card bib-final" id="bd-final"></div>
+      </section>
     </div>
   </div>
 </div>
@@ -1120,6 +1301,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 <div id="cp-toast" aria-live="polite"></div>
 <div id="paste-notice" onclick="this.classList.remove('on');"><div class="pn-card"><div class="pn-check">✅</div><div class="pn-title">MENSAJE COPIADO</div><div class="pn-sub" id="paste-notice-sub">Pégalo con <b>Ctrl+V</b></div></div></div>
 
+<script src="audios/calls_data.js"></script>
 <script>
 'use strict';
 /* ════════════════════════════════════════════════════════════════
@@ -1174,64 +1356,200 @@ function updateMultiBadge(){
 function popBadge(){var el=document.getElementById('multi-badge');if(!el)return;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');setTimeout(function(){el.classList.remove('pop');},460);}
 
 /* ════════ BIBLIOTECA DE CONOCIMIENTO COMERCIAL ════════
-   Audios de llamadas reales, transcritos y titulados a partir de su contenido
-   (ver docs/carpeta "audios" — transcripción con faster-whisper). */
-var AUDIO_LIB=[
-  {
-    file:'s3___010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1000_1000#20260526#145456#11066#342421876.wav',
-    titulo:'Prospección en frío: cómo detectar una deuda impaga para vender Mora Control',
-    categoria:'Prospección',
-    duracion:'3:33',
-    descripcion:'Llamada de primer contacto donde el ejecutivo identifica al encargado de finanzas y sondea si la empresa tiene facturas impagas, usando esa información para introducir la publicación en Dicom como palanca de cobro. Sirve para aprender a estructurar preguntas de sondeo y conectar el dolor del cliente con la solución.'
-  },
-  {
-    file:'s3___010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1003_1003#20260526#134229#5863#56226224124.wav',
-    titulo:'Cómo presentar Mora Control y Reporte Interactivo: planes, precios y objeción del contrato anual',
-    categoria:'Objeciones',
-    duracion:'11:22',
-    descripcion:'Pitch completo de la plataforma de autogestión: carga de facturas, acciones de cobranza, publicación en Dicom y certificado de no deuda, con los dos planes disponibles. Incluye el manejo en vivo de las objeciones de costo mensual y compromiso anual, y cómo escalar una rebaja con la jefatura para avanzar al cierre.'
-  },
-  {
-    file:'s3___010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1008_1008#20260526#125526#11785#56412454174.wav',
-    titulo:'Venta consultiva de Reporte Interactivo comparando el costo actual del cliente',
-    categoria:'Venta consultiva',
-    duracion:'2:46',
-    descripcion:'El ejecutivo descubre cuánto paga hoy el cliente por un informe comercial individual y calcula el ahorro real de contratar un paquete de 10 informes, evidenciando el "gasto hormiga" oculto. Buen ejemplo de venta por comparación de costos para motivar el cambio de plan.'
-  }
-];
+   Audios de llamadas reales transcritos con faster-whisper (segmentos con
+   timestamp) y evaluados automáticamente contra la Rúbrica de Pauta de
+   Calidad del proyecto (ver docs/audios/Rubrica Pauta Calidad.xlsx →
+   RUBRIC_DEF/CALLS cargados desde audios/calls_data.js). */
+var BIB_STATE='grid';      // 'grid' | 'detail'
+var BIB_CURRENT=null;      // llamada abierta actualmente
+var BIB_SEGS=[];           // segmentos de la llamada abierta
+var BIB_ACTIVE_SEG=-1;
 
-function renderBiblioteca(filtro){
-  var list=$('bib-list');if(!list)return;
-  var items=AUDIO_LIB.filter(function(a){return !filtro||filtro==='Todos'||a.categoria===filtro;});
-  list.innerHTML=items.map(function(a){
-    return '<div class="bib-card">'+
-      '<div class="bib-card-h"><div class="bib-title">'+a.titulo+'</div><span class="bib-cat">'+a.categoria+'</span></div>'+
-      '<div class="bib-meta">⏱ '+a.duracion+'</div>'+
-      '<div class="bib-desc">'+a.descripcion+'</div>'+
-      '<audio class="bib-audio" controls preload="none" src="audios/'+encodeURIComponent(a.file)+'"></audio>'+
+function bibFmtTime(s){
+  if(!isFinite(s)||s<0)s=0;
+  var m=Math.floor(s/60),ss=Math.floor(s%60);
+  return m+':'+(ss<10?'0':'')+ss;
+}
+function bibMedColor(m){
+  if(m==='CUMPLE')return 'cumple';
+  if(m==='CUMPLE CON OBS')return 'obs';
+  if(m==='NO CUMPLE')return 'no';
+  return 'na';
+}
+function bibScoreClass(v){return v>=90?'g':(v>=70?'y':'r');}
+function bibScoreColor(v){return v>=90?'var(--gn)':(v>=70?'var(--y)':'var(--rl)');}
+function bibResultado(v){
+  if(v>=90)return 'Llamada de alto estándar — cumple el nivel esperado por la pauta de calidad.';
+  if(v>=70)return 'Llamada con cumplimiento adecuado, con observaciones puntuales a reforzar.';
+  return 'Llamada requiere refuerzo: hay criterios críticos sin cumplir.';
+}
+
+function openBibliotecaView(){
+  document.body.classList.add('bib-open');
+  renderBibGrid();
+  showBibGrid();
+  requestAnimationFrame(function(){$('biblioteca-view').classList.add('in');});
+  playClick();
+}
+function closeBibliotecaView(){
+  var a=$('bd-audio');if(a){a.pause();}
+  $('biblioteca-view').classList.remove('in');
+  document.body.classList.remove('bib-open');
+  playClick();
+}
+function bibBack(){
+  if(BIB_STATE==='detail'){showBibGrid();playClick();}
+  else{closeBibliotecaView();}
+}
+function showBibGrid(){
+  BIB_STATE='grid';
+  var a=$('bd-audio');if(a){a.pause();}
+  $('bib-grid').style.display='grid';
+  $('bib-detail').classList.remove('on');
+  $('bib-back-btn').textContent='← Volver al Cotizador';
+  $('bib-top-sub').textContent=CALLS.length+' llamada'+(CALLS.length===1?'':'s')+' analizada'+(CALLS.length===1?'':'s');
+}
+function renderBibGrid(){
+  var grid=$('bib-grid');
+  grid.innerHTML=CALLS.map(function(c){
+    return '<div class="bib-gcard" onclick="openBibDetail(\''+c.id+'\')">'+
+      '<div class="bib-gcard-h"><span class="bib-cat">'+c.categoria+'</span>'+
+        '<span class="bib-gscore" style="color:'+bibScoreColor(c.scoreTotal)+';">'+c.scoreTotal+'%</span></div>'+
+      '<div class="bib-gtitle">'+c.titulo+'</div>'+
+      '<div class="bib-gmeta"><span>🧑‍💼 '+c.ejecutivo+'</span><span>🏢 '+c.empresa+'</span><span>⏱ '+c.duracionTxt+'</span></div>'+
+      '<div class="bib-gdesc">'+c.resumen.slice(0,150)+'…</div>'+
     '</div>';
   }).join('');
 }
 
-function buildBibFilters(){
-  var box=$('bib-filters');if(!box)return;
-  var cats=['Todos'].concat(AUDIO_LIB.map(function(a){return a.categoria;}).filter(function(c,i,arr){return arr.indexOf(c)===i;}));
-  box.innerHTML=cats.map(function(c,i){return '<button type="button" class="bib-chip'+(i===0?' on':'')+'" data-cat="'+c+'">'+c+'</button>';}).join('');
-  Array.prototype.forEach.call(box.querySelectorAll('.bib-chip'),function(btn){
-    btn.onclick=function(){
-      Array.prototype.forEach.call(box.querySelectorAll('.bib-chip'),function(b){b.classList.remove('on');});
-      btn.classList.add('on');
-      renderBiblioteca(btn.dataset.cat);
-      playClick();
-    };
-  });
+function openBibDetail(id){
+  var c=CALLS.filter(function(x){return x.id===id;})[0];if(!c)return;
+  BIB_CURRENT=c;BIB_SEGS=c.segments;BIB_ACTIVE_SEG=-1;
+  BIB_STATE='detail';
+  $('bib-grid').style.display='none';
+  $('bib-detail').classList.add('on');
+  $('bib-back-btn').textContent='← Todas las llamadas';
+  $('bib-top-sub').textContent=c.categoria+' · '+c.duracionTxt;
+
+  $('bd-title').textContent=c.titulo;
+  $('bd-chips').innerHTML=
+    '<span class="bib-d-chip">🧑‍💼 <b>'+c.ejecutivo+'</b></span>'+
+    '<span class="bib-d-chip">👤 '+c.cliente+'</span>'+
+    '<span class="bib-d-chip">🏢 '+c.empresa+'</span>'+
+    '<span class="bib-d-chip">⏱ '+c.duracionTxt+'</span>'+
+    '<span class="bib-d-chip">📅 '+c.fecha+' · '+c.hora+'</span>';
+
+  var audio=$('bd-audio');
+  audio.src='audios/'+encodeURIComponent(c.file);
+  audio.playbackRate=1;$('bd-speed').value='1';
+  audio.volume=1;$('bd-vol').value='1';
+  $('bd-play').textContent='▶';
+  $('bd-seek').value=0;$('bd-cur').textContent='0:00';$('bd-dur').textContent=c.duracionTxt;
+
+  $('bd-transcript').innerHTML=c.segments.map(function(s,i){
+    return '<div class="bib-seg" id="bd-seg-'+i+'" onclick="bibSeekTo('+s.start+')">'+s.text+'</div>';
+  }).join('');
+
+  $('bd-motivo').textContent=c.motivo;
+  $('bd-resumen').textContent=c.resumen;
+  $('bd-sent').textContent='🙂 '+c.sentimiento;
+  $('bd-kw').innerHTML=c.palabrasClave.map(function(k){return '<span>'+k+'</span>';}).join('');
+
+  $('bd-mom').innerHTML=c.momentos.map(function(m){
+    return '<div class="bib-mom-item" onclick="bibSeekTo('+m.t+')"><span class="bib-mom-t">'+bibFmtTime(m.t)+'</span><span class="bib-mom-lb">'+m.label+'</span></div>';
+  }).join('');
+
+  $('bd-score').textContent=c.scoreTotal+'%';
+  $('bd-score').className='bib-score-num '+bibScoreClass(c.scoreTotal);
+  $('bd-score-fill').style.width=c.scoreTotal+'%';
+  $('bd-score-fill').style.background=bibScoreColor(c.scoreTotal);
+  $('bd-crit').innerHTML=RUBRIC_DEF.map(function(r,i){
+    var e=c.rubrica[i],v=MEDICION_VALUE[e.medicion]*100;
+    return '<div class="bib-crit-row">'+
+        '<span class="bib-crit-name">'+r.nombre+' <span class="bib-crit-peso">('+Math.round(r.peso*100)+'%)</span></span>'+
+        '<span class="bib-badge '+bibMedColor(e.medicion)+'">'+e.medicion+'</span>'+
+      '</div>'+
+      '<div class="bib-crit-bar"><div class="bib-crit-fill" style="width:'+v+'%;background:'+bibScoreColor(v)+';"></div></div>';
+  }).join('');
+
+  $('bd-rubrica').innerHTML=RUBRIC_DEF.map(function(r,i){
+    var e=c.rubrica[i];
+    var cita=e.cita?(
+      '<div class="bib-rub-cita"'+(e.ts!=null?' onclick="bibSeekTo('+e.ts+')"':'')+'>'+
+        '<span>&ldquo;'+e.cita+'&rdquo;</span>'+
+        (e.ts!=null?'<span class="go">▶ '+bibFmtTime(e.ts)+'</span>':'')+
+      '</div>'
+    ):'';
+    return '<div class="bib-rub-item">'+
+        '<div class="bib-rub-h"><span class="bib-rub-name">'+r.nombre+'<span class="bib-rub-peso">Peso '+Math.round(r.peso*100)+'%</span></span>'+
+        '<span class="bib-badge '+bibMedColor(e.medicion)+'">'+e.medicion+'</span></div>'+
+        '<div class="bib-rub-def">'+r.definicion+'</div>'+
+        cita+
+        '<div class="bib-rub-com">💬 '+e.comentario+'</div>'+
+      '</div>';
+  }).join('');
+
+  $('bd-fort').innerHTML=c.fortalezas.map(function(x){return '<li>'+x+'</li>';}).join('');
+  $('bd-opor').innerHTML=c.oportunidades.map(function(x){return '<li>'+x+'</li>';}).join('');
+
+  $('bd-final').innerHTML=
+    '<div class="bib-final-score"><div class="bib-final-num" style="color:'+bibScoreColor(c.scoreTotal)+';">'+c.scoreTotal+'%</div><div class="bib-score-lb">Puntaje final</div></div>'+
+    '<div class="bib-final-info">'+
+      '<div class="bib-final-res">'+bibResultado(c.scoreTotal)+'</div>'+
+      '<div class="bib-final-accion">Acción recomendada: <b>'+c.accionRecomendada+'</b></div>'+
+    '</div>';
+
+  $('bib-detail').scrollTop=0;
+  playClick();
 }
 
-function openBiblioteca(){
-  buildBibFilters();
-  renderBiblioteca('Todos');
-  $('biblioteca-modal').classList.add('on');
-  playClick();
+/* ── reproductor + teleprompter sincronizado ── */
+function bibTogglePlay(){
+  var a=$('bd-audio');if(!a.src)return;
+  if(a.paused){a.play();}else{a.pause();}
+}
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var a=document.getElementById('bd-audio');if(!a)return;
+    a.addEventListener('play',function(){$('bd-play').textContent='❚❚';});
+    a.addEventListener('pause',function(){$('bd-play').textContent='▶';});
+    a.addEventListener('ended',function(){$('bd-play').textContent='▶';});
+    a.addEventListener('loadedmetadata',function(){$('bd-dur').textContent=bibFmtTime(a.duration);});
+    a.addEventListener('timeupdate',function(){
+      if(!a.duration)return;
+      $('bd-seek').value=(a.currentTime/a.duration)*1000;
+      $('bd-cur').textContent=bibFmtTime(a.currentTime);
+      bibSyncTranscript(a.currentTime);
+    });
+  });
+})();
+function bibSeekInput(v){
+  var a=$('bd-audio');if(!a.duration)return;
+  a.currentTime=(v/1000)*a.duration;
+}
+function bibSkip(sec){
+  var a=$('bd-audio');if(!a.duration)return;
+  a.currentTime=Math.max(0,Math.min(a.duration,a.currentTime+sec));
+}
+function bibSetSpeed(v){$('bd-audio').playbackRate=parseFloat(v);}
+function bibSetVol(v){$('bd-audio').volume=parseFloat(v);}
+function bibSeekTo(t){
+  var a=$('bd-audio');if(!a)return;
+  a.currentTime=t;a.play();
+}
+function bibSyncTranscript(t){
+  var idx=-1;
+  for(var i=0;i<BIB_SEGS.length;i++){
+    if(t>=BIB_SEGS[i].start&&t<BIB_SEGS[i].end){idx=i;break;}
+    if(t>=BIB_SEGS[i].start)idx=i;
+  }
+  if(idx===BIB_ACTIVE_SEG)return;
+  if(BIB_ACTIVE_SEG>=0){var prev=$('bd-seg-'+BIB_ACTIVE_SEG);if(prev)prev.classList.remove('active');}
+  BIB_ACTIVE_SEG=idx;
+  if(idx>=0){
+    var cur=$('bd-seg-'+idx);
+    if(cur){cur.classList.add('active');cur.scrollIntoView({block:'center',behavior:'smooth'});}
+  }
 }
 
 /* ════════ CONFIGURACIÓN POR PRODUCTO (inputs del panel izquierdo) ════════ */
