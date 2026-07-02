@@ -118,6 +118,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pbtn .ic{font-size:.95rem;line-height:1;flex-shrink:0;}
 .pbtn .lb{font-size:.85rem;font-weight:700;}
 .pbtn .su{display:none;}
+/* Doble denominación comercial SOLO en las pestañas RI y Bolsa: revela el subtítulo
+   como sufijo sobrio en la misma línea (no altera altura ni el resto de pestañas). */
+.pbtn[data-key="ri"] .su,.pbtn[data-key="bolsa"] .su{display:inline;font-weight:600;font-size:.78rem;opacity:.6;}
+.pbtn[data-key="ri"] .su::before,.pbtn[data-key="bolsa"] .su::before{content:"· ";}
 .pbtn-badge{position:absolute;top:-11px;right:-11px;min-width:26px;height:26px;padding:0 6px;border-radius:50%;background:linear-gradient(135deg,#ffd24d,#f0a51e);color:#3a0a12;font-size:1rem;font-weight:900;line-height:26px;text-align:center;border:2px solid var(--g0);box-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(255,200,60,.85);display:none;letter-spacing:0;box-sizing:border-box;}
 .pbtn-badge.on{display:block;}
 .pbtn-badge.pop{animation:mp-badge-pop .44s cubic-bezier(.34,1.56,.64,1);}
@@ -999,7 +1003,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
           </button>
         </div>
         <div class="pv-frame dark">
-<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div id="cc-price-zone" style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div id="cc-contrato-zone" style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div id="cc-cons-tile" style="display:none;"><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Consultas RI/mes</div><div id="cc-cons" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura · Carpeta Tributaria</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
+<div id="cot-card-pc" style="max-width:600px;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);border:1px solid rgba(155,28,46,.3);"><div style="background:linear-gradient(135deg,#5a0e1a,#9b1c2e 50%,#7a1425);padding:20px 22px 16px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><img src="logo-equifax.png" alt="Equifax" style="height:144px;width:auto;display:block;filter:brightness(0) invert(1);" onerror="this.style.opacity=0"><div style="font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.42);text-transform:uppercase;margin-top:4px;">Chile · Soluciones Empresariales</div></div><div style="text-align:right;"><div id="cc-badge" style="background:rgba(0,0,0,.4);border:1px solid rgba(240,192,64,.5);color:#f0c040;padding:4px 12px;border-radius:14px;font-size:.65rem;font-weight:700;letter-spacing:1px;display:inline-block;">COTIZACIÓN</div><div id="cc-fecha" style="font-size:.58rem;color:rgba(255,255,255,.3);margin-top:5px;"></div></div></div></div><div style="background:#12060a;padding:14px 22px;border-bottom:1px solid rgba(155,28,46,.2);"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:4px;">Propuesta preparada para</div><div id="cc-emp" style="font-size:1.2rem;font-weight:800;color:#fff;line-height:1.3;word-break:break-word;"></div><div id="cc-rut" style="font-size:.68rem;color:#666;margin-top:2px;"></div></div><div id="cc-prod-block" style="background:#0d0a0e;border-bottom:1px solid rgba(155,28,46,.18);padding:14px 22px;"></div><div id="cc-price-zone" style="background:linear-gradient(135deg,#0a0305,#120408);border-bottom:1px solid rgba(155,28,46,.2);padding:16px 22px;"><div style="font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:6px;">Cargo fijo mensual</div><div id="cc-precio" style="font-size:2.4rem;font-weight:900;color:#f0c040;line-height:1;"></div><div id="cc-clp" style="font-size:.78rem;color:#888;margin-top:7px;"></div><div id="cc-dcto-block" style="margin-top:8px;"></div></div><div id="cc-contrato-zone" style="background:#0c0508;border-bottom:1px solid rgba(155,28,46,.15);padding:12px 22px;display:flex;gap:24px;flex-wrap:wrap;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Contrato</div><div id="cc-plazo" style="font-size:.9rem;font-weight:700;color:#fff;"></div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Modalidad</div><div style="font-size:.82rem;font-weight:600;color:#2ecc71;">POSTPAGO · 30 días</div></div><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Documentos</div><div style="font-size:.72rem;color:#aaa;">Ficha · Cédula · Escritura · Carpeta Tributaria</div></div></div><div style="background:linear-gradient(135deg,#1a0a0e,#200d11);border-top:2px solid #9b1c2e;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:12px;"><img id="cc-foto" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #f0c040;flex-shrink:0;background:#1a0a0e;"><div><div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:3px;">Ejecutivo/a Comercial</div><div id="cc-asesor" style="font-size:.95rem;font-weight:700;color:#fff;"></div><div id="cc-contacto" style="font-size:.75rem;color:#3498db;margin-top:3px;"></div></div></div><div style="text-align:right;font-size:.58rem;color:#333;"><div>Valores en UF + IVA</div></div></div></div></div>
         </div>
       </div>
 
@@ -1111,10 +1115,10 @@ function ufd(x){return (Math.round(x*10000)/10000).toString();}
 
 /* ── Catálogo: EXACTAMENTE los productos del index (fuente de verdad) ── */
 var PRODUCTS=[
-  {key:'bundle',ic:'📦',lb:'BUNDLE: Mora Control + Reporte Interactivo',su:'4100 / Ilimitado'},
+  {key:'bundle',ic:'📦',lb:'BUNDLE: Mora Control + Informes Comerciales',su:'4100 / Ilimitado'},
   {key:'mc',    ic:'🚨',lb:'Mora Control',  su:'Gestión de cartera'},
-  {key:'ri',    ic:'📊',lb:'Reporte Interactivo',    su:'12 meses'},
-  {key:'bolsa', ic:'🎒',lb:'Reporte Interactivo Bolsa',      su:'Pago único 12m'},
+  {key:'ri',    ic:'📊',lb:'Reporte Comercial',    su:'Reporte Interactivo'},
+  {key:'bolsa', ic:'🎒',lb:'Informes Comerciales Bolsa',      su:'Reporte Interactivo Bolsa'},
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
@@ -1320,7 +1324,7 @@ function renderSummary(c){
     '</div>';
 
   var html=
-    '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
+    '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+(pi.sub?'<span style="display:block;font-size:.82rem;font-weight:600;color:#9aa0a6;letter-spacing:.2px;">'+pi.sub+'</span>':'')+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
     '<div class="metrics">'+
       ventaCtrl+
       listaCtrl+
@@ -2353,15 +2357,15 @@ var PFM_S={1:0.0725,2:0.0711,3:0.0697,5:0.0683,10:0.067,20:0.065,30:0.063,40:0.0
 var PFM_Q={1:0.0563,2:0.0554,3:0.0546,5:0.0538,10:0.053,20:0.051,30:0.050,40:0.048,50:0.046,60:0.045,70:0.043,80:0.041,90:0.039,100:0.038,200:0.029,300:0.025,500:0.021,1000:0.017};
 var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.039,50:0.038,60:0.036,70:0.035,80:0.033,90:0.032,100:0.030,200:0.023,300:0.020,500:0.017,1000:0.013};
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
-var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Reporte Interactivo'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Reporte Interactivo'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA 12 MESES',n:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
-var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de consultas para usar durante 12 meses','Pago único anticipado, sin cargo mensual','Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Consulta cuando lo necesites, sin plan fijo'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
+var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Comercial',sub:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA · 12 MESES',n:'Informes Comerciales Bolsa',sub:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
+var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de informes comerciales para consumir durante 12 meses','Pago único, sin cargo mensual','Los informes se utilizan a su propio ritmo dentro del período','Mismos datos del Reporte Interactivo: score, morosidades y comportamiento','Ideal para consultas puntuales, sin comprometer un plan mensual'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
 /* ── BULLETS ENRIQUECIDOS — SOLO Gmail/Outlook (WhatsApp usa PITEMS) ── */
 var PITEMS_MAIL={
   bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda','Acciones de cobranza 6× más eficaces','Bloqueo comercial que promueve el pago','Score de riesgo Equifax para evaluar','Portal de autogestión disponible 24/7','Evalúa antes de dar crédito y cobra después'],
   bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda','Publica facturas, cheques y documentos impagos','Acciones de cobranza 6× más eficaces','Bloqueo comercial del deudor moroso','Score de riesgo Equifax incluido','Gestión de abonos y pagos parciales'],
   mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda','Gestión integral de cobranza en una plataforma','Agrupa deudores por monto y fecha','Carga masiva o individual de documentos','Bloqueo comercial que promueve el pago','Publica facturas, cheques y otros impagos','Contratable por personas y empresas'],
   ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral','Análisis de riesgo, crédito y contactabilidad','Identificación de consultas en línea','Antecedentes FONASA y tributarios','Reduce el riesgo de incobrabilidad','Mejor evaluación de nuevos prospectos'],
-  ri_bolsa:['Bolsa de consultas disponible durante 12 meses','Pago único anticipado, sin cargo mensual','Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral','Consume las consultas cuando las necesites','Sin plan fijo ni facturación recurrente','Ideal para evaluaciones puntuales durante el año'],
+  ri_bolsa:['Bolsa de informes comerciales distribuida a lo largo de 12 meses','Pago único, sin cargo mensual: los informes se consumen a su ritmo','Modalidad distinta del Reporte Comercial estándar','Mismos datos que el Reporte Interactivo: score, morosidades y comportamiento','Antecedentes patrimoniales, laborales y tributarios','Activación mediante transferencia','Proceso de contratación propio con documentación específica','Ideal para volúmenes de consulta planificados a 12 meses'],
   pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual','Revisión periódica de toda la cartera','Potencia buenos clientes, limita los riesgosos','Detección temprana de deterioro financiero','Seguimiento de personas y empresas','Reevaluación al renovar líneas de crédito'],
   pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7','Validación de antecedentes de cada proveedor','Reduce el riesgo de contraparte','Centraliza la gestión de proveedores','Respaldo de la marca Equifax'],
   combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio','Score de riesgo Equifax para cada decisión','Acciones de cobranza 6× más eficaces','Alertas tempranas de deterioro financiero','Potencia buenos clientes y limita riesgos','Una plataforma para evaluar, cobrar y monitorear']
@@ -2430,13 +2434,15 @@ function genMail(){
       it=_pfmRw(it);itMail=_pfmRw(itMail);
     }
   }
-  /* Reporte Interactivo / Reporte Interactivo Bolsa / Bundle: reflejar dentro del
-     bloque de características la cantidad de consultas realmente cotizada.
-     Se reutiliza EXACTAMENTE el mismo dato "co" que ya usa la calculadora
-     (mismo origen que Outlook/Gmail/WhatsApp); no muta los arreglos globales. */
-  if(co && (tipo==='ri_plan' || tipo==='ri_bolsa' || tipo==='bundle4100' || tipo==='bundleIlim')){
-    var _riLinea=co+' Reportes Interactivos incluidos';
-    it=it.concat([_riLinea]);itMail=itMail.concat([_riLinea]);
+  /* Reporte Comercial / Informes Comerciales Bolsa: reflejar en el contenido del
+     cliente la cantidad de consultas cotizada. Reutiliza la ÚNICA fuente (mc2 = c.cons,
+     puente que ya alimenta la calculadora); sin variables nuevas ni recálculo. */
+  if(tipo==='ri_plan'||tipo==='ri_bolsa'){
+    var _riCons=parseInt(gv('mc2'))||0;
+    if(_riCons){
+      var _riLine=(tipo==='ri_bolsa')?('Bolsa de '+_riCons+' informes comerciales para 12 meses'):('Plan de '+_riCons+' consultas al mes');
+      it=[_riLine].concat(it);itMail=[_riLine].concat(itMail);
+    }
   }
   var hayDc=ufL&&ufV&&ufV<ufL;
   var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
@@ -2453,7 +2459,6 @@ function genMail(){
   st('cc-precio',ufV?ufV+' UF + IVA':'[precio] UF + IVA'); /* espaciado extra */
   st('cc-clp',clp?'aprox. '+fmtN(clp)+' mensual con IVA incluido':'—');
   st('cc-plazo',pl+' meses');st('cc-asesor',as2);
-  (function(){var _ct=$('cc-cons-tile');if(!_ct)return;var _showCons=co && (tipo.indexOf("ri")>=0 || tipo.indexOf("bundle")>=0);_ct.style.display=_showCons?'':'none';if(_showCons)st('cc-cons',''+co);})();
   st('cc-contacto',(fo||'')+(fo&&ml?' · ':'')+ml);
 
   // Tarjeta WSP — mismos datos
@@ -2468,7 +2473,7 @@ function genMail(){
   var _wccf=$('wcc-foto');if(_wccf)_wccf.src=_fsrc;
   sv('wcc-prod-block',
     '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">Producto cotizado</div>'+
-    '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+'</div>'+
+    '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+(pi.sub?'<span style="display:block;font-size:.8rem;font-weight:600;color:#e0b84a;margin-top:2px;letter-spacing:.3px;">'+pi.sub+'</span>':'')+'</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;">'+
     it.map(function(i){return'<div style="font-size:.8rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;font-size:.85rem;flex-shrink:0;margin-top:1px;">✔</span><span>'+i+'</span></div>';}).join('')+
     '</div>'
@@ -2486,7 +2491,7 @@ function genMail(){
   var col1=itMail.slice(0,mid),col2=itMail.slice(mid);
   sv('cc-prod-block',
     '<div style="font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px;">Producto cotizado</div>'+
-    '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+'</div>'+
+    '<div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;line-height:1.3;">'+pi.n+(pi.sub?'<span style="display:block;font-size:.8rem;font-weight:600;color:#e0b84a;margin-top:2px;letter-spacing:.3px;">'+pi.sub+'</span>':'')+'</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;">'+
     itMail.map(function(i){return'<div style="font-size:.8rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(155,28,46,.2);display:flex;align-items:flex-start;gap:7px;"><span style="color:#9b1c2e;font-weight:900;font-size:.85rem;flex-shrink:0;margin-top:1px;">✔</span><span>'+i+'</span></div>';}).join('')+
     '</div>'
@@ -2508,8 +2513,8 @@ function genMail(){
   if(isPub){sv('cc-prod-block',renderPublicacion('card'));sv('cc-dcto-block','');var _wpbP=document.getElementById('wcc-prod-block');if(_wpbP)_wpbP.innerHTML=renderPublicacion('card');var _wdbP=document.getElementById('wcc-dcto-block');if(_wdbP)_wdbP.innerHTML='';}
   var aEmp=(em?' | '+em:'');
   var _asuntoSol=isSol?('Información de productos Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):null)));
-  st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
-  st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+aEmp));
+  st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+(pi.sub?' ('+pi.sub+')':'')+aEmp));
+  st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+(pi.sub?' ('+pi.sub+')':'')+aEmp));
 
   // ── TEXTO WA (formato markdown WhatsApp) ──
   var _waSaludo = _contactoNom
@@ -2520,10 +2525,10 @@ function genMail(){
   var _waEmpLn = (_contactoNom && !skip && em) ? ("Cotizaci\u00f3n para *" + em + "*.\n") : "";
   var _waRut = (!skip && ru) ? ("RUT: " + ru + "\n") : "";
   var _waEncab = _waSaludo + "\n" + (_contactoNom?"":_waRut) +
-    "Adjunto la propuesta comercial solicitada para el servicio *" + pi.n + "*.\n" + _waEmpLn + (_contactoNom?_waRut:"") + "\n";
+    "Adjunto la propuesta comercial solicitada para el servicio *" + pi.n + (pi.sub?" ("+pi.sub+")":"") + "*.\n" + _waEmpLn + (_contactoNom?_waRut:"") + "\n";
   var txt = _waEncab +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
-    "*" + pi.n + "*\n" +
+    "*" + pi.n + (pi.sub?" ("+pi.sub+")":"") + "*\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n" +
     it.map(function(x){ return "\u2714\ufe0f " + x; }).join("\n") + "\n\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
@@ -2535,7 +2540,7 @@ function genMail(){
     (hayDc ? "\ud83c\udfaf *Descuento: \u2212" + dc + "%*\n" : "") +
     "\ud83d\udcc5 Plazo: *" + pl + " meses*\n" +
     "\ud83d\udcb3 Modalidad: _POSTPAGO \u00b7 30 d\u00edas_\n" +
-    (co && (tipo.indexOf("ri") >= 0 || tipo.indexOf("bundle") >= 0) ? "\ud83d\udcca Consultas RI/mes: *" + co + "*\n" : "") +
+    (co && tipo.indexOf("bundle") >= 0 ? "\ud83d\udcca Consultas RI/mes: *" + co + "*\n" : "") +
     "\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*DOCUMENTOS*\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n" +
@@ -2616,7 +2621,7 @@ function genMail(){
     (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
     '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
-      '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+'</div>'+
+      '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+(pi.sub?'<span style="display:block;font-size:12px;font-weight:600;color:#9b1c2e;margin-top:3px;">'+pi.sub+'</span>':'')+'</div>'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+_listaItems+'</table>'+
     '</div>'+
 
@@ -2651,11 +2656,6 @@ function genMail(){
           '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td>'+
           '<td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</td>'+
         '</tr>'+
-        (co && (tipo.indexOf("ri")>=0 || tipo.indexOf("bundle")>=0) ?
-          '<tr>'+
-            '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Consultas RI/mes</td>'+
-            '<td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+co+'</td>'+
-          '</tr>' : '')+
       '</table>'+
     '</div>'+
 
@@ -2821,7 +2821,7 @@ function genMail(){
               '<font face="Arial,sans-serif" color="#777777" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font>'+
             '</td></tr>'+
             '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:10px;">'+
-              '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;font-weight:bold;"><b>'+pi.n+'</b></font>'+
+              '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;font-weight:bold;"><b>'+pi.n+'</b></font>'+(pi.sub?'<br><font face="Arial,sans-serif" color="#9b1c2e" style="font-size:12px;"><b>'+pi.sub+'</b></font>':'')+''+
             '</td></tr>'+
           '</table>'+
           '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
@@ -2884,15 +2884,6 @@ function genMail(){
             '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></span></font>'+
           '</td>'+
         '</tr>'+
-        (co && (tipo.indexOf("ri")>=0 || tipo.indexOf("bundle")>=0) ?
-          '<tr>'+
-            '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:4px 0 0;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Consultas RI/mes</b></span></font>'+
-            '</td>'+
-            '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:4px 0 0;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+co+'</b></span></font>'+
-            '</td>'+
-          '</tr>' : '')+
       '</table>'+
     '</td></tr>'+
 
@@ -4099,7 +4090,7 @@ cUF();cCLP();cCom();
    genera adjunto ficticio: se aborta con aviso (ver descargarEML()).
    ════════════════════════════════════════════════════════════════ */
 const DOCS_ADJUNTABLES = [
-  { label:'📦 BUNDLE: Mora Control + Reporte Interactivo', archivo:'BUNDLE_Mora_Control_mas_Reporte_Interactivo.pdf', url:'BUNDLE_Mora_Control_mas_Reporte_Interactivo.pdf' },
+  { label:'📦 BUNDLE: Mora Control + Informes Comerciales', archivo:'BUNDLE_Mora_Control_mas_Informes_Comerciales.pdf', url:'BUNDLE_Mora_Control_mas_Informes_Comerciales.pdf' },
   { label:'Mora Control',                 archivo:'MoraControl_Equifax.pdf',        url:'MoraControl_Equifax.pdf' },
   { label:'Mora Control Documento Único', archivo:'MoraControlDocUnico_Equifax.pdf', url:'MoraControlDocUnico_Equifax.pdf' },
   { label:'Reporte Interactivo',          archivo:'ReporteInteractivo_Equifax.pdf',  url:'ReporteInteractivo_Equifax.pdf' },
