@@ -34,7 +34,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .htool-btn{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;
   border-radius:8px;padding:9px 13px;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s;}
 .htool-btn:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
-#audio-lib-btn.on{background:linear-gradient(135deg,rgba(155,28,46,.55),rgba(155,28,46,.28));border-color:var(--y);box-shadow:0 0 12px rgba(240,192,64,.35);}
 /* botón de usuario (datos del ejecutivo/a) */
 .user-btn{display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.22);
   border-radius:30px;padding:5px 13px 5px 5px;cursor:pointer;font-family:inherit;transition:.15s;max-width:190px;}
@@ -659,6 +658,23 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .uf-tool .uf-r{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
 .uf-tool .res{font-size:1.05rem;font-weight:800;color:var(--y);padding-top:6px;}
 
+/* ── BIBLIOTECA DE CONOCIMIENTO COMERCIAL (audios) ── */
+.bib-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.bib-chip{background:var(--g2);border:1px solid var(--g4);color:var(--wa);border-radius:20px;
+  padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
+.bib-chip:hover{border-color:var(--rl);color:#fff;}
+.bib-chip.on{background:var(--r);border-color:var(--rl);color:#fff;}
+.bib-list{display:flex;flex-direction:column;gap:14px;}
+.bib-card{background:var(--g2);border:1px solid var(--g3);border-radius:12px;padding:16px 18px;}
+.bib-card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:2px;flex-wrap:wrap;}
+.bib-title{font-size:1rem;font-weight:800;color:#fff;line-height:1.3;flex:1;min-width:220px;}
+.bib-cat{display:inline-block;background:rgba(52,152,219,.16);border:1px solid rgba(52,152,219,.45);
+  color:#7ec8f0;border-radius:20px;padding:3px 11px;font-size:.68rem;font-weight:800;letter-spacing:.5px;
+  text-transform:uppercase;white-space:nowrap;}
+.bib-meta{font-size:.7rem;color:var(--wb);margin-bottom:10px;}
+.bib-desc{font-size:.85rem;color:var(--wa);line-height:1.5;margin:6px 0 12px;}
+.bib-audio{width:100%;}
+
 /* ── ALTERNADOR MÓVIL ─────────────────────────────── */
 #mtoggle{display:none;}
 @media(max-width:880px){
@@ -748,67 +764,6 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
   /* Fuente más visible del rótulo "ADJUNTAR ARCHIVO" */
   #adj-row .as-lb{font-size:.8rem;letter-spacing:1.5px;}
 }
-<style id="audio-lib-styles">
-/* ════════ 🎧 BIBLIOTECA DE AUDIOS DE VENDEDORES EXITOSOS ════════ */
-#audio-library{position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;bottom:0;
-  background:var(--g0);overflow-y:auto;overflow-x:hidden;z-index:150;display:none;}
-#audio-library.on{display:block;}
-.al-wrap{max-width:980px;margin:0 auto;padding:38px 24px 80px;}
-.al-head{margin-bottom:34px;text-align:left;}
-.al-head h1{font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:.3px;display:flex;align-items:center;gap:12px;}
-.al-head h1 .al-ico{font-size:1.5rem;filter:drop-shadow(0 0 10px rgba(240,192,64,.35));}
-.al-head p{color:var(--wa);font-size:.9rem;margin-top:8px;line-height:1.55;max-width:640px;}
-.al-list{display:flex;flex-direction:column;gap:22px;}
-.al-row{background:linear-gradient(155deg,var(--g1),var(--g2));border:1px solid var(--g3);border-radius:16px;
-  padding:26px 28px;transition:border-color .25s ease,box-shadow .25s ease,transform .25s ease;position:relative;overflow:hidden;}
-.al-row:hover{border-color:var(--g5);}
-.al-row.playing{border-color:var(--r);box-shadow:0 0 0 1px rgba(155,28,46,.35),0 10px 34px -14px rgba(155,28,46,.55);}
-.al-row.playing::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:linear-gradient(180deg,var(--y),var(--r));}
-.al-top{display:flex;align-items:flex-start;gap:18px;margin-bottom:20px;}
-.al-icon{flex:0 0 auto;width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,rgba(155,28,46,.28),rgba(155,28,46,.08));
-  border:1px solid rgba(155,28,46,.4);display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
-.al-row.playing .al-icon{background:linear-gradient(135deg,rgba(240,192,64,.30),rgba(155,28,46,.18));border-color:var(--y);}
-.al-info{flex:1 1 auto;min-width:0;}
-.al-titlerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.al-title{font-size:1.05rem;font-weight:800;color:#fff;line-height:1.3;}
-.al-cat{font-size:.62rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;color:var(--y);
-  background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.32);border-radius:20px;padding:3px 11px;white-space:nowrap;}
-.al-desc{color:var(--wa);font-size:.86rem;margin-top:7px;line-height:1.5;}
-.al-eq{flex:0 0 auto;display:flex;align-items:flex-end;gap:3px;height:22px;opacity:0;transition:opacity .3s ease;}
-.al-row.playing .al-eq{opacity:1;}
-.al-eq span{width:3px;background:var(--y);border-radius:2px;animation:al-eq-bar .9s ease-in-out infinite;}
-.al-eq span:nth-child(1){animation-delay:-.7s;}
-.al-eq span:nth-child(2){animation-delay:-.35s;}
-.al-eq span:nth-child(3){animation-delay:-.9s;}
-.al-eq span:nth-child(4){animation-delay:-.15s;}
-@keyframes al-eq-bar{0%,100%{height:4px;}50%{height:20px;}}
-.al-player{display:flex;align-items:center;gap:18px;}
-.al-playbtn{flex:0 0 auto;width:52px;height:52px;border-radius:50%;border:1px solid var(--g4);background:var(--g3);
-  color:#fff;font-size:1.15rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.18s;}
-.al-playbtn:hover{border-color:var(--r);background:rgba(155,28,46,.25);}
-.al-row.playing .al-playbtn{background:linear-gradient(135deg,var(--r),var(--rd));border-color:var(--rl);
-  box-shadow:0 0 18px rgba(155,28,46,.55);}
-.al-progwrap{flex:1 1 auto;min-width:0;}
-.al-progbar{position:relative;width:100%;height:8px;border-radius:6px;background:var(--g3);cursor:pointer;overflow:hidden;}
-.al-progfill{position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:6px;
-  background:linear-gradient(90deg,var(--rl),var(--y));transition:width .08s linear;}
-.al-proghandle{position:absolute;top:50%;width:15px;height:15px;border-radius:50%;background:#fff;
-  box-shadow:0 1px 6px rgba(0,0,0,.6);transform:translate(-50%,-50%);left:0%;opacity:0;transition:opacity .18s ease;}
-.al-progbar:hover .al-proghandle,.al-row.playing .al-proghandle{opacity:1;}
-.al-times{display:flex;justify-content:space-between;margin-top:7px;font-size:.72rem;color:var(--wb);
-  font-variant-numeric:tabular-nums;letter-spacing:.3px;}
-.al-dur-badge{flex:0 0 auto;font-size:.72rem;color:var(--wb);min-width:44px;text-align:right;}
-@media(max-width:720px){
-  .al-wrap{padding:26px 16px 70px;}
-  .al-row{padding:20px 18px;}
-  .al-top{gap:14px;}
-  .al-icon{width:46px;height:46px;font-size:1.25rem;}
-  .al-title{font-size:.95rem;}
-  .al-player{gap:12px;}
-  .al-playbtn{width:46px;height:46px;}
-  .al-eq{display:none;}
-}
 </style>
 </head>
 <body>
@@ -843,7 +798,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
       <span class="ext-txt"><span class="ext-lb">Extensión CRM</span><span class="ext-sb">Discador ⇄ CRM</span></span>
       <span class="ext-dl">↓</span>
     </a>
-    <button class="htool-btn" id="audio-lib-btn" onclick="toggleAudioLibrary()" title="Biblioteca de Audios de Vendedores Exitosos">🎧 Audios</button>
+    <button class="htool-btn" onclick="openBiblioteca()" title="Biblioteca de conocimiento comercial: audios de llamadas reales, categorizados por tema">🎧 Biblioteca</button>
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
       <span id="user-name">Ejecutivo/a</span>
@@ -1071,17 +1026,6 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
   </section>
 </div>
 
-<!-- ════════ 🎧 BIBLIOTECA DE AUDIOS DE VENDEDORES EXITOSOS ════════ -->
-<section id="audio-library" aria-label="Biblioteca de Audios de Vendedores Exitosos">
-  <div class="al-wrap">
-    <div class="al-head">
-      <h1><span class="al-ico">🎧</span>Biblioteca de Audios de Vendedores Exitosos</h1>
-      <p>Escucha experiencias reales y buenas prácticas comerciales de ejecutivos destacados. La reproducción continúa aunque sigas cotizando o cambies de sección.</p>
-    </div>
-    <div class="al-list" id="al-list"></div>
-  </div>
-</section>
-
 <!-- ════════ MODALES ════════ -->
 <div class="modal" id="ampliar-modal">
   <div class="modal-card" style="max-width:680px;">
@@ -1162,6 +1106,16 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
   </div>
 </div>
 
+<div class="modal" id="biblioteca-modal">
+  <div class="modal-card" style="max-width:920px;">
+    <div class="modal-head"><h3>🎧 Biblioteca de Conocimiento Comercial</h3><button class="modal-x" onclick="closeModal('biblioteca-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="bib-filters" id="bib-filters"></div>
+      <div class="bib-list" id="bib-list"></div>
+    </div>
+  </div>
+</div>
+
 <div id="global-toast" class="toast"></div>
 <div id="cp-toast" aria-live="polite"></div>
 <div id="paste-notice" onclick="this.classList.remove('on');"><div class="pn-card"><div class="pn-check">✅</div><div class="pn-title">MENSAJE COPIADO</div><div class="pn-sub" id="paste-notice-sub">Pégalo con <b>Ctrl+V</b></div></div></div>
@@ -1218,6 +1172,67 @@ function updateMultiBadge(){
 }
 /* Rebote del contador (solo visual) */
 function popBadge(){var el=document.getElementById('multi-badge');if(!el)return;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');setTimeout(function(){el.classList.remove('pop');},460);}
+
+/* ════════ BIBLIOTECA DE CONOCIMIENTO COMERCIAL ════════
+   Audios de llamadas reales, transcritos y titulados a partir de su contenido
+   (ver docs/carpeta "audios" — transcripción con faster-whisper). */
+var AUDIO_LIB=[
+  {
+    file:'s3___010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1000_1000#20260526#145456#11066#342421876.wav',
+    titulo:'Prospección en frío: cómo detectar una deuda impaga para vender Mora Control',
+    categoria:'Prospección',
+    duracion:'3:33',
+    descripcion:'Llamada de primer contacto donde el ejecutivo identifica al encargado de finanzas y sondea si la empresa tiene facturas impagas, usando esa información para introducir la publicación en Dicom como palanca de cobro. Sirve para aprender a estructurar preguntas de sondeo y conectar el dolor del cliente con la solución.'
+  },
+  {
+    file:'s3___010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1003_1003#20260526#134229#5863#56226224124.wav',
+    titulo:'Cómo presentar Mora Control y Reporte Interactivo: planes, precios y objeción del contrato anual',
+    categoria:'Objeciones',
+    duracion:'11:22',
+    descripcion:'Pitch completo de la plataforma de autogestión: carga de facturas, acciones de cobranza, publicación en Dicom y certificado de no deuda, con los dos planes disponibles. Incluye el manejo en vivo de las objeciones de costo mensual y compromiso anual, y cómo escalar una rebaja con la jefatura para avanzar al cierre.'
+  },
+  {
+    file:'s3___010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1008_1008#20260526#125526#11785#56412454174.wav',
+    titulo:'Venta consultiva de Reporte Interactivo comparando el costo actual del cliente',
+    categoria:'Venta consultiva',
+    duracion:'2:46',
+    descripcion:'El ejecutivo descubre cuánto paga hoy el cliente por un informe comercial individual y calcula el ahorro real de contratar un paquete de 10 informes, evidenciando el "gasto hormiga" oculto. Buen ejemplo de venta por comparación de costos para motivar el cambio de plan.'
+  }
+];
+
+function renderBiblioteca(filtro){
+  var list=$('bib-list');if(!list)return;
+  var items=AUDIO_LIB.filter(function(a){return !filtro||filtro==='Todos'||a.categoria===filtro;});
+  list.innerHTML=items.map(function(a){
+    return '<div class="bib-card">'+
+      '<div class="bib-card-h"><div class="bib-title">'+a.titulo+'</div><span class="bib-cat">'+a.categoria+'</span></div>'+
+      '<div class="bib-meta">⏱ '+a.duracion+'</div>'+
+      '<div class="bib-desc">'+a.descripcion+'</div>'+
+      '<audio class="bib-audio" controls preload="none" src="audios/'+encodeURIComponent(a.file)+'"></audio>'+
+    '</div>';
+  }).join('');
+}
+
+function buildBibFilters(){
+  var box=$('bib-filters');if(!box)return;
+  var cats=['Todos'].concat(AUDIO_LIB.map(function(a){return a.categoria;}).filter(function(c,i,arr){return arr.indexOf(c)===i;}));
+  box.innerHTML=cats.map(function(c,i){return '<button type="button" class="bib-chip'+(i===0?' on':'')+'" data-cat="'+c+'">'+c+'</button>';}).join('');
+  Array.prototype.forEach.call(box.querySelectorAll('.bib-chip'),function(btn){
+    btn.onclick=function(){
+      Array.prototype.forEach.call(box.querySelectorAll('.bib-chip'),function(b){b.classList.remove('on');});
+      btn.classList.add('on');
+      renderBiblioteca(btn.dataset.cat);
+      playClick();
+    };
+  });
+}
+
+function openBiblioteca(){
+  buildBibFilters();
+  renderBiblioteca('Todos');
+  $('biblioteca-modal').classList.add('on');
+  playClick();
+}
 
 /* ════════ CONFIGURACIÓN POR PRODUCTO (inputs del panel izquierdo) ════════ */
 function optsFrom(arr,valFn,labFn,dataFn){
@@ -4336,170 +4351,6 @@ function _emlA(dom,seq){
     if(seq!==_EMLSEQ)return;
     _emlSet('gris','• No verificado (sin conexión a la API)');
   });
-}
-
-/* ════════ 🎧 BIBLIOTECA DE AUDIOS DE VENDEDORES EXITOSOS ════════ */
-// Los archivos .wav viven en la MISMA carpeta que este index.html (servidos como estáticos
-// junto al resto del sitio). Para agregar un audio nuevo: subir el archivo a esa carpeta y
-// añadir una entrada al arreglo AL_AUDIOS. Nada más se necesita tocar.
-var AL_BASE = ''; // misma carpeta que index.html — dejar vacío; se antepone a cada "archivo"
-
-var AL_AUDIOS = [
-  {
-    titulo: 'Cierre efectivo en primera llamada',
-    categoria: 'Cierre de venta',
-    descripcion: 'Un ejecutivo comparte cómo estructura la conversación inicial para llegar a un acuerdo sin necesidad de una segunda llamada.',
-    archivo: 's3__010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1000_1000#20260526#145456#11066#342421876.wav'
-  },
-  {
-    titulo: 'Manejo de objeciones de precio',
-    categoria: 'Objeciones',
-    descripcion: 'Ejemplo real de cómo responder cuando el cliente dice que el valor mensual es alto, sin recurrir al descuento inmediato.',
-    archivo: 's3__010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1003_1003#20260526#134229#5863#56226224124.wav'
-  },
-  {
-    titulo: 'Construcción de confianza con el cliente',
-    categoria: 'Relación comercial',
-    descripcion: 'Buenas prácticas para generar cercanía y credibilidad desde los primeros minutos de contacto con una empresa nueva.',
-    archivo: 's3__010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1008_1008#20260526#125526#11785#56412454174.wav'
-  }
-];
-
-var alPlayer = null;        // <audio> único y persistente, reutilizado por toda la biblioteca
-var alCurrentIdx = -1;      // índice del audio actualmente cargado
-var alBuilt = false;
-
-function alSrc(archivo){
-  // encodeURIComponent es indispensable: los nombres de archivo contienen "#", que de
-  // otro modo el navegador interpretaría como un fragmento de URL y no como parte del nombre.
-  return AL_BASE + encodeURIComponent(archivo);
-}
-
-function alFmtTime(s){
-  if(!isFinite(s) || s<0)return '0:00';
-  s=Math.floor(s);
-  var m=Math.floor(s/60), sec=s%60;
-  return m+':'+(sec<10?'0':'')+sec;
-}
-
-function alRowEl(idx){ return document.querySelector('.al-row[data-idx="'+idx+'"]'); }
-
-function alBuildLibrary(){
-  if(alBuilt)return;
-  alBuilt=true;
-
-  // reproductor único, persistente en el DOM (no se recrea ni se destruye al
-  // cambiar de sección) — por eso el audio sigue sonando aunque el usuario
-  // navegue a otra parte de la cotizadora.
-  alPlayer=document.createElement('audio');
-  alPlayer.id='al-global-player';
-  alPlayer.preload='none';
-  alPlayer.style.display='none';
-  document.body.appendChild(alPlayer);
-
-  alPlayer.addEventListener('timeupdate',function(){
-    if(alCurrentIdx<0)return;
-    var row=alRowEl(alCurrentIdx); if(!row)return;
-    var dur=alPlayer.duration||0;
-    var pct=dur>0?(alPlayer.currentTime/dur*100):0;
-    row.querySelector('.al-progfill').style.width=pct+'%';
-    row.querySelector('.al-proghandle').style.left=pct+'%';
-    row.querySelector('.al-t-cur').textContent=alFmtTime(alPlayer.currentTime);
-  });
-  alPlayer.addEventListener('loadedmetadata',function(){
-    if(alCurrentIdx<0)return;
-    var row=alRowEl(alCurrentIdx); if(!row)return;
-    var d=alFmtTime(alPlayer.duration);
-    row.querySelector('.al-t-dur').textContent=d;
-    row.querySelector('.al-dur-badge').textContent=d;
-  });
-  alPlayer.addEventListener('play',function(){
-    if(alCurrentIdx<0)return;
-    var row=alRowEl(alCurrentIdx); if(!row)return;
-    row.classList.add('playing');
-    row.querySelector('.al-playbtn').textContent='⏸';
-  });
-  alPlayer.addEventListener('pause',function(){
-    if(alCurrentIdx<0)return;
-    var row=alRowEl(alCurrentIdx); if(!row)return;
-    row.classList.remove('playing');
-    row.querySelector('.al-playbtn').textContent='▶';
-  });
-  alPlayer.addEventListener('ended',function(){
-    if(alCurrentIdx<0)return;
-    var row=alRowEl(alCurrentIdx); if(!row)return;
-    row.classList.remove('playing');
-    row.querySelector('.al-playbtn').textContent='▶';
-    row.querySelector('.al-progfill').style.width='0%';
-    row.querySelector('.al-proghandle').style.left='0%';
-    row.querySelector('.al-t-cur').textContent='0:00';
-  });
-
-  var list=$('al-list');
-  list.innerHTML=AL_AUDIOS.map(function(a,idx){
-    return '<div class="al-row" data-idx="'+idx+'">'
-      +'<div class="al-top">'
-        +'<div class="al-icon">🎙️</div>'
-        +'<div class="al-info">'
-          +'<div class="al-titlerow"><span class="al-title">'+a.titulo+'</span><span class="al-cat">'+a.categoria+'</span></div>'
-          +'<div class="al-desc">'+a.descripcion+'</div>'
-        +'</div>'
-        +'<div class="al-eq"><span></span><span></span><span></span><span></span></div>'
-      +'</div>'
-      +'<div class="al-player">'
-        +'<button type="button" class="al-playbtn" onclick="alTogglePlay('+idx+')" title="Reproducir / Pausar">▶</button>'
-        +'<div class="al-progwrap">'
-          +'<div class="al-progbar" onclick="alSeek(event,'+idx+')">'
-            +'<div class="al-progfill"></div>'
-            +'<div class="al-proghandle"></div>'
-          +'</div>'
-          +'<div class="al-times"><span class="al-t-cur">0:00</span><span class="al-t-dur">--:--</span></div>'
-        +'</div>'
-        +'<div class="al-dur-badge">--:--</div>'
-      +'</div>'
-    +'</div>';
-  }).join('');
-}
-
-function alTogglePlay(idx){
-  playClick&&playClick();
-  if(alCurrentIdx===idx){
-    // mismo audio: alternar play/pausa
-    if(alPlayer.paused)alPlayer.play(); else alPlayer.pause();
-    return;
-  }
-  // cambia de audio: pausa el anterior (visualmente) y carga el nuevo bajo demanda
-  if(alCurrentIdx>=0){
-    var prevRow=alRowEl(alCurrentIdx);
-    if(prevRow){prevRow.classList.remove('playing');prevRow.querySelector('.al-playbtn').textContent='▶';}
-  }
-  alCurrentIdx=idx;
-  var a=AL_AUDIOS[idx];
-  alPlayer.src=alSrc(a.archivo);   // carga sólo al reproducir, nunca antes
-  alPlayer.currentTime=0;
-  alPlayer.play();
-}
-
-function alSeek(ev,idx){
-  ev.stopPropagation();
-  if(alCurrentIdx!==idx || !alPlayer || !alPlayer.duration)return;
-  var bar=ev.currentTarget;
-  var rect=bar.getBoundingClientRect();
-  var pct=Math.min(1,Math.max(0,(ev.clientX-rect.left)/rect.width));
-  alPlayer.currentTime=pct*alPlayer.duration;
-}
-
-function toggleAudioLibrary(){
-  alBuildLibrary();
-  var sec=$('audio-library');
-  var showing=!sec.classList.contains('on');
-  sec.classList.toggle('on',showing);
-  $('audio-lib-btn').classList.toggle('on',showing);
-  if(window.matchMedia('(max-width:880px)').matches){
-    $('workstation').style.display=showing?'none':'';
-    $('mtoggle').style.display=showing?'none':'';
-  }
-  $('prodbar').style.visibility=showing?'hidden':'';
 }
 </script>
 </body>
