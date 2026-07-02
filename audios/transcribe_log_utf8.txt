@@ -68,7 +68,7 @@ Detected language: es (prob 1.00), duration: 212.5s
 FILE: s3___010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A7935715B4_RECORDS_86A637C467F5B6B4_2026_05_26_1003_1003#20260526#134229#5863#56226224124.wav
 ====================================================================================================
 Detected language: es (prob 1.00), duration: 682.1s
-[   0.00 -    8.38] Hola, buenas tarde, mi nombre es Ximena Cofr�, yo estoy llamando de parte de Ecosaxicom.
+[   0.00 -    8.38] Hola, buenas tarde, mi nombre es Ximena Cofr�, yo estoy llamando de parte de Equifax Dicom 
 [   8.38 -   13.26] Hablo con la persona encargada de finanzas, representante legal de la empresa.
 [  13.26 -   14.26] S�.
 [  14.26 -   19.82] Mire, se�or, nosotros llamamos del �rea comercial, le estamos ofreciendo una plataforma
@@ -280,7 +280,7 @@ FILE: s3___010438475248-br01a-s3-records63_Recorder_hermes_p_Files_86D445A793571
 Detected language: es (prob 1.00), duration: 166.3s
 [   0.00 -    2.00] Hola, buenas tardes.
 [   2.00 -    3.00] Buenas tardes.
-[   3.00 -    8.00] Me presento, mi nombre es Karen, perd�n, estoy hablando de Decom Xfax.
+[   3.00 -    8.00] Me presento, mi nombre es Karen, perd�n, estoy hablando de Dicom Equifax .
 [   8.00 -    9.00] �Con qui�n tengo el gusto?
 [   9.00 -   10.00] Julio Valdevenito.
 [  10.00 -   14.00] Don Julio, mira estamos llamando a la empresa TS Servicios Limitadas.

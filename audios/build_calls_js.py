@@ -125,7 +125,7 @@ CALLS = [
         {"t": 669.62, "label": "Cierre: envío de correo y próximos pasos"}
     ],
     "rubrica": [
-        {"medicion": "CUMPLE CON OBS", "cita": "mi nombre es Ximena Cofré, yo estoy llamando de parte de Ecosaxicom", "ts": 0.0,
+        {"medicion": "CUMPLE CON OBS", "cita": "mi nombre es Ximena Cofré, yo estoy llamando de parte de Dicom Equifax", "ts": 0.0,
          "comentario": "Se presenta con nombre y empresa, pero no menciona a Infobusiness como distribuidor autorizado de Equifax."},
         {"medicion": "CUMPLE", "cita": "Hablo con la persona encargada de finanzas, representante legal de la empresa. Sí.", "ts": 8.38,
          "comentario": "Valida correctamente al interlocutor al inicio de la llamada."},
@@ -182,7 +182,7 @@ CALLS = [
         {"t": 149.28, "label": "Cierre: agenda seguimiento para el jueves"}
     ],
     "rubrica": [
-        {"medicion": "CUMPLE CON OBS", "cita": "Me presento, mi nombre es Karen, perdón, estoy hablando de Decom Xfax.", "ts": 3.0,
+        {"medicion": "CUMPLE CON OBS", "cita": "Me presento, mi nombre es Karen, perdón, estoy hablando de Dicom Equifax.", "ts": 3.0,
          "comentario": "Se presenta con nombre y empresa, pero no menciona a Infobusiness como distribuidor autorizado de Equifax."},
         {"medicion": "CUMPLE", "cita": "estamos llamando a la empresa TS Servicios Limitadas... ¿Ya está correcto, cierto?", "ts": 10.0,
          "comentario": "Valida que habla con la empresa y la persona correctas antes de continuar."},
@@ -195,7 +195,7 @@ CALLS = [
         {"medicion": "CUMPLE", "cita": "Lo vuelvo a llamar el jueves para ver si lo recibió, si está todo ok, ¿le parece?", "ts": 149.28,
          "comentario": "Agenda un siguiente paso concreto y con fecha definida."},
         {"medicion": "CUMPLE", "cita": "", "ts": None,
-         "comentario": "Lenguaje claro y directo, aunque el nombre de la empresa se transcribe de forma confusa en el audio."},
+         "comentario": "Lenguaje claro y directo durante toda la llamada."},
         {"medicion": "CUMPLE", "cita": "Ok, muchas gracias Don Julio, estamos hablando. Hasta luego.", "ts": 158.28,
          "comentario": "Trato cordial durante toda la llamada, breve y respetuosa."},
         {"medicion": "CUMPLE", "cita": "", "ts": None,
