@@ -911,6 +911,7 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
       <button type="button" class="uis-btn" onclick="setTheme('dark',this)" title="Tema oscuro">Oscuro</button>
     </div>
     <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
+    <button class="snd-toggle" id="force-update-btn" onclick="forceUpdate();" title="Ver la última versión publicada (fuerza una recarga real sin usar caché del navegador)" aria-label="Actualizar a la última versión">⟳</button>
     <a class="ext-btn" href="https://cotizadora.github.io/Cotizadora/pluggin_v9.zip" target="_blank" rel="noopener" title="Descargar extensión CRM Extractor Pro — conecta el discador con el CRM (Chrome / Edge)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V19c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V21H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/></svg>
       <span class="ext-txt"><span class="ext-lb">Extensión CRM</span><span class="ext-sb">Discador ⇄ CRM</span></span>
@@ -1302,7 +1303,8 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
 <div id="cp-toast" aria-live="polite"></div>
 <div id="paste-notice" onclick="this.classList.remove('on');"><div class="pn-card"><div class="pn-check">✅</div><div class="pn-title">MENSAJE COPIADO</div><div class="pn-sub" id="paste-notice-sub">Pégalo con <b>Ctrl+V</b></div></div></div>
 
-<script src="audios/calls_data.js"></script>
+<script>var APP_BUILD='20260702-2';</script>
+<script src="audios/calls_data.js?v=20260702-2"></script>
 <script>
 'use strict';
 /* ════════════════════════════════════════════════════════════════
@@ -4202,6 +4204,23 @@ function playClick(){playSound('click');}
 /* ── Toggle de sonido + feedback sonoro de hover (delegado y throttled) ── */
 var _sndOn=true;
 function toggleSnd(){_sndOn=!_sndOn;var b=document.getElementById('snd-toggle');if(b){b.textContent=_sndOn?'🔊':'🔇';b.classList.toggle('off',!_sndOn);}}
+
+/* CONFIABILIDAD: recarga real sin caché — navega a una URL con un parámetro
+   distinto cada vez, así el navegador no puede reutilizar ninguna copia
+   guardada del HTML (equivalente a Ctrl+Shift+R, pero disparable con un clic
+   para compañeros que no conocen el atajo). */
+function forceUpdate(){
+  playClick();
+  var base=location.pathname;
+  location.href=base+'?_hr='+Date.now();
+}
+(function(){
+  if(location.search.indexOf('_hr=')>-1){
+    window.addEventListener('load',function(){
+      history.replaceState(null,'',location.pathname);
+    });
+  }
+})();
 (function(){
   var _last=0;
   var SEL='.cv-btn,.pbtn,.pv-copy-btn,.htool-btn,.ext-btn,.user-btn,.snd-toggle,.btn-foto,.crm-paste-btn,.exec-save';
