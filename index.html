@@ -1121,6 +1121,7 @@ var PRODUCTS=[
   {key:'bolsa', ic:'🎒',lb:'Informes Comerciales Bolsa',      su:'Reporte Interactivo Bolsa'},
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
+  {key:'malla', ic:'🕸️',lb:'Malla Societaria',su:'Vinculaciones societarias'},
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
   {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM'},
   {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'},
@@ -1202,6 +1203,11 @@ function cfgHTML(key){
       '<div class="fld"><label>Consultas / mes</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(RI_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>'+
       dcSelect('c-dc',[0,10,15,20,25,35,50])+
       '</div>';
+  if(key==='malla')
+    return '<div class="cfg-2">'+
+      '<div class="fld"><label>Consultas / mes</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(MALLA_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>'+
+      dcSelect('c-dc',[0,10,15,20,25,35,50])+
+      '</div>';
   if(key==='bolsa')
     return '<div class="fld"><label>Consultas totales (12 meses)</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(RIB_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>';
   if(key==='pfm')
@@ -1243,6 +1249,11 @@ function computeCurrent(){
     var cR=sR?parseInt(sR.options[sR.selectedIndex].dataset.c):0;
     c.tipo='ri_plan';c.ufLista=uR;c.base=uR*(1-dcR/100);c.cons=cR;
     c.note='Plan mensual 12 meses · UF/consulta lista: <b>'+(uR/cR).toFixed(6)+'</b>';
+  }else if(k==='malla'){
+    var sM=$('c-cons'),uM=parseFloat(gv('c-cons')),dcM=parseInt(gv('c-dc'))||0;
+    var cM=sM?parseInt(sM.options[sM.selectedIndex].dataset.c):0;
+    c.tipo='malla';c.ufLista=uM;c.base=uM*(1-dcM/100);c.cons=cM;
+    c.note='Plan mensual 12 meses · UF/consulta lista: <b>'+(uM/cM).toFixed(6)+'</b>';
   }else if(k==='bolsa'){
     var sB=$('c-cons'),uB=parseFloat(gv('c-cons'));
     var cB=sB?parseInt(sB.options[sB.selectedIndex].dataset.c):0;
@@ -1431,7 +1442,7 @@ function toggleDest(skip){var df=$('dest-fields');if(df)df.style.display=skip?'n
 var BCC_FIJO='eduranb@geoinfobusiness.cl';
 var SOL_LIST=[['ri','Reporte Interactivo',1],['mc','Mora Control',1],['docunico','Publicación Única',0],['pfm','Portfolio Monitor',1],['pc','Partner Check',0],['datafinder','Data Finder',0],['malla','Malla Societaria',0],['iris','IRIS',0],['easycheck','Easy Check',0],['basedatos','Base de Datos',0]];
 var SOL_NAMES={ri:'Reporte Interactivo',mc:'Mora Control',docunico:'Publicación Única',pfm:'Portfolio Monitor',pc:'Partner Check',datafinder:'Data Finder',malla:'Malla Societaria',iris:'IRIS',easycheck:'Easy Check',basedatos:'Base de Datos'};
-var SOL_MAP={ri:'ri_plan',mc:'mc_solo',pfm:'pfm',pc:'pc'};
+var SOL_MAP={ri:'ri_plan',mc:'mc_solo',pfm:'pfm',pc:'pc',malla:'malla'};
 var SOL_CARAC={
   docunico:['Publicación de un documento puntual en DICOM','Sin contratar plan mensual','Pago único asociado al documento','Misma marca DICOM de presión de pago','Gestión individual del documento'],
   datafinder:['Búsqueda de teléfonos, correos y direcciones','Datos de personas y empresas','Múltiples fuentes consolidadas','Información de contacto actualizada','Enriquecimiento de bases de datos'],
@@ -1753,7 +1764,7 @@ var MULTI=[];
 function docsForTipo(tipo){
   var byLabel=function(lbl){return DOCS_ADJUNTABLES.filter(function(d){return d.label===lbl;})[0]||null;};
   var map={bundle4100:['Mora Control','Reporte Interactivo'],bundleIlim:['Mora Control','Reporte Interactivo'],
-    mc_solo:['Mora Control'],ri_plan:['Reporte Interactivo'],ri_bolsa:['Reporte Interactivo'],pfm:['Portfolio Monitor'],pc:['Partner Check'],
+    mc_solo:['Mora Control'],ri_plan:['Reporte Interactivo'],ri_bolsa:['Reporte Interactivo'],pfm:['Portfolio Monitor'],pc:['Partner Check'],malla:['Malla Societaria'],
     combo3:['Reporte Interactivo','Mora Control','Portfolio Monitor']};
   return (map[tipo]||[]).map(byLabel).filter(Boolean);
 }
@@ -2351,14 +2362,15 @@ function preloadLogo(cb){
 var B4100=[{r:10,u:2.5,p:28},{r:20,u:3,p:32},{r:30,u:3.5,p:38},{r:40,u:4,p:42},{r:50,u:4.5,p:46},{r:60,u:5,p:50},{r:70,u:5.5,p:54},{r:80,u:6,p:58},{r:90,u:6.5,p:62},{r:100,u:7,p:66}];
 var BILIM=[{r:10,u:4,p:42},{r:20,u:4.5,p:46},{r:30,u:5,p:48},{r:40,u:5.5,p:50},{r:50,u:6,p:52},{r:60,u:6.5,p:54},{r:70,u:7,p:56},{r:80,u:7.5,p:58},{r:90,u:8,p:60},{r:100,u:8.5,p:62}];
 var RI_T=[{c:10,u:0.11},{c:20,u:0.165},{c:30,u:0.2419},{c:40,u:0.3153},{c:50,u:0.3658},{c:60,u:0.4264},{c:70,u:0.4808},{c:80,u:0.5283},{c:90,u:0.5681},{c:100,u:0.627},{c:150,u:0.8359},{c:200,u:0.891},{c:250,u:0.9432},{c:300,u:0.9874},{c:350,u:1.017},{c:400,u:1.0365},{c:500,u:1.056},{c:1000,u:1.8612}];
+var MALLA_T=[{c:10,u:0.45},{c:15,u:0.68},{c:20,u:0.9},{c:25,u:1.13},{c:30,u:1.35},{c:40,u:1.8},{c:50,u:2.16},{c:60,u:2.52},{c:70,u:2.88},{c:80,u:3.25},{c:90,u:3.52},{c:100,u:3.79},{c:150,u:5.19},{c:200,u:6.8},{c:250,u:7.45},{c:300,u:7.95},{c:500,u:9.3},{c:1000,u:16.6}];
 var RIB_T=[{c:10,u:3},{c:20,u:5},{c:30,u:6},{c:40,u:7},{c:50,u:8},{c:60,u:9},{c:70,u:10},{c:80,u:11},{c:90,u:12},{c:100,u:14},{c:150,u:18},{c:200,u:19},{c:250,u:20},{c:300,u:21},{c:500,u:25},{c:1000,u:40}];
 var MC_P=[{id:'4100',lbl:'MC 4100',u:2.65,p:30},{id:'6900',lbl:'MC 6900',u:3.65,p:44},{id:'ilim',lbl:'MC Ilimitado',u:6.65,p:80}];
 var PFM_S={1:0.0725,2:0.0711,3:0.0697,5:0.0683,10:0.067,20:0.065,30:0.063,40:0.062,50:0.060,60:0.058,70:0.056,80:0.054,90:0.052,100:0.050,200:0.039,300:0.035,500:0.029,1000:0.024};
 var PFM_Q={1:0.0563,2:0.0554,3:0.0546,5:0.0538,10:0.053,20:0.051,30:0.050,40:0.048,50:0.046,60:0.045,70:0.043,80:0.041,90:0.039,100:0.038,200:0.029,300:0.025,500:0.021,1000:0.017};
 var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.039,50:0.038,60:0.036,70:0.035,80:0.033,90:0.032,100:0.030,200:0.023,300:0.020,500:0.017,1000:0.013};
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
-var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Comercial',sub:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA · 12 MESES',n:'Informes Comerciales Bolsa',sub:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
-var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de informes comerciales para consumir durante 12 meses','Pago único, sin cargo mensual','Los informes se utilizan a su propio ritmo dentro del período','Mismos datos del Reporte Interactivo: score, morosidades y comportamiento','Ideal para consultas puntuales, sin comprometer un plan mensual'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
+var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Comercial',sub:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA · 12 MESES',n:'Informes Comerciales Bolsa',sub:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},malla:{badge:'COMPLIANCE · VINCULACIONES',n:'Malla Societaria'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
+var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA sin tope','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','Portal de autogestión disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Publicación en Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS por mes','Notificaciones marca DICOM (6× más eficaz)','Gestión de abonos y pagos parciales','Eliminación en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de informes comerciales para consumir durante 12 meses','Pago único, sin cargo mensual','Los informes se utilizan a su propio ritmo dentro del período','Mismos datos del Reporte Interactivo: score, morosidades y comportamiento','Ideal para consultas puntuales, sin comprometer un plan mensual'],pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],malla:['Socios y sociedades vinculadas a un RUT','Dos niveles de profundidad por consulta','Datos actualizados de personas y sus cónyuges','Comportamiento comercial de cada vinculado','Actualización permanente con fuentes propias Equifax'],combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio']};
 /* ── BULLETS ENRIQUECIDOS — SOLO Gmail/Outlook (WhatsApp usa PITEMS) ── */
 var PITEMS_MAIL={
   bundle4100:['Publicación DICOM hasta $4.100.000','40 Emails + 10 Cartas + 5 SMS por mes','Informes comerciales incluidos','~70% de recuperación estimada en el mes 1','Beneficio tributario por castigo de deuda','Acciones de cobranza 6× más eficaces','Bloqueo comercial que promueve el pago','Score de riesgo Equifax para evaluar','Portal de autogestión disponible 24/7','Evalúa antes de dar crédito y cobra después'],
@@ -2368,6 +2380,7 @@ var PITEMS_MAIL={
   ri_bolsa:['Bolsa de informes comerciales distribuida a lo largo de 12 meses','Pago único, sin cargo mensual: los informes se consumen a su ritmo','Modalidad distinta del Reporte Comercial estándar','Mismos datos que el Reporte Interactivo: score, morosidades y comportamiento','Antecedentes patrimoniales, laborales y tributarios','Activación mediante transferencia','Proceso de contratación propio con documentación específica','Ideal para volúmenes de consulta planificados a 12 meses'],
   pfm:['Monitoreo masivo o individual de cartera','Alertas automáticas ante cambios financieros','Indicadores analíticos de riesgo y marketing','Carteras estáticas o dinámicas configurables','Actualización semanal, quincenal o mensual','Revisión periódica de toda la cartera','Potencia buenos clientes, limita los riesgosos','Detección temprana de deterioro financiero','Seguimiento de personas y empresas','Reevaluación al renovar líneas de crédito'],
   pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7','Validación de antecedentes de cada proveedor','Reduce el riesgo de contraparte','Centraliza la gestión de proveedores','Respaldo de la marca Equifax'],
+  malla:['Socios y sociedades vinculadas a un RUT en una sola consulta','Dos niveles de profundidad: el RUT original más cualquiera de sus socios o sociedades','Posibilidad de seguir profundizando en cada RUT de la red','Datos actualizados de personas naturales y de sus cónyuges','Comportamiento comercial de cada empresa vinculada','Acceso directo a Directorios de Vehículos, Bienes Raíces e Informes','Agiliza la evaluación de clientes, proveedores y socios comerciales','Mitiga fraudes con un análisis de riesgo más profundo','Insumo clave para compliance y due diligence','Actualización permanente con fuentes propias de Equifax'],
   combo3:['Evalúa clientes antes de otorgar crédito (RI)','Recupera deudas impagas en DICOM (MC)','Monitorea tu cartera en tiempo real (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio','Score de riesgo Equifax para cada decisión','Acciones de cobranza 6× más eficaces','Alertas tempranas de deterioro financiero','Potencia buenos clientes y limita riesgos','Una plataforma para evaluar, cobrar y monitorear']
 };
 function loadExecutivoFields(){updWspLink();}
@@ -2442,6 +2455,15 @@ function genMail(){
     if(_riCons){
       var _riLine=(tipo==='ri_bolsa')?('Bolsa de '+_riCons+' informes comerciales para 12 meses'):('Plan de '+_riCons+' consultas al mes');
       it=[_riLine].concat(it);itMail=[_riLine].concat(itMail);
+    }
+  }
+  /* Malla Societaria: reflejar la cantidad de consultas cotizada. Misma fuente única
+     (mc2 = c.cons) y mismo mecanismo que ri_plan; guarda aditiva independiente. */
+  if(tipo==='malla'){
+    var _maCons=parseInt(gv('mc2'))||0;
+    if(_maCons){
+      var _maLine='Plan de '+_maCons+' consultas al mes';
+      it=[_maLine].concat(it);itMail=[_maLine].concat(itMail);
     }
   }
   var hayDc=ufL&&ufV&&ufV<ufL;
