@@ -1601,14 +1601,17 @@ function cfgHTML(key){
       '<div class="note-inline" style="margin-bottom:10px;">💳 Usa <b>Datos del cliente</b> (arriba) para Empresa · RUT · Contacto, y el botón <b>Ejecutivo/a</b> del encabezado para los datos del asesor. Aquí solo se completan los datos propios del pago.</div>'+
       '<div class="cfg-2">'+
         '<div class="fld"><label>Fecha del correo</label><input type="date" id="pp-fecha" value="'+_ppHoy+'" oninput="refresh()"></div>'+
-        '<div class="fld"><label>Monto del documento publicado</label><input type="number" id="pp-monto" placeholder="Ej: 304000" min="0" step="1000" oninput="refresh()"></div>'+
+        '<div class="fld"><label>Deuda a Publicar</label><input type="number" id="pp-monto" placeholder="Ej: 304000" min="0" step="1000" oninput="refresh()"></div>'+
       '</div>'+
       '<div class="cfg-2">'+
-        '<div class="fld"><label>Valor neto</label><input type="number" id="pp-neto" placeholder="Ej: 45600" min="0" step="100" oninput="refresh()"></div>'+
-        '<div class="fld"><label>IVA (19%) · calculado</label><input type="text" id="pp-iva-view" readonly value="—"></div>'+
+        '<div class="fld"><label>% a cobrar (neto) — por defecto 15%</label><input type="number" id="pp-pct" value="15" min="0" step="0.5" oninput="refresh()"></div>'+
+        '<div class="fld"><label>Valor neto · calculado</label><input type="text" id="pp-neto-view" readonly value="—"></div>'+
       '</div>'+
-      '<div class="fld"><label>TOTAL A TRANSFERIR · calculado</label><input type="text" id="pp-total-view" readonly value="—" style="font-weight:800;color:var(--y);font-size:1.05rem;"></div>'+
-      '<div class="note-inline" style="margin-top:10px;">💳 <b>Pago Publicación Única:</b> genera el correo de confirmación de contrato firmado y solicitud de transferencia, con datos bancarios y total definitivo (no es una cotización).</div>';
+      '<div class="cfg-2">'+
+        '<div class="fld"><label>IVA (19%) · calculado</label><input type="text" id="pp-iva-view" readonly value="—"></div>'+
+        '<div class="fld"><label>TOTAL A TRANSFERIR · calculado</label><input type="text" id="pp-total-view" readonly value="—" style="font-weight:800;color:var(--y);font-size:1.05rem;"></div>'+
+      '</div>'+
+      '<div class="note-inline" style="margin-top:10px;">💳 <b>Pago Publicación Única:</b> ingresa solo la deuda a publicar. El neto se calcula solo (15% por defecto, editable si cobras otro %), el IVA y el total a transferir se calculan automáticamente y son definitivos (no es una cotización).</div>';
   }
   if(key==='bundle')
     return '<div class="cfg-2">'+
@@ -2101,30 +2104,34 @@ function pubResumenHTML(){
     '</div>'+
     '<div class="note-inline" style="margin-top:10px;">Valor referencial (15% del documento + IVA). El valor final puede ajustarse al contratar.</div>';
 }
-/* ════════ PAGO PUBLICACIÓN ÚNICA — cálculo y resumen (independiente de la lógica UF/cotización) ════════ */
-function ppNeto(){var v=parseFloat(gv('pp-neto'));return(isNaN(v)||v<=0)?0:v;}
+/* ════════ PAGO PUBLICACIÓN ÚNICA — cálculo y resumen (independiente de la lógica UF/cotización) ════════
+   El usuario solo ingresa la DEUDA A PUBLICAR y el % a cobrar (15% por defecto).
+   El neto, el IVA (19%) y el total a transferir se calculan automáticamente. */
 function ppMontoDoc(){var v=parseFloat(gv('pp-monto'));return(isNaN(v)||v<=0)?0:v;}
+function ppPct(){var v=parseFloat(gv('pp-pct'));return(isNaN(v)||v<0)?15:v;}
 function ppCalc(){
-  var neto=ppNeto();if(!neto)return null;
-  var monto=ppMontoDoc();
+  var monto=ppMontoDoc();if(!monto)return null;
+  var pct=ppPct();
+  var neto=Math.round(monto*pct/100);
   var iva=Math.round(neto*0.19);
   var total=neto+iva;
-  return {monto:monto,neto:neto,iva:iva,total:total};
+  return {monto:monto,pct:pct,neto:neto,iva:iva,total:total};
 }
 function pagoPubResumenHTML(){
   var c=ppCalc();
   var html='<div class="sum-head"><div class="sum-name">Pago Publicación Única</div><div class="sum-badge">CONFIRMACIÓN DE PAGO</div></div>';
   if(!c){
-    return html+'<div class="note-inline" style="margin:0;">💳 Ingresa el <b>valor neto</b> para calcular el IVA y el total a transferir.</div>';
+    return html+'<div class="note-inline" style="margin:0;">💳 Ingresa la <b>deuda a publicar</b> para calcular el neto, el IVA y el total a transferir.</div>';
   }
   return html+
     '<div class="metrics">'+
-      (c.monto?metric('Monto documento','m-pp-monto','b',fmtN(c.monto)):'')+
+      metric('Deuda a publicar','m-pp-monto','b',fmtN(c.monto))+
+      metric('% aplicado','m-pp-pct','wa',ufd(c.pct)+'%')+
       metric('Valor neto','m-pp-neto','g',fmtN(c.neto))+
       metric('IVA (19%)','m-pp-iva','wa',fmtN(c.iva))+
       metricBig('Total a transferir','m-pp-total','y',fmtN(c.total))+
     '</div>'+
-    '<div class="note-inline" style="margin-top:10px;">💳 El correo confirma la recepción del contrato firmado y solicita el pago para iniciar la publicación. El total es definitivo.</div>';
+    '<div class="note-inline" style="margin-top:10px;">💳 Neto calculado automáticamente como el <b>'+ufd(c.pct)+'%</b> de la deuda a publicar. El total es definitivo.</div>';
 }
 function pubBlocksInner(theme){
   var dark=(theme==='dark');
@@ -3483,7 +3490,8 @@ function genMailPagoPub(){
   }
 
   var c=ppCalc();
-  var _ivaEl=$('pp-iva-view'),_totEl=$('pp-total-view');
+  var _netoEl=$('pp-neto-view'),_ivaEl=$('pp-iva-view'),_totEl=$('pp-total-view');
+  if(_netoEl)_netoEl.value=c?fmtN(c.neto):'—';
   if(_ivaEl)_ivaEl.value=c?fmtN(c.iva):'—';
   if(_totEl)_totEl.value=c?fmtN(c.total):'—';
 
