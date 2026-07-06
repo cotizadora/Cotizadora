@@ -1332,8 +1332,8 @@ var PRODUCTS=[
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
   {key:'malla', ic:'🕸️',lb:'Malla Societaria',su:'Vinculaciones societarias'},
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
-  {key:'datafinder',ic:'🔎',lb:'Data Finder',su:'Búsqueda de contacto'},
   {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM'},
+  {key:'pago_pub',ic:'💳',lb:'Pago Publicación Única',su:'Confirmación de pago'},
   {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'},
   {key:'soluciones',ic:'🧩',lb:'Información de Productos Equifax',su:'Catálogo'}
 ];
@@ -1595,6 +1595,21 @@ function cfgHTML(key){
       '<div class="note-inline" style="margin-top:10px;">📰 <b>Publicación Única:</b> el valor a cobrar es referencial y corresponde aproximadamente al <b>15% del monto del documento</b> (neto) más IVA. Sin tarifa fija; el valor final puede ajustarse al contratar.</div>'+
       '<button type="button" id="btn-add-pub-multi" class="exec-save" style="background:var(--rd);color:#fff;margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 16px;" onclick="addPubToMulti();playClick();" title="Agrega esta Publicación Única a la propuesta Multiproducto"><span style="font-size:1.4rem;line-height:1;">📦</span><span>Agregar a Multiproducto</span></button>';
   }
+  if(key==='pago_pub'){
+    var _ppHoy=new Date().toISOString().slice(0,10);
+    return '<div class="sol-head2">Datos del pago — Publicación Única</div>'+
+      '<div class="note-inline" style="margin-bottom:10px;">💳 Usa <b>Datos del cliente</b> (arriba) para Empresa · RUT · Contacto, y el botón <b>Ejecutivo/a</b> del encabezado para los datos del asesor. Aquí solo se completan los datos propios del pago.</div>'+
+      '<div class="cfg-2">'+
+        '<div class="fld"><label>Fecha del correo</label><input type="date" id="pp-fecha" value="'+_ppHoy+'" oninput="refresh()"></div>'+
+        '<div class="fld"><label>Monto del documento publicado</label><input type="number" id="pp-monto" placeholder="Ej: 304000" min="0" step="1000" oninput="refresh()"></div>'+
+      '</div>'+
+      '<div class="cfg-2">'+
+        '<div class="fld"><label>Valor neto</label><input type="number" id="pp-neto" placeholder="Ej: 45600" min="0" step="100" oninput="refresh()"></div>'+
+        '<div class="fld"><label>IVA (19%) · calculado</label><input type="text" id="pp-iva-view" readonly value="—"></div>'+
+      '</div>'+
+      '<div class="fld"><label>TOTAL A TRANSFERIR · calculado</label><input type="text" id="pp-total-view" readonly value="—" style="font-weight:800;color:var(--y);font-size:1.05rem;"></div>'+
+      '<div class="note-inline" style="margin-top:10px;">💳 <b>Pago Publicación Única:</b> genera el correo de confirmación de contrato firmado y solicitud de transferencia, con datos bancarios y total definitivo (no es una cotización).</div>';
+  }
   if(key==='bundle')
     return '<div class="cfg-2">'+
       '<div class="fld"><label>Tipo Mora Control</label><select id="c-mc" oninput="onConfigChange()" onchange="onConfigChange()"><option value="4100">MC 4100</option><option value="ilim">MC Ilimitado</option></select></div>'+
@@ -1614,11 +1629,6 @@ function cfgHTML(key){
     return '<div class="cfg-2">'+
       '<div class="fld"><label>Consultas / mes</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(MALLA_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>'+
       dcSelect('c-dc',[0,10,15,20,25,35,50])+
-      '</div>';
-  if(key==='datafinder')
-    return '<div class="cfg-2">'+
-      '<div class="fld"><label>Consultas / mes</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(DF_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>'+
-      dcSelect('c-dc',[0,15,25,35,50])+
       '</div>';
   if(key==='bolsa')
     return '<div class="fld"><label>Consultas totales (12 meses)</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(RIB_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>';
@@ -1666,11 +1676,6 @@ function computeCurrent(){
     var cM=sM?parseInt(sM.options[sM.selectedIndex].dataset.c):0;
     c.tipo='malla';c.ufLista=uM;c.base=uM*(1-dcM/100);c.cons=cM;
     c.note='Plan mensual 12 meses · UF/consulta lista: <b>'+(uM/cM).toFixed(6)+'</b>';
-  }else if(k==='datafinder'){
-    var sD=$('c-cons'),uD=parseFloat(gv('c-cons')),dcD=parseInt(gv('c-dc'))||0;
-    var cD=sD?parseInt(sD.options[sD.selectedIndex].dataset.c):0;
-    c.tipo='datafinder';c.ufLista=uD;c.base=uD*(1-dcD/100);c.cons=cD;
-    c.note='Plan mensual 12 meses · UF/consulta lista: <b>'+(uD/cD).toFixed(6)+'</b>';
   }else if(k==='bolsa'){
     var sB=$('c-cons'),uB=parseFloat(gv('c-cons'));
     var cB=sB?parseInt(sB.options[sB.selectedIndex].dataset.c):0;
@@ -1830,6 +1835,7 @@ function refresh(){
   if(CURRENT.key==='soluciones'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='bdd'){var szb=document.getElementById('summary-zone');if(szb)szb.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='pub'){var szp=document.getElementById('summary-zone');if(szp)szp.innerHTML=pubResumenHTML();genMail();syncWA();return;}
+  if(CURRENT.key==='pago_pub'){var szpp=document.getElementById('summary-zone');if(szpp)szpp.innerHTML=pagoPubResumenHTML();genMail();syncWA();return;}
   var c=computeCurrent();if(!c)return;LAST=c;
   setBridge('mt',c.tipo);
   setBridge('mu',c.ufVenta>0?c.ufVenta:'');
@@ -2094,6 +2100,31 @@ function pubResumenHTML(){
       metricBig('Total aprox. a cobrar','m-pub-total','y',fmtN(c.total))+
     '</div>'+
     '<div class="note-inline" style="margin-top:10px;">Valor referencial (15% del documento + IVA). El valor final puede ajustarse al contratar.</div>';
+}
+/* ════════ PAGO PUBLICACIÓN ÚNICA — cálculo y resumen (independiente de la lógica UF/cotización) ════════ */
+function ppNeto(){var v=parseFloat(gv('pp-neto'));return(isNaN(v)||v<=0)?0:v;}
+function ppMontoDoc(){var v=parseFloat(gv('pp-monto'));return(isNaN(v)||v<=0)?0:v;}
+function ppCalc(){
+  var neto=ppNeto();if(!neto)return null;
+  var monto=ppMontoDoc();
+  var iva=Math.round(neto*0.19);
+  var total=neto+iva;
+  return {monto:monto,neto:neto,iva:iva,total:total};
+}
+function pagoPubResumenHTML(){
+  var c=ppCalc();
+  var html='<div class="sum-head"><div class="sum-name">Pago Publicación Única</div><div class="sum-badge">CONFIRMACIÓN DE PAGO</div></div>';
+  if(!c){
+    return html+'<div class="note-inline" style="margin:0;">💳 Ingresa el <b>valor neto</b> para calcular el IVA y el total a transferir.</div>';
+  }
+  return html+
+    '<div class="metrics">'+
+      (c.monto?metric('Monto documento','m-pp-monto','b',fmtN(c.monto)):'')+
+      metric('Valor neto','m-pp-neto','g',fmtN(c.neto))+
+      metric('IVA (19%)','m-pp-iva','wa',fmtN(c.iva))+
+      metricBig('Total a transferir','m-pp-total','y',fmtN(c.total))+
+    '</div>'+
+    '<div class="note-inline" style="margin-top:10px;">💳 El correo confirma la recepción del contrato firmado y solicita el pago para iniciar la publicación. El total es definitivo.</div>';
 }
 function pubBlocksInner(theme){
   var dark=(theme==='dark');
@@ -2453,6 +2484,10 @@ function setProduct(key){
   var p=PRODUCTS.find(function(x){return x.key===key;});
   $('cfg-prod-name').textContent=p?'· '+p.lb:'';
   $('config-zone').innerHTML=cfgHTML(key);
+  /* Pago Publicación Única: correo (Outlook/Gmail/WhatsApp), sin Ficha de Oferta (imagen) */
+  var _imgBtn=document.getElementById('cvbtn-img');
+  if(_imgBtn){_imgBtn.style.display=(key==='pago_pub')?'none':'';}
+  if(key==='pago_pub'&&typeof CURRENT_PV!=='undefined'&&CURRENT_PV==='img')setPreview('outlook');
   refresh();
   if(window.matchMedia('(max-width:880px)').matches)setMobileView('config');
 }
@@ -2779,12 +2814,6 @@ function preloadLogo(cb){
 var B4100=[{r:10,u:2.5,p:28},{r:20,u:3,p:32},{r:30,u:3.5,p:38},{r:40,u:4,p:42},{r:50,u:4.5,p:46},{r:60,u:5,p:50},{r:70,u:5.5,p:54},{r:80,u:6,p:58},{r:90,u:6.5,p:62},{r:100,u:7,p:66}];
 var BILIM=[{r:10,u:4,p:42},{r:20,u:4.5,p:46},{r:30,u:5,p:48},{r:40,u:5.5,p:50},{r:50,u:6,p:52},{r:60,u:6.5,p:54},{r:70,u:7,p:56},{r:80,u:7.5,p:58},{r:90,u:8,p:60},{r:100,u:8.5,p:62}];
 var RI_T=[{c:10,u:0.11},{c:20,u:0.165},{c:30,u:0.2419},{c:40,u:0.3153},{c:50,u:0.3658},{c:60,u:0.4264},{c:70,u:0.4808},{c:80,u:0.5283},{c:90,u:0.5681},{c:100,u:0.627},{c:150,u:0.8359},{c:200,u:0.891},{c:250,u:0.9432},{c:300,u:0.9874},{c:350,u:1.017},{c:400,u:1.0365},{c:500,u:1.056},{c:1000,u:1.8612}];
-var DF_T=[{c:50,u:1.05},{c:100,u:2},{c:150,u:2.76},{c:200,u:3.4},{c:250,u:3.95},
-{c:300,u:4.41},{c:350,u:5.005},{c:400,u:5.56},{c:450,u:6.12},{c:500,u:6.6},
-{c:750,u:9.375},{c:1000,u:11.9},{c:1500,u:16.05},{c:2000,u:19.2},{c:2500,u:21.75},
-{c:3000,u:23.7},{c:3500,u:25.2},{c:4000,u:26},{c:5000,u:26.5},{c:7500,u:34.5},
-{c:10000,u:40},{c:15000,u:55.5},{c:20000,u:70},{c:30000,u:99},{c:40000,u:124},
-{c:50000,u:145}];
 var MALLA_T=[{c:10,u:0.45},{c:15,u:0.68},{c:20,u:0.9},{c:25,u:1.13},{c:30,u:1.35},{c:40,u:1.8},{c:50,u:2.16},{c:60,u:2.52},{c:70,u:2.88},{c:80,u:3.25},{c:90,u:3.52},{c:100,u:3.79},{c:150,u:5.19},{c:200,u:6.8},{c:250,u:7.45},{c:300,u:7.95},{c:500,u:9.3},{c:1000,u:16.6}];
 var RIB_T=[{c:10,u:3},{c:20,u:5},{c:30,u:6},{c:40,u:7},{c:50,u:8},{c:60,u:9},{c:70,u:10},{c:80,u:11},{c:90,u:12},{c:100,u:14},{c:150,u:18},{c:200,u:19},{c:250,u:20},{c:300,u:21},{c:500,u:25},{c:1000,u:40}];
 var MC_P=[{id:'4100',lbl:'MC 4100',u:2.65,p:30},{id:'6900',lbl:'MC 6900',u:3.65,p:44},{id:'ilim',lbl:'MC Ilimitado',u:6.65,p:80}];
@@ -2792,8 +2821,8 @@ var PFM_S={1:0.0725,2:0.0711,3:0.0697,5:0.0683,10:0.067,20:0.065,30:0.063,40:0.0
 var PFM_Q={1:0.0563,2:0.0554,3:0.0546,5:0.0538,10:0.053,20:0.051,30:0.050,40:0.048,50:0.046,60:0.045,70:0.043,80:0.041,90:0.039,100:0.038,200:0.029,300:0.025,500:0.021,1000:0.017};
 var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.039,50:0.038,60:0.036,70:0.035,80:0.033,90:0.032,100:0.030,200:0.023,300:0.020,500:0.017,1000:0.013};
 function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
-var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Comercial',sub:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA · 12 MESES',n:'Informes Comerciales Bolsa',sub:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},malla:{badge:'COMPLIANCE · VINCULACIONES',n:'Malla Societaria'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'},datafinder:{badge:'BÚSQUEDA DE CONTACTO',n:'Data Finder'}};
-var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000 desde una plataforma integral de cobranza','40 Emails + 10 Cartas + 5 SMS al mes, acciones marca DICOM','Informes comerciales Equifax incluidos para evaluar antes de vender','~70% de recuperación estimada en el primer mes','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA, sin tope de monto','40 Emails + 10 Cartas + 5 SMS al mes, acciones DICOM 6× más eficaces','Informes comerciales Equifax incluidos para evaluar antes de vender','Portal de autogestión de la cobranza disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Plataforma integral de cobranza con publicación en el Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS al mes para acelerar el recupero','Acciones de cobranza marca DICOM: 6× más probabilidades de recuperar','Administra y agrupa deudores; gestiona abonos y pagos parciales','Incorpora y elimina morosos en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de informes comerciales para consumir durante 12 meses','Pago único, sin cargo mensual','Los informes se utilizan a su propio ritmo dentro del período','Mismos datos del Reporte Interactivo: score, morosidades y comportamiento','Ideal para consultas puntuales, sin comprometer un plan mensual'],pfm:['Monitoreo continuo de su cartera de clientes y prospectos','Detecta variaciones comerciales y de morosidad con alertas oportunas','Indicadores analíticos de riesgo y marketing, individual o masivo','Anticípese al riesgo: potencie buenos clientes y limite los riesgosos','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],malla:['Socios y sociedades vinculadas a un RUT','Dos niveles de profundidad por consulta','Datos actualizados de personas y sus cónyuges','Comportamiento comercial de cada vinculado','Actualización permanente con fuentes propias Equifax'],combo3:['Evalúa clientes antes de otorgar crédito con score Equifax (RI)','Recupera deudas publicando en DICOM y gestionando la cobranza (MC)','Monitorea continuamente tu cartera y anticipa el riesgo (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio: evaluar, cobrar y monitorear'],datafinder:['Búsqueda de teléfonos, correos y direcciones','Datos de personas y empresas','Múltiples fuentes consolidadas','Información de contacto actualizada','Enriquecimiento de bases de datos']};
+var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Comercial',sub:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA · 12 MESES',n:'Informes Comerciales Bolsa',sub:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},malla:{badge:'COMPLIANCE · VINCULACIONES',n:'Malla Societaria'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
+var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000 desde una plataforma integral de cobranza','40 Emails + 10 Cartas + 5 SMS al mes, acciones marca DICOM','Informes comerciales Equifax incluidos para evaluar antes de vender','~70% de recuperación estimada en el primer mes','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA, sin tope de monto','40 Emails + 10 Cartas + 5 SMS al mes, acciones DICOM 6× más eficaces','Informes comerciales Equifax incluidos para evaluar antes de vender','Portal de autogestión de la cobranza disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Plataforma integral de cobranza con publicación en el Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS al mes para acelerar el recupero','Acciones de cobranza marca DICOM: 6× más probabilidades de recuperar','Administra y agrupa deudores; gestiona abonos y pagos parciales','Incorpora y elimina morosos en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de informes comerciales para consumir durante 12 meses','Pago único, sin cargo mensual','Los informes se utilizan a su propio ritmo dentro del período','Mismos datos del Reporte Interactivo: score, morosidades y comportamiento','Ideal para consultas puntuales, sin comprometer un plan mensual'],pfm:['Monitoreo continuo de su cartera de clientes y prospectos','Detecta variaciones comerciales y de morosidad con alertas oportunas','Indicadores analíticos de riesgo y marketing, individual o masivo','Anticípese al riesgo: potencie buenos clientes y limite los riesgosos','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],malla:['Socios y sociedades vinculadas a un RUT','Dos niveles de profundidad por consulta','Datos actualizados de personas y sus cónyuges','Comportamiento comercial de cada vinculado','Actualización permanente con fuentes propias Equifax'],combo3:['Evalúa clientes antes de otorgar crédito con score Equifax (RI)','Recupera deudas publicando en DICOM y gestionando la cobranza (MC)','Monitorea continuamente tu cartera y anticipa el riesgo (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio: evaluar, cobrar y monitorear']};
 /* ── BULLETS ENRIQUECIDOS — SOLO Gmail/Outlook (WhatsApp usa PITEMS) ── */
 var PITEMS_MAIL={
   bundle4100:['Publicación DICOM hasta $4.100.000 desde una plataforma integral de cobranza','40 Emails + 10 Cartas + 5 SMS al mes para acelerar el recupero','Informes comerciales Equifax incluidos para evaluar antes de vender','~70% de recuperación estimada en el primer mes','Beneficio tributario por castigo de deuda','Acciones de cobranza marca DICOM: hasta 6× más probabilidades de recuperar','Bloqueo comercial del deudor moroso que promueve el pago','Score de riesgo Equifax para respaldar cada decisión de crédito','Portal de autogestión de la cobranza disponible 24/7','Evalúa antes de otorgar crédito y recupera después, en una sola relación'],
@@ -2804,8 +2833,7 @@ var PITEMS_MAIL={
   pfm:['Herramienta de monitoreo continuo de su cartera de clientes y prospectos','Análisis, monitoreo y control de personas naturales y jurídicas','Detecta variaciones comerciales y de morosidad, positivas y negativas','Alertas oportunas y configurables para anticiparse al riesgo','Indicadores analíticos orientados a riesgo y marketing','Seguimiento individual o masivo, con monitoreo dinámico de la cartera','Actualización semanal, quincenal o mensual','Potencia a sus buenos clientes y limita los de mayor riesgo','Anticipa el deterioro financiero y protege su cartera vigente','Reevaluación al renovar líneas de crédito o facilidades de pago'],
   pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7','Validación de antecedentes de cada proveedor','Reduce el riesgo de contraparte','Centraliza la gestión de proveedores','Respaldo de la marca Equifax'],
   malla:['Socios y sociedades vinculadas a un RUT en una sola consulta','Dos niveles de profundidad: el RUT original más cualquiera de sus socios o sociedades','Posibilidad de seguir profundizando en cada RUT de la red','Datos actualizados de personas naturales y de sus cónyuges','Comportamiento comercial de cada empresa vinculada','Acceso directo a Directorios de Vehículos, Bienes Raíces e Informes','Agiliza la evaluación de clientes, proveedores y socios comerciales','Mitiga fraudes con un análisis de riesgo más profundo','Insumo clave para compliance y due diligence','Actualización permanente con fuentes propias de Equifax'],
-  combo3:['Evalúa clientes antes de otorgar crédito con score de riesgo Equifax (RI)','Recupera deudas impagas publicando en el Boletín Electrónico DICOM (MC)','Monitoreo continuo de tu cartera de clientes y prospectos (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio: evaluar, cobrar y monitorear','Acciones de cobranza marca DICOM: hasta 6× más probabilidades de recuperar','Alertas oportunas ante variaciones comerciales y de morosidad','Potencia a tus buenos clientes y limita los de mayor riesgo','Administra y agrupa deudores; gestiona abonos y pagos parciales','Una sola plataforma para evaluar, cobrar y monitorear'],
-  datafinder:['Búsqueda de teléfonos, correos y direcciones','Datos de personas y empresas','Múltiples fuentes consolidadas','Información de contacto actualizada','Enriquecimiento de bases de datos','Recupere contacto para cobrar o vender','Mejore la localización de su cartera','Aumente la efectividad de sus campañas']
+  combo3:['Evalúa clientes antes de otorgar crédito con score de riesgo Equifax (RI)','Recupera deudas impagas publicando en el Boletín Electrónico DICOM (MC)','Monitoreo continuo de tu cartera de clientes y prospectos (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio: evaluar, cobrar y monitorear','Acciones de cobranza marca DICOM: hasta 6× más probabilidades de recuperar','Alertas oportunas ante variaciones comerciales y de morosidad','Potencia a tus buenos clientes y limita los de mayor riesgo','Administra y agrupa deudores; gestiona abonos y pagos parciales','Una sola plataforma para evaluar, cobrar y monitorear']
 };
 function loadExecutivoFields(){updWspLink();}
 function loadExecutivo(){
@@ -2820,6 +2848,7 @@ function loadExecutivo(){
   }
 }
 function genMail(){
+  if(typeof CURRENT!=='undefined'&&CURRENT.key==='pago_pub'){genMailPagoPub();return;}
   var isSol=(typeof CURRENT!=='undefined'&&CURRENT.key==='soluciones');
   var isMulti=(typeof CURRENT!=='undefined'&&CURRENT.key==='multi');
   var isBdd=(typeof CURRENT!=='undefined'&&CURRENT.key==='bdd');
@@ -3421,6 +3450,289 @@ function genMail(){
     _st3.style.color='#2ecc71'; _st3.textContent='✔ Actualizado · '+_tt3;
   }
 }
+/* ════════════════════════════════════════════════════════════════
+   PAGO PUBLICACIÓN ÚNICA — correo de confirmación de contrato firmado
+   y solicitud de transferencia. Función independiente: no toca ni
+   reutiliza la lógica de precios/UF del resto de genMail(); solo
+   escribe en los MISMOS elementos de salida (tpl-asunto, tpl-rich-
+   gmail/outlook, tpl-body) para que copiar/abrir/.eml funcionen igual.
+   ════════════════════════════════════════════════════════════════ */
+function genMailPagoPub(){
+  var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
+  var sal=saludoChile();
+  var em=skip?'':gv('me')||'',ru=skip?'':gv('mr')||'';
+  var _contactoNom=skip?'':(gv('cli-contacto')||'').trim();
+  var _salNom=_contactoNom?saludoNominal(_contactoNom):'';
+  var _ex=getExecData();
+  var as2=_ex.name||'[Asesor]';
+  var fo=_ex.wsp||'';
+  var ml=_ex.email||'';
+  var exCargo=_ex.cargo||'Ejecutivo Comercial';
+  var exEmpresa=_ex.company||'Equifax Chile';
+  var exFirma=_ex.firma||'';
+  updWspLink();
+
+  var _fechaRaw=gv('pp-fecha');
+  var _fecha=hoy();
+  if(_fechaRaw){
+    try{
+      var _fp=_fechaRaw.split('-');
+      var _fd=new Date(parseInt(_fp[0],10),parseInt(_fp[1],10)-1,parseInt(_fp[2],10));
+      _fecha=_fd.toLocaleDateString('es-CL',{day:'2-digit',month:'long',year:'numeric'});
+    }catch(e){}
+  }
+
+  var c=ppCalc();
+  var _ivaEl=$('pp-iva-view'),_totEl=$('pp-total-view');
+  if(_ivaEl)_ivaEl.value=c?fmtN(c.iva):'—';
+  if(_totEl)_totEl.value=c?fmtN(c.total):'—';
+
+  var asunto='Contrato recibido correctamente';
+  st('tpl-asunto',asunto+(em?' — '+em:''));
+  st('tpl-asunto-outlook',asunto+(em?' — '+em:''));
+
+  var _gmailLogoUrl=window.location.origin+(window.location.pathname.replace(/[^/]*$/,''))+'logo-equifax.png';
+
+  var _bancoRowsDiv=
+    '<div style="font-size:15px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;margin-bottom:10px;">SERVICIOS EQUIFAX CHILE LIMITADA</div>'+
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+      '<tr><td style="font-size:11px;color:#777;font-family:Arial,sans-serif;padding:4px 0;width:130px;">RUT</td><td style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">85.896.100-9</td></tr>'+
+      '<tr><td style="font-size:11px;color:#777;font-family:Arial,sans-serif;padding:4px 0;">Banco</td><td style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">Banco de Chile</td></tr>'+
+      '<tr><td style="font-size:11px;color:#777;font-family:Arial,sans-serif;padding:4px 0;">Cuenta Corriente</td><td style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">166143017</td></tr>'+
+    '</table>';
+
+  var _resumenRowsDiv=!c?
+    '<div style="font-size:13px;color:#999;font-family:Arial,sans-serif;">Ingrese el valor neto para construir el resumen del pago.</div>'
+    :
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+      (c.monto?'<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">Monto del documento publicado</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">'+fmtN(c.monto)+'</td></tr>':'')+
+      '<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">Valor neto</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">'+fmtN(c.neto)+'</td></tr>'+
+      '<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">IVA (19%)</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">'+fmtN(c.iva)+'</td></tr>'+
+      '<tr><td colspan="2" style="border-top:1px solid #e0c8ce;padding-top:8px;"></td></tr>'+
+      '<tr><td style="font-size:13px;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:4px 0;">Total a transferir</td><td align="right" style="font-size:22px;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:900;padding:4px 0;">'+fmtN(c.total)+'</td></tr>'+
+    '</table>';
+
+  var _cuerpoTexto=
+    '<div style="font-size:13px;color:#333;font-family:Arial,sans-serif;line-height:1.6;">'+
+      '<p style="margin:0 0 10px;">Confirmamos la recepción correcta del contrato firmado. Agradecemos su confianza en Equifax Chile.</p>'+
+      '<p style="margin:0 0 10px;">Para dar inicio a la publicación solo resta efectuar el pago correspondiente, indicado en el resumen a continuación. Una vez recibido el comprobante, se procederá de inmediato con la publicación.</p>'+
+      '<p style="margin:0;">Por favor, envíe el comprobante de la transferencia respondiendo este mismo correo.</p>'+
+    '</div>';
+
+  // ══════ GMAIL (div) ══════
+  var _htmlGmail=
+    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:620px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
+    '<div style="background-color:#9b1c2e;background-image:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:24px 28px 20px;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:0;"><tr>'+
+        '<td valign="middle">'+
+          '<img src="logo-equifax.png" alt="Equifax" width="360" height="auto" style="display:block;max-height:114px;width:auto;" />'+
+          '<div style="margin-top:6px;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.55);text-transform:uppercase;font-family:Arial,sans-serif;">Chile &middot; Soluciones Empresariales</div>'+
+        '</td>'+
+        '<td valign="top" align="right">'+
+          '<div style="display:inline-block;background:rgba(0,0,0,.35);border:1px solid rgba(240,192,64,.6);border-radius:20px;padding:5px 16px;">'+
+            '<span style="font-size:10px;font-weight:800;color:#f0c040;letter-spacing:1.5px;font-family:Arial,sans-serif;">CONTRATO RECIBIDO</span>'+
+          '</div>'+
+          '<div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,.5);font-family:Arial,sans-serif;text-align:right;">'+_fecha+'</div>'+
+        '</td>'+
+      '</tr></table>'+
+    '</div>'+
+    '<div style="background:#1a1218;padding:20px 28px;border-bottom:3px solid #9b1c2e;">'+
+      (em
+        ?'<div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#9b4455;font-family:Arial,sans-serif;margin-bottom:6px;">Contrato firmado por</div>'+
+         '<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;">'+em+'</div>'+
+         (ru?'<div style="margin-top:3px;font-size:11px;letter-spacing:.4px;color:#9b8a8a;font-family:Arial,sans-serif;">RUT '+ru+'</div>':'')+
+         (_salNom?'<div style="margin-top:6px;font-size:13px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+_salNom+'</div>':'')+
+         '<div style="margin-top:8px;font-size:13px;color:#ccbbbb;font-family:Arial,sans-serif;">'+sal+'.</div>'
+        :'<div style="font-size:22px;font-weight:800;color:#ffffff;font-family:Arial,sans-serif;line-height:1.2;letter-spacing:1px;">Contrato recibido correctamente</div>'+
+         '<div style="margin-top:6px;font-size:13px;color:#aaa;font-family:Arial,sans-serif;">'+sal+'.</div>'
+      )+
+    '</div>'+
+    '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
+      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:10px;">Publicación Única</div>'+
+      _cuerpoTexto+
+    '</div>'+
+    '<div style="background:#fdf3f4;padding:22px 28px;border-left:5px solid #9b1c2e;border-top:1px solid #f0d8dc;">'+
+      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#9b1c2e;font-family:Arial,sans-serif;font-weight:700;margin-bottom:10px;">Resumen del pago</div>'+
+      _resumenRowsDiv+
+    '</div>'+
+    '<div style="background:#f4f4f4;padding:20px 28px;border-top:1px solid #e0e0e0;">'+
+      _bancoRowsDiv+
+    '</div>'+
+    '<div style="background:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td valign="top">'+
+          '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#666;font-family:Arial,sans-serif;margin-bottom:5px;">'+exCargo+'</div>'+
+          '<div style="font-size:17px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+as2+'</div>'+
+          '<div style="margin-top:3px;font-size:11px;color:#c8960a;font-family:Arial,sans-serif;">'+exEmpresa+'</div>'+
+          (exFirma?'<div style="margin-top:3px;font-size:11px;font-style:italic;color:#b0b0b0;font-family:Arial,sans-serif;">'+exFirma+'</div>':'')+
+          (fo?'<div style="margin-top:6px;font-size:12px;font-family:Arial,sans-serif;"><span style="color:#90d490;font-weight:700;">'+fo+'</span></div>':'')+
+          (ml?'<div style="margin-top:2px;font-size:12px;color:#90b8d4;font-family:Arial,sans-serif;">&#9993; '+ml+'</div>':'')+
+        '</td>'+
+        '<td valign="bottom" align="right">'+
+          '<div style="font-size:10px;color:#555;font-family:Arial,sans-serif;">'+_fecha+'</div>'+
+        '</td>'+
+      '</tr></table>'+
+    '</div>'+
+    '<div style="background:#0d060a;padding:10px 28px;text-align:center;border-top:1px solid #2a1420;">'+
+      '<div style="font-size:9px;color:#444;font-family:Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;">Equifax Chile &middot; Información confidencial &middot; Solo para el destinatario autorizado</div>'+
+    '</div>'+
+    '</div>';
+
+  sv('tpl-rich-gmail',_htmlGmail);
+  sv('tpl-rich',_htmlGmail);
+
+  // ══════ OUTLOOK (tablas + bgcolor) ══════
+  var _bancoRowsOtl=
+    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:10px;"><font face="Arial,sans-serif" color="#1a1a1a" style="font-size:15px;font-weight:bold;"><b>SERVICIOS EQUIFAX CHILE LIMITADA</b></font></td></tr>'+
+    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:3px 0;"><font face="Arial,sans-serif" color="#777777" style="font-size:11px;">RUT</font>&nbsp;&nbsp;<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:13px;"><b>85.896.100-9</b></font></td></tr>'+
+    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:3px 0;"><font face="Arial,sans-serif" color="#777777" style="font-size:11px;">Banco</font>&nbsp;&nbsp;<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:13px;"><b>Banco de Chile</b></font></td></tr>'+
+    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:3px 0;"><font face="Arial,sans-serif" color="#777777" style="font-size:11px;">Cuenta Corriente</font>&nbsp;&nbsp;<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:13px;"><b>166143017</b></font></td></tr>';
+
+  var _resumenRowsOtl=!c?
+    '<tr><td bgcolor="#fdf3f4" style="background-color:#fdf3f4;"><font face="Arial,sans-serif" color="#999999" style="font-size:13px;">Ingrese el valor neto para construir el resumen del pago.</font></td></tr>'
+    :
+    (c.monto?'<tr><td bgcolor="#fdf3f4" style="background-color:#fdf3f4;padding:4px 0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><font face="Arial,sans-serif" color="#666666" style="font-size:12px;">Monto del documento publicado</font></td><td align="right"><font face="Arial,sans-serif" color="#1a1a1a" style="font-size:13px;"><b>'+fmtN(c.monto)+'</b></font></td></tr></table></td></tr>':'')+
+    '<tr><td bgcolor="#fdf3f4" style="background-color:#fdf3f4;padding:4px 0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><font face="Arial,sans-serif" color="#666666" style="font-size:12px;">Valor neto</font></td><td align="right"><font face="Arial,sans-serif" color="#1a1a1a" style="font-size:13px;"><b>'+fmtN(c.neto)+'</b></font></td></tr></table></td></tr>'+
+    '<tr><td bgcolor="#fdf3f4" style="background-color:#fdf3f4;padding:4px 0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><font face="Arial,sans-serif" color="#666666" style="font-size:12px;">IVA (19%)</font></td><td align="right"><font face="Arial,sans-serif" color="#1a1a1a" style="font-size:13px;"><b>'+fmtN(c.iva)+'</b></font></td></tr></table></td></tr>'+
+    '<tr><td bgcolor="#e0c8ce" style="background-color:#e0c8ce;font-size:1px;line-height:1px;height:1px;padding:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
+    '<tr><td bgcolor="#fdf3f4" style="background-color:#fdf3f4;padding:8px 0 0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><font face="Arial,sans-serif" color="#9b1c2e" style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;"><b>Total a transferir</b></font></td><td align="right"><font face="Arial,sans-serif" color="#9b1c2e" style="font-size:22px;"><b>'+fmtN(c.total)+'</b></font></td></tr></table></td></tr>';
+
+  var _htmlOutlook=
+    '<table role="presentation" width="602" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#e0e0e0" style="background-color:#e0e0e0;border-collapse:collapse;">'+
+    '<tr><td style="padding:1px;">'+
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:600px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">'+
+    '<tr><td bgcolor="#6e1220" style="background-color:#6e1220;padding:10px 28px 8px 28px;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;"><tr>'+
+        '<td valign="middle" align="left" bgcolor="#6e1220" style="background-color:#6e1220;">'+
+          '<img src="'+_gmailLogoUrl+'" alt="Equifax" width="280" height="auto" style="display:block;width:280px;height:auto;border:0;" />'+
+          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;"><tr>'+
+            '<td align="left" bgcolor="#6e1220" style="background-color:#6e1220;color:#ffffff;"><font face="Arial,sans-serif" color="#ffffff" style="font-size:9px;letter-spacing:1px;text-transform:uppercase;"><span style="color:#ffffff;"><b>CHILE &middot; SOLUCIONES EMPRESARIALES</b></span></font></td>'+
+          '</tr></table>'+
+        '</td>'+
+        '<td valign="top" align="right" bgcolor="#6e1220" style="background-color:#6e1220;">'+
+          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:separate;"><tr>'+
+            '<td bgcolor="#5e0f1b" align="center" style="background-color:#5e0f1b;border:1px solid rgba(240,192,64,.45);border-radius:10px;padding:9px 18px;">'+
+              '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+                '<td align="center" style="padding-bottom:6px;"><font face="Arial,sans-serif" color="#f0c040" style="font-size:11px;font-weight:bold;letter-spacing:1.5px;white-space:nowrap;"><span style="color:#f0c040;"><b>CONTRATO RECIBIDO</b></span></font></td>'+
+              '</tr><tr>'+
+                '<td align="center" style="border-top:1px solid rgba(240,192,64,.28);padding-top:6px;"><font face="Arial,sans-serif" color="#e9cfd4" style="font-size:10px;letter-spacing:.5px;white-space:nowrap;"><span style="color:#e9cfd4;">'+_fecha+'</span></font></td>'+
+              '</tr></table>'+
+            '</td>'+
+          '</tr></table>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+    '<tr><td bgcolor="#4a0a14" style="background-color:#4a0a14;font-size:2px;line-height:2px;height:2px;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
+    '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding:20px 28px;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+        (em
+          ?'<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:6px;"><font face="Arial,sans-serif" color="#9b4455"><b><font style="font-size:9px;letter-spacing:2.5px;">CONTRATO FIRMADO POR</font></b></font></td></tr>'+
+           '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:3px;"><font face="Arial,sans-serif" color="#ffffff"><b><font style="font-size:22px;line-height:1.2;"><span style="color:#ffffff;">'+em+'</span></font></b></font></td></tr>'+
+           (ru?'<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:8px;"><font face="Arial,sans-serif" color="#9b8a8a"><font style="font-size:11px;letter-spacing:.4px;">RUT '+ru+'</font></font></td></tr>':'')+
+           (_salNom?'<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:8px;"><font face="Arial,sans-serif" color="#ffffff"><b><font style="font-size:13px;"><span style="color:#ffffff;">'+_salNom+'</span></font></b></font></td></tr>':'')+
+           '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;"><font face="Arial,sans-serif" color="#ccbbbb"><font style="font-size:13px;">'+sal+'.</font></font></td></tr>'
+          :'<tr><td bgcolor="#1a1218" style="background-color:#1a1218;padding-bottom:8px;"><font face="Arial,sans-serif" color="#ffffff"><b><font style="font-size:22px;letter-spacing:1px;"><span style="color:#ffffff;">Contrato recibido correctamente</span></font></b></font></td></tr>'+
+           '<tr><td bgcolor="#1a1218" style="background-color:#1a1218;"><font face="Arial,sans-serif" color="#aaaaaa"><font style="font-size:13px;">'+sal+'.</font></font></td></tr>'
+        )+
+      '</table>'+
+    '</td></tr>'+
+    '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;mso-line-height-rule:exactly;line-height:3px;font-size:3px;" height="3">&nbsp;</td></tr>'+
+    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
+        '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;">'+
+          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+            '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:5px;"><font face="Arial,sans-serif" color="#777777" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Publicación Única</font></td></tr>'+
+            '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;"><font face="Arial,sans-serif" color="#333333" style="font-size:13px;line-height:1.6;">'+
+              'Confirmamos la recepci&oacute;n correcta del contrato firmado. Agradecemos su confianza en Equifax Chile.<br><br>'+
+              'Para dar inicio a la publicaci&oacute;n solo resta efectuar el pago correspondiente, indicado en el resumen a continuaci&oacute;n. Una vez recibido el comprobante, se proceder&aacute; de inmediato con la publicaci&oacute;n.<br><br>'+
+              'Por favor, env&iacute;e el comprobante de la transferencia respondiendo este mismo correo.'+
+            '</font></td></tr>'+
+          '</table>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+    '<tr><td bgcolor="#fdf3f4" style="background-color:#fdf3f4;padding:0;border-top:1px solid #f0d8dc;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
+        '<td bgcolor="#fdf3f4" style="background-color:#fdf3f4;padding:22px 28px;">'+
+          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+            '<tr><td bgcolor="#fdf3f4" style="background-color:#fdf3f4;padding-bottom:10px;"><font face="Arial,sans-serif" color="#9b1c2e" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;"><b>Resumen del pago</b></font></td></tr>'+
+            _resumenRowsOtl+
+          '</table>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+    '<tr><td bgcolor="#f4f4f4" style="background-color:#f4f4f4;padding:20px 28px;border-top:1px solid #e0e0e0;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+_bancoRowsOtl+'</table>'+
+    '</td></tr>'+
+    '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td valign="top" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
+          '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-bottom:5px;"><font face="Arial,sans-serif" color="#666666"><font style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">'+exCargo+'</font></font></td></tr>'+
+            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;"><font face="Arial,sans-serif" color="#111111"><b><font style="font-size:17px;">'+as2+'</font></b></font></td></tr>'+
+            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:4px;"><font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:12px;">'+exEmpresa+'</font></b></font></td></tr>'+
+            (exFirma?'<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;"><font face="Arial,sans-serif" color="#555555"><i><font style="font-size:11px;">'+exFirma+'</font></i></font></td></tr>':'')+
+            (fo?'<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:7px;"><font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">'+fo+'</font></font></td></tr>':'')+
+            (ml?'<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;"><font face="Arial,sans-serif" color="#1a4a7a"><font style="font-size:12px;">&#9993; '+ml+'</font></font></td></tr>':'')+
+          '</table>'+
+        '</td>'+
+        '<td valign="bottom" align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
+          '<table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;">'+
+            '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;"><font face="Arial,sans-serif" color="#555555"><font style="font-size:10px;">'+_fecha+'</font></font></td></tr>'+
+          '</table>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+    '<tr><td bgcolor="#cccccc" style="background-color:#cccccc;padding:10px 28px;text-align:center;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td align="center" bgcolor="#cccccc" style="background-color:#cccccc;padding:0;"><font face="Arial,sans-serif" color="#444444"><font style="font-size:9px;text-transform:uppercase;letter-spacing:1px;">Equifax Chile &middot; Informaci&oacute;n confidencial &middot; Solo para el destinatario autorizado</font></font></td>'+
+      '</tr></table>'+
+    '</td></tr>'+
+    '</table>'+
+    '</td></tr></table>';
+
+  sv('tpl-rich-outlook',_htmlOutlook);
+
+  // ── WhatsApp (texto plano con markdown) ──
+  var _waSaludo=_contactoNom?saludoNominal(_contactoNom):((!skip&&em)?("Se\u00f1ores *"+em+"*:"):"Estimados:");
+  var _waRut=(!skip&&ru)?("RUT: "+ru+"\n"):"";
+  var txt=_waSaludo+"\n"+_waRut+"\n"+
+    "Confirmamos la recepci\u00f3n correcta del *contrato firmado*. Agradecemos su confianza en Equifax Chile.\n\n"+
+    "Para dar inicio a la publicaci\u00f3n solo resta efectuar el pago correspondiente. Una vez recibido el comprobante, se procede de inmediato con la publicaci\u00f3n.\n\n"+
+    "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n"+
+    "*RESUMEN DEL PAGO*\n"+
+    "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n"+
+    (c?((c.monto?("Monto del documento publicado: "+fmtN(c.monto)+"\n"):"")+
+        "Valor neto: "+fmtN(c.neto)+"\n"+
+        "IVA (19%): "+fmtN(c.iva)+"\n"+
+        "*TOTAL A TRANSFERIR: "+fmtN(c.total)+"*\n")
+      :"Ingrese el valor neto para completar el resumen del pago.\n")+
+    "\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n"+
+    "*DATOS BANCARIOS*\n"+
+    "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n"+
+    "SERVICIOS EQUIFAX CHILE LIMITADA\n"+
+    "RUT: 85.896.100-9\n"+
+    "Banco: Banco de Chile\n"+
+    "Cuenta Corriente: 166143017\n\n"+
+    "Por favor, env\u00ede el comprobante respondiendo este mismo correo.\n\n"+
+    "\u2014\n"+
+    "*"+as2+"*\n"+
+    "_"+exCargo+" \u00b7 "+exEmpresa+"_\n"+
+    (exFirma?"_"+exFirma+"_\n":"")+
+    (fo?"\ud83d\udcf1 "+fo+"\n":"")+
+    (ml?"\u2709 "+ml+"\n":"");
+  var _tb=$('tpl-body');if(_tb)_tb.value=txt;
+
+  document.getElementById('tpl-out').style.display='block';
+  var _st4=document.getElementById('auto-gen-status');
+  if(_st4){
+    var _tt4=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    _st4.style.color='#2ecc71';_st4.textContent='✔ Actualizado · '+_tt4;
+  }
+}
+
 function updWspLink(){
   var mf=document.getElementById('mf'),row=document.getElementById('wsp-link-row'),lnk=document.getElementById('wsp-link');
   if(!mf||!row||!lnk)return;
