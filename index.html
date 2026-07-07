@@ -1330,6 +1330,7 @@ var PRODUCTS=[
   {key:'bolsa', ic:'🎒',lb:'Reporte Interactivo Bolsa',      su:''},
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
+  {key:'datafinder',ic:'🔎',lb:'Data Finder',su:'Búsqueda de contacto'},
   {key:'malla', ic:'🕸️',lb:'Malla Societaria',su:'Vinculaciones societarias'},
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
   {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM'},
@@ -1571,6 +1572,9 @@ function cfgHTML(key){
   if(key==='soluciones'){
     return '<div class="sol-head2">Productos a incluir</div><div class="sol-list">'+SOL_LIST.map(function(p){return '<label class="sol-item"><input type="checkbox" value="'+p[0]+'"'+(p[2]?' checked':'')+' onchange="refresh()"><span>'+p[1]+'</span></label>';}).join('')+'</div>';
   }
+  if(key==='datafinder'){
+    return '<div class="note-inline" style="margin-top:2px;">🔎 <b>Data Finder</b> es un producto informativo (búsqueda y actualización de teléfonos, correos y direcciones de personas y empresas). No se cotiza desde la calculadora: esta ficha presenta sus situaciones, características y beneficios, lista para adjuntar o enviar al cliente.</div>';
+  }
   if(key==='bdd'){
     var grupos=BDD_GROUPS.map(function(g){
       return '<div class="bdd-grp-t">'+g.t+'</div><div class="sol-list bdd-cols">'+
@@ -1718,7 +1722,9 @@ function renderSummary(c){
   /* MEJORA: aumentar jerarquía visual, eliminar descuento duplicado */
   var ventaCtrl=
     '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
-      '<div style="width:26px;flex-shrink:0;" aria-hidden="true"></div>'+
+      '<button type="button" onclick="resetCalculadora()" title="Reiniciar la calculadora a los valores originales del sistema"'+
+        ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:26px;height:47px;border-radius:5px;cursor:pointer;font-size:1rem;font-weight:900;transition:.12s;line-height:1;padding:0;flex-shrink:0;"'+
+        ' onmouseover="this.style.background=\'var(--r)\'" onmouseout="this.style.background=\'var(--g3)\'">↺</button>'+
       '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">'+
         '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:4px;font-weight:800;line-height:1.1;">Precio venta</label>'+
         '<div class="v g" style="font-size:1.45rem;font-weight:800;line-height:1.2;">'+
@@ -1786,6 +1792,15 @@ function stepPrice(delta){
   var v=Math.max(0,Math.round((cur+delta)*100)/100);
   CURRENT.override=v;lightUpdate(v);
 }
+/* ↺ Reinicia la calculadora: descarta los ajustes manuales de precio venta/lista
+   (y el descuento derivado) volviendo a los valores originales del sistema. No toca
+   los datos del cliente ni cambia de producto. */
+function resetCalculadora(){
+  CURRENT.override=null;
+  CURRENT.overrideLista=null;
+  refresh();
+  toast('✔ Calculadora reiniciada','ok','global-toast');
+}
 /* ▲▼ ajustan el precio lista directamente */
 function stepLista(delta){
   if(!LAST)return;
@@ -1837,6 +1852,7 @@ function refresh(){
   if(CURRENT.key==='multi'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='soluciones'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='bdd'){var szb=document.getElementById('summary-zone');if(szb)szb.innerHTML='';genMail();syncWA();return;}
+  if(CURRENT.key==='datafinder'){var szd=document.getElementById('summary-zone');if(szd)szd.innerHTML='';genMail();syncWA();return;}
   if(CURRENT.key==='pub'){var szp=document.getElementById('summary-zone');if(szp)szp.innerHTML=pubResumenHTML();genMail();syncWA();return;}
   if(CURRENT.key==='pago_pub'){var szpp=document.getElementById('summary-zone');if(szpp)szpp.innerHTML=pagoPubResumenHTML();genMail();syncWA();return;}
   var c=computeCurrent();if(!c)return;LAST=c;
@@ -1944,6 +1960,27 @@ function renderPortafolioSoluciones(target){
       t+='_Características:_\n'+solCarac(k).map(function(x){return '\u2714\ufe0f '+x;}).join('\n')+'\n';
       t+='_Beneficios:_\n'+(SOL_BENE[k]||[]).map(function(x){return '\u203a '+x;}).join('\n')+'\n';
     });
+    return t;
+  }
+  return '';
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DATA FINDER — producto informativo (no cotizable). Reutiliza solBlocksInner
+   con la clave 'datafinder' (SOL_SIT/SOL_CARAC/SOL_BENE ya existentes) y los
+   mismos exportadores por canal. Espejo de renderPortafolioSoluciones / isPub.
+   ════════════════════════════════════════════════════════════════ */
+function renderDataFinder(target){
+  var sel=['datafinder'];
+  if(target==='card')return solBlocksInner(sel,'dark');
+  if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,'light')+'</div>';
+  if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,'light')+'</td></tr>';
+  if(target==='wa'){
+    var k='datafinder';
+    var t='*Data Finder Equifax*\nBúsqueda y actualización de datos de contacto de personas y empresas\n';
+    t+='\n_Situaciones:_\n'+(SOL_SIT[k]||[]).map(function(x){return '• '+x;}).join('\n')+'\n';
+    t+='_Características:_\n'+solCarac(k).map(function(x){return '✔️ '+x;}).join('\n')+'\n';
+    t+='_Beneficios:_\n'+(SOL_BENE[k]||[]).map(function(x){return '› '+x;}).join('\n')+'\n';
     return t;
   }
   return '';
@@ -2157,9 +2194,16 @@ function pubBlocksInner(theme){
     precioTxt+
     '<div style="font-size:10px;color:#999;padding:8px 0 0;line-height:1.4;">Valor referencial equivalente al 15% del monto del documento. El valor final puede ajustarse al momento de la contratación.</div>'+
   '</div>';
+  /* DOCUMENTOS SOLICITADOS — misma estructura del bloque "Documentos para contratar"
+     de los productos estándar (acento ámbar #c8960a); en la tarjeta (dark) se adapta el
+     fondo para no romper la estética oscura. Set estándar de contratación de la colección. */
+  var docs='<div style="margin-top:16px;background:'+(dark?'rgba(240,192,64,.08)':'#fffdf5')+';padding:14px 16px;border-left:5px solid #c8960a;'+(dark?'':'border:1px solid #f0e0a0;')+'border-radius:6px;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+(dark?'#f0c040':'#a07820')+';font-weight:bold;margin-bottom:6px;">Documentos solicitados</div>'+
+    '<div style="font-size:12px;color:'+(dark?cTxt:'#5a4a10')+';line-height:1.5;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</div>'+
+  '</div>';
   return '<div style="margin:0;font-family:Arial,sans-serif;">'+
     '<div style="font-size:15px;font-weight:800;color:'+cTit+';margin-bottom:2px;">Publicación Única en DICOM</div>'+
-    desc+bene+req+resumen+
+    desc+bene+req+resumen+docs+
   '</div>';
 }
 function renderPublicacion(target){
@@ -2182,6 +2226,8 @@ function renderPublicacion(target){
     t+='\u2795 *IVA (19%):* '+fmtN(c.iva)+'\n';
     t+='\u2705 *Total a pagar:* *'+fmtN(c.total)+'*\n';
     t+='_Valor referencial (15% del documento). El valor final puede ajustarse al contratar._\n';
+    t+='\n*DOCUMENTOS SOLICITADOS*\n';
+    t+='✔️ Ficha de contratación\n✔️ Cédula representante legal\n✔️ Escritura con poderes de firma\n✔️ Carpeta tributaria\n';
     return t;
   }
   return '';
@@ -2860,8 +2906,9 @@ function genMail(){
   var isMulti=(typeof CURRENT!=='undefined'&&CURRENT.key==='multi');
   var isBdd=(typeof CURRENT!=='undefined'&&CURRENT.key==='bdd');
   var isPub=(typeof CURRENT!=='undefined'&&CURRENT.key==='pub');
+  var isDataFinder=(typeof CURRENT!=='undefined'&&CURRENT.key==='datafinder');
   var tipo=gv('mt');
-  if(!isSol && !isMulti && !isBdd && !isPub && !tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
+  if(!isSol && !isMulti && !isBdd && !isPub && !isDataFinder && !tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
   var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
   var sal=saludoChile(); /* saludo según hora real de Chile, calculado al generar */
   /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
@@ -2889,6 +2936,7 @@ function genMail(){
   if(isMulti){pi={badge:'PROPUESTA MULTIPRODUCTO',n:'Multiproducto Comercial'};}
   if(isBdd){pi={badge:'SOLICITUD BASE DE DATOS',n:'Base de Datos Comercial'};}
   if(isPub){pi={badge:'PUBLICACIÓN ÚNICA',n:'Publicación Única'};}
+  if(isDataFinder){pi={badge:'BÚSQUEDA DE CONTACTO',n:'Data Finder'};}
   /* ── Enlace de WhatsApp para la firma (cliente → ejecutivo) con mensaje contextual ── */
   var _execNm=(as2&&as2!=='[Asesor]')?as2:'';
   var _prodNm=(pi&&pi.n&&pi.n!=='[Producto]')?pi.n:'';
@@ -2933,7 +2981,8 @@ function genMail(){
   if(isMulti){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
   if(isBdd){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
   if(isPub){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
-  (function(){var _pz=document.getElementById('cc-price-zone'),_cz=document.getElementById('cc-contrato-zone');var _hide=isSol||isMulti||isBdd||isPub;if(_pz)_pz.style.display=_hide?'none':'';if(_cz)_cz.style.display=_hide?'none':'';})();
+  if(isDataFinder){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
+  (function(){var _pz=document.getElementById('cc-price-zone'),_cz=document.getElementById('cc-contrato-zone');var _hide=isSol||isMulti||isBdd||isPub||isDataFinder;if(_pz)_pz.style.display=_hide?'none':'';if(_cz)_cz.style.display=_hide?'none':'';})();
 
   // ── TARJETA PC ──────────────────────────────
   st('cc-badge',pi.badge);st('cc-fecha',hoy());
@@ -2993,8 +3042,9 @@ function genMail(){
   if(isMulti){sv('cc-prod-block',renderMultiproducto('card'));sv('cc-dcto-block','');var _wpbM=document.getElementById('wcc-prod-block');if(_wpbM)_wpbM.innerHTML=renderMultiproducto('card');var _wdbM=document.getElementById('wcc-dcto-block');if(_wdbM)_wdbM.innerHTML='';}
   if(isBdd){sv('cc-prod-block',renderBaseDatos('card'));sv('cc-dcto-block','');var _wpbB=document.getElementById('wcc-prod-block');if(_wpbB)_wpbB.innerHTML=renderBaseDatos('card');var _wdbB=document.getElementById('wcc-dcto-block');if(_wdbB)_wdbB.innerHTML='';}
   if(isPub){sv('cc-prod-block',renderPublicacion('card'));sv('cc-dcto-block','');var _wpbP=document.getElementById('wcc-prod-block');if(_wpbP)_wpbP.innerHTML=renderPublicacion('card');var _wdbP=document.getElementById('wcc-dcto-block');if(_wdbP)_wdbP.innerHTML='';}
+  if(isDataFinder){sv('cc-prod-block',renderDataFinder('card'));sv('cc-dcto-block','');var _wpbD=document.getElementById('wcc-prod-block');if(_wpbD)_wpbD.innerHTML=renderDataFinder('card');var _wdbD=document.getElementById('wcc-dcto-block');if(_wdbD)_wdbD.innerHTML='';}
   var aEmp=(em?' | '+em:'');
-  var _asuntoSol=isSol?('Información de productos Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):null)));
+  var _asuntoSol=isSol?('Información de productos Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):(isDataFinder?('Data Finder Equifax'+(em?' — '+em:'')):null))));
   st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+(pi.sub?' ('+pi.sub+')':'')+aEmp));
   st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+(pi.sub?' ('+pi.sub+')':'')+aEmp));
 
@@ -3048,7 +3098,7 @@ function genMail(){
     (exFirma ? "_" + exFirma + "_\n" : "") +
     (fo ? "\ud83d\udcf1 " + fo + "\n" : "") +
     (ml ? "\u2709 " + ml + "\n" : "");
-  document.getElementById('tpl-body').value=isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')+_waFirma):(isPub?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPublicacion('wa')+_waFirma):(isSol?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPortafolioSoluciones('wa')+_waFirma):(isMulti?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderMultiproducto('wa')+_waFirma):txt)));
+  document.getElementById('tpl-body').value=isDataFinder?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderDataFinder('wa')+_waFirma):(isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')+_waFirma):(isPub?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPublicacion('wa')+_waFirma):(isSol?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPortafolioSoluciones('wa')+_waFirma):(isMulti?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderMultiproducto('wa')+_waFirma):txt))));
 
   // ── HTML ENRIQUECIDO — Diseño corporativo completo ──
   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
@@ -3100,7 +3150,7 @@ function genMail(){
     '</div>'+
 
     // PRODUCTO/PRECIO/DOCS (soluciones: contenido multiproducto sin precio)
-    (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
+    (isDataFinder ? renderDataFinder('gmail') : (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
     '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
       '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+(pi.sub?'<span style="display:block;font-size:12px;font-weight:600;color:#9b1c2e;margin-top:3px;">'+pi.sub+'</span>':'')+'</div>'+
@@ -3145,7 +3195,7 @@ function genMail(){
     '<div style="background:#fffdf5;padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
       '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</div>'+
-    '</div>')))))+
+    '</div>'))))))+
 
     // FIRMA — fondo oscuro corporativo
     '<div style="background:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
@@ -3292,7 +3342,7 @@ function genMail(){
     // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
     // ══════════════════════════════════════════
     _destOutlook+
-    (isBdd ? renderBaseDatos('outlook') : (isPub ? renderPublicacion('outlook') : (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
+    (isDataFinder ? renderDataFinder('outlook') : (isBdd ? renderBaseDatos('outlook') : (isPub ? renderPublicacion('outlook') : (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
     // ══════════════════════════════════════════
     '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
@@ -3386,7 +3436,7 @@ function genMail(){
           '</table>'+
         '</td>'+
       '</tr></table>'+
-    '</td></tr>')))))+
+    '</td></tr>'))))))+
 
     // ══════════════════════════════════════════
     // FIRMA — fondo gris claro, texto oscuro (garantizado Outlook)
@@ -4718,6 +4768,11 @@ function checkWspExecFormat(){
 function limpiarDatosCliente(){
   ['me','cli-tel','cli-email','cli-contacto','mr','mn','cli-obs'].forEach(function(id){var e=$(id);if(e)e.value='';});
   var stt=$('cli-email-status');if(stt){stt.textContent='';stt.className='eml-status';}
+  /* Cliente nuevo → descartar cualquier ajuste manual de precio del cliente anterior
+     (mismo reinicio que hacen setProduct() y onConfigChange()). Ocurre antes de
+     rellenar los datos entrantes para no arrastrar el precio del cliente previo. */
+  CURRENT.override=null;CURRENT.overrideLista=null;
+  if(typeof refresh==='function')refresh();
 }
 function pegarCRM(){
   if(!navigator.clipboard||!navigator.clipboard.readText){
