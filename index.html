@@ -1593,6 +1593,7 @@ function cfgHTML(key){
   if(key==='pub'){
     return '<div class="sol-head2">Valor de la factura</div>'+
       '<div class="fld"><label>Valor de la factura (documento a publicar)</label><input type="number" id="pub-monto" placeholder="Ej: 2615263" min="0" step="1000" oninput="refresh()"></div>'+
+      '<div class="fld"><label>% a cobrar (neto) — por defecto 15%</label><input type="number" id="pub-pct" value="15" min="0" step="0.5" oninput="refresh()"></div>'+
       '<div class="note-inline" style="margin-top:10px;">📰 <b>Publicación Única:</b> el valor a cobrar es referencial y corresponde aproximadamente al <b>15% del monto del documento</b> (neto) más IVA. Sin tarifa fija; el valor final puede ajustarse al contratar.</div>'+
       '<button type="button" id="btn-add-pub-multi" class="exec-save" style="background:var(--rd);color:#fff;margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 16px;" onclick="addPubToMulti();playClick();" title="Agrega esta Publicación Única a la propuesta Multiproducto"><span style="font-size:1.4rem;line-height:1;">📦</span><span>Agregar a Multiproducto</span></button>';
   }
@@ -2109,7 +2110,8 @@ var PUB_REQ=[
   'Personas naturales: autorización según Ley 19.628'
 ];
 function pubMonto(){var e=document.getElementById('pub-monto');var n=e?parseFloat((''+e.value).replace(/[^\d.]/g,'')):NaN;return (!isNaN(n)&&n>0)?n:0;}
-function pubCalc(){var m=pubMonto();if(!m)return null;var neto=m*0.15,iva=neto*0.19,total=neto+iva;return {monto:m,neto:neto,iva:iva,total:total};}
+function pubPct(){var v=parseFloat(gv('pub-pct'));return(isNaN(v)||v<0)?15:v;}
+function pubCalc(){var m=pubMonto();if(!m)return null;var pct=pubPct();var neto=m*(pct/100),iva=neto*0.19,total=neto+iva;return {monto:m,pct:pct,neto:neto,iva:iva,total:total};}
 /* Resumen de precio en el panel izquierdo (bloque summary-zone), MISMA fuente de
    datos que la vista previa: pubCalc(). No hay segundo motor. Se re-renderiza en
    la rama 'pub' de refresh() cada vez que cambia el monto → ambos lados sincronizados. */
@@ -2117,16 +2119,16 @@ function pubResumenHTML(){
   var c=pubCalc();
   var html='<div class="sum-head"><div class="sum-name">Publicación Única</div><div class="sum-badge">DOCUMENTO EN DICOM</div></div>';
   if(!c){
-    return html+'<div class="note-inline" style="margin:0;">🧾 Ingresa el <b>valor de la factura</b> para ver el cálculo referencial (15% + IVA).</div>';
+    return html+'<div class="note-inline" style="margin:0;">🧾 Ingresa el <b>valor de la factura</b> para ver el cálculo referencial ('+ufd(pubPct())+'% + IVA).</div>';
   }
   return html+
     '<div class="metrics">'+
       metric('Monto documento','m-pub-monto','b',fmtN(c.monto))+
-      metric('Precio 15% (neto)','m-pub-neto','g',fmtN(c.neto))+
+      metric('Precio '+ufd(c.pct)+'% (neto)','m-pub-neto','g',fmtN(c.neto))+
       metric('IVA (19%)','m-pub-iva','wa',fmtN(c.iva))+
       metricBig('Total aprox. a cobrar','m-pub-total','y',fmtN(c.total))+
     '</div>'+
-    '<div class="note-inline" style="margin-top:10px;">Valor referencial (15% del documento + IVA). El valor final puede ajustarse al contratar.</div>';
+    '<div class="note-inline" style="margin-top:10px;">Valor referencial ('+ufd(c.pct)+'% del documento + IVA). El valor final puede ajustarse al contratar.</div>';
 }
 /* ════════ PAGO PUBLICACIÓN ÚNICA — cálculo y resumen (independiente de la lógica UF/cotización) ════════
    El usuario solo ingresa la DEUDA A PUBLICAR y el % a cobrar (15% por defecto).
@@ -2172,14 +2174,14 @@ function pubBlocksInner(theme){
     PUB_REQ.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
   var precioTxt = c
     ? ('<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Monto del documento a publicar (aprox.):</b> '+fmtN(c.monto)+'</div>'+
-       '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Precio a cobrar (neto, 15%):</b> '+fmtN(c.neto)+'</div>'+
+       '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Precio a cobrar (neto, '+ufd(c.pct)+'%):</b> '+fmtN(c.neto)+'</div>'+
        '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>IVA (19%):</b> '+fmtN(c.iva)+'</div>'+
        '<div style="font-size:13px;color:'+cSub+';padding:5px 0 0;font-weight:800;">Total a pagar: '+fmtN(c.total)+'</div>')
-    : '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;">Ingrese el valor de la factura para calcular el valor referencial (15% del documento + IVA).</div>';
+    : '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;">Ingrese el valor de la factura para calcular el valor referencial ('+ufd(pubPct())+'% del documento + IVA).</div>';
   var resumen='<div style="margin-top:16px;padding:14px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
     '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Valor referencial de la publicación</div>'+
     precioTxt+
-    '<div style="font-size:10px;color:#999;padding:8px 0 0;line-height:1.4;">Valor referencial equivalente al 15% del monto del documento. El valor final puede ajustarse al momento de la contratación.</div>'+
+    '<div style="font-size:10px;color:#999;padding:8px 0 0;line-height:1.4;">Valor referencial equivalente al '+ufd(c.pct)+'% del monto del documento. El valor final puede ajustarse al momento de la contratación.</div>'+
   '</div>';
   /* DOCUMENTOS SOLICITADOS — misma estructura del bloque "Documentos para contratar"
      de los productos estándar (acento ámbar #c8960a); en la tarjeta (dark) se adapta el
@@ -2209,10 +2211,10 @@ function renderPublicacion(target){
     t+='\n*REQUISITOS DE PUBLICACIÓN*\n'+PUB_REQ.map(function(x){return '\u2714\ufe0f '+x;}).join('\n')+'\n';
     t+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
     t+='\ud83e\uddfe *Monto del documento (aprox.):* '+fmtN(c.monto)+'\n';
-    t+='\ud83d\udcb0 *Precio a cobrar (neto, 15%):* '+fmtN(c.neto)+'\n';
+    t+='\ud83d\udcb0 *Precio a cobrar (neto, '+ufd(c.pct)+'%):* '+fmtN(c.neto)+'\n';
     t+='\u2795 *IVA (19%):* '+fmtN(c.iva)+'\n';
     t+='\u2705 *Total a pagar:* *'+fmtN(c.total)+'*\n';
-    t+='_Valor referencial (15% del documento). El valor final puede ajustarse al contratar._\n';
+    t+='_Valor referencial ('+ufd(c.pct)+'% del documento). El valor final puede ajustarse al contratar._\n';
     t+='\n*DOCUMENTOS SOLICITADOS*\n';
     t+='✔️ Ficha de contratación\n✔️ Cédula representante legal\n✔️ Escritura con poderes de firma\n✔️ Carpeta tributaria\n';
     return t;
@@ -2225,15 +2227,15 @@ function renderPublicacion(target){
 function addPubToMulti(){
   var c=pubCalc();
   if(!c){toast('Ingresa el valor de la factura primero','err','global-toast');return;}
-  var sig='monto:'+c.monto;
+  var sig='monto:'+c.monto+'|pct:'+c.pct;
   if(MULTI.some(function(s){return s.pub&&s.pubSig===sig;})){toast('Esa Publicación Única ya está en el Multiproducto','err','global-toast');return;}
   var labels=[
     'Publicación del documento en DICOM, registrada en el informe comercial del deudor',
     'Notificación al deudor y bloqueo comercial que incentiva el pago',
     'Monto del documento (aprox.): '+fmtN(c.monto),
-    'Precio a cobrar (neto, 15%): '+fmtN(c.neto)+' · IVA: '+fmtN(c.iva)
+    'Precio a cobrar (neto, '+ufd(c.pct)+'%): '+fmtN(c.neto)+' · IVA: '+fmtN(c.iva)
   ];
-  var valTxt=fmtN(c.total)+' total (15% + IVA)';
+  var valTxt=fmtN(c.total)+' total ('+ufd(c.pct)+'% + IVA)';
   MULTI.push({pub:true,pubSig:sig,tipo:'pub',n:'Publicación Única',
     ufV:0,ufL:0,hayDc:false,dc:0,
     clp:0,pl:'—',cons:0,valTxt:valTxt,
