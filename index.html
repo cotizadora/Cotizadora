@@ -3119,7 +3119,7 @@ function genMail(){
     (hayDc ? "\ud83c\udfaf *Descuento: \u2212" + dc + "%*\n" : "") +
     "\ud83d\udcc5 Plazo: *" + pl + " meses*\n" +
     "\ud83d\udcb3 Modalidad: _POSTPAGO \u00b7 30 d\u00edas_\n" +
-    (co && tipo.indexOf("bundle") >= 0 ? "\ud83d\udcca Consultas RI/mes: *" + co + "*\n" : "") +
+    (co && (tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3') ? "\ud83d\udcca " + (tipo==='ri_bolsa'?"Consultas incluidas (bolsa)":"Consultas RI/mes") + ": *" + co + "*\n" : "") +
     "\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
     "*DOCUMENTOS*\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n" +
@@ -3235,6 +3235,11 @@ function genMail(){
           '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td>'+
           '<td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</td>'+
         '</tr>'+
+        (co>0&&(tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3')?
+          '<tr>'+
+            '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">'+(tipo==='ri_bolsa'?'Consultas incluidas (bolsa)':'Consultas RI / mes')+'</td>'+
+            '<td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+co+'</td>'+
+          '</tr>':'')+
       '</table>'+
     '</div>'+
 
@@ -3463,6 +3468,15 @@ function genMail(){
             '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></span></font>'+
           '</td>'+
         '</tr>'+
+        (co>0&&(tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3')?
+          '<tr>'+
+            '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
+              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>'+(tipo==='ri_bolsa'?'Consultas incluidas (bolsa)':'Consultas RI / mes')+'</b></span></font>'+
+            '</td>'+
+            '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
+              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+co+'</b></span></font>'+
+            '</td>'+
+          '</tr>':'')+
       '</table>'+
     '</td></tr>'+
 
