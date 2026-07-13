@@ -2504,10 +2504,42 @@ function renderMultiproducto(target){
     return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Agregue productos al paquete comercial.</div>';
   }
   if(target==='card'){
-    return MULTI.map(_multiCardProduct).join('');
+    /* DOCUMENTOS PARA CONTRATAR — bloque global de la propuesta (una sola vez, al final).
+       Misma estructura visual del bloque de productos estándar, variante dark
+       (patrón replicado de pubBlocksInner, acento ámbar #c8960a). */
+    var mDocsCard='<div style="margin-top:16px;background:rgba(240,192,64,.08);padding:14px 16px;border-left:5px solid #c8960a;border-radius:6px;font-family:Arial,sans-serif;">'+
+      '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#f0c040;font-weight:bold;margin-bottom:6px;">Documentos para contratar</div>'+
+      '<div style="font-size:12px;color:#ccc;line-height:1.5;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</div>'+
+    '</div>';
+    return MULTI.map(_multiCardProduct).join('')+mDocsCard;
   }
-  if(target==='gmail')return MULTI.map(_multiGmailProduct).join('');
-  if(target==='outlook')return MULTI.map(_multiOutlookProduct).join('');
+  if(target==='gmail'){
+    /* DOCUMENTOS PARA CONTRATAR — idéntico al bloque estándar Gmail (fondo #fffdf5, borde #c8960a). */
+    var mDocsGm='<div style="background:#fffdf5;padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
+      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
+      '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</div>'+
+    '</div>';
+    return MULTI.map(_multiGmailProduct).join('')+mDocsGm;
+  }
+  if(target==='outlook'){
+    /* DOCUMENTOS PARA CONTRATAR — idéntica estructura de tabla del bloque estándar Outlook. */
+    var mDocsOl='<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:0;">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+        '<td width="5" bgcolor="#c8960a" style="background-color:#c8960a;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
+        '<td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:14px 28px;">'+
+          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+            '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding-bottom:4px;">'+
+              '<font face="Arial,sans-serif" color="#7a5808" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Documentos para contratar</font>'+
+            '</td></tr>'+
+            '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;">'+
+              '<font face="Arial,sans-serif" color="#3a2c04" style="font-size:12px;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</font>'+
+            '</td></tr>'+
+          '</table>'+
+        '</td>'+
+      '</tr></table>'+
+    '</td></tr>';
+    return MULTI.map(_multiOutlookProduct).join('')+mDocsOl;
+  }
   if(target==='wa'){
     var tx='*Propuesta Multiproducto Equifax*\n';
     MULTI.forEach(function(s){
@@ -2515,6 +2547,8 @@ function renderMultiproducto(target){
       tx+=s.items.map(function(x){return '\u2714\ufe0f '+x;}).join('\n')+'\n';
       tx+='💰 *'+(s.valTxt||(ufd(s.ufV)+' UF + IVA'))+'*'+(s.clp>0?' · ≈'+fmtN(s.clp)+'/mes':'')+(s.hayDc?' · −'+s.dc+'%':'')+((s.bdd||s.pub)?'':' · '+s.pl+' meses POSTPAGO')+'\n';
     });
+    tx+='\n*DOCUMENTOS PARA CONTRATAR*\n';
+    tx+='✔️ Ficha de contratación\n✔️ Cédula representante legal\n✔️ Escritura con poderes de firma\n✔️ Carpeta tributaria\n';
     return tx;
   }
   return '';
