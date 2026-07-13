@@ -3007,10 +3007,14 @@ function genMail(){
   /* Reporte Comercial / Informes Comerciales Bolsa: reflejar en el contenido del
      cliente la cantidad de consultas cotizada. Reutiliza la ÚNICA fuente (mc2 = c.cons,
      puente que ya alimenta la calculadora); sin variables nuevas ni recálculo. */
-  if(tipo==='ri_plan'||tipo==='ri_bolsa'){
+  if(tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='combo3'){
     var _riCons=parseInt(gv('mc2'))||0;
     if(_riCons){
-      var _riLine=(tipo==='ri_bolsa')?('Bolsa de '+_riCons+' informes comerciales para 12 meses'):('Plan de '+_riCons+' consultas al mes');
+      var _riLine=(tipo==='ri_bolsa')
+        ? ('Bolsa de '+_riCons+' informes comerciales para 12 meses')
+        : (tipo==='ri_plan')
+          ? ('Plan de '+_riCons+' consultas al mes')
+          : ('Plan de '+_riCons+' consultas RI al mes');
       it=[_riLine].concat(it);itMail=[_riLine].concat(itMail);
     }
   }
