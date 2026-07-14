@@ -2267,6 +2267,50 @@ function multiTotals(){
   var uf=0,clp=0;MULTI.forEach(function(s){uf+=(s.ufV||0);clp+=(s.clp||0);});
   return {uf:Math.round(uf*10000)/10000,clp:clp};
 }
+/* ── Enriquecimiento dinámico compartido de bullets ─────────────────────────
+   Fuente ÚNICA de la lógica que (a) antepone la línea de consultas de
+   RI/Malla/bundles/combo y (b) reescribe el bullet genérico de frecuencia de
+   Portfolio Monitor. La usan TANTO el render de producto único como addToMulti,
+   para que ambos flujos no vuelvan a divergir ante un futuro fix. No muta los
+   arreglos recibidos: devuelve copias nuevas {items,itemsMail}.
+     tipo      → clave de producto
+     items     → arreglo base (tarjeta / WhatsApp)
+     itemsMail → arreglo base (Gmail / Outlook)
+     cons      → cantidad de consultas ya calculada (c.cons / mc2)
+     extra.fr  → código de frecuencia PFM ('s'|'q'|'m') leído de #c-fr          */
+function enrichItems(tipo,items,itemsMail,cons,extra){
+  extra=extra||{};
+  var it=(items||[]).slice(),itMail=(itemsMail||[]).slice();
+  /* Portfolio Monitor: especializa el bullet genérico de frecuencia. */
+  if(tipo==='pfm'){
+    var _pfmFr={s:'Semanal',q:'Quincenal',m:'Mensual'}[extra.fr]||'';
+    if(_pfmFr){
+      var _pfmRw=function(arr){return arr.map(function(x){return /Actualizaci[oó]n\s+semanal,\s*quincenal\s+o\s+mensual/i.test(x)?('Actualización '+_pfmFr.toLowerCase()+' de toda la cartera'):x;});};
+      it=_pfmRw(it);itMail=_pfmRw(itMail);
+    }
+  }
+  /* Reporte Comercial / Bolsa / bundles / combo: antepone la línea de consultas. */
+  if(tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='combo3'){
+    var _riCons=parseInt(cons)||0;
+    if(_riCons){
+      var _riLine=(tipo==='ri_bolsa')
+        ? ('Bolsa de '+_riCons+' informes comerciales para 12 meses')
+        : (tipo==='ri_plan')
+          ? ('Plan de '+_riCons+' consultas al mes')
+          : ('Plan de '+_riCons+' consultas de Reporte Interactivo (informe comercial) al mes');
+      it=[_riLine].concat(it);itMail=[_riLine].concat(itMail);
+    }
+  }
+  /* Malla Societaria: antepone la línea de consultas. */
+  if(tipo==='malla'){
+    var _maCons=parseInt(cons)||0;
+    if(_maCons){
+      var _maLine='Plan de '+_maCons+' consultas al mes';
+      it=[_maLine].concat(it);itMail=[_maLine].concat(itMail);
+    }
+  }
+  return {items:it,itemsMail:itMail};
+}
 function addToMulti(){
   if(!LAST||CURRENT.key==='soluciones'||CURRENT.key==='multi'||CURRENT.key==='bdd'){toast('Configura un producto primero','err','global-toast');return;}
   var c=LAST,tipo=c.tipo,pi=PINFO[tipo]||{n:'Producto'};
@@ -2276,10 +2320,17 @@ function addToMulti(){
      → se ignora en silencio (sin mensaje, sin animación). Variación real sí se agrega. */
   var _dup=MULTI.some(function(s){return s.tipo===tipo&&s.ufV===ufV&&s.ufL===ufL&&s.dc===dc&&s.pl===pl&&s.cons===cons;});
   if(_dup)return;
+  /* Enriquecimiento dinámico ANTES de congelar el snapshot: misma lógica que el
+     render de producto único (consultas RI/Malla, frecuencia PFM). Se usa la
+     variable 'cons' ya calculada (no gv('mc2')) y #c-fr para la frecuencia. */
+  var _en=enrichItems(tipo,
+    (PITEMS[tipo]||[]),
+    ((typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:(PITEMS[tipo]||[])),
+    cons,{fr:gv('c-fr')});
   MULTI.push({tipo:tipo,n:pi.n,ufV:ufV,ufL:ufL,hayDc:hayDc,dc:dc,
     clp:ufV>0?ufc(ufV):0,pl:pl,cons:cons,
-    items:(PITEMS[tipo]||[]).slice(),
-    itemsMail:((typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:(PITEMS[tipo]||[])).slice(),
+    items:_en.items,
+    itemsMail:_en.itemsMail,
     docs:docsForTipo(tipo)});
   flyToMulti();
   toast('✔ Agregado a Multiproducto ('+MULTI.length+')','ok','global-toast');
@@ -2993,40 +3044,13 @@ function genMail(){
   var wspSigHref=telNum?'https://wa.me/'+telNum+'?text='+encodeURIComponent(_sigMsg):'';
   var it=PITEMS[tipo]||[];
   var itMail=(typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:it; /* enriquecido solo Gmail/Outlook */
-  /* Portfolio Monitor: reflejar en el contenido del cliente la periodicidad elegida
-     en la calculadora. Se reutiliza EXACTAMENTE la misma fuente que usa el cálculo
-     (select #c-fr); sin variables nuevas ni almacenamiento adicional. Solo se
-     especializa el bullet genérico de frecuencia (no muta los arreglos globales). */
-  if(tipo==='pfm'){
-    var _pfmFr={s:'Semanal',q:'Quincenal',m:'Mensual'}[gv('c-fr')]||'';
-    if(_pfmFr){
-      var _pfmRw=function(arr){return arr.map(function(x){return /Actualizaci[oó]n\s+semanal,\s*quincenal\s+o\s+mensual/i.test(x)?('Actualización '+_pfmFr.toLowerCase()+' de toda la cartera'):x;});};
-      it=_pfmRw(it);itMail=_pfmRw(itMail);
-    }
-  }
-  /* Reporte Comercial / Informes Comerciales Bolsa: reflejar en el contenido del
-     cliente la cantidad de consultas cotizada. Reutiliza la ÚNICA fuente (mc2 = c.cons,
-     puente que ya alimenta la calculadora); sin variables nuevas ni recálculo. */
-  if(tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='combo3'){
-    var _riCons=parseInt(gv('mc2'))||0;
-    if(_riCons){
-      var _riLine=(tipo==='ri_bolsa')
-        ? ('Bolsa de '+_riCons+' informes comerciales para 12 meses')
-        : (tipo==='ri_plan')
-          ? ('Plan de '+_riCons+' consultas al mes')
-          : ('Plan de '+_riCons+' consultas de Reporte Interactivo (informe comercial) al mes');
-      it=[_riLine].concat(it);itMail=[_riLine].concat(itMail);
-    }
-  }
-  /* Malla Societaria: reflejar la cantidad de consultas cotizada. Misma fuente única
-     (mc2 = c.cons) y mismo mecanismo que ri_plan; guarda aditiva independiente. */
-  if(tipo==='malla'){
-    var _maCons=parseInt(gv('mc2'))||0;
-    if(_maCons){
-      var _maLine='Plan de '+_maCons+' consultas al mes';
-      it=[_maLine].concat(it);itMail=[_maLine].concat(itMail);
-    }
-  }
+  /* Enriquecimiento dinámico (consultas RI/Malla/bundles/combo + frecuencia PFM):
+     misma fuente única compartida con addToMulti vía enrichItems(). Consultas
+     desde mc2 (= c.cons) y frecuencia desde #c-fr, igual que antes. */
+  (function(){
+    var _en=enrichItems(tipo,it,itMail,parseInt(gv('mc2'))||0,{fr:gv('c-fr')});
+    it=_en.items;itMail=_en.itemsMail;
+  })();
   var hayDc=ufL&&ufV&&ufV<ufL;
   var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
   var clp=ufV?ufc(ufV):null;
