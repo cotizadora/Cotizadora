@@ -4936,7 +4936,14 @@ function mapearCRM(txt){
   var _rutEl=$('mr');if(_rutEl)_rutEl.value=(rut||'').replace(/[\s\u00a0]/g,'').toUpperCase();
   /* CONTACTO — fuente única: el campo visible #cli-contacto.
      El pegado de Excel lo sobrescribe SOLO si trae contacto (no borra lo escrito a mano). */
-  var _ctExcel=extraerContactoExcel(txt);var _ctEl=$('cli-contacto');if(_ctEl&&_ctExcel)_ctEl.value=_ctExcel;
+  var _ctExcel=extraerContactoExcel(txt);
+  /* Respaldo: si la fila NO trae correo, extraerContactoExcel no puede ubicar el
+     contacto (se apoya en la celda posterior al correo) y lo dejaría vacío. En ese
+     caso el representante/contacto es el 2º campo de texto libre (libres[1]), que
+     siempre va después de la razón social. Así el nombre del cliente se completa
+     aunque el cliente no tenga correo. */
+  if(!_ctExcel && libres.length>=2)_ctExcel=_limpiarContacto(libres[1]);
+  var _ctEl=$('cli-contacto');if(_ctEl&&_ctExcel)_ctEl.value=_ctExcel;
   /* Normalización automática también al pegar (REQ 5) */
   var _ne=$('cli-email');if(_ne)_ne.value=_ne.value.toLowerCase();
   var _nc=$('cli-contacto');if(_nc)_nc.value=_titleCase(_nc.value);
