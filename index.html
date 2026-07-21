@@ -979,7 +979,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
           <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
           <button type="button" id="btn-crm-paste" class="crm-paste-btn crm-grid crm-excel-blue" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span></span></button>
           <div class="fld"><label>RUT</label><input type="text" id="mr" placeholder="76.123.456-7" oninput="normRutInput(this);onClientChange()"></div>
-          <button type="button" id="btn-copy-excel" class="crm-paste-btn crm-grid crm-excel-green" onclick="copiarParaExcel();playClick();" title="Copia FECHA · EMPRESA · RUT · TELÉFONO · CORREO · CONTACTO en una sola línea, lista para pegar desde la columna A"><span class="crm-ico">📋</span><span class="crm-txt"><span class="crm-main">Copiar para Excel →</span></span></button>
+          <button type="button" id="btn-copy-excel" class="crm-paste-btn crm-grid crm-excel-green" onclick="copiarParaExcel();playClick();" title="Copia una fila lista para pegar desde la columna A: FECHA · EMPRESA · RUT · TELÉFONO · CORREO · REPRESENTANTE · UF del día · SERVICIO OFRECIDO · (observación) · PRECIO VENTA · PRECIO LISTA · DESCUENTO"><span class="crm-ico">📋</span><span class="crm-txt"><span class="crm-main">Copiar para Excel →</span></span></button>
         </div>
         <div class="cfg-3">
           <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="normTelInput(this);onClientChange()"></div>
@@ -4988,14 +4988,36 @@ function normRutInput(el){if(!el)return;var v=el.value,nv=v.replace(/[\s\u00a0]/
 /* Fecha dd-mm-yyyy (idéntica a la columna FECHA de la planilla) */
 function _fechaDMY(){var d=new Date(),p=function(n){return(n<10?'0':'')+n;};return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear();}
 /* ════════ REQ 4 — COPIAR PARA EXCEL (estructura exacta de la planilla) ════════
-   FECHA · EMPRESA · RUT · TELÉFONO · CORREO · CONTACTO — una sola línea (TAB). */
+   12 columnas alineadas con la planilla de ventas (ver detalle en la función). */
 function copiarParaExcel(){
   var emp=(gv('me')||'');
   var rut=(gv('mr')||'');
   var tel=(gv('cli-tel')||'').replace(/[\s\u00a0]/g,'');
   var email=(gv('cli-email')||'').toLowerCase();
   var cont=_titleCase(gv('cli-contacto')||'');
-  var fila=[_fechaDMY(),emp,rut,tel,email,cont].join('\t');
+  /* G — UF del día (ej. "40.845") */
+  var ufDia=Math.round(getUF()).toLocaleString('es-CL');
+  /* Formato de precio en UF con coma decimal chilena (ej. "2,2 UF") */
+  var ufTxt=function(x){return ufd(x).replace('.',',')+' UF';};
+  /* H/J/K/L — datos comerciales de la cotización actual. Solo se rellenan para
+     producto único con precio calculado (LAST). En Multiproducto / Soluciones /
+     BDD / Publicación quedan vacíos (se llenan a mano, sin arriesgar datos). */
+  var prod='',venta='',lista='',dcto='';
+  var _special=(CURRENT.key==='multi'||CURRENT.key==='soluciones'||CURRENT.key==='bdd'||CURRENT.key==='pub'||CURRENT.key==='pago_pub'||!CURRENT.key);
+  if(!_special&&LAST&&LAST.tipo){
+    var _pn=document.getElementById('cfg-prod-name');
+    if(_pn&&_pn.textContent)prod=_pn.textContent.replace(/^[·\s]+/,'').trim();
+    if(!prod&&PINFO[LAST.tipo])prod=PINFO[LAST.tipo].n;
+    if(typeof LAST.ufVenta==='number'&&!isNaN(LAST.ufVenta))venta=ufTxt(LAST.ufVenta);
+    if(typeof LAST.ufLista==='number'&&!isNaN(LAST.ufLista))lista=ufTxt(LAST.ufLista);
+    if(LAST.ufLista>0&&typeof LAST.ufVenta==='number'){
+      var d=Math.round((1-LAST.ufVenta/LAST.ufLista)*100);
+      dcto=(d>0?'-'+d:''+d)+'%';   /* ej. "-12%" ; sin descuento → "0%" */
+    }
+  }
+  /* Fila 12 columnas: A FECHA·B EMPRESA·C RUT·D TEL·E CORREO·F REPRESENTANTE·
+     G UF·H SERVICIO·I OBSERVACIÓN·J P.VENTA·K P.LISTA·L DESCUENTO */
+  var fila=[_fechaDMY(),emp,rut,tel,email,cont,ufDia,prod,'',venta,lista,dcto].join('\t');
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(fila).then(function(){toast('✔ Copiado para Excel — pega desde la columna A','ok','global-toast');}).catch(function(){toast('✖ Copia manualmente','err','global-toast');});
   }else{toast('✖ Este navegador no permite copiar al portapapeles','err','global-toast');}
