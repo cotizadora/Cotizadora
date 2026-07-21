@@ -4979,6 +4979,73 @@ function pegarCRM(){
     .then(function(txt){mapearCRM(txt||'');})
     .catch(function(){toast('✖ Permite el acceso al portapapeles e intenta de nuevo','err','global-toast');});
 }
+/* ════════ FLUJO INVERSO — restaurar PRODUCTO + PRECIOS desde la fila pegada ════════
+   Lee por posición H (servicio ofrecido), J (precio venta) y K (precio lista) de la
+   fila de 12 columnas que genera "Copiar para Excel". Ignora la UF (G), que cambia a
+   diario. Salta a la pestaña del producto y aplica el precio ofrecido. No reconstruye
+   la config fina (plan/consultas): eso no se guarda en el Excel. Devuelve true si
+   mostró su propio aviso (para no duplicar el toast de "Datos CRM cargados"). */
+function _limpiarCelda(s){
+  s=(''+s).replace(/[    ​]/g,' ').trim();
+  if(s.length>=2&&s.charAt(0)==='"'&&s.charAt(s.length-1)==='"')s=s.slice(1,-1).replace(/""/g,'"');
+  return s.trim();
+}
+function _numDesdeUF(s){
+  if(s==null)return null;
+  var t=(''+s).replace(/uf/ig,'').replace(/[^\d.,\-]/g,'').trim();
+  if(!t)return null;
+  if(t.indexOf(',')>-1)t=t.replace(/\./g,'').replace(',','.');   /* formato chileno: coma decimal */
+  var v=parseFloat(t);
+  return isNaN(v)?null:v;
+}
+function _matchProductoKey(nombre){
+  var norm=function(s){return (''+s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();};
+  var n=norm(nombre);if(!n)return null;
+  for(var i=0;i<PRODUCTS.length;i++){if(norm(PRODUCTS[i].lb)===n)return PRODUCTS[i].key;}                 /* 1) etiqueta exacta */
+  for(var j=0;j<PRODUCTS.length;j++){var lb=norm(PRODUCTS[j].lb);if(lb.length>4&&n.indexOf(lb)>-1)return PRODUCTS[j].key;} /* 2) etiqueta contenida */
+  var has=function(w){return n.indexOf(w)>-1;};                                                          /* 3) palabras clave (filas viejas) */
+  if(has('bindle')||has('bundle'))return 'bundle';
+  if(has('bolsa'))return 'bolsa';
+  if(has('reporte interactivo')||/\bri\b/.test(n))return 'ri';
+  if(has('mora control')||/\bmc\b/.test(n))return 'mc';
+  if(has('portfolio')||has('porfolio')||has('portafolio')||has('monitor'))return 'pfm';
+  if(has('partner'))return 'pc';
+  if(has('data finder')||has('datafinder'))return 'datafinder';
+  if(has('malla')||has('societaria'))return 'malla';
+  if(has('pago')&&has('publicacion'))return 'pago_pub';
+  if(has('publicacion')||has('dicom'))return 'pub';
+  if(has('base de datos')||has('bdd'))return 'bdd';
+  if(has('multiproducto'))return 'multi';
+  if(has('informacion de productos')||has('catalogo'))return 'soluciones';
+  return null;
+}
+function restaurarProductoPrecio(txt){
+  var lineas=(''+txt).split(/\r?\n/),cols=null;
+  for(var i=0;i<lineas.length;i++){
+    var raw=lineas[i].split('\t');
+    if(raw.length>=8){cols=raw.map(_limpiarCelda);break;}   /* solo filas con estructura de planilla */
+  }
+  if(!cols)return false;
+  var nombreProd=cols[7]||'';                 /* H — SERVICIO OFRECIDO */
+  var vVenta=_numDesdeUF(cols[9]);            /* J — PRECIO VENTA */
+  var vLista=_numDesdeUF(cols[10]);           /* K — PRECIO LISTA */
+  if(!nombreProd&&vVenta==null&&vLista==null)return false;
+  var key=nombreProd?_matchProductoKey(nombreProd):null;
+  if(!key){
+    if(nombreProd){toast('⚠ No reconocí el producto "'+nombreProd+'" — elígelo en su pestaña. El cliente ya quedó cargado.','err','global-toast');return true;}
+    return false;
+  }
+  setProduct(key);                            /* salta a la pestaña + reconstruye config + refresh */
+  var especial=(key==='multi'||key==='soluciones'||key==='bdd'||key==='pub'||key==='pago_pub');
+  var aplicoPrecio=false;
+  if(!especial){
+    if(vLista!=null){CURRENT.overrideLista=vLista;aplicoPrecio=true;}
+    if(vVenta!=null){CURRENT.override=vVenta;aplicoPrecio=true;}
+    if(aplicoPrecio&&typeof refresh==='function')refresh();
+  }
+  toast(aplicoPrecio?'✔ Producto y precio restaurados desde el Excel':'✔ Producto seleccionado desde el Excel','ok','global-toast');
+  return true;
+}
 /* ════════ REQ 5 — NORMALIZACIÓN AUTOMÁTICA (al escribir y al pegar) ════════ */
 function _titleCase(s){return (''+s).toLowerCase().replace(/(^|[\s\-'/])([a-z\u00e0-\u00ff\u00f1])/g,function(m,p,c){return p+c.toUpperCase();});}
 function normEmailInput(el){if(!el)return;var v=el.value,nv=v.toLowerCase();if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
@@ -5080,7 +5147,11 @@ function mapearCRM(txt){
   var _nt=$('cli-tel');if(_nt)_nt.value=_nt.value.replace(/[\s\u00a0]/g,'');
   onClientChange();
   validarEmailCliente();
-  if(ok)toast('✔ Datos CRM cargados','ok','global-toast');
+  /* Flujo inverso: si la fila trae producto/precios (formato de la planilla),
+     salta a la pestaña del producto y restaura el precio ofrecido. Aditivo:
+     no altera nada de la carga de datos del cliente hecha arriba. */
+  var _rp=restaurarProductoPrecio(txt);
+  if(ok&&!_rp)toast('✔ Datos CRM cargados','ok','global-toast');
 }
 function updateCRMWsp(){
   var skip=$('skip-dest')&&$('skip-dest').checked;
