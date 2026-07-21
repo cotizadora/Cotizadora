@@ -834,6 +834,39 @@ input#cli-email.eml-ok{border-color:var(--gn)!important;box-shadow:0 0 0 3px rgb
 input#cli-email.eml-bad{border-color:var(--rl)!important;box-shadow:0 0 0 3px rgba(192,38,59,.20)!important;}
 input#cli-email.eml-wait{border-color:var(--y)!important;box-shadow:0 0 0 3px rgba(240,192,64,.18)!important;}
 input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!important;}
+
+/* ── CENTRO DE DESCARGAS (página completa, calcada del patrón Biblioteca) ── */
+body.dl-open #prodbar,body.dl-open #workstation,body.dl-open #mtoggle{display:none !important;}
+#descargas-view{display:none;position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:275;
+  background:var(--g0);flex-direction:column;opacity:0;transform:translateY(14px);
+  transition:opacity .22s ease,transform .22s ease;}
+body.dl-open #descargas-view{display:flex;}
+body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
+/* reutiliza .bib-top / .bib-back / .bib-body / .bib-grid en el HTML */
+.dl-card{background:var(--g2);border:1px solid var(--g3);border-radius:14px;padding:22px;
+  display:flex;flex-direction:column;gap:14px;transition:.15s;}
+.dl-card:hover{border-color:var(--rl);box-shadow:0 6px 22px rgba(0,0,0,.4);transform:translateY(-2px);}
+.dl-prev{height:120px;border-radius:11px;background:linear-gradient(135deg,var(--g3),var(--g1));
+  border:1px solid var(--g4);display:flex;align-items:center;justify-content:center;font-size:3.4rem;overflow:hidden;}
+.dl-prev img{width:100%;height:100%;object-fit:cover;display:block;}
+.dl-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.dl-title{font-size:1.12rem;font-weight:900;color:#fff;line-height:1.3;}
+.dl-tag{border-radius:20px;padding:3px 11px;font-size:.64rem;font-weight:800;letter-spacing:.5px;
+  text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+.dl-tag.ext{background:rgba(52,152,219,.16);border:1px solid rgba(52,152,219,.45);color:#7ec8f0;}
+.dl-tag.win{background:rgba(46,204,113,.14);border:1px solid rgba(46,204,113,.45);color:var(--gn);}
+.dl-desc{font-size:.88rem;color:var(--wa);line-height:1.55;flex:1;}
+.dl-steps{font-size:.8rem;color:var(--wb);line-height:1.5;background:rgba(0,0,0,.22);
+  border:1px solid var(--g3);border-radius:10px;padding:11px 13px;margin:0;}
+.dl-steps b{color:var(--wa);}
+.dl-btn{display:flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;
+  background:linear-gradient(135deg,var(--r),var(--rd));border:1px solid var(--rl);color:#fff;
+  border-radius:10px;padding:12px 16px;font-family:inherit;font-weight:800;font-size:.95rem;cursor:pointer;transition:.15s;}
+.dl-btn:hover{background:linear-gradient(135deg,var(--rl),var(--r));box-shadow:0 0 16px rgba(192,38,59,.45);transform:translateY(-1px);}
+.dl-btn .dl-arrow{font-size:1.1rem;}
+.dl-soon{opacity:.55;pointer-events:none;filter:grayscale(.3);}
+.dl-note{grid-column:1/-1;font-size:.82rem;color:var(--wb);line-height:1.6;
+  background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:12px;padding:14px 18px;}
 </style>
 <style id="sol-cat-styles">
 .sol-head2{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin:14px 2px 9px;}
@@ -912,11 +945,11 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
     </div>
     <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
     <button class="snd-toggle" id="force-update-btn" onclick="forceUpdate();" title="Ver la última versión publicada (fuerza una recarga real sin usar caché del navegador)" aria-label="Actualizar a la última versión">⟳</button>
-    <a class="ext-btn" href="https://cotizadora.github.io/Cotizadora/pluggin_v9.zip" target="_blank" rel="noopener" title="Descargar extensión CRM Extractor Pro — conecta el discador con el CRM (Chrome / Edge)">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V19c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V21H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/></svg>
-      <span class="ext-txt"><span class="ext-lb">Extensión CRM</span><span class="ext-sb">Discador ⇄ CRM</span></span>
+    <button type="button" class="ext-btn" onclick="openDescargasView()" title="Centro de Descargas — extensiones y aplicaciones del equipo (CRM Extractor, ShortCut Vocal, MuteReal, NotasSmart)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      <span class="ext-txt"><span class="ext-lb">Descargas</span><span class="ext-sb">Apps &amp; Extensiones</span></span>
       <span class="ext-dl">↓</span>
-    </a>
+    </button>
     <button class="htool-btn" onclick="openBibliotecaView()" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad">🎧 Biblioteca</button>
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
@@ -1299,6 +1332,70 @@ input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!import
   </div>
 </div>
 
+<!-- ── CENTRO DE DESCARGAS (página completa, patrón Biblioteca) ── -->
+<div id="descargas-view">
+  <div class="bib-top">
+    <button class="bib-back" onclick="closeDescargasView()">← Volver al Cotizador</button>
+    <h2>⬇ Centro de Descargas</h2>
+    <span class="bib-sub">Extensiones y aplicaciones del equipo · instala y actualiza desde un solo lugar</span>
+  </div>
+  <div class="bib-body">
+    <div class="bib-grid">
+
+      <!-- 1) CRM Extractor (extensión) — YA disponible -->
+      <div class="dl-card">
+        <div class="dl-prev">🔌</div>
+        <div class="dl-head">
+          <div class="dl-title">CRM Extractor Pro</div>
+          <span class="dl-tag ext">Extensión</span>
+        </div>
+        <div class="dl-desc">Extrae los datos del cliente desde el CRM y conecta el discador con la cotizadora. Para Chrome y Edge.</div>
+        <p class="dl-steps"><b>Instalar:</b> 1) Descarga y descomprime el .zip. 2) Abre <b>chrome://extensions</b>. 3) Activa <b>Modo desarrollador</b> (arriba a la derecha). 4) <b>Cargar descomprimida</b> → elige la carpeta.</p>
+        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/pluggin_v9.zip" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.zip)</a>
+      </div>
+
+      <!-- 2) ShortCut Vocal (extensión) -->
+      <div class="dl-card">
+        <div class="dl-prev">🎙️</div>
+        <div class="dl-head">
+          <div class="dl-title">ShortCut Vocal CRM</div>
+          <span class="dl-tag ext">Extensión</span>
+        </div>
+        <div class="dl-desc">Atajos por voz para operar el CRM sin soltar el teclado. Acelera tareas repetitivas durante la llamada.</div>
+        <p class="dl-steps"><b>Instalar:</b> 1) Descarga y descomprime el .zip. 2) Abre <b>chrome://extensions</b>. 3) Activa <b>Modo desarrollador</b>. 4) <b>Cargar descomprimida</b> → elige la carpeta.</p>
+        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/shortcut-vocalcrm_v1.zip" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.zip)</a>
+      </div>
+
+      <!-- 3) MuteReal (programa Windows) -->
+      <div class="dl-card">
+        <div class="dl-prev">🔇</div>
+        <div class="dl-head">
+          <div class="dl-title">MuteReal</div>
+          <span class="dl-tag win">Programa Windows</span>
+        </div>
+        <div class="dl-desc">Silencia y activa tu micrófono al instante, con indicador en pantalla. Ideal entre llamadas.</div>
+        <p class="dl-steps"><b>Instalar:</b> descarga y ejecuta el archivo. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
+        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/mutereal_v1.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
+      </div>
+
+      <!-- 4) NotasSmart (programa Windows) -->
+      <div class="dl-card">
+        <div class="dl-prev">🗒️</div>
+        <div class="dl-head">
+          <div class="dl-title">NotasSmart</div>
+          <span class="dl-tag win">Programa Windows</span>
+        </div>
+        <div class="dl-desc">Bloc de notas flotante que queda siempre a la vista. Guarda apuntes rápidos sin cambiar de ventana.</div>
+        <p class="dl-steps"><b>Instalar:</b> descarga y ejecuta el archivo. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
+        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/notassmart_v1.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
+      </div>
+
+      <div class="dl-note">💡 <b>Nota:</b> el botón de <b>CRM Extractor Pro</b> ya descarga el archivo publicado (<code>pluggin_v9.zip</code>). Los otros tres apuntan a los nombres propuestos y funcionarán en cuanto subas esos archivos al hosting. Podemos afinar los nombres cuando quieras.</div>
+
+    </div>
+  </div>
+</div>
+
 <div id="global-toast" class="toast"></div>
 <div id="cp-toast" aria-live="polite"></div>
 <div id="paste-notice" onclick="this.classList.remove('on');"><div class="pn-card"><div class="pn-check">✅</div><div class="pn-title">MENSAJE COPIADO</div><div class="pn-sub" id="paste-notice-sub">Pégalo con <b>Ctrl+V</b></div></div></div>
@@ -1400,6 +1497,17 @@ function closeBibliotecaView(){
   var a=$('bd-audio');if(a){a.pause();}
   $('biblioteca-view').classList.remove('in');
   document.body.classList.remove('bib-open');
+  playClick();
+}
+/* ── Centro de Descargas (misma mecánica que la Biblioteca) ── */
+function openDescargasView(){
+  document.body.classList.add('dl-open');
+  requestAnimationFrame(function(){$('descargas-view').classList.add('in');});
+  playClick();
+}
+function closeDescargasView(){
+  $('descargas-view').classList.remove('in');
+  document.body.classList.remove('dl-open');
   playClick();
 }
 function bibBack(){
