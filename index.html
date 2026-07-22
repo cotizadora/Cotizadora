@@ -835,6 +835,70 @@ input#cli-email.eml-bad{border-color:var(--rl)!important;box-shadow:0 0 0 3px rg
 input#cli-email.eml-wait{border-color:var(--y)!important;box-shadow:0 0 0 3px rgba(240,192,64,.18)!important;}
 input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!important;}
 
+/* ── PLANILLA INTEGRADA (grilla de registros sobre la DB interna) ── */
+body.planilla-open #prodbar,body.planilla-open #workstation,body.planilla-open #mtoggle{display:none !important;}
+#planilla-view{display:none;position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:275;
+  background:var(--g0);flex-direction:column;opacity:0;transform:translateY(14px);
+  transition:opacity .22s ease,transform .22s ease;}
+body.planilla-open #planilla-view{display:flex;}
+body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
+.pl-toolbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 22px;background:var(--g1);border-bottom:1px solid var(--g4);}
+#pl-search{flex:1;min-width:220px;background:var(--g2);border:1px solid var(--g4);color:var(--w);border-radius:9px;padding:9px 13px;font-family:inherit;font-size:.9rem;}
+#pl-search:focus{outline:none;border-color:var(--gn);}
+.pl-toolbar select{background:var(--g2);border:1px solid var(--g4);color:var(--w);border-radius:9px;padding:9px 11px;font-family:inherit;font-size:.85rem;}
+.pl-chk{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--wa);white-space:nowrap;cursor:pointer;}
+.pl-btn{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.5);color:var(--gn);border-radius:9px;padding:9px 14px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;}
+.pl-btn:hover{background:rgba(46,204,113,.22);}
+#pl-table-wrap{width:100%;overflow:auto;}
+#pl-table{border-collapse:collapse;width:100%;font-size:.82rem;white-space:nowrap;}
+.pl-th{position:sticky;top:0;z-index:2;background:var(--r);color:#fff;font-weight:800;text-align:left;padding:10px 12px;border:1px solid var(--rd);cursor:pointer;letter-spacing:.3px;font-size:.72rem;text-transform:uppercase;user-select:none;}
+.pl-th:hover{background:var(--rl);}
+.pl-th-id{width:52px;text-align:center;}
+.pl-th-acc{cursor:default;}
+.pl-td{padding:8px 12px;border:1px solid var(--g3);color:var(--w);max-width:280px;overflow:hidden;text-overflow:ellipsis;}
+.pl-td-id{text-align:center;color:var(--wa);font-variant-numeric:tabular-nums;}
+.pl-tr:nth-child(even){background:var(--g1);}
+.pl-tr:hover{background:rgba(52,152,219,.10);}
+.pl-tr.pl-actual{box-shadow:inset 3px 0 0 var(--gn);}
+.pl-tr.pl-elim{opacity:.5;}
+.pl-tr.pl-elim .pl-td{text-decoration:line-through;}
+.pl-estado-sel{background:var(--g2);border:1px solid var(--g4);color:var(--w);border-radius:7px;padding:4px 6px;font-family:inherit;font-size:.78rem;}
+.pl-td-acc{white-space:nowrap;}
+.pl-act{background:var(--g3);border:1px solid var(--g4);border-radius:7px;padding:4px 7px;margin:0 2px;cursor:pointer;font-size:.95rem;line-height:1;}
+.pl-act:hover{background:var(--g4);border-color:var(--gn);}
+.pl-act-del:hover{border-color:var(--rl);background:rgba(192,38,59,.2);}
+#pl-empty{display:none;padding:60px 24px;text-align:center;color:var(--wa);font-size:1rem;}
+/* Botón 💾 Guardar Cotización + estado, en el panel de cliente */
+.save-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.save-btn{background:linear-gradient(135deg,#2ecc71,#25a85b);border:1px solid #25a85b;color:#06240f;border-radius:9px;padding:11px 18px;cursor:pointer;font-family:inherit;font-weight:800;font-size:.95rem;transition:.14s;}
+.save-btn:hover{box-shadow:0 4px 16px rgba(46,204,113,.4);transform:translateY(-1px);}
+.save-btn.guardado{background:var(--g3);border-color:var(--g4);color:var(--wa);cursor:default;box-shadow:none;transform:none;}
+.save-open-btn{background:rgba(52,152,219,.12);border:1px solid rgba(52,152,219,.5);color:var(--bl);border-radius:9px;padding:11px 15px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.88rem;}
+.save-open-btn:hover{background:rgba(52,152,219,.22);}
+.save-status{font-size:.8rem;font-weight:600;}
+.save-status.dirty{color:var(--y);}
+.save-status.ok{color:var(--gn);}
+/* Modal de historial */
+.pl-modal{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px;}
+.pl-modal.on{display:flex;}
+.pl-modal-box{background:var(--g1);border:1px solid var(--g4);border-radius:14px;max-width:560px;width:100%;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;}
+.pl-modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--g4);}
+.pl-modal-head h3{font-size:1rem;color:#fff;font-weight:800;}
+.pl-modal-x{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:1rem;}
+#pl-hist-body{overflow:auto;padding:16px 18px;}
+.pl-h-title{font-size:.9rem;color:var(--wa);margin-bottom:12px;font-weight:700;}
+.pl-h-item{border-left:2px solid var(--g4);padding:6px 0 10px 12px;margin-left:4px;}
+.pl-h-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pl-h-acc{font-weight:800;font-size:.78rem;padding:2px 9px;border-radius:12px;background:var(--g3);color:#fff;}
+.pl-h-creado{background:rgba(46,204,113,.2);color:var(--gn);}
+.pl-h-editado{background:rgba(52,152,219,.2);color:var(--bl);}
+.pl-h-eliminado{background:rgba(192,38,59,.2);color:var(--rl);}
+.pl-h-ts{font-size:.78rem;color:var(--wa);}
+.pl-h-ej{font-size:.78rem;color:var(--y);}
+.pl-h-camb{margin-top:6px;display:flex;flex-direction:column;gap:3px;font-size:.8rem;color:var(--w);}
+.pl-h-camb b{color:var(--wa);font-weight:700;}
+.pl-h-empty{color:var(--wa);}
+
 /* ── CENTRO DE DESCARGAS (página completa, calcada del patrón Biblioteca) ── */
 body.dl-open #prodbar,body.dl-open #workstation,body.dl-open #mtoggle{display:none !important;}
 #descargas-view{display:none;position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:275;
@@ -950,6 +1014,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <span class="ext-txt"><span class="ext-lb">Descargas</span><span class="ext-sb">Apps &amp; Extensiones</span></span>
       <span class="ext-dl">↓</span>
     </button>
+    <button class="htool-btn" onclick="openPlanillaView()" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)">📋 Planilla</button>
     <button class="htool-btn" onclick="openBibliotecaView()" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad">🎧 Biblioteca</button>
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
@@ -988,6 +1053,11 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
         </div>
         <!-- campos ocultos para compatibilidad -->
         <input type="hidden" id="mn"><input type="hidden" id="cli-obs">
+      </div>
+      <div id="save-row" class="save-row">
+        <button type="button" id="btn-guardar-cotizacion" class="save-btn" onclick="guardarCotizacion();playClick();" title="Guarda esta cotización como registro en la Planilla interna. Si abriste un registro existente, actualiza ESE mismo (no duplica).">💾 Guardar Cotización</button>
+        <button type="button" class="save-open-btn" onclick="openPlanillaView();playClick();" title="Abrir la Planilla de cotizaciones guardadas">📋 Ver Planilla</button>
+        <span id="save-status" class="save-status"></span>
       </div>
     </div>
 
@@ -1393,6 +1463,39 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <div class="dl-note">💡 <b>Nota:</b> el botón de <b>CRM Extractor Pro</b> ya descarga el archivo publicado (<code>pluggin_v9.zip</code>). Los otros tres apuntan a los nombres propuestos y funcionarán en cuanto subas esos archivos al hosting. Podemos afinar los nombres cuando quieras.</div>
 
     </div>
+  </div>
+</div>
+
+<!-- ════════ PLANILLA INTEGRADA — vista de la base de datos interna ════════ -->
+<div id="planilla-view">
+  <div class="bib-top">
+    <button class="bib-back" onclick="closePlanillaView()">← Volver al Cotizador</button>
+    <h2>📋 Planilla de Cotizaciones</h2>
+    <span class="bib-sub" id="pl-count"></span>
+  </div>
+  <div class="pl-toolbar">
+    <input type="text" id="pl-search" placeholder="🔎 Buscar en todos los campos…" oninput="planillaBuscar(this.value)">
+    <select id="pl-estado" onchange="planillaFiltroEstado(this.value)">
+      <option value="">Todos los estados</option>
+      <option value="borrador">Borrador</option>
+      <option value="enviada">Enviada</option>
+      <option value="ganada">Ganada</option>
+      <option value="perdida">Perdida</option>
+    </select>
+    <label class="pl-chk"><input type="checkbox" id="pl-show-del" onchange="planillaToggleEliminados(this.checked)"> Ver eliminados</label>
+    <button class="pl-btn" onclick="planillaExportar()">⬇ Exportar a Excel</button>
+  </div>
+  <div class="bib-body">
+    <div id="pl-table-wrap"><table id="pl-table"></table></div>
+    <div id="pl-empty">Aún no hay cotizaciones guardadas. Genera una cotización y pulsa <b>💾 Guardar Cotización</b>.</div>
+  </div>
+</div>
+
+<!-- Modal de historial de un registro -->
+<div id="pl-hist-modal" class="pl-modal" onclick="if(event.target===this)cerrarHistorial()">
+  <div class="pl-modal-box">
+    <div class="pl-modal-head"><h3>🕘 Historial</h3><button class="pl-modal-x" onclick="cerrarHistorial()">✕</button></div>
+    <div id="pl-hist-body"></div>
   </div>
 </div>
 
@@ -4969,6 +5072,9 @@ function limpiarDatosCliente(){
      (mismo reinicio que hacen setProduct() y onConfigChange()). Ocurre antes de
      rellenar los datos entrantes para no arrastrar el precio del cliente previo. */
   CURRENT.override=null;CURRENT.overrideLista=null;
+  /* Cliente nuevo = cotización nueva: se desliga la sesión del registro anterior
+     para que el próximo 💾 cree un registro nuevo (no sobrescriba el anterior). */
+  if(typeof SESION!=='undefined'){SESION.registroId=null;SESION.dirty=false;if(typeof actualizarBotonGuardar==='function')actualizarBotonGuardar();}
   if(typeof refresh==='function')refresh();
 }
 function pegarCRM(){
@@ -5356,7 +5462,505 @@ function abrirWspWeb(){
   avisoPegado('WhatsApp');
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════════════════
+   ███  MÓDULO REGISTROS · FASE 0 — CAPA DE DATOS (IndexedDB)  ███
+   ──────────────────────────────────────────────────────────────────────────────
+   Base de datos LOCAL de cotizaciones. ÚNICA fuente de verdad de los registros:
+   nadie fuera de este bloque toca IndexedDB directamente; todo pasa por `DB`.
+
+   ALCANCE FASE 0: solo la capa de datos + esquema. NO toca la UI ni el arranque
+   (la base se abre de forma perezosa en la primera operación). Las fases
+   siguientes (puente cotizadora↔DB, vista tabla, CRUD, respaldos) se apoyan aquí.
+
+   REGLAS DE REGISTRO (garantizadas por IndexedDB):
+   · id autoincremental: único, INMUTABLE, NUNCA reutilizado ni renumerado (ni al borrar).
+   · add() = crear (append); update()/put() = editar. Jamás se sobrescribe al crear.
+   · eliminación LÓGICA (estado:'eliminado'): conserva id, orden e historial.
+   · orden cronológico correlativo = orden por id.
+
+   ESQUEMA (schemaVersion 1):
+     { id, schemaVersion, createdAt, updatedAt, ejecutivo, estado,
+       cliente:   { empresa, rut, telefono, correo, representante, observacion },
+       comercial: { servicio, uf, precioVenta, precioLista, descuento },  // = _comercialExcel()
+       snapshot:  { productKey, config, overrides, multi },  // reconstrucción lossless (Fase 1)
+       historial: [ { ts, ejecutivo, accion, cambios } ] }
+   ESTADOS: borrador · enviada · ganada · perdida · eliminado.
+
+   NOTA TÉCNICA (IndexedDB + Promises): una transacción se auto-cierra al ceder el
+   control al event loop. Por eso las operaciones get→put (update/softDelete) NO
+   encadenan Promises entre el get y el put: emiten el put dentro del onsuccess del
+   get, en la MISMA transacción activa. Ver update()/softDelete().
+   ══════════════════════════════════════════════════════════════════════════════ */
+var DB=(function(){
+  var DB_NAME='cotizadora_registros', DB_VERSION=1, STORE='registros';
+  var SCHEMA_VERSION=1;
+  var ESTADOS=['borrador','enviada','ganada','perdida','eliminado'];
+  var _dbp=null;   // promesa singleton de conexión
+
+  function _open(){
+    if(_dbp)return _dbp;
+    _dbp=new Promise(function(resolve,reject){
+      if(!('indexedDB' in window)||!window.indexedDB){reject(new Error('IndexedDB no disponible'));return;}
+      var req=indexedDB.open(DB_NAME,DB_VERSION);
+      req.onupgradeneeded=function(e){
+        var db=e.target.result;
+        if(!db.objectStoreNames.contains(STORE)){
+          var os=db.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
+          os.createIndex('estado','estado',{unique:false});
+          os.createIndex('createdAt','createdAt',{unique:false});
+          os.createIndex('rut','cliente.rut',{unique:false});
+          os.createIndex('empresa','cliente.empresa',{unique:false});
+        }
+      };
+      req.onsuccess=function(e){resolve(e.target.result);};
+      req.onerror=function(e){reject(e.target.error||new Error('No se pudo abrir la base'));};
+    });
+    return _dbp;
+  }
+  function _reqP(request){return new Promise(function(res,rej){request.onsuccess=function(){res(request.result);};request.onerror=function(){rej(request.error);};});}
+  var _subs=[];
+  function _emit(evt,payload){for(var i=0;i<_subs.length;i++){try{_subs[i](evt,payload);}catch(e){}}}
+  function _nowISO(){return new Date().toISOString();}
+  function _s(v){return (v==null)?'':(''+v);}
+  function _ejecutivoActual(){
+    try{return (typeof getExecData==='function'&&getExecData().name)||(typeof _lsGet==='function'&&_lsGet('eq_exec_name'))||'';}catch(e){return '';}
+  }
+  /* Normaliza un registro entrante a la forma canónica del esquema. */
+  function _normalizar(datos){
+    datos=datos||{}; var cli=datos.cliente||{}, com=datos.comercial||{};
+    return {
+      schemaVersion:SCHEMA_VERSION,
+      ejecutivo:_s(datos.ejecutivo||_ejecutivoActual()),
+      estado:(ESTADOS.indexOf(datos.estado)>-1?datos.estado:'borrador'),
+      cliente:{empresa:_s(cli.empresa),rut:_s(cli.rut),telefono:_s(cli.telefono),correo:_s(cli.correo),representante:_s(cli.representante),observacion:_s(cli.observacion)},
+      comercial:{servicio:_s(com.servicio),uf:_s(com.uf),precioVenta:_s(com.precioVenta),precioLista:_s(com.precioLista),descuento:_s(com.descuento)},
+      snapshot:datos.snapshot||null,
+      historial:Array.isArray(datos.historial)?datos.historial.slice():[]
+    };
+  }
+  /* Diff superficial de estado/ejecutivo/cliente/comercial para el historial. */
+  function _diff(antes,despues){
+    var cambios={};
+    ['estado','ejecutivo'].forEach(function(k){if(_s(antes[k])!==_s(despues[k]))cambios[k]=[antes[k],despues[k]];});
+    ['cliente','comercial'].forEach(function(grp){
+      var a=antes[grp]||{}, b=despues[grp]||{};
+      Object.keys(b).forEach(function(k){if(_s(a[k])!==_s(b[k]))cambios[grp+'.'+k]=[a[k],b[k]];});
+    });
+    return cambios;
+  }
+
+  return {
+    ESTADOS:ESTADOS,
+    SCHEMA_VERSION:SCHEMA_VERSION,
+    ready:function(){return _open();},
+
+    /* Bus de eventos: la Planilla se suscribe y re-renderiza cuando la DB cambia.
+       Devuelve una función para cancelar la suscripción. */
+    on:function(fn){_subs.push(fn);return function(){var i=_subs.indexOf(fn);if(i>-1)_subs.splice(i,1);};},
+
+    /* Crear (append). Devuelve el id asignado. Nunca sobrescribe. */
+    add:function(datos){
+      var reg=_normalizar(datos), ahora=_nowISO();
+      reg.createdAt=ahora; reg.updatedAt=ahora;
+      reg.historial.push({ts:ahora,ejecutivo:reg.ejecutivo,accion:'creado',cambios:{}});
+      return _open().then(function(db){return new Promise(function(resolve,reject){
+        var tx=db.transaction(STORE,'readwrite'), os=tx.objectStore(STORE), nuevoId=null;
+        var r=os.add(reg); r.onsuccess=function(){nuevoId=r.result;}; r.onerror=function(){reject(r.error);};
+        tx.oncomplete=function(){_emit('cambio',{tipo:'add',id:nuevoId});resolve(nuevoId);};
+        tx.onerror=function(){reject(tx.error);}; tx.onabort=function(){reject(tx.error||new Error('tx abort'));};
+      });});
+    },
+
+    /* Editar por id con parche parcial {cliente?,comercial?,estado?,ejecutivo?,snapshot?}.
+       get→put en la MISMA transacción (sin Promises intermedias). Devuelve el registro nuevo. */
+    update:function(id,patch){
+      patch=patch||{};
+      return _open().then(function(db){return new Promise(function(resolve,reject){
+        var tx=db.transaction(STORE,'readwrite'), os=tx.objectStore(STORE), result=null;
+        var g=os.get(id);
+        g.onerror=function(){reject(g.error);};
+        g.onsuccess=function(){
+          var actual=g.result;
+          if(!actual){reject(new Error('Registro '+id+' no existe'));tx.abort();return;}
+          var nuevo={
+            id:actual.id, schemaVersion:actual.schemaVersion, createdAt:actual.createdAt,
+            ejecutivo:(patch.ejecutivo!=null)?_s(patch.ejecutivo):actual.ejecutivo,
+            estado:(patch.estado&&ESTADOS.indexOf(patch.estado)>-1)?patch.estado:actual.estado,
+            cliente:Object.assign({},actual.cliente,patch.cliente||{}),
+            comercial:Object.assign({},actual.comercial,patch.comercial||{}),
+            snapshot:(patch.snapshot!==undefined)?patch.snapshot:actual.snapshot,
+            historial:(actual.historial||[]).slice()
+          };
+          nuevo.updatedAt=_nowISO();
+          nuevo.historial.push({ts:nuevo.updatedAt,ejecutivo:_ejecutivoActual(),accion:'editado',cambios:_diff(actual,nuevo)});
+          result=nuevo;
+          os.put(nuevo);   // misma transacción activa
+        };
+        tx.oncomplete=function(){_emit('cambio',{tipo:'update',id:id});resolve(result);};
+        tx.onerror=function(){reject(tx.error);}; tx.onabort=function(){reject(tx.error||new Error('tx abort'));};
+      });});
+    },
+
+    get:function(id){return _open().then(function(db){return _reqP(db.transaction(STORE,'readonly').objectStore(STORE).get(id));});},
+
+    /* Todos, ordenados por id asc. Oculta eliminados salvo incluirEliminados:true. */
+    all:function(opts){
+      opts=opts||{};
+      return _open().then(function(db){return _reqP(db.transaction(STORE,'readonly').objectStore(STORE).getAll());}).then(function(rows){
+        rows.sort(function(a,b){return a.id-b.id;});
+        return opts.incluirEliminados?rows:rows.filter(function(r){return r.estado!=='eliminado';});
+      });
+    },
+
+    /* Búsqueda por cualquier campo (texto contiene, sin acentos). opts.estado filtra. */
+    search:function(q,opts){
+      opts=opts||{};
+      var norm=function(s){return (''+s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');};
+      var nq=norm(q||'');
+      return this.all({incluirEliminados:!!opts.incluirEliminados}).then(function(rows){
+        return rows.filter(function(r){
+          if(opts.estado&&r.estado!==opts.estado)return false;
+          if(!nq)return true;
+          var blob=norm([r.id,r.ejecutivo,r.estado,
+            r.cliente.empresa,r.cliente.rut,r.cliente.telefono,r.cliente.correo,r.cliente.representante,r.cliente.observacion,
+            r.comercial.servicio,r.comercial.precioVenta,r.comercial.precioLista,r.comercial.descuento].join(' '));
+          return blob.indexOf(nq)>-1;
+        });
+      });
+    },
+
+    /* Eliminación LÓGICA: conserva id, orden e historial (get→put misma transacción). */
+    softDelete:function(id){
+      return _open().then(function(db){return new Promise(function(resolve,reject){
+        var tx=db.transaction(STORE,'readwrite'), os=tx.objectStore(STORE), ok=false;
+        var g=os.get(id);
+        g.onerror=function(){reject(g.error);};
+        g.onsuccess=function(){
+          var actual=g.result;
+          if(!actual){reject(new Error('Registro '+id+' no existe'));tx.abort();return;}
+          actual.estado='eliminado'; actual.updatedAt=_nowISO();
+          (actual.historial=actual.historial||[]).push({ts:actual.updatedAt,ejecutivo:_ejecutivoActual(),accion:'eliminado',cambios:{}});
+          ok=true; os.put(actual);
+        };
+        tx.oncomplete=function(){_emit('cambio',{tipo:'delete',id:id});resolve(ok);};
+        tx.onerror=function(){reject(tx.error);}; tx.onabort=function(){reject(tx.error||new Error('tx abort'));};
+      });});
+    },
+
+    /* Duplicar: crea un registro NUEVO (id nuevo) desde uno existente. Arranca 'borrador'. */
+    duplicate:function(id){
+      var self=this;
+      return this.get(id).then(function(src){
+        if(!src)throw new Error('Registro '+id+' no existe');
+        return self.add({ejecutivo:_ejecutivoActual(),estado:'borrador',cliente:src.cliente,comercial:src.comercial,snapshot:src.snapshot});
+      });
+    },
+
+    count:function(opts){return this.all(opts).then(function(r){return r.length;});},
+
+    /* Exporta toda la base como objeto JSON (respaldo/migración; incluye eliminados). */
+    exportJSON:function(){
+      return this.all({incluirEliminados:true}).then(function(rows){
+        return {db:DB_NAME,schemaVersion:SCHEMA_VERSION,exportadoEn:_nowISO(),registros:rows};
+      });
+    }
+  };
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ███  NEXO 💾 GUARDAR COTIZACIÓN  +  MÓDULO PLANILLA (Fases 1 y 2)  ███
+   ──────────────────────────────────────────────────────────────────────────────
+   El botón 💾 es el punto de commit entre el estado vivo de la calculadora y la
+   base de datos interna (DB). Principio Single Source of Truth:
+     Calculadora (borrador) → 💾 → DB (única verdad) → Planilla (proyección).
+   La Planilla NO guarda datos propios: lee de DB y se refresca con DB.on('cambio').
+   Reconstrucción lossless: el snapshot reabre la cotización idéntica.
+   Ver docs/analisis-modulo-registros.md y docs/especificacion-planilla.md.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Identidad de sesión: a qué registro está ligada la calculadora ──
+   registroId=null → cotización NUEVA sin guardar. dirty=true → cambios sin guardar. */
+var SESION={registroId:null,dirty:false};
+var _restaurando=false;   // suprime el marcado "sin guardar" durante una reconstrucción
+var _appReady=false;      // evita marcar dirty durante el arranque
+
+function marcarSucio(){ if(_restaurando||!_appReady)return; SESION.dirty=true; actualizarBotonGuardar(); }
+
+/* Estados visibles del botón 💾 según el binding de sesión. */
+function actualizarBotonGuardar(){
+  var b=document.getElementById('btn-guardar-cotizacion'), s=document.getElementById('save-status');
+  if(!b)return;
+  if(SESION.registroId==null){
+    b.textContent='💾 Guardar Cotización'; b.disabled=false; b.classList.remove('guardado');
+    if(s){s.textContent=''; s.className='save-status';}
+  }else if(SESION.dirty){
+    b.textContent='💾 Guardar cambios'; b.disabled=false; b.classList.remove('guardado');
+    if(s){s.textContent='Editando registro #'+SESION.registroId+' · sin guardar'; s.className='save-status dirty';}
+  }else{
+    b.textContent='✓ Guardado'; b.disabled=true; b.classList.add('guardado');
+    if(s){s.textContent='Registro #'+SESION.registroId+' guardado'; s.className='save-status ok';}
+  }
+}
+
+/* ── Snapshot: captura TODO lo necesario para reconstruir la cotización ── */
+function _capturarConfig(){
+  var out={vals:{},checks:{},checksByValue:{}}, zone=document.getElementById('config-zone');
+  if(!zone)return out;
+  Array.prototype.forEach.call(zone.querySelectorAll('input,select,textarea'),function(el){
+    if(el.type==='checkbox'||el.type==='radio'){
+      if(el.id)out.checks[el.id]=el.checked; else if(el.value)out.checksByValue[el.value]=el.checked;
+    }else if(el.id){ out.vals[el.id]=el.value; }
+  });
+  return out;
+}
+function _restaurarConfig(cfg){
+  var zone=document.getElementById('config-zone');
+  if(!zone||!cfg)return;
+  Object.keys(cfg.vals||{}).forEach(function(id){var el=document.getElementById(id);if(el&&'value' in el)el.value=cfg.vals[id];});
+  Object.keys(cfg.checks||{}).forEach(function(id){var el=document.getElementById(id);if(el&&(el.type==='checkbox'||el.type==='radio'))el.checked=!!cfg.checks[id];});
+  if(cfg.checksByValue){
+    Array.prototype.forEach.call(zone.querySelectorAll('input[type=checkbox],input[type=radio]'),function(el){
+      if(!el.id&&el.value&&cfg.checksByValue[el.value]!==undefined)el.checked=!!cfg.checksByValue[el.value];
+    });
+  }
+}
+function capturarSnapshot(){
+  return {
+    schemaVersion:1,
+    productKey:CURRENT.key,
+    config:_capturarConfig(),
+    overrides:{override:CURRENT.override,overrideLista:CURRENT.overrideLista},
+    multi:(CURRENT.key==='multi'&&typeof MULTI!=='undefined')?JSON.parse(JSON.stringify(MULTI)):[]
+  };
+}
+function restaurarSnapshot(snap){
+  if(!snap)return;
+  var key=snap.productKey;
+  if(key&&typeof setProduct==='function')setProduct(key);   // reconstruye la config del producto
+  _restaurarConfig(snap.config);
+  if(key==='multi'&&Array.isArray(snap.multi)){
+    try{MULTI=JSON.parse(JSON.stringify(snap.multi));}catch(e){MULTI=snap.multi.slice();}
+    if(typeof updateMultiBadge==='function')updateMultiBadge();
+  }
+  var ov=snap.overrides||{};
+  CURRENT.override=(ov.override!=null&&!isNaN(ov.override))?ov.override:null;
+  CURRENT.overrideLista=(ov.overrideLista!=null&&!isNaN(ov.overrideLista))?ov.overrideLista:null;
+  if(typeof refresh==='function')refresh();
+}
+
+/* ── Construir el registro desde el estado vivo (reutiliza _comercialExcel) ── */
+function construirRegistro(){
+  var com=(typeof _comercialExcel==='function')?_comercialExcel():{servicio:'',precioVenta:'',precioLista:'',descuento:'',observacion:''};
+  return {
+    cliente:{
+      empresa:gv('me'), rut:gv('mr'),
+      telefono:(gv('cli-tel')||'').replace(/\s/g,''),
+      correo:(gv('cli-email')||'').toLowerCase(),
+      representante:(typeof _titleCase==='function')?_titleCase(gv('cli-contacto')||''):gv('cli-contacto'),
+      observacion:com.observacion
+    },
+    comercial:{
+      servicio:com.servicio,
+      uf:Math.round(getUF()).toLocaleString('es-CL'),
+      precioVenta:com.precioVenta, precioLista:com.precioLista, descuento:com.descuento
+    },
+    snapshot:capturarSnapshot()
+  };
+}
+
+/* ── El botón 💾: crea (add) o actualiza (update) el MISMO registro. Nunca duplica. ── */
+function guardarCotizacion(){
+  if(typeof DB==='undefined'){toast('✖ Base de datos no disponible','err','global-toast');return;}
+  var reg=construirRegistro();
+  var op=(SESION.registroId==null)
+    ? DB.add(reg).then(function(id){SESION.registroId=id;return id;})
+    : DB.update(SESION.registroId,{cliente:reg.cliente,comercial:reg.comercial,snapshot:reg.snapshot}).then(function(){return SESION.registroId;});
+  return op.then(function(id){
+    SESION.dirty=false; actualizarBotonGuardar();
+    toast('✔ Cotización guardada (registro #'+id+')','ok','global-toast');
+  }).catch(function(){ toast('✖ No se pudo guardar la cotización','err','global-toast'); });
+}
+
+/* ── Abrir un registro: reconstruye cliente + cotización y liga la sesión a él ── */
+function abrirRegistro(reg){
+  if(!reg)return;
+  _restaurando=true;
+  try{
+    var c=reg.cliente||{};
+    setBridge('me',c.empresa); setBridge('mr',c.rut); setBridge('cli-tel',c.telefono);
+    setBridge('cli-email',c.correo); setBridge('cli-contacto',c.representante); setBridge('cli-obs',c.observacion);
+    restaurarSnapshot(reg.snapshot);
+    if(typeof onClientChange==='function')onClientChange();
+    if(typeof validarEmailCliente==='function')validarEmailCliente();
+  }finally{ _restaurando=false; }
+  SESION.registroId=reg.id; SESION.dirty=false;
+  actualizarBotonGuardar();
+}
+
+/* ════════════════════════════ VISTA PLANILLA (Fase 2) ════════════════════════════
+   Grilla reactiva sobre DB con las 12 columnas oficiales de PLANILLA_COLUMNS.
+   La fila de la grilla y la fila de exportación se construyen con el MISMO recorrido. */
+var PL_STATE={q:'',estado:'',sortField:'id',sortDir:1,verEliminados:false};
+
+function _esc(s){return (''+(s==null?'':s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function _capitaliza(s){s=''+(s||'');return s.charAt(0).toUpperCase()+s.slice(1);}
+function _fechaISOaDMY(iso){
+  if(!iso)return '';
+  var d=new Date(iso); if(isNaN(d.getTime()))return '';
+  var p=function(n){return(n<10?'0':'')+n;};
+  return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear();
+}
+/* Proyección registro → columna (misma correspondencia que PLANILLA_COLUMNS/Excel). */
+function _celda(reg,field){
+  var cli=reg.cliente||{}, com=reg.comercial||{};
+  switch(field){
+    case 'fecha': return _fechaISOaDMY(reg.createdAt);
+    case 'empresa': return cli.empresa;
+    case 'rut': return cli.rut;
+    case 'telefono': return cli.telefono;
+    case 'correo': return cli.correo;
+    case 'representante': return cli.representante;
+    case 'servicio': return com.servicio;
+    case 'uf': return com.uf;
+    case 'precioVenta': return com.precioVenta;
+    case 'precioLista': return com.precioLista;
+    case 'descuento': return com.descuento;
+    case 'observacion': return cli.observacion;
+    default: return '';
+  }
+}
+function _plOrdenar(rows){
+  var f=PL_STATE.sortField, dir=PL_STATE.sortDir;
+  return rows.sort(function(a,b){
+    if(f==='id')return (a.id-b.id)*dir;
+    var va=(f==='estado')?a.estado:_celda(a,f), vb=(f==='estado')?b.estado:_celda(b,f);
+    return (''+(va==null?'':va)).localeCompare((''+(vb==null?'':vb)),'es',{numeric:true})*dir;
+  });
+}
+function _plFiltros(){return {estado:PL_STATE.estado,incluirEliminados:PL_STATE.verEliminados};}
+
+function openPlanillaView(){
+  document.body.classList.add('planilla-open');
+  renderPlanilla();
+  requestAnimationFrame(function(){var v=document.getElementById('planilla-view');if(v)v.classList.add('in');});
+  if(typeof playClick==='function')playClick();
+}
+function closePlanillaView(){
+  var v=document.getElementById('planilla-view'); if(v)v.classList.remove('in');
+  document.body.classList.remove('planilla-open');
+  if(typeof playClick==='function')playClick();
+}
+function _estadoSelect(r){
+  var vivos=DB.ESTADOS.filter(function(e){return e!=='eliminado';});
+  var opts=vivos.map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_capitaliza(e)+'</option>';}).join('');
+  if(r.estado==='eliminado')opts='<option value="eliminado" selected>Eliminado</option>'+opts;
+  return '<select class="pl-estado-sel" onchange="planillaEstado('+r.id+',this.value)">'+opts+'</select>';
+}
+function renderPlanilla(){
+  if(typeof DB==='undefined')return;
+  DB.search(PL_STATE.q,_plFiltros()).then(function(rows){
+    rows=_plOrdenar(rows);
+    var cnt=document.getElementById('pl-count'); if(cnt)cnt.textContent=rows.length+' registro'+(rows.length===1?'':'s');
+    var empty=document.getElementById('pl-empty'), wrap=document.getElementById('pl-table-wrap');
+    if(!rows.length){ if(empty)empty.style.display='block'; if(wrap)wrap.style.display='none'; var t0=document.getElementById('pl-table'); if(t0)t0.innerHTML=''; return; }
+    if(empty)empty.style.display='none'; if(wrap)wrap.style.display='';
+    var arrow=function(field){return PL_STATE.sortField===field?(PL_STATE.sortDir>0?' ▲':' ▼'):'';};
+    var thead='<thead><tr>';
+    thead+='<th class="pl-th pl-th-id" onclick="planillaOrden(\'id\')">#'+arrow('id')+'</th>';
+    PLANILLA_COLUMNS.forEach(function(c){ thead+='<th class="pl-th" onclick="planillaOrden(\''+c.field+'\')">'+_esc(c.header)+arrow(c.field)+'</th>'; });
+    thead+='<th class="pl-th" onclick="planillaOrden(\'estado\')">ESTADO'+arrow('estado')+'</th>';
+    thead+='<th class="pl-th pl-th-acc">ACCIONES</th></tr></thead>';
+    var tb='<tbody>';
+    rows.forEach(function(r){
+      var elim=(r.estado==='eliminado'), actual=(SESION.registroId===r.id);
+      tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+'">';
+      tb+='<td class="pl-td pl-td-id">'+r.id+'</td>';
+      PLANILLA_COLUMNS.forEach(function(c){ var v=_celda(r,c.field); tb+='<td class="pl-td" title="'+_esc(v)+'">'+_esc(v)+'</td>'; });
+      tb+='<td class="pl-td pl-td-estado">'+_estadoSelect(r)+'</td>';
+      tb+='<td class="pl-td pl-td-acc">'+
+        '<button class="pl-act" title="Abrir en la calculadora" onclick="planillaAbrir('+r.id+')">📂</button>'+
+        '<button class="pl-act" title="Duplicar" onclick="planillaDuplicar('+r.id+')">⧉</button>'+
+        '<button class="pl-act" title="Historial" onclick="planillaHistorial('+r.id+')">🕘</button>'+
+        (elim?'':'<button class="pl-act pl-act-del" title="Eliminar" onclick="planillaEliminar('+r.id+')">🗑</button>')+
+        '</td></tr>';
+    });
+    tb+='</tbody>';
+    var t=document.getElementById('pl-table'); if(t)t.innerHTML=thead+tb;
+  });
+}
+function planillaOrden(field){
+  if(PL_STATE.sortField===field)PL_STATE.sortDir*=-1; else {PL_STATE.sortField=field;PL_STATE.sortDir=1;}
+  renderPlanilla();
+}
+function planillaBuscar(v){ PL_STATE.q=v||''; renderPlanilla(); }
+function planillaFiltroEstado(v){ PL_STATE.estado=v||''; renderPlanilla(); }
+function planillaToggleEliminados(b){ PL_STATE.verEliminados=!!b; renderPlanilla(); }
+function planillaEstado(id,v){ DB.update(id,{estado:v}).then(function(){toast('✔ Estado actualizado','ok','global-toast');}).catch(function(){}); }
+function planillaAbrir(id){
+  DB.get(id).then(function(reg){ if(!reg){toast('✖ Registro no encontrado','err','global-toast');return;} abrirRegistro(reg); closePlanillaView(); toast('✔ Cotización #'+id+' cargada en la calculadora','ok','global-toast'); });
+}
+function planillaDuplicar(id){ DB.duplicate(id).then(function(nid){toast('✔ Duplicado como registro #'+nid,'ok','global-toast');}).catch(function(){toast('✖ No se pudo duplicar','err','global-toast');}); }
+function planillaEliminar(id){
+  if(!confirm('¿Eliminar el registro #'+id+'?\nSe conserva en el historial y podrás verlo activando "Ver eliminados".'))return;
+  DB.softDelete(id).then(function(){
+    if(SESION.registroId===id){SESION.registroId=null;SESION.dirty=false;actualizarBotonGuardar();}
+    toast('✔ Registro #'+id+' eliminado','ok','global-toast');
+  }).catch(function(){toast('✖ No se pudo eliminar','err','global-toast');});
+}
+function planillaHistorial(id){
+  DB.get(id).then(function(reg){
+    if(!reg)return;
+    var h=(reg.historial||[]).slice().reverse();
+    var filas=h.map(function(e){
+      var camb=e.cambios&&Object.keys(e.cambios).length
+        ? '<div class="pl-h-camb">'+Object.keys(e.cambios).map(function(k){return '<span><b>'+_esc(k)+':</b> '+_esc(''+e.cambios[k][0])+' → '+_esc(''+e.cambios[k][1])+'</span>';}).join('')+'</div>'
+        : '';
+      return '<div class="pl-h-item"><div class="pl-h-top"><span class="pl-h-acc pl-h-'+_esc(e.accion)+'">'+_esc(_capitaliza(e.accion))+'</span>'+
+        '<span class="pl-h-ts">'+_esc(_fechaISOaDMY(e.ts))+' '+_esc((e.ts||'').substr(11,5))+'</span>'+
+        (e.ejecutivo?'<span class="pl-h-ej">'+_esc(e.ejecutivo)+'</span>':'')+'</div>'+camb+'</div>';
+    }).join('');
+    document.getElementById('pl-hist-body').innerHTML='<div class="pl-h-title">Historial · registro #'+reg.id+' · '+_esc(reg.cliente.empresa||'')+'</div>'+(filas||'<div class="pl-h-empty">Sin movimientos.</div>');
+    document.getElementById('pl-hist-modal').classList.add('on');
+  });
+}
+function cerrarHistorial(){ var m=document.getElementById('pl-hist-modal'); if(m)m.classList.remove('on'); }
+
+/* Exportar a Excel (a demanda): tabla HTML .xls con las 12 columnas oficiales,
+   mismo recorrido de PLANILLA_COLUMNS que la grilla. Respeta búsqueda/filtro/orden. */
+function planillaExportar(){
+  DB.search(PL_STATE.q,_plFiltros()).then(function(rows){
+    rows=_plOrdenar(rows);
+    var head='<tr>'+PLANILLA_COLUMNS.map(function(c){return '<th style="background:#204020;color:#fff;">'+_esc(c.header)+'</th>';}).join('')+'</tr>';
+    var body=rows.map(function(r){return '<tr>'+PLANILLA_COLUMNS.map(function(c){return '<td>'+_esc(_celda(r,c.field))+'</td>';}).join('')+'</tr>';}).join('');
+    var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head>'+
+      '<body><table border="1" cellspacing="0">'+head+body+'</table></body></html>';
+    var blob=new Blob(['﻿'+html],{type:'application/vnd.ms-excel'});
+    var url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download='Cotizaciones_'+_fechaISOaDMY(new Date().toISOString()).replace(/-/g,'')+'.xls';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1500);
+    toast('✔ Exportado a Excel ('+rows.length+' fila'+(rows.length===1?'':'s')+')','ok','global-toast');
+  });
+}
+
+/* ── Arranque del módulo: reactividad + marcado "sin guardar" + estado del botón ── */
+function initRegistros(){
+  if(typeof DB!=='undefined'&&DB.ready)DB.ready().catch(function(){});
+  if(typeof DB!=='undefined'&&DB.on)DB.on(function(){ if(document.body.classList.contains('planilla-open'))renderPlanilla(); });
+  var handler=function(e){
+    if(_restaurando||!_appReady)return;
+    var t=e.target; if(!t||!t.closest)return;
+    if(t.closest('#planilla-view')||t.closest('.pl-modal'))return;
+    if(t.closest('#config-zone')||t.closest('#dest-fields')||t.closest('#summary-zone')||t.closest('#prodbar')||t.id==='uf-global')marcarSucio();
+  };
+  document.addEventListener('input',handler,true);
+  document.addEventListener('change',handler,true);
+  document.addEventListener('click',handler,true);
+  _appReady=true;
+  actualizarBotonGuardar();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
    ARRANQUE — abre completamente operativo en Bundle MC 4100 + RI
    ════════════════════════════════════════════════════════════════ */
 buildProdbar();
@@ -5368,6 +5972,7 @@ refreshUserBtn();
 setProduct('bundle');     // PRODUCTO PREDETERMINADO OBLIGATORIO — valores mínimos cargados
 setPreview('outlook');      // primera vista lista
 updateCRMWsp();           // estado inicial integración CRM/WhatsApp
+initRegistros();          // capa de datos + nexo 💾 + reactividad de la Planilla
 setTimeout(syncAdjOffset,0); setTimeout(syncAdjOffset,300); /* REQ 1 — offset de barra fija tras render completo */
 
 /* La UF global recalcula precios al instante */
