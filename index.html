@@ -835,39 +835,101 @@ input#cli-email.eml-bad{border-color:var(--rl)!important;box-shadow:0 0 0 3px rg
 input#cli-email.eml-wait{border-color:var(--y)!important;box-shadow:0 0 0 3px rgba(240,192,64,.18)!important;}
 input#cli-email.eml-gris{border-color:var(--g5)!important;box-shadow:none!important;}
 
-/* ── PLANILLA INTEGRADA (grilla de registros sobre la DB interna) ── */
+/* ── PLANILLA INTEGRADA — look Excel/Sheets con TEMA PROPIO (#1,#8,#15) ── */
 body.planilla-open #prodbar,body.planilla-open #workstation,body.planilla-open #mtoggle{display:none !important;}
-#planilla-view{display:none;position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:275;
-  background:var(--g0);flex-direction:column;opacity:0;transform:translateY(14px);
-  transition:opacity .22s ease,transform .22s ease;}
+#planilla-view{
+  /* Tema EXCEL (claro) — predeterminado. Variables SCOPED: no afectan al resto de la app. */
+  --pl-bg:#ffffff;--pl-surface:#f8f9fa;--pl-toolbar:#f1f3f4;--pl-border:#dadce0;--pl-grid:#e8eaed;
+  --pl-text:#202124;--pl-muted:#5f6368;--pl-hdr-bg:#f1f3f4;--pl-hdr-text:#3c4043;
+  --pl-rowhdr-bg:#f8f9fa;--pl-rowhdr-text:#5f6368;--pl-hover:#f1f7ff;--pl-sel:#1a73e8;--pl-selbg:#e8f0fe;
+  --pl-accent:#188038;--pl-zebra:#fbfbfc;--pl-fontsize:13px;
+  display:none;position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:275;
+  background:var(--pl-bg);color:var(--pl-text);flex-direction:column;opacity:0;transform:translateY(14px);
+  transition:opacity .22s ease,transform .22s ease;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+#planilla-view.pl-dark{
+  --pl-bg:#0d0d0e;--pl-surface:#141416;--pl-toolbar:#1c1c1f;--pl-border:#34343a;--pl-grid:#26262a;
+  --pl-text:#f2f2f2;--pl-muted:#a6a6ad;--pl-hdr-bg:#1c1c1f;--pl-hdr-text:#cbcbd0;
+  --pl-rowhdr-bg:#141416;--pl-rowhdr-text:#a6a6ad;--pl-hover:rgba(52,152,219,.12);--pl-sel:#5ab4ff;--pl-selbg:rgba(52,152,219,.20);
+  --pl-accent:#2ecc71;--pl-zebra:#141416;}
+#planilla-view.pl-font-grande{--pl-fontsize:15px;}
+#planilla-view.pl-font-xl{--pl-fontsize:17px;}
 body.planilla-open #planilla-view{display:flex;}
 body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
-.pl-toolbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 22px;background:var(--g1);border-bottom:1px solid var(--g4);}
-#pl-search{flex:1;min-width:220px;background:var(--g2);border:1px solid var(--g4);color:var(--w);border-radius:9px;padding:9px 13px;font-family:inherit;font-size:.9rem;}
-#pl-search:focus{outline:none;border-color:var(--gn);}
-.pl-toolbar select{background:var(--g2);border:1px solid var(--g4);color:var(--w);border-radius:9px;padding:9px 11px;font-family:inherit;font-size:.85rem;}
-.pl-chk{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--wa);white-space:nowrap;cursor:pointer;}
-.pl-btn{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.5);color:var(--gn);border-radius:9px;padding:9px 14px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;}
-.pl-btn:hover{background:rgba(46,204,113,.22);}
-#pl-table-wrap{width:100%;overflow:auto;}
-#pl-table{border-collapse:collapse;width:100%;font-size:.82rem;white-space:nowrap;}
-.pl-th{position:sticky;top:0;z-index:2;background:var(--r);color:#fff;font-weight:800;text-align:left;padding:10px 12px;border:1px solid var(--rd);cursor:pointer;letter-spacing:.3px;font-size:.72rem;text-transform:uppercase;user-select:none;}
-.pl-th:hover{background:var(--rl);}
-.pl-th-id{width:52px;text-align:center;}
+.pl-appbar{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--pl-surface);border-bottom:1px solid var(--pl-border);}
+.pl-back{background:var(--pl-toolbar);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:8px;padding:8px 13px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;}
+.pl-back:hover{background:var(--pl-hover);border-color:var(--pl-sel);}
+.pl-title{font-size:1.1rem;font-weight:800;color:var(--pl-text);white-space:nowrap;}
+.pl-count{font-size:.82rem;color:var(--pl-muted);font-weight:600;flex:1;}
+.pl-appbar-right{display:flex;align-items:center;gap:10px;}
+.pl-fontsize{display:inline-flex;border:1px solid var(--pl-border);border-radius:8px;overflow:hidden;}
+.pl-fontsize button{background:var(--pl-bg);border:none;border-right:1px solid var(--pl-border);color:var(--pl-muted);cursor:pointer;font-family:inherit;font-weight:800;padding:6px 11px;font-size:.8rem;}
+.pl-fontsize button:last-child{border-right:none;}
+.pl-fontsize button.on{background:var(--pl-sel);color:#fff;}
+.pl-theme-btn{background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.82rem;white-space:nowrap;}
+.pl-theme-btn:hover{border-color:var(--pl-sel);}
+.pl-toolbar{flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 18px;background:var(--pl-toolbar);border-bottom:1px solid var(--pl-border);}
+.pl-tbtn{background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:7px;padding:7px 12px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.82rem;white-space:nowrap;}
+.pl-tbtn:hover{background:var(--pl-hover);border-color:var(--pl-accent);}
+.pl-tsep{width:1px;height:24px;background:var(--pl-border);margin:0 4px;}
+.pl-search{flex:1;min-width:170px;background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:7px;padding:8px 12px;font-family:inherit;font-size:.86rem;}
+.pl-search:focus{outline:none;border-color:var(--pl-sel);box-shadow:0 0 0 2px var(--pl-selbg);}
+.pl-select{background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:.82rem;}
+.pl-chk{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--pl-muted);white-space:nowrap;cursor:pointer;}
+.pl-formula{flex:0 0 auto;display:flex;align-items:center;background:var(--pl-bg);border-bottom:1px solid var(--pl-border);}
+.pl-namebox{min-width:82px;text-align:center;font-weight:700;font-size:.82rem;color:var(--pl-text);padding:7px 10px;border-right:1px solid var(--pl-border);background:var(--pl-surface);}
+.pl-fx{font-style:italic;color:var(--pl-muted);padding:0 12px;font-size:.9rem;border-right:1px solid var(--pl-border);}
+.pl-formula-val{flex:1;padding:7px 12px;font-size:.84rem;color:var(--pl-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pl-body{flex:1;min-height:0;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+#pl-table-wrap{width:100%;flex:1;min-height:0;overflow:auto;}
+#pl-table{border-collapse:collapse;width:100%;font-size:var(--pl-fontsize);color:var(--pl-text);}
+.pl-th{position:sticky;top:0;z-index:2;background:var(--pl-hdr-bg);color:var(--pl-hdr-text);font-weight:700;text-align:left;padding:8px 10px;border:1px solid var(--pl-grid);border-top:none;cursor:pointer;letter-spacing:.2px;font-size:calc(var(--pl-fontsize) - 2px);text-transform:uppercase;user-select:none;white-space:nowrap;}
+.pl-th:hover{background:var(--pl-hover);}
+.pl-th-id{width:46px;min-width:46px;text-align:center;background:var(--pl-rowhdr-bg);color:var(--pl-rowhdr-text);position:sticky;left:0;z-index:3;}
 .pl-th-acc{cursor:default;}
-.pl-td{padding:8px 12px;border:1px solid var(--g3);color:var(--w);max-width:280px;overflow:hidden;text-overflow:ellipsis;}
-.pl-td-id{text-align:center;color:var(--wa);font-variant-numeric:tabular-nums;}
-.pl-tr:nth-child(even){background:var(--g1);}
-.pl-tr:hover{background:rgba(52,152,219,.10);}
-.pl-tr.pl-actual{box-shadow:inset 3px 0 0 var(--gn);}
-.pl-tr.pl-elim{opacity:.5;}
+.pl-td{padding:6px 10px;border:1px solid var(--pl-grid);color:var(--pl-text);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:cell;}
+.pl-td-id{text-align:center;color:var(--pl-rowhdr-text);background:var(--pl-rowhdr-bg);font-variant-numeric:tabular-nums;font-weight:600;position:sticky;left:0;z-index:1;cursor:default;}
+.pl-tr:nth-child(even) .pl-td:not(.pl-td-id){background:var(--pl-zebra);}
+.pl-tr:hover .pl-td{background:var(--pl-hover);}
+.pl-td.pl-sel{outline:2px solid var(--pl-sel);outline-offset:-2px;background:var(--pl-selbg)!important;}
+.pl-tr.pl-actual .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-accent);}
+.pl-tr.pl-elim{opacity:.55;}
 .pl-tr.pl-elim .pl-td{text-decoration:line-through;}
-.pl-estado-sel{background:var(--g2);border:1px solid var(--g4);color:var(--w);border-radius:7px;padding:4px 6px;font-family:inherit;font-size:.78rem;}
-.pl-td-acc{white-space:nowrap;}
-.pl-act{background:var(--g3);border:1px solid var(--g4);border-radius:7px;padding:4px 7px;margin:0 2px;cursor:pointer;font-size:.95rem;line-height:1;}
-.pl-act:hover{background:var(--g4);border-color:var(--gn);}
-.pl-act-del:hover{border-color:var(--rl);background:rgba(192,38,59,.2);}
-#pl-empty{display:none;padding:60px 24px;text-align:center;color:var(--wa);font-size:1rem;}
+.pl-estado-sel{background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:6px;padding:3px 5px;font-family:inherit;font-size:calc(var(--pl-fontsize) - 2px);}
+.pl-td-acc{white-space:nowrap;cursor:default;}
+.pl-act{background:var(--pl-surface);border:1px solid var(--pl-border);border-radius:6px;padding:3px 6px;margin:0 1px;cursor:pointer;font-size:calc(var(--pl-fontsize) - 1px);line-height:1;}
+.pl-act:hover{background:var(--pl-hover);border-color:var(--pl-accent);}
+.pl-act-del:hover{border-color:#d93025;background:rgba(217,48,37,.12);}
+.pl-col-hidden{display:none!important;}
+#pl-empty{display:none;padding:60px 24px;text-align:center;color:var(--pl-muted);font-size:1rem;}
+/* Edición inline (doble clic) */
+.pl-td.pl-editing{padding:0!important;}
+.pl-edit-input{width:100%;box-sizing:border-box;border:2px solid var(--pl-sel);border-radius:3px;padding:5px 7px;font-family:inherit;font-size:var(--pl-fontsize);color:var(--pl-text);background:var(--pl-bg);outline:none;}
+/* Manija de redimensión de columna */
+.pl-th{position:relative;}
+.pl-resize{position:absolute;top:0;right:0;width:7px;height:100%;cursor:col-resize;user-select:none;}
+.pl-resize:hover{background:var(--pl-sel);opacity:.5;}
+/* Menú de acciones por fila (flotante) */
+.pl-rowmenu{display:none;position:fixed;z-index:410;min-width:216px;background:var(--pl-bg,#fff);border:1px solid var(--pl-border,#dadce0);border-radius:10px;padding:6px;box-shadow:0 12px 34px rgba(0,0,0,.28);}
+#planilla-view.pl-dark~.pl-rowmenu,.pl-rowmenu{color:#202124;}
+.pl-rowmenu.on{display:block;}
+.pl-rowmenu button{display:block;width:100%;text-align:left;background:none;border:none;color:#202124;font-family:inherit;font-size:.86rem;padding:9px 12px;border-radius:7px;cursor:pointer;}
+.pl-rowmenu button:hover{background:#f1f3f4;}
+.pl-rowmenu .pl-menu-del{color:#d93025;}
+.pl-rowmenu .pl-menu-del:hover{background:rgba(217,48,37,.1);}
+.pl-menu-btn{font-weight:900;}
+/* Modal editar datos */
+.ple-box{max-width:640px;}
+#ple-body{overflow:auto;padding:16px 18px;}
+.ple-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ple-f{display:flex;flex-direction:column;gap:4px;}
+.ple-f.ple-full{grid-column:1 / -1;}
+.ple-f span{font-size:.76rem;font-weight:700;color:var(--wa);text-transform:uppercase;letter-spacing:.3px;}
+.ple-f input,.ple-f select{background:var(--g2);border:1px solid var(--g4);color:var(--w);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:.9rem;}
+.ple-f input:focus,.ple-f select:focus{outline:none;border-color:var(--gn);}
+.ple-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid var(--g4);}
+.ple-cancel{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:9px;padding:9px 16px;cursor:pointer;font-family:inherit;font-weight:700;}
+.ple-save{background:linear-gradient(135deg,#2ecc71,#1f9d55);border:1px solid #1f9d55;color:#06240f;border-radius:9px;padding:9px 18px;cursor:pointer;font-family:inherit;font-weight:800;}
+.ple-save:hover{box-shadow:0 4px 16px rgba(46,204,113,.4);}
 /* Botón 💾 Guardar Cotización + estado, en el panel de cliente */
 .save-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
 .save-btn{background:linear-gradient(135deg,#2ecc71,#25a85b);border:1px solid #25a85b;color:#06240f;border-radius:9px;padding:11px 18px;cursor:pointer;font-family:inherit;font-weight:800;font-size:.95rem;transition:.14s;}
@@ -878,6 +940,41 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .save-status{font-size:.8rem;font-weight:600;}
 .save-status.dirty{color:var(--y);}
 .save-status.ok{color:var(--gn);}
+/* ── Panel COMPACTO de acciones: 3 botones cuadrados idénticos (#24-27) ── */
+.acc-panel{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px;}
+.acc-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:66px;border-radius:12px;border:1px solid var(--g4);background:var(--g2);color:var(--w);cursor:pointer;font-family:inherit;font-weight:700;font-size:calc(.72rem * var(--ui-scale, 1));text-align:center;line-height:1.1;padding:6px 6px;transition:transform .14s ease,box-shadow .14s ease,background .14s ease,border-color .14s ease;}
+.acc-btn .acc-ico{font-size:1.5rem;line-height:1;}
+.acc-btn:hover{transform:translateY(-3px);border-color:var(--g5);box-shadow:0 8px 20px rgba(0,0,0,.45);}
+.acc-btn:active{transform:translateY(-1px) scale(.97);}
+.acc-guardar{background:linear-gradient(135deg,#2ecc71,#1f9d55);border-color:#1f9d55;color:#06240f;}
+.acc-guardar .acc-lb{font-weight:800;}
+.acc-guardar:hover{box-shadow:0 10px 26px rgba(46,204,113,.5);}
+.acc-guardar.acc-dirty-glow{animation:accPulse 1.7s ease-in-out infinite;}
+@keyframes accPulse{0%,100%{box-shadow:0 0 0 0 rgba(240,192,64,0);}50%{box-shadow:0 0 0 4px rgba(240,192,64,.4);}}
+@keyframes accSaved{0%{transform:scale(1);}30%{transform:scale(1.09);}60%{transform:scale(.96);}100%{transform:scale(1);}}
+.acc-guardar.saved-anim{animation:accSaved .52s ease;}
+.acc-multi:hover{background:rgba(52,152,219,.14);border-color:var(--bl);}
+.acc-export:hover,.acc-import:hover{background:rgba(240,192,64,.1);border-color:var(--y);}
+.acc-excel:hover{background:rgba(33,115,70,.16);border-color:#25a85b;}
+.excel-menu{display:none;position:absolute;right:0;bottom:calc(100% + 8px);z-index:30;background:var(--g1);border:1px solid var(--g4);border-radius:11px;padding:6px;min-width:220px;box-shadow:0 12px 30px rgba(0,0,0,.55);}
+.excel-menu.on{display:block;}
+.excel-menu button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--w);font-family:inherit;font-size:.85rem;padding:9px 11px;border-radius:8px;cursor:pointer;}
+.excel-menu button:hover{background:var(--g3);}
+.acc-secondary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;min-height:20px;font-size:.8rem;}
+.acc-bound{color:var(--wa);font-weight:600;}
+.acc-dirty{color:var(--y);font-weight:700;}
+.acc-clean{color:var(--gn);font-weight:700;}
+.acc-upd{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:8px;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;}
+.acc-upd:hover{border-color:var(--y);color:var(--y);}
+.acc-verplanilla{margin-top:12px;}
+.acc-verplanilla .save-open-btn{width:100%;}
+/* Modal importar: opciones */
+.imp-opt{text-align:left;display:flex;flex-direction:column;gap:3px;background:var(--g2);border:1px solid var(--g4);border-radius:11px;padding:12px 14px;cursor:pointer;font-family:inherit;color:var(--w);}
+.imp-opt b{font-size:.95rem;}
+.imp-opt span{font-size:.8rem;color:var(--wa);line-height:1.4;}
+.imp-opt:hover{border-color:var(--g5);background:var(--g3);}
+.imp-merge:hover{border-color:var(--gn);}
+.imp-replace:hover{border-color:var(--rl);}
 /* Modal de historial */
 .pl-modal{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px;}
 .pl-modal.on{display:flex;}
@@ -1054,11 +1151,6 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
         <!-- campos ocultos para compatibilidad -->
         <input type="hidden" id="mn"><input type="hidden" id="cli-obs">
       </div>
-      <div id="save-row" class="save-row">
-        <button type="button" id="btn-guardar-cotizacion" class="save-btn" onclick="guardarCotizacion();playClick();" title="Guarda esta cotización como registro en la Planilla interna. Si abriste un registro existente, actualiza ESE mismo (no duplica).">💾 Guardar Cotización</button>
-        <button type="button" class="save-open-btn" onclick="openPlanillaView();playClick();" title="Abrir la Planilla de cotizaciones guardadas">📋 Ver Planilla</button>
-        <span id="save-status" class="save-status"></span>
-      </div>
     </div>
 
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
@@ -1072,6 +1164,16 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <div class="block" id="summary-block">
       <div id="summary-zone"></div>
     </div>
+
+    <!-- ════════ PANEL COMPACTO DE ACCIONES — fin de la calculadora (#24-27) ════════
+         Solo acciones de cotización. La administración de la BD (exportar/importar/
+         respaldos) vive en la Planilla, no aquí. El botón 📗 abre la Planilla. -->
+    <div id="acciones-panel" class="acc-panel">
+      <button type="button" id="btn-guardar-cotizacion" class="acc-btn acc-guardar" onclick="guardarCotizacion();playClick();" title="Guardar esta cotización como una NUEVA versión en la base de datos interna (no sobrescribe versiones anteriores)"><span class="acc-ico">💾</span><span class="acc-lb">Guardar</span></button>
+      <button type="button" id="btn-add-multi" class="acc-btn acc-multi" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto"><span class="acc-ico">🛒</span><span class="acc-lb">Multiproducto</span></button>
+      <button type="button" class="acc-btn acc-excel" onclick="openPlanillaView();playClick();" title="Abrir la Planilla — base de datos interna y centro de administración (respaldos, exportar/importar)"><span class="acc-ico">📗</span><span class="acc-lb">Planilla</span></button>
+    </div>
+    <div id="acc-secondary" class="acc-secondary"></div>
   </section>
 
   <!-- ════════ COLUMNA CENTRAL — CONTROLES DE VISUALIZACIÓN ════════ -->
@@ -1466,29 +1568,46 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   </div>
 </div>
 
-<!-- ════════ PLANILLA INTEGRADA — vista de la base de datos interna ════════ -->
-<div id="planilla-view">
-  <div class="bib-top">
-    <button class="bib-back" onclick="closePlanillaView()">← Volver al Cotizador</button>
-    <h2>📋 Planilla de Cotizaciones</h2>
-    <span class="bib-sub" id="pl-count"></span>
+<!-- ════════ PLANILLA INTEGRADA — hoja de cálculo sobre la base de datos interna ════════ -->
+<div id="planilla-view" class="pl-theme-excel pl-font-normal">
+  <div class="pl-appbar">
+    <button class="pl-back" onclick="closePlanillaView()">← Volver al Cotizador</button>
+    <div class="pl-title">📊 Planilla de Cotizaciones</div>
+    <span class="pl-count" id="pl-count"></span>
+    <div class="pl-appbar-right">
+      <div class="pl-fontsize" role="group" aria-label="Tamaño de fuente de la planilla">
+        <button type="button" id="plf-normal" class="on" onclick="planillaFont('normal',this)" title="Fuente normal">A</button>
+        <button type="button" id="plf-grande" onclick="planillaFont('grande',this)" title="Fuente grande">A+</button>
+        <button type="button" id="plf-xl" onclick="planillaFont('xl',this)" title="Fuente muy grande">A++</button>
+      </div>
+      <button type="button" class="pl-theme-btn" id="pl-theme-btn" onclick="planillaToggleTema()" title="Cambiar tema de la Planilla (Excel claro / Oscuro). Solo afecta a la planilla.">☀ Tema Excel</button>
+    </div>
   </div>
   <div class="pl-toolbar">
-    <input type="text" id="pl-search" placeholder="🔎 Buscar en todos los campos…" oninput="planillaBuscar(this.value)">
-    <select id="pl-estado" onchange="planillaFiltroEstado(this.value)">
+    <button class="pl-tbtn" onclick="exportarBaseDatos()" title="Exportar TODA la base a un archivo de respaldo (.json)">📤 Exportar base</button>
+    <button class="pl-tbtn" onclick="importarBaseDatosPick()" title="Importar / restaurar una base exportada (migrar entre equipos)">📥 Importar base</button>
+    <button class="pl-tbtn" onclick="planillaExportar()" title="Exportar la vista actual a Excel (.xls)">📗 A Excel</button>
+    <span class="pl-tsep"></span>
+    <input type="text" id="pl-search" class="pl-search" placeholder="🔎 Buscar…" oninput="planillaBuscar(this.value)">
+    <select id="pl-estado" class="pl-select" onchange="planillaFiltroEstado(this.value)">
       <option value="">Todos los estados</option>
       <option value="borrador">Borrador</option>
       <option value="enviada">Enviada</option>
       <option value="ganada">Ganada</option>
       <option value="perdida">Perdida</option>
     </select>
-    <label class="pl-chk"><input type="checkbox" id="pl-show-del" onchange="planillaToggleEliminados(this.checked)"> Ver eliminados</label>
-    <button class="pl-btn" onclick="planillaExportar()">⬇ Exportar a Excel</button>
+    <label class="pl-chk"><input type="checkbox" id="pl-show-del" onchange="planillaToggleEliminados(this.checked)"> Eliminados</label>
   </div>
-  <div class="bib-body">
+  <div class="pl-formula">
+    <span class="pl-namebox" id="pl-namebox">—</span>
+    <span class="pl-fx">ƒx</span>
+    <span class="pl-formula-val" id="pl-formula-val"></span>
+  </div>
+  <div class="pl-body">
     <div id="pl-table-wrap"><table id="pl-table"></table></div>
-    <div id="pl-empty">Aún no hay cotizaciones guardadas. Genera una cotización y pulsa <b>💾 Guardar Cotización</b>.</div>
+    <div id="pl-empty">Aún no hay cotizaciones guardadas. Genera una cotización y pulsa <b>💾 Guardar</b>.</div>
   </div>
+  <input type="file" id="db-import-file" accept="application/json,.json" style="display:none" onchange="importarBaseDatosArchivo(this.files&&this.files[0]);this.value='';">
 </div>
 
 <!-- Modal de historial de un registro -->
@@ -1496,6 +1615,37 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   <div class="pl-modal-box">
     <div class="pl-modal-head"><h3>🕘 Historial</h3><button class="pl-modal-x" onclick="cerrarHistorial()">✕</button></div>
     <div id="pl-hist-body"></div>
+  </div>
+</div>
+
+<!-- Modal de importación de base de datos -->
+<div id="imp-modal" class="pl-modal" onclick="if(event.target===this)cerrarImport()">
+  <div class="pl-modal-box">
+    <div class="pl-modal-head"><h3>📥 Importar base de datos</h3><button class="pl-modal-x" onclick="cerrarImport()">✕</button></div>
+    <div style="padding:16px 18px;">
+      <div id="imp-info" style="color:var(--wa);font-size:.85rem;margin-bottom:14px;"></div>
+      <p style="color:var(--w);font-size:.92rem;margin-bottom:14px;">¿Cómo quieres importar este respaldo?</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="imp-opt imp-merge" onclick="importarConModo('merge')"><b>➕ Agregar solo lo nuevo</b><span>Fusiona: añade las cotizaciones que no existan (por UID). No toca las actuales. Recomendado para trabajar entre equipos.</span></button>
+        <button class="imp-opt imp-replace" onclick="if(confirm('Esto ELIMINA todas las cotizaciones actuales y las reemplaza por las del archivo. ¿Continuar?'))importarConModo('replace')"><b>♻ Reemplazar todo</b><span>Borra la base actual y restaura exactamente la del archivo. Úsalo para recuperar un respaldo completo.</span></button>
+        <button class="imp-opt imp-cancel" onclick="cerrarImport()"><b>✕ Cancelar</b></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Menú de acciones por fila (flotante) -->
+<div id="pl-rowmenu" class="pl-rowmenu"></div>
+
+<!-- Modal "Editar datos" de una cotización -->
+<div id="ple-modal" class="pl-modal" onclick="if(event.target===this)_plCerrarEdit()">
+  <div class="pl-modal-box ple-box">
+    <div class="pl-modal-head"><h3 id="ple-title">✎ Editar cotización</h3><button class="pl-modal-x" onclick="_plCerrarEdit()">✕</button></div>
+    <div id="ple-body"></div>
+    <div class="ple-foot">
+      <button class="ple-cancel" onclick="_plCerrarEdit()">Cancelar</button>
+      <button class="ple-save" onclick="planillaGuardarDatos()">💾 Guardar cambios</button>
+    </div>
   </div>
 </div>
 
@@ -2002,8 +2152,8 @@ function renderSummary(c){
       '<div class="ci"><label>Contrato</label><div class="cv">'+(c.plazo||'12')+' meses</div></div>'+
       '<div class="ci"><label>Modalidad</label><div class="cv" style="color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
       '<div class="ci"><label>Documentos</label><div class="cv" style="font-weight:600;color:#ccc;">Ficha · Cédula · Escritura · Carpeta Tributaria</div></div>'+
-    '</div>'+
-    '<button type="button" id="btn-add-multi" class="exec-save" style="background:var(--r);color:#fff;margin-top:12px;" onclick="addToMulti();playClick();">🧾 Agregar a Multiproducto</button>';
+    '</div>';
+  /* El botón "Agregar a Multiproducto" se movió al panel de acciones (🛒). */
   $('summary-zone').innerHTML=html;
 }
 /* ▲▼ ajustan el precio de venta directamente */
@@ -4115,6 +4265,7 @@ function copHTMLOutlook(){
   try{if(_sndOn&&'speechSynthesis'in window){var _uo=new SpeechSynthesisUtterance('Asunto copiado para Outlook.');_uo.lang='es-CL';_uo.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_uo);}}catch(e){}
 }
 function abrirGmail(){
+  try{ if(typeof registrarEnvio==='function')registrarEnvio('email'); }catch(_e){}   /* #7 · trazabilidad de envío */
   try{
     var asunto=((document.getElementById('tpl-asunto')||{}).textContent||'Propuesta Comercial Equifax').trim();
     var dest=((document.getElementById('cli-email')||{}).value||'').trim();
@@ -4132,6 +4283,7 @@ function abrirGmail(){
   }catch(e){ alert('⚠ No se pudo abrir Gmail: '+e.message); }
 }
 async function descargarEML(){
+  try{ if(typeof registrarEnvio==='function')registrarEnvio('email'); }catch(_e){}   /* #7 · trazabilidad de envío */
   try{
     var elBody=document.getElementById('tpl-rich-outlook');
     if(!elBody){alert('ERROR: no se encontró la plantilla de Outlook.');return;}
@@ -5448,6 +5600,7 @@ function abrirWspWeb(){
   /* Fuente única: el mismo tpl-body que usa la vista previa. Sin reconstrucción. */
   var msg=(document.getElementById('tpl-body')||{}).value||'';
   if(!msg)return;
+  try{ if(typeof registrarEnvio==='function')registrarEnvio('whatsapp'); }catch(_e){}   /* #7 · trazabilidad de envío */
   /* 1. Copiar al portapapeles antes de abrir WhatsApp */
   navigator.clipboard.writeText(msg).catch(function(){});
   /* 2. Abrir conversación del cliente con el texto de la cotización prellenado (forma histórica que funciona) */
@@ -5522,6 +5675,9 @@ var DB=(function(){
   function _emit(evt,payload){for(var i=0;i<_subs.length;i++){try{_subs[i](evt,payload);}catch(e){}}}
   function _nowISO(){return new Date().toISOString();}
   function _s(v){return (v==null)?'':(''+v);}
+  /* UID global (independiente del id local autoincremental) para fusionar bases
+     entre equipos sin colisiones. Ver DB.importar(). */
+  function _uid(){ try{ if(window.crypto&&crypto.randomUUID)return crypto.randomUUID(); }catch(e){} return 'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,10); }
   function _ejecutivoActual(){
     try{return (typeof getExecData==='function'&&getExecData().name)||(typeof _lsGet==='function'&&_lsGet('eq_exec_name'))||'';}catch(e){return '';}
   }
@@ -5529,9 +5685,12 @@ var DB=(function(){
   function _normalizar(datos){
     datos=datos||{}; var cli=datos.cliente||{}, com=datos.comercial||{};
     return {
+      uid:datos.uid||_uid(),
       schemaVersion:SCHEMA_VERSION,
       ejecutivo:_s(datos.ejecutivo||_ejecutivoActual()),
       estado:(ESTADOS.indexOf(datos.estado)>-1?datos.estado:'borrador'),
+      medioEnvio:_s(datos.medioEnvio),
+      enviadoEn:_s(datos.enviadoEn),
       cliente:{empresa:_s(cli.empresa),rut:_s(cli.rut),telefono:_s(cli.telefono),correo:_s(cli.correo),representante:_s(cli.representante),observacion:_s(cli.observacion)},
       comercial:{servicio:_s(com.servicio),uf:_s(com.uf),precioVenta:_s(com.precioVenta),precioLista:_s(com.precioLista),descuento:_s(com.descuento)},
       snapshot:datos.snapshot||null,
@@ -5583,9 +5742,11 @@ var DB=(function(){
           var actual=g.result;
           if(!actual){reject(new Error('Registro '+id+' no existe'));tx.abort();return;}
           var nuevo={
-            id:actual.id, schemaVersion:actual.schemaVersion, createdAt:actual.createdAt,
+            id:actual.id, uid:actual.uid||_uid(), schemaVersion:actual.schemaVersion, createdAt:actual.createdAt,
             ejecutivo:(patch.ejecutivo!=null)?_s(patch.ejecutivo):actual.ejecutivo,
             estado:(patch.estado&&ESTADOS.indexOf(patch.estado)>-1)?patch.estado:actual.estado,
+            medioEnvio:(patch.medioEnvio!=null)?_s(patch.medioEnvio):_s(actual.medioEnvio),
+            enviadoEn:(patch.enviadoEn!=null)?_s(patch.enviadoEn):_s(actual.enviadoEn),
             cliente:Object.assign({},actual.cliente,patch.cliente||{}),
             comercial:Object.assign({},actual.comercial,patch.comercial||{}),
             snapshot:(patch.snapshot!==undefined)?patch.snapshot:actual.snapshot,
@@ -5663,6 +5824,41 @@ var DB=(function(){
       return this.all({incluirEliminados:true}).then(function(rows){
         return {db:DB_NAME,schemaVersion:SCHEMA_VERSION,exportadoEn:_nowISO(),registros:rows};
       });
+    },
+
+    /* Importa registros desde un respaldo. modo:
+       'replace' → vacía la base y restaura tal cual (conserva id y uid).
+       'merge'   → agrega solo los uid que no existan (id local nuevo). Nunca corrompe.
+       Devuelve {agregados, omitidos}. Aplica prefs (localStorage) si vienen. */
+    importar:function(regs,modo,prefs){
+      regs=regs||[];
+      return _open().then(function(db){return new Promise(function(resolve,reject){
+        var tx=db.transaction(STORE,'readwrite'), os=tx.objectStore(STORE);
+        var agregados=0, omitidos=0;
+        function insertar(existentes){
+          existentes=existentes||{};
+          regs.forEach(function(r){
+            if(modo==='merge'&&r.uid&&existentes[r.uid]){omitidos++;return;}
+            var copia=JSON.parse(JSON.stringify(r));
+            if(modo==='merge')delete copia.id;     /* id local nuevo; conserva uid */
+            if(!copia.uid)copia.uid=_uid();
+            os.add(copia); agregados++;
+          });
+        }
+        if(modo==='replace'){
+          var cl=os.clear(); cl.onsuccess=function(){insertar();}; cl.onerror=function(){reject(cl.error);};
+        }else{
+          var existentes={}, cur=os.openCursor();
+          cur.onsuccess=function(e){var c=e.target.result; if(c){if(c.value&&c.value.uid)existentes[c.value.uid]=1;c.continue();} else insertar(existentes);};
+          cur.onerror=function(){reject(cur.error);};
+        }
+        tx.oncomplete=function(){
+          if(prefs){try{Object.keys(prefs).forEach(function(k){localStorage.setItem(k,prefs[k]);});}catch(e){}}
+          _emit('cambio',{tipo:'import',modo:modo}); resolve({agregados:agregados,omitidos:omitidos});
+        };
+        tx.onerror=function(){reject(tx.error);};
+        tx.onabort=function(){reject(tx.error||new Error('import abort'));};
+      });});
     }
   };
 })();
@@ -5686,20 +5882,16 @@ var _appReady=false;      // evita marcar dirty durante el arranque
 
 function marcarSucio(){ if(_restaurando||!_appReady)return; SESION.dirty=true; actualizarBotonGuardar(); }
 
-/* Estados visibles del botón 💾 según el binding de sesión. */
+/* Modelo de versionado (#18/#19): 💾 SIEMPRE crea una versión nueva. Cuando hay una
+   cotización abierta, el panel secundario ofrece la excepción "Actualizar #N". */
 function actualizarBotonGuardar(){
-  var b=document.getElementById('btn-guardar-cotizacion'), s=document.getElementById('save-status');
-  if(!b)return;
-  if(SESION.registroId==null){
-    b.textContent='💾 Guardar Cotización'; b.disabled=false; b.classList.remove('guardado');
-    if(s){s.textContent=''; s.className='save-status';}
-  }else if(SESION.dirty){
-    b.textContent='💾 Guardar cambios'; b.disabled=false; b.classList.remove('guardado');
-    if(s){s.textContent='Editando registro #'+SESION.registroId+' · sin guardar'; s.className='save-status dirty';}
-  }else{
-    b.textContent='✓ Guardado'; b.disabled=true; b.classList.add('guardado');
-    if(s){s.textContent='Registro #'+SESION.registroId+' guardado'; s.className='save-status ok';}
-  }
+  var b=document.getElementById('btn-guardar-cotizacion');
+  if(b)b.classList.toggle('acc-dirty-glow', SESION.dirty && SESION.registroId!=null);
+  var sec=document.getElementById('acc-secondary'); if(!sec)return;
+  if(SESION.registroId==null){ sec.innerHTML=''; return; }
+  var estadoTxt=SESION.dirty?'<span class="acc-dirty">● cambios sin guardar</span>':'<span class="acc-clean">✓ guardada</span>';
+  sec.innerHTML='<span class="acc-bound">Abierta: cotización #'+SESION.registroId+'</span> '+estadoTxt+
+    ' <button type="button" class="acc-upd" onclick="actualizarCotizacionActual();playClick();" title="Sobrescribe ESTA cotización (corrección). Por defecto 💾 crea una versión nueva e independiente.">✎ Actualizar #'+SESION.registroId+'</button>';
 }
 
 /* ── Snapshot: captura TODO lo necesario para reconstruir la cotización ── */
@@ -5768,17 +5960,27 @@ function construirRegistro(){
   };
 }
 
-/* ── El botón 💾: crea (add) o actualiza (update) el MISMO registro. Nunca duplica. ── */
+/* ── 💾 Guardar Cotización: SIEMPRE crea una versión nueva (#18/#19). ── */
 function guardarCotizacion(){
   if(typeof DB==='undefined'){toast('✖ Base de datos no disponible','err','global-toast');return;}
   var reg=construirRegistro();
-  var op=(SESION.registroId==null)
-    ? DB.add(reg).then(function(id){SESION.registroId=id;return id;})
-    : DB.update(SESION.registroId,{cliente:reg.cliente,comercial:reg.comercial,snapshot:reg.snapshot}).then(function(){return SESION.registroId;});
-  return op.then(function(id){
-    SESION.dirty=false; actualizarBotonGuardar();
-    toast('✔ Cotización guardada (registro #'+id+')','ok','global-toast');
+  return DB.add(reg).then(function(id){
+    SESION.registroId=id; SESION.dirty=false; actualizarBotonGuardar();
+    var gb=document.getElementById('btn-guardar-cotizacion');
+    if(gb){gb.classList.remove('saved-anim');void gb.offsetWidth;gb.classList.add('saved-anim');setTimeout(function(){gb.classList.remove('saved-anim');},520);}
+    var esMulti=reg.snapshot&&reg.snapshot.productKey==='multi';
+    toast('✔ Cotización guardada como #'+id+(esMulti?' (Multiproducto)':''),'ok','global-toast');
+    return id;
   }).catch(function(){ toast('✖ No se pudo guardar la cotización','err','global-toast'); });
+}
+/* Excepción explícita: sobrescribe la cotización abierta (corrección, no nueva versión). */
+function actualizarCotizacionActual(){
+  if(SESION.registroId==null)return guardarCotizacion();
+  var reg=construirRegistro();
+  return DB.update(SESION.registroId,{cliente:reg.cliente,comercial:reg.comercial,snapshot:reg.snapshot}).then(function(){
+    SESION.dirty=false; actualizarBotonGuardar();
+    toast('✔ Cotización #'+SESION.registroId+' actualizada','ok','global-toast');
+  }).catch(function(){ toast('✖ No se pudo actualizar','err','global-toast'); });
 }
 
 /* ── Abrir un registro: reconstruye cliente + cotización y liga la sesión a él ── */
@@ -5796,6 +5998,87 @@ function abrirRegistro(reg){
   SESION.registroId=reg.id; SESION.dirty=false;
   actualizarBotonGuardar();
 }
+
+/* ════════ RESPALDO / MIGRACIÓN — Exportar e Importar TODA la base (#3) ════════
+   El respaldo incluye registros (con historial y metadatos), esquema y prefs.
+   Sirve para migrar entre equipos (oficina↔casa) y como recuperación. */
+function _stampArchivo(){var d=new Date(),p=function(n){return(n<10?'0':'')+n;};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+'-'+p(d.getMinutes());}
+function _descargarJSON(obj,nombre){
+  var blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},1500);
+}
+function recolectarBackup(){
+  return DB.exportJSON().then(function(base){
+    var prefs={}; try{ for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i); if(/^eq_/.test(k))prefs[k]=localStorage.getItem(k);} }catch(e){}
+    return { formato:'cotizadora-backup', formatoVersion:1,
+      appBuild:(typeof APP_BUILD!=='undefined'?APP_BUILD:''),
+      schemaVersion:base.schemaVersion, exportadoEn:base.exportadoEn,
+      total:base.registros.length, registros:base.registros, prefs:prefs };
+  });
+}
+function exportarBaseDatos(){
+  if(typeof DB==='undefined')return;
+  recolectarBackup().then(function(bk){
+    _descargarJSON(bk,'Cotizaciones_'+_stampArchivo()+'.json');
+    toast('✔ Base exportada ('+bk.total+' registro'+(bk.total===1?'':'s')+')','ok','global-toast');
+  });
+}
+var _importPending=null;
+function importarBaseDatosPick(){var f=document.getElementById('db-import-file'); if(f)f.click();}
+function importarBaseDatosArchivo(file){
+  if(!file)return;
+  var r=new FileReader();
+  r.onload=function(){
+    var data; try{data=JSON.parse(r.result);}catch(e){toast('✖ Archivo inválido (no es JSON)','err','global-toast');return;}
+    if(!data||data.formato!=='cotizadora-backup'||!Array.isArray(data.registros)){toast('✖ No es un respaldo válido de la cotizadora','err','global-toast');return;}
+    if((data.schemaVersion||1) > DB.SCHEMA_VERSION){toast('✖ El respaldo es de una versión más nueva que esta app. Actualiza la cotizadora.','err','global-toast');return;}
+    _importPending=data;
+    var info=document.getElementById('imp-info');
+    if(info)info.innerHTML='<b>'+data.registros.length+'</b> registros · exportado '+(data.exportadoEn?data.exportadoEn.substr(0,16).replace('T',' '):'?')+' · esquema v'+(data.schemaVersion||1);
+    var m=document.getElementById('imp-modal'); if(m)m.classList.add('on');
+  };
+  r.readAsText(file);
+}
+/* Migración de esquema al importar (nunca corrompe: asegura campos mínimos). */
+function _migrarRegistro(r){
+  r=r||{}; if(!r.uid)r.uid='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+  if(!r.schemaVersion)r.schemaVersion=1;
+  r.cliente=r.cliente||{}; r.comercial=r.comercial||{}; r.historial=Array.isArray(r.historial)?r.historial:[];
+  return r;
+}
+function importarConModo(modo){
+  var data=_importPending; if(!data)return;
+  cerrarImport();
+  var regs=data.registros.map(_migrarRegistro);
+  DB.importar(regs,modo,data.prefs).then(function(res){
+    var msg=(modo==='replace')?('✔ Base reemplazada: '+res.agregados+' registros'):('✔ Fusionado: '+res.agregados+' nuevos'+(res.omitidos?' · '+res.omitidos+' ya existían':''));
+    toast(msg,'ok','global-toast');
+    if(typeof refreshUserBtn==='function')refreshUserBtn();
+    if(document.body.classList.contains('planilla-open'))renderPlanilla();
+  }).catch(function(){toast('✖ Error al importar','err','global-toast');});
+}
+function cerrarImport(){var m=document.getElementById('imp-modal'); if(m)m.classList.remove('on'); _importPending=null;}
+
+/* ════════ GUARDADO AUTOMÁTICO AL ENVIAR (#7) ════════
+   Al usar un canal de envío (Outlook/Gmail/WhatsApp) la cotización se considera
+   finalizada: se guarda/actualiza con estado 'enviada' + medio + timestamp. */
+function registrarEnvio(medio){
+  if(typeof DB==='undefined')return;
+  if(!gv('me'))return;   // sin empresa no hay cotización real que registrar
+  var reg=construirRegistro(), ts=new Date().toISOString();
+  var patch={cliente:reg.cliente,comercial:reg.comercial,snapshot:reg.snapshot,estado:'enviada',medioEnvio:medio,enviadoEn:ts};
+  if(SESION.registroId==null){
+    DB.add(patch).then(function(id){SESION.registroId=id;SESION.dirty=false;actualizarBotonGuardar();});
+  }else{
+    DB.update(SESION.registroId,patch).then(function(){SESION.dirty=false;actualizarBotonGuardar();});
+  }
+}
+
+/* Menú 📗 Excel (agrupa las funciones Excel existentes; no reemplaza "Copiar para Excel"). */
+function toggleExcelMenu(ev){ if(ev)ev.stopPropagation(); var m=document.getElementById('excel-menu'); if(m)m.classList.toggle('on'); }
+document.addEventListener('click',function(e){ var m=document.getElementById('excel-menu'); if(m&&m.classList.contains('on')&&e.target&&e.target.closest&&!e.target.closest('#excel-menu')&&!e.target.closest('.acc-excel'))m.classList.remove('on'); });
 
 /* ════════════════════════════ VISTA PLANILLA (Fase 2) ════════════════════════════
    Grilla reactiva sobre DB con las 12 columnas oficiales de PLANILLA_COLUMNS.
@@ -5841,6 +6124,7 @@ function _plFiltros(){return {estado:PL_STATE.estado,incluirEliminados:PL_STATE.
 
 function openPlanillaView(){
   document.body.classList.add('planilla-open');
+  _aplicarPrefsPlanilla();
   renderPlanilla();
   requestAnimationFrame(function(){var v=document.getElementById('planilla-view');if(v)v.classList.add('in');});
   if(typeof playClick==='function')playClick();
@@ -5850,43 +6134,236 @@ function closePlanillaView(){
   document.body.classList.remove('planilla-open');
   if(typeof playClick==='function')playClick();
 }
+/* ── Tema propio de la Planilla (Excel claro por defecto / oscuro) — #8. Solo afecta a la planilla. ── */
+function planillaToggleTema(){
+  var v=document.getElementById('planilla-view'); if(!v)return;
+  var dark=v.classList.toggle('pl-dark');
+  var b=document.getElementById('pl-theme-btn'); if(b)b.textContent=dark?'🌙 Tema oscuro':'☀ Tema Excel';
+  try{localStorage.setItem('pl_theme',dark?'dark':'excel');}catch(e){}
+}
+/* ── Tamaño de fuente propio de la Planilla (Normal/Grande/Muy grande) — #15 ── */
+function planillaFont(size,btn){
+  var v=document.getElementById('planilla-view'); if(!v)return;
+  v.classList.remove('pl-font-normal','pl-font-grande','pl-font-xl'); v.classList.add('pl-font-'+size);
+  var map={normal:'plf-normal',grande:'plf-grande',xl:'plf-xl'};
+  ['plf-normal','plf-grande','plf-xl'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('on');});
+  var on=document.getElementById(map[size]||'plf-normal'); if(on)on.classList.add('on');
+  try{localStorage.setItem('pl_fontsize',size);}catch(e){}
+  planillaAjustarColumnas();
+}
+function _aplicarPrefsPlanilla(){
+  var v=document.getElementById('planilla-view'); if(!v)return;
+  var fs='normal'; try{fs=localStorage.getItem('pl_fontsize')||'normal';}catch(e){} planillaFont(fs,null);
+  var th='excel'; try{th=localStorage.getItem('pl_theme')||'excel';}catch(e){}
+  var dark=(th==='dark'); v.classList.toggle('pl-dark',dark);
+  var b=document.getElementById('pl-theme-btn'); if(b)b.textContent=dark?'🌙 Tema oscuro':'☀ Tema Excel';
+}
 function _estadoSelect(r){
   var vivos=DB.ESTADOS.filter(function(e){return e!=='eliminado';});
   var opts=vivos.map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_capitaliza(e)+'</option>';}).join('');
   if(r.estado==='eliminado')opts='<option value="eliminado" selected>Eliminado</option>'+opts;
   return '<select class="pl-estado-sel" onchange="planillaEstado('+r.id+',this.value)">'+opts+'</select>';
 }
+/* Letra de columna estilo hoja de cálculo (A, B, C…). */
+function _colLetra(i){var s='';i=i+1;while(i>0){var m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26);}return s;}
 function renderPlanilla(){
   if(typeof DB==='undefined')return;
   DB.search(PL_STATE.q,_plFiltros()).then(function(rows){
     rows=_plOrdenar(rows);
     var cnt=document.getElementById('pl-count'); if(cnt)cnt.textContent=rows.length+' registro'+(rows.length===1?'':'s');
     var empty=document.getElementById('pl-empty'), wrap=document.getElementById('pl-table-wrap');
-    if(!rows.length){ if(empty)empty.style.display='block'; if(wrap)wrap.style.display='none'; var t0=document.getElementById('pl-table'); if(t0)t0.innerHTML=''; return; }
+    if(!rows.length){ if(empty)empty.style.display='block'; if(wrap)wrap.style.display='none'; var t0=document.getElementById('pl-table'); if(t0)t0.innerHTML=''; _limpiarFormula(); return; }
     if(empty)empty.style.display='none'; if(wrap)wrap.style.display='';
     var arrow=function(field){return PL_STATE.sortField===field?(PL_STATE.sortDir>0?' ▲':' ▼'):'';};
     var thead='<thead><tr>';
     thead+='<th class="pl-th pl-th-id" onclick="planillaOrden(\'id\')">#'+arrow('id')+'</th>';
-    PLANILLA_COLUMNS.forEach(function(c){ thead+='<th class="pl-th" onclick="planillaOrden(\''+c.field+'\')">'+_esc(c.header)+arrow(c.field)+'</th>'; });
+    PLANILLA_COLUMNS.forEach(function(c){ thead+='<th class="pl-th" data-field="'+c.field+'" onclick="planillaOrden(\''+c.field+'\')">'+_esc(c.header)+arrow(c.field)+'<span class="pl-resize" data-field="'+c.field+'" onmousedown="_plResizeStart(event)" onclick="event.stopPropagation()"></span></th>'; });
     thead+='<th class="pl-th" onclick="planillaOrden(\'estado\')">ESTADO'+arrow('estado')+'</th>';
     thead+='<th class="pl-th pl-th-acc">ACCIONES</th></tr></thead>';
     var tb='<tbody>';
     rows.forEach(function(r){
       var elim=(r.estado==='eliminado'), actual=(SESION.registroId===r.id);
-      tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+'">';
+      tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+'" data-id="'+r.id+'">';
       tb+='<td class="pl-td pl-td-id">'+r.id+'</td>';
-      PLANILLA_COLUMNS.forEach(function(c){ var v=_celda(r,c.field); tb+='<td class="pl-td" title="'+_esc(v)+'">'+_esc(v)+'</td>'; });
-      tb+='<td class="pl-td pl-td-estado">'+_estadoSelect(r)+'</td>';
+      PLANILLA_COLUMNS.forEach(function(c,ci){ var v=_celda(r,c.field); tb+='<td class="pl-td" data-field="'+c.field+'" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'">'+_esc(v)+'</td>'; });
+      tb+='<td class="pl-td pl-td-estado" data-field="estado">'+_estadoSelect(r)+'</td>';
       tb+='<td class="pl-td pl-td-acc">'+
         '<button class="pl-act" title="Abrir en la calculadora" onclick="planillaAbrir('+r.id+')">📂</button>'+
         '<button class="pl-act" title="Duplicar" onclick="planillaDuplicar('+r.id+')">⧉</button>'+
-        '<button class="pl-act" title="Historial" onclick="planillaHistorial('+r.id+')">🕘</button>'+
-        (elim?'':'<button class="pl-act pl-act-del" title="Eliminar" onclick="planillaEliminar('+r.id+')">🗑</button>')+
+        '<button class="pl-act pl-menu-btn" title="Más acciones" onclick="planillaMenu('+r.id+',event)">⋮</button>'+
         '</td></tr>';
     });
     tb+='</tbody>';
     var t=document.getElementById('pl-table'); if(t)t.innerHTML=thead+tb;
+    _aplicarColW();
+    _limpiarFormula();
+    planillaAjustarColumnas();
   });
+}
+/* ── Selección de celda + barra de fórmulas (visual) ── */
+function _limpiarFormula(){var nb=document.getElementById('pl-namebox');if(nb)nb.textContent='—';var fv=document.getElementById('pl-formula-val');if(fv)fv.textContent='';}
+function _plCellClick(e){
+  var td=e.target&&e.target.closest?e.target.closest('.pl-td'):null;
+  if(!td||td.classList.contains('pl-td-acc')||td.classList.contains('pl-td-estado')||td.classList.contains('pl-td-id'))return;
+  var tbl=document.getElementById('pl-table'); if(!tbl)return;
+  var prev=tbl.querySelector('.pl-td.pl-sel'); if(prev)prev.classList.remove('pl-sel');
+  td.classList.add('pl-sel');
+  var nb=document.getElementById('pl-namebox'); if(nb)nb.textContent=td.getAttribute('data-ref')||'—';
+  var fv=document.getElementById('pl-formula-val'); if(fv)fv.textContent=td.textContent||'';
+}
+/* ── Adaptación responsive (#17): oculta columnas secundarias antes que forzar
+   scroll horizontal. La prioridad define qué se oculta primero. ── */
+var PL_HIDDEN={};
+var PL_PRIORIDAD_OCULTAR=['observacion','uf','telefono','correo','representante','rut','precioLista','descuento'];
+function _aplicarColHidden(){
+  var tbl=document.getElementById('pl-table'); if(!tbl)return;
+  PLANILLA_COLUMNS.forEach(function(c){
+    var hide=!!PL_HIDDEN[c.field];
+    Array.prototype.forEach.call(tbl.querySelectorAll('[data-field="'+c.field+'"]'),function(el){el.classList.toggle('pl-col-hidden',hide);});
+  });
+}
+function planillaAjustarColumnas(){
+  var wrap=document.getElementById('pl-table-wrap'), tbl=document.getElementById('pl-table');
+  if(!wrap||!tbl||!tbl.tHead)return;
+  PL_HIDDEN={}; _aplicarColHidden();
+  var i=0;
+  while(tbl.scrollWidth>wrap.clientWidth+2 && i<PL_PRIORIDAD_OCULTAR.length){
+    PL_HIDDEN[PL_PRIORIDAD_OCULTAR[i]]=true; _aplicarColHidden(); i++;
+  }
+}
+
+/* ════════ EDICIÓN DIRECTA EN LA GRILLA (#20/#22) ════════
+   Doble clic en una celda comercial → edita in situ → DB.update (sin copias). */
+var PL_EDIT_MAP={
+  empresa:['cliente','empresa'], rut:['cliente','rut'], telefono:['cliente','telefono'],
+  correo:['cliente','correo'], representante:['cliente','representante'], observacion:['cliente','observacion'],
+  servicio:['comercial','servicio'], uf:['comercial','uf'], precioVenta:['comercial','precioVenta'],
+  precioLista:['comercial','precioLista'], descuento:['comercial','descuento']
+};
+function _plCellEdit(e){
+  var td=e.target&&e.target.closest?e.target.closest('.pl-td'):null;
+  if(!td)return;
+  var field=td.getAttribute('data-field');
+  if(!field||!PL_EDIT_MAP[field]||td.querySelector('input'))return;   /* fecha/estado/acciones/id no editables inline */
+  var tr=td.closest('tr'); if(!tr)return; var id=parseInt(tr.getAttribute('data-id'),10);
+  var actual=td.textContent;
+  td.classList.add('pl-editing');
+  td.innerHTML='<input class="pl-edit-input" value="'+_esc(actual)+'">';
+  var inp=td.querySelector('input'); inp.focus(); inp.select();
+  var cerrado=false;
+  var commit=function(save){
+    if(cerrado)return; cerrado=true;
+    var nv=inp.value; td.classList.remove('pl-editing');
+    if(save && nv!==actual){
+      var m=PL_EDIT_MAP[field], patch={}; patch[m[0]]={}; patch[m[0]][m[1]]=nv;
+      DB.update(id,patch).then(function(){toast('✔ Actualizado','ok','global-toast');});  /* 'cambio' re-renderiza */
+    }else{ td.textContent=actual; td.setAttribute('title',_esc(actual)); }
+  };
+  inp.addEventListener('keydown',function(ev){ if(ev.key==='Enter'){ev.preventDefault();commit(true);} else if(ev.key==='Escape'){ev.preventDefault();commit(false);} });
+  inp.addEventListener('blur',function(){commit(true);});
+}
+
+/* ════════ MENÚ DE ACCIONES POR FILA (#21) ════════ */
+function planillaMenu(id,ev){
+  if(ev)ev.stopPropagation();
+  var menu=document.getElementById('pl-rowmenu'); if(!menu)return;
+  menu.innerHTML=
+    '<button onclick="planillaAbrir('+id+');planillaMenuCerrar()">📂 Abrir en calculadora</button>'+
+    '<button onclick="planillaEditarDatos('+id+');planillaMenuCerrar()">✎ Editar datos…</button>'+
+    '<button onclick="planillaDuplicar('+id+');planillaMenuCerrar()">⧉ Duplicar</button>'+
+    '<button onclick="planillaGuardarComoNueva('+id+');planillaMenuCerrar()">➕ Guardar como nueva versión</button>'+
+    '<button onclick="planillaExportarUna('+id+');planillaMenuCerrar()">⬇ Exportar solo esta</button>'+
+    '<button onclick="planillaHistorial('+id+');planillaMenuCerrar()">🕘 Ver historial</button>'+
+    '<button class="pl-menu-del" onclick="planillaEliminar('+id+');planillaMenuCerrar()">🗑 Eliminar</button>';
+  var r=(ev&&ev.target)?ev.target.getBoundingClientRect():{bottom:120,left:120};
+  menu.style.top=Math.min(r.bottom+4,window.innerHeight-320)+'px';
+  menu.style.left=Math.min(r.left-180,window.innerWidth-236)+'px';
+  menu.classList.add('on');
+}
+function planillaMenuCerrar(){var m=document.getElementById('pl-rowmenu');if(m)m.classList.remove('on');}
+document.addEventListener('click',function(e){var m=document.getElementById('pl-rowmenu');if(m&&m.classList.contains('on')&&e.target&&e.target.closest&&!e.target.closest('#pl-rowmenu')&&!e.target.closest('.pl-menu-btn'))m.classList.remove('on');});
+
+/* Guardar como nueva versión = duplicar (conserva intacta la original, #19). */
+function planillaGuardarComoNueva(id){ DB.duplicate(id).then(function(nid){toast('✔ Nueva versión creada (#'+nid+')','ok','global-toast');}); }
+/* Exportar solo una cotización (JSON re-importable). */
+function planillaExportarUna(id){
+  DB.get(id).then(function(r){
+    if(!r)return;
+    var bk={formato:'cotizadora-backup',formatoVersion:1,schemaVersion:DB.SCHEMA_VERSION,exportadoEn:new Date().toISOString(),total:1,registros:[r],prefs:{}};
+    var emp=(r.cliente.empresa||'cotizacion').replace(/[^\w]+/g,'_').slice(0,24);
+    _descargarJSON(bk,'Cotizacion_'+emp+'_'+r.id+'.json');
+    toast('✔ Cotización #'+id+' exportada','ok','global-toast');
+  });
+}
+
+/* ════════ MODAL "EDITAR DATOS" — todos los campos comerciales, incl. ejecutivo (#20/#21) ════════ */
+var _plEditId=null;
+function planillaEditarDatos(id){
+  DB.get(id).then(function(r){
+    if(!r)return; _plEditId=id;
+    var f=function(lbl,key,val,full){return '<label class="ple-f'+(full?' ple-full':'')+'"><span>'+lbl+'</span><input data-k="'+key+'" value="'+_esc(val)+'"></label>';};
+    var estOpts=DB.ESTADOS.filter(function(e){return e!=='eliminado';}).map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_capitaliza(e)+'</option>';}).join('');
+    document.getElementById('ple-body').innerHTML=
+      '<div class="ple-grid">'+
+        f('Empresa','cliente.empresa',r.cliente.empresa)+
+        f('RUT','cliente.rut',r.cliente.rut)+
+        f('Teléfono','cliente.telefono',r.cliente.telefono)+
+        f('Correo','cliente.correo',r.cliente.correo)+
+        f('Representante','cliente.representante',r.cliente.representante)+
+        f('Ejecutivo','ejecutivo',r.ejecutivo)+
+        f('Servicio ofrecido','comercial.servicio',r.comercial.servicio,true)+
+        f('Precio venta','comercial.precioVenta',r.comercial.precioVenta)+
+        f('Precio lista','comercial.precioLista',r.comercial.precioLista)+
+        f('Descuento','comercial.descuento',r.comercial.descuento)+
+        '<label class="ple-f"><span>Estado</span><select data-k="estado">'+estOpts+'</select></label>'+
+        f('Observación','cliente.observacion',r.cliente.observacion,true)+
+      '</div>';
+    document.getElementById('ple-title').textContent='✎ Editar cotización #'+id+' — '+(r.cliente.empresa||'');
+    document.getElementById('ple-modal').classList.add('on');
+  });
+}
+function planillaGuardarDatos(){
+  if(_plEditId==null)return;
+  var patch={cliente:{},comercial:{}};
+  Array.prototype.forEach.call(document.querySelectorAll('#ple-body [data-k]'),function(el){
+    var k=el.getAttribute('data-k'), v=el.value;
+    if(k.indexOf('cliente.')===0)patch.cliente[k.slice(8)]=v;
+    else if(k.indexOf('comercial.')===0)patch.comercial[k.slice(10)]=v;
+    else patch[k]=v;   /* ejecutivo · estado */
+  });
+  DB.update(_plEditId,patch).then(function(){toast('✔ Datos actualizados','ok','global-toast');});
+  _plCerrarEdit();
+}
+function _plCerrarEdit(){var m=document.getElementById('ple-modal');if(m)m.classList.remove('on');_plEditId=null;}
+
+/* ════════ REDIMENSIONAR COLUMNAS (#16) — arrastrar bordes, anchos persistentes ════════ */
+var PL_COLW={}; try{PL_COLW=JSON.parse(localStorage.getItem('pl_colw')||'{}');}catch(e){PL_COLW={};}
+function _guardarColW(){ try{localStorage.setItem('pl_colw',JSON.stringify(PL_COLW));}catch(e){} }
+function _setColWidth(field,w){
+  var tbl=document.getElementById('pl-table'); if(!tbl)return;
+  Array.prototype.forEach.call(tbl.querySelectorAll('[data-field="'+field+'"]'),function(el){
+    el.style.width=w+'px'; el.style.minWidth=w+'px'; el.style.maxWidth=w+'px';
+  });
+}
+function _aplicarColW(){ Object.keys(PL_COLW).forEach(function(f){ if(PL_COLW[f])_setColWidth(f,PL_COLW[f]); }); }
+var _plResize=null;
+function _plResizeStart(e){
+  var handle=e.target&&e.target.closest?e.target.closest('.pl-resize'):null; if(!handle)return;
+  e.preventDefault(); e.stopPropagation();
+  var th=handle.closest('th');
+  _plResize={field:handle.getAttribute('data-field'),th:th,startX:e.clientX,startW:th.offsetWidth};
+  document.addEventListener('mousemove',_plResizeMove); document.addEventListener('mouseup',_plResizeEnd);
+  document.body.style.userSelect='none';
+}
+function _plResizeMove(e){
+  if(!_plResize)return;
+  var w=Math.max(50,_plResize.startW+(e.clientX-_plResize.startX));
+  _setColWidth(_plResize.field,w);
+}
+function _plResizeEnd(){
+  if(_plResize){ PL_COLW[_plResize.field]=_plResize.th.offsetWidth; _guardarColW(); }
+  _plResize=null; document.body.style.userSelect='';
+  document.removeEventListener('mousemove',_plResizeMove); document.removeEventListener('mouseup',_plResizeEnd);
 }
 function planillaOrden(field){
   if(PL_STATE.sortField===field)PL_STATE.sortDir*=-1; else {PL_STATE.sortField=field;PL_STATE.sortDir=1;}
@@ -5956,6 +6433,10 @@ function initRegistros(){
   document.addEventListener('input',handler,true);
   document.addEventListener('change',handler,true);
   document.addEventListener('click',handler,true);
+  /* Planilla: selección de celda, edición inline (doble clic) + reajuste responsive. */
+  var plt=document.getElementById('pl-table');
+  if(plt){ plt.addEventListener('click',_plCellClick); plt.addEventListener('dblclick',_plCellEdit); }
+  var _plRz; window.addEventListener('resize',function(){ if(!document.body.classList.contains('planilla-open'))return; clearTimeout(_plRz); _plRz=setTimeout(planillaAjustarColumnas,150); });
   _appReady=true;
   actualizarBotonGuardar();
 }
