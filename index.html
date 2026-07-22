@@ -979,7 +979,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
           <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
           <button type="button" id="btn-crm-paste" class="crm-paste-btn crm-grid crm-excel-blue" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span></span></button>
           <div class="fld"><label>RUT</label><input type="text" id="mr" placeholder="76.123.456-7" oninput="normRutInput(this);onClientChange()"></div>
-          <button type="button" id="btn-copy-excel" class="crm-paste-btn crm-grid crm-excel-green" onclick="copiarParaExcel();playClick();" title="Copia una fila lista para pegar desde la columna A: FECHA · EMPRESA · RUT · TELÉFONO · CORREO · REPRESENTANTE · UF del día · SERVICIO OFRECIDO · (observación) · PRECIO VENTA · PRECIO LISTA · DESCUENTO"><span class="crm-ico">📋</span><span class="crm-txt"><span class="crm-main">Copiar para Excel →</span></span></button>
+          <button type="button" id="btn-copy-excel" class="crm-paste-btn crm-grid crm-excel-green" onclick="copiarParaExcel();playClick();" title="Copia una fila lista para pegar desde la columna A: FECHA · EMPRESA · RUT · TELÉFONO · CORREO · REPRESENTANTE · SERVICIO OFRECIDO · UF del día · PRECIO VENTA · PRECIO LISTA · DESCUENTO · OBSERVACIÓN"><span class="crm-ico">📋</span><span class="crm-txt"><span class="crm-main">Copiar para Excel →</span></span></button>
         </div>
         <div class="cfg-3">
           <div class="fld"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="+56 9 9876 5432" oninput="normTelInput(this);onClientChange()"></div>
@@ -4980,11 +4980,14 @@ function pegarCRM(){
     .catch(function(){toast('✖ Permite el acceso al portapapeles e intenta de nuevo','err','global-toast');});
 }
 /* ════════ FLUJO INVERSO — restaurar PRODUCTO + PRECIOS desde la fila pegada ════════
-   Lee por posición H (servicio ofrecido), J (precio venta) y K (precio lista) de la
-   fila de 12 columnas que genera "Copiar para Excel". Ignora la UF (G), que cambia a
-   diario. Salta a la pestaña del producto y aplica el precio ofrecido. No reconstruye
-   la config fina (plan/consultas): eso no se guarda en el Excel. Devuelve true si
-   mostró su propio aviso (para no duplicar el toast de "Datos CRM cargados"). */
+   Mapea por SIGNIFICADO, no por posición fija: si el texto pegado trae la fila de
+   ENCABEZADOS de la planilla, cada campo se localiza por su título (SERVICIO
+   OFRECIDO, PRECIO VENTA, PRECIO LISTA…); si no la trae, se usa la posición
+   CANÓNICA declarada en PLANILLA_COLUMNS (única fuente de verdad). Ignora la UF del
+   día (cambia a diario). Salta a la pestaña del producto y aplica el precio ofrecido.
+   No reconstruye la config fina (plan/consultas): eso no se guarda en el Excel.
+   Devuelve true si mostró su propio aviso (para no duplicar el toast de "Datos CRM
+   cargados"). Ver el bloque «MAPEO OFICIAL COTIZADORA ⇄ EXCEL» más abajo. */
 function _limpiarCelda(s){
   s=(''+s).replace(/[    ​]/g,' ').trim();
   if(s.length>=2&&s.charAt(0)==='"'&&s.charAt(s.length-1)==='"')s=s.slice(1,-1).replace(/""/g,'"');
@@ -5019,16 +5022,112 @@ function _matchProductoKey(nombre){
   if(has('informacion de productos')||has('catalogo'))return 'soluciones';
   return null;
 }
+/* ══════════════════════════════════════════════════════════════════════════════
+   ███  MAPEO OFICIAL COTIZADORA ⇄ EXCEL — ÚNICA FUENTE DE VERDAD  ███
+   ──────────────────────────────────────────────────────────────────────────────
+   Este bloque es la referencia oficial para el intercambio de datos entre la
+   cotizadora y la planilla de ventas. TODA modificación futura del import/export
+   debe partir desde aquí. NO cubre el flujo de la extensión CRM (caja negra).
+
+   El intercambio es por PORTAPAPELES: una fila TSV (celdas separadas por TAB) que
+   se pega en Excel desde la columna A. El orden de las celdas corresponde 1:1 con
+   los ENCABEZADOS reales de la planilla (ver captura de referencia):
+
+     COL │ ENCABEZADO PLANILLA          │ CAMPO INTERNO   │ ORIGEN / DESTINO
+     ────┼─────────────────────────────┼─────────────────┼──────────────────────────
+      A  │ FECHA                        │ fecha           │ fecha del día (dd-mm-yyyy)
+      B  │ EMPRESA                      │ empresa         │ #me (razón social)
+      C  │ RUT                          │ rut             │ #mr
+      D  │ TELÉFONO                     │ telefono        │ #cli-tel
+      E  │ CORREO ELECTRÓNICO           │ correo          │ #cli-email
+      F  │ REPRESENTANTE                │ representante   │ #cli-contacto
+      G  │ SERVICIO OFRECIDO            │ servicio        │ nombre del producto activo
+      H  │ UF                           │ uf              │ UF del día (getUF())
+      I  │ PRECIO VENTA                 │ precioVenta     │ UF venta (según producto)
+      J  │ PRECIO LISTA                 │ precioLista     │ UF lista (según producto)
+      K  │ DESCUENTO EN TOTAL OFRECIDO  │ descuento       │ % derivado venta/lista
+      L  │ OBSERVACIÓN                  │ observacion     │ #cli-obs + nota del producto
+
+   JUSTIFICACIÓN DEL ORDEN: los datos históricos de la planilla se pegaron con un
+   orden ANTERIOR desalineado (UF en G, SERVICIO en H, sin PRECIO VENTA). El orden
+   de arriba es el que coincide con los encabezados reales; a partir de esta versión
+   cada dato cae SIEMPRE en la columna de su encabezado, nunca por posición ad-hoc.
+
+   ── MAPEO POR PRODUCTO (cada pestaña exporta SOLO lo que realmente posee) ──
+   Columnas comunes A–H (cliente + servicio + UF del día) se llenan para todos.
+   Las columnas I/J/K/L dependen del producto:
+
+     PRODUCTO (key)            │ I P.VENTA │ J P.LISTA │ K DCTO │ L OBSERVACIÓN
+     ──────────────────────────┼───────────┼───────────┼────────┼───────────────────────
+     bundle / mc / ri / bolsa  │  UF venta │  UF lista │   %    │ #cli-obs
+     pfm / pc / datafinder /    │  (LAST)   │  (LAST)   │        │
+     malla                      │           │           │        │
+     ──────────────────────────┼───────────┼───────────┼────────┼───────────────────────
+     multi (Multiproducto)     │ Σ UF venta│ Σ UF lista│   %    │ #cli-obs + lista prods
+     ──────────────────────────┼───────────┼───────────┼────────┼───────────────────────
+     pub (Publicación Única)   │   vacío   │   vacío   │ vacío  │ Total CLP a cobrar (%)
+     pago_pub (Pago Pub.)      │   vacío   │   vacío   │ vacío  │ Total CLP a transferir
+     bdd (Base de Datos)       │   vacío   │   vacío   │ vacío  │ Volumen + valor (CLP)
+     soluciones (catálogo)     │   vacío   │   vacío   │ vacío  │ Productos seleccionados
+     ──────────────────────────┴───────────┴───────────┴────────┴───────────────────────
+   JUSTIFICACIÓN: pub/pago_pub/bdd trabajan en CLP (no en UF), por eso jamás llenan
+   las columnas UF de PRECIO VENTA/LISTA; su monto real va en OBSERVACIÓN. soluciones
+   es un catálogo sin precio. Ninguna columna reutiliza el dato de otro campo: si el
+   producto no posee ese dato, la celda queda vacía.
+
+   ── EXPORTACIÓN: copiarParaExcel() → _comercialExcel() (campos por producto) →
+      ensamblado por PLANILLA_COLUMNS.
+   ── IMPORTACIÓN: mapearCRM() → restaurarProductoPrecio() (mapea por encabezado si
+      viene la fila de títulos, si no por posición canónica de PLANILLA_COLUMNS).
+   ══════════════════════════════════════════════════════════════════════════════ */
+var PLANILLA_COLUMNS=[
+  {col:'A',field:'fecha',        header:'FECHA'},
+  {col:'B',field:'empresa',      header:'EMPRESA'},
+  {col:'C',field:'rut',          header:'RUT'},
+  {col:'D',field:'telefono',     header:'TELÉFONO'},
+  {col:'E',field:'correo',       header:'CORREO ELECTRÓNICO'},
+  {col:'F',field:'representante', header:'REPRESENTANTE'},
+  {col:'G',field:'servicio',     header:'SERVICIO OFRECIDO'},
+  {col:'H',field:'uf',           header:'UF'},
+  {col:'I',field:'precioVenta',  header:'PRECIO VENTA'},
+  {col:'J',field:'precioLista',  header:'PRECIO LISTA'},
+  {col:'K',field:'descuento',    header:'DESCUENTO EN TOTAL OFRECIDO'},
+  {col:'L',field:'observacion',  header:'OBSERVACIÓN'}
+];
+/* Índice canónico (0-based) de un campo según PLANILLA_COLUMNS. */
+function _colIndex(field){for(var i=0;i<PLANILLA_COLUMNS.length;i++)if(PLANILLA_COLUMNS[i].field===field)return i;return -1;}
+/* Normaliza un encabezado para comparar sin acentos/mayúsculas/espacios extra. */
+function _normHdr(s){return (''+s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();}
+/* ¿Es la fila de ENCABEZADOS de la planilla? (varios títulos coinciden exactos) */
+function _esFilaEncabezado(cels){
+  var hit=0;
+  cels.forEach(function(c){var n=_normHdr(c);
+    PLANILLA_COLUMNS.forEach(function(col){if(_normHdr(col.header)===n)hit++;});});
+  return hit>=4;
+}
 function restaurarProductoPrecio(txt){
-  var lineas=(''+txt).split(/\r?\n/),cols=null;
+  var lineas=(''+txt).split(/\r?\n/),headerMap=null,cols=null;
   for(var i=0;i<lineas.length;i++){
-    var raw=lineas[i].split('\t');
-    if(raw.length>=8){cols=raw.map(_limpiarCelda);break;}   /* solo filas con estructura de planilla */
+    var raw=lineas[i].split('\t').map(_limpiarCelda);
+    if(raw.length<8)continue;                                /* sin estructura de planilla */
+    if(!headerMap&&_esFilaEncabezado(raw)){                  /* fila de títulos → mapa por significado */
+      headerMap={};
+      raw.forEach(function(c,idx){var n=_normHdr(c);
+        PLANILLA_COLUMNS.forEach(function(col){if(_normHdr(col.header)===n&&headerMap[col.field]==null)headerMap[col.field]=idx;});});
+      continue;                                              /* los datos vienen en la siguiente fila */
+    }
+    cols=raw;break;                                          /* primera fila de datos */
   }
   if(!cols)return false;
-  var nombreProd=cols[7]||'';                 /* H — SERVICIO OFRECIDO */
-  var vVenta=_numDesdeUF(cols[9]);            /* J — PRECIO VENTA */
-  var vLista=_numDesdeUF(cols[10]);           /* K — PRECIO LISTA */
+  /* Getter POR SIGNIFICADO: mapa de encabezados si existe; si no, posición canónica.
+     Nunca una posición arbitraria. */
+  var get=function(field){
+    var idx=(headerMap&&headerMap[field]!=null)?headerMap[field]:_colIndex(field);
+    return (idx>=0&&idx<cols.length)?cols[idx]:'';
+  };
+  var nombreProd=get('servicio')||'';         /* G — SERVICIO OFRECIDO */
+  var vVenta=_numDesdeUF(get('precioVenta'));  /* I — PRECIO VENTA */
+  var vLista=_numDesdeUF(get('precioLista'));  /* J — PRECIO LISTA */
   if(!nombreProd&&vVenta==null&&vLista==null)return false;
   var key=nombreProd?_matchProductoKey(nombreProd):null;
   if(!key){
@@ -5054,37 +5153,99 @@ function normTelInput(el){if(!el)return;var v=el.value,nv=v.replace(/[\s\u00a0]/
 function normRutInput(el){if(!el)return;var v=el.value,nv=v.replace(/[\s\u00a0]/g,'').toUpperCase();if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
 /* Fecha dd-mm-yyyy (idéntica a la columna FECHA de la planilla) */
 function _fechaDMY(){var d=new Date(),p=function(n){return(n<10?'0':'')+n;};return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear();}
-/* ════════ REQ 4 — COPIAR PARA EXCEL (estructura exacta de la planilla) ════════
-   12 columnas alineadas con la planilla de ventas (ver detalle en la función). */
+/* ════════ REQ 4 — COPIAR PARA EXCEL (mapeo por encabezado y por producto) ════════
+   Formato de precio en UF con coma decimal chilena (ej. "2,2 UF"). */
+function _ufTxtExcel(x){return ufd(x).replace('.',',')+' UF';}
+/* Descuento derivado venta/lista: "-12%" (con descuento) o "0%" (sin descuento);
+   '' cuando no hay lista válida. */
+function _dctoTxtExcel(venta,lista){
+  if(!(lista>0)||typeof venta!=='number'||isNaN(venta))return '';
+  var d=Math.round((1-venta/lista)*100);
+  return (d>0?'-'+d:''+d)+'%';
+}
+/* Campos comerciales (servicio + I/J/K/L) que REALMENTE posee el producto activo.
+   Cada producto llena solo sus columnas; las que no le corresponden quedan en ''
+   y jamás heredan datos de otro campo. Ver «MAPEO OFICIAL COTIZADORA ⇄ EXCEL». */
+function _comercialExcel(){
+  var key=CURRENT.key;
+  /* SERVICIO OFRECIDO — etiqueta de la pestaña activa (round-trip con _matchProductoKey). */
+  var servicio=(function(){
+    var pn=document.getElementById('cfg-prod-name');
+    if(pn&&pn.textContent){var t=pn.textContent.replace(/^[·\s]+/,'').trim();if(t)return t;}
+    for(var i=0;i<PRODUCTS.length;i++)if(PRODUCTS[i].key===key)return PRODUCTS[i].lb;
+    return '';
+  })();
+  var obs=(gv('cli-obs')||'').trim();
+  var out={servicio:servicio,precioVenta:'',precioLista:'',descuento:'',observacion:obs};
+
+  /* ── Productos con precio en UF (LAST) ── */
+  var conPrecioUF={bundle:1,mc:1,ri:1,bolsa:1,pfm:1,pc:1,datafinder:1,malla:1};
+  if(conPrecioUF[key]&&LAST&&LAST.tipo){
+    if(typeof LAST.ufVenta==='number'&&!isNaN(LAST.ufVenta))out.precioVenta=_ufTxtExcel(LAST.ufVenta);
+    if(typeof LAST.ufLista==='number'&&!isNaN(LAST.ufLista))out.precioLista=_ufTxtExcel(LAST.ufLista);
+    out.descuento=_dctoTxtExcel(LAST.ufVenta,LAST.ufLista);
+    return out;
+  }
+  /* ── Multiproducto: suma de los ítems (todos en UF) ── */
+  if(key==='multi'){
+    if(MULTI.length){
+      var sv=0,sl=0;MULTI.forEach(function(s){sv+=(s.ufV||0);sl+=(s.ufL||0);});
+      sv=Math.round(sv*10000)/10000;sl=Math.round(sl*10000)/10000;
+      if(sv>0)out.precioVenta=_ufTxtExcel(sv);
+      if(sl>0)out.precioLista=_ufTxtExcel(sl);
+      out.descuento=_dctoTxtExcel(sv,sl);
+      var nombres=MULTI.map(function(s){return s.n;}).join(' + ');
+      out.observacion=(obs?obs+' · ':'')+'Multiproducto: '+nombres;
+    }
+    return out;
+  }
+  /* ── Publicación Única (montos en CLP, NO UF): sin columnas UF; total en OBSERVACIÓN. ── */
+  if(key==='pub'){
+    var cp=(typeof pubCalc==='function')?pubCalc():null;
+    if(cp)out.observacion=(obs?obs+' · ':'')+'Publicación DICOM ('+ufd(cp.pct)+'%) · Total a cobrar '+fmtN(cp.total);
+    return out;
+  }
+  /* ── Pago Publicación Única (CLP): total a transferir en OBSERVACIÓN. ── */
+  if(key==='pago_pub'){
+    var pp=(typeof ppCalc==='function')?ppCalc():null;
+    if(pp)out.observacion=(obs?obs+' · ':'')+'Pago publicación ('+ufd(pp.pct)+'%) · Total a transferir '+fmtN(pp.total);
+    return out;
+  }
+  /* ── Base de Datos (valorización a medida, CLP): volumen + valor en OBSERVACIÓN. ── */
+  if(key==='bdd'){
+    var vol=(typeof bddVol==='function')?bddVol():0;
+    var val=(typeof bddVal==='function')?bddVal():null;
+    var nota='Base de Datos a medida'+(vol?' · '+fmtN(vol)+' registros':'')+(val!=null?' · '+fmtN(val):' · Por evaluar');
+    out.observacion=(obs?obs+' · ':'')+nota;
+    return out;
+  }
+  /* ── Información de Productos Equifax (catálogo, sin precio): selección en OBSERVACIÓN. ── */
+  if(key==='soluciones'){
+    var sel=(typeof solSelected==='function')?solSelected():[];
+    if(sel.length){var nn=sel.map(function(k){return (typeof SOL_NAMES!=='undefined'&&SOL_NAMES[k])?SOL_NAMES[k]:k;}).join(', ');
+      out.observacion=(obs?obs+' · ':'')+'Catálogo: '+nn;}
+    return out;
+  }
+  return out;
+}
 function copiarParaExcel(){
   var emp=(gv('me')||'');
   var rut=(gv('mr')||'');
   var tel=(gv('cli-tel')||'').replace(/[\s\u00a0]/g,'');
   var email=(gv('cli-email')||'').toLowerCase();
   var cont=_titleCase(gv('cli-contacto')||'');
-  /* G — UF del día (ej. "40.845") */
-  var ufDia=Math.round(getUF()).toLocaleString('es-CL');
-  /* Formato de precio en UF con coma decimal chilena (ej. "2,2 UF") */
-  var ufTxt=function(x){return ufd(x).replace('.',',')+' UF';};
-  /* H/J/K/L — datos comerciales de la cotización actual. Solo se rellenan para
-     producto único con precio calculado (LAST). En Multiproducto / Soluciones /
-     BDD / Publicación quedan vacíos (se llenan a mano, sin arriesgar datos). */
-  var prod='',venta='',lista='',dcto='';
-  var _special=(CURRENT.key==='multi'||CURRENT.key==='soluciones'||CURRENT.key==='bdd'||CURRENT.key==='pub'||CURRENT.key==='pago_pub'||!CURRENT.key);
-  if(!_special&&LAST&&LAST.tipo){
-    var _pn=document.getElementById('cfg-prod-name');
-    if(_pn&&_pn.textContent)prod=_pn.textContent.replace(/^[·\s]+/,'').trim();
-    if(!prod&&PINFO[LAST.tipo])prod=PINFO[LAST.tipo].n;
-    if(typeof LAST.ufVenta==='number'&&!isNaN(LAST.ufVenta))venta=ufTxt(LAST.ufVenta);
-    if(typeof LAST.ufLista==='number'&&!isNaN(LAST.ufLista))lista=ufTxt(LAST.ufLista);
-    if(LAST.ufLista>0&&typeof LAST.ufVenta==='number'){
-      var d=Math.round((1-LAST.ufVenta/LAST.ufLista)*100);
-      dcto=(d>0?'-'+d:''+d)+'%';   /* ej. "-12%" ; sin descuento → "0%" */
-    }
-  }
-  /* Fila 12 columnas: A FECHA·B EMPRESA·C RUT·D TEL·E CORREO·F REPRESENTANTE·
-     G UF·H SERVICIO·I OBSERVACIÓN·J P.VENTA·K P.LISTA·L DESCUENTO */
-  var fila=[_fechaDMY(),emp,rut,tel,email,cont,ufDia,prod,'',venta,lista,dcto].join('\t');
+  /* Campos comerciales SOLO de lo que el producto activo posee (servicio + I/J/K/L).
+     Ver «MAPEO OFICIAL COTIZADORA ⇄ EXCEL». */
+  var com=_comercialExcel();
+  /* Objeto SEMÁNTICO por campo (no por posición). El ensamblado recorre
+     PLANILLA_COLUMNS, garantizando que cada dato caiga en la columna de su encabezado. */
+  var datos={
+    fecha:_fechaDMY(),empresa:emp,rut:rut,telefono:tel,correo:email,representante:cont,
+    servicio:com.servicio,
+    uf:Math.round(getUF()).toLocaleString('es-CL'),   /* UF del día (ej. "40.845") */
+    precioVenta:com.precioVenta,precioLista:com.precioLista,descuento:com.descuento,observacion:com.observacion
+  };
+  var fila=PLANILLA_COLUMNS.map(function(c){var v=datos[c.field];return (v==null)?'':(''+v);}).join('\t');
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(fila).then(function(){toast('✔ Copiado para Excel — pega desde la columna A','ok','global-toast');}).catch(function(){toast('✖ Copia manualmente','err','global-toast');});
   }else{toast('✖ Este navegador no permite copiar al portapapeles','err','global-toast');}
