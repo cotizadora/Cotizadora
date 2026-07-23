@@ -930,6 +930,30 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .ple-cancel{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:9px;padding:9px 16px;cursor:pointer;font-family:inherit;font-weight:700;}
 .ple-save{background:linear-gradient(135deg,#2ecc71,#1f9d55);border:1px solid #1f9d55;color:#06240f;border-radius:9px;padding:9px 18px;cursor:pointer;font-family:inherit;font-weight:800;}
 .ple-save:hover{box-shadow:0 4px 16px rgba(46,204,113,.4);}
+/* Modal respaldos */
+.bk-cfg{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 14px;background:var(--g2);border:1px solid var(--g4);border-radius:11px;margin-bottom:12px;}
+.bk-cfg-f{display:flex;align-items:center;gap:8px;color:var(--w);font-size:.85rem;font-weight:600;}
+.bk-cfg-f input[type=number]{width:74px;background:var(--g1);border:1px solid var(--g4);color:var(--w);border-radius:7px;padding:6px 8px;font-family:inherit;}
+.bk-savecfg{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:8px;padding:8px 13px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.82rem;}
+.bk-savecfg:hover{border-color:var(--gn);}
+.bk-note{font-size:.78rem;color:var(--wa);line-height:1.4;margin-bottom:12px;}
+.bk-toolbar{margin-bottom:12px;}
+.bk-list{display:flex;flex-direction:column;gap:8px;}
+.bk-empty{color:var(--wa);font-size:.86rem;padding:16px;text-align:center;}
+.bk-item{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--g2);border:1px solid var(--g4);border-radius:10px;padding:10px 13px;}
+.bk-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.bk-name{font-size:.85rem;font-weight:700;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bk-meta{font-size:.75rem;color:var(--wa);}
+.bk-acts{display:flex;gap:6px;flex-shrink:0;}
+.bk-a{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:7px;padding:6px 10px;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:700;}
+.bk-a:hover{border-color:var(--gn);}
+.bk-a-del:hover{border-color:var(--rl);color:var(--rl);}
+/* Aviso de zoom alterado (#4/#28) */
+#zoom-hint{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:500;align-items:center;gap:12px;background:var(--g1);border:1px solid var(--y);border-radius:10px;padding:11px 16px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:.86rem;color:var(--w);max-width:92vw;}
+#zoom-hint.on{display:flex;}
+#zoom-hint b{color:var(--y);}
+#zoom-hint button{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:7px;width:26px;height:26px;cursor:pointer;flex-shrink:0;font-family:inherit;}
+#zoom-hint button:hover{border-color:var(--rl);}
 /* Botón 💾 Guardar Cotización + estado, en el panel de cliente */
 .save-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
 .save-btn{background:linear-gradient(135deg,#2ecc71,#25a85b);border:1px solid #25a85b;color:#06240f;border-radius:9px;padding:11px 18px;cursor:pointer;font-family:inherit;font-weight:800;font-size:.95rem;transition:.14s;}
@@ -975,6 +999,10 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .imp-opt:hover{border-color:var(--g5);background:var(--g3);}
 .imp-merge:hover{border-color:var(--gn);}
 .imp-replace:hover{border-color:var(--rl);}
+/* Botón Guardar Cotización Multiproducto (dentro del panel multiproducto) */
+.mp-save-btn{width:100%;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:1.02rem;font-weight:800;letter-spacing:.3px;padding:15px 16px;border-radius:12px;cursor:pointer;font-family:inherit;color:#06240f;background:linear-gradient(135deg,#2ecc71,#1f9d55);border:1px solid #1f9d55;transition:.14s;}
+.mp-save-btn:hover{box-shadow:0 8px 22px rgba(46,204,113,.45);transform:translateY(-1px);}
+.mp-save-btn:active{transform:translateY(0) scale(.98);}
 /* Modal de historial */
 .pl-modal{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px;}
 .pl-modal.on{display:flex;}
@@ -1586,6 +1614,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   <div class="pl-toolbar">
     <button class="pl-tbtn" onclick="exportarBaseDatos()" title="Exportar TODA la base a un archivo de respaldo (.json)">📤 Exportar base</button>
     <button class="pl-tbtn" onclick="importarBaseDatosPick()" title="Importar / restaurar una base exportada (migrar entre equipos)">📥 Importar base</button>
+    <button class="pl-tbtn" onclick="openRespaldos()" title="Respaldos automáticos: programación, puntos de restauración y descarga">🗄 Respaldos</button>
     <button class="pl-tbtn" onclick="planillaExportar()" title="Exportar la vista actual a Excel (.xls)">📗 A Excel</button>
     <span class="pl-tsep"></span>
     <input type="text" id="pl-search" class="pl-search" placeholder="🔎 Buscar…" oninput="planillaBuscar(this.value)">
@@ -1649,6 +1678,25 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   </div>
 </div>
 
+<!-- Modal de respaldos automáticos -->
+<div id="bk-modal" class="pl-modal" onclick="if(event.target===this)cerrarRespaldos()">
+  <div class="pl-modal-box ple-box">
+    <div class="pl-modal-head"><h3>🗄 Respaldos automáticos</h3><button class="pl-modal-x" onclick="cerrarRespaldos()">✕</button></div>
+    <div style="padding:16px 18px;overflow:auto;">
+      <div class="bk-cfg">
+        <label class="bk-cfg-f"><input type="checkbox" id="bk-auto"> Respaldo automático activado</label>
+        <label class="bk-cfg-f"><span>Cada (minutos)</span><input type="number" id="bk-interval" min="15" step="15" value="120"></label>
+        <label class="bk-cfg-f"><span>Máximo a conservar</span><input type="number" id="bk-max" min="1" step="1" value="12"></label>
+        <button class="bk-savecfg" onclick="bkGuardarCfg()">Guardar configuración</button>
+      </div>
+      <div class="bk-note">Los respaldos se generan mientras la app está abierta. Cada archivo contiene la base completa (registros, historial, metadatos). Se conservan los más recientes.</div>
+      <div class="bk-toolbar"><button class="ple-save" onclick="bkCrearAhora()">＋ Crear respaldo ahora</button></div>
+      <div id="bk-list" class="bk-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="zoom-hint"><span>🔍 El zoom del navegador cambió. Pulsa <b>Ctrl + 0</b> para volver al 100% y ver todos los botones.</span><button onclick="cerrarZoomHint()" title="Ocultar aviso">✕</button></div>
 <div id="global-toast" class="toast"></div>
 <div id="cp-toast" aria-live="polite"></div>
 <div id="paste-notice" onclick="this.classList.remove('on');"><div class="pn-card"><div class="pn-check">✅</div><div class="pn-title">MENSAJE COPIADO</div><div class="pn-sub" id="paste-notice-sub">Pégalo con <b>Ctrl+V</b></div></div></div>
@@ -2692,7 +2740,9 @@ function addToMulti(){
     clp:ufV>0?ufc(ufV):0,pl:pl,cons:cons,
     items:_en.items,
     itemsMail:_en.itemsMail,
-    docs:docsForTipo(tipo)});
+    docs:docsForTipo(tipo),
+    /* #12 · snapshot propio del producto para reconstruirlo exactamente igual. */
+    snap:(typeof capturarSnapshot==='function')?capturarSnapshot():null});
   flyToMulti();
   toast('✔ Agregado a Multiproducto ('+MULTI.length+')','ok','global-toast');
   if(CURRENT.key==='multi'){$('config-zone').innerHTML=cfgHTML('multi');genMail();syncWA();}
@@ -2742,7 +2792,18 @@ function multiPanelHTML(){
   }).join('');
   return '<div class="sol-head2">Productos en el paquete ('+MULTI.length+')</div>'+
     '<div class="sol-list" id="multi-list">'+rows+'</div>'+
-    '<button type="button" class="exec-save multi-clear-btn" style="background:var(--rd);color:#fff;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:1.02rem;font-weight:800;letter-spacing:.3px;padding:15px 16px;" onclick="clearMulti();playClick();" title="Vaciar toda la propuesta multiproducto"><span style="font-size:1.9rem;line-height:1;">🗑️</span><span>Vaciar propuesta completa</span></button>';
+    '<button type="button" id="btn-guardar-multi" class="mp-save-btn" onclick="guardarMultiproducto();playClick();" title="Guardar TODO el documento Multiproducto como un registro independiente en la base de datos (con el snapshot de cada producto)"><span style="font-size:1.5rem;line-height:1;">💾</span><span>Guardar Cotización Multiproducto</span></button>'+
+    '<button type="button" class="exec-save multi-clear-btn" style="background:var(--rd);color:#fff;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:1.02rem;font-weight:800;letter-spacing:.3px;padding:15px 16px;" onclick="clearMulti();playClick();" title="Vaciar toda la propuesta multiproducto"><span style="font-size:1.9rem;line-height:1;">🗑️</span><span>Vaciar propuesta completa</span></button>';
+}
+/* #12 · Guardar el documento Multiproducto completo como registro independiente. */
+function guardarMultiproducto(){
+  if(typeof DB==='undefined')return;
+  if(!MULTI.length){toast('Agrega productos al Multiproducto primero','err','global-toast');return;}
+  var reg=construirRegistro();   /* CURRENT.key==='multi' → snapshot.multi (con snap por producto) + comercial (suma) */
+  return DB.add(reg).then(function(id){
+    SESION.registroId=id; SESION.dirty=false; actualizarBotonGuardar();
+    toast('✔ Cotización Multiproducto guardada como #'+id+' ('+MULTI.length+' producto'+(MULTI.length===1?'':'s')+')','ok','global-toast');
+  }).catch(function(){toast('✖ No se pudo guardar la cotización multiproducto','err','global-toast');});
 }
 /* Animación: una hoja-propuesta blanca (tamaño carta horizontal) viaja completa
    hasta el cajón Multiproducto, con elevación, inclinación y leve balanceo, y
@@ -5645,7 +5706,7 @@ function abrirWspWeb(){
    get, en la MISMA transacción activa. Ver update()/softDelete().
    ══════════════════════════════════════════════════════════════════════════════ */
 var DB=(function(){
-  var DB_NAME='cotizadora_registros', DB_VERSION=1, STORE='registros';
+  var DB_NAME='cotizadora_registros', DB_VERSION=2, STORE='registros', BACKUP_STORE='backups';
   var SCHEMA_VERSION=1;
   var ESTADOS=['borrador','enviada','ganada','perdida','eliminado'];
   var _dbp=null;   // promesa singleton de conexión
@@ -5663,6 +5724,10 @@ var DB=(function(){
           os.createIndex('createdAt','createdAt',{unique:false});
           os.createIndex('rut','cliente.rut',{unique:false});
           os.createIndex('empresa','cliente.empresa',{unique:false});
+        }
+        /* v2 · almacén de respaldos automáticos (#6). keyPath ts (ISO). */
+        if(!db.objectStoreNames.contains(BACKUP_STORE)){
+          db.createObjectStore(BACKUP_STORE,{keyPath:'ts'});
         }
       };
       req.onsuccess=function(e){resolve(e.target.result);};
@@ -5859,6 +5924,33 @@ var DB=(function(){
         tx.onerror=function(){reject(tx.error);};
         tx.onabort=function(){reject(tx.error||new Error('import abort'));};
       });});
+    },
+
+    /* ── Respaldos automáticos (#6): almacén 'backups' (keyPath ts) ── */
+    saveBackup:function(obj){
+      return _open().then(function(db){return new Promise(function(resolve,reject){
+        var tx=db.transaction(BACKUP_STORE,'readwrite'); tx.objectStore(BACKUP_STORE).put(obj);
+        tx.oncomplete=function(){resolve(obj.ts);}; tx.onerror=function(){reject(tx.error);};
+      });});
+    },
+    listBackups:function(){
+      return _open().then(function(db){return _reqP(db.transaction(BACKUP_STORE,'readonly').objectStore(BACKUP_STORE).getAll());}).then(function(rows){
+        rows.sort(function(a,b){return (a.ts<b.ts?1:-1);});   /* más nuevos primero */
+        return rows;
+      });
+    },
+    getBackup:function(ts){return _open().then(function(db){return _reqP(db.transaction(BACKUP_STORE,'readonly').objectStore(BACKUP_STORE).get(ts));});},
+    deleteBackup:function(ts){return _open().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction(BACKUP_STORE,'readwrite');tx.objectStore(BACKUP_STORE).delete(ts);tx.oncomplete=function(){resolve(true);};tx.onerror=function(){reject(tx.error);};});});},
+    pruneBackups:function(max){
+      return this.listBackups().then(function(rows){
+        var sobra=rows.slice(Math.max(0,max));
+        if(!sobra.length)return 0;
+        return _open().then(function(db){return new Promise(function(resolve,reject){
+          var tx=db.transaction(BACKUP_STORE,'readwrite'), os=tx.objectStore(BACKUP_STORE);
+          sobra.forEach(function(r){os.delete(r.ts);});
+          tx.oncomplete=function(){resolve(sobra.length);}; tx.onerror=function(){reject(tx.error);};
+        });});
+      });
     }
   };
 })();
@@ -6060,6 +6152,114 @@ function importarConModo(modo){
   }).catch(function(){toast('✖ Error al importar','err','global-toast');});
 }
 function cerrarImport(){var m=document.getElementById('imp-modal'); if(m)m.classList.remove('on'); _importPending=null;}
+
+/* ════════ RESPALDOS AUTOMÁTICOS PROGRAMABLES (#6) ════════
+   Genera respaldos completos durante la jornada mientras la app está abierta.
+   Config en localStorage: intervalo (min), máximo conservado, on/off.
+   NOTA: solo corre con la app abierta (una web no tiene proceso en segundo plano
+   garantizado). Complementa —no reemplaza— la base interna (#11). */
+var BK_DEFAULTS={auto:true,intervalMin:120,max:12};
+function bkCfg(){
+  var g=function(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}};
+  return { auto:(g('eq_bk_auto','1')==='1'),
+    intervalMin:(parseInt(g('eq_bk_interval_min',BK_DEFAULTS.intervalMin),10)||BK_DEFAULTS.intervalMin),
+    max:(parseInt(g('eq_bk_max',BK_DEFAULTS.max),10)||BK_DEFAULTS.max) };
+}
+function _stampNombre(d){d=d||new Date();var p=function(n){return(n<10?'0':'')+n;};return 'Cotizaciones_'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+'-'+p(d.getMinutes())+'.json';}
+function crearRespaldoAuto(manual){
+  return recolectarBackup().then(function(bk){
+    var d=new Date(); bk.ts=d.toISOString(); bk.nombre=_stampNombre(d); bk.auto=!manual;
+    return DB.saveBackup(bk).then(function(){
+      try{localStorage.setItem('eq_bk_last',bk.ts);}catch(e){}
+      return DB.pruneBackups(bkCfg().max).then(function(){return bk;});
+    });
+  });
+}
+function bkDebeCorrer(){
+  var c=bkCfg(); if(!c.auto)return false;
+  var last; try{last=localStorage.getItem('eq_bk_last');}catch(e){}
+  if(!last)return true;
+  return ((Date.now()-new Date(last).getTime())/60000)>=c.intervalMin;
+}
+function bkTick(){ try{ if(typeof DB!=='undefined'&&bkDebeCorrer())crearRespaldoAuto(false).then(function(bk){ if(bk&&document.body.classList.contains('planilla-open'))renderRespaldos(); }); }catch(e){} }
+
+/* UI · modal de respaldos */
+function openRespaldos(){ _bkPintarCfg(); renderRespaldos(); var m=document.getElementById('bk-modal'); if(m)m.classList.add('on'); }
+function cerrarRespaldos(){ var m=document.getElementById('bk-modal'); if(m)m.classList.remove('on'); }
+function _bkPintarCfg(){
+  var c=bkCfg();
+  var a=document.getElementById('bk-auto'); if(a)a.checked=c.auto;
+  var i=document.getElementById('bk-interval'); if(i)i.value=c.intervalMin;
+  var mx=document.getElementById('bk-max'); if(mx)mx.value=c.max;
+}
+function bkGuardarCfg(){
+  try{
+    localStorage.setItem('eq_bk_auto',document.getElementById('bk-auto').checked?'1':'0');
+    localStorage.setItem('eq_bk_interval_min',''+(parseInt(document.getElementById('bk-interval').value,10)||BK_DEFAULTS.intervalMin));
+    localStorage.setItem('eq_bk_max',''+(parseInt(document.getElementById('bk-max').value,10)||BK_DEFAULTS.max));
+  }catch(e){}
+  DB.pruneBackups(bkCfg().max).then(renderRespaldos);
+  toast('✔ Configuración de respaldos guardada','ok','global-toast');
+}
+function bkCrearAhora(){ crearRespaldoAuto(true).then(function(bk){ toast('✔ Respaldo creado: '+bk.nombre,'ok','global-toast'); renderRespaldos(); }); }
+function renderRespaldos(){
+  var cont=document.getElementById('bk-list'); if(!cont)return;
+  DB.listBackups().then(function(rows){
+    if(!rows.length){ cont.innerHTML='<div class="bk-empty">Aún no hay respaldos. Se crearán automáticamente según el intervalo, o pulsa “Crear respaldo ahora”.</div>'; return; }
+    cont.innerHTML=rows.map(function(b){
+      var fecha=(b.ts||'').substr(0,16).replace('T',' ');
+      return '<div class="bk-item"><div class="bk-info"><span class="bk-name">'+_esc(b.nombre||'respaldo')+'</span>'+
+        '<span class="bk-meta">'+_esc(fecha)+' · '+(b.total||(b.registros?b.registros.length:0))+' registros · '+(b.auto?'auto':'manual')+'</span></div>'+
+        '<div class="bk-acts">'+
+          '<button class="bk-a" title="Restaurar este respaldo" onclick="bkRestaurar(\''+b.ts+'\')">♻ Restaurar</button>'+
+          '<button class="bk-a" title="Compartir por WhatsApp / apps del sistema" onclick="bkCompartir(\''+b.ts+'\')">📲</button>'+
+          '<button class="bk-a" title="Descargar como archivo" onclick="bkDescargar(\''+b.ts+'\')">⬇</button>'+
+          '<button class="bk-a bk-a-del" title="Eliminar respaldo" onclick="bkEliminar(\''+b.ts+'\')">🗑</button>'+
+        '</div></div>';
+    }).join('');
+  });
+}
+function bkRestaurar(ts){
+  DB.getBackup(ts).then(function(bk){ if(!bk)return; _importPending=bk; cerrarRespaldos();
+    var info=document.getElementById('imp-info'); if(info)info.innerHTML='Respaldo <b>'+_esc(bk.nombre||'')+'</b> · '+(bk.registros?bk.registros.length:0)+' registros';
+    var m=document.getElementById('imp-modal'); if(m)m.classList.add('on');
+  });
+}
+function bkDescargar(ts){ DB.getBackup(ts).then(function(bk){ if(bk)_descargarJSON(bk,bk.nombre||('respaldo_'+ts+'.json')); }); }
+function bkEliminar(ts){ if(!confirm('¿Eliminar este respaldo?'))return; DB.deleteBackup(ts).then(function(){toast('✔ Respaldo eliminado','ok','global-toast');renderRespaldos();}); }
+/* ════════ RESILIENCIA AL ZOOM (#4/#28) ════════
+   El zoom real del navegador no se puede fijar ni leer desde JS. El layout (panel
+   compacto de 3 botones + scroll interno en cada panel) ya evita que desaparezcan
+   acciones. Como ayuda extra, detectamos CAMBIOS de zoom durante la sesión
+   (variación de devicePixelRatio respecto al arranque) y mostramos un aviso
+   discreto y descartable con el atajo Ctrl+0. No forzamos el zoom. */
+var _zoomBase=window.devicePixelRatio||1;
+var _zoomHintOff=false;
+function _chequearZoom(){
+  if(_zoomHintOff)return;
+  var hint=document.getElementById('zoom-hint'); if(!hint)return;
+  var r=(window.devicePixelRatio||1)/_zoomBase;
+  hint.classList.toggle('on',(r>1.25||r<0.8));
+}
+function cerrarZoomHint(){ _zoomHintOff=true; var h=document.getElementById('zoom-hint'); if(h)h.classList.remove('on'); }
+
+/* #9 · Compartir por WhatsApp usando la hoja de compartir del sistema (Web Share API,
+   única vía oficial soportada; en el picker el usuario elige WhatsApp → contacto).
+   Sin soporte (escritorio) → descarga para adjuntar manualmente. */
+function bkCompartir(ts){
+  DB.getBackup(ts).then(function(bk){
+    if(!bk)return;
+    try{
+      var file=new File([JSON.stringify(bk,null,2)],bk.nombre||'respaldo.json',{type:'application/json'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:'Respaldo Cotizaciones',text:'Respaldo de la base de cotizaciones ('+(bk.total||0)+' registros)'}).catch(function(){});
+        return;
+      }
+    }catch(e){}
+    _descargarJSON(bk,bk.nombre);
+    toast('Este equipo no permite compartir archivos directamente. Se descargó el respaldo para que lo adjuntes en WhatsApp.','ok','global-toast');
+  });
+}
 
 /* ════════ GUARDADO AUTOMÁTICO AL ENVIAR (#7) ════════
    Al usar un canal de envío (Outlook/Gmail/WhatsApp) la cotización se considera
@@ -6437,6 +6637,10 @@ function initRegistros(){
   var plt=document.getElementById('pl-table');
   if(plt){ plt.addEventListener('click',_plCellClick); plt.addEventListener('dblclick',_plCellEdit); }
   var _plRz; window.addEventListener('resize',function(){ if(!document.body.classList.contains('planilla-open'))return; clearTimeout(_plRz); _plRz=setTimeout(planillaAjustarColumnas,150); });
+  /* Programador de respaldos automáticos (#6): revisa cada minuto; solo con app abierta. */
+  setTimeout(bkTick,5000); setInterval(bkTick,60000);
+  /* Aviso de zoom alterado (#4/#28): detecta cambios de zoom durante la sesión. */
+  var _zt; window.addEventListener('resize',function(){clearTimeout(_zt);_zt=setTimeout(_chequearZoom,250);});
   _appReady=true;
   actualizarBotonGuardar();
 }
