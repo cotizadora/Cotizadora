@@ -66,6 +66,17 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;transition:.15s;flex-shrink:0;}
 .snd-toggle:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
 .snd-toggle.off{opacity:.5;}
+/* ── NAVEGACIÓN PRINCIPAL (zona roja) — botones estandarizados: Cotizadora · Biblioteca · Planilla · Descargas ── */
+.nav-group{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.16);
+  border-radius:10px;padding:4px;}
+.nav-btn{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.18);
+  color:#fff;border-radius:7px;padding:8px 12px;font-family:inherit;font-size:.8rem;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:.15s;}
+.nav-btn:hover{background:rgba(0,0,0,.48);border-color:var(--y);transform:translateY(-1px);}
+.nav-btn .nav-ico{font-size:.95rem;line-height:1;}
+.nav-btn.on{background:var(--y);border-color:var(--y);color:#241705;box-shadow:0 2px 10px rgba(240,192,64,.45);}
+.nav-btn.on:hover{background:var(--y);transform:none;}
+@media(max-width:1180px){.nav-btn .nav-lb{display:none;} .nav-btn{padding:8px 10px;}}
 /* franja de acciones compacta (Gmail / Outlook) */
 .act-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
   background:var(--g2);border:1px solid var(--g4);border-radius:10px;padding:8px 12px;margin-bottom:10px;}
@@ -343,10 +354,8 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .uis-btn:first-child{border-left:0;}
 .uis-btn:hover{background:var(--g2);}
 .uis-btn.on{background:var(--rl);color:#fff;}
-.htools #ui-scale-bar,.htools #theme-bar{width:auto;flex:0 0 auto;height:34px;align-items:stretch;}
-.htools #ui-scale-bar .uis-btn,.htools #theme-bar .uis-btn{flex:0 0 auto;padding:0 11px;display:inline-flex;align-items:center;}
-.htools #ui-scale-bar{margin-left:8px;}
-.htools #theme-bar{margin-left:8px;margin-right:2px;}
+#a11y-pop #ui-scale-bar,#a11y-pop #theme-bar{width:100%;flex:none;height:auto;align-items:stretch;margin:0;}
+#a11y-pop #ui-scale-bar .uis-btn,#a11y-pop #theme-bar .uis-btn{flex:1;padding:8px 6px;display:inline-flex;align-items:center;justify-content:center;}
 
 /* Resumen comercial */
 .sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
@@ -845,6 +854,8 @@ body.bib-open #biblioteca-view.in{opacity:1;transform:translateY(0);}
   .hstatus{font-size:.6rem;padding:5px 9px;max-width:160px;overflow:hidden;text-overflow:ellipsis;}
   .brand img{height:48px;}
   .uf-box input{width:74px;}
+  .nav-group{gap:2px;padding:2px;}
+  .nav-btn{padding:7px 8px;}
   #right-panel{overflow:visible;}
   .pv-content{overflow-y:visible;padding:12px 12px 30px;}
   .cv-btn{flex:0 0 auto;width:auto;}
@@ -862,6 +873,10 @@ body.bib-open #biblioteca-view.in{opacity:1;transform:translateY(0);}
   .brand .nm{font-size:1.05rem;}
   .price-big{font-size:2.2rem;}
   .snd-toggle{display:none;}
+  #auto-gen-status{display:none;}
+}
+@media(max-width:700px){
+  .htools>.htool-btn{display:none;} /* botón "⇄ UF" — la UF sigue editable en el input */
 }
 /* === Validación de correo en tiempo real (estado visual) === */
 .eml-status{font-size:.72rem;font-weight:600;letter-spacing:.3px;min-height:.9em;margin-top:2px;line-height:1.1;}
@@ -1156,31 +1171,60 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     </div>
   </div>
   <div class="htools">
+    <!-- Grupo 1 · información/estado (lo más general, siempre visible) -->
     <div id="auto-gen-status" class="hstatus">✔ Actualizado</div>
     <div class="uf-box">
       <label>UF Hoy</label>
       <input type="number" id="uf-global" value="40779" step="1">
     </div>
     <button class="htool-btn" onclick="openUF()">⇄ UF</button>
-    <div id="ui-scale-bar" class="uis-group" role="group" aria-label="Tamaño de texto del formulario" title="Tamaño de texto del formulario (no afecta la vista previa)">
-      <button type="button" class="uis-btn on" onclick="setUIScale('n',this)" title="Texto normal (100%)">A</button>
-      <button type="button" class="uis-btn" onclick="setUIScale('g',this)" title="Texto grande (115%)">A+</button>
-      <button type="button" class="uis-btn" onclick="setUIScale('xl',this)" title="Texto muy grande (130%)">A++</button>
+
+    <!-- Grupo 2 · NAVEGACIÓN PRINCIPAL — estandarizada: misma gráfica/estilo para
+         todas las secciones. Cada botón trae data-target explícito y navega
+         DIRECTO a su vista (navigateTo), sin depender de historial/pantalla previa. -->
+    <div class="nav-group" role="group" aria-label="Navegación principal">
+      <button type="button" class="nav-btn on" data-target="cotizadora" onclick="navigateTo(this)" title="Ir a la Cotizadora (pantalla principal de cotización)">
+        <span class="nav-ico">🧮</span><span class="nav-lb">Cotizadora</span>
+      </button>
+      <button type="button" class="nav-btn" data-target="biblioteca" onclick="navigateTo(this)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad">
+        <span class="nav-ico">🎧</span><span class="nav-lb">Biblioteca</span>
+      </button>
+      <button type="button" class="nav-btn" data-target="planilla" onclick="navigateTo(this)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)">
+        <span class="nav-ico">📋</span><span class="nav-lb">Planilla</span>
+      </button>
+      <button type="button" class="nav-btn" data-target="descargas" onclick="navigateTo(this)" title="Centro de Descargas — extensiones y aplicaciones del equipo (CRM Extractor, ShortCut Vocal, MuteReal, NotasSmart)">
+        <span class="nav-ico">⬇</span><span class="nav-lb">Descargas</span>
+      </button>
     </div>
-    <div id="theme-bar" class="uis-group" role="group" aria-label="Tema de color" title="Tema de color de la interfaz">
-      <button type="button" class="uis-btn" onclick="setTheme('light',this)" title="Tema claro">Claro</button>
-      <button type="button" class="uis-btn on" onclick="setTheme('normal',this)" title="Tema normal">Normal</button>
-      <button type="button" class="uis-btn" onclick="setTheme('dark',this)" title="Tema oscuro">Oscuro</button>
+
+    <!-- Grupo 3 · Ajustes de vista, compactados en un solo popover (texto + tema) -->
+    <div id="a11y-wrap">
+      <button type="button" id="a11y-btn" onclick="toggleA11yPop(event)" title="Ajustes de vista: tamaño de texto y tema" aria-haspopup="true" aria-expanded="false">Aa</button>
+      <div id="a11y-pop">
+        <div class="a11y-sec">
+          <span class="a11y-lbl">Tamaño de texto</span>
+          <div id="ui-scale-bar" class="uis-group" role="group" aria-label="Tamaño de texto del formulario" title="Tamaño de texto del formulario (no afecta la vista previa)">
+            <button type="button" class="uis-btn on" onclick="setUIScale('n',this)" title="Texto normal (100%)">A</button>
+            <button type="button" class="uis-btn" onclick="setUIScale('g',this)" title="Texto grande (115%)">A+</button>
+            <button type="button" class="uis-btn" onclick="setUIScale('xl',this)" title="Texto muy grande (130%)">A++</button>
+          </div>
+        </div>
+        <div class="a11y-sec">
+          <span class="a11y-lbl">Tema</span>
+          <div id="theme-bar" class="uis-group" role="group" aria-label="Tema de color" title="Tema de color de la interfaz">
+            <button type="button" class="uis-btn" onclick="setTheme('light',this)" title="Tema claro">Claro</button>
+            <button type="button" class="uis-btn on" onclick="setTheme('normal',this)" title="Tema normal">Normal</button>
+            <button type="button" class="uis-btn" onclick="setTheme('dark',this)" title="Tema oscuro">Oscuro</button>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Grupo 4 · utilidades puntuales -->
     <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
     <button class="snd-toggle" id="force-update-btn" onclick="forceUpdate();" title="Ver la última versión publicada (fuerza una recarga real sin usar caché del navegador)" aria-label="Actualizar a la última versión">⟳</button>
-    <button type="button" class="ext-btn" onclick="openDescargasView()" title="Centro de Descargas — extensiones y aplicaciones del equipo (CRM Extractor, ShortCut Vocal, MuteReal, NotasSmart)">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      <span class="ext-txt"><span class="ext-lb">Descargas</span><span class="ext-sb">Apps &amp; Extensiones</span></span>
-      <span class="ext-dl">↓</span>
-    </button>
-    <button class="htool-btn" onclick="openPlanillaView()" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)">📋 Planilla</button>
-    <button class="htool-btn" onclick="openBibliotecaView()" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad">🎧 Biblioteca</button>
+
+    <!-- Grupo 5 · lo más específico/personal, al final -->
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
       <span id="user-name">Ejecutivo/a</span>
@@ -1292,7 +1336,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
         <span class="cp-ico">💾</span><span class="cp-lb">Guardar</span>
       </button>
       <button type="button" id="btn-add-multi" class="cp-act cp-carrito" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto (carrito)">
-        <span class="cp-ico">🛒</span><span class="cp-lb">Carrito</span>
+        <span class="cp-ico">🛒</span><span class="cp-lb">Carrito multiproducto</span>
       </button>
       <button type="button" class="cp-act cp-planilla" onclick="openPlanillaView();playClick();" title="Abrir la Planilla — base de datos interna y centro de administración (respaldos, exportar/importar)">
         <span class="cp-ico">📗</span><span class="cp-lb">Planilla</span>
@@ -1850,27 +1894,35 @@ function bibResultado(v){
 }
 
 function openBibliotecaView(){
+  if(document.body.classList.contains('dl-open'))closeDescargasView(true);
+  if(document.body.classList.contains('planilla-open'))closePlanillaView(true);
   document.body.classList.add('bib-open');
   renderBibGrid();
   showBibGrid();
   requestAnimationFrame(function(){$('biblioteca-view').classList.add('in');});
+  setActiveNav('biblioteca');
   playClick();
 }
-function closeBibliotecaView(){
+function closeBibliotecaView(silencioso){
   var a=$('bd-audio');if(a){a.pause();}
   $('biblioteca-view').classList.remove('in');
   document.body.classList.remove('bib-open');
+  if(!silencioso)setActiveNav('cotizadora');
   playClick();
 }
 /* ── Centro de Descargas (misma mecánica que la Biblioteca) ── */
 function openDescargasView(){
+  if(document.body.classList.contains('bib-open'))closeBibliotecaView(true);
+  if(document.body.classList.contains('planilla-open'))closePlanillaView(true);
   document.body.classList.add('dl-open');
   requestAnimationFrame(function(){$('descargas-view').classList.add('in');});
+  setActiveNav('descargas');
   playClick();
 }
-function closeDescargasView(){
+function closeDescargasView(silencioso){
   $('descargas-view').classList.remove('in');
   document.body.classList.remove('dl-open');
+  if(!silencioso)setActiveNav('cotizadora');
   playClick();
 }
 function bibBack(){
@@ -5190,7 +5242,7 @@ function forceUpdate(){
 })();
 (function(){
   var _last=0;
-  var SEL='.cv-btn,.pbtn,.pv-copy-btn,.htool-btn,.ext-btn,.user-btn,.snd-toggle,.btn-foto,.crm-paste-btn,.exec-save';
+  var SEL='.cv-btn,.pbtn,.pv-copy-btn,.htool-btn,.ext-btn,.user-btn,.snd-toggle,.btn-foto,.crm-paste-btn,.exec-save,.nav-btn,#a11y-btn';
   document.addEventListener('pointerover',function(e){
     if(!_sndOn)return;
     if(e.pointerType&&e.pointerType!=='mouse')return; /* solo mouse, nada en táctil */
@@ -6321,6 +6373,42 @@ function irACotizadorPrincipal(){
   try{ if(document.body.classList.contains('planilla-open')&&typeof closePlanillaView==='function')closePlanillaView(); }catch(e){}
   try{ if(window.matchMedia&&window.matchMedia('(max-width:880px)').matches&&typeof setMobileView==='function')setMobileView('config'); }catch(e){}
 }
+/* ════════ NAVEGACIÓN PRINCIPAL ESTANDARIZADA (zona roja) ════════
+   Un único punto de entrada para los botones con data-target. Cada click
+   navega DIRECTO a la vista pedida — cierra cualquier otra vista abierta
+   primero — sin depender de qué pantalla estaba visible antes ni de historial. */
+function navigateTo(elOrTarget){
+  var target = (elOrTarget && elOrTarget.getAttribute) ? elOrTarget.getAttribute('data-target') : elOrTarget;
+  switch(target){
+    case 'biblioteca': openBibliotecaView(); break;
+    case 'planilla':   openPlanillaView(); break;
+    case 'descargas':  openDescargasView(); break;
+    default:           irACotizadorPrincipal(); setActiveNav('cotizadora'); if(typeof playClick==='function')playClick(); break;
+  }
+}
+function setActiveNav(target){
+  var btns=document.querySelectorAll('.nav-btn[data-target]');
+  for(var i=0;i<btns.length;i++){
+    btns[i].classList.toggle('on', btns[i].getAttribute('data-target')===target);
+  }
+}
+/* Popover compacto de ajustes de vista (tamaño de texto + tema) */
+function toggleA11yPop(e){
+  if(e){e.stopPropagation();}
+  var pop=$('a11y-pop'), btn=$('a11y-btn'); if(!pop)return;
+  var abrir=!pop.classList.contains('on');
+  pop.classList.toggle('on',abrir);
+  if(btn)btn.setAttribute('aria-expanded', abrir?'true':'false');
+}
+document.addEventListener('click',function(e){
+  var wrap=$('a11y-wrap'), pop=$('a11y-pop');
+  if(!wrap||!pop||!pop.classList.contains('on'))return;
+  if(!wrap.contains(e.target)){pop.classList.remove('on');var btn=$('a11y-btn');if(btn)btn.setAttribute('aria-expanded','false');}
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){var pop=$('a11y-pop');if(pop&&pop.classList.contains('on')){pop.classList.remove('on');var btn=$('a11y-btn');if(btn)btn.setAttribute('aria-expanded','false');}}
+});
+
 var _cliSig=null;
 function _watchClienteEntrante(){
   try{
@@ -6416,15 +6504,19 @@ function _plOrdenar(rows){
 function _plFiltros(){return {estado:PL_STATE.estado,incluirEliminados:PL_STATE.verEliminados};}
 
 function openPlanillaView(){
+  if(document.body.classList.contains('bib-open')&&typeof closeBibliotecaView==='function')closeBibliotecaView(true);
+  if(document.body.classList.contains('dl-open')&&typeof closeDescargasView==='function')closeDescargasView(true);
   document.body.classList.add('planilla-open');
   _aplicarPrefsPlanilla();
   renderPlanilla();
   requestAnimationFrame(function(){var v=document.getElementById('planilla-view');if(v)v.classList.add('in');});
+  if(typeof setActiveNav==='function')setActiveNav('planilla');
   if(typeof playClick==='function')playClick();
 }
-function closePlanillaView(){
+function closePlanillaView(silencioso){
   var v=document.getElementById('planilla-view'); if(v)v.classList.remove('in');
   document.body.classList.remove('planilla-open');
+  if(!silencioso&&typeof setActiveNav==='function')setActiveNav('cotizadora');
   if(typeof playClick==='function')playClick();
 }
 /* ── Tema propio de la Planilla (Excel claro por defecto / oscuro) — #8. Solo afecta a la planilla. ── */
