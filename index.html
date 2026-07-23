@@ -193,6 +193,34 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .cv-btn svg{width:20px;height:20px;flex-shrink:0;display:block;}
 .cv-btn .ico{font-size:1.05rem;flex-shrink:0;line-height:1;}
 .cv-btn span{flex:1;text-align:left;}
+/* ── Acciones principales (glass · neón) en la columna central (#1/#2/#3) ── */
+#cp-actions{margin-top:auto;position:sticky;bottom:0;display:flex;flex-direction:column;gap:9px;
+  padding:12px 2px 6px;background:linear-gradient(to top,#0a0a0c 62%,rgba(10,10,12,0));}
+#cp-actions .cv-section-lbl{margin:2px 0 3px;}
+.cp-act{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  width:100%;min-height:clamp(54px,8.5vh,76px);padding:9px 6px;border-radius:15px;cursor:pointer;
+  font-family:inherit;font-weight:700;font-size:calc(.72rem * var(--ui-scale,1));letter-spacing:.2px;text-align:center;line-height:1.05;
+  color:#fff;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.14);
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 6px 18px rgba(0,0,0,.35);
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease;overflow:hidden;}
+.cp-act::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,0) 55%);opacity:.7;}
+.cp-act .cp-ico{font-size:clamp(1.4rem,3.2vh,1.85rem);line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));}
+.cp-act .cp-lb{position:relative;z-index:1;}
+.cp-act:hover{transform:translateY(-2px);background:rgba(255,255,255,.09);}
+.cp-act:active{transform:translateY(0) scale(.97);}
+.cp-guardar{--neon:46,204,113;} .cp-carrito{--neon:240,192,64;} .cp-planilla{--neon:192,38,59;}
+.cp-act:hover,.cp-act:focus-visible{border-color:rgba(var(--neon),.75);
+  box-shadow:inset 0 0 0 1px rgba(var(--neon),.35),0 0 16px rgba(var(--neon),.45),0 8px 22px rgba(0,0,0,.4);}
+.cp-guardar .cp-ico{color:#2ecc71;} .cp-carrito .cp-ico{color:#f0c040;} .cp-planilla .cp-ico{color:#ff5c72;}
+@keyframes cpPulse{0%,100%{box-shadow:inset 0 0 0 1px rgba(240,192,64,0),0 6px 18px rgba(0,0,0,.35);}50%{box-shadow:inset 0 0 0 1px rgba(240,192,64,.6),0 0 18px rgba(240,192,64,.5);}}
+.cp-act.acc-dirty-glow{animation:cpPulse 1.7s ease-in-out infinite;}
+@keyframes cpSaved{0%{transform:scale(1);}30%{transform:scale(1.08);}60%{transform:scale(.95);}100%{transform:scale(1);}}
+.cp-act.saved-anim{animation:cpSaved .52s ease;border-color:rgba(46,204,113,.85);box-shadow:0 0 22px rgba(46,204,113,.6);}
+#cp-actions .acc-secondary{flex-direction:column;align-items:stretch;gap:6px;margin-top:2px;font-size:.72rem;}
+#cp-actions .acc-bound{text-align:center;}
+#cp-actions .acc-upd{width:100%;}
 #left-panel::-webkit-scrollbar,#right-panel::-webkit-scrollbar,.pv-content::-webkit-scrollbar{width:9px;}
 #left-panel::-webkit-scrollbar-thumb,#right-panel::-webkit-scrollbar-thumb,.pv-content::-webkit-scrollbar-thumb{background:var(--g4);border-radius:5px;}
 
@@ -668,9 +696,11 @@ body.bib-open #biblioteca-view.in{opacity:1;transform:translateY(0);}
 
 .bib-top{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:14px 22px;
   background:var(--g1);border-bottom:2px solid var(--g4);}
-.bib-back{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:9px;
-  padding:9px 15px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;}
-.bib-back:hover{background:var(--r);border-color:var(--rl);}
+/* Botón "Volver al Cotizador": identidad corporativa burdeos, alta visibilidad (#7). */
+.bib-back{background:linear-gradient(135deg,var(--rl),var(--rd));border:1px solid var(--rl);color:#fff;border-radius:10px;
+  padding:11px 18px;cursor:pointer;font-family:inherit;font-weight:800;font-size:.9rem;white-space:nowrap;letter-spacing:.2px;
+  box-shadow:0 4px 14px rgba(155,28,46,.42);transition:.16s;}
+.bib-back:hover{background:linear-gradient(135deg,#d12b42,var(--r));border-color:#e0435a;box-shadow:0 6px 22px rgba(192,38,59,.6);transform:translateY(-1px);}
 .bib-top h2{font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:.3px;flex:1;min-width:0;}
 .bib-top .bib-sub{font-size:.78rem;color:var(--wa);font-weight:600;}
 
@@ -818,6 +848,15 @@ body.bib-open #biblioteca-view.in{opacity:1;transform:translateY(0);}
   #right-panel{overflow:visible;}
   .pv-content{overflow-y:visible;padding:12px 12px 30px;}
   .cv-btn{flex:0 0 auto;width:auto;}
+  /* En móvil, en modo Configurar, el panel central se oculta salvo las ACCIONES,
+     para que Guardar/Carrito/Planilla sigan siempre accesibles (#1). */
+  #workstation.m-config #center-panel{display:flex;flex-direction:row;flex-wrap:wrap;padding:8px 10px;}
+  #workstation.m-config #center-panel > .cv-section-lbl,
+  #workstation.m-config #center-panel > .cv-btn,
+  #workstation.m-config #center-panel > .cv-sep{display:none;}
+  #workstation.m-config #cp-actions{position:static;margin-top:0;flex-direction:row;background:none;width:100%;padding:0;gap:8px;}
+  #cp-actions .cp-act{flex:1;min-height:60px;}
+  #cp-actions .cv-section-lbl{display:none;}
 }
 @media(max-width:560px){
   .brand .nm{font-size:1.05rem;}
@@ -856,8 +895,9 @@ body.planilla-open #prodbar,body.planilla-open #workstation,body.planilla-open #
 body.planilla-open #planilla-view{display:flex;}
 body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-appbar{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--pl-surface);border-bottom:1px solid var(--pl-border);}
-.pl-back{background:var(--pl-toolbar);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:8px;padding:8px 13px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.85rem;white-space:nowrap;}
-.pl-back:hover{background:var(--pl-hover);border-color:var(--pl-sel);}
+/* Volver al Cotizador desde la Planilla: burdeos corporativo, muy visible (#7/#8). */
+.pl-back{background:linear-gradient(135deg,#c0263b,#6e1220);border:1px solid #c0263b;color:#fff;border-radius:10px;padding:10px 17px;cursor:pointer;font-family:inherit;font-weight:800;font-size:.9rem;white-space:nowrap;letter-spacing:.2px;box-shadow:0 4px 14px rgba(155,28,46,.42);transition:.16s;}
+.pl-back:hover{background:linear-gradient(135deg,#d12b42,#9b1c2e);box-shadow:0 6px 22px rgba(192,38,59,.6);transform:translateY(-1px);}
 .pl-title{font-size:1.1rem;font-weight:800;color:var(--pl-text);white-space:nowrap;}
 .pl-count{font-size:.82rem;color:var(--pl-muted);font-weight:600;flex:1;}
 .pl-appbar-right{display:flex;align-items:center;gap:10px;}
@@ -1193,15 +1233,8 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <div id="summary-zone"></div>
     </div>
 
-    <!-- ════════ PANEL COMPACTO DE ACCIONES — fin de la calculadora (#24-27) ════════
-         Solo acciones de cotización. La administración de la BD (exportar/importar/
-         respaldos) vive en la Planilla, no aquí. El botón 📗 abre la Planilla. -->
-    <div id="acciones-panel" class="acc-panel">
-      <button type="button" id="btn-guardar-cotizacion" class="acc-btn acc-guardar" onclick="guardarCotizacion();playClick();" title="Guardar esta cotización como una NUEVA versión en la base de datos interna (no sobrescribe versiones anteriores)"><span class="acc-ico">💾</span><span class="acc-lb">Guardar</span></button>
-      <button type="button" id="btn-add-multi" class="acc-btn acc-multi" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto"><span class="acc-ico">🛒</span><span class="acc-lb">Multiproducto</span></button>
-      <button type="button" class="acc-btn acc-excel" onclick="openPlanillaView();playClick();" title="Abrir la Planilla — base de datos interna y centro de administración (respaldos, exportar/importar)"><span class="acc-ico">📗</span><span class="acc-lb">Planilla</span></button>
-    </div>
-    <div id="acc-secondary" class="acc-secondary"></div>
+    <!-- Los botones de acción (Guardar · Carrito · Planilla) se movieron a la
+         columna central (#cp-actions) para liberar altura de la calculadora (#1-4). -->
   </section>
 
   <!-- ════════ COLUMNA CENTRAL — CONTROLES DE VISUALIZACIÓN ════════ -->
@@ -1249,6 +1282,23 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       </svg>
       <span>Ficha de Oferta</span>
     </button>
+
+    <!-- ════════ ACCIONES PRINCIPALES (glass · neón) — #1/#2 ════════
+         Reubicadas desde la calculadora para liberar altura. Pinned al fondo de la
+         columna central; siempre visibles. IDs preservados (no cambia la lógica). -->
+    <div id="cp-actions">
+      <div class="cv-section-lbl">Acciones</div>
+      <button type="button" id="btn-guardar-cotizacion" class="cp-act cp-guardar" onclick="guardarCotizacion();playClick();" title="Guardar esta cotización como una NUEVA versión en la base de datos interna (no sobrescribe versiones anteriores)">
+        <span class="cp-ico">💾</span><span class="cp-lb">Guardar</span>
+      </button>
+      <button type="button" id="btn-add-multi" class="cp-act cp-carrito" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto (carrito)">
+        <span class="cp-ico">🛒</span><span class="cp-lb">Carrito</span>
+      </button>
+      <button type="button" class="cp-act cp-planilla" onclick="openPlanillaView();playClick();" title="Abrir la Planilla — base de datos interna y centro de administración (respaldos, exportar/importar)">
+        <span class="cp-ico">📗</span><span class="cp-lb">Planilla</span>
+      </button>
+      <div id="acc-secondary" class="acc-secondary"></div>
+    </div>
 
   </nav>
 
@@ -1590,7 +1640,19 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
         <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/notassmart_v1.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
       </div>
 
-      <div class="dl-note">💡 <b>Nota:</b> el botón de <b>CRM Extractor Pro</b> ya descarga el archivo publicado (<code>pluggin_v9.zip</code>). Los otros tres apuntan a los nombres propuestos y funcionarán en cuanto subas esos archivos al hosting. Podemos afinar los nombres cuando quieras.</div>
+      <!-- 5) Smart (programa Windows) -->
+      <div class="dl-card">
+        <div class="dl-prev">🧠</div>
+        <div class="dl-head">
+          <div class="dl-title">Smart</div>
+          <span class="dl-tag win">Programa Windows</span>
+        </div>
+        <div class="dl-desc">Panel de notas retráctil que se despliega desde el costado de la pantalla. Anota rápido sin cambiar de ventana y ocúltalo con un clic cuando no lo necesites.</div>
+        <p class="dl-steps"><b>Instalar:</b> 1) Descarga y <b>descomprime</b> el .zip. 2) Ejecuta el archivo. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
+        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/BlocNotasFlotante.zip" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.zip)</a>
+      </div>
+
+      <div class="dl-note">💡 <b>Nota:</b> el botón de <b>CRM Extractor Pro</b> ya descarga el archivo publicado (<code>pluggin_v9.zip</code>). Los demás (incluido <b>Smart</b>) apuntan a los nombres propuestos y funcionarán en cuanto subas esos archivos al hosting. Para Smart, sube tu <code>.zip</code> como <code>BlocNotasFlotante.zip</code> a <code>cotizadora.github.io/Cotizadora/</code>. Podemos afinar los nombres cuando quieras.</div>
 
     </div>
   </div>
@@ -6243,6 +6305,33 @@ function _chequearZoom(){
 }
 function cerrarZoomHint(){ _zoomHintOff=true; var h=document.getElementById('zoom-hint'); if(h)h.classList.remove('on'); }
 
+/* ════════ #6 · CLIENTE ENTRANTE → VOLVER A PRODUCTOS ════════
+   Cuando llegan datos de un cliente nuevo (extensión CRM o pegado) estando en otra
+   sección (Biblioteca / Descargas / Planilla), la app vuelve automáticamente a la
+   vista principal de Productos para mostrar de inmediato ese cliente. Es SOLO
+   navegación: no toca los datos, ni la lógica de recepción, ni la extensión.
+   Se detecta por cambio de empresa/RUT/correo mientras hay una sección abierta. */
+function irACotizadorPrincipal(){
+  try{ if(document.body.classList.contains('bib-open')&&typeof closeBibliotecaView==='function')closeBibliotecaView(); }catch(e){}
+  try{ if(document.body.classList.contains('dl-open')&&typeof closeDescargasView==='function')closeDescargasView(); }catch(e){}
+  try{ if(document.body.classList.contains('planilla-open')&&typeof closePlanillaView==='function')closePlanillaView(); }catch(e){}
+  try{ if(window.matchMedia&&window.matchMedia('(max-width:880px)').matches&&typeof setMobileView==='function')setMobileView('config'); }catch(e){}
+}
+var _cliSig=null;
+function _watchClienteEntrante(){
+  try{
+    var g=function(id){var e=document.getElementById(id);return e?(''+e.value):'';};
+    var sig=g('me')+'│'+g('mr')+'│'+g('cli-email');
+    if(_cliSig===null){_cliSig=sig;return;}
+    if(sig!==_cliSig){
+      var hayDatos=sig.replace(/│/g,'').trim().length>0;
+      var overlay=document.body.classList.contains('bib-open')||document.body.classList.contains('dl-open')||document.body.classList.contains('planilla-open');
+      _cliSig=sig;
+      if(hayDatos&&overlay)irACotizadorPrincipal();
+    }
+  }catch(e){}
+}
+
 /* #9 · Compartir por WhatsApp usando la hoja de compartir del sistema (Web Share API,
    única vía oficial soportada; en el picker el usuario elige WhatsApp → contacto).
    Sin soporte (escritorio) → descarga para adjuntar manualmente. */
@@ -6641,6 +6730,8 @@ function initRegistros(){
   setTimeout(bkTick,5000); setInterval(bkTick,60000);
   /* Aviso de zoom alterado (#4/#28): detecta cambios de zoom durante la sesión. */
   var _zt; window.addEventListener('resize',function(){clearTimeout(_zt);_zt=setTimeout(_chequearZoom,250);});
+  /* #6 · vigila la llegada de un cliente nuevo para volver a Productos. */
+  setInterval(_watchClienteEntrante,400);
   _appReady=true;
   actualizarBotonGuardar();
 }
