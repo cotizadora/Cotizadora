@@ -2163,7 +2163,7 @@ function computeCurrent(){
     var tD=sD?parseFloat(sD.options[sD.selectedIndex].dataset.t):0;
     c.tipo='datafinder';c.ufLista=uD;c.base=uD*(1-dcD/100);c.cons=cD;
     var tVenta=tD*(1-dcD/100);
-    c.note='Plan mensual 12 meses · Tarifa <b>'+tVenta.toFixed(4)+' UF/consulta</b> · Consulta adicional <b>'+(tVenta*1.2).toFixed(4)+' UF</b>';
+    c.note='Plan mensual 12 meses'+(cD?' · <b>'+cD+'</b> consultas/mes':'')+' · Tarifa <b>'+tVenta.toFixed(4)+' UF/consulta</b> · Consulta adicional <b>'+(tVenta*1.2).toFixed(4)+' UF</b>';
   }else if(k==='bolsa'){
     var sB=$('c-cons'),uB=parseFloat(gv('c-cons'));
     var cB=sB?parseInt(sB.options[sB.selectedIndex].dataset.c):0;
@@ -2173,7 +2173,7 @@ function computeCurrent(){
     var fr=gv('c-fr'),ruts=parseInt(gv('c-ruts'))||10,dcP=parseInt(gv('c-dc'))||0;
     var tar=pfmT(fr,ruts);c.tipo='pfm';c.ufLista=tar*ruts;c.base=c.ufLista*(1-dcP/100);
     var fl={s:'Semanal',q:'Quincenal',m:'Mensual'};
-    c.note=fl[fr]+' · '+ruts+' RUTs · Tarifa <b>'+tar+' UF/rut</b>';
+    c.note=fl[fr]+' · <b>'+ruts+'</b> RUTs · Tarifa <b>'+tar+' UF/rut</b>';
   }else if(k==='pc'){
     var v=parseFloat(gv('c-size'));c.tipo='pc';c.ufLista=v;c.base=v;c.plazo='12';
     c.note='Pago anual (12 meses) · Mensualizado <b>'+(v/12).toFixed(4)+' UF</b> ('+fmtN(ufc(v/12))+'/mes) · Evaluación en 30 min';
@@ -2262,7 +2262,11 @@ function renderSummary(c){
       '<div class="ci"><label>Contrato</label><div class="cv">'+(c.plazo||'12')+' meses</div></div>'+
       '<div class="ci"><label>Modalidad</label><div class="cv" style="color:#2ecc71;">POSTPAGO · 30 días</div></div>'+
       '<div class="ci"><label>Documentos</label><div class="cv" style="font-weight:600;color:#ccc;">Ficha · Cédula · Escritura · Carpeta Tributaria</div></div>'+
-    '</div>';
+    '</div>'+
+    /* DETALLE DEL PRODUCTO (rangos de tiempo, tarifa y consultas). Se muestra el
+       c.note calculado en computeCurrent; conserva los <b> de los números para que
+       queden en negrita (PFM: frecuencia + tarifa; Data Finder: tarifa/consultas). */
+    (c.note?'<div class="note-inline" style="margin-top:10px;">'+c.note+'</div>':'');
   /* El botón "Agregar a Multiproducto" se movió al panel de acciones (🛒). */
   $('summary-zone').innerHTML=html;
 }
