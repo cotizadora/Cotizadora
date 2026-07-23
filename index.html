@@ -34,6 +34,19 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .htool-btn{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;
   border-radius:8px;padding:9px 13px;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s;}
 .htool-btn:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
+/* ── Navegación estandarizada (Cotizadora · Planilla · Biblioteca) ──
+   Ocupa el espacio que antes tenían los controles de tamaño de texto/tema. */
+.view-nav{display:flex;align-items:stretch;gap:4px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.16);
+  border-radius:9px;padding:3px;}
+.vn-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid transparent;color:rgba(255,255,255,.82);
+  border-radius:7px;padding:7px 11px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s;}
+.vn-btn:hover{background:rgba(0,0,0,.35);color:#fff;}
+.vn-btn.on{background:rgba(0,0,0,.5);border-color:var(--y);color:var(--y);}
+.vn-btn .vn-ic{font-size:.92rem;line-height:1;}
+@media(max-width:900px){.vn-btn .vn-lb{display:none;}.vn-btn{padding:7px 9px;}}
+/* ── Tamaño de texto + tema, compactados y agrupados en un solo bloque ── */
+.uis-compact{display:flex;flex-direction:column;gap:3px;}
+.uis-compact .uis-group{width:auto;}
 /* botón de usuario (datos del ejecutivo/a) */
 .user-btn{display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.22);
   border-radius:30px;padding:5px 13px 5px 5px;cursor:pointer;font-family:inherit;transition:.15s;max-width:190px;}
@@ -66,17 +79,6 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;transition:.15s;flex-shrink:0;}
 .snd-toggle:hover{background:rgba(0,0,0,.5);border-color:var(--y);}
 .snd-toggle.off{opacity:.5;}
-/* ── NAVEGACIÓN PRINCIPAL (zona roja) — botones estandarizados: Cotizadora · Biblioteca · Planilla · Descargas ── */
-.nav-group{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.16);
-  border-radius:10px;padding:4px;}
-.nav-btn{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.18);
-  color:#fff;border-radius:7px;padding:8px 12px;font-family:inherit;font-size:.8rem;font-weight:700;
-  cursor:pointer;white-space:nowrap;transition:.15s;}
-.nav-btn:hover{background:rgba(0,0,0,.48);border-color:var(--y);transform:translateY(-1px);}
-.nav-btn .nav-ico{font-size:.95rem;line-height:1;}
-.nav-btn.on{background:var(--y);border-color:var(--y);color:#241705;box-shadow:0 2px 10px rgba(240,192,64,.45);}
-.nav-btn.on:hover{background:var(--y);transform:none;}
-@media(max-width:1180px){.nav-btn .nav-lb{display:none;} .nav-btn{padding:8px 10px;}}
 /* franja de acciones compacta (Gmail / Outlook) */
 .act-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
   background:var(--g2);border:1px solid var(--g4);border-radius:10px;padding:8px 12px;margin-bottom:10px;}
@@ -354,8 +356,9 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .uis-btn:first-child{border-left:0;}
 .uis-btn:hover{background:var(--g2);}
 .uis-btn.on{background:var(--rl);color:#fff;}
-#a11y-pop #ui-scale-bar,#a11y-pop #theme-bar{width:100%;flex:none;height:auto;align-items:stretch;margin:0;}
-#a11y-pop #ui-scale-bar .uis-btn,#a11y-pop #theme-bar .uis-btn{flex:1;padding:8px 6px;display:inline-flex;align-items:center;justify-content:center;}
+.htools #ui-scale-bar,.htools #theme-bar{width:auto;flex:0 0 auto;height:22px;align-items:stretch;}
+.htools #ui-scale-bar .uis-btn,.htools #theme-bar .uis-btn{flex:0 0 auto;padding:0 7px;font-size:.62rem;display:inline-flex;align-items:center;}
+.htools #theme-bar{margin-left:8px;margin-right:2px;}
 
 /* Resumen comercial */
 .sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
@@ -854,8 +857,6 @@ body.bib-open #biblioteca-view.in{opacity:1;transform:translateY(0);}
   .hstatus{font-size:.6rem;padding:5px 9px;max-width:160px;overflow:hidden;text-overflow:ellipsis;}
   .brand img{height:48px;}
   .uf-box input{width:74px;}
-  .nav-group{gap:2px;padding:2px;}
-  .nav-btn{padding:7px 8px;}
   #right-panel{overflow:visible;}
   .pv-content{overflow-y:visible;padding:12px 12px 30px;}
   .cv-btn{flex:0 0 auto;width:auto;}
@@ -873,10 +874,6 @@ body.bib-open #biblioteca-view.in{opacity:1;transform:translateY(0);}
   .brand .nm{font-size:1.05rem;}
   .price-big{font-size:2.2rem;}
   .snd-toggle{display:none;}
-  #auto-gen-status{display:none;}
-}
-@media(max-width:700px){
-  .htools>.htool-btn{display:none;} /* botón "⇄ UF" — la UF sigue editable en el input */
 }
 /* === Validación de correo en tiempo real (estado visual) === */
 .eml-status{font-size:.72rem;font-weight:600;letter-spacing:.3px;min-height:.9em;margin-top:2px;line-height:1.1;}
@@ -1171,60 +1168,36 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     </div>
   </div>
   <div class="htools">
-    <!-- Grupo 1 · información/estado (lo más general, siempre visible) -->
     <div id="auto-gen-status" class="hstatus">✔ Actualizado</div>
     <div class="uf-box">
       <label>UF Hoy</label>
       <input type="number" id="uf-global" value="40779" step="1">
     </div>
     <button class="htool-btn" onclick="openUF()">⇄ UF</button>
-
-    <!-- Grupo 2 · NAVEGACIÓN PRINCIPAL — estandarizada: misma gráfica/estilo para
-         todas las secciones. Cada botón trae data-target explícito y navega
-         DIRECTO a su vista (navigateTo), sin depender de historial/pantalla previa. -->
-    <div class="nav-group" role="group" aria-label="Navegación principal">
-      <button type="button" class="nav-btn on" data-target="cotizadora" onclick="navigateTo(this)" title="Ir a la Cotizadora (pantalla principal de cotización)">
-        <span class="nav-ico">🧮</span><span class="nav-lb">Cotizadora</span>
-      </button>
-      <button type="button" class="nav-btn" data-target="biblioteca" onclick="navigateTo(this)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad">
-        <span class="nav-ico">🎧</span><span class="nav-lb">Biblioteca</span>
-      </button>
-      <button type="button" class="nav-btn" data-target="planilla" onclick="navigateTo(this)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)">
-        <span class="nav-ico">📋</span><span class="nav-lb">Planilla</span>
-      </button>
-      <button type="button" class="nav-btn" data-target="descargas" onclick="navigateTo(this)" title="Centro de Descargas — extensiones y aplicaciones del equipo (CRM Extractor, ShortCut Vocal, MuteReal, NotasSmart)">
-        <span class="nav-ico">⬇</span><span class="nav-lb">Descargas</span>
-      </button>
-    </div>
-
-    <!-- Grupo 3 · Ajustes de vista, compactados en un solo popover (texto + tema) -->
-    <div id="a11y-wrap">
-      <button type="button" id="a11y-btn" onclick="toggleA11yPop(event)" title="Ajustes de vista: tamaño de texto y tema" aria-haspopup="true" aria-expanded="false">Aa</button>
-      <div id="a11y-pop">
-        <div class="a11y-sec">
-          <span class="a11y-lbl">Tamaño de texto</span>
-          <div id="ui-scale-bar" class="uis-group" role="group" aria-label="Tamaño de texto del formulario" title="Tamaño de texto del formulario (no afecta la vista previa)">
-            <button type="button" class="uis-btn on" onclick="setUIScale('n',this)" title="Texto normal (100%)">A</button>
-            <button type="button" class="uis-btn" onclick="setUIScale('g',this)" title="Texto grande (115%)">A+</button>
-            <button type="button" class="uis-btn" onclick="setUIScale('xl',this)" title="Texto muy grande (130%)">A++</button>
-          </div>
-        </div>
-        <div class="a11y-sec">
-          <span class="a11y-lbl">Tema</span>
-          <div id="theme-bar" class="uis-group" role="group" aria-label="Tema de color" title="Tema de color de la interfaz">
-            <button type="button" class="uis-btn" onclick="setTheme('light',this)" title="Tema claro">Claro</button>
-            <button type="button" class="uis-btn on" onclick="setTheme('normal',this)" title="Tema normal">Normal</button>
-            <button type="button" class="uis-btn" onclick="setTheme('dark',this)" title="Tema oscuro">Oscuro</button>
-          </div>
-        </div>
+    <nav id="view-nav" class="view-nav" role="group" aria-label="Navegación principal">
+      <button type="button" class="vn-btn on" id="vnbtn-cotizador" data-target="cotizador" onclick="goToView(this.dataset.target)" title="Ir a la Cotizadora (pantalla principal)"><span class="vn-ic">🧮</span><span class="vn-lb">Cotizadora</span></button>
+      <button type="button" class="vn-btn" id="vnbtn-planilla" data-target="planilla" onclick="goToView(this.dataset.target)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)"><span class="vn-ic">📋</span><span class="vn-lb">Planilla</span></button>
+      <button type="button" class="vn-btn" id="vnbtn-biblioteca" data-target="biblioteca" onclick="goToView(this.dataset.target)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad"><span class="vn-ic">🎧</span><span class="vn-lb">Biblioteca</span></button>
+    </nav>
+    <div id="ui-settings-compact" class="uis-compact" role="group" aria-label="Tamaño de texto y tema">
+      <div id="ui-scale-bar" class="uis-group" role="group" aria-label="Tamaño de texto del formulario" title="Tamaño de texto del formulario (no afecta la vista previa)">
+        <button type="button" class="uis-btn on" onclick="setUIScale('n',this)" title="Texto normal (100%)">A</button>
+        <button type="button" class="uis-btn" onclick="setUIScale('g',this)" title="Texto grande (115%)">A+</button>
+        <button type="button" class="uis-btn" onclick="setUIScale('xl',this)" title="Texto muy grande (130%)">A++</button>
+      </div>
+      <div id="theme-bar" class="uis-group" role="group" aria-label="Tema de color" title="Tema de color de la interfaz">
+        <button type="button" class="uis-btn" onclick="setTheme('light',this)" title="Tema claro">Claro</button>
+        <button type="button" class="uis-btn on" onclick="setTheme('normal',this)" title="Tema normal">Normal</button>
+        <button type="button" class="uis-btn" onclick="setTheme('dark',this)" title="Tema oscuro">Oscuro</button>
       </div>
     </div>
-
-    <!-- Grupo 4 · utilidades puntuales -->
     <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
     <button class="snd-toggle" id="force-update-btn" onclick="forceUpdate();" title="Ver la última versión publicada (fuerza una recarga real sin usar caché del navegador)" aria-label="Actualizar a la última versión">⟳</button>
-
-    <!-- Grupo 5 · lo más específico/personal, al final -->
+    <button type="button" class="ext-btn" data-target="descargas" onclick="goToView(this.dataset.target)" title="Centro de Descargas — extensiones y aplicaciones del equipo (CRM Extractor, ShortCut Vocal, MuteReal, NotasSmart)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      <span class="ext-txt"><span class="ext-lb">Descargas</span><span class="ext-sb">Apps &amp; Extensiones</span></span>
+      <span class="ext-dl">↓</span>
+    </button>
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
       <span id="user-name">Ejecutivo/a</span>
@@ -1338,7 +1311,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <button type="button" id="btn-add-multi" class="cp-act cp-carrito" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto (carrito)">
         <span class="cp-ico">🛒</span><span class="cp-lb">Carrito multiproducto</span>
       </button>
-      <button type="button" class="cp-act cp-planilla" onclick="openPlanillaView();playClick();" title="Abrir la Planilla — base de datos interna y centro de administración (respaldos, exportar/importar)">
+      <button type="button" class="cp-act cp-planilla" onclick="goToView('planilla');" title="Abrir la Planilla — base de datos interna y centro de administración (respaldos, exportar/importar)">
         <span class="cp-ico">📗</span><span class="cp-lb">Planilla</span>
       </button>
       <div id="acc-secondary" class="acc-secondary"></div>
@@ -1629,7 +1602,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 <!-- ── CENTRO DE DESCARGAS (página completa, patrón Biblioteca) ── -->
 <div id="descargas-view">
   <div class="bib-top">
-    <button class="bib-back" onclick="closeDescargasView()">← Volver al Cotizador</button>
+    <button class="bib-back" onclick="goToView('cotizador')">← Volver al Cotizador</button>
     <h2>⬇ Centro de Descargas</h2>
     <span class="bib-sub">Extensiones y aplicaciones del equipo · instala y actualiza desde un solo lugar</span>
   </div>
@@ -1705,7 +1678,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 <!-- ════════ PLANILLA INTEGRADA — hoja de cálculo sobre la base de datos interna ════════ -->
 <div id="planilla-view" class="pl-theme-excel pl-font-normal">
   <div class="pl-appbar">
-    <button class="pl-back" onclick="closePlanillaView()">← Volver al Cotizador</button>
+    <button class="pl-back" onclick="goToView('cotizador')">← Volver al Cotizador</button>
     <div class="pl-title">📊 Planilla de Cotizaciones</div>
     <span class="pl-count" id="pl-count"></span>
     <div class="pl-appbar-right">
@@ -1828,17 +1801,21 @@ function ufd(x){return (Math.round(x*10000)/10000).toString();}
 
 /* ── Catálogo: EXACTAMENTE los productos del index (fuente de verdad) ── */
 var PRODUCTS=[
+  /* 1 · Evaluación y cobranza — núcleo comercial */
   {key:'bundle',ic:'📦',lb:'BUNDLE: Mora Control + Reporte Interactivo',su:'4100 / Ilimitado'},
   {key:'mc',    ic:'🚨',lb:'Mora Control',  su:'Gestión de cartera'},
   {key:'ri',    ic:'📊',lb:'Reporte Interactivo',    su:''},
   {key:'bolsa', ic:'🎒',lb:'Reporte Interactivo Bolsa',      su:''},
+  /* 2 · Monitoreo y búsqueda */
   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
-  {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
   {key:'datafinder',ic:'🔎',lb:'Data Finder',su:'Localización y contactabilidad'},
   {key:'malla', ic:'🕸️',lb:'Malla Societaria',su:'Vinculaciones societarias'},
+  {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
+  /* 3 · Productos documentales y a medida */
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
   {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM'},
   {key:'pago_pub',ic:'💳',lb:'Pago Publicación Única',su:'Confirmación de pago'},
+  /* 4 · Agregador y catálogo — al final */
   {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'},
   {key:'soluciones',ic:'🧩',lb:'Información de Productos Equifax',su:'Catálogo'}
 ];
@@ -1894,40 +1871,32 @@ function bibResultado(v){
 }
 
 function openBibliotecaView(){
-  if(document.body.classList.contains('dl-open'))closeDescargasView(true);
-  if(document.body.classList.contains('planilla-open'))closePlanillaView(true);
   document.body.classList.add('bib-open');
   renderBibGrid();
   showBibGrid();
   requestAnimationFrame(function(){$('biblioteca-view').classList.add('in');});
-  setActiveNav('biblioteca');
   playClick();
 }
-function closeBibliotecaView(silencioso){
+function closeBibliotecaView(){
   var a=$('bd-audio');if(a){a.pause();}
   $('biblioteca-view').classList.remove('in');
   document.body.classList.remove('bib-open');
-  if(!silencioso)setActiveNav('cotizadora');
   playClick();
 }
 /* ── Centro de Descargas (misma mecánica que la Biblioteca) ── */
 function openDescargasView(){
-  if(document.body.classList.contains('bib-open'))closeBibliotecaView(true);
-  if(document.body.classList.contains('planilla-open'))closePlanillaView(true);
   document.body.classList.add('dl-open');
   requestAnimationFrame(function(){$('descargas-view').classList.add('in');});
-  setActiveNav('descargas');
   playClick();
 }
-function closeDescargasView(silencioso){
+function closeDescargasView(){
   $('descargas-view').classList.remove('in');
   document.body.classList.remove('dl-open');
-  if(!silencioso)setActiveNav('cotizadora');
   playClick();
 }
 function bibBack(){
   if(BIB_STATE==='detail'){showBibGrid();playClick();}
-  else{closeBibliotecaView();}
+  else{goToView('cotizador');}
 }
 function showBibGrid(){
   BIB_STATE='grid';
@@ -3573,6 +3542,20 @@ function genMail(){
   var ufV=parseFloat(gv('mu'))||null,ufL=parseFloat(gv('mula'))||ufV;
   var co=parseInt(gv('mc2'))||10,pl=gv('mp')||'12';
   var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'[Producto]'};
+  pi=Object.assign({},pi); /* copia: nunca mutar el objeto PINFO compartido */
+  /* Título dinámico con frecuencia/cantidad configurada — Portfolio Monitor y Data Finder.
+     Se recalcula en cada genMail() (disparado por refresh()/lightUpdate() en cada
+     onConfigChange), así que queda reactivo a cambios de frecuencia/cantidad sin recargar. */
+  if(tipo==='pfm'){
+    var _pfmFrTxt={s:'Semanal',q:'Quincenal',m:'Mensual'}[gv('c-fr')]||'Mensual';
+    var _pfmRutsTxt=parseInt(gv('c-ruts'))||0;
+    if(_pfmRutsTxt)pi.n=pi.n+' - '+_pfmFrTxt+'/'+_pfmRutsTxt+' Consultas';
+  }
+  if(tipo==='datafinder'){
+    var _dfSelEl=$('c-cons');
+    var _dfCantTxt=_dfSelEl?(parseInt(_dfSelEl.options[_dfSelEl.selectedIndex].dataset.c)||0):0;
+    if(_dfCantTxt)pi.n=pi.n+' - Mensual/'+_dfCantTxt+' Consultas';
+  }
   if(isSol){pi={badge:'PORTAFOLIO DE SOLUCIONES',n:'Información de productos Equifax'};}
   if(isMulti){pi={badge:'PROPUESTA MULTIPRODUCTO',n:'Multiproducto Comercial'};}
   if(isBdd){pi={badge:'SOLICITUD BASE DE DATOS',n:'Base de Datos Comercial'};}
@@ -5242,7 +5225,7 @@ function forceUpdate(){
 })();
 (function(){
   var _last=0;
-  var SEL='.cv-btn,.pbtn,.pv-copy-btn,.htool-btn,.ext-btn,.user-btn,.snd-toggle,.btn-foto,.crm-paste-btn,.exec-save,.nav-btn,#a11y-btn';
+  var SEL='.cv-btn,.pbtn,.pv-copy-btn,.htool-btn,.ext-btn,.user-btn,.snd-toggle,.btn-foto,.crm-paste-btn,.exec-save';
   document.addEventListener('pointerover',function(e){
     if(!_sndOn)return;
     if(e.pointerType&&e.pointerType!=='mouse')return; /* solo mouse, nada en táctil */
@@ -6372,43 +6355,33 @@ function irACotizadorPrincipal(){
   try{ if(document.body.classList.contains('dl-open')&&typeof closeDescargasView==='function')closeDescargasView(); }catch(e){}
   try{ if(document.body.classList.contains('planilla-open')&&typeof closePlanillaView==='function')closePlanillaView(); }catch(e){}
   try{ if(window.matchMedia&&window.matchMedia('(max-width:880px)').matches&&typeof setMobileView==='function')setMobileView('config'); }catch(e){}
+  _setViewNavActive('cotizador');
 }
-/* ════════ NAVEGACIÓN PRINCIPAL ESTANDARIZADA (zona roja) ════════
-   Un único punto de entrada para los botones con data-target. Cada click
-   navega DIRECTO a la vista pedida — cierra cualquier otra vista abierta
-   primero — sin depender de qué pantalla estaba visible antes ni de historial. */
-function navigateTo(elOrTarget){
-  var target = (elOrTarget && elOrTarget.getAttribute) ? elOrTarget.getAttribute('data-target') : elOrTarget;
-  switch(target){
-    case 'biblioteca': openBibliotecaView(); break;
-    case 'planilla':   openPlanillaView(); break;
-    case 'descargas':  openDescargasView(); break;
-    default:           irACotizadorPrincipal(); setActiveNav('cotizadora'); if(typeof playClick==='function')playClick(); break;
+/* ════════ NAVEGACIÓN ESTANDARIZADA — despachador único y determinista ════════
+   Cada botón de navegación (Cotizadora/Planilla/Biblioteca/Descargas) llama a
+   goToView(target) con su data-target. SIEMPRE cierra primero cualquier sección
+   abierta (vía irACotizadorPrincipal, ya usado por el resto de la app) y luego
+   abre exactamente la sección solicitada — nunca depende de cuál era la
+   pantalla anterior ni de historial del navegador. */
+function goToView(target){
+  irACotizadorPrincipal();
+  try{
+    if(target==='biblioteca'){openBibliotecaView();}
+    else if(target==='planilla'){openPlanillaView();}
+    else if(target==='descargas'){openDescargasView();}
+    else{target='cotizador';playClick();}
+  }catch(e){
+    /* Un error interno de la sección (ej. datos externos aún no cargados) no debe
+       dejar la navegación en un estado indeterminado: el overlay ya quedó marcado
+       'open' por su propia función antes del error, así que respetamos el target. */
   }
+  _setViewNavActive(target);
 }
-function setActiveNav(target){
-  var btns=document.querySelectorAll('.nav-btn[data-target]');
-  for(var i=0;i<btns.length;i++){
-    btns[i].classList.toggle('on', btns[i].getAttribute('data-target')===target);
-  }
+function _setViewNavActive(target){
+  var nav=document.getElementById('view-nav');if(!nav)return;
+  var bs=nav.querySelectorAll('.vn-btn');
+  for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].dataset.target===target);
 }
-/* Popover compacto de ajustes de vista (tamaño de texto + tema) */
-function toggleA11yPop(e){
-  if(e){e.stopPropagation();}
-  var pop=$('a11y-pop'), btn=$('a11y-btn'); if(!pop)return;
-  var abrir=!pop.classList.contains('on');
-  pop.classList.toggle('on',abrir);
-  if(btn)btn.setAttribute('aria-expanded', abrir?'true':'false');
-}
-document.addEventListener('click',function(e){
-  var wrap=$('a11y-wrap'), pop=$('a11y-pop');
-  if(!wrap||!pop||!pop.classList.contains('on'))return;
-  if(!wrap.contains(e.target)){pop.classList.remove('on');var btn=$('a11y-btn');if(btn)btn.setAttribute('aria-expanded','false');}
-});
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){var pop=$('a11y-pop');if(pop&&pop.classList.contains('on')){pop.classList.remove('on');var btn=$('a11y-btn');if(btn)btn.setAttribute('aria-expanded','false');}}
-});
-
 var _cliSig=null;
 function _watchClienteEntrante(){
   try{
@@ -6504,19 +6477,15 @@ function _plOrdenar(rows){
 function _plFiltros(){return {estado:PL_STATE.estado,incluirEliminados:PL_STATE.verEliminados};}
 
 function openPlanillaView(){
-  if(document.body.classList.contains('bib-open')&&typeof closeBibliotecaView==='function')closeBibliotecaView(true);
-  if(document.body.classList.contains('dl-open')&&typeof closeDescargasView==='function')closeDescargasView(true);
   document.body.classList.add('planilla-open');
   _aplicarPrefsPlanilla();
   renderPlanilla();
   requestAnimationFrame(function(){var v=document.getElementById('planilla-view');if(v)v.classList.add('in');});
-  if(typeof setActiveNav==='function')setActiveNav('planilla');
   if(typeof playClick==='function')playClick();
 }
-function closePlanillaView(silencioso){
+function closePlanillaView(){
   var v=document.getElementById('planilla-view'); if(v)v.classList.remove('in');
   document.body.classList.remove('planilla-open');
-  if(!silencioso&&typeof setActiveNav==='function')setActiveNav('cotizadora');
   if(typeof playClick==='function')playClick();
 }
 /* ── Tema propio de la Planilla (Excel claro por defecto / oscuro) — #8. Solo afecta a la planilla. ── */
