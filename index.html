@@ -1076,6 +1076,88 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-h-camb b{color:var(--wa);font-weight:700;}
 .pl-h-empty{color:var(--wa);}
 
+/* ── HEADER REDISEÑADO (Fase 1): 3 zonas + UF destacada + menú Personalización ── */
+header{gap:18px;padding:0 20px;}
+.hz{display:flex;align-items:center;min-width:0;}
+.hz-left{gap:16px;flex:1 1 0;justify-content:flex-start;}
+.hz-right{gap:12px;flex:1 1 0;justify-content:flex-end;}
+header .view-nav{flex:0 0 auto;}
+/* Indicador UF destacado (lado izquierdo, sección propia) */
+.uf-indicator{display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.34);
+  border:1px solid rgba(240,192,64,.5);border-radius:12px;padding:6px 10px 6px 14px;
+  box-shadow:0 0 0 1px rgba(240,192,64,.12),0 4px 14px rgba(0,0,0,.35);}
+.uf-indicator .ufi-cap{font-size:.56rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:800;white-space:nowrap;}
+.uf-indicator input{background:none;border:none;color:var(--y);font-size:1.2rem;font-weight:900;width:90px;text-align:left;font-family:inherit;letter-spacing:.3px;}
+.uf-indicator input:focus{outline:none;}
+.uf-indicator .ufi-conv{background:rgba(240,192,64,.14);border:1px solid rgba(240,192,64,.4);color:var(--y);
+  width:30px;height:30px;border-radius:8px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s;flex-shrink:0;}
+.uf-indicator .ufi-conv:hover{background:var(--y);color:#3a2a00;}
+@media(max-width:820px){.brand .sb{display:none;} .uf-indicator input{width:74px;font-size:1.05rem;}}
+/* Botón + menú Personalización (agrupa tema, fuente, sonido, actualizar, descargas) */
+#settings-wrap{position:relative;display:inline-flex;}
+#settings-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:10px;padding:9px 14px;
+  font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s;}
+#settings-btn:hover,#settings-btn.on{background:rgba(0,0,0,.5);border-color:var(--y);}
+#settings-btn .set-ic{font-size:1.05rem;line-height:1;}
+#settings-btn .set-caret{font-size:.66rem;opacity:.7;}
+@media(max-width:1080px){#settings-btn .set-lb{display:none;}}
+#settings-pop{position:absolute;top:calc(100% + 8px);right:0;z-index:400;display:none;min-width:290px;
+  background:var(--g1);border:1px solid var(--g4);border-radius:14px;padding:16px;
+  box-shadow:0 16px 44px rgba(0,0,0,.6);}
+#settings-pop.on{display:block;animation:setpop .16s ease;}
+@keyframes setpop{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.set-sec{margin-bottom:14px;}
+.set-sec:last-of-type{margin-bottom:8px;}
+.set-hd{display:block;font-size:.6rem;letter-spacing:1.6px;text-transform:uppercase;color:var(--wb);font-weight:800;margin-bottom:7px;}
+#settings-pop .uis-group{width:100%;height:auto;}
+#settings-pop .uis-group .uis-btn{flex:1;padding:9px 6px;font-size:.78rem;display:inline-flex;align-items:center;justify-content:center;}
+.set-row{display:flex;gap:8px;}
+.set-item{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--g2);border:1px solid var(--g3);color:var(--w);border-radius:9px;padding:10px 12px;
+  font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
+.set-item:hover{border-color:var(--rl);background:var(--g3);}
+.set-item .set-emo{font-size:1rem;line-height:1;}
+#snd-toggle.off{opacity:.5;}
+.set-wide{width:100%;justify-content:flex-start;}
+.set-dl-ic{width:20px;height:20px;fill:#7ec8f0;flex-shrink:0;}
+.set-foot{border-top:1px solid var(--g3);padding-top:10px;display:flex;justify-content:center;}
+.set-foot .hstatus{font-size:.68rem;}
+
+/* ── Observaciones del cliente (Fase 4) — sincroniza con la Planilla ── */
+.obs-fld{margin-top:12px;}
+.obs-fld label{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.obs-fld .obs-hint{font-weight:600;color:var(--wb);letter-spacing:.3px;text-transform:none;font-size:calc(.62rem * var(--ui-scale,1));}
+.obs-textarea{width:100%;box-sizing:border-box;background:var(--g1);border:1px solid var(--g4);border-radius:9px;
+  color:var(--w);font-family:inherit;font-size:calc(.95rem * var(--ui-scale,1));line-height:1.5;padding:10px 12px;
+  resize:vertical;min-height:54px;transition:border-color .15s,box-shadow .15s;}
+.obs-textarea:focus{outline:none;border-color:var(--rl);box-shadow:0 0 0 3px rgba(192,38,59,.15);}
+.obs-textarea::placeholder{color:var(--wb);}
+body.theme-light .obs-textarea{background:#fff;color:#1a1a1a;border-color:#c9ccd3;}
+body.theme-light .obs-textarea::placeholder{color:#8a8f98;}
+/* Celda de observación clicable (Planilla) — abre el visor completo */
+.pl-td-obs{cursor:pointer;position:relative;padding-right:22px!important;}
+.pl-td-obs::after{content:'⤢';position:absolute;right:6px;top:50%;transform:translateY(-50%);opacity:.45;font-size:.9em;pointer-events:none;}
+.pl-td-obs:hover{background:rgba(192,38,59,.12);}
+.pl-td-obs:hover::after{opacity:.95;}
+/* Visor/editor de observación completa (modal) */
+#obs-viewer{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px;}
+#obs-viewer.on{display:flex;}
+.obsv-card{background:var(--g1);border:1px solid var(--g4);border-radius:16px;width:min(620px,100%);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;}
+.obsv-head{display:flex;align-items:center;gap:12px;padding:15px 18px;background:linear-gradient(135deg,var(--rd),#a01f30 70%,var(--rdd));}
+.obsv-title{font-weight:900;color:#fff;font-size:1rem;white-space:nowrap;}
+.obsv-emp{flex:1;color:rgba(255,255,255,.82);font-size:.85rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.obsv-x{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.28);color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:.85rem;flex-shrink:0;}
+.obsv-x:hover{background:rgba(0,0,0,.5);}
+.obsv-text{flex:1;min-height:210px;margin:16px 18px 8px;background:var(--g0);border:1px solid var(--g4);border-radius:10px;color:var(--w);font-family:inherit;font-size:1.02rem;line-height:1.6;padding:14px 16px;resize:vertical;box-sizing:border-box;}
+.obsv-text:focus{outline:none;border-color:var(--rl);box-shadow:0 0 0 3px rgba(192,38,59,.15);}
+.obsv-actions{display:flex;align-items:center;gap:10px;padding:6px 18px 18px;}
+.obsv-sync{flex:1;font-size:.72rem;color:var(--wb);font-weight:600;}
+.obsv-cancel{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:9px;padding:10px 18px;cursor:pointer;font-family:inherit;font-weight:700;}
+.obsv-cancel:hover{background:var(--g4);}
+.obsv-save{background:linear-gradient(135deg,var(--r),var(--rd));border:1px solid var(--rl);color:#fff;border-radius:9px;padding:10px 20px;cursor:pointer;font-family:inherit;font-weight:800;}
+.obsv-save:hover{background:linear-gradient(135deg,var(--rl),var(--r));box-shadow:0 0 16px rgba(192,38,59,.4);}
+
 /* ── CENTRO DE DESCARGAS (página completa, calcada del patrón Biblioteca) ── */
 body.dl-open #prodbar,body.dl-open #workstation,body.dl-open #mtoggle{display:none !important;}
 #descargas-view{display:none;position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:275;
@@ -1158,46 +1240,71 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 }
 </style>
 </head>
-<body>
+<body class="uis-g">
 <header>
-  <div class="brand">
-    <img src="logo-equifax.png" alt="Equifax" id="header-logo" onerror="this.style.display='none'">
-    <div>
-      <div class="nm">CotizadorGo!</div>
-      <div class="sb">Estación de Cotización · Equifax Chile</div>
+  <!-- ZONA IZQUIERDA — marca + indicador UF destacado -->
+  <div class="hz hz-left">
+    <div class="brand">
+      <img src="logo-equifax.png" alt="Equifax" id="header-logo" onerror="this.style.display='none'">
+      <div>
+        <div class="nm">CotizadorGo!</div>
+        <div class="sb">Estación de Cotización · Equifax Chile</div>
+      </div>
+    </div>
+    <div class="uf-indicator" title="Valor de la UF de hoy (editable)">
+      <span class="ufi-cap">UF HOY</span>
+      <input type="number" id="uf-global" value="40779" step="1" aria-label="Valor UF de hoy">
+      <button type="button" class="ufi-conv" onclick="openUF()" title="Convertidor UF ⇄ Pesos" aria-label="Convertidor UF">⇄</button>
     </div>
   </div>
-  <div class="htools">
-    <div id="auto-gen-status" class="hstatus">✔ Actualizado</div>
-    <div class="uf-box">
-      <label>UF Hoy</label>
-      <input type="number" id="uf-global" value="40779" step="1">
-    </div>
-    <button class="htool-btn" onclick="openUF()">⇄ UF</button>
-    <nav id="view-nav" class="view-nav" role="group" aria-label="Navegación principal">
-      <button type="button" class="vn-btn on" id="vnbtn-cotizador" data-target="cotizador" onclick="goToView(this.dataset.target)" title="Ir a la Cotizadora (pantalla principal)"><span class="vn-ic">🧮</span><span class="vn-lb">Cotizadora</span></button>
-      <button type="button" class="vn-btn" id="vnbtn-planilla" data-target="planilla" onclick="goToView(this.dataset.target)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)"><span class="vn-ic">📋</span><span class="vn-lb">Planilla</span></button>
-      <button type="button" class="vn-btn" id="vnbtn-biblioteca" data-target="biblioteca" onclick="goToView(this.dataset.target)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad"><span class="vn-ic">🎧</span><span class="vn-lb">Biblioteca</span></button>
-    </nav>
-    <div id="ui-settings-compact" class="uis-compact" role="group" aria-label="Tamaño de texto y tema">
-      <div id="ui-scale-bar" class="uis-group" role="group" aria-label="Tamaño de texto del formulario" title="Tamaño de texto del formulario (no afecta la vista previa)">
-        <button type="button" class="uis-btn on" onclick="setUIScale('n',this)" title="Texto normal (100%)">A</button>
-        <button type="button" class="uis-btn" onclick="setUIScale('g',this)" title="Texto grande (115%)">A+</button>
-        <button type="button" class="uis-btn" onclick="setUIScale('xl',this)" title="Texto muy grande (130%)">A++</button>
+
+  <!-- ZONA CENTRO — navegación principal -->
+  <nav id="view-nav" class="view-nav" role="group" aria-label="Navegación principal">
+    <button type="button" class="vn-btn on" id="vnbtn-cotizador" data-target="cotizador" onclick="goToView(this.dataset.target)" title="Ir a la Cotizadora (pantalla principal)"><span class="vn-ic">🧮</span><span class="vn-lb">Cotizadora</span></button>
+    <button type="button" class="vn-btn" id="vnbtn-planilla" data-target="planilla" onclick="goToView(this.dataset.target)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)"><span class="vn-ic">📋</span><span class="vn-lb">Planilla</span></button>
+    <button type="button" class="vn-btn" id="vnbtn-biblioteca" data-target="biblioteca" onclick="goToView(this.dataset.target)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad"><span class="vn-ic">🎧</span><span class="vn-lb">Biblioteca</span></button>
+  </nav>
+
+  <!-- ZONA DERECHA — personalización (menú único) + usuario -->
+  <div class="hz hz-right">
+    <div id="settings-wrap">
+      <button type="button" id="settings-btn" onclick="toggleSettings(event)" aria-haspopup="true" aria-expanded="false" title="Personalización y herramientas">
+        <span class="set-ic">⚙</span><span class="set-lb">Personalización</span><span class="set-caret">▾</span>
+      </button>
+      <div id="settings-pop" role="menu" aria-label="Personalización">
+        <div class="set-sec">
+          <span class="set-hd">Tema de color</span>
+          <div id="theme-bar" class="uis-group" role="group" aria-label="Tema de color">
+            <button type="button" class="uis-btn" onclick="setTheme('light',this)" title="Tema claro">Claro</button>
+            <button type="button" class="uis-btn on" onclick="setTheme('normal',this)" title="Tema normal">Normal</button>
+            <button type="button" class="uis-btn" onclick="setTheme('dark',this)" title="Tema oscuro">Oscuro</button>
+          </div>
+        </div>
+        <div class="set-sec">
+          <span class="set-hd">Tamaño de texto</span>
+          <div id="ui-scale-bar" class="uis-group" role="group" aria-label="Tamaño de texto del formulario">
+            <button type="button" class="uis-btn" onclick="setUIScale('n',this)" title="Texto normal (100%)">A</button>
+            <button type="button" class="uis-btn on" onclick="setUIScale('g',this)" title="Texto grande (115%)">A+</button>
+            <button type="button" class="uis-btn" onclick="setUIScale('xl',this)" title="Texto muy grande (130%)">A++</button>
+          </div>
+        </div>
+        <div class="set-sec">
+          <span class="set-hd">Interfaz</span>
+          <div class="set-row">
+            <button type="button" class="set-item" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)"><span id="snd-toggle" class="set-emo">🔊</span>Sonido</button>
+            <button type="button" class="set-item" id="force-update-btn" onclick="forceUpdate();" title="Ver la última versión publicada (recarga sin caché)"><span class="set-emo">⟳</span>Actualizar</button>
+          </div>
+        </div>
+        <div class="set-sec">
+          <span class="set-hd">Aplicaciones</span>
+          <button type="button" class="set-item set-wide" data-target="descargas" onclick="_cerrarSettings();goToView(this.dataset.target)" title="Centro de Descargas — extensiones y aplicaciones del equipo (CRM Extractor, ShortCut Vocal, MuteReal, NotasSmart)">
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="set-dl-ic"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>Descargas · Apps &amp; Extensiones</span>
+          </button>
+        </div>
+        <div class="set-foot"><span id="auto-gen-status" class="hstatus">✔ Actualizado</span></div>
       </div>
-      <div id="theme-bar" class="uis-group" role="group" aria-label="Tema de color" title="Tema de color de la interfaz">
-        <button type="button" class="uis-btn" onclick="setTheme('light',this)" title="Tema claro">Claro</button>
-        <button type="button" class="uis-btn on" onclick="setTheme('normal',this)" title="Tema normal">Normal</button>
-        <button type="button" class="uis-btn" onclick="setTheme('dark',this)" title="Tema oscuro">Oscuro</button>
-      </div>
     </div>
-    <button class="snd-toggle" id="snd-toggle" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)" aria-label="Sonido de interfaz">🔊</button>
-    <button class="snd-toggle" id="force-update-btn" onclick="forceUpdate();" title="Ver la última versión publicada (fuerza una recarga real sin usar caché del navegador)" aria-label="Actualizar a la última versión">⟳</button>
-    <button type="button" class="ext-btn" data-target="descargas" onclick="goToView(this.dataset.target)" title="Centro de Descargas — extensiones y aplicaciones del equipo (CRM Extractor, ShortCut Vocal, MuteReal, NotasSmart)">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      <span class="ext-txt"><span class="ext-lb">Descargas</span><span class="ext-sb">Apps &amp; Extensiones</span></span>
-      <span class="ext-dl">↓</span>
-    </button>
     <button class="user-btn" id="user-btn" onclick="openExec()" title="✏️ Editar datos del ejecutivo/a">
       <img id="user-avatar" alt="">
       <span id="user-name">Ejecutivo/a</span>
@@ -1233,8 +1340,13 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
           <div class="fld"><label>Correo electrónico</label><input type="email" id="cli-email" placeholder="contacto@empresa.cl" oninput="normEmailInput(this);onClientChange();validarEmailCliente()"><span id="cli-email-status" class="eml-status"></span></div>
           <div class="fld"><label>Contacto (opcional)</label><input type="text" id="cli-contacto" placeholder="Nombre del contacto" oninput="normContactoInput(this);onClientChange()"></div>
         </div>
-        <!-- campos ocultos para compatibilidad -->
-        <input type="hidden" id="mn"><input type="hidden" id="cli-obs">
+        <!-- Observaciones del cliente (Fase 4) — se guardan y sincronizan con la Planilla -->
+        <div class="fld obs-fld">
+          <label for="cli-obs"><span>📝 Observaciones</span><span class="obs-hint">se sincronizan con la Planilla</span></label>
+          <textarea id="cli-obs" class="obs-textarea" rows="2" placeholder="Notas de este cliente: contexto de la llamada, acuerdos, próximos pasos, qué revisar en el próximo contacto…" oninput="onObsInput()"></textarea>
+        </div>
+        <!-- campo oculto para compatibilidad -->
+        <input type="hidden" id="mn">
       </div>
     </div>
 
@@ -1676,18 +1788,18 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 </div>
 
 <!-- ════════ PLANILLA INTEGRADA — hoja de cálculo sobre la base de datos interna ════════ -->
-<div id="planilla-view" class="pl-theme-excel pl-font-normal">
+<div id="planilla-view" class="pl-theme-excel pl-dark pl-font-grande">
   <div class="pl-appbar">
     <button class="pl-back" onclick="goToView('cotizador')">← Volver al Cotizador</button>
     <div class="pl-title">📊 Planilla de Cotizaciones</div>
     <span class="pl-count" id="pl-count"></span>
     <div class="pl-appbar-right">
       <div class="pl-fontsize" role="group" aria-label="Tamaño de fuente de la planilla">
-        <button type="button" id="plf-normal" class="on" onclick="planillaFont('normal',this)" title="Fuente normal">A</button>
-        <button type="button" id="plf-grande" onclick="planillaFont('grande',this)" title="Fuente grande">A+</button>
+        <button type="button" id="plf-normal" onclick="planillaFont('normal',this)" title="Fuente normal">A</button>
+        <button type="button" id="plf-grande" class="on" onclick="planillaFont('grande',this)" title="Fuente grande">A+</button>
         <button type="button" id="plf-xl" onclick="planillaFont('xl',this)" title="Fuente muy grande">A++</button>
       </div>
-      <button type="button" class="pl-theme-btn" id="pl-theme-btn" onclick="planillaToggleTema()" title="Cambiar tema de la Planilla (Excel claro / Oscuro). Solo afecta a la planilla.">☀ Tema Excel</button>
+      <button type="button" class="pl-theme-btn" id="pl-theme-btn" onclick="planillaToggleTema()" title="Cambiar tema de la Planilla (Excel claro / Oscuro). Solo afecta a la planilla.">🌙 Tema oscuro</button>
     </div>
   </div>
   <div class="pl-toolbar">
@@ -1776,6 +1888,23 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 </div>
 
 <div id="zoom-hint"><span>🔍 El zoom del navegador cambió. Pulsa <b>Ctrl + 0</b> para volver al 100% y ver todos los botones.</span><button onclick="cerrarZoomHint()" title="Ocultar aviso">✕</button></div>
+<!-- Visor/editor de observación completa (Fase 4) — abierto desde la Planilla -->
+<div id="obs-viewer" role="dialog" aria-modal="true" aria-label="Observación completa" onclick="if(event.target===this)cerrarObsViewer()">
+  <div class="obsv-card">
+    <div class="obsv-head">
+      <span class="obsv-title">📝 Observación</span>
+      <span class="obsv-emp" id="obs-viewer-emp"></span>
+      <button class="obsv-x" onclick="cerrarObsViewer()" title="Cerrar" aria-label="Cerrar">✕</button>
+    </div>
+    <textarea id="obs-viewer-text" class="obsv-text" placeholder="Escribe una observación para este cliente…"></textarea>
+    <div class="obsv-actions">
+      <span class="obsv-sync">🔄 Se sincroniza con la Cotizadora</span>
+      <button class="obsv-cancel" onclick="cerrarObsViewer()">Cancelar</button>
+      <button class="obsv-save" onclick="planillaGuardarObs()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div id="global-toast" class="toast"></div>
 <div id="cp-toast" aria-live="polite"></div>
 <div id="paste-notice" onclick="this.classList.remove('on');"><div class="pn-card"><div class="pn-check">✅</div><div class="pn-title">MENSAJE COPIADO</div><div class="pn-sub" id="paste-notice-sub">Pégalo con <b>Ctrl+V</b></div></div></div>
@@ -5299,6 +5428,26 @@ function setTheme(mode,btn){
   if(bar){var bs=bar.querySelectorAll('.uis-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('on');}
   if(btn)btn.classList.add('on');
 }
+/* ── Menú de Personalización (Fase 1) — abrir/cerrar el popover del header ── */
+function toggleSettings(ev){
+  if(ev&&ev.stopPropagation)ev.stopPropagation();
+  var pop=document.getElementById('settings-pop'),btn=document.getElementById('settings-btn');
+  if(!pop)return;
+  var abrir=!pop.classList.contains('on');
+  pop.classList.toggle('on',abrir);
+  if(btn){btn.classList.toggle('on',abrir);btn.setAttribute('aria-expanded',abrir?'true':'false');}
+  if(typeof playClick==='function')playClick();
+}
+function _cerrarSettings(){
+  var pop=document.getElementById('settings-pop'),btn=document.getElementById('settings-btn');
+  if(pop)pop.classList.remove('on');
+  if(btn){btn.classList.remove('on');btn.setAttribute('aria-expanded','false');}
+}
+document.addEventListener('click',function(e){
+  var w=document.getElementById('settings-wrap');
+  if(w&&!w.contains(e.target))_cerrarSettings();
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){_cerrarSettings();if(typeof cerrarObsViewer==='function')cerrarObsViewer();}});
 
 /* ════════════════════════════════════════════════════════════════
    SALUDO NOMINAL — Estimado/Estimada/Estimado/a NOMBRE
@@ -6087,6 +6236,23 @@ var _restaurando=false;   // suprime el marcado "sin guardar" durante una recons
 var _appReady=false;      // evita marcar dirty durante el arranque
 
 function marcarSucio(){ if(_restaurando||!_appReady)return; SESION.dirty=true; actualizarBotonGuardar(); }
+/* ── Observaciones (Fase 4): al escribir, marca modificado y, si la cotización YA
+   está guardada, escribe al instante en la base para que aparezca en la Planilla
+   sin apretar Guardar (sincronización Cotizadora → Planilla). ── */
+var _obsSyncT=null;
+function onObsInput(){
+  if(_restaurando)return;
+  if(typeof marcarSucio==='function')marcarSucio();
+  clearTimeout(_obsSyncT);
+  _obsSyncT=setTimeout(function(){
+    try{
+      if(typeof SESION!=='undefined'&&SESION.registroId!=null&&typeof DB!=='undefined'){
+        var el=document.getElementById('cli-obs');
+        DB.update(SESION.registroId,{cliente:{observacion:el?el.value:''}});
+      }
+    }catch(e){}
+  },500);
+}
 
 /* Modelo de versionado (#18/#19): 💾 SIEMPRE crea una versión nueva. Cuando hay una
    cotización abierta, el panel secundario ofrece la excepción "Actualizar #N". */
@@ -6520,11 +6686,36 @@ function planillaFont(size,btn){
 }
 function _aplicarPrefsPlanilla(){
   var v=document.getElementById('planilla-view'); if(!v)return;
-  var fs='normal'; try{fs=localStorage.getItem('pl_fontsize')||'normal';}catch(e){} planillaFont(fs,null);
-  var th='excel'; try{th=localStorage.getItem('pl_theme')||'excel';}catch(e){}
+  var fs='grande'; try{fs=localStorage.getItem('pl_fontsize')||'grande';}catch(e){} planillaFont(fs,null);
+  var th='dark'; try{th=localStorage.getItem('pl_theme')||'dark';}catch(e){}
   var dark=(th==='dark'); v.classList.toggle('pl-dark',dark);
   var b=document.getElementById('pl-theme-btn'); if(b)b.textContent=dark?'🌙 Tema oscuro':'☀ Tema Excel';
 }
+/* ── Visor/editor de observación completa (Fase 4) — "ver contenido completo" ── */
+function planillaVerObs(id,ev){
+  if(ev&&ev.stopPropagation)ev.stopPropagation();
+  if(typeof DB==='undefined')return;
+  DB.get(id).then(function(r){
+    if(!r)return;
+    var ov=document.getElementById('obs-viewer'); if(!ov)return;
+    document.getElementById('obs-viewer-emp').textContent=(r.cliente&&r.cliente.empresa)||('#'+id);
+    document.getElementById('obs-viewer-text').value=(r.cliente&&r.cliente.observacion)||'';
+    ov.dataset.id=id; ov.classList.add('on');
+    setTimeout(function(){var t=document.getElementById('obs-viewer-text');if(t)t.focus();},60);
+  });
+}
+function planillaGuardarObs(){
+  var ov=document.getElementById('obs-viewer'); if(!ov)return;
+  var id=parseInt(ov.dataset.id,10); if(isNaN(id))return;
+  var val=document.getElementById('obs-viewer-text').value;
+  DB.update(id,{cliente:{observacion:val}}).then(function(){
+    /* eco a la Cotizadora si es el registro abierto */
+    if(typeof SESION!=='undefined'&&id===SESION.registroId){var le=document.getElementById('cli-obs'); if(le)le.value=val;}
+    toast('✔ Observación guardada','ok','global-toast');
+    cerrarObsViewer();
+  }).catch(function(){toast('✖ No se pudo guardar la observación','err','global-toast');});
+}
+function cerrarObsViewer(){var ov=document.getElementById('obs-viewer'); if(ov)ov.classList.remove('on');}
 function _estadoSelect(r){
   var vivos=DB.ESTADOS.filter(function(e){return e!=='eliminado';});
   var opts=vivos.map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_capitaliza(e)+'</option>';}).join('');
@@ -6552,7 +6743,10 @@ function renderPlanilla(){
       var elim=(r.estado==='eliminado'), actual=(SESION.registroId===r.id);
       tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+'" data-id="'+r.id+'">';
       tb+='<td class="pl-td pl-td-id">'+r.id+'</td>';
-      PLANILLA_COLUMNS.forEach(function(c,ci){ var v=_celda(r,c.field); tb+='<td class="pl-td" data-field="'+c.field+'" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'">'+_esc(v)+'</td>'; });
+      PLANILLA_COLUMNS.forEach(function(c,ci){ var v=_celda(r,c.field);
+        if(c.field==='observacion'){ tb+='<td class="pl-td pl-td-obs" data-field="observacion" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'" onclick="planillaVerObs('+r.id+',event)">'+_esc(v)+'</td>'; }
+        else { tb+='<td class="pl-td" data-field="'+c.field+'" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'">'+_esc(v)+'</td>'; }
+      });
       tb+='<td class="pl-td pl-td-estado" data-field="estado">'+_estadoSelect(r)+'</td>';
       tb+='<td class="pl-td pl-td-acc">'+
         '<button class="pl-act" title="Abrir en la calculadora" onclick="planillaAbrir('+r.id+')">📂</button>'+
@@ -6581,7 +6775,10 @@ function _plCellClick(e){
 /* ── Adaptación responsive (#17): oculta columnas secundarias antes que forzar
    scroll horizontal. La prioridad define qué se oculta primero. ── */
 var PL_HIDDEN={};
-var PL_PRIORIDAD_OCULTAR=['observacion','uf','telefono','correo','representante','rut','precioLista','descuento'];
+/* Fase 4: la Planilla muestra SIEMPRE todas las columnas (no se pierde info).
+   Si no caben, el contenedor #pl-table-wrap hace scroll horizontal (normal en una
+   planilla; la regla de "sin scroll" aplica solo a la calculadora, no aquí). */
+var PL_PRIORIDAD_OCULTAR=[];
 function _aplicarColHidden(){
   var tbl=document.getElementById('pl-table'); if(!tbl)return;
   PLANILLA_COLUMNS.forEach(function(c){
@@ -6611,6 +6808,7 @@ function _plCellEdit(e){
   var td=e.target&&e.target.closest?e.target.closest('.pl-td'):null;
   if(!td)return;
   var field=td.getAttribute('data-field');
+  if(field==='observacion'){var _tro=td.closest('tr'); if(_tro)planillaVerObs(parseInt(_tro.getAttribute('data-id'),10)); return;}  /* obs → visor amplio */
   if(!field||!PL_EDIT_MAP[field]||td.querySelector('input'))return;   /* fecha/estado/acciones/id no editables inline */
   var tr=td.closest('tr'); if(!tr)return; var id=parseInt(tr.getAttribute('data-id'),10);
   var actual=td.textContent;
@@ -6624,6 +6822,11 @@ function _plCellEdit(e){
     if(save && nv!==actual){
       var m=PL_EDIT_MAP[field], patch={}; patch[m[0]]={}; patch[m[0]][m[1]]=nv;
       DB.update(id,patch).then(function(){toast('✔ Actualizado','ok','global-toast');});  /* 'cambio' re-renderiza */
+      /* Eco Planilla → Cotizadora (Fase 4): si se edita el registro abierto, refleja el cambio en el campo vivo */
+      if(typeof SESION!=='undefined'&&id===SESION.registroId){
+        var _live={observacion:'cli-obs',empresa:'me',rut:'mr',telefono:'cli-tel',correo:'cli-email',representante:'cli-contacto'};
+        var _eid=_live[field]; if(_eid){var _le=document.getElementById(_eid); if(_le)_le.value=nv;}
+      }
     }else{ td.textContent=actual; td.setAttribute('title',_esc(actual)); }
   };
   inp.addEventListener('keydown',function(ev){ if(ev.key==='Enter'){ev.preventDefault();commit(true);} else if(ev.key==='Escape'){ev.preventDefault();commit(false);} });
