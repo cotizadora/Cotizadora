@@ -2268,7 +2268,7 @@ function renderSummary(c){
     '</div>';
 
   var html=
-    '<div class="sum-head"><div class="sum-name" id="s-name">'+pi.n+(pi.sub?'<span style="display:block;font-size:.82rem;font-weight:600;color:#9aa0a6;letter-spacing:.2px;">'+pi.sub+'</span>':'')+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
+    '<div class="sum-head"><div class="sum-name" id="s-name">'+(pi.n+tituloSufijo(c.tipo))+(pi.sub?'<span style="display:block;font-size:.82rem;font-weight:600;color:#9aa0a6;letter-spacing:.2px;">'+pi.sub+'</span>':'')+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
     '<div class="metrics">'+
       ventaCtrl+
       listaCtrl+
@@ -2774,6 +2774,28 @@ function multiTotals(){
      itemsMail → arreglo base (Gmail / Outlook)
      cons      → cantidad de consultas ya calculada (c.cons / mc2)
      extra.fr  → código de frecuencia PFM ('s'|'q'|'m') leído de #c-fr          */
+/* ══════════ TÍTULO DINÁMICO — sufijo con las variables de la calculadora ══════════
+   Fuente ÚNICA del sufijo del título de producto (variante + consultas/rangos que fija
+   la calculadora). Consumida por genMail (asunto+cuerpo Outlook/Gmail, WhatsApp y ambas
+   fichas/canvas vía #cc-prod-block), renderSummary (panel) y addToMulti (snapshot).
+   Lee la config activa del DOM. Devuelve '' o ' · …' (separador incluido). El DESCUENTO
+   queda fuera a propósito (va en precio/resumen). Los especiales (bdd/pub/pago_pub/
+   soluciones) reasignan pi por completo y no reciben sufijo. */
+function tituloSufijo(tipo){
+  try{
+    var S=' · ';
+    var selNum=function(id,attr){var el=$(id);if(!el||el.selectedIndex<0)return 0;var o=el.options[el.selectedIndex];return parseInt(o&&o.dataset?o.dataset[attr]:0)||0;};
+    var selLbl=function(id){var el=$(id);if(!el||el.selectedIndex<0)return '';return String((el.options[el.selectedIndex]||{}).text||'').split(' — ')[0].trim();};
+    if(tipo==='ri_plan'||tipo==='malla'||tipo==='datafinder'){var c=selNum('c-cons','c');return c?S+c+' consultas/mes':'';}
+    if(tipo==='ri_bolsa'){var c=selNum('c-cons','c');return c?S+c+' consultas/12 meses':'';}
+    if(tipo==='bundle4100'||tipo==='bundleIlim'){var r=parseInt(gv('c-ri'))||0;return r?S+r+' consultas RI/mes':'';}
+    if(tipo==='mc_solo'){var v=selLbl('c-plan').replace(/^MC\s+/i,'');return v?S+v:'';}
+    if(tipo==='pfm'){var fr={s:'Semanal',q:'Quincenal',m:'Mensual'}[gv('c-fr')]||'Mensual';var ru=parseInt(gv('c-ruts'))||0;return ru?S+fr+S+ru+' RUTs':'';}
+    if(tipo==='pc'){var v=selLbl('c-size');return v?S+v:'';}
+    if(tipo==='combo3'){var c=parseInt(gv('c-cons'))||0;var pl=gv('c-plazo')||'12';return (c?S+c+' consultas RI/mes':'')+S+pl+' meses';}
+  }catch(e){}
+  return '';
+}
 function enrichItems(tipo,items,itemsMail,cons,extra){
   extra=extra||{};
   var it=(items||[]).slice(),itMail=(itemsMail||[]).slice();
@@ -2823,7 +2845,7 @@ function addToMulti(){
     (PITEMS[tipo]||[]),
     ((typeof PITEMS_MAIL!=='undefined'&&PITEMS_MAIL[tipo])?PITEMS_MAIL[tipo]:(PITEMS[tipo]||[])),
     cons,{fr:gv('c-fr')});
-  MULTI.push({tipo:tipo,n:pi.n,ufV:ufV,ufL:ufL,hayDc:hayDc,dc:dc,
+  MULTI.push({tipo:tipo,n:pi.n+tituloSufijo(tipo),ufV:ufV,ufL:ufL,hayDc:hayDc,dc:dc,
     clp:ufV>0?ufc(ufV):0,pl:pl,cons:cons,
     items:_en.items,
     itemsMail:_en.itemsMail,
@@ -3543,19 +3565,10 @@ function genMail(){
   var co=parseInt(gv('mc2'))||10,pl=gv('mp')||'12';
   var pi=PINFO[tipo]||{badge:'COTIZACIÓN',n:'[Producto]'};
   pi=Object.assign({},pi); /* copia: nunca mutar el objeto PINFO compartido */
-  /* Título dinámico con frecuencia/cantidad configurada — Portfolio Monitor y Data Finder.
-     Se recalcula en cada genMail() (disparado por refresh()/lightUpdate() en cada
-     onConfigChange), así que queda reactivo a cambios de frecuencia/cantidad sin recargar. */
-  if(tipo==='pfm'){
-    var _pfmFrTxt={s:'Semanal',q:'Quincenal',m:'Mensual'}[gv('c-fr')]||'Mensual';
-    var _pfmRutsTxt=parseInt(gv('c-ruts'))||0;
-    if(_pfmRutsTxt)pi.n=pi.n+' - '+_pfmFrTxt+'/'+_pfmRutsTxt+' Consultas';
-  }
-  if(tipo==='datafinder'){
-    var _dfSelEl=$('c-cons');
-    var _dfCantTxt=_dfSelEl?(parseInt(_dfSelEl.options[_dfSelEl.selectedIndex].dataset.c)||0):0;
-    if(_dfCantTxt)pi.n=pi.n+' - Mensual/'+_dfCantTxt+' Consultas';
-  }
+  /* Título dinámico: sufijo con las variables de la calculadora para TODOS los productos
+     (variante + consultas/rangos). Fuente única en tituloSufijo(). Reactivo en cada genMail().
+     Los especiales reasignan pi más abajo, por lo que no arrastran sufijo. */
+  pi.n=pi.n+tituloSufijo(tipo);
   if(isSol){pi={badge:'PORTAFOLIO DE SOLUCIONES',n:'Información de productos Equifax'};}
   if(isMulti){pi={badge:'PROPUESTA MULTIPRODUCTO',n:'Multiproducto Comercial'};}
   if(isBdd){pi={badge:'SOLICITUD BASE DE DATOS',n:'Base de Datos Comercial'};}
