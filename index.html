@@ -264,6 +264,35 @@ body.uis-xl{--ui-scale:1.30;}
 #left-panel .chk-row{font-size:calc(.85rem * var(--ui-scale));}
 #left-panel .crm-paste-btn .crm-main{font-size:calc(1rem * var(--ui-scale));}
 #left-panel .crm-paste-btn .crm-sub{font-size:calc(.7rem * var(--ui-scale));}
+/* ── FIX RESPONSIVE — evita que los controles de #left-panel desborden el panel
+   con fuentes grandes (A+/A++). Los inputs/selects sin ancho explícito heredan un
+   ancho por defecto del navegador basado en el tamaño de fuente; al escalar la
+   fuente ese ancho crecía más que la columna del grid y rompía el layout.
+   Ahora se fuerza min-width:0 en toda la cadena de contenedores (grid/flex) y
+   width:100% en los propios controles, para que SIEMPRE respeten el espacio
+   disponible sin importar var(--ui-scale). No cambia estructura, ni flujo, ni
+   tamaños base a escala 1 (render idéntico). */
+#left-panel,
+#left-panel .block,
+#left-panel .cfg-grid,
+#left-panel .cfg-2,
+#left-panel .cfg-3,
+#left-panel .dc-top-grid,
+#left-panel .fld{min-width:0;}
+#left-panel .cfg-2 > *,
+#left-panel .cfg-3 > *,
+#left-panel .dc-top-grid > *{min-width:0;}
+#left-panel .fld select,
+#left-panel .fld input{width:100%;min-width:0;max-width:100%;}
+#left-panel .crm-paste-btn{min-width:0;max-width:100%;}
+#left-panel .crm-paste-btn.crm-grid{white-space:normal;}
+#left-panel .crm-paste-btn.crm-grid .crm-txt{min-width:0;overflow:hidden;}
+#left-panel .crm-paste-btn.crm-grid .crm-main{white-space:normal;overflow-wrap:break-word;line-height:1.15;}
+/* En A++ (fuente muy grande) se modera el tamaño de estos dos botones de acción
+   (Pegar/Copiar Excel) para que no compitan por ancho con los campos del cliente. */
+body.uis-xl #left-panel .crm-paste-btn.crm-grid{height:auto;min-height:40px;padding:8px 12px;}
+body.uis-xl #left-panel .crm-paste-btn.crm-grid .crm-main{font-size:.86rem;}
+body.uis-xl #left-panel .crm-paste-btn.crm-grid .crm-ico{font-size:1.05rem;}
 /* ════════ ACCESIBILIDAD — popover en header (Contraste · Texto · Distribución) ════════
    TEMAS por clase global en <body>. Base (sin clase) = "Normal" = look actual (no se altera al cargar).
    Solo recolorea estilos vía variables; no toca estructura ni las tarjetas de correo. */
