@@ -125,11 +125,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 #prodbar::-webkit-scrollbar{height:4px;}
 #prodbar::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px;}
 .pbtn{flex:0 0 auto;background:var(--g2);border:1px solid var(--g3);border-radius:8px;
-  padding:10px 14px;cursor:pointer;color:var(--w);font-family:inherit;text-align:center;
-  transition:all .18s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-  font-size:.85rem;font-weight:700;letter-spacing:.2px;position:relative;min-height:56px;}
-.pbtn .ic{font-size:1rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.pbtn .lb{font-size:.84rem;font-weight:700;white-space:pre-line;line-height:1.3;display:flex;align-items:center;justify-content:center;}
+  padding:12px 14px;cursor:pointer;color:var(--w);font-family:inherit;text-align:left;
+  transition:all .18s ease;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;
+  font-size:.88rem;font-weight:600;letter-spacing:.15px;position:relative;min-height:56px;}
+.pbtn .ic{font-size:1.1rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.pbtn .lb{font-size:.88rem;font-weight:600;white-space:normal;line-height:1.35;display:flex;align-items:center;justify-content:flex-start;flex:1;}
 .pbtn .su{display:none;}
 .pbtn-badge{position:absolute;top:-11px;right:-11px;min-width:26px;height:26px;padding:0 6px;border-radius:50%;background:linear-gradient(135deg,#ffd24d,#f0a51e);color:#3a0a12;font-size:1rem;font-weight:900;line-height:26px;text-align:center;border:2px solid var(--g0);box-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(255,200,60,.85);display:none;letter-spacing:0;box-sizing:border-box;}
 .pbtn-badge.on{display:block;}
@@ -238,14 +238,14 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 #left-panel::-webkit-scrollbar-thumb,#right-panel::-webkit-scrollbar-thumb,.pv-content::-webkit-scrollbar-thumb{background:var(--g4);border-radius:5px;}
 
 /* ── BLOQUES IZQUIERDA ────────────────────────────── */
-.block{background:var(--g1);border:1px solid var(--g3);border-radius:12px;padding:13px 16px;margin-bottom:11px;}
+.block{background:var(--g1);border:1px solid var(--g3);border-radius:12px;padding:15px 18px;margin-bottom:11px;}
 .block-t{font-size:.72rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--rl);font-weight:800;line-height:1.2;margin-bottom:9px;
   margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .cfg-grid{display:flex;flex-direction:column;gap:10px;}
 .fld{display:flex;flex-direction:column;gap:4px;}
 .fld label{font-size:.74rem;letter-spacing:.6px;text-transform:uppercase;color:var(--wa);font-weight:600;}
 .fld select,.fld input{background:var(--g0);border:2px solid var(--g4);color:var(--w);
-  padding:8px 12px;font-family:inherit;font-size:1.02rem;font-weight:600;border-radius:9px;min-height:40px;transition:.15s;}
+  padding:9px 12px;font-family:inherit;font-size:1.02rem;font-weight:600;border-radius:9px;min-height:42px;transition:.15s;}
 .fld select:hover,.fld input[type=text]:hover,.fld input[type=email]:hover,.fld input[type=number]:hover{border-color:var(--g5);}
 .fld select:focus,.fld input:focus{outline:none;border-color:var(--rl);box-shadow:0 0 0 3px rgba(155,28,46,.22);}
 .cfg-2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
@@ -1128,13 +1128,14 @@ header .view-nav{flex:0 0 auto;}
 .obs-fld{margin-top:0;}
 .obs-fld label{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .obs-fld .obs-hint{font-weight:600;color:var(--wb);letter-spacing:.3px;text-transform:none;font-size:calc(.62rem * var(--ui-scale,1));}
-.obs-textarea{width:100%;box-sizing:border-box;background:var(--g1);border:1px solid var(--g4);border-radius:9px;
-  color:var(--w);font-family:inherit;font-size:calc(.95rem * var(--ui-scale,1));line-height:1.5;padding:8px 12px;
-  resize:vertical;min-height:48px;transition:border-color .15s,box-shadow .15s;}
-.obs-textarea:focus{outline:none;border-color:var(--rl);box-shadow:0 0 0 3px rgba(192,38,59,.15);}
-.obs-textarea::placeholder{color:var(--wb);}
-body.theme-light .obs-textarea{background:#fff;color:#1a1a1a;border-color:#c9ccd3;}
-body.theme-light .obs-textarea::placeholder{color:#8a8f98;}
+.obs-textarea{width:100%;box-sizing:border-box;background:var(--g2);border:1px solid var(--g4);border-radius:9px;
+  color:var(--w);font-family:inherit;font-size:calc(.95rem * var(--ui-scale,1));line-height:1.5;padding:10px 12px;
+  resize:vertical;min-height:48px;transition:background-color .2s ease, border-color .2s ease, box-shadow .2s ease;}
+.obs-textarea:focus{outline:none;border-color:var(--rl);background:var(--g1);box-shadow:0 0 0 2px rgba(192,38,59,.12), inset 0 0 0 1px rgba(192,38,59,.08);}
+.obs-textarea::placeholder{color:var(--wa);opacity:.7;}
+body.theme-light .obs-textarea{background:#f9fafb;color:#1a1a1a;border-color:#d1d5db;}
+body.theme-light .obs-textarea:focus{background:#fff;border-color:#9b1c2e;box-shadow:0 0 0 2px rgba(155,28,46,.1), inset 0 0 0 1px rgba(155,28,46,.06);}
+body.theme-light .obs-textarea::placeholder{color:#7a8491;opacity:.8;}
 /* Celda de observación clicable (Planilla) — abre el visor completo */
 .pl-td-obs{cursor:pointer;position:relative;padding-right:22px!important;}
 .pl-td-obs::after{content:'⤢';position:absolute;right:6px;top:50%;transform:translateY(-50%);opacity:.45;font-size:.9em;pointer-events:none;}
@@ -1363,7 +1364,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <div class="cfg-grid">
         <div class="fld obs-fld">
           <label for="cli-obs"><span class="obs-hint">se sincronizan con la Planilla</span></label>
-          <textarea id="cli-obs" class="obs-textarea" rows="2" placeholder="Notas de este cliente: contexto de la llamada, acuerdos, próximos pasos, qué revisar en el próximo contacto…" oninput="onObsInput()"></textarea>
+          <textarea id="cli-obs" class="obs-textarea" rows="2" placeholder="Escriba aquí las observaciones de la cotización…" oninput="onObsInput()"></textarea>
         </div>
       </div>
     </div>
@@ -1937,22 +1938,22 @@ function ufd(x){return (Math.round(x*10000)/10000).toString();}
 /* ── Catálogo: EXACTAMENTE los productos del index (fuente de verdad) ── */
 var PRODUCTS=[
   /* 1 · Evaluación y cobranza — núcleo comercial */
-  {key:'bundle',ic:'📦',lb:'BUNDLE:\nMora Control +\nReporte Interactivo',su:'4100 / Ilimitado'},
+  {key:'bundle',ic:'📦',lb:'BUNDLE: Mora Control + RI',su:'4100 / Ilimitado'},
   {key:'mc',    ic:'🚨',lb:'Mora Control',  su:'Gestión de cartera'},
-  {key:'ri',    ic:'📊',lb:'Reporte\nInteractivo',    su:''},
-  {key:'bolsa', ic:'🎒',lb:'Reporte\nInteractivo Bolsa',      su:''},
+  {key:'ri',    ic:'📊',lb:'Reporte Interactivo',    su:''},
+  {key:'bolsa', ic:'🎒',lb:'Reporte Interactivo Bolsa',      su:''},
   /* 2 · Monitoreo y búsqueda */
-  {key:'pfm',   ic:'📡',lb:'Portfolio\nMonitor',su:'Monitoreo'},
+  {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
   {key:'datafinder',ic:'🔎',lb:'Data Finder',su:'Localización y contactabilidad'},
-  {key:'malla', ic:'🕸️',lb:'Malla\nSocietaria',su:'Vinculaciones societarias'},
+  {key:'malla', ic:'🕸️',lb:'Malla Societaria',su:'Vinculaciones societarias'},
   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
   /* 3 · Productos documentales y a medida */
-  {key:'bdd',ic:'🗄️',lb:'Base de\nDatos',su:'Solicitud a medida'},
-  {key:'pub',ic:'📰',lb:'Publicación\nÚnica',su:'Documento en DICOM'},
-  {key:'pago_pub',ic:'💳',lb:'Pago\nPublicación\nÚnica',su:'Confirmación de pago'},
+  {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
+  {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM'},
+  {key:'pago_pub',ic:'💳',lb:'Pago Publicación Única',su:'Confirmación de pago'},
   /* 4 · Agregador y catálogo — al final */
   {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial'},
-  {key:'soluciones',ic:'🧩',lb:'Información de\nProductos Equifax',su:'Catálogo'}
+  {key:'soluciones',ic:'🧩',lb:'Información de Productos',su:'Catálogo'}
 ];
 
 function buildProdbar(){
