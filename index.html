@@ -1094,6 +1094,101 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .ple-cancel{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:9px;padding:9px 16px;cursor:pointer;font-family:inherit;font-weight:700;}
 .ple-save{background:linear-gradient(135deg,#2ecc71,#1f9d55);border:1px solid #1f9d55;color:#06240f;border-radius:9px;padding:9px 18px;cursor:pointer;font-family:inherit;font-weight:800;}
 .ple-save:hover{box-shadow:0 4px 16px rgba(46,204,113,.4);}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MEJORAS TIPO EXCEL — selección múltiple de filas, tipificaciones ampliadas,
+   agenda de recordatorios (calendario propio) y barra de acciones masivas.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Cursor de "flecha de selección de fila" al pasar sobre el número de fila,
+   igual que en Excel. Clic = seleccionar fila completa. */
+.pl-td-id{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M4 3 L18 11 L4 19 Z' fill='%23202124' stroke='white' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 11,pointer;
+  user-select:none;
+}
+#planilla-view.pl-dark .pl-td-id{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M4 3 L18 11 L4 19 Z' fill='white' stroke='%23202124' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 11,pointer;
+}
+
+/* Fila seleccionada — resaltado neón elegante, coherente con la estética general. */
+.pl-tr.pl-row-selected .pl-td{background:var(--pl-selbg)!important;border-top:1px solid var(--pl-sel)!important;border-bottom:1px solid var(--pl-sel)!important;}
+.pl-tr.pl-row-selected .pl-td-id{background:var(--pl-sel)!important;color:#fff!important;font-weight:900;box-shadow:0 0 10px var(--pl-sel),inset 3px 0 0 var(--pl-sel);}
+#planilla-view.pl-dark .pl-tr.pl-row-selected .pl-td{box-shadow:inset 0 0 16px rgba(90,180,255,.20);}
+#planilla-view.pl-dark .pl-tr.pl-row-selected .pl-td-id{box-shadow:0 0 14px rgba(90,180,255,.65),inset 3px 0 0 var(--pl-sel);}
+
+/* Badge pequeño de recordatorio vencido junto al número de fila. */
+.pl-due-badge{display:inline-block;margin-left:2px;font-size:.85em;filter:drop-shadow(0 0 3px rgba(240,192,64,.8));}
+
+/* Fila con recordatorio vencido: aviso visual propio de la fila, sin popups. */
+@keyframes plDuePulse{
+  0%,100%{box-shadow:inset 0 0 0 2px rgba(240,192,64,.55),0 0 9px rgba(240,192,64,.35);}
+  50%{box-shadow:inset 0 0 0 2px rgba(240,192,64,.95),0 0 20px rgba(240,192,64,.65);}
+}
+.pl-tr.pl-row-due .pl-td{background:rgba(240,192,64,.09)!important;}
+.pl-tr.pl-row-due .pl-td-id{animation:plDuePulse 1.8s ease-in-out infinite;}
+
+/* Botón de agenda en la columna Acciones. */
+.pl-act-agenda{color:#9a6b00;border-color:rgba(240,192,64,.55);background:rgba(240,192,64,.12);}
+.pl-act-agenda:hover{border-color:#f0c040;background:rgba(240,192,64,.24);box-shadow:0 0 8px rgba(240,192,64,.45);}
+.pl-act-agenda.pl-has-agenda{background:rgba(240,192,64,.32);border-color:#f0c040;box-shadow:0 0 6px rgba(240,192,64,.4);}
+#planilla-view.pl-dark .pl-act-agenda{color:#f0c040;}
+
+/* ── Barra flotante de acciones masivas ── */
+.pl-bulkbar{display:none;position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:60;
+  align-items:center;gap:10px;background:var(--pl-surface);border:1px solid var(--pl-sel);border-radius:12px;
+  padding:9px 14px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 10px 30px rgba(0,0,0,.30),0 0 18px rgba(26,115,232,.25);}
+.pl-bulkbar.on{display:flex;}
+.pl-bulkbar .pl-bb-count{font-weight:800;font-size:.86rem;color:var(--pl-text);white-space:nowrap;}
+.pl-bulkbar .pl-bb-count b{color:var(--pl-sel);}
+.pl-bb-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.pl-bb-btn{background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:8px;
+  padding:7px 12px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:.14s;}
+.pl-bb-btn:hover{border-color:var(--pl-sel);background:var(--pl-hover);box-shadow:0 0 8px rgba(26,115,232,.3);}
+.pl-bb-btn.pl-bb-danger{color:#d93025;border-color:rgba(217,48,37,.4);}
+.pl-bb-btn.pl-bb-danger:hover{border-color:#d93025;background:rgba(217,48,37,.14);box-shadow:0 0 8px rgba(217,48,37,.35);}
+.pl-bb-clear{background:none;border:none;color:var(--pl-muted);cursor:pointer;font-size:1rem;padding:2px 6px;}
+.pl-bb-clear:hover{color:var(--pl-text);}
+/* Mini-selector de tipificación para la acción masiva "Cambiar tipificación" */
+.pl-bb-estado-pop{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:240px;max-height:280px;overflow:auto;
+  background:var(--pl-bg);border:1px solid var(--pl-border);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.35);padding:6px;z-index:70;}
+.pl-bb-estado-pop.on{display:block;}
+.pl-bb-estado-pop button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--pl-text);
+  font-family:inherit;font-size:.82rem;padding:8px 10px;border-radius:7px;cursor:pointer;}
+.pl-bb-estado-pop button:hover{background:var(--pl-hover);}
+.pl-bb-wrap{position:relative;}
+
+/* ── Calendario propio (modal de agenda) ── */
+.ag-box{max-width:360px;}
+.ag-body{padding:16px 18px;display:flex;flex-direction:column;gap:14px;}
+.ag-cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ag-nav{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:8px;width:32px;height:32px;
+  cursor:pointer;font-size:1.05rem;font-weight:800;line-height:1;}
+.ag-nav:hover{border-color:var(--bl);box-shadow:0 0 8px rgba(52,152,219,.4);}
+.ag-yy{display:flex;align-items:center;gap:8px;}
+.ag-mes-lbl{font-weight:800;color:#fff;font-size:.94rem;min-width:76px;text-align:center;}
+.ag-ano-sel{background:var(--g2);border:1px solid var(--g4);color:#fff;border-radius:7px;padding:5px 7px;font-family:inherit;font-weight:700;font-size:.84rem;}
+.ag-dow{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:.7rem;font-weight:800;
+  color:var(--wa);letter-spacing:.4px;text-transform:uppercase;}
+.ag-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.ag-day{display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;border-radius:8px;font-size:.86rem;
+  color:var(--w);cursor:pointer;transition:.12s;font-weight:600;}
+.ag-day:hover{background:rgba(52,152,219,.22);}
+.ag-day-out{color:var(--wb);opacity:.4;cursor:default;pointer-events:none;}
+.ag-day-hoy{box-shadow:inset 0 0 0 1.5px var(--y);}
+.ag-day-sel{background:linear-gradient(135deg,#3498db,#2570a8);color:#fff;font-weight:900;box-shadow:0 0 12px rgba(52,152,219,.55);}
+.ag-time-row{display:flex;align-items:center;gap:10px;border-top:1px solid var(--g4);padding-top:12px;}
+.ag-time-row label{font-size:.8rem;font-weight:700;color:var(--wa);}
+.ag-hora-input{background:var(--g2);border:1px solid var(--g4);color:#fff;border-radius:8px;padding:8px 10px;
+  font-family:inherit;font-size:.92rem;font-weight:700;letter-spacing:.5px;}
+.ag-hora-input:focus{outline:none;border-color:var(--bl);box-shadow:0 0 0 3px rgba(52,152,219,.22);}
+.ag-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:4px;}
+.ag-actions-right{display:flex;gap:8px;}
+.ag-btn-quitar{background:rgba(217,48,37,.12);border:1px solid rgba(217,48,37,.4);color:#e0392c;border-radius:8px;
+  padding:8px 12px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;}
+.ag-btn-quitar:hover{background:rgba(217,48,37,.22);border-color:#d93025;}
+.ag-btn-ok{background:linear-gradient(135deg,#3498db,#2570a8);border:1px solid #3498db;color:#fff;border-radius:8px;
+  padding:9px 16px;font-family:inherit;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 4px 14px rgba(52,152,219,.4);}
+.ag-btn-ok:hover{box-shadow:0 6px 20px rgba(52,152,219,.6);transform:translateY(-1px);}
 /* Modal respaldos */
 .bk-cfg{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 14px;background:var(--g2);border:1px solid var(--g4);border-radius:11px;margin-bottom:12px;}
 .bk-cfg-f{display:flex;align-items:center;gap:8px;color:var(--w);font-size:.85rem;font-weight:600;}
@@ -1956,10 +2051,6 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     </div>
     <select id="pl-estado" class="pl-select" onchange="planillaFiltroEstado(this.value)">
       <option value="">Todos los estados</option>
-      <option value="borrador">Borrador</option>
-      <option value="enviada">Enviada</option>
-      <option value="ganada">Ganada</option>
-      <option value="perdida">Perdida</option>
     </select>
     <label class="pl-chk"><input type="checkbox" id="pl-show-del" onchange="planillaToggleEliminados(this.checked)"> Eliminados</label>
   </div>
@@ -1969,6 +2060,11 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <span class="pl-formula-val" id="pl-formula-val"></span>
   </div>
   <div class="pl-body">
+    <div id="pl-bulkbar" class="pl-bulkbar">
+      <span class="pl-bb-count" id="pl-bb-count"></span>
+      <div class="pl-bb-actions" id="pl-bb-actions"></div>
+      <button type="button" class="pl-bb-clear" title="Quitar selección (Esc)" onclick="plSeleccionLimpiar()">✕</button>
+    </div>
     <div id="pl-table-wrap"><table id="pl-table"></table></div>
     <div id="pl-empty">Aún no hay cotizaciones guardadas. Genera una cotización y pulsa <b>💾 Guardar</b>.</div>
   </div>
@@ -2015,6 +2111,36 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 
 <!-- Menú de acciones por fila (flotante) -->
 <div id="pl-rowmenu" class="pl-rowmenu"></div>
+
+<!-- Modal calendario propio: agendar recordatorio de contacto -->
+<div id="ag-modal" class="pl-modal" onclick="if(event.target===this)_agCerrar()">
+  <div class="pl-modal-box ag-box">
+    <div class="pl-modal-head"><h3 id="ag-title">📅 Agendar recordatorio</h3><button class="pl-modal-x" onclick="_agCerrar()">✕</button></div>
+    <div class="ag-body">
+      <div class="ag-cal-head">
+        <button type="button" class="ag-nav" onclick="_agMes(-1)" aria-label="Mes anterior">‹</button>
+        <div class="ag-yy">
+          <span id="ag-mes-lbl" class="ag-mes-lbl"></span>
+          <select id="ag-ano-sel" class="ag-ano-sel" onchange="_agAnoChange(this.value)"></select>
+        </div>
+        <button type="button" class="ag-nav" onclick="_agMes(1)" aria-label="Mes siguiente">›</button>
+      </div>
+      <div class="ag-dow"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+      <div id="ag-grid" class="ag-grid"></div>
+      <div class="ag-time-row">
+        <label for="ag-hora">🕐 Hora</label>
+        <input type="time" id="ag-hora" class="ag-hora-input" value="09:00" step="60">
+      </div>
+      <div class="ag-actions">
+        <button type="button" class="ag-btn-quitar" id="ag-btn-quitar" onclick="_agQuitar()">🗑 Quitar agenda</button>
+        <div class="ag-actions-right">
+          <button type="button" class="ple-cancel" onclick="_agCerrar()">Cancelar</button>
+          <button type="button" class="ag-btn-ok" onclick="_agConfirmar()">✔ Agendar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal "Editar datos" de una cotización -->
 <div id="ple-modal" class="pl-modal" onclick="if(event.target===this)_plCerrarEdit()">
@@ -6219,7 +6345,10 @@ function abrirWspWeb(){
        comercial: { servicio, uf, precioVenta, precioLista, descuento },  // = _comercialExcel()
        snapshot:  { productKey, config, overrides, multi },  // reconstrucción lossless (Fase 1)
        historial: [ { ts, ejecutivo, accion, cambios } ] }
-   ESTADOS: borrador · enviada · ganada · perdida · eliminado.
+   ESTADOS: borrador · enviada · agendado · agendado_futuro · no_quiere · no_contesta ·
+   buzon_voz · cliente_molesto · corta_llamada · no_credito · interesado · negociacion ·
+   pendiente_doc · venta_cerrada · eliminado. (Ver DB.ESTADO_LABELS para las etiquetas.)
+   AGENDA: registro.agenda = {fecha:'AAAA-MM-DD', hora:'HH:MM', estadoAnterior} | null.
 
    NOTA TÉCNICA (IndexedDB + Promises): una transacción se auto-cierra al ceder el
    control al event loop. Por eso las operaciones get→put (update/softDelete) NO
@@ -6229,7 +6358,13 @@ function abrirWspWeb(){
 var DB=(function(){
   var DB_NAME='cotizadora_registros', DB_VERSION=2, STORE='registros', BACKUP_STORE='backups';
   var SCHEMA_VERSION=1;
-  var ESTADOS=['borrador','enviada','ganada','perdida','eliminado'];
+  var ESTADOS=['borrador','enviada','agendado','agendado_futuro','no_quiere','no_contesta','buzon_voz','cliente_molesto','corta_llamada','no_credito','interesado','negociacion','pendiente_doc','venta_cerrada','eliminado'];
+  var ESTADO_LABELS={
+    borrador:'Borrador', enviada:'Enviada', agendado:'Agendado', agendado_futuro:'Agendado para llamar a futuro',
+    no_quiere:'No quiere', no_contesta:'No contesta', buzon_voz:'Buzón de voz', cliente_molesto:'Cliente molesto',
+    corta_llamada:'Corta llamada', no_credito:'No trabaja con crédito', interesado:'Cliente interesado',
+    negociacion:'En negociación', pendiente_doc:'Pendiente de documentación', venta_cerrada:'Venta cerrada', eliminado:'Eliminado'
+  };
   var _dbp=null;   // promesa singleton de conexión
 
   function _open(){
@@ -6280,6 +6415,7 @@ var DB=(function(){
       cliente:{empresa:_s(cli.empresa),rut:_s(cli.rut),telefono:_s(cli.telefono),correo:_s(cli.correo),representante:_s(cli.representante),observacion:_s(cli.observacion)},
       comercial:{servicio:_s(com.servicio),uf:_s(com.uf),precioVenta:_s(com.precioVenta),precioLista:_s(com.precioLista),descuento:_s(com.descuento)},
       snapshot:datos.snapshot||null,
+      agenda:datos.agenda||null,
       historial:Array.isArray(datos.historial)?datos.historial.slice():[]
     };
   }
@@ -6296,6 +6432,7 @@ var DB=(function(){
 
   return {
     ESTADOS:ESTADOS,
+    ESTADO_LABELS:ESTADO_LABELS,
     SCHEMA_VERSION:SCHEMA_VERSION,
     ready:function(){return _open();},
 
@@ -6336,6 +6473,7 @@ var DB=(function(){
             cliente:Object.assign({},actual.cliente,patch.cliente||{}),
             comercial:Object.assign({},actual.comercial,patch.comercial||{}),
             snapshot:(patch.snapshot!==undefined)?patch.snapshot:actual.snapshot,
+            agenda:(patch.agenda!==undefined)?patch.agenda:(actual.agenda||null),
             historial:(actual.historial||[]).slice()
           };
           nuevo.updatedAt=_nowISO();
@@ -6882,6 +7020,7 @@ var PL_STATE={q:'',estado:'',sortField:'id',sortDir:1,verEliminados:false};
 
 function _esc(s){return (''+(s==null?'':s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function _capitaliza(s){s=''+(s||'');return s.charAt(0).toUpperCase()+s.slice(1);}
+function _estadoLabel(e){ return (typeof DB!=='undefined'&&DB.ESTADO_LABELS&&DB.ESTADO_LABELS[e])||_capitaliza(e); }
 function _fechaISOaDMY(iso){
   if(!iso)return '';
   var d=new Date(iso); if(isNaN(d.getTime()))return '';
@@ -6980,7 +7119,7 @@ function planillaGuardarObs(){
 function cerrarObsViewer(){var ov=document.getElementById('obs-viewer'); if(ov)ov.classList.remove('on');}
 function _estadoSelect(r){
   var vivos=DB.ESTADOS.filter(function(e){return e!=='eliminado';});
-  var opts=vivos.map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_capitaliza(e)+'</option>';}).join('');
+  var opts=vivos.map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_estadoLabel(e)+'</option>';}).join('');
   if(r.estado==='eliminado')opts='<option value="eliminado" selected>Eliminado</option>'+opts;
   return '<select class="pl-estado-sel" onchange="planillaEstado('+r.id+',this.value)">'+opts+'</select>';
 }
@@ -6990,6 +7129,7 @@ function renderPlanilla(){
   if(typeof DB==='undefined')return;
   DB.search(PL_STATE.q,_plFiltros()).then(function(rows){
     rows=_plOrdenar(rows);
+    PL_ULTIMA_LISTA=rows.map(function(r){return r.id;});
     var cnt=document.getElementById('pl-count'); if(cnt)cnt.textContent=rows.length+' registro'+(rows.length===1?'':'s');
     var empty=document.getElementById('pl-empty'), wrap=document.getElementById('pl-table-wrap');
     if(!rows.length){ if(empty)empty.style.display='block'; if(wrap)wrap.style.display='none'; var t0=document.getElementById('pl-table'); if(t0)t0.innerHTML=''; _limpiarFormula(); return; }
@@ -7003,14 +7143,17 @@ function renderPlanilla(){
     var tb='<tbody>';
     rows.forEach(function(r){
       var elim=(r.estado==='eliminado'), actual=(SESION.registroId===r.id);
-      tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+'" data-id="'+r.id+'">';
-      tb+='<td class="pl-td pl-td-id">'+r.id+'</td>';
+      var due=_agEstaVencida(r), sel=PL_SELECTED.has(r.id);
+      var agStamp=(r.agenda&&r.agenda.fecha)?(r.agenda.fecha+'T'+(r.agenda.hora||'00:00')):'';
+      tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+(sel?' pl-row-selected':'')+(due?' pl-row-due':'')+'" data-id="'+r.id+'"'+(agStamp?' data-agenda="'+_esc(agStamp)+'"':'')+'>';
+      tb+='<td class="pl-td pl-td-id">'+r.id+(due?' <span class="pl-due-badge" title="Recordatorio pendiente">⏰</span>':'')+'</td>';
       PLANILLA_COLUMNS.forEach(function(c,ci){ var v=_celda(r,c.field);
         if(c.field==='observacion'){ tb+='<td class="pl-td pl-td-obs" data-field="observacion" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'" onclick="planillaVerObs('+r.id+',event)">'+_esc(v)+'</td>'; }
         else { tb+='<td class="pl-td" data-field="'+c.field+'" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'">'+_esc(v)+'</td>'; }
       });
       tb+='<td class="pl-td pl-td-estado" data-field="estado">'+_estadoSelect(r)+'</td>';
       tb+='<td class="pl-td pl-td-acc">'+
+        '<button class="pl-act pl-act-agenda'+((r.agenda&&r.agenda.fecha)?' pl-has-agenda':'')+'" title="'+((r.agenda&&r.agenda.fecha)?('Recordatorio: '+_fechaISOaDMY(r.agenda.fecha)+' '+(r.agenda.hora||'')):'Agendar recordatorio')+'" onclick="planillaAbrirAgenda('+r.id+')">📅</button>'+
         '<button class="pl-act" title="Abrir en la calculadora" onclick="planillaAbrir('+r.id+')">📂</button>'+
         '<button class="pl-act pl-act-del" title="Eliminar cotización" onclick="planillaEliminar('+r.id+')">🗑</button>'+
         '<button class="pl-act pl-menu-btn" title="Más acciones" onclick="planillaMenu('+r.id+',event)">⋮</button>'+
@@ -7021,6 +7164,7 @@ function renderPlanilla(){
     _aplicarColW();
     _limpiarFormula();
     planillaAjustarColumnas();
+    _plBulkBarActualizar();
   });
 }
 /* ── Selección de celda + barra de fórmulas (visual) ── */
@@ -7046,6 +7190,8 @@ function _plCopiarCelda(td){
   }catch(e){}
 }
 function _plCellClick(e){
+  var tdId=e.target&&e.target.closest?e.target.closest('.pl-td-id'):null;
+  if(tdId){ _plSeleccionarFila(tdId,e); return; }
   var td=e.target&&e.target.closest?e.target.closest('.pl-td'):null;
   if(!td||td.classList.contains('pl-td-acc')||td.classList.contains('pl-td-estado')||td.classList.contains('pl-td-id'))return;
   var tbl=document.getElementById('pl-table'); if(!tbl)return;
@@ -7218,7 +7364,7 @@ function planillaEditarDatos(id){
   DB.get(id).then(function(r){
     if(!r)return; _plEditId=id;
     var f=function(lbl,key,val,full){return '<label class="ple-f'+(full?' ple-full':'')+'"><span>'+lbl+'</span><input data-k="'+key+'" value="'+_esc(val)+'"></label>';};
-    var estOpts=DB.ESTADOS.filter(function(e){return e!=='eliminado';}).map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_capitaliza(e)+'</option>';}).join('');
+    var estOpts=DB.ESTADOS.filter(function(e){return e!=='eliminado';}).map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_estadoLabel(e)+'</option>';}).join('');
     document.getElementById('ple-body').innerHTML=
       '<div class="ple-grid">'+
         f('Empresa','cliente.empresa',r.cliente.empresa)+
@@ -7368,6 +7514,8 @@ function planillaExportar(){
 function initRegistros(){
   if(typeof DB!=='undefined'&&DB.ready)DB.ready().catch(function(){});
   if(typeof DB!=='undefined'&&DB.on)DB.on(function(){ if(document.body.classList.contains('planilla-open'))renderPlanilla(); });
+  _plPoblarFiltroEstado();
+  setInterval(_plChequearVencidos,30000);
   var handler=function(e){
     if(_restaurando||!_appReady)return;
     var t=e.target; if(!t||!t.closest)return;
@@ -7384,6 +7532,7 @@ function initRegistros(){
   var _plHoverRow=null;
   var plw=document.getElementById('pl-table-wrap');
   if(plw){
+    plw.addEventListener('click',function(e){ if(e.target===plw)plSeleccionLimpiar(); });
     plw.addEventListener('mouseover',function(e){
       var tr=e.target&&e.target.closest?e.target.closest('.pl-tr'):null;
       if(!tr||tr===_plHoverRow)return;
@@ -7589,6 +7738,255 @@ function _emlA(dom,seq){
     _emlSet('gris','• No verificado (sin conexión a la API)');
   });
 }
+/* ══════════════════════════════════════════════════════════════════════════
+   MEJORAS TIPO EXCEL — JS: selección múltiple de filas, filtro de tipificación
+   dinámico, agenda de recordatorios (calendario propio) y acciones masivas.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Filtro de tipificación (poblado desde DB.ESTADOS, ya no hardcodeado) ── */
+function _plPoblarFiltroEstado(){
+  var sel=document.getElementById('pl-estado'); if(!sel||typeof DB==='undefined')return;
+  var vivos=DB.ESTADOS.filter(function(e){return e!=='eliminado';});
+  var actual=sel.value;
+  sel.innerHTML='<option value="">Todos los estados</option>'+vivos.map(function(e){return '<option value="'+e+'">'+_estadoLabel(e)+'</option>';}).join('');
+  sel.value=actual||'';
+}
+
+/* ── Selección múltiple de filas, estilo Excel (clic=fila, Shift=rango, Ctrl=toggle) ──
+   Arquitectura pensada para acciones masivas futuras: PL_SELECTED es la única fuente
+   de verdad (Set de ids); cualquier acción nueva solo necesita leer _plBulkIds(). */
+var PL_SELECTED=new Set();
+var PL_SELECT_ANCHOR=null;
+var PL_ULTIMA_LISTA=[];
+
+function _plSeleccionarFila(tdCelda,e){
+  var tr=tdCelda.closest('tr'); if(!tr)return;
+  var id=parseInt(tr.getAttribute('data-id'),10); if(isNaN(id))return;
+  if(e&&e.shiftKey&&PL_SELECT_ANCHOR!=null){
+    var ia=PL_ULTIMA_LISTA.indexOf(PL_SELECT_ANCHOR), ib=PL_ULTIMA_LISTA.indexOf(id);
+    if(ia>-1&&ib>-1){
+      var desde=Math.min(ia,ib), hasta=Math.max(ia,ib);
+      PL_SELECTED=new Set(PL_ULTIMA_LISTA.slice(desde,hasta+1));
+    }else{
+      PL_SELECTED=new Set([id]); PL_SELECT_ANCHOR=id;
+    }
+  }else if(e&&(e.ctrlKey||e.metaKey)){
+    if(PL_SELECTED.has(id))PL_SELECTED.delete(id); else PL_SELECTED.add(id);
+    PL_SELECT_ANCHOR=id;
+  }else{
+    PL_SELECTED=new Set([id]);
+    PL_SELECT_ANCHOR=id;
+  }
+  if(typeof playClick==='function')playClick();
+  _plAplicarSeleccionDOM();
+  _plBulkBarActualizar();
+}
+function _plAplicarSeleccionDOM(){
+  var tbl=document.getElementById('pl-table'); if(!tbl)return;
+  Array.prototype.forEach.call(tbl.querySelectorAll('.pl-tr'),function(tr){
+    var id=parseInt(tr.getAttribute('data-id'),10);
+    tr.classList.toggle('pl-row-selected',PL_SELECTED.has(id));
+  });
+}
+function plSeleccionLimpiar(){
+  PL_SELECTED=new Set(); PL_SELECT_ANCHOR=null;
+  _plAplicarSeleccionDOM(); _plBulkBarActualizar();
+}
+
+/* ── Registro de acciones masivas (arquitectura escalable) ──
+   Agregar una acción futura sobre la selección = agregar una entrada aquí;
+   la barra flotante se pinta sola a partir de este arreglo. */
+function _plBulkIds(){ return Array.prototype.slice.call(PL_SELECTED); }
+
+var PL_BULK_ACTIONS=[
+  {key:'estado',   icon:'🏷', label:'Cambiar tipificación',  handler:function(){_plBulkAbrirEstadoPop();}},
+  {key:'enviadas', icon:'✔',  label:'Marcar como enviadas',  handler:function(){_plBulkMarcarEnviadas();}},
+  {key:'exportar', icon:'⬇',  label:'Exportar selección',    handler:function(){_plBulkExportar();}},
+  {key:'agenda',   icon:'📅', label:'Reasignar agenda',      handler:function(){_plBulkAgendaPendiente();}},
+  {key:'eliminar', icon:'🗑', label:'Eliminar selección',    danger:true, handler:function(){_plBulkEliminar();}}
+];
+
+function _plBulkBarActualizar(){
+  var bar=document.getElementById('pl-bulkbar'); if(!bar)return;
+  var n=PL_SELECTED.size;
+  if(!n){bar.classList.remove('on');return;}
+  bar.classList.add('on');
+  var cnt=document.getElementById('pl-bb-count');
+  if(cnt)cnt.innerHTML='<b>'+n+'</b> fila'+(n===1?'':'s')+' seleccionada'+(n===1?'':'s');
+  var wrap=document.getElementById('pl-bb-actions'); if(!wrap)return;
+  wrap.innerHTML=PL_BULK_ACTIONS.map(function(a,i){
+    return '<span class="pl-bb-wrap">'+
+      '<button type="button" class="pl-bb-btn'+(a.danger?' pl-bb-danger':'')+'" onclick="PL_BULK_ACTIONS['+i+'].handler()">'+a.icon+' '+a.label+'</button>'+
+      (a.key==='estado'?'<div class="pl-bb-estado-pop" id="pl-bb-estado-pop"></div>':'')+
+      '</span>';
+  }).join('');
+}
+function _plBulkAbrirEstadoPop(){
+  var pop=document.getElementById('pl-bb-estado-pop'); if(!pop||typeof DB==='undefined')return;
+  var vivos=DB.ESTADOS.filter(function(e){return e!=='eliminado';});
+  pop.innerHTML=vivos.map(function(e){return '<button type="button" onclick="_plBulkAplicarEstado(\''+e+'\')">'+_estadoLabel(e)+'</button>';}).join('');
+  pop.classList.toggle('on');
+}
+function _plBulkAplicarEstado(estado){
+  var ids=_plBulkIds(); if(!ids.length)return;
+  Promise.all(ids.map(function(id){return DB.update(id,{estado:estado});})).then(function(){
+    toast('✔ Tipificación actualizada en '+ids.length+' registro'+(ids.length===1?'':'s'),'ok','global-toast');
+    var pop=document.getElementById('pl-bb-estado-pop'); if(pop)pop.classList.remove('on');
+  }).catch(function(){toast('✖ No se pudo actualizar la tipificación','err','global-toast');});
+}
+function _plBulkMarcarEnviadas(){
+  var ids=_plBulkIds(); if(!ids.length)return;
+  var ts=new Date().toISOString();
+  Promise.all(ids.map(function(id){return DB.update(id,{estado:'enviada',medioEnvio:'masivo',enviadoEn:ts});})).then(function(){
+    toast('✔ '+ids.length+' cotización'+(ids.length===1?'':'es')+' marcada'+(ids.length===1?'':'s')+' como enviada'+(ids.length===1?'':'s'),'ok','global-toast');
+  }).catch(function(){toast('✖ No se pudo actualizar la selección','err','global-toast');});
+}
+function _plBulkExportar(){
+  var ids=_plBulkIds(); if(!ids.length)return;
+  Promise.all(ids.map(function(id){return DB.get(id);})).then(function(regs){
+    regs=regs.filter(Boolean);
+    var bk={formato:'cotizadora-backup',formatoVersion:1,schemaVersion:DB.SCHEMA_VERSION,exportadoEn:new Date().toISOString(),total:regs.length,registros:regs,prefs:{}};
+    _descargarJSON(bk,'Cotizaciones_seleccion_'+regs.length+'.json');
+    toast('✔ '+regs.length+' cotización'+(regs.length===1?'':'es')+' exportada'+(regs.length===1?'':'s'),'ok','global-toast');
+  });
+}
+function _plBulkEliminar(){
+  var ids=_plBulkIds(); if(!ids.length)return;
+  if(!confirm('¿Eliminar '+ids.length+' cotización'+(ids.length===1?'':'es')+' seleccionada'+(ids.length===1?'':'s')+'?'))return;
+  Promise.all(ids.map(function(id){return DB.softDelete(id);})).then(function(){
+    toast('✔ '+ids.length+' registro'+(ids.length===1?'':'s')+' eliminado'+(ids.length===1?'':'s'),'ok','global-toast');
+    plSeleccionLimpiar();
+  }).catch(function(){toast('✖ No se pudo eliminar la selección','err','global-toast');});
+}
+/* Reservada para una futura pantalla de reasignación masiva de agenda.
+   Ya está enganchada en PL_BULK_ACTIONS: cuando se implemente, solo hay que
+   reemplazar este cuerpo por la lógica real (abrir el mismo calendario y
+   aplicar la fecha/hora elegida a todos los ids de _plBulkIds()). */
+function _plBulkAgendaPendiente(){ toast('⏳ Reasignar agenda para varias filas — próximamente','ok','global-toast'); }
+
+/* ── Agenda de recordatorios: calendario propio + relación con la tipificación ──
+   Al confirmar una fecha: la tipificación pasa a 'agendado' (guardando la anterior
+   en agenda.estadoAnterior). Al quitar la agenda: vuelve a esa tipificación previa
+   (o a 'borrador' si no había ninguna válida o si era 'agendado'). */
+var AG_MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var AG_STATE={id:null,year:0,month:0,day:null};
+
+function _agEstaVencida(r){
+  if(!r||!r.agenda||!r.agenda.fecha||r.estado==='eliminado')return false;
+  var ts=Date.parse(r.agenda.fecha+'T'+(r.agenda.hora||'00:00')+':00');
+  if(isNaN(ts))return false;
+  return Date.now()>=ts;
+}
+function _plChequearVencidos(){
+  var tbl=document.getElementById('pl-table'); if(!tbl)return;
+  Array.prototype.forEach.call(tbl.querySelectorAll('.pl-tr[data-agenda]'),function(tr){
+    var ts=Date.parse(tr.getAttribute('data-agenda')+':00');
+    tr.classList.toggle('pl-row-due', !isNaN(ts)&&Date.now()>=ts);
+  });
+}
+function _agParseFecha(f){
+  var p=(f||'').split('-');
+  return new Date(parseInt(p[0],10)||new Date().getFullYear(),(parseInt(p[1],10)||1)-1,parseInt(p[2],10)||1);
+}
+function planillaAbrirAgenda(id){
+  DB.get(id).then(function(r){
+    if(!r)return;
+    var ag=r.agenda||null, base=ag&&ag.fecha?_agParseFecha(ag.fecha):new Date();
+    AG_STATE={id:id,year:base.getFullYear(),month:base.getMonth(),day:ag?base.getDate():null};
+    var tEl=document.getElementById('ag-title'); if(tEl)tEl.textContent='📅 Agendar recordatorio — '+(r.cliente.empresa||('#'+id));
+    var hEl=document.getElementById('ag-hora'); if(hEl)hEl.value=(ag&&ag.hora)?ag.hora:'09:00';
+    var qBtn=document.getElementById('ag-btn-quitar'); if(qBtn)qBtn.style.display=ag?'inline-flex':'none';
+    _agRenderAnos();
+    _agRender();
+    var m=document.getElementById('ag-modal'); if(m)m.classList.add('on');
+  });
+}
+function _agRenderAnos(){
+  var sel=document.getElementById('ag-ano-sel'); if(!sel)return;
+  var actual=new Date().getFullYear(), opts='';
+  for(var y=actual-1;y<=actual+5;y++){opts+='<option value="'+y+'"'+(y===AG_STATE.year?' selected':'')+'>'+y+'</option>';}
+  sel.innerHTML=opts;
+}
+function _agAnoChange(v){ AG_STATE.year=parseInt(v,10)||AG_STATE.year; _agRender(); }
+function _agMes(delta){
+  AG_STATE.month+=delta;
+  if(AG_STATE.month<0){AG_STATE.month=11;AG_STATE.year--;}
+  else if(AG_STATE.month>11){AG_STATE.month=0;AG_STATE.year++;}
+  _agRenderAnos(); _agRender();
+}
+function _agRender(){
+  var lbl=document.getElementById('ag-mes-lbl'); if(lbl)lbl.textContent=AG_MESES[AG_STATE.month];
+  var selAno=document.getElementById('ag-ano-sel'); if(selAno)selAno.value=AG_STATE.year;
+  var grid=document.getElementById('ag-grid'); if(!grid)return;
+  var primero=new Date(AG_STATE.year,AG_STATE.month,1);
+  var offset=(primero.getDay()+6)%7; /* lunes=0 */
+  var diasMes=new Date(AG_STATE.year,AG_STATE.month+1,0).getDate();
+  var diasPrevMes=new Date(AG_STATE.year,AG_STATE.month,0).getDate();
+  var hoy=new Date(), hoyStr=hoy.getFullYear()+'-'+(hoy.getMonth()+1)+'-'+hoy.getDate();
+  var html='';
+  for(var i=0;i<offset;i++){ html+='<span class="ag-day ag-day-out">'+(diasPrevMes-offset+i+1)+'</span>'; }
+  for(var d=1;d<=diasMes;d++){
+    var esHoy=((AG_STATE.year+'-'+(AG_STATE.month+1)+'-'+d)===hoyStr);
+    var esSel=(AG_STATE.day===d);
+    html+='<span class="ag-day'+(esHoy?' ag-day-hoy':'')+(esSel?' ag-day-sel':'')+'" onclick="_agElegirDia('+d+')">'+d+'</span>';
+  }
+  var total=offset+diasMes, resto=(7-(total%7))%7;
+  for(var j=1;j<=resto;j++){ html+='<span class="ag-day ag-day-out">'+j+'</span>'; }
+  grid.innerHTML=html;
+}
+function _agElegirDia(d){ AG_STATE.day=d; _agRender(); }
+function _agFechaISO(){
+  if(!AG_STATE.day)return null;
+  var mm=('0'+(AG_STATE.month+1)).slice(-2), dd=('0'+AG_STATE.day).slice(-2);
+  return AG_STATE.year+'-'+mm+'-'+dd;
+}
+function _agConfirmar(){
+  if(AG_STATE.id==null)return;
+  var fecha=_agFechaISO();
+  if(!fecha){toast('✖ Elige un día en el calendario','err','global-toast');return;}
+  var hEl=document.getElementById('ag-hora'), hora=(hEl&&hEl.value)?hEl.value:'09:00';
+  var id=AG_STATE.id;
+  DB.get(id).then(function(r){
+    if(!r)return;
+    var estadoPrevio=(r.agenda&&r.agenda.estadoAnterior!=null)?r.agenda.estadoAnterior:r.estado;
+    DB.update(id,{agenda:{fecha:fecha,hora:hora,estadoAnterior:estadoPrevio},estado:'agendado'}).then(function(){
+      toast('✔ Recordatorio agendado para '+_fechaISOaDMY(fecha)+' '+hora,'ok','global-toast');
+      _agCerrar();
+    }).catch(function(){toast('✖ No se pudo agendar','err','global-toast');});
+  });
+}
+function _agQuitar(){
+  if(AG_STATE.id==null)return;
+  var id=AG_STATE.id;
+  DB.get(id).then(function(r){
+    if(!r)return;
+    var vuelta=(r.agenda&&r.agenda.estadoAnterior&&DB.ESTADOS.indexOf(r.agenda.estadoAnterior)>-1)?r.agenda.estadoAnterior:'borrador';
+    if(vuelta==='agendado')vuelta='borrador';
+    DB.update(id,{agenda:null,estado:vuelta}).then(function(){
+      toast('✔ Agenda eliminada','ok','global-toast');
+      _agCerrar();
+    }).catch(function(){toast('✖ No se pudo quitar la agenda','err','global-toast');});
+  });
+}
+function _agCerrar(){
+  var m=document.getElementById('ag-modal'); if(m)m.classList.remove('on');
+  AG_STATE={id:null,year:0,month:0,day:null};
+}
+
+/* ── Cierre de popups auxiliares con clic afuera / Esc ── */
+document.addEventListener('click',function(e){
+  var pop=document.getElementById('pl-bb-estado-pop');
+  if(pop&&pop.classList.contains('on')&&e.target&&e.target.closest&&!e.target.closest('.pl-bb-wrap'))pop.classList.remove('on');
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  var am=document.getElementById('ag-modal');
+  if(am&&am.classList.contains('on')){_agCerrar();return;}
+  var pop=document.getElementById('pl-bb-estado-pop');
+  if(pop&&pop.classList.contains('on')){pop.classList.remove('on');return;}
+  if(PL_SELECTED.size)plSeleccionLimpiar();
+});
+
 </script>
 </body>
 </html>
