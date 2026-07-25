@@ -168,6 +168,11 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 /* Separador vertical entre el menú "Productos" y los accesos rápidos */
 .pnav-sep{flex:0 0 auto;align-self:stretch;width:0;border-left:1px solid var(--g4);margin:12px 2px;opacity:.7;}
 
+/* Spacer flexible: absorbe todo el espacio libre de la barra para que lo que
+   venga después (Multiproducto) quede anclado al borde derecho real de
+   #prodbar, con una separación amplia real (no simulada con márgenes). */
+.pnav-spacer-right{flex:1 1 auto;min-width:20px;}
+
 /* Botón de acceso rápido (Multiproducto / Información de Productos / Pago
    Publicación Única) — mismo look de siempre, permanentemente visibles */
 .pbtn{flex:0 0 auto;background:var(--g2);border:1px solid var(--g3);border-radius:10px;
@@ -297,9 +302,10 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .block{background:var(--g1);border:1px solid var(--g3);border-radius:12px;padding:14px 17px;margin-bottom:9px;}
 .block-t{font-size:.70rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--rl);font-weight:800;line-height:1.2;margin-bottom:10px;
   display:flex;align-items:center;gap:8px;}
-/* Encabezado "Configuración" — badge del producto activo con más jerarquía visual,
-   sin crecer la altura del bloque (misma fila, sin línea nueva). */
-.cfg-block-t{justify-content:space-between;margin-bottom:9px;flex-wrap:nowrap;}
+/* Encabezado "Calculadora" — único lugar donde aparece el producto activo:
+   título + badge del producto integrados en la misma línea, a la izquierda
+   (NO al extremo derecho), sin crecer la altura del bloque (misma fila). */
+.cfg-block-t{justify-content:flex-start;margin-bottom:9px;flex-wrap:nowrap;}
 .cfg-block-lb{white-space:nowrap;flex-shrink:0;}
 .cfg-active-badge{display:flex;align-items:center;gap:6px;min-width:0;max-width:75%;height:22px;
   background:linear-gradient(135deg,rgba(155,28,46,.24),rgba(155,28,46,.08));
@@ -461,10 +467,6 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 /* Resumen comercial */
 .sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
 .sum-name{font-size:1.2rem;font-weight:900;color:#fff;line-height:1.25;}
-/* El producto ya se identifica en el badge del encabezado (#cfg-active-badge);
-   aquí solo queda la variante configurada (ej. "10 descargas/mes"), en un tono
-   más discreto para no competir visualmente. Vacía en pub/pago_pub (solo badge). */
-.sum-name.sum-name-cfg{font-size:.92rem;font-weight:700;color:#c7c7cd;letter-spacing:.15px;line-height:1.3;}
 .sum-badge{background:var(--rd);color:var(--y);border:1px solid rgba(240,192,64,.5);font-size:.62rem;font-weight:800;
   letter-spacing:1px;padding:4px 11px;border-radius:20px;white-space:nowrap;}
 .price-wrap{background:linear-gradient(135deg,#1a0a0e,#23090f);border:1px solid rgba(155,28,46,.5);
@@ -2081,7 +2083,8 @@ var PRODUCTS=[
    individual. No toca PRODUCTS ni ninguna función de cálculo/export —
    solo cómo se navega. */
 var PROD_MENU_KEYS=['bundle','mc','ri','bolsa','pfm','datafinder','malla','pc','bdd','pub'];
-var PROD_TOOLS_STANDALONE=['soluciones','pago_pub','multi'];
+var PROD_TOOLS_STANDALONE=['soluciones','pago_pub'];
+var PROD_TOOLS_RIGHT=['multi']; /* Multiproducto: ancla independiente al extremo derecho de #prodbar, separada del resto */
 
 function buildProdbar(){
   var bar=$('prodbar');bar.innerHTML='';
@@ -2130,6 +2133,15 @@ function buildProdbar(){
   /* Separador + accesos rápidos permanentes (un clic, sin menú) */
   var sep=document.createElement('div');sep.className='pnav-sep';bar.appendChild(sep);
   PROD_TOOLS_STANDALONE.forEach(function(k){if(byKey[k])bar.appendChild(makeToolBtn(byKey[k]));});
+
+  /* Spacer flexible: empuja Multiproducto al extremo derecho real de la barra
+     (borde derecho de #prodbar), separándolo visualmente del resto de accesos
+     para que se perciba como una herramienta independiente. */
+  var spacerRight=document.createElement('div');
+  spacerRight.className='pnav-spacer-right';
+  bar.appendChild(spacerRight);
+  var sepRight=document.createElement('div');sepRight.className='pnav-sep';bar.appendChild(sepRight);
+  PROD_TOOLS_RIGHT.forEach(function(k){if(byKey[k])bar.appendChild(makeToolBtn(byKey[k]));});
 
   if(!window._prodMenuListenersOn){
     window._prodMenuListenersOn=true;
@@ -2605,7 +2617,7 @@ function renderSummary(c){
     '</div>';
 
   var html=
-    '<div class="sum-head"><div class="sum-name sum-name-cfg" id="s-name">'+(tituloSufijo(c.tipo).replace(/^\s*·\s*/,'')||'&nbsp;')+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
+    '<div class="sum-head"><div class="sum-name" id="s-name"></div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
     '<div class="metrics">'+
       ventaCtrl+
       listaCtrl+
