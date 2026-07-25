@@ -1048,8 +1048,8 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-th:hover{background:var(--pl-hover);}
 .pl-th-id{width:46px;min-width:46px;text-align:center;background:var(--pl-rowhdr-bg);color:var(--pl-rowhdr-text);position:sticky;left:0;z-index:3;}
 .pl-th-acc{cursor:default;}
-.pl-td{padding:6px 10px;border:1px solid var(--pl-grid);color:var(--pl-text);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:cell;transition:background .14s ease,box-shadow .14s ease;}
-.pl-td-id{text-align:center;color:var(--pl-rowhdr-text);background:var(--pl-rowhdr-bg);font-variant-numeric:tabular-nums;font-weight:600;position:sticky;left:0;z-index:1;cursor:default;transition:background .14s ease,box-shadow .14s ease;}
+.pl-td{padding:6px 10px;border:1px solid var(--pl-grid);color:var(--pl-text);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:cell;}
+.pl-td-id{text-align:center;color:var(--pl-rowhdr-text);background:var(--pl-rowhdr-bg);font-variant-numeric:tabular-nums;font-weight:600;position:sticky;left:0;z-index:1;cursor:default;}
 .pl-tr:nth-child(even) .pl-td:not(.pl-td-id){background:var(--pl-zebra);}
 .pl-tr:hover .pl-td{background:var(--pl-hover)!important;}
 .pl-tr:hover .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-sel);}
@@ -1476,7 +1476,6 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   font-size:1.1em;
   margin-right:4px;
   opacity:0;
-  transition:opacity .18s ease;
   vertical-align:middle;
 }
 
@@ -7357,6 +7356,10 @@ function renderPlanilla(){
     _limpiarFormula();
     planillaAjustarColumnas();
     _plBulkBarActualizar();
+    /* La tabla se acaba de reconstruir desde cero (innerHTML): los colores/íconos
+       de estado deben reaplicarse aquí mismo, de forma síncrona, para que el
+       cambio visual sea instantáneo y nunca quede "pisado" por el re-render. */
+    _plChequearVencidos();
   });
 }
 /* ── Selección de celda + barra de fórmulas (visual) ── */
@@ -7645,8 +7648,9 @@ function planillaToggleEliminados(b){ PL_STATE.verEliminados=!!b; renderPlanilla
 function planillaEstado(id,v){ 
   DB.update(id,{estado:v}).then(function(){
     toast('✔ Estado actualizado','ok','global-toast');
-    /* Refrescar estilos visuales de agenda (vencido, venta, etc.) */
-    _plChequearVencidos();
+    /* Refrescar la fila (rebuild + reaplicar overdue/sold/ícono de agenda) de
+       forma inmediata, sin esperar el ciclo de 30s ni una transición. */
+    renderPlanilla();
   }).catch(function(){}); 
 }
 function planillaAbrir(id){
@@ -7709,9 +7713,17 @@ function planillaExportar(){
 }
 
 /* ── Arranque del módulo: reactividad + marcado "sin guardar" + estado del botón ── */
+/* Durante una acción masiva (varias llamadas a DB.update/softDelete en paralelo),
+   cada una dispara su propio evento 'cambio' de forma asíncrona e independiente.
+   Sin esta bandera, la tabla se re-renderiza una vez por cada fila a medida que
+   van terminando sus transacciones IndexedDB, y el usuario ve las filas cambiar
+   una por una. Con la bandera activa, esos renders individuales se suprimen y
+   quien orquesta la acción masiva llama a renderPlanilla() UNA sola vez al final,
+   con toda la selección ya actualizada, para que el cambio se vea simultáneo. */
+var PL_BULK_BUSY=false;
 function initRegistros(){
   if(typeof DB!=='undefined'&&DB.ready)DB.ready().catch(function(){});
-  if(typeof DB!=='undefined'&&DB.on)DB.on(function(){ if(document.body.classList.contains('planilla-open'))renderPlanilla(); });
+  if(typeof DB!=='undefined'&&DB.on)DB.on(function(){ if(!PL_BULK_BUSY&&document.body.classList.contains('planilla-open'))renderPlanilla(); });
   _plPoblarFiltroEstado();
   setInterval(_plChequearVencidos,30000);
   var handler=function(e){
@@ -8000,7 +8012,7 @@ var PL_BULK_ACTIONS=[
   {key:'estado',   icon:'🏷', label:'Cambiar tipificación',  handler:function(){_plBulkAbrirEstadoPop();}},
   {key:'enviadas', icon:'✔',  label:'Marcar como enviadas',  handler:function(){_plBulkMarcarEnviadas();}},
   {key:'exportar', icon:'⬇',  label:'Exportar selección',    handler:function(){_plBulkExportar();}},
-  {key:'agenda',   icon:'📅', label:'Reasignar agenda',      handler:function(){_plBulkAgendaPendiente();}},
+  {key:'agenda',   icon:'📅', label:'Reasignar agenda',      handler:function(){_plBulkAgenda();}},
   {key:'eliminar', icon:'🗑', label:'Eliminar selección',    danger:true, handler:function(){_plBulkEliminar();}}
 ];
 
@@ -8025,19 +8037,44 @@ function _plBulkAbrirEstadoPop(){
   pop.innerHTML=vivos.map(function(e){return '<button type="button" onclick="_plBulkAplicarEstado(\''+e+'\')">'+_estadoLabel(e)+'</button>';}).join('');
   pop.classList.toggle('on');
 }
+/* Cambiar tipificación para toda la selección. Respeta la misma lógica que una
+   fila individual: si la nueva tipificación es "Agendado"/"Agendado para llamar
+   a futuro", hay que fijar fecha/hora → se abre el mismo calendario, aplicado
+   a todos los ids seleccionados a la vez (ver _plBulkAgenda). Para cualquier
+   otra tipificación (incluido salir de "Agendado"), el cambio se aplica directo:
+   la alerta roja / el ícono de reloj desaparecen solos porque _plChequearVencidos()
+   ya no reconoce esas filas como "agendado" (se recalcula en cada render). */
 function _plBulkAplicarEstado(estado){
   var ids=_plBulkIds(); if(!ids.length)return;
+  var pop=document.getElementById('pl-bb-estado-pop'); if(pop)pop.classList.remove('on');
+  if(estado==='agendado'||estado==='agendado_futuro'){
+    _plBulkAgenda(estado);
+    return;
+  }
+  PL_BULK_BUSY=true;
   Promise.all(ids.map(function(id){return DB.update(id,{estado:estado});})).then(function(){
-    toast('✔ Tipificación actualizada en '+ids.length+' registro'+(ids.length===1?'':'s'),'ok','global-toast');
-    var pop=document.getElementById('pl-bb-estado-pop'); if(pop)pop.classList.remove('on');
-  }).catch(function(){toast('✖ No se pudo actualizar la tipificación','err','global-toast');});
+    PL_BULK_BUSY=false;
+    renderPlanilla();
+    toast('✔ '+ids.length+' registro'+(ids.length===1?'':'s')+' tipificado'+(ids.length===1?'':'s')+' como "'+_estadoLabel(estado)+'"','ok','global-toast');
+  }).catch(function(){
+    PL_BULK_BUSY=false;
+    renderPlanilla();
+    toast('✖ No se pudo actualizar la tipificación de la selección','err','global-toast');
+  });
 }
 function _plBulkMarcarEnviadas(){
   var ids=_plBulkIds(); if(!ids.length)return;
   var ts=new Date().toISOString();
+  PL_BULK_BUSY=true;
   Promise.all(ids.map(function(id){return DB.update(id,{estado:'enviada',medioEnvio:'masivo',enviadoEn:ts});})).then(function(){
-    toast('✔ '+ids.length+' cotización'+(ids.length===1?'':'es')+' marcada'+(ids.length===1?'':'s')+' como enviada'+(ids.length===1?'':'s'),'ok','global-toast');
-  }).catch(function(){toast('✖ No se pudo actualizar la selección','err','global-toast');});
+    PL_BULK_BUSY=false;
+    renderPlanilla();
+    toast('✔ '+ids.length+' registro'+(ids.length===1?'':'s')+' marcado'+(ids.length===1?'':'s')+' como enviado'+(ids.length===1?'':'s'),'ok','global-toast');
+  }).catch(function(){
+    PL_BULK_BUSY=false;
+    renderPlanilla();
+    toast('✖ No se pudo actualizar la selección','err','global-toast');
+  });
 }
 function _plBulkExportar(){
   var ids=_plBulkIds(); if(!ids.length)return;
@@ -8045,22 +8082,43 @@ function _plBulkExportar(){
     regs=regs.filter(Boolean);
     var bk={formato:'cotizadora-backup',formatoVersion:1,schemaVersion:DB.SCHEMA_VERSION,exportadoEn:new Date().toISOString(),total:regs.length,registros:regs,prefs:{}};
     _descargarJSON(bk,'Cotizaciones_seleccion_'+regs.length+'.json');
-    toast('✔ '+regs.length+' cotización'+(regs.length===1?'':'es')+' exportada'+(regs.length===1?'':'s'),'ok','global-toast');
+    toast('✔ '+regs.length+' registro'+(regs.length===1?'':'s')+' exportado'+(regs.length===1?'':'s'),'ok','global-toast');
   });
 }
 function _plBulkEliminar(){
   var ids=_plBulkIds(); if(!ids.length)return;
-  if(!confirm('¿Eliminar '+ids.length+' cotización'+(ids.length===1?'':'es')+' seleccionada'+(ids.length===1?'':'s')+'?'))return;
+  if(!confirm('Se eliminarán '+ids.length+' registro'+(ids.length===1?'':'s')+' seleccionado'+(ids.length===1?'':'s')+'. Esta acción no se puede deshacer desde aquí.\n\n¿Confirmar la eliminación?'))return;
+  PL_BULK_BUSY=true;
   Promise.all(ids.map(function(id){return DB.softDelete(id);})).then(function(){
-    toast('✔ '+ids.length+' registro'+(ids.length===1?'':'s')+' eliminado'+(ids.length===1?'':'s'),'ok','global-toast');
+    PL_BULK_BUSY=false;
     plSeleccionLimpiar();
-  }).catch(function(){toast('✖ No se pudo eliminar la selección','err','global-toast');});
+    renderPlanilla();
+    toast('✔ '+ids.length+' registro'+(ids.length===1?'':'s')+' eliminado'+(ids.length===1?'':'s')+' correctamente','ok','global-toast');
+  }).catch(function(){
+    PL_BULK_BUSY=false;
+    renderPlanilla();
+    toast('✖ No se pudo eliminar la selección','err','global-toast');
+  });
 }
-/* Reservada para una futura pantalla de reasignación masiva de agenda.
-   Ya está enganchada en PL_BULK_ACTIONS: cuando se implemente, solo hay que
-   reemplazar este cuerpo por la lógica real (abrir el mismo calendario y
-   aplicar la fecha/hora elegida a todos los ids de _plBulkIds()). */
-function _plBulkAgendaPendiente(){ toast('⏳ Reasignar agenda para varias filas — próximamente','ok','global-toast'); }
+/* Reasignar agenda para toda la selección: reutiliza EXACTAMENTE el mismo
+   calendario/modal (#ag-modal) que la agenda individual. `estadoFinal` permite
+   que también la use "Cambiar tipificación" cuando el destino es un estado de
+   agenda (agendado / agendado_futuro), sin duplicar el flujo del calendario. */
+function _plBulkAgenda(estadoFinal){
+  var ids=_plBulkIds(); if(!ids.length)return;
+  var hoy=new Date();
+  AG_STATE={id:null,ids:ids.slice(),estadoFinal:estadoFinal||'agendado',year:hoy.getFullYear(),month:hoy.getMonth(),day:null};
+  var tEl=document.getElementById('ag-title');
+  if(tEl)tEl.textContent='📅 Reasignar agenda — '+ids.length+' registro'+(ids.length===1?'':'s')+' seleccionado'+(ids.length===1?'':'s');
+  var hEl=document.getElementById('ag-hora'); if(hEl)hEl.value='09';
+  var mEl=document.getElementById('ag-minutos'); if(mEl)mEl.value='00';
+  /* "Quitar recordatorio" no aplica en modo masivo (cada fila puede tener un
+     estado previo distinto); se oculta para no confundir. */
+  var qBtn=document.getElementById('ag-btn-quitar'); if(qBtn)qBtn.style.display='none';
+  _agRenderAnos();
+  _agRender();
+  var m=document.getElementById('ag-modal'); if(m)m.classList.add('on');
+}
 
 /* ── Agenda de recordatorios: calendario propio + relación con la tipificación ──
    Al confirmar una fecha: la tipificación pasa a 'agendado' (guardando la anterior
@@ -8182,12 +8240,36 @@ function _agFechaISO(){
   return AG_STATE.year+'-'+mm+'-'+dd;
 }
 function _agConfirmar(){
-  if(AG_STATE.id==null)return;
+  var esBulk=Array.isArray(AG_STATE.ids)&&AG_STATE.ids.length>0;
+  if(AG_STATE.id==null&&!esBulk)return;
   var fecha=_agFechaISO();
   if(!fecha){toast('✖ Elige un día en el calendario','err','global-toast');return;}
   var hEl=document.getElementById('ag-hora'), mEl=document.getElementById('ag-minutos');
   var hora=(hEl&&hEl.value)?hEl.value:'09', minutos=(mEl&&mEl.value)?mEl.value:'00';
   hora=hora+':'+minutos;
+
+  if(esBulk){
+    var ids=AG_STATE.ids.slice(), estadoFinal=AG_STATE.estadoFinal||'agendado';
+    PL_BULK_BUSY=true;
+    Promise.all(ids.map(function(id){
+      return DB.get(id).then(function(r){
+        if(!r)return null;
+        var estadoPrevio=(r.agenda&&r.agenda.estadoAnterior!=null)?r.agenda.estadoAnterior:r.estado;
+        return DB.update(id,{agenda:{fecha:fecha,hora:hora,estadoAnterior:estadoPrevio},estado:estadoFinal});
+      });
+    })).then(function(){
+      PL_BULK_BUSY=false;
+      _agCerrar();
+      renderPlanilla();
+      toast('✔ '+ids.length+' agenda'+(ids.length===1?'':'s')+' reasignada'+(ids.length===1?'':'s')+' para '+_fechaISOaDMY(fecha)+' '+hora,'ok','global-toast');
+    }).catch(function(){
+      PL_BULK_BUSY=false;
+      renderPlanilla();
+      toast('✖ No se pudo reasignar la agenda de la selección','err','global-toast');
+    });
+    return;
+  }
+
   var id=AG_STATE.id;
   DB.get(id).then(function(r){
     if(!r)return;
@@ -8195,7 +8277,7 @@ function _agConfirmar(){
     DB.update(id,{agenda:{fecha:fecha,hora:hora,estadoAnterior:estadoPrevio},estado:'agendado'}).then(function(){
       toast('✔ Recordatorio agendado para '+_fechaISOaDMY(fecha)+' '+hora,'ok','global-toast');
       _agCerrar();
-      _plChequearVencidos();
+      renderPlanilla();
     }).catch(function(){toast('✖ No se pudo agendar','err','global-toast');});
   });
 }
@@ -8209,13 +8291,13 @@ function _agQuitar(){
     DB.update(id,{agenda:null,estado:vuelta}).then(function(){
       toast('✔ Agenda eliminada','ok','global-toast');
       _agCerrar();
-      _plChequearVencidos();
+      renderPlanilla();
     }).catch(function(){toast('✖ No se pudo quitar la agenda','err','global-toast');});
   });
 }
 function _agCerrar(){
   var m=document.getElementById('ag-modal'); if(m)m.classList.remove('on');
-  AG_STATE={id:null,year:0,month:0,day:null};
+  AG_STATE={id:null,ids:null,estadoFinal:null,year:0,month:0,day:null};
 }
 
 /* ── Cierre de popups auxiliares con clic afuera / Esc ── */
