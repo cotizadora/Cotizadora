@@ -120,20 +120,24 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 
 /* ── BARRA DE PRODUCTOS (gobierna todo) ───────────── */
 #prodbar{position:fixed;top:var(--headH);left:0;right:0;z-index:280;height:var(--barH);
-  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;align-items:center;justify-content:flex-start;gap:6px;
-  padding:0 14px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;}
+  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-start;column-gap:9px;
+  padding:0 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;}
 #prodbar::-webkit-scrollbar{height:4px;}
 #prodbar::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px;}
-.pbtn{flex:0 0 auto;background:var(--g2);border:1px solid var(--g3);border-radius:9px;
+.pbtn{flex:0 0 auto;background:var(--g2);border:1px solid var(--g3);border-radius:10px;
   padding:9px 14px;cursor:pointer;color:var(--w);font-family:inherit;
   transition:all .18s ease;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;
-  font-size:.87rem;font-weight:700;letter-spacing:.06px;position:relative;white-space:normal;min-width:138px;max-width:202px;min-height:56px;height:auto;}
-.pbtn .ic{font-size:1.3rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:26px;height:26px;}
-.pbtn .lb{font-size:.87rem;font-weight:700;line-height:1.25;display:flex;align-items:center;justify-content:flex-start;text-align:left;flex:1;min-width:0;white-space:normal;overflow-wrap:break-word;word-break:normal;overflow:visible;}
+  font-size:.9rem;font-weight:700;letter-spacing:.08px;position:relative;height:66px;white-space:normal;}
+.pbtn .ic{font-size:1.3rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:27px;height:27px;}
+.pbtn .lb{font-size:.9rem;font-weight:700;line-height:1.2;display:flex;align-items:center;justify-content:flex-start;text-align:left;flex-wrap:wrap;max-width:186px;word-break:break-word;overflow-wrap:break-word;}
 .pbtn .su{display:none;}
-/* Separación visual sutil entre grupos: espaciador de aire */
-.pbtn[data-group="tools"]{margin-left:10px;padding-left:16px;border-left:1px solid var(--g3);background:linear-gradient(135deg,rgba(52,152,219,.06),rgba(52,152,219,.01));border-color:var(--g3);}
-.pbtn[data-group="tools"]:first-of-type{border-left:1px solid rgba(52,152,219,.30);}
+/* Separación entre Productos (izquierda) y Herramientas (derecha): espaciador flexible,
+   sin línea divisoria — empuja el grupo de herramientas al extremo derecho cuando hay espacio
+   disponible, y se reduce a un margen mínimo cuando la barra necesita scroll horizontal. */
+.pbtn-separator{flex:1 1 28px;min-width:28px;height:1px;border:none;margin:0;opacity:0;align-self:stretch;}
+.pbtn[data-group="tools"]{background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02));border-color:rgba(52,152,219,.25);}
+.pbtn[data-group="tools"]:hover{background:linear-gradient(135deg,rgba(52,152,219,.18),rgba(52,152,219,.08));border-color:rgba(52,152,219,.45);}
+.pbtn[data-group="tools"].on{background:linear-gradient(135deg,rgba(52,152,219,.28),rgba(52,152,219,.12));border-color:#3498db;}
 .pbtn-badge{position:absolute;top:-11px;right:-11px;min-width:26px;height:26px;padding:0 6px;border-radius:50%;background:linear-gradient(135deg,#ffd24d,#f0a51e);color:#3a0a12;font-size:1rem;font-weight:900;line-height:26px;text-align:center;border:2px solid var(--g0);box-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(255,200,60,.85);display:none;letter-spacing:0;box-sizing:border-box;}
 .pbtn-badge.on{display:block;}
 .pbtn-badge.pop{animation:mp-badge-pop .44s cubic-bezier(.34,1.56,.64,1);}
@@ -175,21 +179,19 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 #multi-list{max-height:46vh;overflow-y:auto;overflow-x:hidden;}
 #prodbar{position:fixed;}
 #prodbar::after{content:"";position:fixed;top:var(--headH);right:0;height:var(--barH);width:26px;pointer-events:none;z-index:281;background:linear-gradient(to right,rgba(20,20,22,0),var(--g1));display:none;}
-.pbtn:hover{border-color:var(--rl);background:rgba(155,28,46,.18);
-  box-shadow:0 0 10px rgba(192,38,59,.40),0 0 20px rgba(155,28,46,.16);
+.pbtn:hover{border-color:var(--rl);background:rgba(155,28,46,.20);
+  box-shadow:0 0 12px rgba(192,38,59,.45),0 0 22px rgba(155,28,46,.18),0 0 1px rgba(255,80,100,.3) inset;
   color:#fff;transform:translateY(-1px);}
-.pbtn.on{border-color:var(--r);background:linear-gradient(135deg,rgba(155,28,46,.28),rgba(155,28,46,.10));
-  box-shadow:0 0 0 1px var(--r) inset,0 0 10px rgba(155,28,46,.35),0 0 20px rgba(155,28,46,.15);
+.pbtn.on{border-color:var(--r);background:linear-gradient(135deg,rgba(155,28,46,.30),rgba(155,28,46,.10));
+  box-shadow:0 0 0 1px var(--r) inset,0 0 12px rgba(155,28,46,.40),0 0 24px rgba(155,28,46,.18);
   color:#fff;}
-.pbtn[data-group="tools"]:hover{background:linear-gradient(135deg,rgba(52,152,219,.14),rgba(52,152,219,.05));border-color:rgba(52,152,219,.45);}
-.pbtn[data-group="tools"].on{background:linear-gradient(135deg,rgba(52,152,219,.22),rgba(52,152,219,.08));border-color:#3498db;}
 /* Identidad institucional de "Información de productos Equifax" también al pasar el mouse y al estar activa */
 .pbtn[data-key="soluciones"]:hover{border-color:#3498db;background:rgba(52,152,219,.20);box-shadow:0 0 12px rgba(52,152,219,.35),inset 0 0 0 1px rgba(52,152,219,.25);}
 .pbtn[data-key="soluciones"].on{border-color:#3498db;background:linear-gradient(135deg,rgba(52,152,219,.30),rgba(52,152,219,.10));box-shadow:0 0 0 1px #3498db inset,0 0 14px rgba(52,152,219,.40),0 0 28px rgba(52,152,219,.18);color:#fff;}
 
 /* ── ESTACIÓN DE TRABAJO — 3 COLUMNAS ─────────────── */
-#workstation{position:fixed;top:calc(var(--headH) + var(--barH));left:0;right:0;bottom:0;
-  display:grid;grid-template-columns:minmax(0,1fr) max-content minmax(0,1fr);gap:0;}
+#workstation{position:fixed;top:calc(var(--headH) + 0px);left:0;right:0;bottom:0;
+  display:grid;grid-template-columns:minmax(0,1fr) max-content minmax(0,1fr);gap:0;padding-top:var(--barH);}
 #left-panel{border-right:3px solid var(--g4);overflow-y:auto;padding:14px 18px 40px;background:var(--g0);}
 #center-panel{border-right:2px solid var(--g3);background:linear-gradient(to bottom,#0a0a0c,#0e0e10 50%,#0a0a0c);
   overflow-y:auto;padding:16px 14px 30px;display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:175px;}
@@ -1992,7 +1994,15 @@ var PRODUCTS=[
 
 function buildProdbar(){
   var bar=$('prodbar');bar.innerHTML='';
-  PRODUCTS.forEach(function(p){
+  var prevGroup=null;
+  PRODUCTS.forEach(function(p,idx){
+    /* Insertar separador visual cuando cambia el grupo */
+    if(prevGroup!==null && prevGroup!==p.group){
+      var sep=document.createElement('div');
+      sep.className='pbtn-separator';
+      bar.appendChild(sep);
+    }
+    
     var b=document.createElement('button');
     b.className='pbtn';
     b.dataset.key=p.key;
@@ -2001,6 +2011,8 @@ function buildProdbar(){
     b.onclick=function(){playClick();setProduct(p.key);};
     b.addEventListener('mouseenter',function(){playHover();});
     bar.appendChild(b);
+    
+    prevGroup=p.group;
   });
   updateMultiBadge();
 }
