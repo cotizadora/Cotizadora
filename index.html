@@ -10,7 +10,7 @@
   --g0:#0d0d0e;--g1:#141416;--g2:#1c1c1f;--g3:#26262a;--g4:#34343a;--g5:#46464d;
   --w:#f2f2f2;--wa:#a6a6ad;--wb:#7a7a82;
   --y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
-  --headH:84px;--barH:92px;
+  --headH:84px;--barH:74px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
@@ -118,26 +118,67 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .exec-save{width:100%;background:var(--gn);color:#06210f;border:none;border-radius:10px;padding:14px;cursor:pointer;font-family:inherit;font-weight:800;font-size:1rem;margin-top:6px;}
 .exec-save:hover{box-shadow:0 0 18px rgba(46,204,113,.5);}
 
-/* ── BARRA DE PRODUCTOS (gobierna todo) ───────────── */
+/* ── BARRA DE PRODUCTOS — NAVEGACIÓN POR CATEGORÍAS (v3) ─────────────
+   13 pestañas no caben en una fila sin abreviar, cortar palabras ni
+   generar una 2ª fila. Solución: los 10 "Productos" se agrupan en 3
+   categorías con panel flotante (SAP/Salesforce-style); las 3
+   "Herramientas" siguen como accesos directos de un clic, igual que
+   antes. Elegir un producto sigue siendo UN clic; abrir la categoría
+   es solo la revelación del menú (hover o clic), no una selección.
+   La barra nunca crece de alto, nunca hace scroll horizontal y nunca
+   arma una segunda fila de botones. ── */
 #prodbar{position:fixed;top:var(--headH);left:0;right:0;z-index:280;height:var(--barH);
-  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-start;column-gap:9px;
-  padding:0 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;}
+  background:var(--g1);border-bottom:2px solid var(--g4);display:flex;flex-wrap:nowrap;
+  align-items:center;justify-content:flex-start;column-gap:10px;row-gap:0;
+  padding:0 16px;overflow:visible;}
 #prodbar::-webkit-scrollbar{height:4px;}
 #prodbar::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px;}
+
+/* Contenedor de cada categoría: botón + panel flotante */
+.pcat{position:relative;flex:0 0 auto;}
+.pcat-btn{display:flex;align-items:center;gap:10px;background:var(--g2);border:1px solid var(--g3);
+  border-radius:10px;padding:9px 13px;cursor:pointer;color:var(--w);font-family:inherit;
+  min-width:168px;white-space:nowrap;transition:all .18s ease;}
+.pcat-btn .ic{font-size:1.3rem;line-height:1;flex-shrink:0;width:26px;text-align:center;}
+.pcat-btn .pcat-txt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;}
+.pcat-btn .pcat-main{font-size:.82rem;font-weight:700;letter-spacing:.1px;white-space:nowrap;}
+.pcat-btn .pcat-sub{font-size:.65rem;font-weight:600;color:var(--wb);white-space:nowrap;}
+.pcat-btn .pcat-car{margin-left:auto;padding-left:6px;font-size:.65rem;color:var(--wb);
+  transition:transform .18s ease;flex-shrink:0;}
+.pcat-btn:hover{border-color:var(--rl);background:rgba(155,28,46,.16);box-shadow:0 0 10px rgba(192,38,59,.30);}
+.pcat-btn.on{border-color:var(--r);background:linear-gradient(135deg,rgba(155,28,46,.26),rgba(155,28,46,.08));
+  box-shadow:0 0 0 1px var(--r) inset;}
+.pcat-btn.on .pcat-sub{color:var(--y);}
+.pcat.open .pcat-btn .pcat-car{transform:rotate(180deg);}
+.pcat.open .pcat-btn{border-color:var(--rl);box-shadow:0 0 12px rgba(192,38,59,.35);}
+
+/* Panel flotante: lista completa (sin abreviar) de los productos de la categoría */
+.pcat-flyout{position:absolute;top:calc(100% + 8px);left:0;min-width:300px;max-width:360px;
+  background:var(--g1);border:1px solid var(--g4);border-radius:12px;
+  box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2);
+  padding:8px;display:flex;flex-direction:column;gap:6px;z-index:20;
+  opacity:0;visibility:hidden;transform:translateY(-6px);
+  transition:opacity .16s ease,transform .16s ease,visibility .16s;}
+.pcat.open .pcat-flyout{opacity:1;visibility:visible;transform:translateY(0);}
+.pcat-flyout .pbtn{width:100%;min-height:50px;}
+.pcat-flyout .pbtn .lb{max-width:none;min-width:0;flex:1 1 auto;white-space:normal;}
+
+/* Separador vertical entre Productos (categorías) y Herramientas (accesos directos) */
+.pnav-sep{flex:0 0 auto;align-self:stretch;width:0;border-left:1px solid var(--g4);margin:12px 2px;opacity:.7;}
+
+/* Botón base de producto individual — usado dentro del panel flotante
+   Y en los accesos directos de Herramientas (idéntico look que antes) */
 .pbtn{flex:0 0 auto;background:var(--g2);border:1px solid var(--g3);border-radius:10px;
-  padding:9px 14px;cursor:pointer;color:var(--w);font-family:inherit;
-  transition:all .18s ease;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;
-  font-size:.9rem;font-weight:700;letter-spacing:.08px;position:relative;height:66px;white-space:normal;}
-.pbtn .ic{font-size:1.3rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:27px;height:27px;}
-.pbtn .lb{font-size:.9rem;font-weight:700;line-height:1.2;display:flex;align-items:center;justify-content:flex-start;text-align:left;flex-wrap:wrap;max-width:186px;word-break:break-word;overflow-wrap:break-word;}
+  padding:10px 14px;cursor:pointer;color:var(--w);font-family:inherit;
+  transition:all .18s ease;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:11px;
+  font-size:.88rem;font-weight:700;letter-spacing:.08px;position:relative;min-height:48px;white-space:normal;}
+.pbtn .ic{font-size:1.35rem;line-height:1;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:28px;height:28px;}
+.pbtn .lb{font-size:.88rem;font-weight:700;line-height:1.28;display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;max-width:130px;word-break:break-word;overflow-wrap:break-word;}
 .pbtn .su{display:none;}
-/* Separación entre Productos (izquierda) y Herramientas (derecha): espaciador flexible,
-   sin línea divisoria — empuja el grupo de herramientas al extremo derecho cuando hay espacio
-   disponible, y se reduce a un margen mínimo cuando la barra necesita scroll horizontal. */
-.pbtn-separator{flex:1 1 28px;min-width:28px;height:1px;border:none;margin:0;opacity:0;align-self:stretch;}
 .pbtn[data-group="tools"]{background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02));border-color:rgba(52,152,219,.25);}
 .pbtn[data-group="tools"]:hover{background:linear-gradient(135deg,rgba(52,152,219,.18),rgba(52,152,219,.08));border-color:rgba(52,152,219,.45);}
 .pbtn[data-group="tools"].on{background:linear-gradient(135deg,rgba(52,152,219,.28),rgba(52,152,219,.12));border-color:#3498db;}
+
 .pbtn-badge{position:absolute;top:-11px;right:-11px;min-width:26px;height:26px;padding:0 6px;border-radius:50%;background:linear-gradient(135deg,#ffd24d,#f0a51e);color:#3a0a12;font-size:1rem;font-weight:900;line-height:26px;text-align:center;border:2px solid var(--g0);box-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(255,200,60,.85);display:none;letter-spacing:0;box-sizing:border-box;}
 .pbtn-badge.on{display:block;}
 .pbtn-badge.pop{animation:mp-badge-pop .44s cubic-bezier(.34,1.56,.64,1);}
@@ -1992,29 +2033,100 @@ var PRODUCTS=[
   {key:'soluciones',ic:'🧩',lb:'Información de Productos',su:'Catálogo',group:'tools'}
 ];
 
+/* ── Navegación por categorías (v3) ───────────────────────────────────
+   13 productos no caben en una fila sin abreviar, cortar palabras ni
+   generar una 2ª fila (restricción de Eduardo). Se agrupan los 10
+   "Productos" en 3 categorías con panel flotante; las 3 "Herramientas"
+   quedan como accesos directos de un clic, igual que antes. No toca
+   PRODUCTS ni ninguna función de cálculo/export — solo cómo se navega. */
+var PROD_CATEGORIES=[
+  {id:'pcat-eval',ic:'⚖️',lb:'Evaluación y Cobranza',   keys:['bundle','mc','ri','bolsa']},
+  {id:'pcat-mon', ic:'🔭',lb:'Monitoreo y Búsqueda',    keys:['pfm','datafinder','malla','pc']},
+  {id:'pcat-doc', ic:'📁',lb:'Documentales y a Medida', keys:['bdd','pub']}
+];
+var PROD_TOOLS_STANDALONE=['pago_pub','multi','soluciones'];
+
 function buildProdbar(){
   var bar=$('prodbar');bar.innerHTML='';
-  var prevGroup=null;
-  PRODUCTS.forEach(function(p,idx){
-    /* Insertar separador visual cuando cambia el grupo */
-    if(prevGroup!==null && prevGroup!==p.group){
-      var sep=document.createElement('div');
-      sep.className='pbtn-separator';
-      bar.appendChild(sep);
-    }
-    
+  var byKey={};PRODUCTS.forEach(function(p){byKey[p.key]=p;});
+
+  function makeProductBtn(p){
     var b=document.createElement('button');
+    b.type='button';
     b.className='pbtn';
     b.dataset.key=p.key;
     if(p.group) b.dataset.group=p.group;
     b.innerHTML='<span class="ic">'+p.ic+'</span><span class="lb">'+p.lb+'</span><span class="su">'+p.su+'</span>'+(p.key==='multi'?'<span class="pbtn-badge" id="multi-badge"></span>':'');
-    b.onclick=function(){playClick();setProduct(p.key);};
+    b.onclick=function(){playClick();setProduct(p.key);closeAllProdFlyouts();};
     b.addEventListener('mouseenter',function(){playHover();});
-    bar.appendChild(b);
-    
-    prevGroup=p.group;
+    return b;
+  }
+
+  /* Categorías de producto: botón + panel flotante con la lista completa */
+  PROD_CATEGORIES.forEach(function(cat){
+    var wrap=document.createElement('div');
+    wrap.className='pcat';wrap.dataset.catId=cat.id;
+
+    var btn=document.createElement('button');
+    btn.type='button';btn.className='pcat-btn';btn.id=cat.id;
+    btn.innerHTML='<span class="ic">'+cat.ic+'</span>'+
+      '<span class="pcat-txt"><span class="pcat-main">'+cat.lb+'</span>'+
+      '<span class="pcat-sub">'+cat.keys.length+' productos</span></span>'+
+      '<span class="pcat-car">▾</span>';
+    btn.onclick=function(e){e.stopPropagation();playClick();toggleProdFlyout(cat.id);};
+    btn.addEventListener('mouseenter',function(){playHover();});
+    wrap.appendChild(btn);
+
+    var fly=document.createElement('div');
+    fly.className='pcat-flyout';fly.id=cat.id+'-fly';
+    cat.keys.forEach(function(k){if(byKey[k])fly.appendChild(makeProductBtn(byKey[k]));});
+    wrap.appendChild(fly);
+
+    bar.appendChild(wrap);
   });
+
+  /* Separador + Herramientas: acceso directo de un clic (sin menú) */
+  var sep=document.createElement('div');sep.className='pnav-sep';bar.appendChild(sep);
+  PROD_TOOLS_STANDALONE.forEach(function(k){if(byKey[k])bar.appendChild(makeProductBtn(byKey[k]));});
+
+  if(!window._prodFlyoutListenersOn){
+    window._prodFlyoutListenersOn=true;
+    document.addEventListener('click',function(e){
+      if(!e.target.closest('.pcat'))closeAllProdFlyouts();
+    });
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape')closeAllProdFlyouts();
+    });
+  }
+
   updateMultiBadge();
+  updateProdNavActive(CURRENT.key);
+}
+/* Abre/cierra el panel flotante de una categoría (clic fuera o Esc cierran) */
+function toggleProdFlyout(id){
+  document.querySelectorAll('.pcat').forEach(function(w){
+    var willOpen=(w.dataset.catId===id)&&!w.classList.contains('open');
+    w.classList.toggle('open',willOpen);
+  });
+}
+function closeAllProdFlyouts(){
+  document.querySelectorAll('.pcat.open').forEach(function(w){w.classList.remove('open');});
+}
+/* Resalta la categoría activa y, cuando el nombre es corto, lo muestra
+   directamente en el botón (si es muy largo, se deja el conteo genérico
+   para no romper la fila de una sola línea). El nombre completo del
+   producto activo siempre se ve, sin abreviar, en #s-name/#cfg-prod-name. */
+function updateProdNavActive(key){
+  var p=null;PRODUCTS.forEach(function(x){if(x.key===key)p=x;});
+  document.querySelectorAll('.pcat').forEach(function(w){
+    var cat=null;PROD_CATEGORIES.forEach(function(c){if(c.id===w.dataset.catId)cat=c;});
+    if(!cat)return;
+    var isActive=!!(key&&cat.keys.indexOf(key)>-1);
+    var catBtn=w.querySelector('.pcat-btn');
+    if(catBtn)catBtn.classList.toggle('on',isActive);
+    var sub=w.querySelector('.pcat-sub');
+    if(sub)sub.textContent=(isActive&&p&&p.lb.length<=22)?p.lb:(cat.keys.length+' productos');
+  });
 }
 function updateMultiBadge(){
   var el=document.getElementById('multi-badge');if(el){el.textContent=MULTI.length;el.classList.toggle('on',MULTI.length>0);}
@@ -2024,6 +2136,15 @@ function updateMultiBadge(){
 }
 /* Rebote del contador (solo visual) */
 function popBadge(){var el=document.getElementById('multi-badge');if(!el)return;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');setTimeout(function(){el.classList.remove('pop');},460);}
+
+/* setProduct se define más abajo (function declaration, hoisted). Se
+   envuelve —sin tocar su cuerpo— para sincronizar el resaltado de la
+   categoría activa cada vez que cambia el producto, venga el cambio de
+   un clic en el panel flotante, de "Pegar desde Excel" o de cualquier
+   otro punto del código que ya llamaba a setProduct(). */
+var _setProductCore=setProduct;
+setProduct=function(key){_setProductCore(key);updateProdNavActive(key);};
+
 
 /* ════════ BIBLIOTECA DE CONOCIMIENTO COMERCIAL ════════
    Audios de llamadas reales transcritos con faster-whisper (segmentos con
@@ -5423,7 +5544,7 @@ function forceUpdate(){
 })();
 (function(){
   var _last=0;
-  var SEL='.cv-btn,.pbtn,.pv-copy-btn,.htool-btn,.ext-btn,.user-btn,.snd-toggle,.btn-foto,.crm-paste-btn,.exec-save';
+  var SEL='.cv-btn,.pbtn,.pcat-btn,.pv-copy-btn,.htool-btn,.ext-btn,.user-btn,.snd-toggle,.btn-foto,.crm-paste-btn,.exec-save';
   document.addEventListener('pointerover',function(e){
     if(!_sndOn)return;
     if(e.pointerType&&e.pointerType!=='mouse')return; /* solo mouse, nada en táctil */
