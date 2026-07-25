@@ -1430,37 +1430,25 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 .ag-time-col select{width:76px;}
 .ag-time-sep{font-size:1.35rem;color:var(--w);font-weight:700;line-height:1;padding-bottom:2px;}
 
-/* ── ESTADOS DE AGENDA: JERARQUÍA VISUAL ───────────────────────────────────────── */
+/* ── ESTADOS DE AGENDA: JERARQUÍA VISUAL REFORZADA ──────────────────────────────────────── */
+/* Arquitectura: 
+   🔴 Vencido: rojo palpitante (requiere atención inmediata)
+   🟢 Venta cerrada: verde estático (éxito comercial)
+   ⚪ Agendado vigente: sin color, solo ícono reloj (compromiso pendiente)
+   ⚪ Normal: limpio y sobrio
+*/
 
-/* Estado 1: Agendamiento futuro (azul discreto) */
-.pl-tr.pl-row-future{
-  border-left:3px solid rgba(52,152,219,.4)!important;
-  box-shadow:inset 0 0 0 1px rgba(52,152,219,.15),0 0 8px rgba(52,152,219,.15)!important;
-}
-.pl-tr.pl-row-future .pl-td{background:rgba(52,152,219,.05)!important;}
-
-/* Estado 2: Próximo a vencer (24h) — ámbar con resplandor dorado suave */
-.pl-tr.pl-row-soon{
-  border-left:4px solid #f0c040!important;
-  box-shadow:inset 0 0 0 1px rgba(240,192,64,.4),0 0 12px rgba(240,192,64,.35)!important;
-  animation:plRowSoonBreathe 2.4s ease-in-out infinite;
-}
-.pl-tr.pl-row-soon .pl-td{background:rgba(240,192,64,.13)!important;}
-
-@keyframes plRowSoonBreathe{
-  0%,100%{box-shadow:inset 0 0 0 1px rgba(240,192,64,.4),0 0 12px rgba(240,192,64,.35)!important;}
-  50%{box-shadow:inset 0 0 0 1px rgba(240,192,64,.5),0 0 18px rgba(240,192,64,.55)!important;}
-}
-
-/* Estado 3: Agendamiento vencido — rojo intenso con efecto neón elegante */
-.pl-tr.pl-row-due{
-  border-left:5px solid #ff4444!important;
+/* 🔴 Estado 1: RECORDATORIO VENCIDO — rojo con pulso elegante */
+.pl-tr.pl-row-overdue{
+  border-left:4px solid #ff4444!important;
   box-shadow:inset 0 0 0 1px rgba(255,68,68,.6),0 0 16px rgba(255,68,68,.5)!important;
-  animation:plRowDuePulse 1.6s ease-in-out infinite;
+  animation:plOverdueGlow 1.6s ease-in-out infinite;
 }
-.pl-tr.pl-row-due .pl-td{background:rgba(255,68,68,.18)!important;}
+.pl-tr.pl-row-overdue .pl-td{
+  background:rgba(255,68,68,.16)!important;
+}
 
-@keyframes plRowDuePulse{
+@keyframes plOverdueGlow{
   0%,100%{
     box-shadow:inset 0 0 0 1px rgba(255,68,68,.6),0 0 16px rgba(255,68,68,.5)!important;
   }
@@ -1469,22 +1457,62 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   }
 }
 
-/* Combinar con hover: mantener efecto de agenda incluso on hover */
-.pl-tr.pl-row-due:hover{box-shadow:inset 0 0 0 1px rgba(255,68,68,.6),0 0 16px rgba(255,68,68,.5)!important;}
-.pl-tr.pl-row-soon:hover{box-shadow:inset 0 0 0 1px rgba(240,192,64,.4),0 0 12px rgba(240,192,64,.35)!important;}
-.pl-tr.pl-row-future:hover{box-shadow:inset 0 0 0 1px rgba(52,152,219,.15),0 0 8px rgba(52,152,219,.15)!important;}
+/* 🟢 Estado 2: VENTA REALIZADA — verde elegante, sin animación */
+.pl-tr.pl-row-sold{
+  border-left:4px solid #2ecc71!important;
+  box-shadow:inset 0 0 0 1px rgba(46,204,113,.4),0 0 12px rgba(46,204,113,.35)!important;
+}
+.pl-tr.pl-row-sold .pl-td{
+  background:rgba(46,204,113,.08)!important;
+}
+
+/* ⚪ Estado 3: AGENDADO VIGENTE — sin color, solo ícono reloj en columna # */
+.pl-tr[data-agenda-vigente="true"]{
+  /* Sin estilos especiales: apariencia completamente normal */
+}
+
+.pl-agenda-icon{
+  display:inline-block;
+  font-size:1.1em;
+  margin-right:4px;
+  opacity:0;
+  transition:opacity .18s ease;
+  vertical-align:middle;
+}
+
+.pl-tr[data-agenda-vigente="true"] .pl-agenda-icon{
+  opacity:1;
+}
+
+.pl-tr.pl-row-overdue .pl-agenda-icon{
+  opacity:1;
+  animation:plAgendaIconPulse 1.6s ease-in-out infinite;
+}
+
+.pl-tr.pl-row-sold .pl-agenda-icon{
+  opacity:0;
+}
+
+@keyframes plAgendaIconPulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.15);}
+}
+
+/* Combinar con hover: mantener efecto de estado incluso on hover */
+.pl-tr.pl-row-overdue:hover{
+  box-shadow:inset 0 0 0 1px rgba(255,68,68,.6),0 0 16px rgba(255,68,68,.5)!important;
+}
+.pl-tr.pl-row-sold:hover{
+  box-shadow:inset 0 0 0 1px rgba(46,204,113,.4),0 0 12px rgba(46,204,113,.35)!important;
+}
 
 /* Combinar con selección: mantener ambos efectos */
-.pl-tr.pl-row-due.pl-row-selected{
+.pl-tr.pl-row-overdue.pl-row-selected{
   box-shadow:inset 0 0 0 2px #ff4444,0 0 16px rgba(255,68,68,.5)!important;
-  animation:plRowDuePulse 1.6s ease-in-out infinite;
+  animation:plOverdueGlow 1.6s ease-in-out infinite;
 }
-.pl-tr.pl-row-soon.pl-row-selected{
-  box-shadow:inset 0 0 0 2px #f0c040,0 0 12px rgba(240,192,64,.35)!important;
-  animation:plRowSoonBreathe 2.4s ease-in-out infinite;
-}
-.pl-tr.pl-row-future.pl-row-selected{
-  box-shadow:inset 0 0 0 2px rgba(52,152,219,.6),0 0 8px rgba(52,152,219,.15)!important;
+.pl-tr.pl-row-sold.pl-row-selected{
+  box-shadow:inset 0 0 0 2px #2ecc71,0 0 12px rgba(46,204,113,.35)!important;
 }
 </style>
 <style id="sol-cat-styles">
@@ -7309,8 +7337,8 @@ function renderPlanilla(){
       var elim=(r.estado==='eliminado'), actual=(SESION.registroId===r.id);
       var due=_agEstaVencida(r), sel=PL_SELECTED.has(r.id);
       var agStamp=(r.agenda&&r.agenda.fecha)?(r.agenda.fecha+'T'+(r.agenda.hora||'00:00')):'';
-      tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+(sel?' pl-row-selected':'')+(due?' pl-row-due':'')+'" data-id="'+r.id+'"'+(agStamp?' data-agenda="'+_esc(agStamp)+'"':'')+'>';
-      tb+='<td class="pl-td pl-td-id">'+r.id+(due?' <span class="pl-due-badge" title="Recordatorio pendiente">⏰</span>':'')+'</td>';
+      tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+(sel?' pl-row-selected':'')+'" data-id="'+r.id+'" data-estado="'+_esc(r.estado||'')+'"'+(agStamp?' data-agenda="'+_esc(agStamp)+'"':'')+'>';
+      tb+='<td class="pl-td pl-td-id"><span class="pl-num-text">'+r.id+'</span><span class="pl-agenda-icon">🕰️</span></td>';
       PLANILLA_COLUMNS.forEach(function(c,ci){ var v=_celda(r,c.field);
         if(c.field==='observacion'){ tb+='<td class="pl-td pl-td-obs" data-field="observacion" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'" onclick="planillaVerObs('+r.id+',event)">'+_esc(v)+'</td>'; }
         else { tb+='<td class="pl-td" data-field="'+c.field+'" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'">'+_esc(v)+'</td>'; }
@@ -7614,7 +7642,13 @@ function planillaLimpiarBusqueda(){
 }
 function planillaFiltroEstado(v){ PL_STATE.estado=v||''; renderPlanilla(); }
 function planillaToggleEliminados(b){ PL_STATE.verEliminados=!!b; renderPlanilla(); }
-function planillaEstado(id,v){ DB.update(id,{estado:v}).then(function(){toast('✔ Estado actualizado','ok','global-toast');}).catch(function(){}); }
+function planillaEstado(id,v){ 
+  DB.update(id,{estado:v}).then(function(){
+    toast('✔ Estado actualizado','ok','global-toast');
+    /* Refrescar estilos visuales de agenda (vencido, venta, etc.) */
+    _plChequearVencidos();
+  }).catch(function(){}); 
+}
 function planillaAbrir(id){
   DB.get(id).then(function(reg){ if(!reg){toast('✖ Registro no encontrado','err','global-toast');return;} abrirRegistro(reg); closePlanillaView(); toast('✔ Cotización #'+id+' cargada en la calculadora','ok','global-toast'); });
 }
@@ -8044,14 +8078,44 @@ function _agEstaVencida(r){
 function _plChequearVencidos(){
   var tbl=document.getElementById('pl-table'); if(!tbl)return;
   var ahora=Date.now();
-  var hace24h=ahora-(24*60*60*1000);
+  
+  /* PARTE 1: Procesar filas con agenda (detectar vencidas vs vigentes) */
   Array.prototype.forEach.call(tbl.querySelectorAll('.pl-tr[data-agenda]'),function(tr){
     var agStr=tr.getAttribute('data-agenda');
+    var estado=tr.getAttribute('data-estado')||'';
     var ts=Date.parse(agStr+':00');
-    if(isNaN(ts)){tr.classList.remove('pl-row-future','pl-row-soon','pl-row-due');return;}
-    if(ahora>=ts){tr.classList.remove('pl-row-future','pl-row-soon');tr.classList.add('pl-row-due');}
-    else if(ts<=ahora+(24*60*60*1000)){tr.classList.remove('pl-row-future','pl-row-due');tr.classList.add('pl-row-soon');}
-    else{tr.classList.remove('pl-row-soon','pl-row-due');tr.classList.add('pl-row-future');}
+    
+    /* Limpiar todas las clases de estado */
+    tr.classList.remove('pl-row-overdue','pl-row-sold');
+    tr.removeAttribute('data-agenda-vigente');
+    
+    if(isNaN(ts))return; /* Agenda inválida → sin estilos */
+    
+    /* Solo aplicar estilos de vencido si el estado sigue siendo un tipo "agendado" */
+    var esAgendado=(estado==='agendado'||estado==='agendado_futuro');
+    
+    if(!esAgendado)return; /* Si el estado ya cambió, limpiar todo */
+    
+    if(ahora>=ts){
+      /* 🔴 VENCIDO: recordatorio expirado */
+      tr.classList.add('pl-row-overdue');
+    } else {
+      /* ⚪ AGENDADO VIGENTE: compromiso pendiente (sin color, solo ícono) */
+      tr.setAttribute('data-agenda-vigente','true');
+    }
+  });
+  
+  /* PARTE 2: Procesar ventas cerradas (independiente de agenda) */
+  Array.prototype.forEach.call(tbl.querySelectorAll('.pl-tr'),function(tr){
+    var estado=tr.getAttribute('data-estado')||'';
+    
+    if(estado==='venta_cerrada'){
+      tr.classList.remove('pl-row-overdue');
+      tr.removeAttribute('data-agenda-vigente');
+      tr.classList.add('pl-row-sold');
+    } else {
+      tr.classList.remove('pl-row-sold');
+    }
   });
 }
 function _agParseFecha(f){
