@@ -1420,6 +1420,38 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 .dl-soon{opacity:.55;pointer-events:none;filter:grayscale(.3);}
 .dl-note{grid-column:1/-1;font-size:.82rem;color:var(--wb);line-height:1.6;
   background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:12px;padding:14px 18px;}
+
+/* ── SELECTOR DE HORA 24H ───────────────────────────────────────── */
+.ag-hora-select{background:var(--g2);border:1px solid var(--g4);color:#fff;border-radius:8px;padding:9px 11px;
+  font-size:1.02rem;font-family:'Segoe UI',system-ui,Arial;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease;min-height:38px;}
+.ag-hora-select:hover{border-color:var(--g5);}
+.ag-hora-select:focus{outline:none;border-color:var(--bl);box-shadow:0 0 0 3px rgba(52,152,219,.22);}
+.ag-hora-select option{background:var(--g0);color:#fff;padding:6px 8px;}
+
+/* ── ESTADOS DE AGENDA: JERARQUÍA VISUAL ───────────────────────────────────────── */
+
+/* Estado 1: Agendamiento futuro (azul discreto) */
+.pl-tr.pl-row-future{border-left:3px solid rgba(52,152,219,.35)!important;}
+.pl-tr.pl-row-future .pl-td{background:rgba(52,152,219,.04)!important;}
+.pl-tr.pl-row-future .pl-td-id{color:rgba(90,180,255,.6);background:rgba(52,152,219,.08);border:1px solid rgba(52,152,219,.25);}
+
+/* Estado 2: Próximo a vencer (24h) — ámbar con resplandor dorado */
+.pl-tr.pl-row-soon{border-left:4px solid #f0c040!important;box-shadow:inset 0 0 0 1px rgba(240,192,64,.3);}
+.pl-tr.pl-row-soon .pl-td{background:rgba(240,192,64,.12)!important;animation:plSoonGlow 2.4s ease-in-out infinite;}
+.pl-tr.pl-row-soon .pl-td-id{color:#f0c040;background:rgba(240,192,64,.18);border:1.5px solid #f0c040;
+  box-shadow:0 0 12px rgba(240,192,64,.45),inset 0 0 8px rgba(240,192,64,.12);animation:plSoonPulse 2.4s ease-in-out infinite;}
+@keyframes plSoonGlow{0%,100%{background:rgba(240,192,64,.12);}50%{background:rgba(240,192,64,.18);}}
+@keyframes plSoonPulse{0%,100%{box-shadow:0 0 12px rgba(240,192,64,.45),inset 0 0 8px rgba(240,192,64,.12);}
+  50%{box-shadow:0 0 18px rgba(240,192,64,.65),inset 0 0 12px rgba(240,192,64,.22);}}
+
+/* Estado 3: Agendamiento vencido — rojo intenso con efecto neón */
+.pl-tr.pl-row-due{border-left:4px solid #ff4444!important;box-shadow:inset 0 0 0 1px rgba(255,68,68,.5);}
+.pl-tr.pl-row-due .pl-td{background:rgba(255,68,68,.16)!important;animation:plDueGlow 1.6s ease-in-out infinite;}
+.pl-tr.pl-row-due .pl-td-id{color:#ff4444;background:rgba(255,68,68,.24);border:2px solid #ff4444;
+  box-shadow:0 0 16px rgba(255,68,68,.7),inset 0 0 10px rgba(255,68,68,.2);animation:plDuePulse 1.6s ease-in-out infinite;font-weight:900;}
+@keyframes plDueGlow{0%,100%{background:rgba(255,68,68,.16);}50%{background:rgba(255,68,68,.28);}}
+@keyframes plDuePulse{0%,100%{box-shadow:0 0 16px rgba(255,68,68,.7),inset 0 0 10px rgba(255,68,68,.2);transform:scale(1);}
+  50%{box-shadow:0 0 26px rgba(255,68,68,.95),inset 0 0 14px rgba(255,68,68,.35);transform:scale(1.02);}}
 </style>
 <style id="sol-cat-styles">
 .sol-head2{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--wa);font-weight:800;margin:14px 2px 9px;}
@@ -2128,8 +2160,57 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <div class="ag-dow"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
       <div id="ag-grid" class="ag-grid"></div>
       <div class="ag-time-row">
-        <label for="ag-hora">🕐 Hora</label>
-        <input type="time" id="ag-hora" class="ag-hora-input" value="09:00" step="60">
+        <label for="ag-hora-sel">🕰️ Hora (24h)</label>
+        <select id="ag-hora-sel" class="ag-hora-select">
+          <option value="00:00">00:00</option>
+          <option value="00:30">00:30</option>
+          <option value="01:00">01:00</option>
+          <option value="01:30">01:30</option>
+          <option value="02:00">02:00</option>
+          <option value="02:30">02:30</option>
+          <option value="03:00">03:00</option>
+          <option value="03:30">03:30</option>
+          <option value="04:00">04:00</option>
+          <option value="04:30">04:30</option>
+          <option value="05:00">05:00</option>
+          <option value="05:30">05:30</option>
+          <option value="06:00">06:00</option>
+          <option value="06:30">06:30</option>
+          <option value="07:00">07:00</option>
+          <option value="07:30">07:30</option>
+          <option value="08:00">08:00</option>
+          <option value="08:30">08:30</option>
+          <option value="09:00" selected>09:00</option>
+          <option value="09:30">09:30</option>
+          <option value="10:00">10:00</option>
+          <option value="10:30">10:30</option>
+          <option value="11:00">11:00</option>
+          <option value="11:30">11:30</option>
+          <option value="12:00">12:00</option>
+          <option value="12:30">12:30</option>
+          <option value="13:00">13:00</option>
+          <option value="13:30">13:30</option>
+          <option value="14:00">14:00</option>
+          <option value="14:30">14:30</option>
+          <option value="15:00">15:00</option>
+          <option value="15:30">15:30</option>
+          <option value="16:00">16:00</option>
+          <option value="16:30">16:30</option>
+          <option value="17:00">17:00</option>
+          <option value="17:30">17:30</option>
+          <option value="18:00">18:00</option>
+          <option value="18:30">18:30</option>
+          <option value="19:00">19:00</option>
+          <option value="19:30">19:30</option>
+          <option value="20:00">20:00</option>
+          <option value="20:30">20:30</option>
+          <option value="21:00">21:00</option>
+          <option value="21:30">21:30</option>
+          <option value="22:00">22:00</option>
+          <option value="22:30">22:30</option>
+          <option value="23:00">23:00</option>
+          <option value="23:30">23:30</option>
+        </select>
       </div>
       <div class="ag-actions">
         <button type="button" class="ag-btn-quitar" id="ag-btn-quitar" onclick="_agQuitar()">🗑 Quitar agenda</button>
@@ -7879,9 +7960,15 @@ function _agEstaVencida(r){
 }
 function _plChequearVencidos(){
   var tbl=document.getElementById('pl-table'); if(!tbl)return;
+  var ahora=Date.now();
+  var hace24h=ahora-(24*60*60*1000);
   Array.prototype.forEach.call(tbl.querySelectorAll('.pl-tr[data-agenda]'),function(tr){
-    var ts=Date.parse(tr.getAttribute('data-agenda')+':00');
-    tr.classList.toggle('pl-row-due', !isNaN(ts)&&Date.now()>=ts);
+    var agStr=tr.getAttribute('data-agenda');
+    var ts=Date.parse(agStr+':00');
+    if(isNaN(ts)){tr.classList.remove('pl-row-future','pl-row-soon','pl-row-due');return;}
+    if(ahora>=ts){tr.classList.remove('pl-row-future','pl-row-soon');tr.classList.add('pl-row-due');}
+    else if(ts<=ahora+(24*60*60*1000)){tr.classList.remove('pl-row-future','pl-row-due');tr.classList.add('pl-row-soon');}
+    else{tr.classList.remove('pl-row-soon','pl-row-due');tr.classList.add('pl-row-future');}
   });
 }
 function _agParseFecha(f){
@@ -7894,7 +7981,7 @@ function planillaAbrirAgenda(id){
     var ag=r.agenda||null, base=ag&&ag.fecha?_agParseFecha(ag.fecha):new Date();
     AG_STATE={id:id,year:base.getFullYear(),month:base.getMonth(),day:ag?base.getDate():null};
     var tEl=document.getElementById('ag-title'); if(tEl)tEl.textContent='📅 Agendar recordatorio — '+(r.cliente.empresa||('#'+id));
-    var hEl=document.getElementById('ag-hora'); if(hEl)hEl.value=(ag&&ag.hora)?ag.hora:'09:00';
+    var hEl=document.getElementById('ag-hora-sel'); if(hEl)hEl.value=(ag&&ag.hora)?ag.hora:'09:00';
     var qBtn=document.getElementById('ag-btn-quitar'); if(qBtn)qBtn.style.display=ag?'inline-flex':'none';
     _agRenderAnos();
     _agRender();
@@ -7944,7 +8031,7 @@ function _agConfirmar(){
   if(AG_STATE.id==null)return;
   var fecha=_agFechaISO();
   if(!fecha){toast('✖ Elige un día en el calendario','err','global-toast');return;}
-  var hEl=document.getElementById('ag-hora'), hora=(hEl&&hEl.value)?hEl.value:'09:00';
+  var hEl=document.getElementById('ag-hora-sel'), hora=(hEl&&hEl.value)?hEl.value:'09:00';
   var id=AG_STATE.id;
   DB.get(id).then(function(r){
     if(!r)return;
@@ -7952,6 +8039,7 @@ function _agConfirmar(){
     DB.update(id,{agenda:{fecha:fecha,hora:hora,estadoAnterior:estadoPrevio},estado:'agendado'}).then(function(){
       toast('✔ Recordatorio agendado para '+_fechaISOaDMY(fecha)+' '+hora,'ok','global-toast');
       _agCerrar();
+      _plChequearVencidos();
     }).catch(function(){toast('✖ No se pudo agendar','err','global-toast');});
   });
 }
@@ -7965,6 +8053,7 @@ function _agQuitar(){
     DB.update(id,{agenda:null,estado:vuelta}).then(function(){
       toast('✔ Agenda eliminada','ok','global-toast');
       _agCerrar();
+      _plChequearVencidos();
     }).catch(function(){toast('✖ No se pudo quitar la agenda','err','global-toast');});
   });
 }
