@@ -1027,8 +1027,12 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-tbtn{background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:7px;padding:7px 12px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.82rem;white-space:nowrap;}
 .pl-tbtn:hover{background:var(--pl-hover);border-color:var(--pl-accent);}
 .pl-tsep{width:1px;height:24px;background:var(--pl-border);margin:0 4px;}
-.pl-search{flex:1;min-width:170px;background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:7px;padding:8px 12px;font-family:inherit;font-size:.86rem;}
+.pl-search-wrap{position:relative;flex:1;min-width:170px;display:flex;align-items:center;}
+.pl-search{flex:1;min-width:0;width:100%;background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:7px;padding:8px 30px 8px 12px;font-family:inherit;font-size:.86rem;}
 .pl-search:focus{outline:none;border-color:var(--pl-sel);box-shadow:0 0 0 2px var(--pl-selbg);}
+.pl-search-clear{display:none;align-items:center;justify-content:center;position:absolute;right:5px;top:50%;transform:translateY(-50%);width:22px;height:22px;border:none;border-radius:50%;background:transparent;color:var(--pl-muted);cursor:pointer;font-size:.78rem;line-height:1;padding:0;transition:background .14s ease,color .14s ease;}
+.pl-search-clear:hover{background:var(--pl-hover);color:var(--pl-text);}
+.pl-search-wrap.has-text .pl-search-clear{display:flex;}
 .pl-select{background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:.82rem;}
 .pl-chk{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--pl-muted);white-space:nowrap;cursor:pointer;}
 .pl-formula{flex:0 0 auto;display:flex;align-items:center;background:var(--pl-bg);border-bottom:1px solid var(--pl-border);}
@@ -1045,7 +1049,7 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-td{padding:6px 10px;border:1px solid var(--pl-grid);color:var(--pl-text);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:cell;transition:background .14s ease,box-shadow .14s ease;}
 .pl-td-id{text-align:center;color:var(--pl-rowhdr-text);background:var(--pl-rowhdr-bg);font-variant-numeric:tabular-nums;font-weight:600;position:sticky;left:0;z-index:1;cursor:default;transition:background .14s ease,box-shadow .14s ease;}
 .pl-tr:nth-child(even) .pl-td:not(.pl-td-id){background:var(--pl-zebra);}
-.pl-tr:hover .pl-td{background:var(--pl-hover);}
+.pl-tr:hover .pl-td{background:var(--pl-hover)!important;}
 .pl-tr:hover .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-sel);}
 .pl-td.pl-sel{outline:2px solid var(--pl-sel);outline-offset:-2px;background:var(--pl-selbg)!important;}
 .pl-tr.pl-actual .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-accent);}
@@ -1931,7 +1935,10 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <button class="pl-tbtn" onclick="openRespaldos()" title="Respaldos automáticos: programación, puntos de restauración y descarga">🗄 Respaldos</button>
     <button class="pl-tbtn" onclick="planillaExportar()" title="Exportar la vista actual a Excel (.xls)">📗 A Excel</button>
     <span class="pl-tsep"></span>
-    <input type="text" id="pl-search" class="pl-search" placeholder="🔎 Buscar…" oninput="planillaBuscar(this.value)">
+    <div class="pl-search-wrap" id="pl-search-wrap">
+      <input type="text" id="pl-search" class="pl-search" placeholder="🔎 Buscar…" oninput="planillaBuscar(this.value)">
+      <button type="button" class="pl-search-clear" id="pl-search-clear" onclick="planillaLimpiarBusqueda()" title="Limpiar búsqueda" aria-label="Limpiar búsqueda">✕</button>
+    </div>
     <select id="pl-estado" class="pl-select" onchange="planillaFiltroEstado(this.value)">
       <option value="">Todos los estados</option>
       <option value="borrador">Borrador</option>
@@ -6909,7 +6916,7 @@ function planillaFont(size,btn){
 }
 function _aplicarPrefsPlanilla(){
   var v=document.getElementById('planilla-view'); if(!v)return;
-  var fs='xl'; try{fs=localStorage.getItem('pl_fontsize')||'xl';}catch(e){} planillaFont(fs,null);
+  var fs='xl'; planillaFont(fs,null); /* la Planilla siempre abre en A++ (máxima legibilidad), sin importar preferencia guardada */
   var th='dark'; try{th=localStorage.getItem('pl_theme')||'dark';}catch(e){}
   var dark=(th==='dark'); v.classList.toggle('pl-dark',dark);
   var b=document.getElementById('pl-theme-btn'); if(b)b.textContent=dark?'🌙 Tema oscuro':'☀ Tema Excel';
@@ -7252,7 +7259,17 @@ function planillaOrden(field){
   if(PL_STATE.sortField===field)PL_STATE.sortDir*=-1; else {PL_STATE.sortField=field;PL_STATE.sortDir=1;}
   renderPlanilla();
 }
-function planillaBuscar(v){ PL_STATE.q=v||''; renderPlanilla(); }
+function planillaBuscar(v){
+  PL_STATE.q=v||'';
+  var wrap=document.getElementById('pl-search-wrap'); if(wrap)wrap.classList.toggle('has-text',!!PL_STATE.q);
+  renderPlanilla();
+}
+function planillaLimpiarBusqueda(){
+  var inp=document.getElementById('pl-search'); if(!inp)return;
+  inp.value='';
+  planillaBuscar('');
+  inp.focus();
+}
 function planillaFiltroEstado(v){ PL_STATE.estado=v||''; renderPlanilla(); }
 function planillaToggleEliminados(b){ PL_STATE.verEliminados=!!b; renderPlanilla(); }
 function planillaEstado(id,v){ DB.update(id,{estado:v}).then(function(){toast('✔ Estado actualizado','ok','global-toast');}).catch(function(){}); }
