@@ -292,7 +292,9 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .cp-act.acc-dirty-glow{animation:cpPulse 1.7s ease-in-out infinite;}
 @keyframes cpSaved{0%{transform:scale(1);}30%{transform:scale(1.08);}60%{transform:scale(.95);}100%{transform:scale(1);}}
 .cp-act.saved-anim{animation:cpSaved .52s ease;border-color:rgba(46,204,113,.85);box-shadow:0 0 22px rgba(46,204,113,.6);}
-#cp-actions .acc-secondary{flex-direction:column;align-items:stretch;gap:6px;margin-top:2px;font-size:.72rem;}
+#cp-actions .acc-secondary{flex-direction:column;align-items:stretch;gap:6px;margin-top:2px;font-size:.72rem;
+  opacity:0;pointer-events:none;transition:opacity .25s ease;}
+#cp-actions .acc-secondary.acc-secondary-on{opacity:1;pointer-events:auto;}
 #cp-actions .acc-bound{text-align:center;}
 #cp-actions .acc-upd{width:100%;}
 #left-panel::-webkit-scrollbar,#right-panel::-webkit-scrollbar,.pv-content::-webkit-scrollbar{width:9px;}
@@ -1057,16 +1059,18 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-tr.pl-elim .pl-td{text-decoration:line-through;}
 .pl-estado-sel{background:var(--pl-bg);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:6px;padding:3px 5px;font-family:inherit;font-size:calc(var(--pl-fontsize) - 2px);}
 .pl-td-acc{white-space:nowrap;cursor:default;}
-.pl-act{background:var(--pl-surface);border:1px solid var(--pl-border);border-radius:6px;padding:3px 6px;margin:0 1px;cursor:pointer;font-size:calc(var(--pl-fontsize) - 1px);line-height:1;}
+.pl-act{background:var(--pl-surface);border:1px solid var(--pl-border);color:var(--pl-text);border-radius:6px;padding:3px 6px;margin:0 1px;cursor:pointer;font-size:calc(var(--pl-fontsize) - 1px);line-height:1;}
 .pl-act:hover{background:var(--pl-hover);border-color:var(--pl-accent);}
-.pl-act-del:hover{border-color:#d93025;background:rgba(217,48,37,.12);}
+.pl-act-del{color:#d93025;border-color:rgba(217,48,37,.4);background:rgba(217,48,37,.08);}
+.pl-act-del:hover{border-color:#d93025;background:rgba(217,48,37,.18);color:#d93025;}
+.pl-menu-btn{font-weight:900;color:var(--pl-text);opacity:1;}
 .pl-col-hidden{display:none!important;}
 #pl-empty{display:none;padding:60px 24px;text-align:center;color:var(--pl-muted);font-size:1rem;}
 /* Edición inline (doble clic) */
 .pl-td.pl-editing{padding:0!important;}
 .pl-edit-input{width:100%;box-sizing:border-box;border:2px solid var(--pl-sel);border-radius:3px;padding:5px 7px;font-family:inherit;font-size:var(--pl-fontsize);color:var(--pl-text);background:var(--pl-bg);outline:none;}
-/* Manija de redimensión de columna */
-.pl-th{position:relative;}
+/* Manija de redimensión de columna (el th ya es position:sticky, que también
+   funciona como contexto de posicionamiento para el .pl-resize absoluto) */
 .pl-resize{position:absolute;top:0;right:0;width:7px;height:100%;cursor:col-resize;user-select:none;}
 .pl-resize:hover{background:var(--pl-sel);opacity:.5;}
 /* Menú de acciones por fila (flotante) */
@@ -1077,7 +1081,6 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-rowmenu button:hover{background:#f1f3f4;}
 .pl-rowmenu .pl-menu-del{color:#d93025;}
 .pl-rowmenu .pl-menu-del:hover{background:rgba(217,48,37,.1);}
-.pl-menu-btn{font-weight:900;}
 /* Modal editar datos */
 .ple-box{max-width:640px;}
 #ple-body{overflow:auto;padding:16px 18px;}
@@ -1185,6 +1188,14 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--g4);}
 .pl-modal-head h3{font-size:1rem;color:#fff;font-weight:800;}
 .pl-modal-x{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:1rem;}
+.pl-del-box{max-width:380px;}
+.pl-del-body{padding:18px;}
+.pl-del-msg{color:var(--w);font-size:.94rem;margin:0 0 18px;line-height:1.45;}
+.pl-del-actions{display:flex;justify-content:flex-end;gap:10px;}
+.pl-del-cancel{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:8px;padding:9px 16px;font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .14s ease,border-color .14s ease;}
+.pl-del-cancel:hover{background:var(--g4);}
+.pl-del-confirm{background:linear-gradient(135deg,#e0392c,#a11f18);border:1px solid #d93025;color:#fff;border-radius:8px;padding:9px 16px;font-family:inherit;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 4px 14px rgba(217,48,37,.35);transition:box-shadow .14s ease,transform .14s ease;}
+.pl-del-confirm:hover{box-shadow:0 6px 18px rgba(217,48,37,.55);transform:translateY(-1px);}
 #pl-hist-body{overflow:auto;padding:16px 18px;}
 .pl-h-title{font-size:.9rem;color:var(--wa);margin-bottom:12px;font-weight:700;}
 .pl-h-item{border-left:2px solid var(--g4);padding:6px 0 10px 12px;margin-left:4px;}
@@ -1553,7 +1564,11 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <button type="button" id="btn-guardar-cotizacion" class="cp-act cp-guardar" onclick="guardarCotizacion();playClick();" title="Guardar esta cotización como una NUEVA versión en la base de datos interna (no sobrescribe versiones anteriores)">
         <span class="cp-ico">💾</span><span class="cp-lb">Guardar</span>
       </button>
-      <div id="acc-secondary" class="acc-secondary"></div>
+      <div id="acc-secondary" class="acc-secondary">
+        <span class="acc-bound" id="acc-bound-lbl">Abierta: cotización #0</span>
+        <span class="acc-clean" id="acc-estado-lbl">✓ guardada</span>
+        <button type="button" class="acc-upd" id="acc-upd-btn" onclick="actualizarCotizacionActual();playClick();" title="Sobrescribe ESTA cotización (corrección). Por defecto 💾 crea una versión nueva e independiente.">✎ Actualizar</button>
+      </div>
     </div>
 
   </nav>
@@ -1965,6 +1980,20 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   <div class="pl-modal-box">
     <div class="pl-modal-head"><h3>🕘 Historial</h3><button class="pl-modal-x" onclick="cerrarHistorial()">✕</button></div>
     <div id="pl-hist-body"></div>
+  </div>
+</div>
+
+<!-- Modal de confirmación para eliminar un registro -->
+<div id="pl-del-modal" class="pl-modal" onclick="if(event.target===this)planillaCancelarEliminar()">
+  <div class="pl-modal-box pl-del-box">
+    <div class="pl-modal-head"><h3>🗑 Eliminar cotización</h3><button class="pl-modal-x" onclick="planillaCancelarEliminar()">✕</button></div>
+    <div class="pl-del-body">
+      <p class="pl-del-msg">¿Deseas eliminar definitivamente esta cotización?</p>
+      <div class="pl-del-actions">
+        <button type="button" class="pl-del-cancel" onclick="planillaCancelarEliminar()">Cancelar</button>
+        <button type="button" class="pl-del-confirm" onclick="planillaConfirmarEliminar()">🗑 Eliminar</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -6489,10 +6518,13 @@ function actualizarBotonGuardar(){
   var b=document.getElementById('btn-guardar-cotizacion');
   if(b)b.classList.toggle('acc-dirty-glow', SESION.dirty && SESION.registroId!=null);
   var sec=document.getElementById('acc-secondary'); if(!sec)return;
-  if(SESION.registroId==null){ sec.innerHTML=''; return; }
-  var estadoTxt=SESION.dirty?'<span class="acc-dirty">● cambios sin guardar</span>':'<span class="acc-clean">✓ guardada</span>';
-  sec.innerHTML='<span class="acc-bound">Abierta: cotización #'+SESION.registroId+'</span> '+estadoTxt+
-    ' <button type="button" class="acc-upd" onclick="actualizarCotizacionActual();playClick();" title="Sobrescribe ESTA cotización (corrección). Por defecto 💾 crea una versión nueva e independiente.">✎ Actualizar #'+SESION.registroId+'</button>';
+  var activo=(SESION.registroId!=null);
+  sec.classList.toggle('acc-secondary-on', activo);
+  if(!activo)return;
+  var boundLbl=document.getElementById('acc-bound-lbl'), estLbl=document.getElementById('acc-estado-lbl'), updBtn=document.getElementById('acc-upd-btn');
+  if(boundLbl)boundLbl.textContent='Abierta: cotización #'+SESION.registroId;
+  if(estLbl){ estLbl.className=SESION.dirty?'acc-dirty':'acc-clean'; estLbl.textContent=SESION.dirty?'● cambios sin guardar':'✓ guardada'; }
+  if(updBtn)updBtn.textContent='✎ Actualizar #'+SESION.registroId;
 }
 
 /* ── Snapshot: captura TODO lo necesario para reconstruir la cotización ── */
@@ -6980,7 +7012,7 @@ function renderPlanilla(){
       tb+='<td class="pl-td pl-td-estado" data-field="estado">'+_estadoSelect(r)+'</td>';
       tb+='<td class="pl-td pl-td-acc">'+
         '<button class="pl-act" title="Abrir en la calculadora" onclick="planillaAbrir('+r.id+')">📂</button>'+
-        '<button class="pl-act" title="Duplicar" onclick="planillaDuplicar('+r.id+')">⧉</button>'+
+        '<button class="pl-act pl-act-del" title="Eliminar cotización" onclick="planillaEliminar('+r.id+')">🗑</button>'+
         '<button class="pl-act pl-menu-btn" title="Más acciones" onclick="planillaMenu('+r.id+',event)">⋮</button>'+
         '</td></tr>';
     });
@@ -7277,8 +7309,20 @@ function planillaAbrir(id){
   DB.get(id).then(function(reg){ if(!reg){toast('✖ Registro no encontrado','err','global-toast');return;} abrirRegistro(reg); closePlanillaView(); toast('✔ Cotización #'+id+' cargada en la calculadora','ok','global-toast'); });
 }
 function planillaDuplicar(id){ DB.duplicate(id).then(function(nid){toast('✔ Duplicado como registro #'+nid,'ok','global-toast');}).catch(function(){toast('✖ No se pudo duplicar','err','global-toast');}); }
+var PL_DEL_ID=null;
 function planillaEliminar(id){
-  if(!confirm('¿Eliminar el registro #'+id+'?\nSe conserva en el historial y podrás verlo activando "Ver eliminados".'))return;
+  PL_DEL_ID=id;
+  var m=document.getElementById('pl-del-modal'); if(m)m.classList.add('on');
+}
+function planillaCancelarEliminar(){
+  PL_DEL_ID=null;
+  var m=document.getElementById('pl-del-modal'); if(m)m.classList.remove('on');
+}
+function planillaConfirmarEliminar(){
+  var id=PL_DEL_ID;
+  var m=document.getElementById('pl-del-modal'); if(m)m.classList.remove('on');
+  PL_DEL_ID=null;
+  if(id==null)return;
   DB.softDelete(id).then(function(){
     if(SESION.registroId===id){SESION.registroId=null;SESION.dirty=false;actualizarBotonGuardar();}
     toast('✔ Registro #'+id+' eliminado','ok','global-toast');
