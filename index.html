@@ -280,14 +280,14 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
   transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease;overflow:hidden;}
 .cp-act::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,0) 55%);opacity:.7;}
-.cp-act .cp-ico{font-size:clamp(1.4rem,3.2vh,1.85rem);line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));}
+.cp-act .cp-ico{font-size:clamp(1.75rem,4vh,2.35rem);line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));}
 .cp-act .cp-lb{position:relative;z-index:1;}
 .cp-act:hover{transform:translateY(-2px);background:rgba(255,255,255,.09);}
 .cp-act:active{transform:translateY(0) scale(.97);}
-.cp-guardar{--neon:46,204,113;} .cp-carrito{--neon:240,192,64;} .cp-planilla{--neon:192,38,59;}
+.cp-guardar{--neon:46,204,113;} .cp-carrito{--neon:240,192,64;}
 .cp-act:hover,.cp-act:focus-visible{border-color:rgba(var(--neon),.75);
   box-shadow:inset 0 0 0 1px rgba(var(--neon),.35),0 0 16px rgba(var(--neon),.45),0 8px 22px rgba(0,0,0,.4);}
-.cp-guardar .cp-ico{color:#2ecc71;} .cp-carrito .cp-ico{color:#f0c040;} .cp-planilla .cp-ico{color:#ff5c72;}
+.cp-guardar .cp-ico{color:#2ecc71;} .cp-carrito .cp-ico{color:#f0c040;}
 @keyframes cpPulse{0%,100%{box-shadow:inset 0 0 0 1px rgba(240,192,64,0),0 6px 18px rgba(0,0,0,.35);}50%{box-shadow:inset 0 0 0 1px rgba(240,192,64,.6),0 0 18px rgba(240,192,64,.5);}}
 .cp-act.acc-dirty-glow{animation:cpPulse 1.7s ease-in-out infinite;}
 @keyframes cpSaved{0%{transform:scale(1);}30%{transform:scale(1.08);}60%{transform:scale(.95);}100%{transform:scale(1);}}
@@ -1042,10 +1042,11 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-th:hover{background:var(--pl-hover);}
 .pl-th-id{width:46px;min-width:46px;text-align:center;background:var(--pl-rowhdr-bg);color:var(--pl-rowhdr-text);position:sticky;left:0;z-index:3;}
 .pl-th-acc{cursor:default;}
-.pl-td{padding:6px 10px;border:1px solid var(--pl-grid);color:var(--pl-text);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:cell;}
-.pl-td-id{text-align:center;color:var(--pl-rowhdr-text);background:var(--pl-rowhdr-bg);font-variant-numeric:tabular-nums;font-weight:600;position:sticky;left:0;z-index:1;cursor:default;}
+.pl-td{padding:6px 10px;border:1px solid var(--pl-grid);color:var(--pl-text);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:cell;transition:background .14s ease,box-shadow .14s ease;}
+.pl-td-id{text-align:center;color:var(--pl-rowhdr-text);background:var(--pl-rowhdr-bg);font-variant-numeric:tabular-nums;font-weight:600;position:sticky;left:0;z-index:1;cursor:default;transition:background .14s ease,box-shadow .14s ease;}
 .pl-tr:nth-child(even) .pl-td:not(.pl-td-id){background:var(--pl-zebra);}
 .pl-tr:hover .pl-td{background:var(--pl-hover);}
+.pl-tr:hover .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-sel);}
 .pl-td.pl-sel{outline:2px solid var(--pl-sel);outline-offset:-2px;background:var(--pl-selbg)!important;}
 .pl-tr.pl-actual .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-accent);}
 .pl-tr.pl-elim{opacity:.55;}
@@ -1542,14 +1543,11 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
          columna central; siempre visibles. IDs preservados (no cambia la lógica). -->
     <div id="cp-actions">
       <div class="cv-section-lbl">Acciones</div>
-      <button type="button" id="btn-guardar-cotizacion" class="cp-act cp-guardar" onclick="guardarCotizacion();playClick();" title="Guardar esta cotización como una NUEVA versión en la base de datos interna (no sobrescribe versiones anteriores)">
-        <span class="cp-ico">💾</span><span class="cp-lb">Guardar</span>
-      </button>
       <button type="button" id="btn-add-multi" class="cp-act cp-carrito" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto (carrito)">
         <span class="cp-ico">🛒</span><span class="cp-lb">Carrito multiproducto</span>
       </button>
-      <button type="button" class="cp-act cp-planilla" onclick="goToView('planilla');" title="Abrir la Planilla — base de datos interna y centro de administración (respaldos, exportar/importar)">
-        <span class="cp-ico">📗</span><span class="cp-lb">Planilla</span>
+      <button type="button" id="btn-guardar-cotizacion" class="cp-act cp-guardar" onclick="guardarCotizacion();playClick();" title="Guardar esta cotización como una NUEVA versión en la base de datos interna (no sobrescribe versiones anteriores)">
+        <span class="cp-ico">💾</span><span class="cp-lb">Guardar</span>
       </button>
       <div id="acc-secondary" class="acc-secondary"></div>
     </div>
@@ -1913,7 +1911,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 </div>
 
 <!-- ════════ PLANILLA INTEGRADA — hoja de cálculo sobre la base de datos interna ════════ -->
-<div id="planilla-view" class="pl-theme-excel pl-dark pl-font-grande">
+<div id="planilla-view" class="pl-theme-excel pl-dark pl-font-xl">
   <div class="pl-appbar">
     <button class="pl-back" onclick="goToView('cotizador')">← Volver al Cotizador</button>
     <div class="pl-title">📊 Planilla de Cotizaciones</div>
@@ -1921,8 +1919,8 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <div class="pl-appbar-right">
       <div class="pl-fontsize" role="group" aria-label="Tamaño de fuente de la planilla">
         <button type="button" id="plf-normal" onclick="planillaFont('normal',this)" title="Fuente normal">A</button>
-        <button type="button" id="plf-grande" class="on" onclick="planillaFont('grande',this)" title="Fuente grande">A+</button>
-        <button type="button" id="plf-xl" onclick="planillaFont('xl',this)" title="Fuente muy grande">A++</button>
+        <button type="button" id="plf-grande" onclick="planillaFont('grande',this)" title="Fuente grande">A+</button>
+        <button type="button" id="plf-xl" class="on" onclick="planillaFont('xl',this)" title="Fuente muy grande">A++</button>
       </div>
       <button type="button" class="pl-theme-btn" id="pl-theme-btn" onclick="planillaToggleTema()" title="Cambiar tema de la Planilla (Excel claro / Oscuro). Solo afecta a la planilla.">🌙 Tema oscuro</button>
     </div>
@@ -5516,6 +5514,7 @@ function copImgPC(){
   preloadLogo(function(){
     captureCardPC().then(function(cv){
       handleCopy(cv,'tpl-toast2');
+      try{ if(typeof registrarEnvio==='function')registrarEnvio('ficha'); }catch(_e){}   /* #7 · trazabilidad de envío */
       try{if(_sndOn&&'speechSynthesis'in window){var _ui=new SpeechSynthesisUtterance('Vista previa copiada.');_ui.lang='es-CL';_ui.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_ui);}}catch(e){}
     }).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});
   });
@@ -5524,6 +5523,7 @@ function copImgWsp(){
   toast('⏳ Generando imagen WhatsApp...','info','global-toast');
   getCanvasWsp().then(function(cv){
     cv.toBlob(function(blob){
+      try{ if(typeof registrarEnvio==='function')registrarEnvio('ficha'); }catch(_e){}   /* #7 · trazabilidad de envío */
       if(navigator.clipboard&&window.ClipboardItem){
         navigator.clipboard.write([new ClipboardItem({'image/png':blob})])
           .then(function(){toast('🖼 Imagen copiada — pega directo en WhatsApp','ok','global-toast');})
@@ -5534,6 +5534,7 @@ function copImgWsp(){
 }
 function descImg(){
   toast('⏳ Generando PNG...','info','tpl-toast2');
+  try{ if(typeof registrarEnvio==='function')registrarEnvio('ficha'); }catch(_e){}   /* #7 · trazabilidad de envío */
   if(CURRENT.key==='soluciones'||CURRENT.key==='multi'||CURRENT.key==='bdd'){preloadLogo(function(){captureCardPC().then(function(cv){var a=document.createElement('a');a.download=nombreArchivo('png');a.href=cv.toDataURL('image/png');a.click();toast('⬇ PNG descargado','ok','tpl-toast2');}).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});});return;}
   getCanvasPC().then(function(cv){
     var a=document.createElement('a');
@@ -6908,7 +6909,7 @@ function planillaFont(size,btn){
 }
 function _aplicarPrefsPlanilla(){
   var v=document.getElementById('planilla-view'); if(!v)return;
-  var fs='grande'; try{fs=localStorage.getItem('pl_fontsize')||'grande';}catch(e){} planillaFont(fs,null);
+  var fs='xl'; try{fs=localStorage.getItem('pl_fontsize')||'xl';}catch(e){} planillaFont(fs,null);
   var th='dark'; try{th=localStorage.getItem('pl_theme')||'dark';}catch(e){}
   var dark=(th==='dark'); v.classList.toggle('pl-dark',dark);
   var b=document.getElementById('pl-theme-btn'); if(b)b.textContent=dark?'🌙 Tema oscuro':'☀ Tema Excel';
@@ -6985,6 +6986,26 @@ function renderPlanilla(){
 }
 /* ── Selección de celda + barra de fórmulas (visual) ── */
 function _limpiarFormula(){var nb=document.getElementById('pl-namebox');if(nb)nb.textContent='—';var fv=document.getElementById('pl-formula-val');if(fv)fv.textContent='';}
+/* Mensajes de copiado rápido (#6) — uno por columna, tal como los pidió Eduardo. */
+var PL_COPY_MSG={
+  fecha:'Fecha copiada.', empresa:'Empresa copiada.', rut:'RUT copiado.',
+  telefono:'Teléfono copiado.', correo:'Correo copiado.', representante:'Representante copiado.',
+  servicio:'Servicio copiado.', uf:'UF copiada.', precioVenta:'Precio venta copiado.',
+  precioLista:'Precio lista copiado.', descuento:'Descuento copiado.'
+};
+function _plCopiarCelda(td){
+  var field=td.getAttribute('data-field');
+  if(!field||!PL_COPY_MSG[field])return;   /* observación tiene su propio visor; no se copia sola */
+  var val=td.textContent||'';
+  if(!val.trim())return;
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(val).then(function(){
+        toast(PL_COPY_MSG[field],'ok','global-toast');
+      }).catch(function(){});
+    }
+  }catch(e){}
+}
 function _plCellClick(e){
   var td=e.target&&e.target.closest?e.target.closest('.pl-td'):null;
   if(!td||td.classList.contains('pl-td-acc')||td.classList.contains('pl-td-estado')||td.classList.contains('pl-td-id'))return;
@@ -6993,14 +7014,21 @@ function _plCellClick(e){
   td.classList.add('pl-sel');
   var nb=document.getElementById('pl-namebox'); if(nb)nb.textContent=td.getAttribute('data-ref')||'—';
   var fv=document.getElementById('pl-formula-val'); if(fv)fv.textContent=td.textContent||'';
+  /* Copiado automático de la celda (#6): sin necesidad de Ctrl+C. */
+  _plCopiarCelda(td);
 }
-/* ── Adaptación responsive (#17): oculta columnas secundarias antes que forzar
-   scroll horizontal. La prioridad define qué se oculta primero. ── */
+/* ── Adaptación responsive (obligatorio): la Planilla NUNCA debe generar scroll
+   horizontal, sin importar el tamaño de fuente. En vez de ocultar columnas, se
+   reajusta su ANCHO: las columnas cortas (fecha/UF/precios/descuento/estado/
+   acciones/#) usan solo el espacio que necesitan; las columnas largas (empresa,
+   correo, representante, servicio, observación...) absorben el espacio libre.
+   Ver planillaAjustarColumnas(). PL_HIDDEN se mantiene solo por compatibilidad
+   (siempre vacío: ya no se oculta ninguna columna). ── */
 var PL_HIDDEN={};
-/* Fase 4: la Planilla muestra SIEMPRE todas las columnas (no se pierde info).
-   Si no caben, el contenedor #pl-table-wrap hace scroll horizontal (normal en una
-   planilla; la regla de "sin scroll" aplica solo a la calculadora, no aquí). */
 var PL_PRIORIDAD_OCULTAR=[];
+/* Columnas "cortas": su contenido es intrínsecamente breve, se les da solo el
+   ancho que necesitan (no participan del reparto proporcional del espacio libre). */
+var PL_COL_TIGHT=['fecha','uf','precioVenta','precioLista','descuento'];
 function _aplicarColHidden(){
   var tbl=document.getElementById('pl-table'); if(!tbl)return;
   PLANILLA_COLUMNS.forEach(function(c){
@@ -7012,10 +7040,67 @@ function planillaAjustarColumnas(){
   var wrap=document.getElementById('pl-table-wrap'), tbl=document.getElementById('pl-table');
   if(!wrap||!tbl||!tbl.tHead)return;
   PL_HIDDEN={}; _aplicarColHidden();
-  var i=0;
-  while(tbl.scrollWidth>wrap.clientWidth+2 && i<PL_PRIORIDAD_OCULTAR.length){
-    PL_HIDDEN[PL_PRIORIDAD_OCULTAR[i]]=true; _aplicarColHidden(); i++;
+  var avail=wrap.clientWidth; if(!avail)return;
+
+  /* 1) Medir el ancho natural (sin restricciones) de cada columna. */
+  tbl.style.tableLayout='auto';
+  Array.prototype.forEach.call(tbl.querySelectorAll('th,td'),function(el){el.style.width='';el.style.minWidth='';el.style.maxWidth='';});
+
+  var idTh=tbl.querySelector('.pl-th-id'), accTh=tbl.querySelector('.pl-th-acc'), estTh=null;
+  Array.prototype.forEach.call(tbl.tHead.querySelectorAll('th'),function(th){
+    if(!th.hasAttribute('data-field')&&th!==idTh&&th!==accTh)estTh=th;
+  });
+  var idW=idTh?Math.max(38,idTh.scrollWidth+4):38;
+  var accW=accTh?Math.max(86,accTh.scrollWidth+8):86;
+  var estW=estTh?Math.max(96,estTh.scrollWidth+16):96;
+
+  var tightW={}, tightSum=idW+accW+estW;
+  PLANILLA_COLUMNS.forEach(function(c){
+    if(PL_COL_TIGHT.indexOf(c.field)===-1)return;
+    var th=tbl.querySelector('th[data-field="'+c.field+'"]');
+    var w=Math.max(56,Math.min(120,(th?th.scrollWidth:70)+16));
+    tightW[c.field]=w; tightSum+=w;
+  });
+
+  var flexFields=PLANILLA_COLUMNS.filter(function(c){return PL_COL_TIGHT.indexOf(c.field)===-1;}).map(function(c){return c.field;});
+  var natural={}, naturalSum=0;
+  flexFields.forEach(function(f){
+    var th=tbl.querySelector('th[data-field="'+f+'"]');
+    var w=Math.max(70,(th?th.scrollWidth:90)+16);
+    natural[f]=w; naturalSum+=w;
+  });
+
+  /* 2) Aplicar anchos fijos (table-layout:fixed) para que TODO quepa siempre. */
+  tbl.style.tableLayout='fixed';
+  function fijar(field,w){
+    Array.prototype.forEach.call(tbl.querySelectorAll('[data-field="'+field+'"]'),function(el){
+      el.style.width=w+'px'; el.style.minWidth=w+'px'; el.style.maxWidth=w+'px';
+    });
   }
+  if(idTh){var _idset=[idTh].concat(Array.prototype.slice.call(tbl.querySelectorAll('.pl-td-id')));_idset.forEach(function(el){el.style.width=idW+'px';el.style.minWidth=idW+'px';el.style.maxWidth=idW+'px';});}
+  if(accTh){var _accset=[accTh].concat(Array.prototype.slice.call(tbl.querySelectorAll('.pl-td-acc')));_accset.forEach(function(el){el.style.width=accW+'px';el.style.minWidth=accW+'px';el.style.maxWidth=accW+'px';});}
+  if(estTh){var _estset=[estTh].concat(Array.prototype.slice.call(tbl.querySelectorAll('.pl-td-estado')));_estset.forEach(function(el){el.style.width=estW+'px';el.style.minWidth=estW+'px';el.style.maxWidth=estW+'px';});}
+  Object.keys(tightW).forEach(function(f){fijar(f,tightW[f]);});
+
+  var remaining=Math.max(flexFields.length*60,avail-tightSum-6);
+  if(naturalSum<=remaining){
+    /* Sobra espacio: el extra se reparte proporcionalmente (la columna más larga, ej. Observación, recibe más). */
+    var extra=remaining-naturalSum;
+    flexFields.forEach(function(f){
+      var share=naturalSum>0?(natural[f]/naturalSum):(1/flexFields.length);
+      fijar(f,Math.round(natural[f]+extra*share));
+    });
+  }else{
+    /* No alcanza: comprime proporcionalmente con un piso mínimo legible, nunca genera scroll. */
+    var minW=60, totalMin=minW*flexFields.length;
+    if(remaining<=totalMin){
+      flexFields.forEach(function(f){fijar(f,minW);});
+    }else{
+      var factor=(remaining-totalMin)/Math.max(1,(naturalSum-totalMin));
+      flexFields.forEach(function(f){fijar(f,Math.max(minW,Math.round(minW+(natural[f]-minW)*factor)));});
+    }
+  }
+  tbl.style.width=avail+'px';
 }
 
 /* ════════ EDICIÓN DIRECTA EN LA GRILLA (#20/#22) ════════
@@ -7151,6 +7236,12 @@ function _plResizeMove(e){
   if(!_plResize)return;
   var w=Math.max(50,_plResize.startW+(e.clientX-_plResize.startX));
   _setColWidth(_plResize.field,w);
+  /* Nunca permitir scroll horizontal por un arrastre manual (regla obligatoria). */
+  var wrap=document.getElementById('pl-table-wrap'), tbl=document.getElementById('pl-table');
+  if(wrap&&tbl&&tbl.scrollWidth>wrap.clientWidth){
+    var ajustado=Math.max(50,w-(tbl.scrollWidth-wrap.clientWidth));
+    _setColWidth(_plResize.field,ajustado);
+  }
 }
 function _plResizeEnd(){
   if(_plResize){ PL_COLW[_plResize.field]=_plResize.th.offsetWidth; _guardarColW(); }
@@ -7228,6 +7319,18 @@ function initRegistros(){
   /* Planilla: selección de celda, edición inline (doble clic) + reajuste responsive. */
   var plt=document.getElementById('pl-table');
   if(plt){ plt.addEventListener('click',_plCellClick); plt.addEventListener('dblclick',_plCellEdit); }
+  /* Sonido de interfaz al recorrer filas (#5): una vez por fila, no por cada celda. */
+  var _plHoverRow=null;
+  var plw=document.getElementById('pl-table-wrap');
+  if(plw){
+    plw.addEventListener('mouseover',function(e){
+      var tr=e.target&&e.target.closest?e.target.closest('.pl-tr'):null;
+      if(!tr||tr===_plHoverRow)return;
+      _plHoverRow=tr;
+      if(typeof playHover==='function')playHover();
+    });
+    plw.addEventListener('mouseleave',function(){_plHoverRow=null;});
+  }
   var _plRz; window.addEventListener('resize',function(){ if(!document.body.classList.contains('planilla-open'))return; clearTimeout(_plRz); _plRz=setTimeout(planillaAjustarColumnas,150); });
   /* Programador de respaldos automáticos (#6): revisa cada minuto; solo con app abierta. */
   setTimeout(bkTick,5000); setInterval(bkTick,60000);
