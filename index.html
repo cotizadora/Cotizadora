@@ -297,6 +297,19 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .block{background:var(--g1);border:1px solid var(--g3);border-radius:12px;padding:14px 17px;margin-bottom:9px;}
 .block-t{font-size:.70rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--rl);font-weight:800;line-height:1.2;margin-bottom:10px;
   display:flex;align-items:center;gap:8px;}
+/* Encabezado "Configuración" — badge del producto activo con más jerarquía visual,
+   sin crecer la altura del bloque (misma fila, sin línea nueva). */
+.cfg-block-t{justify-content:space-between;margin-bottom:9px;flex-wrap:nowrap;}
+.cfg-block-lb{white-space:nowrap;flex-shrink:0;}
+.cfg-active-badge{display:flex;align-items:center;gap:6px;min-width:0;max-width:75%;height:22px;
+  background:linear-gradient(135deg,rgba(155,28,46,.24),rgba(155,28,46,.08));
+  border:1px solid rgba(192,38,59,.45);border-radius:11px;padding:0 11px 0 7px;box-sizing:border-box;}
+.cfg-badge-ic{font-size:1.05rem;line-height:1;flex-shrink:0;}
+.cfg-badge-name{font-size:.86rem;font-weight:800;letter-spacing:.15px;text-transform:none;
+  color:#fff;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#left-panel .cfg-active-badge{height:calc(22px * var(--ui-scale,1));}
+#left-panel .cfg-badge-ic{font-size:calc(1.05rem * var(--ui-scale,1));}
+#left-panel .cfg-badge-name{font-size:calc(.86rem * var(--ui-scale,1));}
 .cfg-grid{display:flex;flex-direction:column;gap:8px;}
 .fld{display:flex;flex-direction:column;gap:3px;}
 .fld label{font-size:.72rem;letter-spacing:.5px;text-transform:uppercase;color:var(--wa);font-weight:600;line-height:1.1;}
@@ -1140,6 +1153,20 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .mp-save-btn{width:100%;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:1.02rem;font-weight:800;letter-spacing:.3px;padding:15px 16px;border-radius:12px;cursor:pointer;font-family:inherit;color:#06240f;background:linear-gradient(135deg,#2ecc71,#1f9d55);border:1px solid #1f9d55;transition:.14s;}
 .mp-save-btn:hover{box-shadow:0 8px 22px rgba(46,204,113,.45);transform:translateY(-1px);}
 .mp-save-btn:active{transform:translateY(0) scale(.98);}
+/* Encabezado compacto del panel Multiproducto: título + botón cuadrado "vaciar"
+   (mismo tamaño/estilo que los demás botones cuadrados de la app, ej. .modal-x).
+   El guardado ahora usa el botón estándar 💾 Guardar de #cp-actions. */
+.mp-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 2px 9px;}
+.mp-panel-head .sol-head2{margin:0;}
+.mp-trash-btn{flex:0 0 auto;width:38px;height:38px;border-radius:9px;border:1px solid rgba(155,28,46,.4);
+  background:var(--g3);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:1.15rem;cursor:pointer;transition:.15s;}
+.mp-trash-btn:hover{background:var(--r);border-color:var(--r);box-shadow:0 0 14px rgba(192,38,59,.5);}
+.mp-trash-btn:active{transform:scale(.94);}
+/* Más aire en la lista de productos agregados, con el espacio liberado por el botón compacto */
+#multi-list.mp-list-air{gap:11px;}
+#multi-list.mp-list-air .sol-item{padding:13px 15px;}
+#multi-list.mp-list-air .mp-item > div:first-child > div:first-child{font-size:.97rem;}
 /* Modal de historial */
 .pl-modal{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px;}
 .pl-modal.on{display:flex;}
@@ -1434,7 +1461,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
     <!-- 3 · CONFIGURACIÓN COMERCIAL del producto activo -->
     <div class="block">
-      <div class="block-t">⚙ Configuración <span id="cfg-prod-name" style="color:var(--wa);font-weight:600;letter-spacing:1px;"></span></div>
+      <div class="block-t cfg-block-t"><span class="cfg-block-lb">⚙ Configuración</span><span class="cfg-active-badge" id="cfg-active-badge"><span class="cfg-badge-ic" id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span></div>
       <div id="config-zone" class="cfg-grid"></div>
     </div>
 
@@ -2050,7 +2077,7 @@ var PRODUCTS=[
    individual. No toca PRODUCTS ni ninguna función de cálculo/export —
    solo cómo se navega. */
 var PROD_MENU_KEYS=['bundle','mc','ri','bolsa','pfm','datafinder','malla','pc','bdd','pub'];
-var PROD_TOOLS_STANDALONE=['multi','soluciones','pago_pub'];
+var PROD_TOOLS_STANDALONE=['soluciones','pago_pub','multi'];
 
 function buildProdbar(){
   var bar=$('prodbar');bar.innerHTML='';
@@ -3206,10 +3233,10 @@ function multiPanelHTML(){
       '<button type="button" class="mp-del-row" onclick="removeMulti('+i+');playClick();" title="Eliminar este producto del paquete">Eliminar producto</button>'+
     '</div>';
   }).join('');
-  return '<div class="sol-head2">Productos en el paquete ('+MULTI.length+')</div>'+
-    '<div class="sol-list" id="multi-list">'+rows+'</div>'+
-    '<button type="button" id="btn-guardar-multi" class="mp-save-btn" onclick="guardarMultiproducto();playClick();" title="Guardar TODO el documento Multiproducto como un registro independiente en la base de datos (con el snapshot de cada producto)"><span style="font-size:1.5rem;line-height:1;">💾</span><span>Guardar Cotización Multiproducto</span></button>'+
-    '<button type="button" class="exec-save multi-clear-btn" style="background:var(--rd);color:#fff;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:1.02rem;font-weight:800;letter-spacing:.3px;padding:15px 16px;" onclick="clearMulti();playClick();" title="Vaciar toda la propuesta multiproducto"><span style="font-size:1.9rem;line-height:1;">🗑️</span><span>Vaciar propuesta completa</span></button>';
+  return '<div class="mp-panel-head"><div class="sol-head2">Productos en el paquete ('+MULTI.length+')</div>'+
+    '<button type="button" class="mp-trash-btn" onclick="clearMulti();playClick();" title="Vaciar carro de multiproducto" aria-label="Vaciar carro de multiproducto">🗑️</button></div>'+
+    '<div class="sol-list mp-list-air" id="multi-list">'+rows+'</div>'+
+    '<div class="note-inline" style="margin-top:10px;">💾 Para guardar este paquete, usa el botón <b>Guardar</b> de las acciones principales.</div>';
 }
 /* #12 · Guardar el documento Multiproducto completo como registro independiente. */
 function guardarMultiproducto(){
@@ -3447,7 +3474,8 @@ function setProduct(key){
   CURRENT.key=key;CURRENT.override=null;CURRENT.overrideLista=null;
   document.querySelectorAll('.pbtn').forEach(function(b){b.classList.toggle('on',b.dataset.key===key);});
   var p=PRODUCTS.find(function(x){return x.key===key;});
-  $('cfg-prod-name').textContent=p?'· '+p.lb:'';
+  $('cfg-prod-name').textContent=p?p.lb:'';
+  var _pIco=$('cfg-prod-icon');if(_pIco)_pIco.textContent=p?p.ic:'';
   $('config-zone').innerHTML=cfgHTML(key);
   /* Pago Publicación Única: correo (Outlook/Gmail/WhatsApp), sin Ficha de Oferta (imagen) */
   var _imgBtn=document.getElementById('cvbtn-img');
@@ -6513,6 +6541,7 @@ function construirRegistro(){
 /* ── 💾 Guardar Cotización: SIEMPRE crea una versión nueva (#18/#19). ── */
 function guardarCotizacion(){
   if(typeof DB==='undefined'){toast('✖ Base de datos no disponible','err','global-toast');return;}
+  if(CURRENT.key==='multi'&&(!MULTI||!MULTI.length)){toast('Agrega productos al Multiproducto primero','err','global-toast');return;}
   var reg=construirRegistro();
   return DB.add(reg).then(function(id){
     SESION.registroId=id; SESION.dirty=false; actualizarBotonGuardar();
