@@ -461,6 +461,10 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 /* Resumen comercial */
 .sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
 .sum-name{font-size:1.2rem;font-weight:900;color:#fff;line-height:1.25;}
+/* El producto ya se identifica en el badge del encabezado (#cfg-active-badge);
+   aquí solo queda la variante configurada (ej. "10 descargas/mes"), en un tono
+   más discreto para no competir visualmente. Vacía en pub/pago_pub (solo badge). */
+.sum-name.sum-name-cfg{font-size:.92rem;font-weight:700;color:#c7c7cd;letter-spacing:.15px;line-height:1.3;}
 .sum-badge{background:var(--rd);color:var(--y);border:1px solid rgba(240,192,64,.5);font-size:.62rem;font-weight:800;
   letter-spacing:1px;padding:4px 11px;border-radius:20px;white-space:nowrap;}
 .price-wrap{background:linear-gradient(135deg,#1a0a0e,#23090f);border:1px solid rgba(155,28,46,.5);
@@ -1461,7 +1465,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
     <!-- 3 · CONFIGURACIÓN COMERCIAL del producto activo -->
     <div class="block">
-      <div class="block-t cfg-block-t"><span class="cfg-block-lb">⚙ Configuración</span><span class="cfg-active-badge" id="cfg-active-badge"><span class="cfg-badge-ic" id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span></div>
+      <div class="block-t cfg-block-t"><span class="cfg-block-lb">🧮 Calculadora</span><span class="cfg-active-badge" id="cfg-active-badge"><span class="cfg-badge-ic" id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span></div>
       <div id="config-zone" class="cfg-grid"></div>
     </div>
 
@@ -2601,7 +2605,7 @@ function renderSummary(c){
     '</div>';
 
   var html=
-    '<div class="sum-head"><div class="sum-name" id="s-name">'+(pi.n+tituloSufijo(c.tipo))+(pi.sub?'<span style="display:block;font-size:.82rem;font-weight:600;color:#9aa0a6;letter-spacing:.2px;">'+pi.sub+'</span>':'')+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
+    '<div class="sum-head"><div class="sum-name sum-name-cfg" id="s-name">'+(tituloSufijo(c.tipo).replace(/^\s*·\s*/,'')||'&nbsp;')+'</div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
     '<div class="metrics">'+
       ventaCtrl+
       listaCtrl+
@@ -2946,7 +2950,7 @@ function pubCalc(){var m=pubMonto();if(!m)return null;var pct=pubPct();var neto=
    la rama 'pub' de refresh() cada vez que cambia el monto → ambos lados sincronizados. */
 function pubResumenHTML(){
   var c=pubCalc();
-  var html='<div class="sum-head"><div class="sum-name">Publicación Única</div><div class="sum-badge">DOCUMENTO EN DICOM</div></div>';
+  var html='<div class="sum-head"><div class="sum-name"></div><div class="sum-badge">DOCUMENTO EN DICOM</div></div>';
   if(!c){
     return html+'<div class="note-inline" style="margin:0;">🧾 Ingresa el <b>valor de la factura</b> para ver el cálculo referencial ('+ufd(pubPct())+'% + IVA).</div>';
   }
@@ -2974,7 +2978,7 @@ function ppCalc(){
 }
 function pagoPubResumenHTML(){
   var c=ppCalc();
-  var html='<div class="sum-head"><div class="sum-name">Pago Publicación Única</div><div class="sum-badge">CONFIRMACIÓN DE PAGO</div></div>';
+  var html='<div class="sum-head"><div class="sum-name"></div><div class="sum-badge">CONFIRMACIÓN DE PAGO</div></div>';
   if(!c){
     return html+'<div class="note-inline" style="margin:0;">💳 Ingresa la <b>deuda a publicar</b> para calcular el neto, el IVA y el total a transferir.</div>';
   }
