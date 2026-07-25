@@ -1467,7 +1467,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
     <!-- 3 · CONFIGURACIÓN COMERCIAL del producto activo -->
     <div class="block">
-      <div class="block-t cfg-block-t"><span class="cfg-block-lb">🧮 Calculadora</span><span class="cfg-active-badge" id="cfg-active-badge"><span class="cfg-badge-ic" id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span></div>
+      <div class="block-t cfg-block-t"><span class="cfg-active-badge" id="cfg-active-badge"><span class="cfg-badge-ic" id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span></div>
       <div id="config-zone" class="cfg-grid"></div>
     </div>
 
@@ -2617,7 +2617,6 @@ function renderSummary(c){
     '</div>';
 
   var html=
-    '<div class="sum-head"><div class="sum-name" id="s-name"></div><div class="sum-badge" id="s-badge">'+pi.badge+'</div></div>'+
     '<div class="metrics">'+
       ventaCtrl+
       listaCtrl+
@@ -2962,7 +2961,7 @@ function pubCalc(){var m=pubMonto();if(!m)return null;var pct=pubPct();var neto=
    la rama 'pub' de refresh() cada vez que cambia el monto → ambos lados sincronizados. */
 function pubResumenHTML(){
   var c=pubCalc();
-  var html='<div class="sum-head"><div class="sum-name"></div><div class="sum-badge">DOCUMENTO EN DICOM</div></div>';
+  var html='';
   if(!c){
     return html+'<div class="note-inline" style="margin:0;">🧾 Ingresa el <b>valor de la factura</b> para ver el cálculo referencial ('+ufd(pubPct())+'% + IVA).</div>';
   }
@@ -2990,7 +2989,7 @@ function ppCalc(){
 }
 function pagoPubResumenHTML(){
   var c=ppCalc();
-  var html='<div class="sum-head"><div class="sum-name"></div><div class="sum-badge">CONFIRMACIÓN DE PAGO</div></div>';
+  var html='';
   if(!c){
     return html+'<div class="note-inline" style="margin:0;">💳 Ingresa la <b>deuda a publicar</b> para calcular el neto, el IVA y el total a transferir.</div>';
   }
