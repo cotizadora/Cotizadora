@@ -7685,13 +7685,21 @@ function planillaCancelarEliminar(){
   PL_DEL_ID=null;
   var m=document.getElementById('pl-del-modal'); if(m)m.classList.remove('on');
 }
+/* Única implementación de "eliminar un registro" (DB.softDelete + efectos
+   secundarios). El flujo individual (planillaConfirmarEliminar, tras el modal
+   de confirmación) y el flujo masivo (_plBulkEliminar) llaman a esta misma
+   función por id; ninguno de los dos reimplementa el borrado. */
+function _plEliminarRegistroPorId(id){
+  return DB.softDelete(id).then(function(){
+    if(SESION.registroId===id){SESION.registroId=null;SESION.dirty=false;actualizarBotonGuardar();}
+  });
+}
 function planillaConfirmarEliminar(){
   var id=PL_DEL_ID;
   var m=document.getElementById('pl-del-modal'); if(m)m.classList.remove('on');
   PL_DEL_ID=null;
   if(id==null)return;
-  DB.softDelete(id).then(function(){
-    if(SESION.registroId===id){SESION.registroId=null;SESION.dirty=false;actualizarBotonGuardar();}
+  _plEliminarRegistroPorId(id).then(function(){
     toast('✔ Registro #'+id+' eliminado','ok','global-toast');
   }).catch(function(){toast('✖ No se pudo eliminar','err','global-toast');});
 }
@@ -8031,7 +8039,7 @@ function plSeleccionLimpiar(){
 /* ── Registro de acciones masivas (arquitectura escalable) ──
    Agregar una acción futura sobre la selección = agregar una entrada aquí;
    la barra flotante se pinta sola a partir de este arreglo. */
-function _plBulkIds(){ return Array.prototype.slice.call(PL_SELECTED); }
+function _plBulkIds(){ return Array.from(PL_SELECTED); }
 
 var PL_BULK_ACTIONS=[
   {key:'estado',   icon:'🏷', label:'Cambiar tipificación',  handler:function(){_plBulkAbrirEstadoPop();}},
@@ -8086,6 +8094,12 @@ function _plBulkAbrirEstadoPop(){
    otra tipificación (incluido salir de "Agendado"), el cambio se aplica directo:
    la alerta roja / el ícono de reloj desaparecen solos porque _plChequearVencidos()
    ya no reconoce esas filas como "agendado" (se recalcula en cada render). */
+/* Cambiar tipificación para toda la selección. ÚNICA implementación: es la
+   misma función planillaEstado(id,v) que usa el select de tipificación de
+   cada fila individual — aquí solo se recorre la selección y se la llama una
+   vez por id. Si el destino es "Agendado"/"Agendado para llamar a futuro" se
+   necesita fecha/hora → se delega en _plBulkAgenda, que a su vez reutiliza el
+   mismo calendario y el mismo _agAplicarAId() que usa la agenda individual. */
 function _plBulkAplicarEstado(estado){
   var ids=_plBulkIds(); if(!ids.length)return;
   var pop=document.getElementById('pl-bb-estado-pop'); if(pop)pop.classList.remove('on');
@@ -8093,45 +8107,28 @@ function _plBulkAplicarEstado(estado){
     _plBulkAgenda(estado);
     return;
   }
-  PL_BULK_BUSY=true;
-  Promise.all(ids.map(function(id){return DB.update(id,{estado:estado});})).then(function(){
-    PL_BULK_BUSY=false;
-    renderPlanilla();
-    toast('✔ '+ids.length+' registro'+(ids.length===1?'':'s')+' tipificado'+(ids.length===1?'':'s')+' como "'+_estadoLabel(estado)+'"','ok','global-toast');
-  }).catch(function(){
-    PL_BULK_BUSY=false;
-    renderPlanilla();
-    toast('✖ No se pudo actualizar la tipificación de la selección','err','global-toast');
-  });
+  ids.forEach(function(id){ planillaEstado(id,estado); });
 }
+/* "Marcar como enviadas" es, ni más ni menos, la misma tipificación "enviada"
+   que ya existe en el select de cada fila → misma función, sin excepciones. */
 function _plBulkMarcarEnviadas(){
   var ids=_plBulkIds(); if(!ids.length)return;
-  var ts=new Date().toISOString();
-  PL_BULK_BUSY=true;
-  Promise.all(ids.map(function(id){return DB.update(id,{estado:'enviada',medioEnvio:'masivo',enviadoEn:ts});})).then(function(){
-    PL_BULK_BUSY=false;
-    renderPlanilla();
-    toast('✔ '+ids.length+' registro'+(ids.length===1?'':'s')+' marcado'+(ids.length===1?'':'s')+' como enviado'+(ids.length===1?'':'s'),'ok','global-toast');
-  }).catch(function(){
-    PL_BULK_BUSY=false;
-    renderPlanilla();
-    toast('✖ No se pudo actualizar la selección','err','global-toast');
-  });
+  ids.forEach(function(id){ planillaEstado(id,'enviada'); });
 }
+/* Exportar selección = exportar cada cotización con la misma función que usa
+   "Exportar solo esta" en el menú ⋮ de cada fila, una vez por id seleccionado. */
 function _plBulkExportar(){
   var ids=_plBulkIds(); if(!ids.length)return;
-  Promise.all(ids.map(function(id){return DB.get(id);})).then(function(regs){
-    regs=regs.filter(Boolean);
-    var bk={formato:'cotizadora-backup',formatoVersion:1,schemaVersion:DB.SCHEMA_VERSION,exportadoEn:new Date().toISOString(),total:regs.length,registros:regs,prefs:{}};
-    _descargarJSON(bk,'Cotizaciones_seleccion_'+regs.length+'.json');
-    toast('✔ '+regs.length+' registro'+(regs.length===1?'':'s')+' exportado'+(regs.length===1?'':'s'),'ok','global-toast');
-  });
+  ids.forEach(function(id){ planillaExportarUna(id); });
 }
+/* Eliminar selección: UNA sola confirmación para todo el lote (evita N diálogos),
+   pero el borrado en sí llama a _plEliminarRegistroPorId(id) — la misma función
+   que usa la eliminación individual tras confirmar en el modal de una fila. */
 function _plBulkEliminar(){
   var ids=_plBulkIds(); if(!ids.length)return;
   if(!confirm('Se eliminarán '+ids.length+' registro'+(ids.length===1?'':'s')+' seleccionado'+(ids.length===1?'':'s')+'. Esta acción no se puede deshacer desde aquí.\n\n¿Confirmar la eliminación?'))return;
   PL_BULK_BUSY=true;
-  Promise.all(ids.map(function(id){return DB.softDelete(id);})).then(function(){
+  Promise.all(ids.map(function(id){return _plEliminarRegistroPorId(id);})).then(function(){
     PL_BULK_BUSY=false;
     plSeleccionLimpiar();
     renderPlanilla();
@@ -8281,6 +8278,17 @@ function _agFechaISO(){
   var mm=('0'+(AG_STATE.month+1)).slice(-2), dd=('0'+AG_STATE.day).slice(-2);
   return AG_STATE.year+'-'+mm+'-'+dd;
 }
+/* Única implementación de "fijar agenda a un registro" (lee el estado previo,
+   escribe agenda + tipificación destino). _agConfirmar() la llama una vez
+   para el caso individual y en un bucle para el caso masivo — nunca dos
+   implementaciones distintas del mismo escritura. */
+function _agAplicarAId(id,fecha,hora,estadoDestino){
+  return DB.get(id).then(function(r){
+    if(!r)return;
+    var estadoPrevio=(r.agenda&&r.agenda.estadoAnterior!=null)?r.agenda.estadoAnterior:r.estado;
+    return DB.update(id,{agenda:{fecha:fecha,hora:hora,estadoAnterior:estadoPrevio},estado:estadoDestino});
+  });
+}
 function _agConfirmar(){
   var esBulk=Array.isArray(AG_STATE.ids)&&AG_STATE.ids.length>0;
   if(AG_STATE.id==null&&!esBulk)return;
@@ -8293,13 +8301,7 @@ function _agConfirmar(){
   if(esBulk){
     var ids=AG_STATE.ids.slice(), estadoFinal=AG_STATE.estadoFinal||'agendado';
     PL_BULK_BUSY=true;
-    Promise.all(ids.map(function(id){
-      return DB.get(id).then(function(r){
-        if(!r)return null;
-        var estadoPrevio=(r.agenda&&r.agenda.estadoAnterior!=null)?r.agenda.estadoAnterior:r.estado;
-        return DB.update(id,{agenda:{fecha:fecha,hora:hora,estadoAnterior:estadoPrevio},estado:estadoFinal});
-      });
-    })).then(function(){
+    Promise.all(ids.map(function(id){ return _agAplicarAId(id,fecha,hora,estadoFinal); })).then(function(){
       PL_BULK_BUSY=false;
       _agCerrar();
       renderPlanilla();
@@ -8313,15 +8315,11 @@ function _agConfirmar(){
   }
 
   var id=AG_STATE.id;
-  DB.get(id).then(function(r){
-    if(!r)return;
-    var estadoPrevio=(r.agenda&&r.agenda.estadoAnterior!=null)?r.agenda.estadoAnterior:r.estado;
-    DB.update(id,{agenda:{fecha:fecha,hora:hora,estadoAnterior:estadoPrevio},estado:'agendado'}).then(function(){
-      toast('✔ Recordatorio agendado para '+_fechaISOaDMY(fecha)+' '+hora,'ok','global-toast');
-      _agCerrar();
-      renderPlanilla();
-    }).catch(function(){toast('✖ No se pudo agendar','err','global-toast');});
-  });
+  _agAplicarAId(id,fecha,hora,'agendado').then(function(){
+    toast('✔ Recordatorio agendado para '+_fechaISOaDMY(fecha)+' '+hora,'ok','global-toast');
+    _agCerrar();
+    renderPlanilla();
+  }).catch(function(){toast('✖ No se pudo agendar','err','global-toast');});
 }
 function _agQuitar(){
   if(AG_STATE.id==null)return;
