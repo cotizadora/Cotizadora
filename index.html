@@ -8043,18 +8043,35 @@ var PL_BULK_ACTIONS=[
 
 function _plBulkBarActualizar(){
   var bar=document.getElementById('pl-bulkbar'); if(!bar)return;
+  var wrapTbl=document.getElementById('pl-table-wrap');
   var n=PL_SELECTED.size;
-  if(!n){bar.classList.remove('on');return;}
+  /* Regla obligatoria: el panel es EXCLUSIVO para selección múltiple.
+     0 o 1 fila seleccionada → oculto (con 1 fila ya están los botones de
+     acción individuales al final de esa misma fila; el panel sería redundante). */
+  if(n<2){
+    bar.classList.remove('on');
+    if(wrapTbl)wrapTbl.style.paddingBottom='';
+    return;
+  }
   bar.classList.add('on');
   var cnt=document.getElementById('pl-bb-count');
-  if(cnt)cnt.innerHTML='<b>'+n+'</b> fila'+(n===1?'':'s')+' seleccionada'+(n===1?'':'s');
-  var wrap=document.getElementById('pl-bb-actions'); if(!wrap)return;
-  wrap.innerHTML=PL_BULK_ACTIONS.map(function(a,i){
-    return '<span class="pl-bb-wrap">'+
-      '<button type="button" class="pl-bb-btn'+(a.danger?' pl-bb-danger':'')+'" onclick="PL_BULK_ACTIONS['+i+'].handler()">'+a.icon+' '+a.label+'</button>'+
-      (a.key==='estado'?'<div class="pl-bb-estado-pop" id="pl-bb-estado-pop"></div>':'')+
-      '</span>';
-  }).join('');
+  if(cnt)cnt.innerHTML='<b>'+n+'</b> filas seleccionadas';
+  var wrap=document.getElementById('pl-bb-actions');
+  if(wrap){
+    wrap.innerHTML=PL_BULK_ACTIONS.map(function(a,i){
+      return '<span class="pl-bb-wrap">'+
+        '<button type="button" class="pl-bb-btn'+(a.danger?' pl-bb-danger':'')+'" onclick="PL_BULK_ACTIONS['+i+'].handler()">'+a.icon+' '+a.label+'</button>'+
+        (a.key==='estado'?'<div class="pl-bb-estado-pop" id="pl-bb-estado-pop"></div>':'')+
+        '</span>';
+    }).join('');
+  }
+  /* Segundo problema: el panel es absolute/flotante sobre la tabla y puede
+     tapar la última fila. Se reserva, en el propio contenedor con scroll,
+     un padding-bottom igual a la altura real del panel (+ su offset inferior
+     de 16px + un pequeño respiro), así la última fila siempre queda 100%
+     visible y seleccionable por encima del panel. Se recalcula cada vez
+     porque la altura del panel varía según cuántos botones entran por fila. */
+  if(wrapTbl)wrapTbl.style.paddingBottom=(bar.offsetHeight+16+12)+'px';
 }
 function _plBulkAbrirEstadoPop(){
   var pop=document.getElementById('pl-bb-estado-pop'); if(!pop||typeof DB==='undefined')return;
