@@ -1101,7 +1101,8 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* Cursor de "flecha de selección de fila" al pasar sobre el número de fila,
-   igual que en Excel. Clic = seleccionar fila completa. */
+   igual que en Excel. Clic = alternar selección de esa fila (toggle puro,
+   sin teclas modificadoras: funciona con un solo clic, una sola mano). */
 .pl-td-id{
   cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M4 3 L18 11 L4 19 Z' fill='%23202124' stroke='white' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 11,pointer;
   user-select:none;
@@ -1110,9 +1111,11 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
   cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M4 3 L18 11 L4 19 Z' fill='white' stroke='%23202124' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 11,pointer;
 }
 
-/* Fila seleccionada — resaltado neón elegante, coherente con la estética general. */
+/* Fila seleccionada — resaltado neón + ✓ explícito en el número de fila, para
+   que no quede ninguna duda de cuáles filas están marcadas. */
 .pl-tr.pl-row-selected .pl-td{background:var(--pl-selbg)!important;border-top:1px solid var(--pl-sel)!important;border-bottom:1px solid var(--pl-sel)!important;}
 .pl-tr.pl-row-selected .pl-td-id{background:var(--pl-sel)!important;color:#fff!important;font-weight:900;box-shadow:0 0 10px var(--pl-sel),inset 3px 0 0 var(--pl-sel);}
+.pl-tr.pl-row-selected .pl-td-id .pl-num-text::before{content:"✓ ";}
 #planilla-view.pl-dark .pl-tr.pl-row-selected .pl-td{box-shadow:inset 0 0 16px rgba(90,180,255,.20);}
 #planilla-view.pl-dark .pl-tr.pl-row-selected .pl-td-id{box-shadow:0 0 14px rgba(90,180,255,.65),inset 3px 0 0 var(--pl-sel);}
 
@@ -7337,7 +7340,7 @@ function renderPlanilla(){
       var due=_agEstaVencida(r), sel=PL_SELECTED.has(r.id);
       var agStamp=(r.agenda&&r.agenda.fecha)?(r.agenda.fecha+'T'+(r.agenda.hora||'00:00')):'';
       tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+(sel?' pl-row-selected':'')+'" data-id="'+r.id+'" data-estado="'+_esc(r.estado||'')+'"'+(agStamp?' data-agenda="'+_esc(agStamp)+'"':'')+'>';
-      tb+='<td class="pl-td pl-td-id"><span class="pl-num-text">'+r.id+'</span><span class="pl-agenda-icon">🕰️</span></td>';
+      tb+='<td class="pl-td pl-td-id" title="Clic para marcar / desmarcar esta fila"><span class="pl-num-text">'+r.id+'</span><span class="pl-agenda-icon">🕰️</span></td>';
       PLANILLA_COLUMNS.forEach(function(c,ci){ var v=_celda(r,c.field);
         if(c.field==='observacion'){ tb+='<td class="pl-td pl-td-obs" data-field="observacion" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'" onclick="planillaVerObs('+r.id+',event)">'+_esc(v)+'</td>'; }
         else { tb+='<td class="pl-td" data-field="'+c.field+'" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'">'+_esc(v)+'</td>'; }
@@ -7386,7 +7389,7 @@ function _plCopiarCelda(td){
 }
 function _plCellClick(e){
   var tdId=e.target&&e.target.closest?e.target.closest('.pl-td-id'):null;
-  if(tdId){ _plSeleccionarFila(tdId,e); return; }
+  if(tdId){ _plSeleccionarFila(tdId); return; }
   var td=e.target&&e.target.closest?e.target.closest('.pl-td'):null;
   if(!td||td.classList.contains('pl-td-acc')||td.classList.contains('pl-td-estado')||td.classList.contains('pl-td-id'))return;
   var tbl=document.getElementById('pl-table'); if(!tbl)return;
@@ -7965,28 +7968,18 @@ function _plPoblarFiltroEstado(){
 /* ── Selección múltiple de filas, estilo Excel (clic=fila, Shift=rango, Ctrl=toggle) ──
    Arquitectura pensada para acciones masivas futuras: PL_SELECTED es la única fuente
    de verdad (Set de ids); cualquier acción nueva solo necesita leer _plBulkIds(). */
+/* ── Selección múltiple de filas: SOLO clic-toggle sobre el número de fila ──
+   Simplificado a propósito: sin Shift, sin Ctrl, sin ancla de rango. Un clic
+   sobre el número marca/desmarca esa fila (toggle puro), y nada más. Se puede
+   hacer completamente con una sola mano / un solo botón del mouse, en
+   cualquier orden y a la velocidad que el ejecutivo necesite. */
 var PL_SELECTED=new Set();
-var PL_SELECT_ANCHOR=null;
 var PL_ULTIMA_LISTA=[];
 
-function _plSeleccionarFila(tdCelda,e){
+function _plSeleccionarFila(tdCelda){
   var tr=tdCelda.closest('tr'); if(!tr)return;
   var id=parseInt(tr.getAttribute('data-id'),10); if(isNaN(id))return;
-  if(e&&e.shiftKey&&PL_SELECT_ANCHOR!=null){
-    var ia=PL_ULTIMA_LISTA.indexOf(PL_SELECT_ANCHOR), ib=PL_ULTIMA_LISTA.indexOf(id);
-    if(ia>-1&&ib>-1){
-      var desde=Math.min(ia,ib), hasta=Math.max(ia,ib);
-      PL_SELECTED=new Set(PL_ULTIMA_LISTA.slice(desde,hasta+1));
-    }else{
-      PL_SELECTED=new Set([id]); PL_SELECT_ANCHOR=id;
-    }
-  }else if(e&&(e.ctrlKey||e.metaKey)){
-    if(PL_SELECTED.has(id))PL_SELECTED.delete(id); else PL_SELECTED.add(id);
-    PL_SELECT_ANCHOR=id;
-  }else{
-    PL_SELECTED=new Set([id]);
-    PL_SELECT_ANCHOR=id;
-  }
+  if(PL_SELECTED.has(id))PL_SELECTED.delete(id); else PL_SELECTED.add(id);
   if(typeof playClick==='function')playClick();
   _plAplicarSeleccionDOM();
   _plBulkBarActualizar();
@@ -7999,7 +7992,7 @@ function _plAplicarSeleccionDOM(){
   });
 }
 function plSeleccionLimpiar(){
-  PL_SELECTED=new Set(); PL_SELECT_ANCHOR=null;
+  PL_SELECTED=new Set();
   _plAplicarSeleccionDOM(); _plBulkBarActualizar();
 }
 
