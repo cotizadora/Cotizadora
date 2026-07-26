@@ -7999,7 +7999,7 @@ function plSeleccionLimpiar(){
 /* ── Registro de acciones masivas (arquitectura escalable) ──
    Agregar una acción futura sobre la selección = agregar una entrada aquí;
    la barra flotante se pinta sola a partir de este arreglo. */
-function _plBulkIds(){ return Array.prototype.slice.call(PL_SELECTED); }
+function _plBulkIds(){ return Array.from(PL_SELECTED); }
 
 var PL_BULK_ACTIONS=[
   {key:'estado',   icon:'🏷', label:'Cambiar tipificación',  handler:function(){_plBulkAbrirEstadoPop();}},
