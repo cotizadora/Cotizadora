@@ -1491,6 +1491,11 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 .pl-tr.pl-row-sold .pl-agenda-icon{
   opacity:0;
 }
+/* Estrella de FAVORITO — dorada, estado propio e independiente del reloj (comparte solo el patrón visual). */
+.pl-fav-star{display:inline-block;cursor:pointer;font-size:1.05em;line-height:1;margin:0 5px 0 3px;vertical-align:middle;
+  color:var(--pl-muted,#9aa0a6);opacity:.4;transition:transform .12s ease,color .12s ease,opacity .12s ease;}
+.pl-fav-star:hover{opacity:1;color:#f0c040;transform:scale(1.2);}
+.pl-fav-star.on{opacity:1;color:#f0c040;text-shadow:0 0 8px rgba(240,192,64,.7);}
 
 @keyframes plAgendaIconPulse{
   0%,100%{transform:scale(1);}
@@ -1520,6 +1525,27 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 .bdd-grp-t{font-size:.66rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--y);font-weight:800;margin:13px 2px 7px;opacity:.92;}
 .sol-list.bdd-cols{display:grid;grid-template-columns:1fr 1fr;gap:7px 10px;}
 .sol-list.bdd-cols .sol-item{padding:9px 11px;font-size:.84rem;}
+/* Base de Datos — universo Personas/Empresas + acordeón de atributos */
+.bdd-univ-tabs{display:flex;gap:8px;margin:4px 2px 12px;}
+.bdd-univ-btn{flex:1;background:var(--g2);border:1px solid var(--g4);color:var(--wa);border-radius:9px;padding:9px 8px;cursor:pointer;font-family:inherit;font-weight:800;font-size:.85rem;transition:.14s;}
+.bdd-univ-btn:hover{border-color:var(--rl);color:var(--w);}
+.bdd-univ-btn.on{background:linear-gradient(135deg,rgba(155,28,46,.42),rgba(155,28,46,.18));border-color:var(--r);color:#fff;box-shadow:0 0 12px rgba(155,28,46,.35);}
+.bdd-acc{border:1px solid var(--g3);border-radius:9px;margin-bottom:7px;overflow:hidden;background:var(--g1);}
+.bdd-acc-h{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--g2);border:none;color:var(--w);padding:10px 13px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.82rem;letter-spacing:.2px;text-align:left;}
+.bdd-acc-h:hover{background:var(--g3);}
+.bdd-acc-arrow{color:var(--wa);flex:0 0 auto;transition:transform .15s ease;}
+.bdd-acc.bdd-open .bdd-acc-arrow{transform:rotate(90deg);color:var(--rl);}
+.bdd-acc-body{display:none;padding:10px 12px;border-top:1px solid var(--g3);}
+.bdd-acc.bdd-open .bdd-acc-body{display:block;}
+/* Producto activo: nombre centrado y dominante sobre la barra de productos */
+#active-product-title{position:fixed;top:var(--headH);left:0;right:0;height:var(--barH);z-index:281;
+  display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:none;}
+#active-product-title:empty{display:none;}
+#active-product-title .apt-ic{font-size:1.45rem;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));}
+#active-product-title .apt-lb{font-size:1.12rem;font-weight:900;color:#fff;letter-spacing:.4px;white-space:nowrap;
+  background:rgba(18,18,20,.58);padding:5px 18px;border-radius:22px;border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 4px 16px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+@media(max-width:880px){#active-product-title{display:none;}}
 @media(max-width:520px){.sol-list.bdd-cols{grid-template-columns:1fr;}}
 .sol-list{display:flex;flex-direction:column;gap:8px;}
 .sol-item{display:flex;align-items:center;gap:10px;background:var(--g2);border:1px solid var(--g3);border-radius:8px;padding:11px 13px;cursor:pointer;color:var(--w);font-size:.9rem;transition:.15s;}
@@ -1636,6 +1662,8 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 </header>
 
 <div id="prodbar"></div>
+<!-- Producto activo: nombre centrado y jerárquicamente dominante sobre la barra de productos. -->
+<div id="active-product-title" aria-live="polite"></div>
 
 <div id="mtoggle">
   <button id="mt-config" class="on" onclick="setMobileView('config')">⚙ Configurar</button>
@@ -1671,7 +1699,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
     <!-- 3 · CONFIGURACIÓN COMERCIAL del producto activo -->
     <div class="block">
-      <div class="block-t cfg-block-t"><span class="cfg-active-badge" id="cfg-active-badge"><span class="cfg-badge-ic" id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span></div>
+      <div class="block-t cfg-block-t">⚙ Configuración<span id="cfg-active-badge" style="display:none;"><span id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span></div>
       <div id="config-zone" class="cfg-grid"></div>
     </div>
 
@@ -1682,7 +1710,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 
     <!-- 7 · OBSERVACIONES (último paso, después del cálculo y resultados) -->
     <div class="block">
-      <div class="block-t">📝 Observaciones</div>
+      <div class="block-t">📝 Nota Interna</div>
       <div class="cfg-grid">
         <div class="fld obs-fld">
           <label for="cli-obs"><span class="obs-hint">se sincronizan con la Planilla</span></label>
@@ -2762,12 +2790,18 @@ function cfgHTML(key){
     return '<div class="sol-head2">Productos a incluir</div><div class="sol-list">'+SOL_LIST.map(function(p){return '<label class="sol-item"><input type="checkbox" value="'+p[0]+'"'+(p[2]?' checked':'')+' onchange="refresh()"><span>'+p[1]+'</span></label>';}).join('')+'</div>';
   }
   if(key==='bdd'){
-    var grupos=BDD_GROUPS.map(function(g){
-      return '<div class="bdd-grp-t">'+g.t+'</div><div class="sol-list bdd-cols">'+
-        g.items.map(function(it){return '<label class="sol-item"><input type="checkbox" data-bdd="1" value="'+it[0]+'" data-lb="'+it[1]+'"'+(it[2]?' checked':'')+' onchange="refresh()"><span>'+it[1]+'</span></label>';}).join('')+
-      '</div>';
-    }).join('');
-    return '<div class="sol-head2">Atributos de la Base de Datos</div>'+grupos+
+    var grupoAcc=function(g){
+      return '<div class="bdd-acc">'+
+        '<button type="button" class="bdd-acc-h" onclick="bddGrpToggle(this)"><span class="bdd-acc-t">'+g.t+'</span><span class="bdd-acc-arrow">▸</span></button>'+
+        '<div class="bdd-acc-body"><div class="sol-list bdd-cols">'+
+          g.items.map(function(it){return '<label class="sol-item"><input type="checkbox" data-bdd="1" value="'+it[0]+'" data-lb="'+it[1]+'"'+(BDD_DEFAULTS[it[0]]?' checked':'')+' onchange="refresh()"><span>'+it[1]+'</span></label>';}).join('')+
+        '</div></div></div>';
+    };
+    var per=BDD_CATALOGO.personas.map(grupoAcc).join(''), emp=BDD_CATALOGO.empresas.map(grupoAcc).join('');
+    return '<div class="sol-head2">Atributos de la Base de Datos</div>'+
+      '<div class="bdd-univ-tabs"><button type="button" class="bdd-univ-btn on" data-univ="personas" onclick="bddUniverso(\'personas\')">👤 Personas</button><button type="button" class="bdd-univ-btn" data-univ="empresas" onclick="bddUniverso(\'empresas\')">🏢 Empresas</button></div>'+
+      '<div id="bdd-personas" class="bdd-univ">'+per+'</div>'+
+      '<div id="bdd-empresas" class="bdd-univ" style="display:none;">'+emp+'</div>'+
       '<div class="bdd-grp-t">Servicio adicional</div><div class="sol-list">'+
         '<label class="sol-item"><input type="checkbox" id="bdd-enrich" onchange="refresh()"><span>Enrichment — actualizar y complementar base existente del cliente</span></label>'+
       '</div>'+
@@ -3172,12 +3206,52 @@ function renderPortafolioSoluciones(target){
    igual que Soluciones. Aislado tras CURRENT.key==='bdd'. Rutas existentes
    intactas (guardas isBdd, espejo de isSol/isMulti).
    ════════════════════════════════════════════════════════════════ */
-var BDD_GROUPS=[
-  {t:'Identificación',items:[['nombre','Nombre completo',1],['rut','RUT',1],['edad','Edad',0],['genero','Género',0],['empresa','Empresa',0],['tipoemp','Tipo de empresa',0],['rubro','Rubro',0],['replegal','Representante legal',0]]},
-  {t:'Información de contacto',items:[['email','Correo electrónico',1],['telpart','Teléfono particular',0],['telcom','Teléfono comercial',0],['telcel','Teléfono celular',1],['dircom','Dirección comercial',0]]},
-  {t:'Ubicación',items:[['region','Región',1],['sector','Sector',0],['cobnac','Cobertura nacional',0]]},
-  {t:'Información comercial y de riesgo',items:[['renta','Renta',0],['score','Score',1],['riesgo','Puntuación de riesgo crediticio',0]]}
-];
+/* ════════ CATÁLOGO BASE DE DATOS — fuente: BASES.xlsx (hoja FILTROS) ════════
+   142 atributos (74 Personas + 68 Empresas) agrupados para navegación por acordeón.
+   Patrón por ítem: [key, label]. Keys prefijadas p_/e_ (únicas). El check por
+   defecto lo define BDD_DEFAULTS. BDD_GROUPS = versión PLANA (personas+empresas)
+   que consumen SIN CAMBIOS las plantillas (Ficha/Gmail/Outlook/WhatsApp) y
+   addBddToMulti(). La UI (cfgHTML) usa BDD_CATALOGO por universo. */
+var BDD_CATALOGO={
+  personas:[
+    {t:'Identificación',items:[['p_rut','Rut'],['p_nombre','Nombre'],['p_rutificacion_de_nombres_cobro_por_','Rutificación de Nombres (cobro por reg. Entrada)']]},
+    {t:'Información personal',items:[['p_sexo','Sexo'],['p_fecha_de_nacimiento_edad','Fecha de Nacimiento (Edad)'],['p_tipo_de_nacionalidad','Tipo de Nacionalidad'],['p_interdictos','Interdictos']]},
+    {t:'Información familiar',items:[['p_estado_civil','Estado Civil'],['p_fecha_ultimo_matrimonio','Fecha último Matrimonio'],['p_registro_de_conyuge_cobro_por_reg_','Registro de Cónyuge (cobro por reg. Entrada)'],['p_registro_de_hijos_cobro_por_reg_en','Registro de Hijos (cobro por reg. Entrada)'],['p_registro_de_hermanos_cobro_por_reg','Registro de Hermanos (cobro por reg. Entrada)'],['p_registro_de_padres_cobro_por_reg_e','Registro de Padres (cobro por reg. Entrada)']]},
+    {t:'Información socioeconómica',items:[['p_pension_basica_vejez_invalidez','Pensión Básica Vejez/Invalidez'],['p_profesion_u_oficio','Profesión u Oficio'],['p_profesion_especialidad','Profesión - Especialidad'],['p_modelo_renta','Modelo Renta'],['p_fonasa','Fonasa'],['p_grupo_socioeconomico_gse','Grupo Socioeconómico (GSE)'],['p_indice_socioeconomico_equifax_ise','Indice Socioeconómico Equifax (ISE)']]},
+    {t:'Direcciones',items:[['p_direccion_particular_sin_verificac','Dirección Particular Sin Verificación'],['p_direccion_particular_verificada_po','Dirección Particular (Verificada por Equifax)'],['p_direccion_comercial_sin_verificaci','Dirección Comercial Sin Verificación'],['p_direccion_comercial_verificada_por','Dirección Comercial (Verificada por Equifax)'],['p_codigo_postal','Código Postal'],['p_limpieza_automatica_direcciones_ma','Limpieza Automática Direcciones (máx 3, cobro por reg. Entrada)']]},
+    {t:'Teléfonos',items:[['p_telefono_particular_sin_verificaci','Teléfono Particular Sin Verificación'],['p_telefono_particular_verificado_por','Teléfono Particular (Verificado por Equifax)'],['p_telefono_comercial_sin_verificacio','Teléfono Comercial Sin Verificación'],['p_telefono_comercial_verificado_por_','Teléfono Comercial (Verificado por Equifax)'],['p_telefono_celular_sin_verificacion','Teléfono Celular Sin Verificación.'],['p_telefono_celular_verificado_por_eq','Teléfono Celular (Verificado por Equifax)'],['p_limpieza_automatica_de_telefonos_m','Limpieza Automática de Teléfonos (máx 3, cobro por reg. Entrada)'],['p_numero_de_fax','Número de Fax']]},
+    {t:'Correos',items:[['p_direccion_e_mail','Dirección E-Mail']]},
+    {t:'Quiebras y prendas',items:[['p_inscrito_proceso_quiebra_cobro_por','Inscrito Proceso Quiebra (cobro por reg. Entrada)'],['p_prospecto_proceso_quiebra_cobro_po','Prospecto Proceso Quiebra (cobro por reg. Entrada)'],['p_prendas_sin_desplazamiento_si_no','Prendas sin desplazamiento (Si/No)'],['p_prendas_sin_desplazamiento_detalle','Prendas sin desplazamiento (Detalle)']]},
+    {t:'Antecedentes comerciales',items:[['p_predictor_actual','Predictor Actual'],['p_consultas_al_rut_ultimos_6_meses_s','Consultas al Rut Ultimos 6 Meses (Si/No)'],['p_consultas_al_rut_ultimos_6_meses_d','Consultas al Rut Ultimos 6 Meses (Detalle)'],['p_antecedentes_comerciales_bolcom_si','Antecedentes Comerciales BOLCOM (Si/No)'],['p_antecedentes_comerciales_bolcom_de','Antecedentes Comerciales BOLCOM (Detalle)'],['p_antecedentes_comerciales_boletin_d','Antecedentes Comerciales BOLETIN DICOM (Si/No)'],['p_antecedentes_comerciales_boletin_d2','Antecedentes Comerciales BOLETIN DICOM (Detalle)'],['p_antecedentes_comerciales_icom_si_n','Antecedentes Comerciales ICOM (Si/No)'],['p_antecedentes_comerciales_icom_deta','Antecedentes Comerciales ICOM (Detalle)']]},
+    {t:'Antecedentes bancarios',items:[['p_antecedentes_bancarios_si_no','Antecedentes Bancarios (Si/No)'],['p_antecedentes_bancarios_detalle','Antecedentes Bancarios (Detalle)']]},
+    {t:'Participaciones societarias',items:[['p_participacion_socio_y_sociedades_s','Participación Socio y Sociedades (Si/No)'],['p_participacion_socio_y_sociedades_d','Participación Socio y Sociedades (Detalle)']]},
+    {t:'Bienes raíces',items:[['p_bienes_raices_si_no','Bienes Raíces (Si/No)'],['p_bienes_raices_detalle','Bienes Raíces (Detalle)'],['p_bienes_raices_detalle_construccion','Bienes Raíces (Detalle Construcción)']]},
+    {t:'Laboral y previsional',items:[['p_boletin_laboral_y_previsional_si_n','Boletín Laboral y Previsional (Si/No)'],['p_boletin_laboral_y_previsional_deta','Boletín Laboral y Previsional (Detalle)']]},
+    {t:'Información tributaria',items:[['p_anotaciones_tributarias_si_no','Anotaciones Tributarias (Si/No)'],['p_anotaciones_tributarias_detalle','Anotaciones Tributarias (Detalle)']]},
+    {t:'Vehículos',items:[['p_vehiculos_motorizados_si_no','Vehículos Motorizados (Si/No)'],['p_placa_patente','Placa Patente'],['p_marca','Marca'],['p_modelo','Modelo'],['p_tipo','Tipo'],['p_taxi','Taxi'],['p_transporte_publico_de_vehiculos','Transporte Publico de Vehiculos'],['p_avaluo_fiscal','Avalúo Fiscal'],['p_avaluo_comercial','Avaluo Comercial'],['p_fecha_ultima_transferencia','Fecha última transferencia'],['p_vehiculo_en_prenda','Vehiculo en Prenda'],['p_color','Color'],['p_ano_fabricacion','Año Fabricación'],['p_chasis','Chasis'],['p_motor','Motor']]}
+  ],
+  empresas:[
+    {t:'Identificación',items:[['e_rut','Rut'],['e_razon_social','Razón Social'],['e_rutificacion_de_razon_social_cobro','Rutificación de Razón Social (cobro por reg. Entrada)'],['e_registro_de_quiebra','Registro de Quiebra']]},
+    {t:'Actividad económica',items:[['e_actividad_economica','Actividad Económica'],['e_actividad_economica_principal','Actividad Económica Principal'],['e_ultimo_ano_timbraje','Último Año Timbraje'],['e_pago_moneda_extranjera_si_no','Pago Moneda Extranjera (Si/No)'],['e_pro_pyme_si_no','Pro-PYME (Si/No)'],['e_fecha_inicio_actividades','Fecha Inicio Actividades'],['e_empresas_activas_si_no','Empresas Activas (Si/No)']]},
+    {t:'Tamaño y facturación',items:[['e_tamano_empresa','Tamaño Empresa'],['e_facturacion_empresa_tamano','Facturación Empresa (Tamaño)'],['e_facturacion_rango_subrango','Facturación Rango+Subrango'],['e_observaciones_empresas','Observaciones Empresas'],['e_numero_de_trabajadores_rango','Número de Trabajadores (Rango)'],['e_numero_de_trabajadores_exacto','Número de Trabajadores (Exacto)']]},
+    {t:'Ejecutivos y contactos',items:[['e_ejecutivos_de_contacto','Ejecutivos de Contacto'],['e_cargo_general_ejecutivo','Cargo General Ejecutivo'],['e_area_de_trabajo','Área de Trabajo'],['e_nivel_de_cargo_ejecutivo_codigo','Nivel de Cargo Ejecutivo (código)']]},
+    {t:'Direcciones',items:[['e_direccion_comercial_sin_verificaci','Dirección Comercial Sin Verificación'],['e_direccion_comercial_verificada_por','Dirección Comercial (Verificada por Equifax)'],['e_codigo_postal','Código Postal'],['e_limpieza_automatica_direcciones_ma','Limpieza Automática Direcciones (máx 3, cobro por reg. Entrada)']]},
+    {t:'Teléfonos',items:[['e_telefono_comercial_sin_verificacio','Teléfono Comercial Sin Verificación'],['e_telefono_comercial_verificado_por_','Teléfono Comercial (Verificado por Equifax)'],['e_telefono_celular_sin_verificacion','Teléfono Celular Sin Verificación.'],['e_telefono_celular_verificado_por_eq','Teléfono Celular (Verificado por Equifax)'],['e_limpieza_automatica_de_telefonos_m','Limpieza Automática de Teléfonos (máx 3, cobro por reg. Entrada)']]},
+    {t:'Correos',items:[['e_direccion_e_mail','Dirección E-Mail']]},
+    {t:'Antecedentes comerciales',items:[['e_clasificador_actual','Clasificador Actual'],['e_consultas_al_rut_ultimos_6_meses_s','Consultas al Rut Ultimos 6 Meses (Si/No)'],['e_consultas_al_rut_ultimos_6_meses_d','Consultas al Rut Ultimos 6 Meses (Detalle)'],['e_antecedentes_comerciales_bolcom_si','Antecedentes Comerciales BOLCOM (Si/No)'],['e_antecedentes_comerciales_bolcom_de','Antecedentes Comerciales BOLCOM (Detalle)'],['e_antecedentes_comerciales_boletin_d','Antecedentes Comerciales BOLETIN DICOM (Si/No)'],['e_antecedentes_comerciales_boletin_d2','Antecedentes Comerciales BOLETIN DICOM (Detalle)'],['e_antecedentes_comerciales_icom_si_n','Antecedentes Comerciales ICOM (Si/No)'],['e_antecedentes_comerciales_icom_deta','Antecedentes Comerciales ICOM (Detalle)']]},
+    {t:'Antecedentes bancarios',items:[['e_antecedentes_bancarios_si_no','Antecedentes Bancarios (Si/No)'],['e_antecedentes_bancarios_detalle','Antecedentes Bancarios (Detalle)']]},
+    {t:'Participaciones',items:[['e_participacion_socio_y_sociedades_s','Participación Socio y Sociedades (Si/No)'],['e_participacion_socio_y_sociedades_d','Participación Socio y Sociedades (Detalle)']]},
+    {t:'Bienes raíces',items:[['e_bienes_raices_si_no','Bienes Raíces (Si/No)'],['e_bienes_raices_detalle','Bienes Raíces (Detalle)'],['e_bienes_raices_detalle_construccion','Bienes Raíces (Detalle Construcción)']]},
+    {t:'Laboral y previsional',items:[['e_boletin_laboral_y_previsional_si_n','Boletín Laboral y Previsional (Si/No)'],['e_boletin_laboral_y_previsional_deta','Boletín Laboral y Previsional (Detalle)']]},
+    {t:'Información tributaria',items:[['e_anotaciones_tributarias_si_no','Anotaciones Tributarias (Si/No)'],['e_anotaciones_tributarias_detalle','Anotaciones Tributarias (Detalle)']]},
+    {t:'Prendas',items:[['e_prendas_sin_desplazamiento_si_no','Prendas sin desplazamiento (Si/No)'],['e_prendas_sin_desplazamiento_detalle','Prendas sin desplazamiento (Detalle)']]},
+    {t:'Vehículos',items:[['e_vehiculos_motorizados_si_no','Vehículos Motorizados (Si/No)'],['e_placa_patente','Placa Patente'],['e_marca','Marca'],['e_modelo','Modelo'],['e_tipo','Tipo'],['e_taxi','Taxi'],['e_transporte_publico_de_vehiculos','Transporte Publico de Vehiculos'],['e_avaluo_fiscal','Avalúo Fiscal'],['e_avaluo_comercial','Avaluo Comercial'],['e_fecha_ultima_transferencia','Fecha última transferencia'],['e_vehiculo_en_prenda','Vehiculo en Prenda'],['e_color','Color'],['e_ano_fabricacion','Año Fabricación'],['e_chasis','Chasis'],['e_motor','Motor']]}
+  ]
+};
+/* Versión PLANA para las plantillas y addBddToMulti (no las tocamos). */
+var BDD_GROUPS=BDD_CATALOGO.personas.concat(BDD_CATALOGO.empresas);
+/* Atributos marcados por defecto (mínimos habituales de una base). */
+var BDD_DEFAULTS={p_rut:1,p_nombre:1,p_direccion_e_mail:1,p_telefono_celular_verificado_por_eq:1,e_rut:1,e_razon_social:1,e_direccion_e_mail:1};
 /* Valores de ejemplo NEUTROS y claramente referenciales (punto 5) */
 var BDD_EJEMPLOS={nombre:'Juan Pérez González',rut:'12.345.678-9',edad:'42',genero:'Femenino / Masculino',empresa:'Empresa Ejemplo SpA',tipoemp:'Sociedad por Acciones',rubro:'Comercio / Servicios',replegal:'María Soto Reyes',email:'contacto@empresa.cl',telpart:'+56 2 2345 6789',telcom:'+56 2 2987 6543',telcel:'+56 9 8765 4321',dircom:'Av. Ejemplo 1234, Of. 56',region:'Región Metropolitana',sector:'Providencia',cobnac:'Nacional',renta:'$1.500.000 (tramo ref.)',score:'720 (ref.)',riesgo:'Bajo (ref.)'};
 /* Valor comercial de una base segmentada (punto 6) */
@@ -3198,6 +3272,14 @@ function bddDescHTML(cTxt){
 function bddDescWA(){
   return BDD_DESC_P.join('\n\n')+'\n';
 }
+/* Toggle universo Personas/Empresas: ambos viven en el DOM (uno oculto) para que la
+   selección persista y las plantillas (que leen los checks marcados) sigan viéndola. */
+function bddUniverso(u){
+  ['personas','empresas'].forEach(function(x){var el=document.getElementById('bdd-'+x);if(el)el.style.display=(x===u)?'':'none';});
+  Array.prototype.forEach.call(document.querySelectorAll('.bdd-univ-btn'),function(b){b.classList.toggle('on',b.getAttribute('data-univ')===u);});
+}
+/* Acordeón: abre/cierra un grupo de atributos. */
+function bddGrpToggle(btn){var acc=btn.parentNode;if(acc)acc.classList.toggle('bdd-open');}
 function bddSelected(){var s={},zone=document.getElementById('config-zone');if(zone)Array.prototype.forEach.call(zone.querySelectorAll('.sol-item input[data-bdd]:checked'),function(c){s[c.value]=c.getAttribute('data-lb')||c.value;});return s;}
 function bddEnrich(){var e=document.getElementById('bdd-enrich');return !!(e&&e.checked);}
 function bddVol(){var e=document.getElementById('bdd-vol');var n=e?parseInt(e.value):0;return (n&&n>0)?n:0;}
@@ -3839,6 +3921,9 @@ function setProduct(key){
   var p=PRODUCTS.find(function(x){return x.key===key;});
   $('cfg-prod-name').textContent=p?p.lb:'';
   var _pIco=$('cfg-prod-icon');if(_pIco)_pIco.textContent=p?p.ic:'';
+  /* Producto activo dominante, centrado sobre la barra de productos. */
+  var _apt=document.getElementById('active-product-title');
+  if(_apt)_apt.innerHTML=p?('<span class="apt-ic">'+p.ic+'</span><span class="apt-lb">'+p.lb+'</span>'):'';
   $('config-zone').innerHTML=cfgHTML(key);
   /* Pago Publicación Única: correo (Outlook/Gmail/WhatsApp), sin Ficha de Oferta (imagen) */
   var _imgBtn=document.getElementById('cvbtn-img');
@@ -7205,6 +7290,16 @@ document.addEventListener('click',function(e){ var m=document.getElementById('ex
    Grilla reactiva sobre DB con las 12 columnas oficiales de PLANILLA_COLUMNS.
    La fila de la grilla y la fila de exportación se construyen con el MISMO recorrido. */
 var PL_STATE={q:'',estado:'',sortField:'id',sortDir:1,verEliminados:false};
+/* ════════ FAVORITOS (estrella) — sistema paralelo e INDEPENDIENTE de la agenda/reloj ════════
+   Estado propio en localStorage (mapa {id:true}). Una gestión puede ser favorita,
+   agendada, ambas o ninguna. No reutiliza la lógica del reloj. */
+var PL_FAVS=(function(){try{return JSON.parse(localStorage.getItem('pl_favoritos')||'{}')||{};}catch(e){return {};}})();
+function _plFavGuardar(){try{localStorage.setItem('pl_favoritos',JSON.stringify(PL_FAVS));}catch(e){}}
+function planillaFav(id,el){
+  if(PL_FAVS[id]){delete PL_FAVS[id];} else {PL_FAVS[id]=true;}
+  _plFavGuardar();
+  if(el)el.classList.toggle('on',!!PL_FAVS[id]);   /* toggle inmediato, sin re-render */
+}
 
 function _esc(s){return (''+(s==null?'':s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function _capitaliza(s){s=''+(s||'');return s.charAt(0).toUpperCase()+s.slice(1);}
@@ -7350,7 +7445,7 @@ function renderPlanilla(){
       var due=_agEstaVencida(r), sel=PL_SELECTED.has(r.id);
       var agStamp=(r.agenda&&r.agenda.fecha)?(r.agenda.fecha+'T'+(r.agenda.hora||'00:00')):'';
       tb+='<tr class="pl-tr'+(elim?' pl-elim':'')+(actual?' pl-actual':'')+(sel?' pl-row-selected':'')+'" data-id="'+r.id+'" data-estado="'+_esc(r.estado||'')+'"'+(agStamp?' data-agenda="'+_esc(agStamp)+'"':'')+'>';
-      tb+='<td class="pl-td pl-td-id"><span class="pl-num-text">'+r.id+'</span><span class="pl-agenda-icon">🕰️</span></td>';
+      tb+='<td class="pl-td pl-td-id"><span class="pl-num-text">'+r.id+'</span><span class="pl-fav-star'+(PL_FAVS[r.id]?' on':'')+'" onclick="event.stopPropagation();planillaFav('+r.id+',this)" title="Favorito (independiente de la agenda)">★</span><span class="pl-agenda-icon">🕰️</span></td>';
       PLANILLA_COLUMNS.forEach(function(c,ci){ var v=_celda(r,c.field);
         if(c.field==='observacion'){ tb+='<td class="pl-td pl-td-obs" data-field="observacion" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'" onclick="planillaVerObs('+r.id+',event)">'+_esc(v)+'</td>'; }
         else { tb+='<td class="pl-td" data-field="'+c.field+'" data-ref="'+_colLetra(ci)+r.id+'" title="'+_esc(v)+'">'+_esc(v)+'</td>'; }
