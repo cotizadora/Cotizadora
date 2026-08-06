@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plantilla de correo · Secretaría Virtual — Geimser</title>
+  <link rel="icon" href="assets/logo_geimser.webp" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/plantilla.css" />
+</head>
+<body>
+
+  <header class="pt-header">
+    <img class="logo" src="assets/logo_geimser.webp" alt="Geimser" />
+    <div class="titles">
+      <div class="t1">Plantilla de <b>correo</b></div>
+      <div class="t2">Asistente Ejecutiva en Línea · editable y exportable a Outlook</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="pt-actions">
+      <button class="btn" id="btn-reset" title="Volver a los valores por defecto">↺ Restablecer</button>
+      <button class="btn" id="btn-save" title="Guardar esta plantilla en el navegador">💾 Guardar</button>
+      <button class="btn primary" id="btn-export" title="Descargar el correo .eml para Outlook">📥 Exportar .eml</button>
+    </div>
+  </header>
+
+  <main class="pt-main">
+
+    <!-- ══ Editor ═══════════════════════════════════════════════════════ -->
+    <section class="editor">
+
+      <div class="card">
+        <div class="card-head"><span class="c-tag">✉</span> Encabezado del correo</div>
+        <div class="card-body">
+          <div class="row2">
+            <div class="field"><label for="f_fromName">Remitente (nombre)</label><input class="input" id="f_fromName" type="text" /></div>
+            <div class="field"><label for="f_fromEmail">Remitente (correo)</label><input class="input" id="f_fromEmail" type="email" /></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="f_toName">Destinatario (nombre)</label><input class="input" id="f_toName" type="text" /></div>
+            <div class="field"><label for="f_toEmail">Destinatario (correo)</label><input class="input" id="f_toEmail" type="email" /></div>
+          </div>
+          <div class="field"><label for="f_subject">Asunto</label><input class="input" id="f_subject" type="text" /></div>
+          <p class="hint">Al abrir el .eml, Outlook puede usar tu cuenta como remitente real; estos campos definen el contenido de la plantilla.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="c-tag">🖼</span> Banner</div>
+        <div class="card-body">
+          <div class="banner-tools">
+            <button class="btn" id="btn-banner">Reemplazar imagen…</button>
+            <button class="btn ghost" id="btn-banner-reset">Usar TOP_01 (por defecto)</button>
+            <input class="file-hidden" id="banner-file" type="file" accept="image/*" />
+          </div>
+          <img class="banner-preview" id="banner-preview" alt="Vista del banner" />
+          <p class="hint">Recomendado: imagen apaisada ~640 px de ancho. Se embebe dentro del .eml.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="c-tag">✎</span> Cuerpo</div>
+        <div class="card-body">
+          <div class="row2">
+            <div class="field"><label for="f_saludo">Saludo</label><input class="input" id="f_saludo" type="text" /></div>
+            <div class="field"><label for="f_planValor">Valor mensual</label><input class="input" id="f_planValor" type="text" /></div>
+          </div>
+          <div class="field"><label for="f_intro">Introducción</label><textarea class="textarea" id="f_intro"></textarea></div>
+          <div class="row2">
+            <div class="field"><label for="f_planNombre">Plan</label><input class="input" id="f_planNombre" type="text" /></div>
+            <div class="field"><label for="f_planDesc">Descripción del plan</label><input class="input" id="f_planDesc" type="text" /></div>
+          </div>
+          <div class="field"><label for="f_notaUf">Nota UF</label><textarea class="textarea" id="f_notaUf"></textarea></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="c-tag">✓</span> El servicio incluye</div>
+        <div class="card-body">
+          <div class="field">
+            <label for="f_incluye">Un ítem por línea</label>
+            <textarea class="textarea" id="f_incluye" style="min-height:120px;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="c-tag">§</span> Condiciones comerciales</div>
+        <div class="card-body">
+          <div class="field">
+            <label for="f_condiciones">Un ítem por línea, formato <code>Etiqueta: valor</code></label>
+            <textarea class="textarea" id="f_condiciones" style="min-height:120px;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="c-tag">↪</span> Cierre y firma</div>
+        <div class="card-body">
+          <div class="field"><label for="f_cta">Párrafo de cierre (CTA)</label><textarea class="textarea" id="f_cta"></textarea></div>
+          <div class="row2">
+            <div class="field"><label for="f_firmaArea">Área / cargo</label><input class="input" id="f_firmaArea" type="text" /></div>
+            <div class="field"><label for="f_firmaTel">Teléfono (opcional)</label><input class="input" id="f_firmaTel" type="text" placeholder="+56 9 ..." /></div>
+          </div>
+          <div class="field"><label for="f_footer">Pie corporativo</label><input class="input" id="f_footer" type="text" /></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══ Vista previa ═════════════════════════════════════════════════ -->
+    <section class="preview-wrap">
+      <div class="preview-meta">
+        <span>Para: <b id="pm-to">—</b></span>
+        <span>Asunto: <b id="pm-subject">—</b></span>
+      </div>
+      <div class="preview-frame" id="preview-frame"><!-- correo renderizado --></div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/plantilla-assets.js"></script>
+  <script src="js/plantilla.js"></script>
+</body>
+</html>
