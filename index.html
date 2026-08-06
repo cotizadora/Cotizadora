@@ -779,8 +779,11 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 /* Selector de cuenta de Gmail (junto al botón) + config de cuentas (Personalización) */
 .gmail-acct-wrap{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;border:1px solid var(--g4);border-radius:8px;padding:0 9px;background:rgba(0,0,0,.12);}
 .gmail-acct-cap{font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.7;white-space:nowrap;}
-.gmail-acct-sel{background:transparent;border:none;color:inherit;font-weight:700;font-size:.82rem;padding:7px 2px;cursor:pointer;max-width:160px;font-family:inherit;}
+.gmail-acct-sel{background:#000;border:none;color:#39FF14;font-weight:700;font-size:.82rem;padding:7px 2px;cursor:pointer;max-width:160px;font-family:inherit;border-radius:6px;}
 .gmail-acct-sel:focus{outline:none;}
+/* CONFIABILIDAD: color explícito en las <option> para que el desplegable nativo contraste (fondo negro, verde neón) en vez de texto claro sobre fondo claro */
+.gmail-acct-sel option{background:#000;color:#39FF14;font-weight:700;}
+.gmail-acct-sel option:checked,.gmail-acct-sel option:hover{background:#0a0a0a;color:#5bff4d;}
 
 /* ── MODAL (Ampliar / UF / Guardadas) ─────────────── */
 .modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.82);
