@@ -191,6 +191,8 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .pbtn[data-key="multi"]{min-height:56px;padding:12px 18px;}
 .pbtn[data-key="multi"] .ic{font-size:1.55rem;width:30px;height:30px;}
 .pbtn[data-key="multi"] .lb{max-width:150px;font-size:.93rem;}
+/* Etiqueta larga "Datos Bancarios para Pagar Publicación Única": un poco más ancha y compacta para no crecer de más */
+.pbtn[data-key="pago_pub"] .lb{max-width:172px;font-size:.82rem;line-height:1.22;}
 
 .pbtn-badge{position:absolute;top:-11px;right:-11px;min-width:26px;height:26px;padding:0 6px;border-radius:50%;background:linear-gradient(135deg,#ffd24d,#f0a51e);color:#3a0a12;font-size:1rem;font-weight:900;line-height:26px;text-align:center;border:2px solid var(--g0);box-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(255,200,60,.85);display:none;letter-spacing:0;box-sizing:border-box;}
 .pbtn-badge.on{display:block;}
@@ -2476,7 +2478,7 @@ var PRODUCTS=[
   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida',group:'products'},
   {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM',group:'products'},
   /* 4 · Agregador y catálogo — herramientas de apoyo */
-  {key:'pago_pub',ic:'💳',lb:'Pago Publicación Única',su:'Confirmación de pago',group:'tools'},
+  {key:'pago_pub',ic:'💳',lb:'Datos Bancarios para Pagar Publicación Única',su:'Confirmación de pago',group:'tools'},
   {key:'multi',ic:'📦',lb:'Multiproducto',su:'Paquete comercial',group:'tools'},
   {key:'soluciones',ic:'🧩',lb:'Información de Productos',su:'Catálogo',group:'tools'}
 ];
@@ -2525,7 +2527,7 @@ function buildProdbar(){
 
   var trigger=document.createElement('button');
   trigger.type='button';trigger.className='pmenu-trigger';trigger.id='pmenu-trigger';
-  trigger.innerHTML='<span class="ic">🗂️</span><span class="pmenu-lb">Productos</span><span class="pmenu-car">▾</span>';
+  trigger.innerHTML='<span class="ic">🗂️</span><span class="pmenu-lb">Crear Cotizaciones</span><span class="pmenu-car">▾</span>';
   trigger.onclick=function(e){e.stopPropagation();playClick();toggleProdMenu();};
   trigger.addEventListener('mouseenter',function(){playHover();});
   wrap.appendChild(trigger);
