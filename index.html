@@ -5245,7 +5245,10 @@ function _gmailAcctsParse(raw){
 function _gmailAcctsGet(){
   var raw=''; try{raw=localStorage.getItem(_GMAIL_ACCTS_KEY)||'';}catch(e){}
   var list=_gmailAcctsParse(raw);
-  return list.length?list:[{idx:'0',label:'Cuenta 0'}];
+  if(list.length)return list;
+  /* Sin configurar: ofrecer 0–5 para poder elegir cualquier cuenta al vuelo. */
+  var def=[]; for(var i=0;i<=5;i++)def.push({idx:String(i),label:'Cuenta '+i});
+  return def;
 }
 function _gmailAcctFill(){
   var sel=document.getElementById('gmail-acct-sel'); if(!sel)return;
