@@ -1806,7 +1806,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <div id="cp-actions">
       <div class="cv-section-lbl">Acciones</div>
       <button type="button" id="btn-cot-fav" class="cp-act cp-favorito" onclick="cotizadorFav();playClick();" title="Marcar esta cotización como FAVORITA (★). Aparece destacada en la Planilla. Si aún no está guardada, se guarda y se marca.">
-        <span class="cp-ico">★</span><span class="cp-lb" id="cot-fav-lb">Favorito</span>
+        <span class="cp-ico">★</span><span class="cp-lb" id="cot-fav-lb">Añadir a favoritos</span>
       </button>
       <button type="button" id="btn-add-multi" class="cp-act cp-carrito" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto (carrito)">
         <span class="cp-ico">🛒</span><span class="cp-lb">Carrito multiproducto</span>
@@ -7375,7 +7375,7 @@ function _cotFavRefrescar(){
   var id=(typeof SESION!=='undefined')?SESION.registroId:null;
   var on=(id!=null)&&!!PL_FAVS[id];
   b.classList.toggle('on',on);
-  var lb=document.getElementById('cot-fav-lb'); if(lb)lb.textContent=on?'Favorita ★':'Favorito';
+  var lb=document.getElementById('cot-fav-lb'); if(lb)lb.textContent=on?'Quitar de favoritos':'Añadir a favoritos';
 }
 function cotizadorFav(){
   var id=(typeof SESION!=='undefined')?SESION.registroId:null;
