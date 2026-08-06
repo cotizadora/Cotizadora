@@ -313,6 +313,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
    título + badge del producto integrados en la misma línea, a la izquierda
    (NO al extremo derecho), sin crecer la altura del bloque (misma fila). */
 .cfg-block-t{justify-content:flex-start;margin-bottom:9px;flex-wrap:nowrap;}
+/* Botón "Reiniciar calculadora": vive en el encabezado (no suma altura); resetea TODO el precio, no solo Precio Venta */
+.reset-calc-btn{margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 10px;border-radius:11px;
+  background:var(--g2);border:1px solid var(--g4);color:var(--wa);font-family:inherit;font-weight:800;font-size:.62rem;
+  letter-spacing:.4px;text-transform:uppercase;cursor:pointer;transition:.14s ease;flex-shrink:0;line-height:1;}
+.reset-calc-btn:hover{background:var(--r);border-color:var(--rl);color:#fff;}
+.reset-calc-btn .rc-ico{font-size:.92rem;line-height:1;}
 .cfg-block-lb{white-space:nowrap;flex-shrink:0;}
 .cfg-active-badge{display:flex;align-items:center;gap:6px;min-width:0;max-width:75%;height:22px;
   background:linear-gradient(135deg,rgba(155,28,46,.24),rgba(155,28,46,.08));
@@ -779,6 +785,10 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
   box-shadow:0 0 12px rgba(37,211,102,.45);transform:translateY(-1px);}
 .btn-envio-directo .edir-txt{flex:1;text-align:left;}
 .btn-envio-directo .edir-arrow{font-size:1.35rem;line-height:1;color:#25D366;flex-shrink:0;margin-left:6px;}
+/* Gmail: mismo verde que el menú de cuentas (tono medio) para que armonicen al estar juntos */
+#btn-abrir-gmail{color:#2FE93D;border-color:rgba(47,233,61,.55);}
+#btn-abrir-gmail .edir-arrow{color:#2FE93D;}
+#btn-abrir-gmail:hover{background:rgba(47,233,61,.12);border-color:#2FE93D;box-shadow:0 0 12px rgba(47,233,61,.45);}
 /* Botón copiar asunto — ocupa el resto del ancho disponible */
 .btn-copiar-asunto{flex:1;min-width:0;}
 /* Selector de cuenta de Gmail (junto al botón) + config de cuentas (Personalización) */
@@ -788,10 +798,10 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .gmail-acct-btn{background:transparent;border:none;color:inherit;font-weight:700;font-size:.82rem;padding:7px 2px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
 .gmail-acct-btn:focus{outline:none;}
 .gmail-acct-caret{font-size:.7rem;opacity:.85;}
-.gmail-acct-menu{display:none;position:absolute;top:calc(100% + 4px);right:0;z-index:9999;margin:0;padding:4px;list-style:none;min-width:118px;background:#000;border:1px solid #39FF14;border-radius:8px;box-shadow:0 8px 26px rgba(0,0,0,.65);}
+.gmail-acct-menu{display:none;position:absolute;top:calc(100% + 4px);right:0;z-index:9999;margin:0;padding:4px;list-style:none;min-width:118px;background:#000;border:1px solid #2FE93D;border-radius:8px;box-shadow:0 8px 26px rgba(0,0,0,.65);}
 .gmail-acct-menu.open{display:block;}
-.gmail-acct-menu li{padding:7px 12px;color:#39FF14;font-weight:700;font-size:.82rem;cursor:pointer;border-radius:5px;white-space:nowrap;}
-.gmail-acct-menu li:hover,.gmail-acct-menu li.sel{background:#0f2e0a;color:#5bff4d;}
+.gmail-acct-menu li{padding:7px 12px;color:#2FE93D;font-weight:700;font-size:.82rem;cursor:pointer;border-radius:5px;white-space:nowrap;}
+.gmail-acct-menu li:hover,.gmail-acct-menu li.sel{background:rgba(47,233,61,.16);color:#2FE93D;}
 
 /* ── MODAL (Ampliar / UF / Guardadas) ─────────────── */
 .modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.82);
@@ -1718,7 +1728,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
     <!-- 3 · CONFIGURACIÓN COMERCIAL del producto activo -->
     <div class="block">
-      <div class="block-t cfg-block-t">⚙ Configuración<span id="cfg-active-badge" style="display:none;"><span id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span></div>
+      <div class="block-t cfg-block-t">⚙ Configuración<span id="cfg-active-badge" style="display:none;"><span id="cfg-prod-icon"></span><span id="cfg-prod-name" class="cfg-badge-name"></span></span><button type="button" id="btn-reset-calc" class="reset-calc-btn" onclick="resetCalculadora();playClick();" title="Reiniciar la calculadora: descarta los ajustes manuales de precio venta/lista y vuelve a los valores del sistema"><span class="rc-ico">↺</span><span class="rc-tx">Reiniciar</span></button></div>
       <div id="config-zone" class="cfg-grid"></div>
     </div>
 
@@ -2976,9 +2986,7 @@ function renderSummary(c){
   /* MEJORA: aumentar jerarquía visual, eliminar descuento duplicado */
   var ventaCtrl=
     '<div class="metric" style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:6px;">'+
-      '<button type="button" onclick="resetCalculadora()" title="Reiniciar la calculadora a los valores originales del sistema"'+
-        ' style="background:var(--g3);border:1px solid var(--g4);color:#fff;width:26px;height:47px;border-radius:5px;cursor:pointer;font-size:1rem;font-weight:900;transition:.12s;line-height:1;padding:0;flex-shrink:0;"'+
-        ' onmouseover="this.style.background=\'var(--r)\'" onmouseout="this.style.background=\'var(--g3)\'">↺</button>'+
+      '<div style="width:26px;flex-shrink:0;" aria-hidden="true"></div>'+
       '<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">'+
         '<label style="display:block;font-size:.86rem;letter-spacing:.2px;text-transform:uppercase;color:#cbcbd0;margin-bottom:4px;font-weight:800;line-height:1.1;">Precio venta</label>'+
         '<div class="v g" style="font-size:1.45rem;font-weight:800;line-height:1.2;">'+
@@ -7413,7 +7421,7 @@ var _EQFAV=(function(){
   function start(){
     ensureLink();if(!fRed)build();
     if(timer){clearInterval(timer);timer=null;}
-    if(on){tick();timer=setInterval(tick,850);}else{LINK.href=fStatic;}
+    if(on){tick();timer=setInterval(tick,450);}else{LINK.href=fStatic;}
   }
   function set(v){on=!!v;try{localStorage.setItem('eq_fav_blink',on?'1':'0');}catch(e){}start();_syncIco();}
   function _syncIco(){var e=document.getElementById('fav-blink-emo');if(e)e.textContent=on?'✨':'▫️';
