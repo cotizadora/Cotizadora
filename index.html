@@ -776,6 +776,12 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .btn-envio-directo .edir-arrow{font-size:1.35rem;line-height:1;color:#25D366;flex-shrink:0;margin-left:6px;}
 /* Botón copiar asunto — ocupa el resto del ancho disponible */
 .btn-copiar-asunto{flex:1;min-width:0;}
+/* Selector de cuenta de Gmail (junto al botón) + config de cuentas (Personalización) */
+.gmail-acct-wrap{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;border:1px solid var(--g4);border-radius:8px;padding:0 9px;background:rgba(0,0,0,.12);}
+.gmail-acct-cap{font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.7;white-space:nowrap;}
+.gmail-acct-sel{background:transparent;border:none;color:inherit;font-weight:700;font-size:.82rem;padding:7px 2px;cursor:pointer;max-width:160px;font-family:inherit;}
+.gmail-acct-sel:focus{outline:none;}
+.gmail-accts-cfg{width:100%;box-sizing:border-box;resize:vertical;min-height:56px;font-family:inherit;font-size:.8rem;padding:6px 8px;border:1px solid var(--g4);border-radius:8px;background:rgba(0,0,0,.12);color:inherit;margin-bottom:6px;}
 
 /* ── MODAL (Ampliar / UF / Guardadas) ─────────────── */
 .modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.82);
@@ -1645,6 +1651,11 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
           </div>
         </div>
         <div class="set-sec">
+          <span class="set-hd">Cuentas de Gmail</span>
+          <textarea id="gmail-accts-cfg" class="gmail-accts-cfg" rows="3" spellcheck="false" placeholder="Una por línea:  0 Trabajo&#10;1 Personal&#10;2 Otra"></textarea>
+          <button type="button" class="set-item set-wide" id="gmail-accts-save" onclick="_gmailAcctsSave();">Guardar cuentas</button>
+        </div>
+        <div class="set-sec">
           <span class="set-hd">Aplicaciones</span>
           <button type="button" class="set-item set-wide" data-target="descargas" onclick="_cerrarSettings();goToView(this.dataset.target)" title="Centro de Descargas — extensiones y aplicaciones del equipo (CRM Extractor, ShortCut Vocal, MuteReal, NotasSmart)">
             <svg viewBox="0 0 24 24" aria-hidden="true" class="set-dl-ic"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
@@ -1820,9 +1831,10 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
         <div class="act-strip sticky-bar">
           <div class="as-subject"><span class="as-lb">ASUNTO</span><span class="sv" id="tpl-asunto" contenteditable="true" spellcheck="false" title="Editable — puedes ajustarlo antes de copiar"></span></div>
           <div class="as-actions" style="flex:1;display:flex;gap:7px;align-items:stretch;">
-            <button class="pv-copy-btn btn-destacado btn-copiar-asunto" onclick="copHTMLGmail();playClick();" title="Copia el contenido del correo para pegarlo en Gmail">
-              <span class="ico">📋</span><span>COPIAR ASUNTO GMAIL</span>
-            </button>
+            <label class="gmail-acct-wrap" title="Cuenta de Gmail a usar (configura tus cuentas en Personalización ⚙)">
+              <span class="gmail-acct-cap">Cuenta</span>
+              <select id="gmail-acct-sel" class="gmail-acct-sel" onchange="_gmailAcctSelSave(this.value)"></select>
+            </label>
             <button class="btn-envio-directo" id="btn-abrir-gmail" onclick="abrirGmail();playClick();" title="Abre Gmail con destinatario y asunto, y copia el diseño al portapapeles: solo haz clic en el cuerpo y pega con Ctrl+V">
               <span class="edir-txt">ENVÍO DIRECTO GMAIL</span><span class="edir-arrow">➜</span>
             </button>
@@ -1836,9 +1848,6 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <!-- OUTLOOK -->
       <div class="pv-pane on" id="pane-outlook">
         <div class="act-strip sticky-bar">
-          <button class="pv-copy-btn btn-destacado" style="flex:0 1 60%;max-width:70%;justify-content:center;" onclick="copAsunto();playClick();" title="Copia solo el asunto del correo">
-            <span class="ico">📋</span><span>Copiar asunto…</span>
-          </button>
           <span class="sv" id="tpl-asunto-outlook" style="display:none;"></span>
           <div class="as-actions" style="flex:0 0 auto;display:flex;gap:7px;align-items:stretch;margin-left:auto;">
             <button class="btn-envio-directo" id="btn-abrir-outlook" onclick="descargarEML();playClick();" title="Descarga un .eml que abre Outlook con destinatario, asunto y cuerpo precargados — solo adjunta el PDF y envía">
@@ -5222,6 +5231,47 @@ function copHTMLOutlook(){
   _copHTMLEl(el,'📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje');
   try{if(_sndOn&&'speechSynthesis'in window){var _uo=new SpeechSynthesisUtterance('Asunto copiado para Outlook.');_uo.lang='es-CL';_uo.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_uo);}}catch(e){}
 }
+/* ═══ Cuentas de Gmail — selector junto al botón + config en Personalización (aditivo) ═══ */
+var _GMAIL_ACCTS_KEY='eq_gmail_accts', _GMAIL_ACCT_SEL_KEY='eq_gmail_acct_sel';
+function _gmailAcctsParse(raw){
+  var out=[];
+  (raw||'').split(/\r?\n/).forEach(function(ln){
+    ln=ln.trim(); if(!ln)return;
+    var m=ln.match(/^(\d+)\s*[=:\-]?\s*(.*)$/);
+    if(m)out.push({idx:m[1],label:(m[2]||('Cuenta '+m[1])).trim()});
+  });
+  return out;
+}
+function _gmailAcctsGet(){
+  var raw=''; try{raw=localStorage.getItem(_GMAIL_ACCTS_KEY)||'';}catch(e){}
+  var list=_gmailAcctsParse(raw);
+  return list.length?list:[{idx:'0',label:'Cuenta 0'}];
+}
+function _gmailAcctFill(){
+  var sel=document.getElementById('gmail-acct-sel'); if(!sel)return;
+  var list=_gmailAcctsGet(), cur='';
+  try{cur=localStorage.getItem(_GMAIL_ACCT_SEL_KEY)||'';}catch(e){}
+  sel.innerHTML=list.map(function(a){return '<option value="'+a.idx+'">'+String(a.label).replace(/</g,'&lt;')+'</option>';}).join('');
+  sel.value=(cur&&list.some(function(a){return a.idx===cur;}))?cur:list[0].idx;
+}
+function _gmailAcctSelSave(v){try{localStorage.setItem(_GMAIL_ACCT_SEL_KEY,String(v));}catch(e){}}
+function _gmailAcctCurrent(){
+  var sel=document.getElementById('gmail-acct-sel');
+  if(sel&&sel.value!=='')return sel.value.replace(/\D/g,'')||'0';
+  try{return (localStorage.getItem(_GMAIL_ACCT_SEL_KEY)||'0').replace(/\D/g,'')||'0';}catch(e){return '0';}
+}
+function _gmailAcctsSave(){
+  var ta=document.getElementById('gmail-accts-cfg'); if(!ta)return;
+  try{localStorage.setItem(_GMAIL_ACCTS_KEY,ta.value||'');}catch(e){}
+  _gmailAcctFill();
+  if(typeof toast==='function')toast('✔ Cuentas de Gmail guardadas','ok','global-toast');
+}
+function _gmailAcctsInit(){
+  var ta=document.getElementById('gmail-accts-cfg');
+  if(ta){try{ta.value=localStorage.getItem(_GMAIL_ACCTS_KEY)||'';}catch(e){}}
+  _gmailAcctFill();
+}
+(function(){ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_gmailAcctsInit); else _gmailAcctsInit(); })();
 function abrirGmail(){
   try{ if(typeof registrarEnvio==='function')registrarEnvio('email'); }catch(_e){}   /* #7 · trazabilidad de envío */
   try{
@@ -5232,7 +5282,7 @@ function abrirGmail(){
     if(elRich) _copHTMLEl(elRich,'📧 Gmail abierto · Plantilla copiada — solo haz clic en el cuerpo y pega con Ctrl+V');
     /* Gmail no admite HTML por URL y el cuerpo NO se precarga: se abre vacío
        para que el usuario solo pegue (Ctrl+V) sin tener que borrar nada antes. */
-    var url='https://mail.google.com/mail/?view=cm&fs=1&tf=1'+
+    var url='https://mail.google.com/mail/u/'+_gmailAcctCurrent()+'/?view=cm&fs=1&tf=1'+
             '&to='+encodeURIComponent(dest)+
             '&bcc='+encodeURIComponent(BCC_FIJO)+
             '&su='+encodeURIComponent(asunto);
