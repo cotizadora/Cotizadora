@@ -284,7 +284,12 @@ header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 6
 .cp-act .cp-lb{position:relative;z-index:1;}
 .cp-act:hover{transform:translateY(-2px);background:rgba(255,255,255,.09);}
 .cp-act:active{transform:translateY(0) scale(.97);}
-.cp-guardar{--neon:46,204,113;} .cp-carrito{--neon:240,192,64;}
+.cp-guardar{--neon:46,204,113;} .cp-carrito{--neon:240,192,64;} .cp-favorito{--neon:240,192,64;}
+/* Estrella grande de favorito en Acciones: apagada = gris; encendida = dorada con glow */
+.cp-favorito .cp-ico{color:#6b6b74;transition:color .16s ease,text-shadow .16s ease,transform .16s ease;}
+.cp-favorito:hover .cp-ico{color:#f0c040;transform:scale(1.06);}
+.cp-favorito.on .cp-ico{color:#f0c040;text-shadow:0 0 14px rgba(240,192,64,.85);}
+.cp-favorito.on{border-color:rgba(240,192,64,.6);box-shadow:inset 0 0 0 1px rgba(240,192,64,.35),0 0 16px rgba(240,192,64,.35),0 8px 22px rgba(0,0,0,.4);}
 .cp-act:hover,.cp-act:focus-visible{border-color:rgba(var(--neon),.75);
   box-shadow:inset 0 0 0 1px rgba(var(--neon),.35),0 0 16px rgba(var(--neon),.45),0 8px 22px rgba(0,0,0,.4);}
 .cp-guardar .cp-ico{color:#2ecc71;} .cp-carrito .cp-ico{color:#f0c040;}
@@ -1503,9 +1508,9 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   opacity:0;
 }
 /* Estrella de FAVORITO — dorada, estado propio e independiente del reloj (comparte solo el patrón visual). */
-.pl-fav-star{display:inline-block;cursor:pointer;font-size:1.05em;line-height:1;margin:0 5px 0 3px;vertical-align:middle;
-  color:var(--pl-muted,#9aa0a6);opacity:.4;transition:transform .12s ease,color .12s ease,opacity .12s ease;}
-.pl-fav-star:hover{opacity:1;color:#f0c040;transform:scale(1.2);}
+.pl-fav-star{display:inline-block;cursor:pointer;font-size:1.55em;line-height:1;margin:0 2px;padding:3px 5px;vertical-align:middle;
+  color:var(--pl-muted,#9aa0a6);opacity:.6;transition:transform .12s ease,color .12s ease,opacity .12s ease;}
+.pl-fav-star:hover{opacity:1;color:#f0c040;transform:scale(1.28);}
 .pl-fav-star.on{opacity:1;color:#f0c040;text-shadow:0 0 8px rgba(240,192,64,.7);}
 
 @keyframes plAgendaIconPulse{
@@ -1654,6 +1659,9 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
             <button type="button" class="set-item" onclick="toggleSnd();" title="Sonido de interfaz (activar/silenciar)"><span id="snd-toggle" class="set-emo">🔊</span>Sonido</button>
             <button type="button" class="set-item" id="force-update-btn" onclick="forceUpdate();" title="Ver la última versión publicada (recarga sin caché)"><span class="set-emo">⟳</span>Actualizar</button>
           </div>
+          <div class="set-row" style="margin-top:8px;">
+            <button type="button" class="set-item set-wide" id="fav-blink-btn" onclick="toggleFavBlink();" title="Hace parpadear el ícono de la pestaña con los colores de Equifax para ubicar la Cotizadora entre muchas pestañas (Chrome y Edge)"><span id="fav-blink-emo" class="set-emo">✨</span><span id="fav-blink-txt">Parpadeo ON</span></button>
+          </div>
         </div>
         <div class="set-sec">
           <span class="set-hd">Aplicaciones</span>
@@ -1785,6 +1793,9 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
          columna central; siempre visibles. IDs preservados (no cambia la lógica). -->
     <div id="cp-actions">
       <div class="cv-section-lbl">Acciones</div>
+      <button type="button" id="btn-cot-fav" class="cp-act cp-favorito" onclick="cotizadorFav();playClick();" title="Marcar esta cotización como FAVORITA (★). Aparece destacada en la Planilla. Si aún no está guardada, se guarda y se marca.">
+        <span class="cp-ico">★</span><span class="cp-lb" id="cot-fav-lb">Favorito</span>
+      </button>
       <button type="button" id="btn-add-multi" class="cp-act cp-carrito" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto (carrito)">
         <span class="cp-ico">🛒</span><span class="cp-lb">Carrito multiproducto</span>
       </button>
@@ -6972,6 +6983,7 @@ function onObsInput(){
 /* Modelo de versionado (#18/#19): 💾 SIEMPRE crea una versión nueva. Cuando hay una
    cotización abierta, el panel secundario ofrece la excepción "Actualizar #N". */
 function actualizarBotonGuardar(){
+  if(typeof _cotFavRefrescar==='function')_cotFavRefrescar();  /* la estrella de Acciones sigue el registro abierto */
   var b=document.getElementById('btn-guardar-cotizacion');
   if(b)b.classList.toggle('acc-dirty-glow', SESION.dirty && SESION.registroId!=null);
   var sec=document.getElementById('acc-secondary'); if(!sec)return;
@@ -7345,8 +7357,73 @@ function planillaFav(id,el){
   if(PL_FAVS[id]){delete PL_FAVS[id];} else {PL_FAVS[id]=true;}
   _plFavGuardar();
   if(el)el.classList.toggle('on',!!PL_FAVS[id]);   /* toggle inmediato, sin re-render */
+  if(typeof _cotFavRefrescar==='function')_cotFavRefrescar();  /* mantiene sincronía con la estrella de Acciones */
+}
+/* Estrella de FAVORITO en la vista de Cotización (misma que la Planilla, keyed por registroId). */
+function _cotFavRefrescar(){
+  var b=document.getElementById('btn-cot-fav'); if(!b)return;
+  var id=(typeof SESION!=='undefined')?SESION.registroId:null;
+  var on=(id!=null)&&!!PL_FAVS[id];
+  b.classList.toggle('on',on);
+  var lb=document.getElementById('cot-fav-lb'); if(lb)lb.textContent=on?'Favorita ★':'Favorito';
+}
+function cotizadorFav(){
+  var id=(typeof SESION!=='undefined')?SESION.registroId:null;
+  if(id==null){
+    /* Aún no guardada: la guardamos y la marcamos como favorita. */
+    if(typeof guardarCotizacion!=='function')return;
+    var p=guardarCotizacion();
+    if(p&&p.then)p.then(function(nid){
+      if(nid==null)return;
+      PL_FAVS[nid]=true; _plFavGuardar(); _cotFavRefrescar();
+      toast('★ Guardada y marcada como favorita (#'+nid+')','ok','global-toast');
+    });
+    return;
+  }
+  if(PL_FAVS[id]){delete PL_FAVS[id];} else {PL_FAVS[id]=true;}
+  _plFavGuardar(); _cotFavRefrescar();
+  toast(PL_FAVS[id]?('★ Cotización #'+id+' marcada como favorita'):('☆ #'+id+' quitada de favoritos'),'ok','global-toast');
 }
 
+/* ═══ Favicon dinámico Equifax — parpadea para ubicar la pestaña entre muchas ═══
+   Nota: un sitio web NO puede fijar su pestaña "por encima" de las demás ni reordenarlas
+   (lo impide el navegador). Lo que sí se puede es hacer que el ÍCONO de la pestaña
+   destaque/parpadee, y funciona igual en Chrome y Edge. */
+var _EQFAV=(function(){
+  var LINK=null,timer=null,on=true,phase=0,fRed=null,fGold=null,fStatic=null;
+  try{on=(localStorage.getItem('eq_fav_blink')||'1')!=='0';}catch(e){}
+  function ensureLink(){
+    LINK=document.querySelector('link[rel="icon"]');
+    if(!LINK){LINK=document.createElement('link');LINK.rel='icon';document.head.appendChild(LINK);}
+  }
+  function star(x,cx,cy,outer,inner){
+    var rot=-Math.PI/2,step=Math.PI/5;x.beginPath();x.moveTo(cx,cy-outer);
+    for(var i=0;i<5;i++){x.lineTo(cx+Math.cos(rot)*outer,cy+Math.sin(rot)*outer);rot+=step;
+      x.lineTo(cx+Math.cos(rot)*inner,cy+Math.sin(rot)*inner);rot+=step;}
+    x.closePath();x.fill();
+  }
+  function draw(bg,fg){
+    var c=document.createElement('canvas');c.width=c.height=64;var x=c.getContext('2d'),r=13;
+    x.fillStyle=bg;x.beginPath();x.moveTo(r,0);x.arcTo(64,0,64,64,r);x.arcTo(64,64,0,64,r);x.arcTo(0,64,0,0,r);x.arcTo(0,0,64,0,r);x.closePath();x.fill();
+    x.fillStyle=fg;star(x,32,34,20,9);
+    return c.toDataURL('image/png');
+  }
+  function build(){fRed=draw('#c0263b','#f0c040');fGold=draw('#f0c040','#9b1c2e');fStatic=draw('#9b1c2e','#ffffff');}
+  function tick(){phase^=1;LINK.href=phase?fRed:fGold;}
+  function start(){
+    ensureLink();if(!fRed)build();
+    if(timer){clearInterval(timer);timer=null;}
+    if(on){tick();timer=setInterval(tick,850);}else{LINK.href=fStatic;}
+  }
+  function set(v){on=!!v;try{localStorage.setItem('eq_fav_blink',on?'1':'0');}catch(e){}start();_syncIco();}
+  function _syncIco(){var e=document.getElementById('fav-blink-emo');if(e)e.textContent=on?'✨':'▫️';
+    var t=document.getElementById('fav-blink-txt');if(t)t.textContent=on?'Parpadeo ON':'Parpadeo OFF';}
+  function toggle(){set(!on);}
+  function init(){start();_syncIco();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+  return {toggle:toggle,set:set,get:function(){return on;}};
+})();
+function toggleFavBlink(){_EQFAV.toggle();}
 function _esc(s){return (''+(s==null?'':s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function _capitaliza(s){s=''+(s||'');return s.charAt(0).toUpperCase()+s.slice(1);}
 function _estadoLabel(e){ return (typeof DB!=='undefined'&&DB.ESTADO_LABELS&&DB.ESTADO_LABELS[e])||_capitaliza(e); }
