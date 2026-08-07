@@ -117,6 +117,12 @@ table.hist tr:hover td{background:var(--surface-2)}
 .h-btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px;margin-right:4px}
 .h-btn:hover{border-color:var(--brand)}
 .hist-empty{text-align:center;color:var(--muted);padding:24px}
+/* pegar / modal */
+.btn-paste{width:100%;justify-content:center;margin-bottom:12px;background:var(--brand-100);border-color:var(--brand);color:var(--brand-600);font-weight:800}
+.btn-paste:hover{background:var(--brand);color:#fff}
+.modal-back{position:fixed;inset:0;background:rgba(3,12,20,.55);display:flex;align-items:center;justify-content:center;z-index:70;padding:20px}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-lg);padding:18px;width:min(560px,96vw)}
+.modal-h{font-weight:800;font-size:16px;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -147,6 +153,7 @@ table.hist tr:hover td{background:var(--surface-2)}
     <div class="card">
       <div class="card-head"><span class="c-tag">1</span> Cliente</div>
       <div class="card-body">
+        <button class="btn btn-paste" id="btn-paste" title="Lee la ficha copiada del CRM Atlas y rellena los campos">📋 Pegar datos del CRM (Atlas)</button>
         <div class="row2">
           <div class="field"><label for="f_toName">Contacto</label><input class="input" id="f_toName" type="text" placeholder="Nombre" /></div>
           <div class="field"><label for="f_toEmail">Correo</label><input class="input" id="f_toEmail" type="email" placeholder="correo@dominio.cl" /></div>
@@ -155,7 +162,10 @@ table.hist tr:hover td{background:var(--surface-2)}
           <div class="field"><label for="f_empresa">Empresa / Administrador</label><input class="input" id="f_empresa" type="text" placeholder="(opcional)" /></div>
           <div class="field"><label for="f_condominios">N° condominios</label><input class="input" id="f_condominios" type="number" min="0" placeholder="(opcional)" /></div>
         </div>
-        <div class="field"><label for="f_telefono">Teléfono</label><input class="input" id="f_telefono" type="tel" placeholder="(opcional)" /></div>
+        <div class="row2">
+          <div class="field"><label for="f_telefono">Teléfono</label><input class="input" id="f_telefono" type="tel" placeholder="(opcional)" /></div>
+          <div class="field"><label for="f_rut">RUT</label><input class="input" id="f_rut" type="text" placeholder="(opcional)" /></div>
+        </div>
       </div>
     </div>
 
@@ -246,12 +256,15 @@ table.hist tr:hover td{background:var(--surface-2)}
       </select>
       <input class="input" id="hist-search" style="width:170px" placeholder="Buscar…" />
       <button class="btn" id="hist-tsv">📋 Copiar TSV</button>
+      <button class="btn" id="hist-backup" title="Descargar respaldo del historial (JSON)">⬇ Respaldo</button>
+      <button class="btn" id="hist-import-btn" title="Importar un respaldo JSON">⬆ Importar</button>
+      <input type="file" id="hist-import-file" accept="application/json,.json" style="display:none" />
       <button class="btn primary" id="hist-export">📊 Exportar Excel</button>
     </div>
     <div class="hist-table-wrap">
       <table class="hist" id="hist-table">
         <thead><tr>
-          <th>Fecha</th><th>Empresa</th><th>Contacto</th><th>Correo</th><th>Tel.</th><th>Cond.</th>
+          <th>Fecha</th><th>Empresa</th><th>Contacto</th><th>Correo</th><th>Tel.</th><th>RUT</th><th>Cond.</th>
           <th>Plan</th><th>UF/mes</th><th>CLP/mes</th><th>Período</th><th>Estado</th><th>Agendar</th><th>Obs.</th><th></th>
         </tr></thead>
         <tbody id="hist-tbody"></tbody>
@@ -259,6 +272,18 @@ table.hist tr:hover td{background:var(--surface-2)}
     </div>
   </div>
 </section>
+
+<div class="modal-back" id="paste-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-h">📋 Pegar datos del CRM</div>
+    <p class="hint" style="margin:0 0 8px">Copia la ficha del lead en Atlas y pégala aquí (Ctrl+V). Detecto nombre, correo, teléfono y RUT.</p>
+    <textarea class="textarea" id="paste-text" style="min-height:170px" placeholder="Pega aquí la ficha del CRM…"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn" id="paste-cancel">Cancelar</button>
+      <button class="btn primary" id="paste-go">Procesar</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -329,10 +354,10 @@ var PLANS={
 };
 
 var DEF_SEL={atencion:'tel_g',servicios:[],cobertura:[],sala:'sala5',reporte:'rep_m',dash:false,periodo:'p_m'};
-var TEXT_FIELDS=['toName','toEmail','empresa','condominios','telefono','fromName','fromEmail',
+var TEXT_FIELDS=['toName','toEmail','empresa','condominios','telefono','rut','fromName','fromEmail',
   'subject','saludo','intro','cta','condiciones','firmaArea','firmaTel','planNombre','incluye'];
 var DEFAULTS={
-  toName:'',toEmail:'',empresa:'',condominios:'',telefono:'',
+  toName:'',toEmail:'',empresa:'',condominios:'',telefono:'',rut:'',
   fromName:'Wilma Carolina Santos Fuentes',fromEmail:'wsantos@infobusiness.cl',
   subject:'Geimser · Cotización Asistente Ejecutiva en Línea',
   saludo:'Estimada',
@@ -637,7 +662,7 @@ function histAdd(){
   if(!state.toName&&!state.toEmail){toast('Agrega al menos nombre o correo del cliente','bad');return;}
   var uf=computeUf(), clp=Math.round(uf*(parseFloat(state.ufdia)||0));
   var row={id:Date.now(),fecha:fechaHoy(),empresa:state.empresa||'',contacto:state.toName||'',correo:state.toEmail||'',
-    telefono:state.telefono||'',condominios:state.condominios||'',plan:state.planNombre||'',modulos:state.planDesc||'',
+    telefono:state.telefono||'',rut:state.rut||'',condominios:state.condominios||'',plan:state.planNombre||'',modulos:state.planDesc||'',
     uf:uf,clp:clp,periodo:state.periodoTxt||'Mensual',estado:'Borrador',agenda:'',obs:'',
     sel:JSON.parse(JSON.stringify(sel)),ufdia:state.ufdia,iva:state.iva};
   var a=histAll(); a.unshift(row); histSave(a);
@@ -647,7 +672,7 @@ function histSet(id,field,val){var a=histAll();for(var i=0;i<a.length;i++){if(a[
 function histDelete(id){if(!confirm('¿Borrar este registro del historial?'))return;histSave(histAll().filter(function(r){return r.id!=id;}));renderHist();}
 function histReopen(id){
   var r=histAll().filter(function(x){return x.id==id;})[0]; if(!r)return;
-  state.empresa=r.empresa;state.toName=r.contacto;state.toEmail=r.correo;state.telefono=r.telefono;state.condominios=r.condominios;
+  state.empresa=r.empresa;state.toName=r.contacto;state.toEmail=r.correo;state.telefono=r.telefono;state.rut=r.rut||'';state.condominios=r.condominios;
   if(r.ufdia)state.ufdia=r.ufdia; if(typeof r.iva!=='undefined')state.iva=r.iva;
   if(r.sel){sel={atencion:r.sel.atencion,servicios:(r.sel.servicios||[]).slice(),cobertura:(r.sel.cobertura||[]).slice(),sala:r.sel.sala,reporte:r.sel.reporte,dash:!!r.sel.dash,periodo:r.sel.periodo};}
   autoName=true;autoIncluye=true; writeForm(); syncModuleUI(); compute(); render(); showTab('cotizador'); toast('Cotización reabierta','ok');
@@ -661,14 +686,14 @@ function renderHist(){
     return true;
   });
   if($('hist-count'))$('hist-count').textContent=a.length+' registro'+(a.length===1?'':'s');
-  if(!a.length){body.innerHTML='<tr><td colspan="14" class="hist-empty">Sin registros. Arma una cotización y pulsa “➕ Historial”.</td></tr>';return;}
+  if(!a.length){body.innerHTML='<tr><td colspan="15" class="hist-empty">Sin registros. Arma una cotización y pulsa “➕ Historial”.</td></tr>';return;}
   var today=new Date(); today.setHours(0,0,0,0);
   body.innerHTML=a.map(function(r){
     var overdue=r.agenda&&new Date(r.agenda)<today&&r.estado!=='Ganada'&&r.estado!=='Perdida';
     var opts=ESTADOS.map(function(e){return '<option'+(e===r.estado?' selected':'')+'>'+e+'</option>';}).join('');
     return '<tr data-id="'+r.id+'">'+
       '<td>'+esc(r.fecha)+'</td><td>'+esc(r.empresa)+'</td><td>'+esc(r.contacto)+'</td><td>'+esc(r.correo)+'</td>'+
-      '<td>'+esc(r.telefono)+'</td><td style="text-align:center">'+esc(r.condominios)+'</td>'+
+      '<td>'+esc(r.telefono)+'</td><td>'+esc(r.rut||'')+'</td><td style="text-align:center">'+esc(r.condominios)+'</td>'+
       '<td>'+esc(r.plan)+'</td><td style="text-align:right">'+fmtUf(r.uf)+'</td><td style="text-align:right">'+fmtClp(r.clp)+'</td>'+
       '<td>'+esc(r.periodo)+'</td>'+
       '<td><select class="h-in" data-f="estado">'+opts+'</select></td>'+
@@ -687,8 +712,8 @@ function bindHist(){
   if($('hist-export'))$('hist-export').addEventListener('click',exportHistExcel);
   if($('hist-tsv'))$('hist-tsv').addEventListener('click',copyHistTsv);
 }
-var HIST_COLS=['Fecha','Empresa','Contacto','Correo','Teléfono','N° Condominios','Plan / Módulos','UF/mes','CLP/mes','Período','Estado','Agenda','Observaciones'];
-function histRowArr(r){return [r.fecha,r.empresa,r.contacto,r.correo,r.telefono,r.condominios,r.plan+(r.modulos?' — '+r.modulos:''),fmtUf(r.uf),r.clp,r.periodo,r.estado,r.agenda,r.obs];}
+var HIST_COLS=['Fecha','Empresa','Contacto','Correo','Teléfono','RUT','N° Condominios','Plan / Módulos','UF/mes','CLP/mes','Período','Estado','Agenda','Observaciones'];
+function histRowArr(r){return [r.fecha,r.empresa,r.contacto,r.correo,r.telefono,r.rut||'',r.condominios,r.plan+(r.modulos?' — '+r.modulos:''),fmtUf(r.uf),r.clp,r.periodo,r.estado,r.agenda,r.obs];}
 function exportHistExcel(){
   var a=histAll(); if(!a.length){toast('Historial vacío','bad');return;}
   var head='<tr>'+HIST_COLS.map(function(c){return '<th style="background:#0A2540;color:#fff">'+esc(c)+'</th>';}).join('')+'</tr>';
@@ -704,6 +729,73 @@ function copyHistTsv(){
   copyText(tsv,'📋 Copiado — pega en Excel');
 }
 
+/* ── Mapeo desde el CRM Atlas (botón "Pegar") ───────────────────────────── */
+function titleCase(s){return String(s||'').toLowerCase().replace(/\b([a-záéíóúñü])/g,function(m,c){return c.toUpperCase();});}
+function parseCrm(raw){
+  var lines=String(raw||'').replace(/\r/g,'').split('\n').map(function(l){return l.trim();});
+  function afterLabel(labels){
+    for(var i=0;i<lines.length;i++){
+      var ln=lines[i].toLowerCase().replace(/:$/,'').trim();
+      if(labels.indexOf(ln)>=0){ for(var k=i+1;k<lines.length;k++){ if(lines[k]) return lines[k]; } }
+    }
+    return '';
+  }
+  var email=afterLabel(['correo','email','e-mail','correo electrónico','correo electronico']);
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ var m=raw.match(/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i); if(m)email=m[0]; }
+  var tel=afterLabel(['teléfono','telefono','fono','celular','móvil','movil']).replace(/[^\d+]/g,'');
+  var rut=afterLabel(['rut','r.u.t.','r.u.t']);
+  var nombre='';
+  for(var i=0;i<lines.length;i++){
+    var l=lines[i];
+    if(/datos de contacto/i.test(l)) break;
+    if(l.split(/\s+/).length>=2 && /^[A-ZÁÉÍÓÚÑÜ][A-ZÁÉÍÓÚÑÜ'.\s]{4,}$/.test(l)
+       && !/^(RUT|CORREO|TEL|OPERAC|CAMPA|DATOS|HISTORIAL|NUEVO|ENVIAR|SE ENV|GESTION|LLAMAD|DISPONIBLE|CONSOLA)/i.test(l)){ nombre=l; break; }
+  }
+  return {nombre:titleCase(nombre), correo:email, telefono:tel, rut:rut};
+}
+function applyParsed(d,autoRegister){
+  var got=[];
+  if(d.nombre){state.toName=d.nombre;got.push('nombre');}
+  if(d.correo){state.toEmail=d.correo;got.push('correo');}
+  if(d.telefono){state.telefono=d.telefono;got.push('teléfono');}
+  if(d.rut){state.rut=d.rut;got.push('RUT');}
+  writeForm(); render();
+  if(!got.length){toast('No detecté datos en el texto pegado','bad');return false;}
+  if(autoRegister){ histAdd(); toast('✅ Pegado y registrado: '+got.join(', '),'ok'); }
+  else toast('✅ Detectado: '+got.join(', '),'ok');
+  return true;
+}
+function openPasteModal(){$('paste-text').value='';$('paste-modal').style.display='flex';setTimeout(function(){$('paste-text').focus();},60);}
+function pasteFromClipboard(){
+  if(navigator.clipboard&&navigator.clipboard.readText){
+    navigator.clipboard.readText().then(function(t){ if(!t){openPasteModal();return;} applyParsed(parseCrm(t),true); }).catch(function(){openPasteModal();});
+  } else openPasteModal();
+}
+
+/* ── Respaldo / importación del historial (no perder contactos) ─────────── */
+function backupJson(auto){
+  var a=histAll(); if(!a.length){ if(!auto)toast('Historial vacío','bad'); return; }
+  var d=new Date();
+  var name='Historial_Geimser_'+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+'_'+pad2(d.getHours())+pad2(d.getMinutes())+'.json';
+  dl(new Blob([JSON.stringify(a,null,2)],{type:'application/json'}),name);
+  try{localStorage.setItem('sv_hist_lastbackup',String(Date.now()));}catch(e){}
+  if(auto)toast('💾 Respaldo automático del historial descargado','ok');
+}
+function importBackupFile(ev){
+  var f=ev.target.files&&ev.target.files[0]; if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var data=JSON.parse(r.result); if(!Array.isArray(data))throw 0;
+      var cur=histAll(); var ids={}; cur.forEach(function(x){ids[x.id]=1;});
+      var add=0; data.forEach(function(row){ if(row&&row.id&&!ids[row.id]){cur.push(row);ids[row.id]=1;add++;} });
+      cur.sort(function(a,b){return (b.id||0)-(a.id||0);});
+      histSave(cur); renderHist(); toast('⬆ Importados '+add+' registro'+(add===1?'':'s'),'ok');
+    }catch(e){toast('Archivo JSON inválido','bad');}
+  };
+  r.readAsText(f); ev.target.value='';
+}
+
 document.addEventListener('DOMContentLoaded',function(){
   load(); renderQuickplans(); renderModules(); renderPacks();
   writeForm(); syncModuleUI(); compute(); render(); bindForm();
@@ -713,6 +805,13 @@ document.addEventListener('DOMContentLoaded',function(){
   $('btn-reset').addEventListener('click',reset);
   $('btn-hist-save').addEventListener('click',histAdd);
   $('btn-copy-script').addEventListener('click',function(){var t=$('pack-script').querySelector('.ps-text').textContent;if(!t){toast('Elige un pack primero','bad');return;}copyText(t,'📋 Guion copiado');});
+  $('btn-paste').addEventListener('click',pasteFromClipboard);
+  $('paste-cancel').addEventListener('click',function(){$('paste-modal').style.display='none';});
+  $('paste-go').addEventListener('click',function(){var t=$('paste-text').value;$('paste-modal').style.display='none';applyParsed(parseCrm(t),true);});
+  $('hist-backup').addEventListener('click',function(){backupJson(false);});
+  $('hist-import-btn').addEventListener('click',function(){$('hist-import-file').click();});
+  $('hist-import-file').addEventListener('change',importBackupFile);
+  setInterval(function(){backupJson(true);},3600000);
   $('btn-banner').addEventListener('click',function(){$('banner-file').click();});
   $('banner-file').addEventListener('change',onBannerFile);
   $('btn-banner-reset').addEventListener('click',function(){state.bannerData=DEFAULTS.bannerData;updateBannerPreview();render();toast('Banner TOP_01 restaurado');});
