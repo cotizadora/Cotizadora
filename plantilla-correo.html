@@ -82,7 +82,23 @@ body{font-family:var(--font-ui);color:var(--ink);background:var(--bg);font-size:
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.ok{background:var(--ok)}.toast.bad{background:var(--error)}
 @media(max-width:1080px){.pt-main{grid-template-columns:1fr}.preview-wrap{position:static}}
-@media(max-width:520px){.row2{grid-template-columns:1fr}.pt-header .titles .t2{display:none}.pt-actions .btn span{display:none}}
+@media(max-width:640px){
+  .pt-header{padding:0 12px;gap:10px}
+  .pt-header .titles .t2{display:none}
+  .pt-header .titles .t1{font-size:14px}
+  .pt-header .logo{height:22px}
+  .pt-actions{gap:6px}
+  .pt-actions .btn{padding:8px 10px}
+  .pt-actions .btn span{display:none}
+  .pt-main{padding:0 10px 44px;gap:14px;margin-top:12px}
+  .card-body{padding:12px}
+  .row2{grid-template-columns:1fr}
+  .preview-wrap{margin-top:4px}
+  .preview-frame{padding:10px;max-height:none}
+  .tabbtn{padding:9px 14px;font-size:13px}
+  .totbar{gap:8px}
+  .hist-toolbar{gap:8px}
+}
 /* tabs */
 .tabbar{display:flex;gap:6px;padding:8px 18px 0;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:var(--header-h);z-index:20}
 .tabbtn{border:1px solid var(--line);border-bottom:none;background:var(--surface-2);color:var(--muted);font-weight:700;font-size:14px;padding:10px 18px;border-radius:10px 10px 0 0;cursor:pointer}
@@ -149,10 +165,10 @@ table.hist tr:hover td{background:var(--surface-2)}
   <div class="pt-actions">
     <span id="google-status" class="hint"></span>
     <button class="btn" id="btn-google" title="Guarda tu historial en tu cuenta Google — disponible desde cualquier PC"><span>Entrar con Google</span></button>
-    <button class="btn" id="btn-reset" title="Restablecer"><span>↺ Restablecer</span></button>
-    <button class="btn" id="btn-save" title="Guardar"><span>💾 Guardar</span></button>
-    <button class="btn" id="btn-hist-save" title="Guardar este contacto/cotización en el historial"><span>➕ Historial</span></button>
-    <button class="btn primary" id="btn-export" title="Descargar .eml para Outlook">📥 Exportar .eml</button>
+    <button class="btn" id="btn-reset" title="Restablecer">↺<span> Restablecer</span></button>
+    <button class="btn" id="btn-save" title="Guardar">💾<span> Guardar</span></button>
+    <button class="btn" id="btn-hist-save" title="Guardar este contacto/cotización en el historial">➕<span> Historial</span></button>
+    <button class="btn primary" id="btn-export" title="Descargar .eml para Outlook">📥<span> Exportar .eml</span></button>
   </div>
 </header>
 
@@ -564,15 +580,14 @@ function buildEml(){
 }
 function safeName(s){return String(s||'cotizacion').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40)||'cotizacion';}
 function exportEml(){
-  if(!state.toEmail){toast('Falta el correo del cliente','bad');return;}
   try{
     var blob=new Blob([buildEml()],{type:'message/rfc822'});
     var a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download='Cotizacion_'+safeName(state.toName)+'_Geimser.eml';
+    a.download='Cotizacion_'+safeName(state.toName||'plantilla')+'_Geimser.eml';
     document.body.appendChild(a);a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
     histMarkSent();
-    toast('📥 .eml descargado y registrado como Enviada','ok');
+    toast(state.toEmail?'📥 .eml descargado y registrado como Enviada':'📥 Plantilla .eml exportada (sin destinatario)','ok');
   }catch(e){toast('Error generando el .eml: '+e.message,'bad');}
 }
 
@@ -816,6 +831,7 @@ function nominaTexto(){
 /* ── Registrar en historial como ENVIADA al generar el .eml ─────────────── */
 function nowStamp(){var d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+' '+pad2(d.getHours())+':'+pad2(d.getMinutes());}
 function histMarkSent(){
+  if(!state.toName&&!state.toEmail)return; // plantilla sin destinatario: no registra fila
   var uf=computeUf(), clp=Math.round(uf*(parseFloat(state.ufdia)||0)), a=histAll();
   var key=(state.toEmail||'').toLowerCase(), row=null;
   if(key){for(var i=0;i<a.length;i++){if((a[i].correo||'').toLowerCase()===key&&a[i].estado!=='Ganada'&&a[i].estado!=='Perdida'){row=a[i];break;}}}
