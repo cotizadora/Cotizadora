@@ -6454,6 +6454,31 @@ function restaurarProductoPrecio(txt){
 /* ════════ REQ 5 — NORMALIZACIÓN AUTOMÁTICA (al escribir y al pegar) ════════ */
 function _titleCase(s){return (''+s).toLowerCase().replace(/(^|[\s\-'/])([a-z\u00e0-\u00ff\u00f1])/g,function(m,p,c){return p+c.toUpperCase();});}
 function normEmailInput(el){if(!el)return;var v=el.value,nv=v.toLowerCase();if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
+/* PARCHE AISLADO — pegado manual en #cli-email: al PEGAR desde el portapapeles
+   directamente sobre este campo, el texto pegado se pasa a minúsculas y se le quitan
+   los espacios, conservando ", " como separador de múltiples correos. Se inserta con
+   execCommand('insertText') (única API de inserción que funciona en input type=email)
+   y el evento 'input' nativo dispara la cadena existente (normEmailInput/onClientChange/
+   validarEmailCliente). No afecta escritura/edición ni el mapeo CRM/Excel (esos escriben
+   .value de forma programática, sin evento paste). */
+(function(){
+  function _limpiarPegadoCorreo(t){ return (t||'').toLowerCase().replace(/\s+/g,'').replace(/,+/g,', '); }
+  function _attach(){
+    var el=document.getElementById('cli-email');
+    if(!el||el._pasteLimpioOn)return;
+    el._pasteLimpioOn=true;
+    el.addEventListener('paste',function(e){
+      var cd=e.clipboardData||window.clipboardData; if(!cd)return;
+      var raw=cd.getData('text'); if(raw==null)return;
+      e.preventDefault();
+      var limpio=_limpiarPegadoCorreo(raw);
+      if(!document.execCommand('insertText',false,limpio)){
+        el.value=limpio; el.dispatchEvent(new Event('input',{bubbles:true}));
+      }
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_attach); else _attach();
+})();
 function normContactoInput(el){if(!el)return;var v=el.value,nv=_titleCase(v);if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
 function normTelInput(el){if(!el)return;var v=el.value,nv=v.replace(/[\s\u00a0]/g,'');if(nv!==v){var keep=v.slice(0,el.selectionStart).replace(/[\s\u00a0]/g,'').length;el.value=nv;try{el.setSelectionRange(keep,keep);}catch(_){}}}
 function normRutInput(el){if(!el)return;var v=el.value,nv=v.replace(/[\s\u00a0]/g,'').toUpperCase();if(nv!==v){var a=el.selectionStart,b=el.selectionEnd;el.value=nv;try{el.setSelectionRange(a,b);}catch(_){}}}
