@@ -142,6 +142,8 @@ table.hist tr:hover td{background:var(--surface-2)}
   </div>
   <div class="spacer"></div>
   <div class="pt-actions">
+    <span id="google-status" class="hint"></span>
+    <button class="btn" id="btn-google" title="Guarda tu historial en tu cuenta Google — disponible desde cualquier PC"><span>Entrar con Google</span></button>
     <button class="btn" id="btn-reset" title="Restablecer"><span>↺ Restablecer</span></button>
     <button class="btn" id="btn-save" title="Guardar"><span>💾 Guardar</span></button>
     <button class="btn" id="btn-hist-save" title="Guardar este contacto/cotización en el historial"><span>➕ Historial</span></button>
@@ -690,7 +692,8 @@ function bindTabs(){document.querySelectorAll('.tabbtn').forEach(function(b){b.a
 var HIST_KEY='sv_historial_v1';
 var ESTADOS=['Borrador','Enviada','En negociación','Ganada','Perdida'];
 function histAll(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]');}catch(e){return [];}}
-function histSave(a){try{localStorage.setItem(HIST_KEY,JSON.stringify(a));}catch(e){toast('No se pudo guardar el historial','bad');}}
+function histSaveLocal(a){try{localStorage.setItem(HIST_KEY,JSON.stringify(a));}catch(e){toast('No se pudo guardar el historial','bad');}}
+function histSave(a){ histSaveLocal(a); if(typeof gScheduleSync==='function')gScheduleSync(); }
 function fechaHoy(){var d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
 function histAdd(){
   if(!state.toName&&!state.toEmail){toast('Agrega al menos nombre o correo del cliente','bad');return;}
@@ -818,6 +821,84 @@ function histMarkSent(){
   histSave(a); renderHist();
 }
 
+/* ── "Entrar con Google": sincroniza el historial en Drive (appDataFolder) ─
+   Guarda el historial de CADA ejecutivo en SU propia cuenta Google, invisible,
+   disponible desde cualquier PC. No usa backend ni secretos: solo un Client ID
+   público (OAuth). Si no está configurado, al entrar se pide una vez y se guarda. */
+var GOOGLE_CLIENT_ID=''; try{GOOGLE_CLIENT_ID=localStorage.getItem('sv_gclientid')||'';}catch(e){}
+var GDRIVE_FILE='historial_secretaria_virtual.json';
+var gAccessToken=null,gTokenClient=null,gFileId=null,gSyncTimer=null;
+function updateGStatus(txt){
+  var b=$('btn-google'),s=$('google-status'); if(!b)return;
+  if(gAccessToken){b.innerHTML='✓ Google';b.classList.add('primary');if(s)s.textContent=txt||'Conectado';}
+  else{b.innerHTML='<span>Entrar con Google</span>';b.classList.remove('primary');if(s)s.textContent='';}
+}
+function gLoadScript(cb){
+  if(window.google&&window.google.accounts&&window.google.accounts.oauth2){cb();return;}
+  var s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;
+  s.onload=cb;s.onerror=function(){toast('No se pudo cargar Google (revisa tu conexión)','bad');};
+  document.head.appendChild(s);
+}
+function gInit(cb){
+  gLoadScript(function(){
+    try{
+      gTokenClient=window.google.accounts.oauth2.initTokenClient({
+        client_id:GOOGLE_CLIENT_ID,
+        scope:'https://www.googleapis.com/auth/drive.appdata',
+        callback:function(resp){ if(resp&&resp.access_token){gAccessToken=resp.access_token;try{localStorage.setItem('sv_gsignedin','1');}catch(e){}onSignedIn();} else {toast('No se pudo conectar con Google','bad');} }
+      });
+      if(cb)cb();
+    }catch(e){toast('Google no disponible: '+e.message,'bad');}
+  });
+}
+function gSignIn(){
+  if(!GOOGLE_CLIENT_ID){
+    var id=window.prompt('Pega aquí el Client ID de Google (lo obtienes una sola vez; termina en .apps.googleusercontent.com):');
+    if(!id)return; GOOGLE_CLIENT_ID=id.trim(); try{localStorage.setItem('sv_gclientid',GOOGLE_CLIENT_ID);}catch(e){}
+  }
+  gInit(function(){ try{gTokenClient.requestAccessToken({prompt:gAccessToken?'':'consent'});}catch(e){toast('Error Google: '+e.message,'bad');} });
+}
+function gSignOut(){ gAccessToken=null;gFileId=null; try{localStorage.removeItem('sv_gsignedin');}catch(e){} updateGStatus(); toast('Sesión de Google cerrada'); }
+function gFetch(url,opt){ opt=opt||{};opt.headers=opt.headers||{};opt.headers['Authorization']='Bearer '+gAccessToken; return fetch(url,opt).then(function(r){ if(r.status===401){gAccessToken=null;updateGStatus();throw new Error('token');} return r; }); }
+function gFindFile(cb){
+  if(gFileId){cb();return;}
+  gFetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files(id,name)&q="+encodeURIComponent("name='"+GDRIVE_FILE+"'"))
+    .then(function(r){return r.json();}).then(function(j){ if(j.files&&j.files.length)gFileId=j.files[0].id; cb(); }).catch(function(){cb();});
+}
+function onSignedIn(){ updateGStatus('Conectado'); gPullMerge(function(){ gPush(); }); }
+function gPullMerge(done){
+  gFindFile(function(){
+    if(!gFileId){ if(done)done(); return; }
+    gFetch('https://www.googleapis.com/drive/v3/files/'+gFileId+'?alt=media').then(function(r){return r.json();}).then(function(remote){
+      if(Array.isArray(remote)){
+        var local=histAll(),ids={};local.forEach(function(x){ids[x.id]=1;});
+        var add=0;remote.forEach(function(row){ if(row&&row.id&&!ids[row.id]){local.push(row);ids[row.id]=1;add++;} });
+        local.sort(function(a,b){return (b.id||0)-(a.id||0);});
+        histSaveLocal(local); renderHist();
+        if(add)toast('☁ '+add+' registro(s) recuperado(s) de tu Google','ok');
+      }
+      if(done)done();
+    }).catch(function(){if(done)done();});
+  });
+}
+function gPush(){
+  if(!gAccessToken)return;
+  var data=JSON.stringify(histAll());
+  gFindFile(function(){
+    if(gFileId){
+      gFetch('https://www.googleapis.com/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',headers:{'Content-Type':'application/json'},body:data})
+        .then(function(){updateGStatus('Sincronizado ✓');}).catch(function(){});
+    } else {
+      var bo='sv'+Date.now();
+      var body='--'+bo+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify({name:GDRIVE_FILE,parents:['appDataFolder']})+'\r\n--'+bo+'\r\nContent-Type: application/json\r\n\r\n'+data+'\r\n--'+bo+'--';
+      gFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+bo},body:body})
+        .then(function(r){return r.json();}).then(function(j){gFileId=j.id;updateGStatus('Sincronizado ✓');}).catch(function(){});
+    }
+  });
+}
+function gScheduleSync(){ if(!gAccessToken)return; clearTimeout(gSyncTimer); gSyncTimer=setTimeout(gPush,1500); }
+function gRestore(){ try{ if(localStorage.getItem('sv_gsignedin')&&GOOGLE_CLIENT_ID){ gInit(function(){ try{gTokenClient.requestAccessToken({prompt:''});}catch(e){} }); } }catch(e){} }
+
 /* ── Mapeo desde el CRM Atlas (botón "Pegar") ───────────────────────────── */
 function titleCase(s){return String(s||'').toLowerCase().replace(/\b([a-záéíóúñü])/g,function(m,c){return c.toUpperCase();});}
 function parseCrm(raw){
@@ -908,6 +989,8 @@ document.addEventListener('DOMContentLoaded',function(){
   $('hist-backup').addEventListener('click',function(){backupJson(false);});
   $('hist-import-btn').addEventListener('click',function(){$('hist-import-file').click();});
   $('hist-import-file').addEventListener('change',importBackupFile);
+  $('btn-google').addEventListener('click',function(){ if(gAccessToken)gSignOut(); else gSignIn(); });
+  updateGStatus(); gRestore();
   setInterval(function(){backupJson(true);},3600000);
   $('btn-banner').addEventListener('click',function(){$('banner-file').click();});
   $('banner-file').addEventListener('change',onBannerFile);
