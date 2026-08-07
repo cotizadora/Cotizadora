@@ -553,7 +553,7 @@ function duriParts(u){var m=/^data:([^;]+);base64,(.*)$/.exec(u||'');return m?{m
 function imgPart(rb,cid,u,name){var p=duriParts(u);if(!p)return '';return '--'+rb+'\r\nContent-Type: '+p.mime+'\r\nContent-Transfer-Encoding: base64\r\nContent-ID: <'+cid+'>\r\nContent-Disposition: inline; filename="'+name+'"\r\n\r\n'+b64ln(p.b64)+'\r\n\r\n';}
 function buildEml(){
   var s=Date.now().toString(36),rb='----rel-'+s,ab='----alt-'+s;
-  var headers=['MIME-Version: 1.0','Date: '+new Date().toUTCString().replace('GMT','+0000'),'Message-ID: <sv-'+s+'@geimser.cl>',
+  var headers=['MIME-Version: 1.0','X-Unsent: 1','Date: '+new Date().toUTCString().replace('GMT','+0000'),'Message-ID: <sv-'+s+'@geimser.cl>',
    'From: '+encSubj(state.fromName)+' <'+state.fromEmail+'>','To: '+encSubj(state.toName||'')+' <'+state.toEmail+'>',
    'Subject: '+encSubj(state.subject),'Content-Type: multipart/related; type="multipart/alternative"; boundary="'+rb+'"'].join('\r\n');
   var alt='--'+rb+'\r\nContent-Type: multipart/alternative; boundary="'+ab+'"\r\n\r\n'+
