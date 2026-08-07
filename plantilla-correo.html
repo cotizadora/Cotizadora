@@ -130,6 +130,9 @@ table.hist tr:hover td{background:var(--surface-2)}
 .nomina li{margin:1px 0}
 .nom-tot{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:13px}
 .nom-tot b{color:var(--brand)}
+.nomina-box{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;background:var(--surface-2)}
+.nomina-head{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;margin-bottom:8px}
+.nomina-head span{font-weight:500;font-size:11px;color:var(--muted)}
 /* Google en pausa (se reactiva quitando esta regla) */
 #btn-google,#google-status{display:none!important}
 </style>
@@ -193,6 +196,10 @@ table.hist tr:hover td{background:var(--surface-2)}
             <div class="ps-text"></div>
           </div>
         </div>
+        <div class="nomina-box">
+          <div class="nomina-head">📋 Resumen del plan <span>para explicarle al cliente</span><button class="btn ghost" id="btn-copy-nomina" style="margin-left:auto;padding:4px 10px;font-size:12px">📋 Copiar</button></div>
+          <div id="nomina" class="nomina"></div>
+        </div>
         <div class="quickplans" id="quickplans"></div>
         <div id="modules"></div>
         <div class="totbar">
@@ -203,11 +210,6 @@ table.hist tr:hover td{background:var(--surface-2)}
           <label class="iva"><input type="checkbox" id="f_iva" checked /> + IVA</label>
         </div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><span class="c-tag">📋</span> Nómina del plan <span class="c-rule">para explicarle al cliente</span><button class="btn ghost" id="btn-copy-nomina" style="margin-left:8px;padding:4px 10px;font-size:12px">📋 Copiar</button></div>
-      <div class="card-body"><div id="nomina" class="nomina"></div></div>
     </div>
 
     <div class="card">
