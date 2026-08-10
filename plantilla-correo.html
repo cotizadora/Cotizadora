@@ -245,7 +245,8 @@ table.hist tr:hover td{background:var(--surface-2)}
             <div class="field"><label for="f_incluye">El servicio incluye (se completa solo; editable)</label><textarea class="textarea" id="f_incluye" style="min-height:120px"></textarea></div>
           </div>
         </details>
-        <div class="row2" style="margin-top:12px">
+        <div class="field" style="margin-top:12px;margin-bottom:12px"><label for="f_ejecutivo">Ejecutivo</label><select class="input" id="f_ejecutivo"><option value="">Selecciona un ejecutivo…</option><option value="eduardo">Eduardo Pérez</option><option value="ana">Ana Morales</option><option value="jenny">Jenny Pozo Correa</option></select></div>
+        <div class="row2">
           <div class="field"><label for="f_fromName">Remitente (nombre)</label><input class="input" id="f_fromName" type="text" /></div>
           <div class="field"><label for="f_fromEmail">Remitente (correo)</label><input class="input" id="f_fromEmail" type="email" /></div>
         </div>
@@ -627,7 +628,8 @@ function load(){
   if(!state.logoData)state.logoData=DEFAULTS.logoData;
   sel=Object.assign({},DEF_SEL,(d&&d.sel)||{});
   sel.servicios=(sel.servicios||[]).slice(); sel.cobertura=(sel.cobertura||[]).slice();
-  applyProfile();
+  loadExecutiveSelection();
+  if(CURRENT_EXEC){applyExecutive(CURRENT_EXEC);}else{applyProfile();}
 }
 function reset(){
   if(!confirm('¿Restablecer todo a los valores por defecto?'))return;
@@ -789,7 +791,7 @@ function copyHistTsv(){
 var GEN_F={ana:1,maria:1,'maría':1,brenda:1,paz:1,carolina:1,wilma:1,andrea:1,francisca:1,javiera:1,camila:1,valentina:1,constanza:1,catalina:1,fernanda:1,daniela:1,paulina:1,claudia:1,carmen:1,rosa:1,patricia:1,marcela:1,alejandra:1,'verónica':1,veronica:1,gabriela:1,'sofía':1,sofia:1,isidora:1,antonia:1,martina:1,florencia:1,emilia:1,josefa:1,'mónica':1,monica:1,cecilia:1,pamela:1,jimena:1,lorena:1,ivonne:1,nicole:1,karen:1,tamara:1,denisse:1,ignacia:1,trinidad:1,amanda:1,agustina:1,elena:1,teresa:1,laura:1,sandra:1,natalia:1,viviana:1,ximena:1,soledad:1,macarena:1,'bárbara':1,barbara:1,romina:1,'angélica':1,angelica:1,ruth:1,gloria:1,margarita:1,silvia:1,beatriz:1,raquel:1,adriana:1,'lucía':1,lucia:1,julia:1,eliana:1,jacqueline:1,yasna:1,'belén':1,belen:1,scarlett:1,loreto:1,pia:1,'pía':1,vania:1,dominga:1};
 var GEN_M={juan:1,'josé':1,jose:1,carlos:1,luis:1,pedro:1,pablo:1,eduardo:1,felipe:1,diego:1,'cristián':1,cristian:1,'sebastián':1,sebastian:1,rodrigo:1,francisco:1,'andrés':1,andres:1,gonzalo:1,ricardo:1,jorge:1,manuel:1,fernando:1,mario:1,alejandro:1,ignacio:1,'matías':1,matias:1,'benjamín':1,benjamin:1,vicente:1,'tomás':1,tomas:1,'martín':1,martin:1,'joaquín':1,joaquin:1,'agustín':1,agustin:1,maximiliano:1,'nicolás':1,nicolas:1,gabriel:1,daniel:1,rafael:1,alberto:1,roberto:1,'hernán':1,hernan:1,patricio:1,claudio:1,marcelo:1,mauricio:1,sergio:1,'héctor':1,hector:1,'víctor':1,victor:1,'ramón':1,ramon:1,oscar:1,'raúl':1,raul:1,'césar':1,cesar:1,enrique:1,esteban:1,camilo:1,'bastián':1,bastian:1,alonso:1,emilio:1,lucas:1,renato:1,arturo:1,guillermo:1,alfredo:1,gaspar:1,'cristóbal':1,cristobal:1,franco:1,dante:1,mateo:1,gael:1};
 function normName(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();}
-function firstName(full){var p=String(full||'').trim().split(/\s+/);return p[0]||'';}
+function firstName(full){var p=String(full||'').trim().split(/\s+/);var fn=p[0]||'';if(!fn)return '';return fn.charAt(0).toUpperCase()+fn.slice(1).toLowerCase();}
 function genderOf(full){var n=normName(firstName(full));if(GEN_F[n])return 'F';if(GEN_M[n])return 'M';return '?';}
 function saludoFor(full){var g=genderOf(full);return g==='F'?'Estimada':g==='M'?'Estimado':'Estimado/a';}
 function refreshSaludo(){ if(autoSaludo && state.toName) state.saludo=saludoFor(state.toName); }
@@ -797,9 +799,29 @@ function refreshSaludo(){ if(autoSaludo && state.toName) state.saludo=saludoFor(
 /* ── Perfil del ejecutivo/a (memoria de sesión, sobrevive a Restablecer) ── */
 var PROFILE_KEY='sv_perfil_v1';
 var PROFILE_FIELDS=['fromName','fromEmail','firmaArea','firmaTel'];
+var EXECUTIVES={
+  'eduardo':{nombre:'Eduardo Pérez',cargo:'Área Comercial · Geimser Tecnología',correo:'eperezm@geoinfobusiness.cl',telefono:'+56 9 7966 6724'},
+  'ana':{nombre:'Ana Morales',cargo:'Ejecutiva Comercial',correo:'amoralesc@geoinfobusiness.cl',telefono:'+56 9 2749 3203'},
+  'jenny':{nombre:'Jenny Pozo Correa',cargo:'Ejecutiva Comercial',correo:'jpozoc@geoinfobusiness.cl',telefono:'+56 9 5820 2007'}
+};
+var CURRENT_EXEC='';
 function loadProfile(){try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'null');}catch(e){return null;}}
-function saveProfile(){try{var p={};PROFILE_FIELDS.forEach(function(f){p[f]=state[f];});p.ufdia=state.ufdia;p.iva=state.iva;localStorage.setItem(PROFILE_KEY,JSON.stringify(p));}catch(e){}}
-function applyProfile(){var p=loadProfile();if(!p)return;PROFILE_FIELDS.forEach(function(f){if(p[f])state[f]=p[f];});if(p.ufdia)state.ufdia=p.ufdia;if(typeof p.iva!=='undefined')state.iva=p.iva;}
+function saveProfile(){try{var p={};PROFILE_FIELDS.forEach(function(f){p[f]=state[f];});p.ufdia=state.ufdia;p.iva=state.iva;if(CURRENT_EXEC){var key='sv_exec_'+CURRENT_EXEC;localStorage.setItem(key,JSON.stringify(p));}else{localStorage.setItem(PROFILE_KEY,JSON.stringify(p));}}catch(e){}}
+function applyProfile(){var p=null;if(CURRENT_EXEC){try{p=JSON.parse(localStorage.getItem('sv_exec_'+CURRENT_EXEC)||'null');}catch(e){}}if(!p){p=loadProfile();}if(!p)return;PROFILE_FIELDS.forEach(function(f){if(p[f])state[f]=p[f];});if(p.ufdia)state.ufdia=p.ufdia;if(typeof p.iva!=='undefined')state.iva=p.iva;}
+function applyExecutive(exec_id){
+  if(!exec_id){CURRENT_EXEC='';applyProfile();return;}
+  CURRENT_EXEC=exec_id;
+  var e=EXECUTIVES[exec_id];
+  if(e){
+    state.fromName=e.nombre;
+    state.fromEmail=e.correo;
+    state.firmaArea=e.cargo;
+    state.firmaTel=e.telefono;
+  }
+  applyProfile();
+}
+function loadExecutiveSelection(){try{CURRENT_EXEC=localStorage.getItem('sv_current_exec')||'';}catch(e){CURRENT_EXEC='';}}
+function saveExecutiveSelection(){try{if(CURRENT_EXEC){localStorage.setItem('sv_current_exec',CURRENT_EXEC);}else{localStorage.removeItem('sv_current_exec');}}catch(e){}}
 
 /* ── Nómina compacta del plan (para explicar al cliente, aparte del correo) ─ */
 function renderNomina(){
@@ -997,6 +1019,15 @@ document.addEventListener('DOMContentLoaded',function(){
   load(); renderQuickplans(); renderModules(); renderPacks();
   writeForm(); syncModuleUI(); compute(); render(); bindForm();
   bindTabs(); bindHist(); renderHist();
+  if($('f_ejecutivo')){
+    $('f_ejecutivo').value=CURRENT_EXEC;
+    $('f_ejecutivo').addEventListener('change',function(){
+      applyExecutive(this.value);
+      saveExecutiveSelection();
+      writeForm();
+      render();
+    });
+  }
   $('btn-export').addEventListener('click',exportEml);
   $('btn-save').addEventListener('click',save);
   $('btn-reset').addEventListener('click',reset);
