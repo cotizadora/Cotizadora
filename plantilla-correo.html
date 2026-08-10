@@ -180,13 +180,13 @@ table.hist tr:hover td{background:var(--surface-2)}
 <main class="pt-main" id="view-cotizador">
   <section class="editor">
 
-    <div id="profile-bar" style="position:sticky;top:calc(var(--header-h) + 50px);z-index:25;background:linear-gradient(135deg,#007DB3,#0098D8);border-radius:10px;padding:14px 18px;margin-bottom:18px;box-shadow:0 4px 12px rgba(0,152,216,0.15);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div id="profile-bar" style="background:linear-gradient(135deg,#007DB3,#0098D8);border-radius:10px;padding:14px 18px;margin-bottom:18px;box-shadow:0 4px 12px rgba(0,152,216,0.15);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:200px">
-        <span style="font-size:18px;font-weight:800;color:#fff;letter-spacing:0.5px">PERFIL ACTIVO: <span id="profile-name">NINGUNO</span></span>
+        <span style="font-size:18px;font-weight:800;color:#fff;letter-spacing:0.5px">PERFIL:<span id="profile-name"> EDUARDO</span></span>
       </div>
       <select class="input" id="f_ejecutivo" style="min-width:220px;padding:9px 11px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.12);color:#fff;border-radius:6px;font-weight:600;cursor:pointer">
         <option value="" style="background:#fff;color:#01030B">Selecciona un ejecutivo…</option>
-        <option value="edu" style="background:#fff;color:#01030B">Eduardo Pérez</option>
+        <option value="eduardo" style="background:#fff;color:#01030B">Eduardo Pérez</option>
         <option value="ana" style="background:#fff;color:#01030B">Ana Morales</option>
         <option value="jenny" style="background:#fff;color:#01030B">Jenny Pozo Correa</option>
       </select>
@@ -642,7 +642,7 @@ function load(){
   // NO restaurar datos del cliente: siempre vacío
   state.toName=''; state.toEmail=''; state.telefono=''; state.rut='';
   loadExecutiveSelection();
-  if(CURRENT_EXEC){applyExecutive(CURRENT_EXEC);}else{applyProfile();updateProfileDisplay();}
+  if(CURRENT_EXEC){applyExecutive(CURRENT_EXEC);}else{applyProfile();}
 }
 function reset(){
   if(!confirm('¿Restablecer todo a los valores por defecto?'))return;
@@ -820,9 +820,9 @@ var EXECUTIVES={
 var CURRENT_EXEC='';
 function loadProfile(){try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'null');}catch(e){return null;}}
 function saveProfile(){try{var p={};PROFILE_FIELDS.forEach(function(f){p[f]=state[f];});p.ufdia=state.ufdia;p.iva=state.iva;if(CURRENT_EXEC){var key='sv_exec_'+CURRENT_EXEC;localStorage.setItem(key,JSON.stringify(p));}else{localStorage.setItem(PROFILE_KEY,JSON.stringify(p));}}catch(e){}}
-function applyProfile(){var p=null;if(CURRENT_EXEC){try{p=JSON.parse(localStorage.getItem('sv_exec_'+CURRENT_EXEC)||'null');}catch(e){}}if(!p){p=loadProfile();}if(!p)return;PROFILE_FIELDS.forEach(function(f){if(p[f])state[f]=p[f];});if(p.ufdia)state.ufdia=p.ufdia;if(typeof p.iva!=='undefined')state.iva=p.iva;}
+function applyProfile(){var p=null;if(CURRENT_EXEC){try{p=JSON.parse(localStorage.getItem('sv_exec_'+CURRENT_EXEC)||'null');}catch(e){}}else{p=loadProfile();}if(!p)return;PROFILE_FIELDS.forEach(function(f){if(p[f])state[f]=p[f];});if(p.ufdia)state.ufdia=p.ufdia;if(typeof p.iva!=='undefined')state.iva=p.iva;}
 function applyExecutive(exec_id){
-  if(!exec_id){CURRENT_EXEC='';applyProfile();updateProfileDisplay();return;}
+  if(!exec_id){CURRENT_EXEC='';applyProfile();return;}
   CURRENT_EXEC=exec_id;
   var e=EXECUTIVES[exec_id];
   if(e){
@@ -832,24 +832,19 @@ function applyExecutive(exec_id){
     state.firmaTel=e.telefono;
   }
   applyProfile();
-  updateProfileDisplay();
-  writeForm();
-  render();
 }
 function loadExecutiveSelection(){try{CURRENT_EXEC=localStorage.getItem('sv_current_exec')||'';}catch(e){CURRENT_EXEC='';}}
 function saveExecutiveSelection(){try{if(CURRENT_EXEC){localStorage.setItem('sv_current_exec',CURRENT_EXEC);}else{localStorage.removeItem('sv_current_exec');}}catch(e){}}
-function updateProfileDisplay(){
+function updateWelcomeBanner(){
   var nameEl=$('profile-name');
   if(!nameEl)return;
   if(CURRENT_EXEC&&EXECUTIVES[CURRENT_EXEC]){
     var exec=EXECUTIVES[CURRENT_EXEC];
-    nameEl.textContent=exec.nombre.toUpperCase();
+    var displayName=exec.nombre.split(' ')[0].toUpperCase();
+    nameEl.textContent=' '+displayName;
   }else{
-    nameEl.textContent='NINGUNO';
+    nameEl.textContent=' PERFIL';
   }
-}
-function updateWelcomeBanner(){
-  updateProfileDisplay();
 }
 
 /* ── Nómina compacta del plan (para explicar al cliente, aparte del correo) ─ */
@@ -1050,11 +1045,13 @@ document.addEventListener('DOMContentLoaded',function(){
   bindTabs(); bindHist(); renderHist();
   updateWelcomeBanner();
   if($('f_ejecutivo')){
-    $('f_ejecutivo').value=CURRENT_EXEC||'';
+    $('f_ejecutivo').value=CURRENT_EXEC;
     $('f_ejecutivo').addEventListener('change',function(){
       applyExecutive(this.value);
       saveExecutiveSelection();
-      compute();
+      updateWelcomeBanner();
+      writeForm();
+      render();
     });
   }
   $('btn-export').addEventListener('click',exportEml);
