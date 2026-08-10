@@ -966,7 +966,7 @@ function gScheduleSync(){ if(!gAccessToken)return; clearTimeout(gSyncTimer); gSy
 function gRestore(){ try{ if(localStorage.getItem('sv_gsignedin')&&GOOGLE_CLIENT_ID){ gInit(function(){ try{gTokenClient.requestAccessToken({prompt:''});}catch(e){} }); } }catch(e){} }
 
 /* ── Mapeo desde el CRM Atlas (botón "Pegar") ───────────────────────────── */
-function titleCase(s){return String(s||'').toLowerCase().replace(/\b([a-záéíóúñü])/g,function(m,c){return c.toUpperCase();});}
+function titleCase(s){return String(s||'').toLocaleLowerCase('es-ES').replace(/(^|[^\p{L}])(\p{L})/gu,function(m,pre,c){return pre+c.toLocaleUpperCase('es-ES');});}
 function parseCrm(raw){
   var lines=String(raw||'').replace(/\r/g,'').split('\n').map(function(l){return l.trim();});
   function afterLabel(labels){
