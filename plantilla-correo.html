@@ -180,6 +180,10 @@ table.hist tr:hover td{background:var(--surface-2)}
 <main class="pt-main" id="view-cotizador">
   <section class="editor">
 
+    <div id="welcome-banner" style="background:linear-gradient(135deg,#E1F3FB,#F4F7FA);border:2px solid #0098D8;border-radius:10px;padding:16px 18px;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,152,216,0.08)">
+      <div style="font-size:16px;font-weight:700;color:#01030B"><span id="welcome-text">Bienvenido, Eduardo</span></div>
+    </div>
+
     <div class="card">
       <div class="card-head"><span class="c-tag">1</span> Cliente</div>
       <div class="card-body">
@@ -620,7 +624,7 @@ function bindForm(){
   $('f_iva').addEventListener('change',function(){state.iva=this.checked;saveProfile();compute();render();});
 }
 
-function save(){try{localStorage.setItem(LS_KEY,JSON.stringify({state:state,sel:sel}));toast('💾 Guardado','ok');}catch(e){toast('No se pudo guardar','bad');}}
+function save(){try{var stateToSave=Object.assign({},state);delete stateToSave.toName;delete stateToSave.toEmail;delete stateToSave.telefono;delete stateToSave.rut;localStorage.setItem(LS_KEY,JSON.stringify({state:stateToSave,sel:sel}));saveExecutiveSelection();toast('💾 Guardado','ok');}catch(e){toast('No se pudo guardar','bad');}}
 function load(){
   var d=null;try{d=JSON.parse(localStorage.getItem(LS_KEY)||'null');}catch(e){}
   state=Object.assign({},DEFAULTS,(d&&d.state)||{});
@@ -628,6 +632,8 @@ function load(){
   if(!state.logoData)state.logoData=DEFAULTS.logoData;
   sel=Object.assign({},DEF_SEL,(d&&d.sel)||{});
   sel.servicios=(sel.servicios||[]).slice(); sel.cobertura=(sel.cobertura||[]).slice();
+  // NO restaurar datos del cliente: siempre vacío
+  state.toName=''; state.toEmail=''; state.telefono=''; state.rut='';
   loadExecutiveSelection();
   if(CURRENT_EXEC){applyExecutive(CURRENT_EXEC);}else{applyProfile();}
 }
@@ -822,6 +828,17 @@ function applyExecutive(exec_id){
 }
 function loadExecutiveSelection(){try{CURRENT_EXEC=localStorage.getItem('sv_current_exec')||'';}catch(e){CURRENT_EXEC='';}}
 function saveExecutiveSelection(){try{if(CURRENT_EXEC){localStorage.setItem('sv_current_exec',CURRENT_EXEC);}else{localStorage.removeItem('sv_current_exec');}}catch(e){}}
+function updateWelcomeBanner(){
+  var bannerEl=$('welcome-text');
+  if(!bannerEl)return;
+  if(CURRENT_EXEC&&EXECUTIVES[CURRENT_EXEC]){
+    var exec=EXECUTIVES[CURRENT_EXEC];
+    var genero=exec.nombre.toLowerCase().includes('ana')||exec.nombre.toLowerCase().includes('jenny')?'a':'o';
+    bannerEl.textContent='Bienvenid'+genero+', '+exec.nombre;
+  }else{
+    bannerEl.textContent='Bienvenido, selecciona un ejecutivo';
+  }
+}
 
 /* ── Nómina compacta del plan (para explicar al cliente, aparte del correo) ─ */
 function renderNomina(){
@@ -1019,11 +1036,13 @@ document.addEventListener('DOMContentLoaded',function(){
   load(); renderQuickplans(); renderModules(); renderPacks();
   writeForm(); syncModuleUI(); compute(); render(); bindForm();
   bindTabs(); bindHist(); renderHist();
+  updateWelcomeBanner();
   if($('f_ejecutivo')){
     $('f_ejecutivo').value=CURRENT_EXEC;
     $('f_ejecutivo').addEventListener('change',function(){
       applyExecutive(this.value);
       saveExecutiveSelection();
+      updateWelcomeBanner();
       writeForm();
       render();
     });
