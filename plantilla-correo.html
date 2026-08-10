@@ -180,8 +180,16 @@ table.hist tr:hover td{background:var(--surface-2)}
 <main class="pt-main" id="view-cotizador">
   <section class="editor">
 
-    <div id="welcome-banner" style="background:linear-gradient(135deg,#E1F3FB,#F4F7FA);border:2px solid #0098D8;border-radius:10px;padding:16px 18px;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,152,216,0.08)">
-      <div style="font-size:16px;font-weight:700;color:#01030B"><span id="welcome-text">Bienvenido, Eduardo</span></div>
+    <div id="profile-bar" style="background:linear-gradient(135deg,#007DB3,#0098D8);border-radius:10px;padding:14px 18px;margin-bottom:18px;box-shadow:0 4px 12px rgba(0,152,216,0.15);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:200px">
+        <span style="font-size:18px;font-weight:800;color:#fff;letter-spacing:0.5px">PERFIL:<span id="profile-name"> EDUARDO</span></span>
+      </div>
+      <select class="input" id="f_ejecutivo" style="min-width:220px;padding:9px 11px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.12);color:#fff;border-radius:6px;font-weight:600;cursor:pointer">
+        <option value="" style="background:#fff;color:#01030B">Selecciona un ejecutivo…</option>
+        <option value="eduardo" style="background:#fff;color:#01030B">Eduardo Pérez</option>
+        <option value="ana" style="background:#fff;color:#01030B">Ana Morales</option>
+        <option value="jenny" style="background:#fff;color:#01030B">Jenny Pozo Correa</option>
+      </select>
     </div>
 
     <div class="card">
@@ -249,7 +257,6 @@ table.hist tr:hover td{background:var(--surface-2)}
             <div class="field"><label for="f_incluye">El servicio incluye (se completa solo; editable)</label><textarea class="textarea" id="f_incluye" style="min-height:120px"></textarea></div>
           </div>
         </details>
-        <div class="field" style="margin-top:12px;margin-bottom:12px"><label for="f_ejecutivo">Ejecutivo</label><select class="input" id="f_ejecutivo"><option value="">Selecciona un ejecutivo…</option><option value="eduardo">Eduardo Pérez</option><option value="ana">Ana Morales</option><option value="jenny">Jenny Pozo Correa</option></select></div>
         <div class="row2">
           <div class="field"><label for="f_fromName">Remitente (nombre)</label><input class="input" id="f_fromName" type="text" /></div>
           <div class="field"><label for="f_fromEmail">Remitente (correo)</label><input class="input" id="f_fromEmail" type="email" /></div>
@@ -829,14 +836,14 @@ function applyExecutive(exec_id){
 function loadExecutiveSelection(){try{CURRENT_EXEC=localStorage.getItem('sv_current_exec')||'';}catch(e){CURRENT_EXEC='';}}
 function saveExecutiveSelection(){try{if(CURRENT_EXEC){localStorage.setItem('sv_current_exec',CURRENT_EXEC);}else{localStorage.removeItem('sv_current_exec');}}catch(e){}}
 function updateWelcomeBanner(){
-  var bannerEl=$('welcome-text');
-  if(!bannerEl)return;
+  var nameEl=$('profile-name');
+  if(!nameEl)return;
   if(CURRENT_EXEC&&EXECUTIVES[CURRENT_EXEC]){
     var exec=EXECUTIVES[CURRENT_EXEC];
-    var genero=exec.nombre.toLowerCase().includes('ana')||exec.nombre.toLowerCase().includes('jenny')?'a':'o';
-    bannerEl.textContent='Bienvenid'+genero+', '+exec.nombre;
+    var displayName=exec.nombre.split(' ')[0].toUpperCase();
+    nameEl.textContent=' '+displayName;
   }else{
-    bannerEl.textContent='Bienvenido, selecciona un ejecutivo';
+    nameEl.textContent=' PERFIL';
   }
 }
 
