@@ -483,7 +483,8 @@ function buildDescHtml(){
 function buildIncluye(){
   var out=BASE_INC.slice();
   var atm=ITEM[sel.atencion]; if(atm&&atm.it.inc)out.splice(2,0,atm.it.inc);
-  ['cobertura','servicios'].forEach(function(k){sel[k].forEach(function(id){var m=ITEM[id];if(m&&m.it.inc)out.push(m.it.inc);});});
+  // Emergencias 24/7 NO se lista aquí: ya va destacada en la franja del detalle (evita repetición).
+  ['cobertura','servicios'].forEach(function(k){sel[k].forEach(function(id){ if(id==='emergencias')return; var m=ITEM[id];if(m&&m.it.inc)out.push(m.it.inc);});});
   var rp=ITEM[sel.reporte]; if(rp&&rp.it.inc)out.push(rp.it.inc);
   if(sel.dash)out.push(ITEM.dash.it.inc);
   var sl=ITEM[sel.sala]; if(sl&&sl.it.inc)out.push(sl.it.inc);
@@ -593,14 +594,7 @@ function updateChips(){
 function buildEmailHtml(imgMode){
   var banner=imgMode==='cid'?'cid:banner@geimser':(state.bannerData||'');
   var logo=imgMode==='cid'?'cid:logo@geimser':(state.logoData||'');
-  var incRows=lines(state.incluye).map(function(t){
-    var em=/24\/7/.test(t);
-    var mark='<td valign="top" style="padding:5px 10px 5px 0;font-size:15px;color:'+(em?'#E8890C':BRAND)+';line-height:1;">'+(em?'&#9889;':'&#10004;')+'</td>';
-    var cell=em
-      ? '<td valign="top" style="padding:4px 0;"><span style="display:inline-block;background:#FFF4E5;border:1px solid #F0C88A;border-radius:6px;padding:5px 10px;font-size:14px;color:#8A4B00;font-weight:700;line-height:1.4;">'+esc(t)+'</span></td>'
-      : '<td valign="top" style="padding:4px 0;font-size:14px;color:'+INK+';line-height:1.5;">'+esc(t)+'</td>';
-    return '<tr>'+mark+cell+'</tr>';
-  }).join('');
+  var incRows=lines(state.incluye).map(function(t){return '<tr><td valign="top" style="padding:5px 10px 5px 0;font-size:15px;color:'+BRAND+';line-height:1;">&#10004;</td><td valign="top" style="padding:4px 0;font-size:14px;color:'+INK+';line-height:1.5;">'+esc(t)+'</td></tr>';}).join('');
   var condRows=lines(state.condiciones).map(function(l){var i=l.indexOf(':');var k=i>=0?l.slice(0,i).trim():l;var v=i>=0?l.slice(i+1).trim():'';return '<tr><td valign="top" style="padding:6px 14px 6px 0;font-size:14px;color:'+NAVY+';font-weight:700;white-space:nowrap;">'+esc(k)+'</td><td valign="top" style="padding:6px 0;font-size:14px;color:'+INK+';line-height:1.5;">'+esc(v)+'</td></tr>';}).join('');
   var tel=state.firmaTel?'<p style="margin:2px 0 0;font-size:13px;color:'+MUTED+';">'+esc(state.firmaTel)+'</p>':'';
   var logoImg=logo?'<img src="'+logo+'" width="120" alt="Geimser" style="display:block;border:0;margin-bottom:8px;">':'';
