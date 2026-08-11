@@ -445,15 +445,37 @@ function computeUf(){
   var uf=0; selectedIds().forEach(function(id){var m=ITEM[id];if(m)uf+=m.it.uf;});
   return Math.max(0,Math.round(uf*100)/100);
 }
+// Separa el servicio en su núcleo (atención + reporte + sala) y los módulos adicionales,
+// que en la vista/correo se muestran como subcategorías anexas al plan.
+function descParts(){
+  var base=[];
+  var atm=ITEM[sel.atencion]; if(atm&&atm.it.d)base.push(atm.it.d);
+  var rp=ITEM[sel.reporte]; if(rp&&rp.it.d)base.push(rp.it.d);
+  var sl=ITEM[sel.sala]; if(sl&&sl.it.d)base.push(sl.it.d);
+  var addons=[];
+  sel.cobertura.forEach(function(id){var m=ITEM[id];if(m&&m.it.d)addons.push(m.it.d);});
+  sel.servicios.forEach(function(id){ if(id==='emergencias')return; var m=ITEM[id];if(m&&m.it.d)addons.push(m.it.d);});
+  if(sel.dash)addons.push(ITEM.dash.it.d);
+  return {base:base, addons:addons, emerg:hasEmergencias()};
+}
 function buildDesc(){
-  var order=['atencion','servicios','cobertura','reporte','dash','sala'];
-  var parts=[];
-  order.forEach(function(k){
-    if(k==='servicios'||k==='cobertura'){ sel[k].forEach(function(id){var m=ITEM[id];if(m&&m.it.d)parts.push(m.it.d);}); }
-    else if(k==='dash'){ if(sel.dash)parts.push(ITEM.dash.it.d); }
-    else { var m=ITEM[sel[k]]; if(m&&m.it.d)parts.push(m.it.d); }
-  });
-  return parts.join(' + ');
+  var p=descParts();
+  var s=p.base.join(' · ');
+  if(p.addons.length) s+=' + '+p.addons.join(' + ');
+  if(p.emerg) s+=' + Emergencias 24/7';
+  return s;
+}
+// Render enriquecido del desglose para el correo/vista previa: núcleo + adicionales anexos.
+function buildDescHtml(){
+  var p=descParts();
+  var h='<p style="margin:0;font-size:14px;color:'+INK+';font-weight:600;line-height:1.5;">'+esc(p.base.join(' · '))+'</p>';
+  if(p.addons.length){
+    h+='<p style="margin:12px 0 4px;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:'+MUTED+';font-weight:700;">Se agrega a su plan</p>';
+    p.addons.forEach(function(a){
+      h+='<p style="margin:0 0 0 2px;padding:5px 0 5px 14px;border-left:3px solid '+BRAND+';font-size:14px;color:'+INK+';line-height:1.4;"><span style="color:'+BRAND+';font-weight:800;">+</span> '+esc(a)+'</p>';
+    });
+  }
+  return h;
 }
 function buildIncluye(){
   var out=BASE_INC.slice();
@@ -472,6 +494,26 @@ function matchPlan(){
   }
   return null;
 }
+// Reconoce el plan base ignorando Emergencias 24/7, para nombrarlo p.ej. "Plan Full + Emergencias 24/7".
+function basePlan(){
+  var svc=sel.servicios.filter(function(i){return i!=='emergencias';}).slice().sort().join();
+  var cob=sel.cobertura.slice().sort().join();
+  for(var name in PLANS){ if(name==='Emergencias 24/7')continue; var p=PLANS[name];
+    var psvc=p.servicios.filter(function(i){return i!=='emergencias';}).slice().sort().join();
+    if(p.atencion===sel.atencion&&p.sala===sel.sala&&p.reporte===sel.reporte&&p.periodo===sel.periodo&&!!p.dash===!!sel.dash&&psvc===svc&&p.cobertura.slice().sort().join()===cob) return name;
+  }
+  return null;
+}
+function hasEmergencias(){ return sel.servicios.indexOf('emergencias')>=0; }
+// Nombre destacado del plan: base reconocido + realce explícito de Emergencias 24/7 (CONFIABILIDAD comercial).
+function planName(){
+  var mp=matchPlan();
+  var nm;
+  if(mp && mp!=='Emergencias 24/7'){ nm='Plan '+mp; }
+  else { var bp=basePlan(); nm='Plan '+(bp||'a medida'); }
+  if(hasEmergencias() && !/24\/7/i.test(nm)) nm+=' + Emergencias 24/7';
+  return nm;
+}
 function compute(){
   var uf=computeUf();
   var clp=uf*(parseFloat(state.ufdia)||0);
@@ -480,7 +522,7 @@ function compute(){
   var per=ITEM[sel.periodo]; state.periodoTxt=per?per.it.disc:'Mensual';
   state.notaUf='Los valores están expresados en UF y se facturan en pesos según el valor de la UF al día de emisión de la factura. Referencial: '+fmtClp(clp)+(state.iva?' + IVA':'')+' (UF '+fmtClp(parseFloat(state.ufdia)||0)+').';
   if(autoIncluye) state.incluye=buildIncluye();
-  if(autoName){ var mp=matchPlan(); state.planNombre = mp?('Plan '+mp):'Plan a medida'; }
+  if(autoName){ state.planNombre = planName(); }
   $('tot-uf').textContent=fmtUf(uf);
   $('tot-clp').textContent='≈ '+fmtClp(clp)+(state.iva?' + IVA':'');
   if($('f_incluye'))$('f_incluye').value=state.incluye;
@@ -547,10 +589,20 @@ function updateChips(){
 function buildEmailHtml(imgMode){
   var banner=imgMode==='cid'?'cid:banner@geimser':(state.bannerData||'');
   var logo=imgMode==='cid'?'cid:logo@geimser':(state.logoData||'');
-  var incRows=lines(state.incluye).map(function(t){return '<tr><td valign="top" style="padding:5px 10px 5px 0;font-size:15px;color:'+BRAND+';line-height:1;">&#10004;</td><td valign="top" style="padding:4px 0;font-size:14px;color:'+INK+';line-height:1.5;">'+esc(t)+'</td></tr>';}).join('');
+  var incRows=lines(state.incluye).map(function(t){
+    var em=/24\/7/.test(t);
+    var mark='<td valign="top" style="padding:5px 10px 5px 0;font-size:15px;color:'+(em?'#E8890C':BRAND)+';line-height:1;">'+(em?'&#9889;':'&#10004;')+'</td>';
+    var cell=em
+      ? '<td valign="top" style="padding:4px 0;"><span style="display:inline-block;background:#FFF4E5;border:1px solid #F0C88A;border-radius:6px;padding:5px 10px;font-size:14px;color:#8A4B00;font-weight:700;line-height:1.4;">'+esc(t)+'</span></td>'
+      : '<td valign="top" style="padding:4px 0;font-size:14px;color:'+INK+';line-height:1.5;">'+esc(t)+'</td>';
+    return '<tr>'+mark+cell+'</tr>';
+  }).join('');
   var condRows=lines(state.condiciones).map(function(l){var i=l.indexOf(':');var k=i>=0?l.slice(0,i).trim():l;var v=i>=0?l.slice(i+1).trim():'';return '<tr><td valign="top" style="padding:6px 14px 6px 0;font-size:14px;color:'+NAVY+';font-weight:700;white-space:nowrap;">'+esc(k)+'</td><td valign="top" style="padding:6px 0;font-size:14px;color:'+INK+';line-height:1.5;">'+esc(v)+'</td></tr>';}).join('');
   var tel=state.firmaTel?'<p style="margin:2px 0 0;font-size:13px;color:'+MUTED+';">'+esc(state.firmaTel)+'</p>':'';
   var logoImg=logo?'<img src="'+logo+'" width="120" alt="Geimser" style="display:block;border:0;margin-bottom:8px;">':'';
+  var emergStrip=hasEmergencias()
+    ? '<tr><td colspan="2" style="background:#FFF4E5;border-top:1px solid '+LINE+';padding:12px 18px;font-size:13px;color:#8A4B00;line-height:1.45;"><span style="font-weight:800;">&#9889; Incluye Emergencias 24/7</span> &mdash; agua, gas, ascensor, portón, etc., con derivación inmediata al contacto que usted defina, cualquier día y a cualquier hora.</td></tr>'
+    : '';
   return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>'+
   '<body style="margin:0;padding:0;background:#EEF2F6;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EEF2F6;padding:24px 0;"><tr><td align="center">'+
   '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:640px;max-width:640px;background:#FFFFFF;border-radius:14px;overflow:hidden;box-shadow:0 6px 24px rgba(16,33,43,.10);font-family:\'Segoe UI\',Roboto,Arial,sans-serif;">'+
@@ -558,11 +610,15 @@ function buildEmailHtml(imgMode){
   '<tr><td style="padding:28px 34px 8px;"><p style="margin:0 0 14px;font-size:15px;color:'+INK+';">'+esc(state.saludo)+' <strong>'+esc(firstName(state.toName)||'')+'</strong>,</p>'+
   '<p style="margin:0 0 16px;font-size:14px;color:'+INK+';line-height:1.6;">'+nl2br(state.intro)+'</p></td></tr>'+
   '<tr><td style="padding:6px 34px 0;"><p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:'+BRAND+';">Detalle de la propuesta</p>'+
-  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid '+LINE+';border-radius:10px;overflow:hidden;">'+
-  '<tr style="background:'+NAVY+';"><th align="left" style="padding:11px 14px;font-size:12px;color:#fff;font-weight:700;">PLAN</th><th align="left" style="padding:11px 14px;font-size:12px;color:#fff;font-weight:700;">DESCRIPCIÓN</th><th align="right" style="padding:11px 14px;font-size:12px;color:#fff;font-weight:700;white-space:nowrap;">VALOR MENSUAL</th></tr>'+
-  '<tr style="background:#FFFFFF;"><td valign="top" style="padding:14px;font-size:14px;color:'+INK+';font-weight:700;border-top:1px solid '+LINE+';">'+esc(state.planNombre)+'</td>'+
-  '<td valign="top" style="padding:14px;font-size:14px;color:'+INK+';border-top:1px solid '+LINE+';line-height:1.5;">'+esc(state.planDesc)+'</td>'+
-  '<td valign="top" align="right" style="padding:14px;border-top:1px solid '+LINE+';white-space:nowrap;"><span style="display:inline-block;background:'+BRAND+';color:#fff;font-size:15px;font-weight:800;padding:6px 12px;border-radius:8px;">'+esc(state.planValor)+'</span></td></tr></table>'+
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid '+LINE+';border-radius:12px;overflow:hidden;">'+
+  '<tr style="background:'+NAVY+';"><td valign="middle" style="padding:18px 20px;">'+
+  '<p style="margin:0 0 4px;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#8FC4E8;font-weight:700;">Plan seleccionado</p>'+
+  '<p style="margin:0;font-size:23px;line-height:1.15;font-weight:800;color:#FFFFFF;">'+esc(state.planNombre)+'</p></td>'+
+  '<td valign="middle" align="right" style="padding:18px 20px;white-space:nowrap;">'+
+  '<span style="display:inline-block;background:'+BRAND+';color:#fff;font-size:17px;font-weight:800;padding:9px 15px;border-radius:9px;">'+esc(state.planValor)+'</span>'+
+  '<p style="margin:7px 0 0;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#8FC4E8;">Valor mensual</p></td></tr>'+
+  emergStrip+
+  '<tr><td colspan="2" style="background:#FFFFFF;border-top:1px solid '+LINE+';padding:16px 20px;">'+buildDescHtml()+'</td></tr></table>'+
   '<p style="margin:10px 2px 0;font-size:12px;color:'+MUTED+';line-height:1.5;">'+esc(state.notaUf)+'</p></td></tr>'+
   '<tr><td style="padding:22px 34px 0;"><p style="margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:'+BRAND+';">El servicio incluye</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0">'+incRows+'</table></td></tr>'+
   '<tr><td style="padding:22px 34px 0;"><p style="margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:'+BRAND+';">Condiciones comerciales</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F9FB;border:1px solid '+LINE+';border-radius:10px;"><tr><td style="padding:8px 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">'+condRows+'</table></td></tr></table></td></tr>'+
