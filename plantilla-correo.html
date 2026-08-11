@@ -101,7 +101,10 @@ body{font-family:var(--font-ui);color:var(--ink);background:var(--bg);font-size:
 }
 /* tabs */
 .topsticky{position:sticky;top:var(--header-h);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
-.tabbar{display:flex;gap:6px;padding:8px 18px 0;background:var(--surface)}
+.topsticky-inner{max-width:1500px;margin:0 auto;padding:0 18px}
+.profile-row{display:grid;grid-template-columns:minmax(340px,1fr) minmax(0,1.1fr);gap:20px}
+.tabbar{display:flex;gap:6px;padding:8px 0 0;background:var(--surface)}
+@media(max-width:1080px){.profile-row{grid-template-columns:1fr}}
 .tabbtn{border:1px solid var(--line);border-bottom:none;background:var(--surface-2);color:var(--muted);font-weight:700;font-size:14px;padding:10px 18px;border-radius:10px 10px 0 0;cursor:pointer}
 .tabbtn.on{background:var(--surface);color:var(--brand);box-shadow:0 -2px 0 var(--brand) inset}
 /* packs */
@@ -174,18 +177,22 @@ table.hist tr:hover td{background:var(--surface-2)}
 </header>
 
 <div class="topsticky">
-  <nav class="tabbar">
-    <button class="tabbtn on" data-tab="cotizador">🧮 Cotizador</button>
-    <button class="tabbtn" data-tab="historial">📇 Historial</button>
-  </nav>
-  <div id="profile-bar" style="margin:12px 18px 14px;background:linear-gradient(135deg,#007DB3,#0098D8);border-radius:10px;padding:12px 18px;box-shadow:0 4px 12px rgba(0,152,216,0.15);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <span id="profile-label" style="font-size:22px;font-weight:800;color:#fff;letter-spacing:0.5px">PERFIL:<span id="profile-name"> EDUARDO</span></span>
-    <select class="input" id="f_ejecutivo" style="min-width:220px;padding:9px 11px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.15);color:#fff;border-radius:6px;font-weight:600;cursor:pointer">
-      <option value="" style="background:#fff;color:#01030B">Selecciona un ejecutivo…</option>
-      <option value="eduardo" style="background:#fff;color:#01030B">Eduardo Pérez</option>
-      <option value="ana" style="background:#fff;color:#01030B">Ana Morales</option>
-      <option value="jenny" style="background:#fff;color:#01030B">Jenny Pozo Correa</option>
-    </select>
+  <div class="topsticky-inner">
+    <nav class="tabbar">
+      <button class="tabbtn on" data-tab="cotizador">🧮 Cotizador</button>
+      <button class="tabbtn" data-tab="historial">📇 Historial</button>
+    </nav>
+    <div class="profile-row">
+      <div id="profile-bar" style="margin:12px 0 14px;background:linear-gradient(135deg,#007DB3,#0098D8);border-radius:10px;padding:12px 18px;box-shadow:0 4px 12px rgba(0,152,216,0.15);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <span id="profile-label" style="font-size:22px;font-weight:800;color:#fff;letter-spacing:0.5px">PERFIL:<span id="profile-name"> EDUARDO</span></span>
+        <select class="input" id="f_ejecutivo" style="min-width:220px;padding:9px 11px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.15);color:#fff;border-radius:6px;font-weight:600;cursor:pointer">
+          <option value="" style="background:#fff;color:#01030B">Selecciona un ejecutivo…</option>
+          <option value="eduardo" style="background:#fff;color:#01030B">Eduardo Pérez</option>
+          <option value="ana" style="background:#fff;color:#01030B">Ana Morales</option>
+          <option value="jenny" style="background:#fff;color:#01030B">Jenny Pozo Correa</option>
+        </select>
+      </div>
+    </div>
   </div>
 </div>
 
