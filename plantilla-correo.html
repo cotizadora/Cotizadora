@@ -424,6 +424,9 @@ var DEFAULTS={
   logoData:(window.SV_ASSETS&&window.SV_ASSETS.logo)||''
 };
 var state={}, sel={}, autoIncluye=true, autoName=true, autoSaludo=true;
+// Nombre EXACTO del preset elegido (plan rápido o pack). Manda sobre el nombre derivado
+// para que la propuesta diga lo mismo que el ejecutivo seleccionó. Se limpia al editar módulos.
+var presetName=null;
 
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -507,6 +510,7 @@ function basePlan(){
 function hasEmergencias(){ return sel.servicios.indexOf('emergencias')>=0; }
 // Nombre destacado del plan: base reconocido + realce explícito de Emergencias 24/7 (CONFIABILIDAD comercial).
 function planName(){
+  if(presetName) return presetName;
   var mp=matchPlan();
   var nm;
   if(mp && mp!=='Emergencias 24/7'){ nm='Plan '+mp; }
@@ -561,7 +565,7 @@ function renderModules(){
 function onModuleChange(e){
   var group=e.target.dataset.group, id=e.target.value;
   var g=GROUPS.filter(function(x){return x.key===group;})[0];
-  autoName=true; autoIncluye=true;
+  presetName=null; autoName=true; autoIncluye=true;
   if(g.type==='radio'){ sel[group]=id; }
   else if(group==='dash'){ sel.dash=e.target.checked; }
   else { var arr=sel[group]; var i=arr.indexOf(id); if(e.target.checked){if(i<0)arr.push(id);}else{if(i>=0)arr.splice(i,1);} }
@@ -570,7 +574,7 @@ function onModuleChange(e){
 function applyPlan(name){
   var p=PLANS[name];
   sel={atencion:p.atencion,servicios:p.servicios.slice(),cobertura:p.cobertura.slice(),sala:p.sala,reporte:p.reporte,dash:!!p.dash,periodo:p.periodo};
-  autoName=true; autoIncluye=true;
+  presetName='Plan '+name; autoName=true; autoIncluye=true;
   syncModuleUI(); compute(); render(); toast('Plan '+name+' aplicado','ok');
 }
 function syncModuleUI(){
@@ -709,7 +713,7 @@ function reset(){
   if(!confirm('¿Restablecer todo a los valores por defecto?'))return;
   try{localStorage.removeItem(LS_KEY);}catch(e){}
   state=Object.assign({},DEFAULTS); sel=Object.assign({},DEF_SEL); sel.servicios=[]; sel.cobertura=[];
-  autoIncluye=true; autoName=true; autoSaludo=true; applyProfile();
+  presetName=null; autoIncluye=true; autoName=true; autoSaludo=true; applyProfile();
   writeForm(); syncModuleUI(); compute(); render(); updateFavButton(); toast('Restablecido (se conserva tu perfil)');
 }
 function onBannerFile(ev){
@@ -759,7 +763,7 @@ function renderPacks(){
 function applyPack(id){
   var p=PACKS.concat(PACKS_WE).filter(function(x){return x.id===id;})[0]; if(!p)return;
   sel={atencion:p.sel.atencion,servicios:p.sel.servicios.slice(),cobertura:p.sel.cobertura.slice(),sala:p.sel.sala,reporte:p.sel.reporte,dash:!!p.sel.dash,periodo:p.sel.periodo};
-  autoName=true; autoIncluye=true; syncModuleUI(); compute(); render();
+  presetName=p.name; autoName=true; autoIncluye=true; syncModuleUI(); compute(); render();
   var box=$('pack-script'); if(box){box.style.display='block'; box.querySelector('.ps-title').textContent='Guion — '+p.name; box.querySelector('.ps-text').textContent=p.script;}
   document.querySelectorAll('.packcard').forEach(function(c){c.classList.toggle('on',c.dataset.pack===id);});
   toast(p.name+' aplicado','ok');
@@ -837,7 +841,7 @@ function histReopen(id){
   if(r.ufdia)state.ufdia=r.ufdia; if(typeof r.iva!=='undefined')state.iva=r.iva;
   state.favorito=r.favorito||false;
   if(r.sel){sel={atencion:r.sel.atencion,servicios:(r.sel.servicios||[]).slice(),cobertura:(r.sel.cobertura||[]).slice(),sala:r.sel.sala,reporte:r.sel.reporte,dash:!!r.sel.dash,periodo:r.sel.periodo};}
-  autoName=true;autoIncluye=true; writeForm(); syncModuleUI(); compute(); render(); updateFavButton(); showTab('cotizador'); toast('Cotización reabierta','ok');
+  presetName=r.plan||null; autoName=true;autoIncluye=true; writeForm(); syncModuleUI(); compute(); render(); updateFavButton(); showTab('cotizador'); toast('Cotización reabierta','ok');
 }
 function renderHist(){
   var body=$('hist-tbody'); if(!body)return;
