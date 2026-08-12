@@ -129,6 +129,7 @@ table.hist th{background:var(--navy-800);color:#fff;font-weight:700;padding:9px 
 table.hist td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:middle}
 table.hist tr:hover td{background:var(--surface-2)}
 .h-in{width:100%;min-width:88px;padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font-size:12.5px;font-family:inherit}
+.hist-cb,#hist-selall{width:16px;height:16px;cursor:pointer;accent-color:#0098D8}
 .h-in.overdue{border-color:var(--error);box-shadow:0 0 0 2px rgba(192,38,59,.15)}
 .h-actions{white-space:nowrap}
 .h-btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px;margin-right:4px}
@@ -307,14 +308,30 @@ table.hist tr:hover td{background:var(--surface-2)}
       </select>
       <input class="input" id="hist-search" style="width:170px" placeholder="Buscar…" />
       <button class="btn" id="hist-tsv">📋 Copiar TSV</button>
+      <button class="btn" id="hist-dedupe" title="Eliminar registros duplicados; conserva siempre el último">🧹 Quitar duplicados</button>
       <button class="btn" id="hist-backup" title="Descargar respaldo del historial (JSON)">⬇ Respaldo</button>
       <button class="btn" id="hist-import-btn" title="Importar un respaldo JSON">⬆ Importar</button>
       <input type="file" id="hist-import-file" accept="application/json,.json" style="display:none" />
       <button class="btn primary" id="hist-export">📊 Exportar Excel</button>
     </div>
+    <div class="hist-bulk" id="hist-bulk" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;margin-bottom:10px;background:#EAF6FC;border:1px solid #BFE3F5;border-radius:8px">
+      <strong id="hist-bulk-count" style="font-size:13px;color:#0A2540"></strong>
+      <span style="flex:1"></span>
+      <select class="input" id="hist-bulk-estado" style="width:auto">
+        <option value="">Estado…</option>
+        <option>Borrador</option><option>Enviada</option><option>En negociación</option><option>Ganada</option><option>Perdida</option>
+      </select>
+      <button class="btn" id="hist-bulk-estado-apply">Aplicar estado</button>
+      <input class="input" type="date" id="hist-bulk-date" style="width:auto" title="Fecha para agendar los seleccionados">
+      <button class="btn" id="hist-bulk-date-apply">📅 Agendar</button>
+      <button class="btn" id="hist-bulk-fav">★ Favorito</button>
+      <button class="btn" id="hist-bulk-del" style="border-color:#e3b3b3;color:#c0392b">🗑 Borrar</button>
+      <button class="btn" id="hist-bulk-clear" title="Quitar selección">✕</button>
+    </div>
     <div class="hist-table-wrap">
       <table class="hist" id="hist-table">
         <thead><tr>
+          <th style="width:30px;text-align:center"><input type="checkbox" id="hist-selall" title="Seleccionar todos los visibles"></th>
           <th style="width:36px;color:#FFC107;font-size:18px">★</th><th>Fecha</th><th>Empresa</th><th>Contacto</th><th>Correo</th><th>Tel.</th><th>RUT</th><th>Cond.</th>
           <th>Plan</th><th>UF/mes</th><th>CLP/mes</th><th>Período</th><th>Estado</th><th>Agendar</th><th>Obs.</th><th></th>
         </tr></thead>
@@ -785,7 +802,7 @@ var HIST_KEY='sv_historial_v1';
 var ESTADOS=['Borrador','Enviada','En negociación','Ganada','Perdida'];
 function histAll(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]');}catch(e){return [];}}
 function histSaveLocal(a){try{localStorage.setItem(HIST_KEY,JSON.stringify(a));}catch(e){toast('No se pudo guardar el historial','bad');}}
-function histSave(a){ histSaveLocal(a); if(typeof gScheduleSync==='function')gScheduleSync(); }
+function histSave(a){ a=histDedupe(a); histSaveLocal(a); if(typeof gScheduleSync==='function')gScheduleSync(); }
 function fechaHoy(){var d=new Date();return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
 function histAdd(){
   if(!state.toName&&!state.toEmail){toast('Agrega al menos nombre o correo del cliente','bad');return;}
@@ -828,6 +845,67 @@ function histAdd(){
 function histSet(id,field,val){var a=histAll();for(var i=0;i<a.length;i++){if(a[i].id==id){a[i][field]=val;break;}}histSave(a);renderHist();}
 function histToggleFav(id){var a=histAll();for(var i=0;i<a.length;i++){if(a[i].id==id){a[i].favorito=!a[i].favorito;break;}}histSave(a);renderHist();}
 function histDelete(id){if(!confirm('¿Borrar este registro del historial?'))return;histSave(histAll().filter(function(r){return r.id!=id;}));renderHist();}
+
+/* ── Selección múltiple + acciones globales + deduplicado ─────────────────── */
+var histSel={};
+// Clave de identidad de un cliente (misma prioridad que findExistingClient): RUT > correo > teléfono > contacto+empresa.
+function histKey(r){
+  var rut=normClientData(r.rut); if(rut) return 'rut:'+rut;
+  var mail=normClientData(r.correo); if(mail) return 'mail:'+mail;
+  var tel=normClientData(r.telefono); if(tel) return 'tel:'+tel;
+  var c=normClientData(r.contacto), e=normClientData(r.empresa);
+  if(c&&e) return 'ce:'+c+'|'+e;
+  return 'id:'+(r.id||Math.random());
+}
+// Deduplica conservando SIEMPRE el registro más reciente (mayor id) por cliente; preserva el favorito.
+function histDedupe(list){
+  var groups={};
+  list.forEach(function(r){var k=histKey(r);(groups[k]=groups[k]||[]).push(r);});
+  var out=[];
+  Object.keys(groups).forEach(function(k){
+    var g=groups[k], best=g[0], anyFav=false;
+    g.forEach(function(r){ if(r.favorito)anyFav=true; if((r.id||0)>(best.id||0))best=r; });
+    if(anyFav)best.favorito=true;
+    out.push(best);
+  });
+  out.sort(function(a,b){return (b.id||0)-(a.id||0);});
+  return out;
+}
+function histRemoveDuplicates(){
+  var before=histAll(), after=histDedupe(before.slice());
+  var removed=before.length-after.length;
+  if(removed<=0){toast('No hay duplicados','ok');return;}
+  histSaveLocal(after); if(typeof gScheduleSync==='function')gScheduleSync();
+  histSel={}; renderHist();
+  toast('🧹 '+removed+' duplicado'+(removed===1?'':'s')+' eliminado'+(removed===1?'':'s')+' (se conservó el último)','ok');
+}
+function histSelectedIds(){var o=[];for(var k in histSel){if(histSel[k])o.push(k);}return o;}
+function histVisibleIds(){return [].slice.call(document.querySelectorAll('.hist-cb')).map(function(cb){return cb.dataset.id;});}
+function histUpdateBulkBar(){
+  var ids=histSelectedIds(), bar=$('hist-bulk'); if(!bar)return;
+  bar.style.display=ids.length?'flex':'none';
+  var c=$('hist-bulk-count'); if(c)c.textContent=ids.length+' seleccionado'+(ids.length===1?'':'s');
+  var vis=histVisibleIds(), all=$('hist-selall');
+  if(all)all.checked=vis.length>0&&vis.every(function(id){return histSel[id];});
+}
+function histSelectAllVisible(on){
+  histVisibleIds().forEach(function(id){ if(on)histSel[id]=true; else delete histSel[id]; });
+  document.querySelectorAll('.hist-cb').forEach(function(cb){cb.checked=on;});
+  histUpdateBulkBar();
+}
+function histClearSel(){histSel={};document.querySelectorAll('.hist-cb').forEach(function(cb){cb.checked=false;});var all=$('hist-selall');if(all)all.checked=false;histUpdateBulkBar();}
+function histBulkDelete(){
+  var ids=histSelectedIds(); if(!ids.length)return;
+  if(!confirm('¿Borrar '+ids.length+' registro'+(ids.length===1?'':'s')+' seleccionado'+(ids.length===1?'':'s')+'?'))return;
+  var set={}; ids.forEach(function(id){set[id]=true;});
+  histSaveLocal(histAll().filter(function(r){return !set[String(r.id)];})); if(typeof gScheduleSync==='function')gScheduleSync();
+  histSel={}; renderHist(); toast('🗑 '+ids.length+' eliminado'+(ids.length===1?'':'s'),'ok');
+}
+function histBulkSet(field,val,msg){
+  var ids=histSelectedIds(); if(!ids.length)return;
+  var set={}; ids.forEach(function(id){set[id]=true;});
+  var a=histAll(); a.forEach(function(r){if(set[String(r.id)])r[field]=val;}); histSave(a); renderHist(); toast(msg,'ok');
+}
 function histReopen(id){
   var r=histAll().filter(function(x){return x.id==id;})[0]; if(!r)return;
   state.empresa=r.empresa;state.toName=r.contacto;state.toEmail=r.correo;state.telefono=r.telefono;state.rut=r.rut||'';state.condominios=r.condominios;
@@ -845,13 +923,14 @@ function renderHist(){
     return true;
   });
   if($('hist-count'))$('hist-count').textContent=a.length+' registro'+(a.length===1?'':'s');
-  if(!a.length){body.innerHTML='<tr><td colspan="15" class="hist-empty">Sin registros. Arma una cotización y pulsa “➕ Historial”.</td></tr>';return;}
+  if(!a.length){body.innerHTML='<tr><td colspan="17" class="hist-empty">Sin registros. Arma una cotización y pulsa “➕ Historial”.</td></tr>';histUpdateBulkBar();return;}
   var today=new Date(); today.setHours(0,0,0,0);
   body.innerHTML=a.map(function(r){
     var overdue=r.agenda&&new Date(r.agenda)<today&&r.estado!=='Ganada'&&r.estado!=='Perdida';
     var opts=ESTADOS.map(function(e){return '<option'+(e===r.estado?' selected':'')+'>'+e+'</option>';}).join('');
     var favStar=r.favorito?'★':'☆';
     return '<tr data-id="'+r.id+'">'+
+      '<td style="text-align:center"><input type="checkbox" class="hist-cb" data-id="'+r.id+'"'+(histSel[r.id]?' checked':'')+'></td>'+
       '<td style="text-align:center;cursor:pointer;font-size:24px;color:#FFC107;line-height:1" data-a="fav" title="'+(r.favorito?'Quitar de favoritos':'Añadir a favoritos')+'">'+favStar+'</td>'+
       '<td>'+esc(r.fecha)+'</td><td>'+esc(r.empresa)+'</td><td>'+esc(r.contacto)+'</td><td>'+esc(r.correo)+'</td>'+
       '<td>'+esc(r.telefono)+'</td><td>'+esc(r.rut||'')+'</td><td style="text-align:center">'+esc(r.condominios)+'</td>'+
@@ -863,15 +942,26 @@ function renderHist(){
       '<td class="h-actions"><button class="h-btn" data-a="reopen" title="Reabrir en cotizador">↩</button><button class="h-btn" data-a="del" title="Borrar">🗑</button></td>'+
     '</tr>';
   }).join('');
+  histUpdateBulkBar();
 }
 function bindHist(){
   var tbl=$('hist-table'); if(!tbl)return;
-  tbl.addEventListener('change',function(e){var f=e.target.getAttribute('data-f');if(!f)return;var tr=e.target.closest('tr');if(tr)histSet(tr.dataset.id,f,e.target.value);});
+  tbl.addEventListener('change',function(e){
+    if(e.target.id==='hist-selall'){histSelectAllVisible(e.target.checked);return;}
+    if(e.target.classList&&e.target.classList.contains('hist-cb')){histSel[e.target.dataset.id]=e.target.checked;histUpdateBulkBar();return;}
+    var f=e.target.getAttribute('data-f');if(!f)return;var tr=e.target.closest('tr');if(tr)histSet(tr.dataset.id,f,e.target.value);
+  });
   tbl.addEventListener('click',function(e){var a=e.target.getAttribute('data-a');if(!a)return;var tr=e.target.closest('tr');if(!tr)return;if(a==='reopen')histReopen(tr.dataset.id);if(a==='del')histDelete(tr.dataset.id);if(a==='fav')histToggleFav(tr.dataset.id);});
-  if($('hist-filter'))$('hist-filter').addEventListener('change',renderHist);
-  if($('hist-search'))$('hist-search').addEventListener('input',renderHist);
+  if($('hist-filter'))$('hist-filter').addEventListener('change',function(){histSel={};renderHist();});
+  if($('hist-search'))$('hist-search').addEventListener('input',function(){histSel={};renderHist();});
   if($('hist-export'))$('hist-export').addEventListener('click',exportHistExcel);
   if($('hist-tsv'))$('hist-tsv').addEventListener('click',copyHistTsv);
+  if($('hist-dedupe'))$('hist-dedupe').addEventListener('click',histRemoveDuplicates);
+  if($('hist-bulk-del'))$('hist-bulk-del').addEventListener('click',histBulkDelete);
+  if($('hist-bulk-clear'))$('hist-bulk-clear').addEventListener('click',histClearSel);
+  if($('hist-bulk-estado-apply'))$('hist-bulk-estado-apply').addEventListener('click',function(){var v=$('hist-bulk-estado').value;if(!v){toast('Elige un estado','bad');return;}var n=histSelectedIds().length;histBulkSet('estado',v,'Estado "'+v+'" aplicado a '+n);});
+  if($('hist-bulk-date-apply'))$('hist-bulk-date-apply').addEventListener('click',function(){var v=$('hist-bulk-date').value;var n=histSelectedIds().length;histBulkSet('agenda',v,v?('📅 Agenda '+v+' aplicada a '+n):('Agenda limpiada en '+n));});
+  if($('hist-bulk-fav'))$('hist-bulk-fav').addEventListener('click',function(){var n=histSelectedIds().length;histBulkSet('favorito',true,'★ '+n+' marcado'+(n===1?'':'s')+' como favorito');});
 }
 var HIST_COLS=['Fecha','Empresa','Contacto','Correo','Teléfono','RUT','N° Condominios','Plan / Módulos','UF/mes','CLP/mes','Período','Estado','Agenda','Observaciones'];
 function histRowArr(r){return [r.fecha,r.empresa,r.contacto,r.correo,r.telefono,r.rut||'',r.condominios,r.plan+(r.modulos?' — '+r.modulos:''),fmtUf(r.uf),r.clp,r.periodo,r.estado,r.agenda,r.obs];}
