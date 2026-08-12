@@ -196,6 +196,7 @@ table.hist tr:hover td{background:var(--surface-2)}
       <div class="card-head"><span class="c-tag">1</span> Cliente</div>
       <div class="card-body">
         <button class="btn btn-paste" id="btn-paste" title="Lee la ficha copiada del CRM Atlas y rellena los campos">📋 Pegar datos del CRM (Atlas)</button>
+        <button class="btn" id="btn-atlas-help" title="Trae los datos desde Atlas con un marcador de 1 clic, sin instalar extensiones" style="width:100%;justify-content:center;margin-bottom:12px;font-weight:600">⚡ Traer desde Atlas sin copiar a mano</button>
         <div class="row2">
           <div class="field"><label for="f_toName">Contacto</label><input class="input" id="f_toName" type="text" placeholder="Nombre" /></div>
           <div class="field"><label for="f_toEmail">Correo</label><input class="input" id="f_toEmail" type="email" placeholder="correo@dominio.cl" /></div>
@@ -349,6 +350,27 @@ table.hist tr:hover td{background:var(--surface-2)}
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
       <button class="btn" id="paste-cancel">Cancelar</button>
       <button class="btn primary" id="paste-go">Procesar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="atlas-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-h">⚡ Traer datos desde Atlas sin copiar a mano</div>
+    <p class="hint" style="margin:0 0 10px">Por seguridad, una página web no puede leer otra pestaña. Pero con este <b>marcador</b> lo consigues en 1 clic, <b>sin instalar ninguna extensión</b>:</p>
+    <ol style="margin:0 0 10px 20px;padding:0;font-size:13.5px;line-height:1.7;color:var(--ink)">
+      <li><b>Una sola vez:</b> arrastra este botón a tu <b>barra de marcadores</b> del navegador:</li>
+    </ol>
+    <div style="text-align:center;margin:0 0 12px">
+      <a id="atlas-bm" class="btn primary" draggable="true" style="display:inline-block;text-decoration:none;cursor:grab;font-weight:800;padding:10px 16px">📋 Copiar lead de Atlas</a>
+    </div>
+    <ol start="2" style="margin:0;padding:0 0 0 20px;font-size:13.5px;line-height:1.7;color:var(--ink)">
+      <li>Abre la ficha del lead en <b>Atlas</b> y haz clic en ese marcador (copia todos los datos).</li>
+      <li>Vuelve a esta pestaña y pulsa <b>“Pegar datos del CRM (Atlas)”</b>. Se mapea solo.</li>
+    </ol>
+    <p class="hint" style="margin:12px 0 0">Si tu Atlas bloquea marcadores, usa el modo manual: en la ficha del lead haz <b>Ctrl+A</b> y <b>Ctrl+C</b>, y aquí pulsa Pegar.</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn primary" id="atlas-close">Entendido</button>
     </div>
   </div>
 </div>
@@ -1282,6 +1304,12 @@ document.addEventListener('DOMContentLoaded',function(){
   $('btn-paste').addEventListener('click',pasteFromClipboard);
   $('paste-cancel').addEventListener('click',function(){$('paste-modal').style.display='none';});
   $('paste-go').addEventListener('click',function(){var t=$('paste-text').value;$('paste-modal').style.display='none';applyParsed(parseCrm(t),true);});
+  // Atlas → Cotizador sin extensión: marcador (bookmarklet) que copia la ficha del lead al portapapeles.
+  var ATLAS_BM="javascript:(function(){var t=(document.body&&document.body.innerText)||'';var ok='Lead copiado. Vuelve al Cotizador y pulsa Pegar datos del CRM.';function f(){var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity=0;document.body.appendChild(a);a.focus();a.select();try{document.execCommand('copy');alert(ok);}catch(e){alert('No se pudo copiar. Usa Ctrl+A y luego Ctrl+C.');}a.remove();}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){alert(ok);},f);}else{f();}})();";
+  if($('atlas-bm')){$('atlas-bm').setAttribute('href',ATLAS_BM);$('atlas-bm').addEventListener('click',function(e){e.preventDefault();toast('Arrástralo a tu barra de marcadores (no lo pulses aquí)','ok');});}
+  if($('btn-atlas-help'))$('btn-atlas-help').addEventListener('click',function(){$('atlas-modal').style.display='flex';});
+  if($('atlas-close'))$('atlas-close').addEventListener('click',function(){$('atlas-modal').style.display='none';});
+  if($('atlas-modal'))$('atlas-modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
   $('hist-backup').addEventListener('click',function(){backupJson(false);});
   $('hist-import-btn').addEventListener('click',function(){$('hist-import-file').click();});
   $('hist-import-file').addEventListener('change',importBackupFile);
