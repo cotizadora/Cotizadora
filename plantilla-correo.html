@@ -315,7 +315,7 @@ table.hist tr:hover td{background:var(--surface-2)}
     <div class="hist-table-wrap">
       <table class="hist" id="hist-table">
         <thead><tr>
-          <th style="width:36px">★</th><th>Fecha</th><th>Empresa</th><th>Contacto</th><th>Correo</th><th>Tel.</th><th>RUT</th><th>Cond.</th>
+          <th style="width:36px;color:#FFC107;font-size:18px">★</th><th>Fecha</th><th>Empresa</th><th>Contacto</th><th>Correo</th><th>Tel.</th><th>RUT</th><th>Cond.</th>
           <th>Plan</th><th>UF/mes</th><th>CLP/mes</th><th>Período</th><th>Estado</th><th>Agendar</th><th>Obs.</th><th></th>
         </tr></thead>
         <tbody id="hist-tbody"></tbody>
@@ -852,7 +852,7 @@ function renderHist(){
     var opts=ESTADOS.map(function(e){return '<option'+(e===r.estado?' selected':'')+'>'+e+'</option>';}).join('');
     var favStar=r.favorito?'★':'☆';
     return '<tr data-id="'+r.id+'">'+
-      '<td style="text-align:center;cursor:pointer;font-size:18px" data-a="fav" title="'+(r.favorito?'Quitar de favoritos':'Añadir a favoritos')+'">'+favStar+'</td>'+
+      '<td style="text-align:center;cursor:pointer;font-size:24px;color:#FFC107;line-height:1" data-a="fav" title="'+(r.favorito?'Quitar de favoritos':'Añadir a favoritos')+'">'+favStar+'</td>'+
       '<td>'+esc(r.fecha)+'</td><td>'+esc(r.empresa)+'</td><td>'+esc(r.contacto)+'</td><td>'+esc(r.correo)+'</td>'+
       '<td>'+esc(r.telefono)+'</td><td>'+esc(r.rut||'')+'</td><td style="text-align:center">'+esc(r.condominios)+'</td>'+
       '<td>'+esc(r.plan)+'</td><td style="text-align:right">'+fmtUf(r.uf)+'</td><td style="text-align:right">'+fmtClp(r.clp)+'</td>'+
@@ -1083,7 +1083,7 @@ function gRestore(){ try{ if(localStorage.getItem('sv_gsignedin')&&GOOGLE_CLIENT
 function updateFavButton(){
   var btn=$('btn-fav'); if(!btn)return;
   var isFav=state.favorito||false;
-  btn.textContent=(isFav?'★':'☆')+' '+(isFav?'QUITAR DE FAVORITOS':'AÑADIR A FAVORITOS');
+  btn.innerHTML='<span style="color:#FFD23F;font-size:24px;line-height:1;vertical-align:-3px;">'+(isFav?'★':'☆')+'</span> '+(isFav?'QUITAR DE FAVORITOS':'AÑADIR A FAVORITOS');
   btn.style.opacity=isFav?'1':'0.9';
 }
 function toggleFavorito(){
