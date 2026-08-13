@@ -780,6 +780,7 @@ h2.h-scene{font-family:var(--ff-display);font-weight:800;font-size:44px;line-hei
 
     idx=n;
     updateChrome();
+    syncHash();
     runCounts(nxt);
     navSound(dir);
 
@@ -810,9 +811,28 @@ h2.h-scene{font-family:var(--ff-display);font-weight:800;font-size:44px;line-hei
   /* ---- Microinteracción sonora al pasar por los tabs ---- */
   tabs.forEach(t=>t.addEventListener('mouseenter',()=>tick()));
 
+  /* ---- Enlace directo a una diapositiva: .../#4 abre la 4 ----------------
+     Permite repartir un enlace a una lámina concreta y que recargar la página
+     no devuelva a la portada en mitad de la presentación. */
+  function hashIndex(){
+    const n=parseInt((location.hash||'').replace('#',''),10);
+    return (Number.isFinite(n) && n>=1 && n<=N) ? n-1 : null;
+  }
+  function syncHash(){
+    const h='#'+(idx+1);
+    if(location.hash!==h) history.replaceState(null,'',h);
+  }
+  window.addEventListener('hashchange',()=>{
+    const n=hashIndex();
+    if(n!==null && n!==idx) go(n);
+  });
+
   /* ---- Inicio ---- */
-  scenes[0].classList.add('active');
+  const start = hashIndex() ?? 0;
+  idx = start;
+  scenes[start].classList.add('active');
   updateChrome();
-  runCounts(scenes[0]);
+  syncHash();
+  runCounts(scenes[start]);
 })();
 </script>
