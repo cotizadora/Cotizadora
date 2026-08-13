@@ -1373,21 +1373,12 @@ header .view-nav{flex:0 0 auto;}
   font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
 .set-item:hover{border-color:var(--rl);background:var(--g3);}
 .set-item .set-emo{font-size:1rem;line-height:1;}
-/* Enlaces útiles — accesos rápidos (CRM · Discador) */
-.fav-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.fav-link{position:relative;display:flex;align-items:center;gap:9px;text-decoration:none;overflow:hidden;
-  background:linear-gradient(160deg,var(--g2),var(--g1));border:1px solid var(--g3);border-radius:11px;
-  padding:9px 11px 9px 13px;transition:transform .15s,border-color .15s,box-shadow .15s;}
-.fav-link::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc);opacity:.9;}
-.fav-link:hover{transform:translateY(-2px);border-color:var(--acc);box-shadow:0 7px 18px -9px var(--acc);}
-.fav-ic{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:30px;height:30px;font-size:1rem;
-  border-radius:9px;background:color-mix(in srgb,var(--acc) 16%,var(--g3));
-  border:1px solid color-mix(in srgb,var(--acc) 34%,transparent);}
-.fav-tx{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
-.fav-tx b{font-size:.82rem;font-weight:800;color:var(--w);}
-.fav-tx small{font-size:.62rem;font-weight:600;color:var(--wb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.fav-go{margin-left:auto;font-size:.82rem;color:var(--wb);transition:color .15s,transform .15s;}
-.fav-link:hover .fav-go{color:var(--acc);transform:translate(1px,-1px);}
+/* Enlaces útiles en la nav — accesos externos (CRM · Discador) */
+a.vn-btn{text-decoration:none;}
+.vn-div{width:1px;align-self:stretch;margin:4px 3px;background:rgba(255,255,255,.16);flex:0 0 auto;}
+.vn-btn.vn-ext .vn-ic{color:var(--acc);}
+.vn-btn.vn-ext:hover{background:color-mix(in srgb,var(--acc) 20%,rgba(0,0,0,.35));border-color:var(--acc);color:#fff;}
+.vn-ext-go{font-size:.66rem;opacity:.55;margin-left:1px;}
 #snd-toggle.off{opacity:.5;}
 .set-wide{width:100%;justify-content:flex-start;}
 .set-dl-ic{width:20px;height:20px;fill:#7ec8f0;flex-shrink:0;}
@@ -1655,6 +1646,9 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <button type="button" class="vn-btn on" id="vnbtn-cotizador" data-target="cotizador" onclick="goToView(this.dataset.target)" title="Ir a la Cotizadora (pantalla principal)"><span class="vn-ic">🧮</span><span class="vn-lb">Cotizadora</span></button>
     <button type="button" class="vn-btn" id="vnbtn-planilla" data-target="planilla" onclick="goToView(this.dataset.target)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)"><span class="vn-ic">📋</span><span class="vn-lb">Planilla</span></button>
     <button type="button" class="vn-btn" id="vnbtn-biblioteca" data-target="biblioteca" onclick="goToView(this.dataset.target)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad"><span class="vn-ic">🎧</span><span class="vn-lb">Biblioteca</span></button>
+    <span class="vn-div" aria-hidden="true"></span>
+    <a class="vn-btn vn-ext" style="--acc:var(--bl)" href="https://cdn.s-br01a-product.prod1.vocalcomcx.com/hermes360/Admin/Launcher/dashboard?screen=workspace" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir el CRM (Vocalcom Hermes360) en una pestaña nueva"><span class="vn-ic">🗂️</span><span class="vn-lb">CRM</span><span class="vn-ext-go" aria-hidden="true">↗</span></a>
+    <a class="vn-btn vn-ext" style="--acc:var(--gn)" href="https://atlas.geimser.cl/app/calls/new?campaignId=b5df1732-476e-4475-a21a-bae8e0942829" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir el discador (Atlas Geimser · llamada nueva) en una pestaña nueva"><span class="vn-ic">📞</span><span class="vn-lb">Discador</span><span class="vn-ext-go" aria-hidden="true">↗</span></a>
   </nav>
 
   <!-- ZONA DERECHA — personalización (menú único) + usuario -->
@@ -1688,21 +1682,6 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
           </div>
           <div class="set-row" style="margin-top:8px;">
             <button type="button" class="set-item set-wide" id="fav-blink-btn" onclick="toggleFavBlink();" title="Hace parpadear el ícono de la pestaña con los colores de Equifax para ubicar la Cotizadora entre muchas pestañas (Chrome y Edge)"><span id="fav-blink-emo" class="set-emo">✨</span><span id="fav-blink-txt">Parpadeo ON</span></button>
-          </div>
-        </div>
-        <div class="set-sec">
-          <span class="set-hd">Enlaces útiles</span>
-          <div class="fav-grid">
-            <a class="fav-link" style="--acc:var(--bl)" href="https://cdn.s-br01a-product.prod1.vocalcomcx.com/hermes360/Admin/Launcher/dashboard?screen=workspace" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir el CRM (Vocalcom Hermes360) en una pestaña nueva">
-              <span class="fav-ic">🗂️</span>
-              <span class="fav-tx"><b>CRM</b><small>Vocalcom</small></span>
-              <span class="fav-go" aria-hidden="true">↗</span>
-            </a>
-            <a class="fav-link" style="--acc:var(--gn)" href="https://atlas.geimser.cl/app/calls/new?campaignId=b5df1732-476e-4475-a21a-bae8e0942829" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir el discador (Atlas Geimser · llamada nueva) en una pestaña nueva">
-              <span class="fav-ic">📞</span>
-              <span class="fav-tx"><b>Discador</b><small>Atlas Geimser</small></span>
-              <span class="fav-go" aria-hidden="true">↗</span>
-            </a>
           </div>
         </div>
         <div class="set-sec">
