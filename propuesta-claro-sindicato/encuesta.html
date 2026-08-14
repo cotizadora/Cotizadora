@@ -73,6 +73,8 @@ p{margin:0}
 .ref .rr b{color:var(--ink)}
 .ref .rr .a{font-family:var(--ff-display);font-weight:800;color:var(--slate);text-decoration:line-through}
 .ref .rr .b{font-family:var(--ff-display);font-weight:900;color:var(--red);font-size:16px}
+.price-tbl em{display:block;text-decoration:none;font-style:normal;font-weight:600;font-size:9.5px;letter-spacing:.03em;
+                text-transform:uppercase;color:var(--slate);margin-top:2px}
 .price-tbl small{display:block;font-weight:500;color:var(--slate);font-size:11px;margin-top:2px}
 
 label.f{display:block;font-size:12px;font-weight:700;color:var(--graphite);margin:0 0 6px}
@@ -156,7 +158,7 @@ button.go svg{width:19px;height:19px}
       <div class="t">Precio de tu plan</div>
       <div class="cols">
         <div>Pagas el valor que corresponde a tu plan actual.</div>
-        <div class="b">Precio <b>de Sindicato</b>, muy por debajo de lo que consigue una persona por su cuenta.</div>
+        <div class="b">Precio <b>de Sindicato</b>: el plan L queda en <b>$4.477</b> frente a los <b>$7.990 + IVA</b> que paga una persona por su cuenta.</div>
       </div>
     </div>
 
@@ -175,18 +177,17 @@ button.go svg{width:19px;height:19px}
     <p style="font-size:13px;color:var(--graphite);line-height:1.55;margin-bottom:16px">
       Estos son los tres planes negociados para el Sindicato. Todos incluyen <b>minutos libres a todo destino</b> y bolsa de Roaming + Larga Distancia Internacional. Valores mensuales con IVA incluido.
     </p>
-    <div class="ref">
-      <div class="rl">Para que lo compares</div>
-      <div class="rr">El plan <b>L Libre</b> en Claro, contratado por una persona, cuesta <span class="a">$7.990</span> al mes.<br>Por el Sindicato, el mismo plan queda en <span class="b">$4.477</span>.</div>
-    </div>
     <table class="price-tbl">
-      <thead><tr><th>Plan</th><th>Navegación</th><th>Precio Sindicato</th></tr></thead>
+      <thead><tr><th>Plan</th><th>Contratado<br>por tu cuenta</th><th>Por el<br>Sindicato</th></tr></thead>
       <tbody>
-        <tr><td>Empresas L Libre</td><td>400 GB</td><td><span class="new">$4.477</span></td></tr>
-        <tr><td>Empresas XL Libre</td><td>600 GB</td><td><span class="new">$5.437</span></td></tr>
-        <tr><td>Empresas Premium Pro</td><td>1.000 GB</td><td><span class="new">$6.897</span></td></tr>
+        <tr><td>L Libre<small>400 GB</small></td><td class="old">$7.990<em>+ IVA</em></td><td><span class="new">$4.477</span><em>IVA incl.</em></td></tr>
+        <tr><td>XL Libre<small>600 GB</small></td><td class="old">$11.990<em>+ IVA</em></td><td><span class="new">$5.437</span><em>IVA incl.</em></td></tr>
+        <tr><td>Premium Pro<small>1.000 GB</small></td><td class="old">$14.990<em>+ IVA</em></td><td><span class="new">$6.897</span><em>IVA incl.</em></td></tr>
       </tbody>
     </table>
+    <p style="font-size:11.5px;color:var(--slate);line-height:1.55;margin-top:14px">
+      La columna «por tu cuenta» es el precio vigente de Claro Personas. Existe además la modalidad Claro Negocios / Empresas Web ($7.140 · $7.735 · $9.520 con IVA), pero requiere tener empresa, por lo que no aplica a la mayoría de los socios.
+    </p>
   </div>
 
   <div class="sec">Tu respuesta</div>
