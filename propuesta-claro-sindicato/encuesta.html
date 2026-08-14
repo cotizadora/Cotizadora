@@ -67,6 +67,12 @@ p{margin:0}
 .price-tbl td:first-child{text-align:left;font-weight:600}
 .price-tbl .old{color:var(--slate);text-decoration:line-through}
 .price-tbl .new{font-family:var(--ff-display);font-weight:900;color:var(--red);font-size:15px}
+.ref{border:1.5px solid #F3D3CF;background:#FFF7F6;border-radius:13px;padding:14px 15px;margin-bottom:18px}
+.ref .rl{font-family:var(--ff-display);font-weight:800;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--red-deep);margin-bottom:7px}
+.ref .rr{font-size:13.5px;line-height:1.6;color:var(--graphite)}
+.ref .rr b{color:var(--ink)}
+.ref .rr .a{font-family:var(--ff-display);font-weight:800;color:var(--slate);text-decoration:line-through}
+.ref .rr .b{font-family:var(--ff-display);font-weight:900;color:var(--red);font-size:16px}
 .price-tbl small{display:block;font-weight:500;color:var(--slate);font-size:11px;margin-top:2px}
 
 label.f{display:block;font-size:12px;font-weight:700;color:var(--graphite);margin:0 0 6px}
@@ -169,12 +175,16 @@ button.go svg{width:19px;height:19px}
     <p style="font-size:13px;color:var(--graphite);line-height:1.55;margin-bottom:16px">
       Estos son los tres planes negociados para el Sindicato. Todos incluyen <b>minutos libres a todo destino</b> y bolsa de Roaming + Larga Distancia Internacional. Valores mensuales con IVA incluido.
     </p>
+    <div class="ref">
+      <div class="rl">Para que lo compares</div>
+      <div class="rr">El plan <b>L Libre</b> en Claro, contratado por una persona, cuesta <span class="a">$7.990</span> al mes.<br>Por el Sindicato, el mismo plan queda en <span class="b">$4.477</span>.</div>
+    </div>
     <table class="price-tbl">
-      <thead><tr><th>Plan</th><th>Por tu cuenta</th><th>Por el Sindicato</th></tr></thead>
+      <thead><tr><th>Plan</th><th>Navegación</th><th>Precio Sindicato</th></tr></thead>
       <tbody>
-        <tr><td>Empresas L Libre<small>400 GB</small></td><td class="old">$13.990</td><td><span class="new">$4.477</span></td></tr>
-        <tr><td>Empresas XL Libre<small>600 GB</small></td><td class="old">$16.990</td><td><span class="new">$5.437</span></td></tr>
-        <tr><td>Empresas Premium Pro<small>1.000 GB</small></td><td class="old">$22.990</td><td><span class="new">$6.897</span></td></tr>
+        <tr><td>Empresas L Libre</td><td>400 GB</td><td><span class="new">$4.477</span></td></tr>
+        <tr><td>Empresas XL Libre</td><td>600 GB</td><td><span class="new">$5.437</span></td></tr>
+        <tr><td>Empresas Premium Pro</td><td>1.000 GB</td><td><span class="new">$6.897</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -229,15 +239,15 @@ button.go svg{width:19px;height:19px}
     <div class="opts">
       <label class="opt"><input type="radio" name="plan" value="Empresas L Libre - $4.477 (400 GB)">
         <div class="bx"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M5 12l5 5L20 6"/></svg></span>
-          <div class="bd"><div class="ti">Empresas L Libre <span class="pr"><s>$13.990</s>$4.477</span></div>
+          <div class="bd"><div class="ti">Empresas L Libre <span class="pr">$4.477</span></div>
           <div class="ds"><b>400 GB</b> · Minutos libres · Roaming 40 min + 2GB · LDI 40 min</div></div></div></label>
       <label class="opt"><input type="radio" name="plan" value="Empresas XL Libre - $5.437 (600 GB)">
         <div class="bx"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M5 12l5 5L20 6"/></svg></span>
-          <div class="bd"><div class="ti">Empresas XL Libre <span class="tag">Más elegido</span> <span class="pr"><s>$16.990</s>$5.437</span></div>
+          <div class="bd"><div class="ti">Empresas XL Libre <span class="tag">Más elegido</span> <span class="pr">$5.437</span></div>
           <div class="ds"><b>600 GB</b> · Minutos libres · Roaming 60 min + 3GB · LDI 60 min</div></div></div></label>
       <label class="opt"><input type="radio" name="plan" value="Empresas Premium Pro - $6.897 (1.000 GB)">
         <div class="bx"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M5 12l5 5L20 6"/></svg></span>
-          <div class="bd"><div class="ti">Empresas Premium Pro <span class="pr"><s>$22.990</s>$6.897</span></div>
+          <div class="bd"><div class="ti">Empresas Premium Pro <span class="pr">$6.897</span></div>
           <div class="ds"><b>1.000 GB</b> · Minutos libres · Roaming 100 min + 5GB · LDI 100 min</div></div></div></label>
       <label class="opt"><input type="radio" name="plan" value="Necesita orientación para elegir">
         <div class="bx"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M5 12l5 5L20 6"/></svg></span>
