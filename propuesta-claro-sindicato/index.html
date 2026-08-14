@@ -269,6 +269,8 @@ h2.h-scene{font-family:var(--ff-display);font-weight:800;font-size:44px;line-hei
 .fill.mov{background:linear-gradient(90deg,#7a7f89,#3A3D44)}
 .fill.claro{background:linear-gradient(90deg,var(--red),var(--red-deep))}
 .scene.active .fill{width:var(--w)}
+.per-mes{font-size:11.5px;color:var(--slate);margin-top:6px}
+.per-mes b{color:var(--graphite);font-weight:700;font-variant-numeric:tabular-nums}
 .saving-tag{display:inline-flex;align-items:center;gap:7px;margin-top:11px;background:var(--green-050);color:var(--green);font-weight:700;font-size:13px;padding:6px 12px;border-radius:8px}
 .saving-tag svg{width:15px;height:15px}
 .sp{background:var(--ink);color:#fff;border-radius:18px;padding:30px 30px;display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden}
@@ -279,8 +281,8 @@ h2.h-scene{font-family:var(--ff-display);font-weight:800;font-size:44px;line-hei
 .sp .sub{font-size:13.5px;color:rgba(255,255,255,.8);line-height:1.5;margin-top:8px}
 .sp .sub b{color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
 .sp .rows{display:flex;gap:24px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.16)}
-.sp .rows .c .k{font-size:10.5px;color:rgba(255,255,255,.55);letter-spacing:.05em;text-transform:uppercase}
-.sp .rows .c .v{font-family:var(--ff-display);font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;margin-top:3px}
+.sp .rows .c .k{display:block;font-size:10.5px;color:rgba(255,255,255,.55);letter-spacing:.05em;text-transform:uppercase}
+.sp .rows .c .v{display:block;font-family:var(--ff-display);font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;margin-top:3px}
 .sp .rows .c .v.g{color:#5FD08A}
 
 /* ===========================================================================
@@ -558,24 +560,26 @@ h2.h-scene{font-family:var(--ff-display);font-weight:800;font-size:44px;line-hei
         <section class="scene" id="sc-comparativa" data-name="Comparativa">
           <div class="scene-head reveal"><div class="scene-kin"><svg class="spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v6M18.4 6.5l-3.7 4M21 13.5l-5.3-1"/></svg><span class="k">Movistar hoy vs. Claro</span></div><div class="ix">Comparativa · <b>07</b>/09</div></div>
           <div class="scene-body">
-            <h2 class="h-scene reveal" style="--d:.05s;margin-bottom:26px">El mismo servicio, por mucho menos</h2>
+            <h2 class="h-scene reveal" style="--d:.05s;margin-bottom:24px">$10 millones menos al año,<br>por el mismo servicio</h2>
             <div class="cmp">
               <div class="bars">
                 <div class="bar-row reveal" style="--d:.14s">
-                  <div class="bl"><div class="who">Movistar<small>Gasto mensual actual · 254 líneas</small></div><div class="amt num">$<span data-count="2184698">2.184.698</span></div></div>
+                  <div class="bl"><div class="who">Movistar<small>Gasto <b>anual</b> actual · 254 líneas</small></div><div class="amt num">$<span data-count="26216376">26.216.376</span></div></div>
                   <div class="track"><div class="fill mov" style="--w:100%"></div></div>
+                  <div class="per-mes">equivale a <b>$2.184.698</b> al mes</div>
                 </div>
                 <div class="bar-row reveal" style="--d:.22s">
-                  <div class="bl"><div class="who" style="color:var(--red)">Claro Empresas<small style="color:var(--slate)">Propuesta mensual · 254 líneas</small></div><div class="amt num" style="color:var(--red)">$<span data-count="1337242">1.337.242</span></div></div>
+                  <div class="bl"><div class="who" style="color:var(--red)">Claro Empresas<small style="color:var(--slate)">Propuesta <b>anual</b> · 254 líneas</small></div><div class="amt num" style="color:var(--red)">$<span data-count="16046904">16.046.904</span></div></div>
                   <div class="track"><div class="fill claro" style="--w:61.2%"></div></div>
-                  <div class="saving-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>$<span data-count="847456">847.456</span> menos cada mes</div>
+                  <div class="per-mes">equivale a <b>$1.337.242</b> al mes</div>
+                  <div class="saving-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>$<span data-count="10169472">10.169.472</span> menos cada año</div>
                 </div>
               </div>
               <div class="sp reveal" style="--d:.3s">
                 <div class="l">Ahorro total</div>
                 <div class="pct"><em><span data-count="39">39</span></em>%</div>
-                <p class="sub">El Sindicato reduce su gasto en telefonía móvil en <b>$847.456</b> mensuales sin resignar cobertura ni beneficios.</p>
-                <div class="rows"><div class="c"><span class="k">Ahorro anual</span><span class="v g num">$<span data-count="10169472">10.169.472</span></span></div><div class="c"><span class="k">Costo por línea</span><span class="v num">$8.601 → $5.265</span></div></div>
+                <p class="sub">En un año el Sindicato deja de gastar <b>$10.169.472</b> en telefonía móvil, sin resignar cobertura ni beneficios.</p>
+                <div class="rows"><div class="c"><span class="k">Ahorro mensual</span><span class="v g num">$<span data-count="847456">847.456</span></span></div><div class="c"><span class="k">Costo por línea</span><span class="v num">$8.601 → $5.265</span></div></div>
               </div>
             </div>
             <p class="src-note reveal" style="--d:.38s">Comparación c/IVA vs c/IVA. Movistar: cargo del mes (boleta jun 2026, sin saldo anterior). Claro: cargo fijo mensual de los 3 planes (254 líneas); equipos Pie $0 no incluidos en el cargo mensual. Anual = mensual × 12.</p>
