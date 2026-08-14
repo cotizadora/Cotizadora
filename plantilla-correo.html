@@ -196,7 +196,6 @@ table.hist tr:hover td{background:var(--surface-2)}
       <div class="card-head"><span class="c-tag">1</span> Cliente</div>
       <div class="card-body">
         <button class="btn btn-paste" id="btn-paste" title="Lee la ficha copiada del CRM Atlas y rellena los campos">📋 Pegar datos del CRM (Atlas)</button>
-        <button class="btn" id="btn-atlas-help" title="Trae los datos desde Atlas con un marcador de 1 clic, sin instalar extensiones" style="width:100%;justify-content:center;margin-bottom:12px;font-weight:600">⚡ Traer desde Atlas sin copiar a mano</button>
         <div class="row2">
           <div class="field"><label for="f_toName">Contacto</label><input class="input" id="f_toName" type="text" placeholder="Nombre" /></div>
           <div class="field"><label for="f_toEmail">Correo</label><input class="input" id="f_toEmail" type="email" placeholder="correo@dominio.cl" /></div>
@@ -350,27 +349,6 @@ table.hist tr:hover td{background:var(--surface-2)}
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
       <button class="btn" id="paste-cancel">Cancelar</button>
       <button class="btn primary" id="paste-go">Procesar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-back" id="atlas-modal" style="display:none">
-  <div class="modal">
-    <div class="modal-h">⚡ Traer datos desde Atlas sin copiar a mano</div>
-    <p class="hint" style="margin:0 0 10px">Con este <b>marcador</b> traes el lead en 1 clic, <b>sin instalar ninguna extensión</b>. Se abre (o se enfoca) el Cotizador y se rellena solo:</p>
-    <ol style="margin:0 0 10px 20px;padding:0;font-size:13.5px;line-height:1.7;color:var(--ink)">
-      <li><b>Una sola vez:</b> arrastra este botón a tu <b>barra de marcadores</b> del navegador:</li>
-    </ol>
-    <div style="text-align:center;margin:0 0 12px">
-      <a id="atlas-bm" class="btn primary" draggable="true" style="display:inline-block;text-decoration:none;cursor:grab;font-weight:800;padding:10px 16px">⚡ Enviar lead al Cotizador</a>
-    </div>
-    <ol start="2" style="margin:0;padding:0 0 0 20px;font-size:13.5px;line-height:1.7;color:var(--ink)">
-      <li>Abre la ficha del lead en <b>Atlas</b> y haz clic en ese marcador.</li>
-      <li>El Cotizador pasa al frente y <b>se rellena automáticamente</b>. No tienes que copiar ni pegar nada.</li>
-    </ol>
-    <p class="hint" style="margin:12px 0 0">Si tu Atlas bloquea marcadores, usa el modo manual: en la ficha del lead haz <b>Ctrl+A</b> y <b>Ctrl+C</b>, y aquí pulsa <b>“Pegar datos del CRM”</b>.</p>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-      <button class="btn primary" id="atlas-close">Entendido</button>
     </div>
   </div>
 </div>
@@ -1304,14 +1282,9 @@ document.addEventListener('DOMContentLoaded',function(){
   $('btn-paste').addEventListener('click',pasteFromClipboard);
   $('paste-cancel').addEventListener('click',function(){$('paste-modal').style.display='none';});
   $('paste-go').addEventListener('click',function(){var t=$('paste-text').value;$('paste-modal').style.display='none';applyParsed(parseCrm(t),true);});
-  // Atlas → Cotizador sin extensión: el marcador (bookmarklet) abre/enfoca el Cotizador y le envía
-  // la ficha del lead por postMessage (sin datos en la URL, sin diálogos). El Cotizador la mapea solo.
-  var ATLAS_BM="javascript:(function(){var C='https://cotizadora.github.io';var U=C+'/Cotizadora/plantilla-correo.html';var t=(document.body&&document.body.innerText)||'';var W=window.open(U,'sv_cotizador');if(!W){try{navigator.clipboard.writeText(t);}catch(e){}return;}var iv;function send(){try{W.postMessage({__sv:'crm',text:t},C);}catch(e){}}window.addEventListener('message',function(e){if(e.origin!==C)return;if(e.data&&e.data.__sv==='ready')send();if(e.data&&e.data.__sv==='ok'&&iv)clearInterval(iv);});var n=0;iv=setInterval(function(){n++;send();if(n>25)clearInterval(iv);},300);try{W.focus();}catch(e){}})();";
-  if($('atlas-bm')){$('atlas-bm').setAttribute('href',ATLAS_BM);$('atlas-bm').addEventListener('click',function(e){e.preventDefault();toast('Arrástralo a tu barra de marcadores (no lo pulses aquí)','ok');});}
-  if($('btn-atlas-help'))$('btn-atlas-help').addEventListener('click',function(){$('atlas-modal').style.display='flex';});
-  if($('atlas-close'))$('atlas-close').addEventListener('click',function(){$('atlas-modal').style.display='none';});
-  if($('atlas-modal'))$('atlas-modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
-  // Receptor: recibe la ficha desde el marcador de Atlas y la mapea automáticamente (sin pegar a mano).
+  // Receptor invisible: recibe la ficha del lead desde el marcador de Atlas (postMessage) y la mapea
+  // automáticamente. Sin UI, sin diálogos, sin configuración en el uso diario. El marcador se instala
+  // una sola vez desde atlas-setup.html.
   window.addEventListener('message',function(e){
     if(e.origin!=='https://atlascrm.geimser.cl')return;
     var d=e.data||{};
