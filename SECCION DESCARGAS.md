@@ -92,3 +92,26 @@ el nombre exacto de la tabla. La URL del botón no cambia.
   (asset `extractor-crm.zip`). Mantener el mismo nombre de asset en cada update.
 - Este archivo se mantiene en dos lugares: la carpeta local
   `C:\Users\eduardo.perez\Documents\Cotizadora\` y el repo/hosting del proyecto.
+
+---
+
+## Accesos externos de la barra de navegación (Atlas · Vocal · PeopleWork)
+
+Independiente del Centro de Descargas. Son **enlaces directos** a herramientas
+externas, ubicados en la **barra de navegación superior** (`<nav id="view-nav">`
+en `index.html`), después de Cotizadora / Planilla / Biblioteca, separados por un
+divisor `.vn-div`. Abren en pestaña nueva (`target="_blank"` + `rel="noopener noreferrer"`).
+
+| Nombre visible | Qué es    | Ícono | URL |
+|----------------|-----------|-------|-----|
+| **Atlas**      | CRM       | 🗂️   | `https://atlas.geimser.cl/app/calls/new?campaignId=b5df1732-476e-4475-a21a-bae8e0942829` |
+| **Vocal**      | Discador  | 📞    | `https://cdn.s-br01a-product.prod1.vocalcomcx.com/hermes360/Admin/Launcher/dashboard?screen=workspace` |
+| **PeopleWork** | Asistencia| 🏢    | `https://app.peoplework.cl/login` |
+
+**Cómo modificarlos:** editar el bloque `<nav id="view-nav">` en `index.html`.
+Cada acceso es un `<a class="vn-btn vn-ext" style="--acc:var(--COLOR)">` con
+`<span class="vn-ic">ícono</span>`, `<span class="vn-lb">nombre</span>` y la flecha
+`<span class="vn-ext-go">↗</span>`. Colores de acento usados: Atlas `--bl` (azul),
+Vocal `--gn` (verde), PeopleWork `--or` (naranja). Estilos en el CSS bajo el
+comentario *"Enlaces útiles en la nav"* (`.vn-ext`, `.vn-div`, `.vn-ext-go`).
+No usan `data-target`, por eso nunca quedan marcados como sección activa.
