@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configurar marcador Atlas → Cotizador</title>
+<style>
+  :root{--brand:#0098D8;--navy:#0A2540;--ink:#16212B;--muted:#667380;--line:#E2E8EF}
+  *{box-sizing:border-box}
+  body{margin:0;background:#EEF2F6;color:var(--ink);font-family:'Segoe UI',Roboto,Arial,sans-serif;line-height:1.6}
+  .wrap{max-width:640px;margin:40px auto;padding:0 18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 6px 24px rgba(16,33,43,.08)}
+  h1{font-size:21px;margin:0 0 4px;color:var(--navy)}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 20px}
+  .step{font-size:15px;margin:0 0 8px}
+  .bm{display:inline-block;background:var(--brand);color:#fff;text-decoration:none;font-weight:800;font-size:16px;padding:12px 20px;border-radius:10px;cursor:grab;box-shadow:0 4px 12px rgba(0,152,216,.25)}
+  .bmbox{text-align:center;background:#F6F9FB;border:1px dashed #BFE3F5;border-radius:12px;padding:22px;margin:14px 0}
+  ol{padding-left:20px;margin:6px 0 0}
+  li{margin:0 0 8px}
+  .note{font-size:13px;color:var(--muted);margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+  b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>⚡ Traer leads de Atlas al Cotizador</h1>
+    <p class="sub">Configuración de una sola vez por navegador. Después no vuelves aquí nunca más.</p>
+
+    <p class="step"><b>Paso 1.</b> Arrastra este botón a tu <b>barra de marcadores</b> del navegador:</p>
+    <div class="bmbox">
+      <a id="bm" class="bm" draggable="true">⚡ Enviar lead al Cotizador</a>
+    </div>
+
+    <p class="step"><b>Paso 2.</b> ¡Listo! Desde ahora, en la ficha de un lead en Atlas:</p>
+    <ol>
+      <li>Haz clic en el marcador <b>“Enviar lead al Cotizador”</b>.</li>
+      <li>El Cotizador se abre (o pasa al frente) y <b>se rellena solo</b> con los datos del cliente. Sin copiar, sin pegar, sin ventanas.</li>
+    </ol>
+
+    <p class="note">Si tu navegador no muestra la barra de marcadores: actívala con <b>Ctrl+Shift+B</b>. Si Atlas bloqueara el marcador, usa el modo manual en el Cotizador (botón “Pegar datos del CRM”: Ctrl+A y Ctrl+C en la ficha, y pulsa Pegar).</p>
+  </div>
+</div>
+<script>
+  var C='https://cotizadora.github.io';
+  var U=C+'/Cotizadora/plantilla-correo.html';
+  var BM="javascript:(function(){var C='"+C+"';var U='"+U+"';var t=(document.body&&document.body.innerText)||'';var W=window.open(U,'sv_cotizador');if(!W){try{navigator.clipboard.writeText(t);}catch(e){}return;}var iv;function s(){try{W.postMessage({__sv:'crm',text:t},C);}catch(e){}}window.addEventListener('message',function(e){if(e.origin!==C)return;if(e.data&&e.data.__sv==='ready')s();if(e.data&&e.data.__sv==='ok'&&iv)clearInterval(iv);});var n=0;iv=setInterval(function(){n++;s();if(n>25)clearInterval(iv);},300);try{W.focus();}catch(e){}})();";
+  var a=document.getElementById('bm');
+  a.setAttribute('href',BM);
+  a.addEventListener('click',function(e){e.preventDefault();alert('No lo pulses aquí: arrástralo a tu barra de marcadores (Ctrl+Shift+B para mostrarla).');});
+</script>
+</body>
+</html>
