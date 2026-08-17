@@ -1282,19 +1282,6 @@ document.addEventListener('DOMContentLoaded',function(){
   $('btn-paste').addEventListener('click',pasteFromClipboard);
   $('paste-cancel').addEventListener('click',function(){$('paste-modal').style.display='none';});
   $('paste-go').addEventListener('click',function(){var t=$('paste-text').value;$('paste-modal').style.display='none';applyParsed(parseCrm(t),true);});
-  // Receptor invisible: recibe la ficha del lead desde el marcador de Atlas (postMessage) y la mapea
-  // automáticamente. Sin UI, sin diálogos, sin configuración en el uso diario. El marcador se instala
-  // una sola vez desde atlas-setup.html.
-  window.addEventListener('message',function(e){
-    if(e.origin!=='https://atlascrm.geimser.cl')return;
-    var d=e.data||{};
-    if(d.__sv==='crm'&&typeof d.text==='string'){
-      if(window.__svLastCrm!==d.text){window.__svLastCrm=d.text;showTab('cotizador');applyParsed(parseCrm(d.text),true);}
-      try{e.source.postMessage({__sv:'ok'},e.origin);}catch(_){}
-      try{window.focus();}catch(_){}
-    }
-  });
-  try{ if(window.opener) window.opener.postMessage({__sv:'ready'},'https://atlascrm.geimser.cl'); }catch(_){}
   $('hist-backup').addEventListener('click',function(){backupJson(false);});
   $('hist-import-btn').addEventListener('click',function(){$('hist-import-file').click();});
   $('hist-import-file').addEventListener('change',importBackupFile);
