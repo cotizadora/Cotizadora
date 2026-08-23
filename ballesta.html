@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ballesta</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #hint {
+    position: fixed; left: 0; right: 0; top: 18px;
+    text-align: center; color: #555; font-size: 14px;
+    pointer-events: none; letter-spacing: .5px;
+    transition: opacity .6s;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">Arrastrá hacia atrás y soltá para disparar 🏹</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const hint = document.getElementById('hint');
+let W, H, DPR;
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// --- Geometría de la ballesta (fija en la parte inferior) ---
+function anchor() {
+  return { x: W / 2, y: H * 0.82 }; // punto de reposo de la cuerda / flecha
+}
+const BOW_HALF = () => Math.min(W * 0.30, 170); // mitad del ancho del arco
+const BOW_Y_OFF = 74; // qué tan arriba del anchor están las puntas del arco
+
+// --- Estado ---
+let dragging = false;
+let pull = { x: 0, y: 0 };   // desplazamiento de la cuerda respecto al anchor
+let arrows = [];             // flechas voladoras
+const MAX_PULL = 190;
+
+function getPoint(e) {
+  const t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX, y: t.clientY };
+}
+
+function startDrag(e) {
+  e.preventDefault();
+  dragging = true;
+  hint.style.opacity = '0';
+  updatePull(getPoint(e));
+}
+function moveDrag(e) {
+  if (!dragging) return;
+  e.preventDefault();
+  updatePull(getPoint(e));
+}
+function updatePull(p) {
+  const a = anchor();
+  let dx = p.x - a.x;
+  let dy = p.y - a.y;
+  // solo permitir tirar hacia atrás/abajo, limitar magnitud
+  if (dy < 0) dy = 0;
+  const d = Math.hypot(dx, dy);
+  if (d > MAX_PULL) { dx *= MAX_PULL / d; dy *= MAX_PULL / d; }
+  pull.x = dx; pull.y = dy;
+}
+function endDrag(e) {
+  if (!dragging) return;
+  e.preventDefault();
+  dragging = false;
+  fire();
+  pull.x = 0; pull.y = 0;
+}
+
+function fire() {
+  const power = Math.hypot(pull.x, pull.y);
+  if (power < 12) return; // no tiraste casi nada
+  const a = anchor();
+  // dirección: opuesta al tiro (si tiraste abajo, sale hacia arriba)
+  const ang = Math.atan2(-pull.y, -pull.x);
+  const speed = (power / MAX_PULL) * 42 + 8;
+  const tip = { x: a.x + pull.x, y: a.y + pull.y };
+  arrows.push({
+    x: tip.x, y: tip.y,
+    vx: Math.cos(ang) * speed,
+    vy: Math.sin(ang) * speed,
+    ang: ang,
+    life: 0
+  });
+  // pequeño "twang"
+  vibrate(30);
+}
+
+function vibrate(ms) {
+  if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} }
+}
+
+canvas.addEventListener('touchstart', startDrag, { passive: false });
+canvas.addEventListener('touchmove', moveDrag, { passive: false });
+canvas.addEventListener('touchend', endDrag, { passive: false });
+canvas.addEventListener('touchcancel', endDrag, { passive: false });
+canvas.addEventListener('mousedown', startDrag);
+window.addEventListener('mousemove', moveDrag);
+window.addEventListener('mouseup', endDrag);
+
+// --- Dibujo ---
+function drawArrowShape(x, y, ang, len, scale) {
+  scale = scale || 1;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(ang);
+  // asta
+  ctx.strokeStyle = '#d9c6a5';
+  ctx.lineWidth = 3 * scale;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-len, 0);
+  ctx.lineTo(len * 0.55, 0);
+  ctx.stroke();
+  // punta
+  ctx.fillStyle = '#e8e8ec';
+  ctx.beginPath();
+  ctx.moveTo(len * 0.55, 0);
+  ctx.lineTo(len * 0.30, -6 * scale);
+  ctx.lineTo(len * 0.30, 6 * scale);
+  ctx.closePath();
+  ctx.fill();
+  // plumas
+  ctx.strokeStyle = '#c0392b';
+  ctx.lineWidth = 2 * scale;
+  for (let i = 0; i < 3; i++) {
+    const bx = -len + i * 7 * scale;
+    ctx.beginPath();
+    ctx.moveTo(bx, 0);
+    ctx.lineTo(bx - 8 * scale, -7 * scale);
+    ctx.moveTo(bx, 0);
+    ctx.lineTo(bx - 8 * scale, 7 * scale);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawCrossbow() {
+  const a = anchor();
+  const bh = BOW_HALF();
+  const tipL = { x: a.x - bh, y: a.y - BOW_Y_OFF };
+  const tipR = { x: a.x + bh, y: a.y - BOW_Y_OFF };
+  // punto de la cuerda (tirado)
+  const string = { x: a.x + pull.x, y: a.y + pull.y };
+
+  // riel/cuerpo de la ballesta
+  ctx.strokeStyle = '#3a3a42';
+  ctx.lineWidth = 16;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y - BOW_Y_OFF - 6);
+  ctx.lineTo(a.x, H + 40);
+  ctx.stroke();
+  // detalle riel
+  ctx.strokeStyle = '#55555f';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y - BOW_Y_OFF - 6);
+  ctx.lineTo(a.x, H + 40);
+  ctx.stroke();
+
+  // brazos del arco (curvados)
+  ctx.strokeStyle = '#6b4a2b';
+  ctx.lineWidth = 12;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(tipL.x, tipL.y);
+  ctx.quadraticCurveTo(a.x, a.y - BOW_Y_OFF + 26, tipR.x, tipR.y);
+  ctx.stroke();
+  // brillo del arco
+  ctx.strokeStyle = '#8a6236';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(tipL.x, tipL.y);
+  ctx.quadraticCurveTo(a.x, a.y - BOW_Y_OFF + 26, tipR.x, tipR.y);
+  ctx.stroke();
+
+  // cuerda
+  ctx.strokeStyle = '#eaeaea';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(tipL.x, tipL.y);
+  ctx.lineTo(string.x, string.y);
+  ctx.lineTo(tipR.x, tipR.y);
+  ctx.stroke();
+
+  // flecha cargada (mientras no está volando)
+  const pullDist = Math.hypot(pull.x, pull.y);
+  const ang = pullDist > 4 ? Math.atan2(-pull.y, -pull.x) : -Math.PI / 2;
+  drawArrowShape(string.x, string.y, ang, 46, 1);
+
+  // indicador de fuerza
+  if (dragging && pullDist > 8) {
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.beginPath();
+    ctx.arc(string.x, string.y, 30, 0, Math.PI * 2);
+    ctx.fill();
+    const pct = Math.round((pullDist / MAX_PULL) * 100);
+    ctx.fillStyle = '#c0392b';
+    ctx.font = '600 13px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(pct + '%', string.x, string.y - 40);
+  }
+}
+
+function tick() {
+  ctx.clearRect(0, 0, W, H);
+  drawCrossbow();
+
+  // actualizar flechas
+  for (let i = arrows.length - 1; i >= 0; i--) {
+    const ar = arrows[i];
+    ar.vy += 0.35;        // gravedad leve
+    ar.x += ar.vx;
+    ar.y += ar.vy;
+    ar.ang = Math.atan2(ar.vy, ar.vx);
+    ar.life++;
+    drawArrowShape(ar.x, ar.y, ar.ang, 46, 1);
+
+    // fuera de pantalla → eliminar
+    const m = 120;
+    if (ar.x < -m || ar.x > W + m || ar.y < -m || ar.y > H + m) {
+      arrows.splice(i, 1);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+tick();
+
+// evitar scroll/zoom accidental
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault());
+</script>
+</body>
+</html>
