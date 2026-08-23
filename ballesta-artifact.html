@@ -5,6 +5,7 @@
     --hud: #4a5568;
     --accent: #d94f2b;
     --accent2: #ffb547;
+    --accent3: #38d0ff;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
@@ -29,32 +30,42 @@
     pointer-events: none; text-transform: uppercase;
     font-variant-numeric: tabular-nums;
   }
-  #mode {
-    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
-    padding: 12px 22px; border-radius: 999px;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14);
-    color: #e8e8ec; font-family: inherit; font-size: 13px; font-weight: 600;
-    letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
-    -webkit-tap-highlight-color: transparent; transition: background .2s, border-color .2s;
+  #modes {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+    display: flex; gap: 6px; padding: 5px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px; z-index: 5;
   }
-  #mode:active { background: rgba(255,255,255,0.12); }
-  #mode.cannon { border-color: var(--accent2); color: var(--accent2); }
+  #modes button {
+    padding: 10px 16px; border: 0; border-radius: 999px;
+    background: transparent; color: #9aa3b2;
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; transition: background .2s, color .2s;
+  }
+  #modes button.active { background: rgba(255,255,255,0.12); color: #fff; }
+  #modes button[data-m="bow"].active   { color: var(--accent); }
+  #modes button[data-m="cannon"].active { color: var(--accent2); }
+  #modes button[data-m="drone"].active  { color: var(--accent3); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
 <canvas id="c"></canvas>
 <div id="hint">Tirá hacia atrás &amp; soltá 🏹</div>
 <div id="shots">Flechas 0</div>
-<button id="mode" type="button">⚙ Transformar en cañón</button>
+<div id="modes">
+  <button type="button" data-m="bow" class="active">🏹 Ballesta</button>
+  <button type="button" data-m="cannon">💣 Cañón</button>
+  <button type="button" data-m="drone">🚁 Dron</button>
+</div>
 
 <script>
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const hint = document.getElementById('hint');
 const shotsEl = document.getElementById('shots');
-const modeBtn = document.getElementById('mode');
 let W, H, DPR, shotCount = 0;
-let CANNON = false; // false = ballesta, true = cañón
+let MODE = 'bow'; // 'bow' | 'cannon' | 'drone'
 
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -72,10 +83,16 @@ const MAX_PULL = 190;
 
 let dragging = false;
 let pull = { x: 0, y: 0 };
-let projectiles = [];  // flechas o torpedos
+let projectiles = [];
 let trails = [];
-let particles = [];    // humo / fuego del cañón
+let particles = [];
 let flash = 0;
+
+// --- dron y palanca ---
+const JOY_R = 70; // radio de la palanca
+function joyBase() { return { x: W / 2, y: H - 120 }; }
+let joy = { x: 0, y: 0 };               // desplazamiento del pomo
+let drone = { x: 0, y: 0, vx: 0, vy: 0, ang: 0, spin: 0, init: false };
 
 function getPoint(e) {
   const t = e.touches ? e.touches[0] : e;
@@ -85,23 +102,31 @@ function startDrag(e) {
   e.preventDefault();
   dragging = true;
   hint.style.opacity = '0';
-  updatePull(getPoint(e));
+  updateInput(getPoint(e));
 }
-function moveDrag(e) { if (!dragging) return; e.preventDefault(); updatePull(getPoint(e)); }
-function updatePull(p) {
-  const a = anchor();
-  let dx = p.x - a.x, dy = p.y - a.y;
-  if (dy < 0) dy = 0;
-  const d = Math.hypot(dx, dy);
-  if (d > MAX_PULL) { dx *= MAX_PULL / d; dy *= MAX_PULL / d; }
-  pull.x = dx; pull.y = dy;
+function moveDrag(e) { if (!dragging) return; e.preventDefault(); updateInput(getPoint(e)); }
+function updateInput(p) {
+  if (MODE === 'drone') {
+    const b = joyBase();
+    let dx = p.x - b.x, dy = p.y - b.y;
+    const d = Math.hypot(dx, dy);
+    if (d > JOY_R) { dx *= JOY_R / d; dy *= JOY_R / d; }
+    joy.x = dx; joy.y = dy;
+  } else {
+    const a = anchor();
+    let dx = p.x - a.x, dy = p.y - a.y;
+    if (dy < 0) dy = 0;
+    const d = Math.hypot(dx, dy);
+    if (d > MAX_PULL) { dx *= MAX_PULL / d; dy *= MAX_PULL / d; }
+    pull.x = dx; pull.y = dy;
+  }
 }
 function endDrag(e) {
   if (!dragging) return;
   e.preventDefault();
   dragging = false;
-  fire();
-  pull.x = 0; pull.y = 0;
+  if (MODE === 'drone') { joy.x = 0; joy.y = 0; }
+  else { fire(); pull.x = 0; pull.y = 0; }
 }
 
 function fire() {
@@ -109,46 +134,29 @@ function fire() {
   if (power < 12) return;
   const a = anchor();
   const ang = Math.atan2(-pull.y, -pull.x);
-
-  if (CANNON) {
+  if (MODE === 'cannon') {
     const speed = (power / MAX_PULL) * 34 + 10;
-    // el torpedo sale de la boca del cañón
     const muzzle = { x: a.x + Math.cos(ang) * 90, y: a.y - BOW_Y_OFF + Math.sin(ang) * 90 };
-    projectiles.push({
-      x: muzzle.x, y: muzzle.y,
-      vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed,
-      ang, torpedo: true
-    });
+    projectiles.push({ x: muzzle.x, y: muzzle.y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, ang, torpedo: true });
     flash = 1;
-    // fogonazo + humo
     for (let i = 0; i < 26; i++) {
-      const sp = Math.random() * 6 + 1;
-      const pa = ang + (Math.random() - 0.5) * 1.1;
-      particles.push({
-        x: muzzle.x, y: muzzle.y,
-        vx: Math.cos(pa) * sp, vy: Math.sin(pa) * sp,
-        r: Math.random() * 10 + 4, a: 1,
-        fire: Math.random() < 0.5
-      });
+      const sp = Math.random() * 6 + 1, pa = ang + (Math.random() - 0.5) * 1.1;
+      particles.push({ x: muzzle.x, y: muzzle.y, vx: Math.cos(pa) * sp, vy: Math.sin(pa) * sp, r: Math.random() * 10 + 4, a: 1, fire: Math.random() < 0.5 });
     }
     boom();
     if (navigator.vibrate) { try { navigator.vibrate([40, 20, 60]); } catch (e) {} }
   } else {
     const speed = (power / MAX_PULL) * 42 + 8;
     const tip = { x: a.x + pull.x, y: a.y + pull.y };
-    projectiles.push({
-      x: tip.x, y: tip.y,
-      vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed,
-      ang, torpedo: false
-    });
+    projectiles.push({ x: tip.x, y: tip.y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, ang, torpedo: false });
     twang();
     if (navigator.vibrate) { try { navigator.vibrate(30); } catch (e) {} }
   }
   shotCount++;
-  shotsEl.textContent = (CANNON ? 'Torpedos ' : 'Flechas ') + shotCount;
+  shotsEl.textContent = (MODE === 'cannon' ? 'Torpedos ' : 'Flechas ') + shotCount;
 }
 
-// --- sonidos WebAudio (sin archivos) ---
+// --- sonidos WebAudio ---
 let actx;
 function ac() { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); return actx; }
 function twang() {
@@ -159,28 +167,43 @@ function twang() {
     o.frequency.exponentialRampToValueAtTime(90, c.currentTime + 0.18);
     g.gain.setValueAtTime(0.25, c.currentTime);
     g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.22);
-    o.connect(g); g.connect(c.destination);
-    o.start(); o.stop(c.currentTime + 0.24);
+    o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + 0.24);
   } catch (e) {}
 }
 function boom() {
   try {
-    const c = ac(), t = c.currentTime;
-    // ruido de explosión
-    const dur = 0.5, buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
-    const d = buf.getChannelData(0);
+    const c = ac(), t = c.currentTime, dur = 0.5;
+    const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
     const noise = c.createBufferSource(); noise.buffer = buf;
     const nf = c.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = 700;
     const ng = c.createGain(); ng.gain.setValueAtTime(0.9, t); ng.gain.exponentialRampToValueAtTime(0.001, t + dur);
     noise.connect(nf); nf.connect(ng); ng.connect(c.destination); noise.start(t);
-    // golpe grave
     const o = c.createOscillator(), g = c.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.3);
+    o.type = 'sine'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.3);
     g.gain.setValueAtTime(0.7, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
     o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.36);
   } catch (e) {}
+}
+// zumbido continuo del dron
+let droneOsc = null, droneGain = null;
+function droneSoundOn() {
+  try {
+    const c = ac();
+    droneOsc = c.createOscillator(); droneGain = c.createGain();
+    droneOsc.type = 'sawtooth'; droneOsc.frequency.value = 70;
+    const lfo = c.createOscillator(), lfoG = c.createGain();
+    lfo.frequency.value = 22; lfoG.gain.value = 14;
+    lfo.connect(lfoG); lfoG.connect(droneOsc.frequency);
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 400;
+    droneGain.gain.value = 0.0;
+    droneOsc.connect(lp); lp.connect(droneGain); droneGain.connect(c.destination);
+    droneOsc.start(); lfo.start();
+  } catch (e) {}
+}
+function droneSoundOff() {
+  try { if (droneOsc) { droneOsc.stop(); droneOsc.disconnect(); } } catch (e) {}
+  droneOsc = null; droneGain = null;
 }
 
 canvas.addEventListener('touchstart', startDrag, { passive: false });
@@ -191,93 +214,76 @@ canvas.addEventListener('mousedown', startDrag);
 window.addEventListener('mousemove', moveDrag);
 window.addEventListener('mouseup', endDrag);
 
-modeBtn.addEventListener('click', () => {
-  CANNON = !CANNON;
-  modeBtn.classList.toggle('cannon', CANNON);
-  modeBtn.textContent = CANNON ? '🏹 Volver a ballesta' : '⚙ Transformar en cañón';
-  hint.innerHTML = CANNON ? 'Cargá el cañón &amp; dispará 💣' : 'Tirá hacia atrás &amp; soltá 🏹';
-  hint.style.opacity = '1';
-  shotCount = 0;
-  shotsEl.textContent = (CANNON ? 'Torpedos 0' : 'Flechas 0');
-  setTimeout(() => hint.style.opacity = '0', 1600);
+document.querySelectorAll('#modes button').forEach(btn => {
+  btn.addEventListener('click', () => setMode(btn.dataset.m));
 });
+function setMode(m) {
+  if (m === MODE) return;
+  MODE = m;
+  document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('active', b.dataset.m === m));
+  dragging = false; pull.x = pull.y = 0; joy.x = joy.y = 0;
+  shotCount = 0;
+  if (m === 'bow')    { shotsEl.textContent = 'Flechas 0'; hint.innerHTML = 'Tirá hacia atrás &amp; soltá 🏹'; }
+  if (m === 'cannon') { shotsEl.textContent = 'Torpedos 0'; hint.innerHTML = 'Cargá el cañón &amp; dispará 💣'; }
+  if (m === 'drone')  {
+    shotsEl.textContent = 'DRON ● EN VUELO';
+    hint.innerHTML = 'Movés la palanca, el dron obedece 🚁';
+    if (!drone.init) { drone.x = W / 2; drone.y = H * 0.28; drone.init = true; }
+    droneSoundOn();
+  } else { droneSoundOff(); }
+  hint.style.opacity = '1';
+  setTimeout(() => { if (dragging) return; hint.style.opacity = '0'; }, 1800);
+}
 
-// --- dibujo ---
+// ---------- dibujo compartido ----------
 function drawArrowShape(x, y, ang, len) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
   ctx.strokeStyle = '#d9c6a5'; ctx.lineWidth = 3; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(-len, 0); ctx.lineTo(len * 0.55, 0); ctx.stroke();
   ctx.fillStyle = '#e8e8ec';
-  ctx.beginPath(); ctx.moveTo(len * 0.55, 0); ctx.lineTo(len * 0.30, -6); ctx.lineTo(len * 0.30, 6);
-  ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(len * 0.55, 0); ctx.lineTo(len * 0.30, -6); ctx.lineTo(len * 0.30, 6); ctx.closePath(); ctx.fill();
   ctx.strokeStyle = '#d94f2b'; ctx.lineWidth = 2;
   for (let i = 0; i < 3; i++) {
     const bx = -len + i * 7;
-    ctx.beginPath(); ctx.moveTo(bx, 0); ctx.lineTo(bx - 8, -7);
-    ctx.moveTo(bx, 0); ctx.lineTo(bx - 8, 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx, 0); ctx.lineTo(bx - 8, -7); ctx.moveTo(bx, 0); ctx.lineTo(bx - 8, 7); ctx.stroke();
   }
   ctx.restore();
 }
-
 function drawTorpedo(x, y, ang, scale) {
-  scale = scale || 1;
-  const L = 34 * scale, R = 11 * scale;
+  scale = scale || 1; const L = 34 * scale, R = 11 * scale;
   ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
-  // cuerpo
   const grad = ctx.createLinearGradient(0, -R, 0, R);
   grad.addColorStop(0, '#8b939e'); grad.addColorStop(0.5, '#e6ebf2'); grad.addColorStop(1, '#5a626d');
   ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.moveTo(L, 0);
-  ctx.quadraticCurveTo(L * 0.5, -R, -L * 0.6, -R);
-  ctx.lineTo(-L, -R * 0.7);
-  ctx.lineTo(-L, R * 0.7);
-  ctx.lineTo(-L * 0.6, R);
-  ctx.quadraticCurveTo(L * 0.5, R, L, 0);
-  ctx.closePath(); ctx.fill();
-  // ojiva
+  ctx.beginPath(); ctx.moveTo(L, 0); ctx.quadraticCurveTo(L * 0.5, -R, -L * 0.6, -R);
+  ctx.lineTo(-L, -R * 0.7); ctx.lineTo(-L, R * 0.7); ctx.lineTo(-L * 0.6, R);
+  ctx.quadraticCurveTo(L * 0.5, R, L, 0); ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#d94f2b';
-  ctx.beginPath(); ctx.moveTo(L, 0);
-  ctx.quadraticCurveTo(L * 0.55, -R * 0.7, L * 0.45, 0);
+  ctx.beginPath(); ctx.moveTo(L, 0); ctx.quadraticCurveTo(L * 0.55, -R * 0.7, L * 0.45, 0);
   ctx.quadraticCurveTo(L * 0.55, R * 0.7, L, 0); ctx.fill();
-  // aletas
   ctx.fillStyle = '#3d4150';
-  ctx.beginPath();
-  ctx.moveTo(-L, -R * 0.7); ctx.lineTo(-L - 10 * scale, -R * 1.5);
-  ctx.lineTo(-L + 4 * scale, -R * 0.6); ctx.closePath(); ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(-L, R * 0.7); ctx.lineTo(-L - 10 * scale, R * 1.5);
-  ctx.lineTo(-L + 4 * scale, R * 0.6); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-L, -R * 0.7); ctx.lineTo(-L - 10 * scale, -R * 1.5); ctx.lineTo(-L + 4 * scale, -R * 0.6); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-L, R * 0.7); ctx.lineTo(-L - 10 * scale, R * 1.5); ctx.lineTo(-L + 4 * scale, R * 0.6); ctx.closePath(); ctx.fill();
   ctx.restore();
 }
 
 function drawCrossbow() {
   const a = anchor(), bh = BOW_HALF();
-  const tipL = { x: a.x - bh, y: a.y - BOW_Y_OFF };
-  const tipR = { x: a.x + bh, y: a.y - BOW_Y_OFF };
+  const tipL = { x: a.x - bh, y: a.y - BOW_Y_OFF }, tipR = { x: a.x + bh, y: a.y - BOW_Y_OFF };
   const string = { x: a.x + pull.x, y: a.y + pull.y };
-
   ctx.strokeStyle = '#2a2d38'; ctx.lineWidth = 16; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(a.x, a.y - BOW_Y_OFF - 6); ctx.lineTo(a.x, H + 40); ctx.stroke();
   ctx.strokeStyle = '#3d4150'; ctx.lineWidth = 4;
   ctx.beginPath(); ctx.moveTo(a.x, a.y - BOW_Y_OFF - 6); ctx.lineTo(a.x, H + 40); ctx.stroke();
-
   ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 12; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(tipL.x, tipL.y);
-  ctx.quadraticCurveTo(a.x, a.y - BOW_Y_OFF + 26, tipR.x, tipR.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(tipL.x, tipL.y); ctx.quadraticCurveTo(a.x, a.y - BOW_Y_OFF + 26, tipR.x, tipR.y); ctx.stroke();
   ctx.strokeStyle = '#8a6236'; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.moveTo(tipL.x, tipL.y);
-  ctx.quadraticCurveTo(a.x, a.y - BOW_Y_OFF + 26, tipR.x, tipR.y); ctx.stroke();
-
+  ctx.beginPath(); ctx.moveTo(tipL.x, tipL.y); ctx.quadraticCurveTo(a.x, a.y - BOW_Y_OFF + 26, tipR.x, tipR.y); ctx.stroke();
   ctx.strokeStyle = '#eaeaea'; ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  ctx.moveTo(tipL.x, tipL.y); ctx.lineTo(string.x, string.y); ctx.lineTo(tipR.x, tipR.y);
-  ctx.stroke();
-
+  ctx.beginPath(); ctx.moveTo(tipL.x, tipL.y); ctx.lineTo(string.x, string.y); ctx.lineTo(tipR.x, tipR.y); ctx.stroke();
   const pullDist = Math.hypot(pull.x, pull.y);
   const ang = pullDist > 4 ? Math.atan2(-pull.y, -pull.x) : -Math.PI / 2;
   drawArrowShape(string.x, string.y, ang, 46);
-
   if (dragging && pullDist > 8) {
     ctx.fillStyle = 'rgba(217,79,43,0.10)';
     ctx.beginPath(); ctx.arc(string.x, string.y, 30, 0, Math.PI * 2); ctx.fill();
@@ -288,46 +294,29 @@ function drawCrossbow() {
 }
 
 function drawCannon() {
-  const a = anchor();
-  const pullDist = Math.hypot(pull.x, pull.y);
-  // el cañón apunta opuesto al arrastre; en reposo apunta hacia arriba
+  const a = anchor(), pullDist = Math.hypot(pull.x, pull.y);
   const ang = pullDist > 6 ? Math.atan2(-pull.y, -pull.x) : -Math.PI / 2;
   const recoil = pullDist / MAX_PULL * 26;
-  const bx = a.x - Math.cos(ang) * recoil;
-  const by = (a.y - BOW_Y_OFF) - Math.sin(ang) * recoil;
-
-  // base / afuste
-  ctx.fillStyle = '#23262f';
-  ctx.beginPath(); ctx.arc(a.x, a.y, 40, Math.PI, 0); ctx.fill();
-  ctx.fillStyle = '#2f3340';
-  ctx.fillRect(a.x - 46, a.y, 92, H - a.y + 40);
-  // ruedas
+  const bx = a.x - Math.cos(ang) * recoil, by = (a.y - BOW_Y_OFF) - Math.sin(ang) * recoil;
+  ctx.fillStyle = '#23262f'; ctx.beginPath(); ctx.arc(a.x, a.y, 40, Math.PI, 0); ctx.fill();
+  ctx.fillStyle = '#2f3340'; ctx.fillRect(a.x - 46, a.y, 92, H - a.y + 40);
   ctx.fillStyle = '#15171d';
   ctx.beginPath(); ctx.arc(a.x - 34, a.y + 30, 20, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(a.x + 34, a.y + 30, 20, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#3d4150';
   ctx.beginPath(); ctx.arc(a.x - 34, a.y + 30, 7, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(a.x + 34, a.y + 30, 7, 0, Math.PI * 2); ctx.fill();
-
-  // tubo del cañón
   ctx.save(); ctx.translate(bx, by); ctx.rotate(ang);
   const L = 96, R1 = 26, R2 = 18;
   const g = ctx.createLinearGradient(0, -R1, 0, R1);
   g.addColorStop(0, '#4c525e'); g.addColorStop(0.45, '#8b929c'); g.addColorStop(1, '#2b2f38');
   ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.moveTo(-6, -R1); ctx.lineTo(L, -R2);
-  ctx.lineTo(L, R2); ctx.lineTo(-6, R1); ctx.closePath(); ctx.fill();
-  // boca
-  ctx.fillStyle = '#101217';
-  ctx.beginPath(); ctx.ellipse(L, 0, 5, R2, 0, 0, Math.PI * 2); ctx.fill();
-  // anillos
+  ctx.beginPath(); ctx.moveTo(-6, -R1); ctx.lineTo(L, -R2); ctx.lineTo(L, R2); ctx.lineTo(-6, R1); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#101217'; ctx.beginPath(); ctx.ellipse(L, 0, 5, R2, 0, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#20232b'; ctx.lineWidth = 4;
-  for (const rx of [12, 40, 68]) { ctx.beginPath(); ctx.moveTo(rx, -R1 + rx*0.08); ctx.lineTo(rx, R1 - rx*0.08); ctx.stroke(); }
-  // torpedo cargado asomando en la boca
+  for (const rx of [12, 40, 68]) { ctx.beginPath(); ctx.moveTo(rx, -R1 + rx * 0.08); ctx.lineTo(rx, R1 - rx * 0.08); ctx.stroke(); }
   drawTorpedo(L - 6, 0, 0, 0.9);
   ctx.restore();
-
   if (dragging && pullDist > 8) {
     const pct = Math.round((pullDist / MAX_PULL) * 100);
     ctx.fillStyle = '#ffb547'; ctx.font = '600 13px ui-monospace, monospace';
@@ -335,57 +324,132 @@ function drawCannon() {
   }
 }
 
+// ---------- modo dron ----------
+function drawDroneCraft(x, y, ang, spin, tilt) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(tilt);
+  const arm = 34;
+  // sombra/brazos
+  ctx.strokeStyle = '#20242c'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-arm, -arm * 0.55); ctx.lineTo(arm, arm * 0.55); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-arm, arm * 0.55); ctx.lineTo(arm, -arm * 0.55); ctx.stroke();
+  // cuerpo central
+  const bg = ctx.createLinearGradient(0, -14, 0, 14);
+  bg.addColorStop(0, '#3a4150'); bg.addColorStop(1, '#181b22');
+  ctx.fillStyle = bg;
+  ctx.beginPath(); ctx.ellipse(0, 0, 20, 14, 0, 0, Math.PI * 2); ctx.fill();
+  // cámara
+  ctx.fillStyle = '#0c0e12'; ctx.beginPath(); ctx.arc(0, 8, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#38d0ff'; ctx.beginPath(); ctx.arc(0, 8, 2.4, 0, Math.PI * 2); ctx.fill();
+  // motores + hélices en las 4 puntas
+  const motors = [[-arm, -arm * 0.55], [arm, arm * 0.55], [-arm, arm * 0.55], [arm, -arm * 0.55]];
+  motors.forEach((m, i) => {
+    ctx.save(); ctx.translate(m[0], m[1]);
+    ctx.fillStyle = '#12141a'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.rotate(spin * (i % 2 ? -1 : 1));
+    ctx.strokeStyle = 'rgba(180,200,220,0.55)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    for (let k = 0; k < 2; k++) {
+      ctx.rotate(Math.PI / 2 * k);
+      ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(18, 0); ctx.stroke();
+    }
+    // disco de hélice difuso
+    ctx.strokeStyle = 'rgba(150,170,200,0.12)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  });
+  // luces de navegación parpadeantes
+  const on = (Math.floor(spin * 3) % 2) === 0;
+  ctx.fillStyle = on ? '#ff3b3b' : '#3a0d0d';
+  ctx.beginPath(); ctx.arc(-arm, -arm * 0.55, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = on ? '#33ff66' : '#0d2a12';
+  ctx.beginPath(); ctx.arc(arm, -arm * 0.55, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function drawJoystick() {
+  const b = joyBase();
+  // aro base
+  ctx.strokeStyle = 'rgba(56,208,255,0.35)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(b.x, b.y, JOY_R, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(56,208,255,0.06)';
+  ctx.beginPath(); ctx.arc(b.x, b.y, JOY_R, 0, Math.PI * 2); ctx.fill();
+  // cruz guía
+  ctx.strokeStyle = 'rgba(56,208,255,0.18)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(b.x - JOY_R, b.y); ctx.lineTo(b.x + JOY_R, b.y);
+  ctx.moveTo(b.x, b.y - JOY_R); ctx.lineTo(b.x, b.y + JOY_R); ctx.stroke();
+  // pomo
+  const kx = b.x + joy.x, ky = b.y + joy.y;
+  const kg = ctx.createRadialGradient(kx - 6, ky - 6, 4, kx, ky, 28);
+  kg.addColorStop(0, '#7fe3ff'); kg.addColorStop(1, '#1f7fa0');
+  ctx.fillStyle = kg;
+  ctx.beginPath(); ctx.arc(kx, ky, 26, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(kx, ky, 26, 0, Math.PI * 2); ctx.stroke();
+  // etiqueta
+  ctx.fillStyle = 'rgba(56,208,255,0.6)'; ctx.font = '600 11px ui-monospace, monospace';
+  ctx.textAlign = 'center'; ctx.fillText('CONTROL', b.x, b.y + JOY_R + 22);
+}
+
+function updateDrone() {
+  const acc = 0.55;
+  drone.vx += (joy.x / JOY_R) * acc;
+  drone.vy += (joy.y / JOY_R) * acc;
+  drone.vx *= 0.94; drone.vy *= 0.94; // fricción del aire
+  // deriva suave al soltar (flotando)
+  drone.x += drone.vx; drone.y += drone.vy;
+  // límites: se mantiene por arriba de la palanca
+  const marginX = 40, topY = 60, botY = H - 230;
+  if (drone.x < marginX) { drone.x = marginX; drone.vx *= -0.5; }
+  if (drone.x > W - marginX) { drone.x = W - marginX; drone.vx *= -0.5; }
+  if (drone.y < topY) { drone.y = topY; drone.vy *= -0.5; }
+  if (drone.y > botY) { drone.y = botY; drone.vy *= -0.5; }
+  drone.spin += 0.9;
+  // volumen del zumbido según movimiento
+  if (droneGain) {
+    const spd = Math.hypot(drone.vx, drone.vy);
+    droneGain.gain.value = 0.02 + Math.min(spd, 8) * 0.012;
+  }
+}
+
+// ---------- loop ----------
 function tick() {
   ctx.clearRect(0, 0, W, H);
 
-  // partículas (humo/fuego)
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-    p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.vy += 0.03;
-    p.r *= 1.03; p.a -= 0.025;
+    p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.vy += 0.03; p.r *= 1.03; p.a -= 0.025;
     if (p.a <= 0) { particles.splice(i, 1); continue; }
-    if (p.fire) ctx.fillStyle = 'rgba(255,' + (120 + Math.random()*80|0) + ',40,' + p.a + ')';
+    if (p.fire) ctx.fillStyle = 'rgba(255,' + (120 + Math.random() * 80 | 0) + ',40,' + p.a + ')';
     else ctx.fillStyle = 'rgba(120,120,130,' + p.a * 0.5 + ')';
     ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
   }
-
-  // estelas
   for (let i = trails.length - 1; i >= 0; i--) {
     const t = trails[i]; t.a -= t.big ? 0.04 : 0.06;
     if (t.a <= 0) { trails.splice(i, 1); continue; }
-    if (t.big) {
-      ctx.fillStyle = 'rgba(255,150,50,' + t.a * 0.6 + ')';
-      ctx.beginPath(); ctx.arc(t.x, t.y, 6 * t.a + 2, 0, Math.PI * 2); ctx.fill();
-    } else {
-      ctx.fillStyle = 'rgba(217,79,43,' + t.a * 0.5 + ')';
-      ctx.beginPath(); ctx.arc(t.x, t.y, 2.5, 0, Math.PI * 2); ctx.fill();
-    }
+    if (t.big) { ctx.fillStyle = 'rgba(255,150,50,' + t.a * 0.6 + ')'; ctx.beginPath(); ctx.arc(t.x, t.y, 6 * t.a + 2, 0, Math.PI * 2); ctx.fill(); }
+    else { ctx.fillStyle = 'rgba(217,79,43,' + t.a * 0.5 + ')'; ctx.beginPath(); ctx.arc(t.x, t.y, 2.5, 0, Math.PI * 2); ctx.fill(); }
   }
 
-  if (CANNON) drawCannon(); else drawCrossbow();
+  if (MODE === 'bow') drawCrossbow();
+  else if (MODE === 'cannon') drawCannon();
+  else if (MODE === 'drone') {
+    updateDrone();
+    const tilt = Math.max(-0.4, Math.min(0.4, drone.vx * 0.06));
+    drawDroneCraft(drone.x, drone.y, 0, drone.spin, tilt);
+    drawJoystick();
+  }
 
-  // fogonazo
   if (flash > 0) {
-    const a = anchor();
     ctx.fillStyle = 'rgba(255,220,150,' + flash * 0.25 + ')';
-    ctx.fillRect(0, 0, W, H);
-    flash -= 0.08;
+    ctx.fillRect(0, 0, W, H); flash -= 0.08;
   }
 
-  // proyectiles
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const pr = projectiles[i];
     pr.vy += pr.torpedo ? 0.28 : 0.35;
-    pr.x += pr.vx; pr.y += pr.vy;
-    pr.ang = Math.atan2(pr.vy, pr.vx);
+    pr.x += pr.vx; pr.y += pr.vy; pr.ang = Math.atan2(pr.vy, pr.vx);
     if (pr.torpedo) {
       trails.push({ x: pr.x, y: pr.y, a: 1, big: true });
-      // chispas del propulsor
-      if (Math.random() < 0.6) particles.push({
-        x: pr.x - Math.cos(pr.ang) * 30, y: pr.y - Math.sin(pr.ang) * 30,
-        vx: -Math.cos(pr.ang) * 2 + (Math.random()-0.5), vy: -Math.sin(pr.ang) * 2 + (Math.random()-0.5),
-        r: Math.random() * 5 + 2, a: 1, fire: true
-      });
+      if (Math.random() < 0.6) particles.push({ x: pr.x - Math.cos(pr.ang) * 30, y: pr.y - Math.sin(pr.ang) * 30, vx: -Math.cos(pr.ang) * 2 + (Math.random() - 0.5), vy: -Math.sin(pr.ang) * 2 + (Math.random() - 0.5), r: Math.random() * 5 + 2, a: 1, fire: true });
       drawTorpedo(pr.x, pr.y, pr.ang, 1.25);
     } else {
       trails.push({ x: pr.x, y: pr.y, a: 1 });
