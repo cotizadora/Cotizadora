@@ -10,7 +10,10 @@
   --g0:#0d0d0e;--g1:#141416;--g2:#1c1c1f;--g3:#26262a;--g4:#34343a;--g5:#46464d;
   --w:#f2f2f2;--wa:#a6a6ad;--wb:#7a7a82;
   --y:#f0c040;--gn:#2ecc71;--bl:#3498db;--or:#e67e22;
-  --headH:84px;--barH:74px;
+  /* --headBar = alto visual del header. --playerH = franja del mini-reproductor
+     (temporal). --headH = offset total desde arriba (header+reproductor): TODO el
+     layout se ancla a --headH, así que sumar el reproductor aquí desplaza todo. */
+  --playerH:34px;--headBar:84px;--headH:118px;--barH:74px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
@@ -18,9 +21,31 @@ body{background:var(--g0);color:var(--w);font-family:'Segoe UI',system-ui,Arial,
   font-size:16px;line-height:1.45;overflow:hidden;}
 
 /* ── HEADER ───────────────────────────────────────── */
-header{height:var(--headH);background:linear-gradient(135deg,var(--rd),#a01f30 60%,var(--rdd));
+header{height:var(--headBar);background:linear-gradient(135deg,var(--rd),#a01f30 60%,var(--rdd));
   display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 18px;
-  position:fixed;top:0;left:0;right:0;z-index:300;box-shadow:0 2px 14px rgba(0,0,0,.6);}
+  position:fixed;top:var(--playerH);left:0;right:0;z-index:300;box-shadow:0 2px 14px rgba(0,0,0,.6);}
+/* ── Mini-reproductor temporal (franja superior, sobria) ── */
+#mini-player{position:fixed;top:0;left:0;right:0;height:var(--playerH);z-index:340;
+  display:flex;align-items:center;gap:10px;padding:0 14px;
+  background:linear-gradient(90deg,#0b0507,#15090d 55%,#0b0507);
+  border-bottom:1px solid rgba(240,192,64,.30);box-shadow:0 1px 8px rgba(0,0,0,.5);}
+#mini-player .mp-btn{background:rgba(240,192,64,.14);border:1px solid rgba(240,192,64,.5);color:var(--y);
+  width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:.72rem;line-height:1;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s,transform .15s;}
+#mini-player .mp-btn:hover{background:rgba(240,192,64,.28);transform:translateY(-1px);}
+#mini-player .mp-btn-sm{width:22px;height:22px;font-size:.66rem;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);color:#d8ccc0;}
+#mini-player .mp-note{font-size:.9rem;flex:0 0 auto;}
+#mini-player .mp-meta{display:flex;flex-direction:column;line-height:1.02;flex:0 0 auto;min-width:0;}
+#mini-player .mp-title{font-size:.74rem;font-weight:800;color:#fff;white-space:nowrap;}
+#mini-player .mp-sub{font-size:.56rem;color:rgba(255,255,255,.5);white-space:nowrap;letter-spacing:.2px;}
+#mini-player .mp-seek{flex:1 1 auto;min-width:70px;max-width:460px;accent-color:var(--y);height:3px;cursor:pointer;}
+#mini-player .mp-time{font-size:.64rem;color:rgba(255,255,255,.58);font-variant-numeric:tabular-nums;flex:0 0 auto;white-space:nowrap;}
+#mini-player .mp-close{margin-left:2px;}
+body.theme-light #mini-player{background:linear-gradient(90deg,#f4efe4,#efe7d6 55%,#f4efe4);border-bottom-color:rgba(176,138,20,.45);}
+body.theme-light #mini-player .mp-title{color:#2a2417;}
+body.theme-light #mini-player .mp-sub{color:rgba(60,52,30,.6);}
+body.theme-light #mini-player .mp-time{color:rgba(60,52,30,.7);}
+@media(max-width:640px){#mini-player .mp-sub{display:none;}#mini-player .mp-time{display:none;}}
 .brand{display:flex;align-items:center;gap:12px;min-width:0;}
 .brand img{height:64px;width:auto;display:block;filter:brightness(0) invert(1);}
 .brand .nm{font-size:1.25rem;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1;}
@@ -1642,6 +1667,43 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 </style>
 </head>
 <body class="uis-g">
+<!-- ════ MINI-REPRODUCTOR TEMPORAL — "La Cumbia del DICOM" (tema del equipo) ════ -->
+<div id="mini-player" title="Tema original — La Cumbia del DICOM">
+  <button id="mp-toggle" class="mp-btn" onclick="mpToggle()" aria-label="Reproducir">▶</button>
+  <span class="mp-note" aria-hidden="true">🎵</span>
+  <div class="mp-meta">
+    <span class="mp-title">La Cumbia del DICOM</span>
+    <span class="mp-sub">tema original · para los compañeros</span>
+  </div>
+  <input id="mp-seek" class="mp-seek" type="range" min="0" max="100" value="0" step="0.1" oninput="mpSeek(this.value)" aria-label="Avance de la canción">
+  <span id="mp-time" class="mp-time">0:00 / 0:00</span>
+  <button id="mp-mute" class="mp-btn mp-btn-sm" onclick="mpMute()" aria-label="Silenciar">🔊</button>
+  <button class="mp-btn mp-btn-sm mp-close" onclick="mpClose()" title="Ocultar reproductor" aria-label="Ocultar reproductor">✕</button>
+  <audio id="mp-audio" preload="metadata" src="MP3/LaCumbiaDel_DICOM.mp3"></audio>
+</div>
+<script>
+/* Mini-reproductor autónomo (temporal). No depende del script principal. */
+(function(){
+  var a=document.getElementById('mp-audio'); if(!a)return;
+  var btn=document.getElementById('mp-toggle'), seek=document.getElementById('mp-seek'),
+      tEl=document.getElementById('mp-time'), muteBtn=document.getElementById('mp-mute');
+  function fmt(s){s=Math.max(0,Math.floor(s||0));var m=Math.floor(s/60),r=s%60;return m+':'+(r<10?'0':'')+r;}
+  function upd(){
+    if(!a.duration||isNaN(a.duration)){tEl.textContent='0:00 / 0:00';return;}
+    seek.value=(a.currentTime/a.duration*100)||0;
+    tEl.textContent=fmt(a.currentTime)+' / '+fmt(a.duration);
+  }
+  a.addEventListener('timeupdate',upd);
+  a.addEventListener('loadedmetadata',upd);
+  a.addEventListener('play',function(){btn.textContent='⏸';btn.setAttribute('aria-label','Pausar');});
+  a.addEventListener('pause',function(){btn.textContent='▶';btn.setAttribute('aria-label','Reproducir');});
+  a.addEventListener('ended',function(){btn.textContent='▶';seek.value=0;});
+  window.mpToggle=function(){ if(a.paused){a.play().catch(function(){});}else{a.pause();} };
+  window.mpSeek=function(v){ if(a.duration)a.currentTime=(v/100)*a.duration; };
+  window.mpMute=function(){ a.muted=!a.muted; muteBtn.textContent=a.muted?'🔇':'🔊'; };
+  window.mpClose=function(){ try{a.pause();}catch(e){} var p=document.getElementById('mini-player'); if(p)p.parentNode.removeChild(p); };
+})();
+</script>
 <header>
   <!-- ZONA IZQUIERDA — marca + indicador UF destacado -->
   <div class="hz hz-left">
