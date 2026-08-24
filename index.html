@@ -2226,6 +2226,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
     <button class="pl-tbtn" onclick="importarBaseDatosPick()" title="Importar / restaurar una base exportada (migrar entre equipos)">📥 Importar base</button>
     <button class="pl-tbtn" onclick="openRespaldos()" title="Respaldos automáticos: programación, puntos de restauración y descarga">🗄 Respaldos</button>
     <button class="pl-tbtn" onclick="planillaExportar()" title="Exportar la vista actual a Excel (.xls)">📗 A Excel</button>
+    <button class="pl-tbtn" onclick="planillaEliminarDuplicados()" title="Deja una sola fila por cliente (mismo RUT): conserva la más reciente y mueve las cotizaciones repetidas al historial">🧹 Eliminar duplicados</button>
     <span class="pl-tsep"></span>
     <div class="pl-search-wrap" id="pl-search-wrap">
       <input type="text" id="pl-search" class="pl-search" placeholder="🔎 Buscar…" oninput="planillaBuscar(this.value)">
@@ -2270,6 +2271,20 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <div class="pl-del-actions">
         <button type="button" class="pl-del-cancel" onclick="planillaCancelarEliminar()">Cancelar</button>
         <button type="button" class="pl-del-confirm" onclick="planillaConfirmarEliminar()">🗑 Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación para eliminar duplicados -->
+<div id="pl-dedup-modal" class="pl-modal" onclick="if(event.target===this)planillaCancelarDedupe()">
+  <div class="pl-modal-box pl-del-box">
+    <div class="pl-modal-head"><h3>🧹 Eliminar duplicados</h3><button class="pl-modal-x" onclick="planillaCancelarDedupe()">✕</button></div>
+    <div class="pl-del-body">
+      <p class="pl-del-msg" id="pl-dedup-msg"></p>
+      <div class="pl-del-actions">
+        <button type="button" class="pl-del-cancel" onclick="planillaCancelarDedupe()">Cancelar</button>
+        <button type="button" class="pl-del-confirm" id="pl-dedup-ok" onclick="planillaConfirmarDedupe()">🧹 Consolidar</button>
       </div>
     </div>
   </div>
@@ -6970,6 +6985,53 @@ var DB=(function(){
       });});
     },
 
+    /* ── DEDUPE POR RUT — deja una sola fila por cliente en TODA la base ─────────
+       Recorre los registros no eliminados, los agrupa por RUT y, en cada grupo con
+       más de uno, conserva el más reciente y mueve las cotizaciones de los demás a
+       su historial (versiones[]), ocultándolos (eliminación lógica, reversible).
+       dryRun=true solo cuenta, sin modificar. Devuelve {grupos, eliminados}. */
+    dedupePorRut:function(dryRun){
+      return _open().then(function(db){return new Promise(function(resolve,reject){
+        var modo=dryRun?'readonly':'readwrite';
+        var tx=db.transaction(STORE,modo), os=tx.objectStore(STORE), ahora=_nowISO();
+        var res={grupos:0,eliminados:0};
+        var g=os.getAll();
+        g.onerror=function(){reject(g.error);};
+        g.onsuccess=function(){
+          var rows=g.result||[], mapa={};
+          rows.forEach(function(r){
+            if(!r||r.estado==='eliminado')return;
+            var k=_rutKey(r.cliente&&r.cliente.rut);
+            if(!k)return;                    /* sin RUT: no se puede agrupar */
+            (mapa[k]=mapa[k]||[]).push(r);
+          });
+          Object.keys(mapa).forEach(function(k){
+            var grupo=mapa[k];
+            if(grupo.length<2)return;
+            res.grupos++; res.eliminados+=(grupo.length-1);
+            if(dryRun)return;
+            grupo.sort(function(a,b){return _s(b.updatedAt||b.createdAt)<_s(a.updatedAt||a.createdAt)?-1:1;});
+            var survivor=grupo[0], extras=grupo.slice(1);
+            var versiones=(survivor.versiones||[]).slice();
+            extras.forEach(function(ex){
+              (ex.versiones||[]).forEach(function(v){versiones.push(v);});
+              versiones.push(_snapVersion(ex));
+              ex.estado='eliminado'; ex.updatedAt=ahora;
+              (ex.historial=ex.historial||[]).push({ts:ahora,ejecutivo:_ejecutivoActual(),accion:'consolidado',cambios:{}});
+              os.put(ex);
+            });
+            versiones.sort(function(a,b){return _s(a.guardadoEn)<_s(b.guardadoEn)?-1:1;});
+            if(versiones.length>200)versiones=versiones.slice(versiones.length-200);
+            survivor.versiones=versiones; survivor.updatedAt=ahora;
+            (survivor.historial=survivor.historial||[]).push({ts:ahora,ejecutivo:_ejecutivoActual(),accion:'editado',cambios:{}});
+            os.put(survivor);
+          });
+        };
+        tx.oncomplete=function(){ if(!dryRun&&res.eliminados)_emit('cambio',{tipo:'dedupe'}); resolve(res); };
+        tx.onerror=function(){reject(tx.error);}; tx.onabort=function(){reject(tx.error||new Error('tx abort'));};
+      });});
+    },
+
     /* Editar por id con parche parcial {cliente?,comercial?,estado?,ejecutivo?,snapshot?}.
        get→put en la MISMA transacción (sin Promises intermedias). Devuelve el registro nuevo. */
     update:function(id,patch){
@@ -8137,6 +8199,32 @@ function _cotResumen(com){
   if(_dc&&_dc!=='0'&&_dc!=='0%')precios.push('<span class="pl-v-dc"><b>Dcto:</b> '+_esc(com.descuento)+'</span>');
   return (chips.length?'<div class="pl-v-serv-line">'+chips.join('')+'</div>':'')+
          (precios.length?'<div class="pl-v-precios">'+precios.join('')+'</div>':'');
+}
+/* ── Eliminar duplicados (una sola fila por RUT en toda la base) ──
+   Paso 1: cuenta (dry run) y pide confirmación. Paso 2: consolida. */
+function planillaEliminarDuplicados(){
+  if(typeof DB==='undefined'||!DB.dedupePorRut){toast('✖ Base de datos no disponible','err','global-toast');return;}
+  DB.dedupePorRut(true).then(function(res){
+    if(!res.eliminados){toast('✔ No hay clientes duplicados: ya hay una sola fila por RUT','ok','global-toast');return;}
+    var msg=document.getElementById('pl-dedup-msg');
+    if(msg)msg.innerHTML='Se encontraron <b>'+res.eliminados+'</b> fila(s) duplicada(s) en <b>'+res.grupos+'</b> cliente(s).<br>'+
+      'Se conservará la más reciente de cada cliente y las cotizaciones repetidas pasarán a su <b>historial</b> (reversible: quedan como “Eliminados”).';
+    var m=document.getElementById('pl-dedup-modal'); if(m)m.classList.add('on');
+  }).catch(function(){toast('✖ No se pudo analizar duplicados','err','global-toast');});
+}
+function planillaCancelarDedupe(){ var m=document.getElementById('pl-dedup-modal'); if(m)m.classList.remove('on'); }
+function planillaConfirmarDedupe(){
+  var m=document.getElementById('pl-dedup-modal'); if(m)m.classList.remove('on');
+  var ok=document.getElementById('pl-dedup-ok'); if(ok)ok.disabled=true;
+  DB.dedupePorRut(false).then(function(res){
+    if(ok)ok.disabled=false;
+    toast('✔ Duplicados consolidados: '+res.eliminados+' fila(s) movidas al historial · '+res.grupos+' cliente(s)','ok','global-toast');
+    if(SESION.registroId!=null&&typeof DB.get==='function'){
+      /* Si la fila abierta fue absorbida, re-liga la sesión al sobreviviente. */
+      DB.get(SESION.registroId).then(function(r){ if(r&&r.estado==='eliminado'){SESION.registroId=null;SESION.dirty=false;actualizarBotonGuardar();} });
+    }
+    renderPlanilla();
+  }).catch(function(){ if(ok)ok.disabled=false; toast('✖ No se pudo consolidar','err','global-toast'); });
 }
 function planillaHistorial(id){
   DB.get(id).then(function(reg){
