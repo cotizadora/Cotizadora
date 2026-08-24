@@ -1330,6 +1330,24 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 .pl-h-camb{margin-top:6px;display:flex;flex-direction:column;gap:3px;font-size:.8rem;color:var(--w);}
 .pl-h-camb b{color:var(--wa);font-weight:700;}
 .pl-h-empty{color:var(--wa);}
+.pl-h-consolidado{background:rgba(240,192,64,.2);color:var(--y);}
+/* ── Cotizaciones anteriores (historial por RUT) ── */
+.pl-h-title-2{margin-top:20px;padding-top:14px;border-top:1px solid var(--g4);}
+.pl-v-item{border:1px solid var(--g4);border-radius:10px;padding:9px 12px;margin-bottom:9px;background:var(--g2);}
+.pl-v-vigente{border-color:rgba(240,192,64,.55);box-shadow:0 0 0 1px rgba(240,192,64,.18);}
+.pl-v-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px;}
+.pl-v-badge{font-weight:800;font-size:.72rem;padding:2px 9px;border-radius:12px;background:var(--g3);color:var(--wa);}
+.pl-v-badge-cur{background:rgba(240,192,64,.22);color:var(--y);}
+.pl-v-ts{font-size:.76rem;color:var(--wa);}
+.pl-v-open{margin-left:auto;background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:7px;padding:3px 9px;font-family:inherit;font-weight:700;font-size:.74rem;cursor:pointer;transition:background .14s ease,border-color .14s ease;}
+.pl-v-open:hover{background:var(--g4);border-color:var(--bl);}
+.pl-v-serv-line{font-size:.82rem;color:var(--w);margin-bottom:3px;}
+.pl-v-serv{font-weight:600;}
+.pl-v-precios{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--w);}
+.pl-v-precios b{color:var(--wa);font-weight:700;}
+.pl-v-dc{color:var(--gn);}
+.pl-v-sub{font-size:.8rem;color:var(--wa);font-weight:700;margin:12px 0 8px;}
+.pl-v-none{font-size:.82rem;color:var(--wa);margin:8px 0 4px;}
 
 /* ── HEADER REDISEÑADO (Fase 1): 3 zonas + UF destacada + menú Personalización ── */
 header{gap:18px;padding:0 20px;}
@@ -1821,13 +1839,13 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <button type="button" id="btn-add-multi" class="cp-act cp-carrito" onclick="addToMulti();playClick();" title="Agregar el producto actual al Multiproducto (carrito)">
         <span class="cp-ico">🛒</span><span class="cp-lb">Carrito multiproducto</span>
       </button>
-      <button type="button" id="btn-guardar-cotizacion" class="cp-act cp-guardar" onclick="guardarCotizacion();playClick();" title="Guardar esta cotización como una NUEVA versión en la base de datos interna (no sobrescribe versiones anteriores)">
+      <button type="button" id="btn-guardar-cotizacion" class="cp-act cp-guardar" onclick="guardarCotizacion();playClick();" title="Guardar la cotización del cliente (identificado por su RUT). Si el cliente ya existe, deja esta como su cotización vigente y guarda la anterior en el historial; si es idéntica, no la duplica.">
         <span class="cp-ico">💾</span><span class="cp-lb">Guardar</span>
       </button>
       <div id="acc-secondary" class="acc-secondary">
         <span class="acc-bound" id="acc-bound-lbl">Abierta: cotización #0</span>
         <span class="acc-clean" id="acc-estado-lbl">✓ guardada</span>
-        <button type="button" class="acc-upd" id="acc-upd-btn" onclick="actualizarCotizacionActual();playClick();" title="Sobrescribe ESTA cotización (corrección). Por defecto 💾 crea una versión nueva e independiente.">✎ Actualizar</button>
+        <button type="button" class="acc-upd" id="acc-upd-btn" onclick="actualizarCotizacionActual();playClick();" title="Sobrescribe ESTA cotización abierta en el mismo registro (corrección puntual), sin moverla al historial.">✎ Actualizar</button>
       </div>
     </div>
 
@@ -3729,9 +3747,9 @@ function guardarMultiproducto(){
   if(typeof DB==='undefined')return;
   if(!MULTI.length){toast('Agrega productos al Multiproducto primero','err','global-toast');return;}
   var reg=construirRegistro();   /* CURRENT.key==='multi' → snapshot.multi (con snap por producto) + comercial (suma) */
-  return DB.add(reg).then(function(id){
-    SESION.registroId=id; SESION.dirty=false; actualizarBotonGuardar();
-    toast('✔ Cotización Multiproducto guardada como #'+id+' ('+MULTI.length+' producto'+(MULTI.length===1?'':'s')+')','ok','global-toast');
+  return DB.upsertPorRut(reg).then(function(res){   /* mismo upsert por RUT: una sola línea por cliente */
+    SESION.registroId=res.id; SESION.dirty=false; actualizarBotonGuardar();
+    toast(_msgGuardado(res,true),'ok','global-toast');
   }).catch(function(){toast('✖ No se pudo guardar la cotización multiproducto','err','global-toast');});
 }
 /* Animación: una hoja-propuesta blanca (tamaño carta horizontal) viaja completa
@@ -6792,7 +6810,10 @@ var DB=(function(){
       comercial:{servicio:_s(com.servicio),uf:_s(com.uf),precioVenta:_s(com.precioVenta),precioLista:_s(com.precioLista),descuento:_s(com.descuento)},
       snapshot:datos.snapshot||null,
       agenda:datos.agenda||null,
-      historial:Array.isArray(datos.historial)?datos.historial.slice():[]
+      historial:Array.isArray(datos.historial)?datos.historial.slice():[],
+      /* Cotizaciones anteriores del MISMO cliente (agrupadas por RUT vía upsertPorRut).
+         Campo aditivo y retrocompatible: builds viejas lo ignoran. Ver upsertPorRut(). */
+      versiones:Array.isArray(datos.versiones)?datos.versiones.slice():[]
     };
   }
   /* Diff superficial de estado/ejecutivo/cliente/comercial para el historial. */
@@ -6804,6 +6825,43 @@ var DB=(function(){
       Object.keys(b).forEach(function(k){if(_s(a[k])!==_s(b[k]))cambios[grp+'.'+k]=[a[k],b[k]];});
     });
     return cambios;
+  }
+
+  /* ── Identidad de cliente por RUT (clave única) ──────────────────────────────
+     Normaliza el RUT a solo dígitos + K final para que "76.123.456-7",
+     "761234567" y "76123456-7" se reconozcan como el MISMO cliente. Devuelve ''
+     si no hay RUT (en ese caso no se puede agrupar → se crea registro suelto). */
+  function _rutKey(rut){ return _s(rut).toUpperCase().replace(/[^0-9K]/g,''); }
+
+  /* JSON canónico con claves ordenadas recursivamente: dos objetos equivalentes
+     producen la MISMA cadena aunque el orden de inserción difiera. Base de la
+     huella de cotización (comparación estable, independiente del recorrido DOM). */
+  function _canon(v){
+    if(v===null||typeof v!=='object')return JSON.stringify(v);
+    if(Array.isArray(v))return '['+v.map(_canon).join(',')+']';
+    return '{'+Object.keys(v).sort().map(function(k){return JSON.stringify(k)+':'+_canon(v[k]);}).join(',')+'}';
+  }
+  /* Huella de una cotización: identifica la CONFIGURACIÓN + PRECIO ofrecidos
+     (servicio, precios, descuento y snapshot completo del producto/config/overrides/
+     multiproducto). NO incluye datos de contacto: cambiar un teléfono no crea una
+     versión nueva, pero cualquier cambio real de la cotización sí. */
+  function _fpCotizacion(r){
+    var c=r.comercial||{};
+    return _canon({s:_s(c.servicio),pv:_s(c.precioVenta),pl:_s(c.precioLista),dc:_s(c.descuento),snap:r.snapshot||null});
+  }
+  /* Huella de los datos de contacto del cliente (para refrescar el registro
+     principal cuando cambian datos sin que cambie la cotización). */
+  function _fpCliente(r){ var c=r.cliente||{}; return _canon({e:_s(c.empresa),t:_s(c.telefono),co:_s(c.correo),rp:_s(c.representante),ob:_s(c.observacion)}); }
+  /* Congela una cotización como entrada del historial de versiones. */
+  function _snapVersion(r){
+    return {
+      guardadoEn:_s(r.updatedAt||r.createdAt||_nowISO()),
+      ejecutivo:_s(r.ejecutivo), estado:_s(r.estado),
+      cliente:Object.assign({},r.cliente||{}),
+      comercial:Object.assign({},r.comercial||{}),
+      snapshot:r.snapshot||null,
+      origenId:(r.id!=null?r.id:null)
+    };
   }
 
   return {
@@ -6829,6 +6887,89 @@ var DB=(function(){
       });});
     },
 
+    /* ── UPSERT POR RUT — un único registro principal por cliente ────────────────
+       Regla de negocio (registro principal siempre = última cotización):
+         • RUT nuevo (o sin RUT)  → crea el registro.
+         • Misma cotización EXACTA → no duplica; conserva el registro y, si cambiaron
+           datos de contacto, los refresca. NO genera versión.
+         • Cotización modificada   → archiva la cotización anterior en versiones[] y
+           reemplaza la principal (mismo id, misma línea). La última manda.
+         • Duplicados previos del mismo RUT → se consolidan: su cotización se guarda
+           en versiones[] y quedan ocultos (eliminación lógica), dejando una sola línea.
+       Todo en UNA transacción. Devuelve {id, accion, archivadas}.
+       accion ∈ creado | sin_cambios | actualizado | reemplazado | consolidado */
+    upsertPorRut:function(datos){
+      var reg=_normalizar(datos), ahora=_nowISO();
+      var rutKey=_rutKey(reg.cliente.rut);
+      return _open().then(function(db){return new Promise(function(resolve,reject){
+        var tx=db.transaction(STORE,'readwrite'), os=tx.objectStore(STORE);
+        var salida={id:null,accion:'creado',archivadas:0};
+        function crearNuevo(){
+          reg.createdAt=ahora; reg.updatedAt=ahora;
+          reg.historial.push({ts:ahora,ejecutivo:reg.ejecutivo,accion:'creado',cambios:{}});
+          var a=os.add(reg); a.onsuccess=function(){salida.id=a.result;salida.accion='creado';};
+        }
+        /* Sin RUT no hay clave de agrupación: se comporta como add() clásico. */
+        if(!rutKey){ crearNuevo(); }
+        else{
+          var matches=[];
+          var cur=os.openCursor();
+          cur.onerror=function(){reject(cur.error);};
+          cur.onsuccess=function(e){
+            var c=e.target.result;
+            if(c){
+              var v=c.value;
+              if(v&&v.estado!=='eliminado'&&_rutKey(v.cliente&&v.cliente.rut)===rutKey)matches.push(v);
+              c.continue(); return;
+            }
+            /* Cursor agotado: decidir crear vs. consolidar. */
+            if(!matches.length){ crearNuevo(); return; }
+            matches.sort(function(a,b){return _s(b.updatedAt||b.createdAt)<_s(a.updatedAt||a.createdAt)?-1:1;});
+            var survivor=matches[0], extras=matches.slice(1);
+            var versiones=(survivor.versiones||[]).slice();
+            var mismaCot=(_fpCotizacion(reg)===_fpCotizacion(survivor));
+            var mismoCli=(_fpCliente(reg)===_fpCliente(survivor));
+            /* Consolidar duplicados previos: su cotización va al historial y se ocultan. */
+            extras.forEach(function(ex){
+              (ex.versiones||[]).forEach(function(v){versiones.push(v);});
+              versiones.push(_snapVersion(ex));
+              ex.estado='eliminado'; ex.updatedAt=ahora;
+              (ex.historial=ex.historial||[]).push({ts:ahora,ejecutivo:reg.ejecutivo,accion:'consolidado',cambios:{}});
+              os.put(ex); salida.archivadas++;
+            });
+            if(mismaCot&&mismoCli&&!extras.length){
+              /* Nada cambió: se conserva el registro existente tal cual. */
+              salida.id=survivor.id; salida.accion='sin_cambios'; return;
+            }
+            /* Si la cotización cambió, la anterior del survivor se archiva. */
+            if(!mismaCot)versiones.push(_snapVersion(survivor));
+            /* Ordenar versiones por fecha asc y evitar el consumo ilimitado. */
+            versiones.sort(function(a,b){return _s(a.guardadoEn)<_s(b.guardadoEn)?-1:1;});
+            if(versiones.length>200)versiones=versiones.slice(versiones.length-200);
+            var nuevo={
+              id:survivor.id, uid:survivor.uid||_uid(), schemaVersion:survivor.schemaVersion,
+              createdAt:survivor.createdAt||ahora,
+              ejecutivo:reg.ejecutivo||survivor.ejecutivo,
+              estado:(datos&&datos.estado&&ESTADOS.indexOf(datos.estado)>-1)?datos.estado:survivor.estado,
+              medioEnvio:(datos&&datos.medioEnvio!=null&&datos.medioEnvio!=='')?_s(datos.medioEnvio):_s(survivor.medioEnvio),
+              enviadoEn:(datos&&datos.enviadoEn!=null&&datos.enviadoEn!=='')?_s(datos.enviadoEn):_s(survivor.enviadoEn),
+              cliente:reg.cliente, comercial:reg.comercial, snapshot:reg.snapshot,
+              agenda:survivor.agenda||null,
+              historial:(survivor.historial||[]).slice(),
+              versiones:versiones
+            };
+            nuevo.updatedAt=ahora;
+            var accion=(!mismaCot)?'reemplazado':(extras.length?'consolidado':'actualizado');
+            nuevo.historial.push({ts:ahora,ejecutivo:reg.ejecutivo,accion:'editado',cambios:_diff(survivor,nuevo)});
+            os.put(nuevo);
+            salida.id=survivor.id; salida.accion=accion;
+          };
+        }
+        tx.oncomplete=function(){_emit('cambio',{tipo:'upsert',id:salida.id});resolve(salida);};
+        tx.onerror=function(){reject(tx.error);}; tx.onabort=function(){reject(tx.error||new Error('tx abort'));};
+      });});
+    },
+
     /* Editar por id con parche parcial {cliente?,comercial?,estado?,ejecutivo?,snapshot?}.
        get→put en la MISMA transacción (sin Promises intermedias). Devuelve el registro nuevo. */
     update:function(id,patch){
@@ -6850,7 +6991,8 @@ var DB=(function(){
             comercial:Object.assign({},actual.comercial,patch.comercial||{}),
             snapshot:(patch.snapshot!==undefined)?patch.snapshot:actual.snapshot,
             agenda:(patch.agenda!==undefined)?patch.agenda:(actual.agenda||null),
-            historial:(actual.historial||[]).slice()
+            historial:(actual.historial||[]).slice(),
+            versiones:(patch.versiones!==undefined)?patch.versiones:((actual.versiones||[]).slice())
           };
           nuevo.updatedAt=_nowISO();
           nuevo.historial.push({ts:nuevo.updatedAt,ejecutivo:_ejecutivoActual(),accion:'editado',cambios:_diff(actual,nuevo)});
@@ -7108,19 +7250,33 @@ function construirRegistro(){
   };
 }
 
-/* ── 💾 Guardar Cotización: SIEMPRE crea una versión nueva (#18/#19). ── */
+/* ── 💾 Guardar Cotización: UPSERT POR RUT (registro principal = última cotización).
+   El cliente se identifica por su RUT: si ya existe, se reemplaza su cotización
+   principal y la anterior queda en el historial de versiones; si es idéntica, no
+   se duplica; si no existía, se crea. Ver DB.upsertPorRut(). ── */
 function guardarCotizacion(){
   if(typeof DB==='undefined'){toast('✖ Base de datos no disponible','err','global-toast');return;}
   if(CURRENT.key==='multi'&&(!MULTI||!MULTI.length)){toast('Agrega productos al Multiproducto primero','err','global-toast');return;}
   var reg=construirRegistro();
-  return DB.add(reg).then(function(id){
-    SESION.registroId=id; SESION.dirty=false; actualizarBotonGuardar();
+  var esMulti=reg.snapshot&&reg.snapshot.productKey==='multi';
+  return DB.upsertPorRut(reg).then(function(res){
+    SESION.registroId=res.id; SESION.dirty=false; actualizarBotonGuardar();
     var gb=document.getElementById('btn-guardar-cotizacion');
     if(gb){gb.classList.remove('saved-anim');void gb.offsetWidth;gb.classList.add('saved-anim');setTimeout(function(){gb.classList.remove('saved-anim');},520);}
-    var esMulti=reg.snapshot&&reg.snapshot.productKey==='multi';
-    toast('✔ Cotización guardada como #'+id+(esMulti?' (Multiproducto)':''),'ok','global-toast');
-    return id;
+    toast(_msgGuardado(res,esMulti),'ok','global-toast');
+    return res.id;
   }).catch(function(){ toast('✖ No se pudo guardar la cotización','err','global-toast'); });
+}
+/* Mensaje de resultado del upsert según la acción efectuada. */
+function _msgGuardado(res,esMulti){
+  var suf=esMulti?' (Multiproducto)':'';
+  switch(res.accion){
+    case 'sin_cambios':  return '✔ Cliente #'+res.id+' ya estaba guardado con esta misma cotización'+suf;
+    case 'reemplazado':  return '✔ Cotización de #'+res.id+' actualizada · la anterior quedó en el historial'+suf;
+    case 'actualizado':  return '✔ Datos del cliente #'+res.id+' actualizados'+suf;
+    case 'consolidado':  return '✔ Cliente #'+res.id+' actualizado · '+res.archivadas+' cotización(es) previa(s) movidas al historial'+suf;
+    default:             return '✔ Cotización guardada como #'+res.id+suf;
+  }
 }
 /* Excepción explícita: sobrescribe la cotización abierta (corrección, no nueva versión). */
 function actualizarCotizacionActual(){
@@ -7195,6 +7351,7 @@ function _migrarRegistro(r){
   r=r||{}; if(!r.uid)r.uid='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
   if(!r.schemaVersion)r.schemaVersion=1;
   r.cliente=r.cliente||{}; r.comercial=r.comercial||{}; r.historial=Array.isArray(r.historial)?r.historial:[];
+  r.versiones=Array.isArray(r.versiones)?r.versiones:[];
   return r;
 }
 function importarConModo(modo){
@@ -7380,7 +7537,8 @@ function registrarEnvio(medio){
   var reg=construirRegistro(), ts=new Date().toISOString();
   var patch={cliente:reg.cliente,comercial:reg.comercial,snapshot:reg.snapshot,estado:'enviada',medioEnvio:medio,enviadoEn:ts};
   if(SESION.registroId==null){
-    DB.add(patch).then(function(id){SESION.registroId=id;SESION.dirty=false;actualizarBotonGuardar();});
+    /* Aún no ligada a un registro: upsert por RUT para no duplicar al cliente. */
+    DB.upsertPorRut(patch).then(function(res){SESION.registroId=res.id;SESION.dirty=false;actualizarBotonGuardar();});
   }else{
     DB.update(SESION.registroId,patch).then(function(){SESION.dirty=false;actualizarBotonGuardar();});
   }
@@ -7813,7 +7971,7 @@ function planillaMenu(id,ev){
     '<button onclick="planillaDuplicar('+id+');planillaMenuCerrar()">⧉ Duplicar</button>'+
     '<button onclick="planillaGuardarComoNueva('+id+');planillaMenuCerrar()">➕ Guardar como nueva versión</button>'+
     '<button onclick="planillaExportarUna('+id+');planillaMenuCerrar()">⬇ Exportar solo esta</button>'+
-    '<button onclick="planillaHistorial('+id+');planillaMenuCerrar()">🕘 Ver historial</button>'+
+    '<button onclick="planillaHistorial('+id+');planillaMenuCerrar()">🕘 Historial y cotizaciones anteriores</button>'+
     '<button class="pl-menu-del" onclick="planillaEliminar('+id+');planillaMenuCerrar()">🗑 Eliminar</button>';
   var r=(ev&&ev.target)?ev.target.getBoundingClientRect():{bottom:120,left:120};
   menu.style.top=Math.min(r.bottom+4,window.innerHeight-320)+'px';
@@ -7967,9 +8125,44 @@ function planillaConfirmarEliminar(){
     toast('✔ Registro #'+id+' eliminado','ok','global-toast');
   }).catch(function(){toast('✖ No se pudo eliminar','err','global-toast');});
 }
+/* Resumen comercial compacto de una cotización (vigente o versión anterior). */
+function _cotResumen(com){
+  com=com||{};
+  var chips=[];
+  if(com.servicio)chips.push('<span class="pl-v-serv">'+_esc(com.servicio)+'</span>');
+  var precios=[];
+  if(com.precioVenta)precios.push('<span><b>Venta:</b> '+_esc(com.precioVenta)+'</span>');
+  if(com.precioLista)precios.push('<span><b>Lista:</b> '+_esc(com.precioLista)+'</span>');
+  var _dc=(''+(com.descuento||'')).trim();
+  if(_dc&&_dc!=='0'&&_dc!=='0%')precios.push('<span class="pl-v-dc"><b>Dcto:</b> '+_esc(com.descuento)+'</span>');
+  return (chips.length?'<div class="pl-v-serv-line">'+chips.join('')+'</div>':'')+
+         (precios.length?'<div class="pl-v-precios">'+precios.join('')+'</div>':'');
+}
 function planillaHistorial(id){
   DB.get(id).then(function(reg){
     if(!reg)return;
+    /* ── Sección 1: cotización vigente + cotizaciones anteriores (por RUT) ── */
+    var vers=(reg.versiones||[]).slice().reverse();   /* más reciente archivada primero */
+    var vigente='<div class="pl-v-item pl-v-vigente">'+
+      '<div class="pl-v-top"><span class="pl-v-badge pl-v-badge-cur">Cotización vigente</span>'+
+      '<span class="pl-v-ts">'+_esc(_fechaISOaDMY(reg.updatedAt||reg.createdAt))+' '+_esc((''+(reg.updatedAt||reg.createdAt||'')).substr(11,5))+'</span>'+
+      (reg.ejecutivo?'<span class="pl-h-ej">'+_esc(reg.ejecutivo)+'</span>':'')+'</div>'+
+      _cotResumen(reg.comercial)+'</div>';
+    var versHtml=vers.map(function(v,i){
+      var idxReal=(reg.versiones.length-1)-i;   /* índice real en reg.versiones */
+      return '<div class="pl-v-item">'+
+        '<div class="pl-v-top"><span class="pl-v-badge">Anterior</span>'+
+        '<span class="pl-v-ts">'+_esc(_fechaISOaDMY(v.guardadoEn))+' '+_esc((''+(v.guardadoEn||'')).substr(11,5))+'</span>'+
+        (v.ejecutivo?'<span class="pl-h-ej">'+_esc(v.ejecutivo)+'</span>':'')+
+        '<button class="pl-v-open" onclick="verVersionAnterior('+reg.id+','+idxReal+')" title="Cargar esta cotización en la calculadora como referencia">📂 Ver</button>'+
+        '</div>'+_cotResumen(v.comercial)+'</div>';
+    }).join('');
+    var secCot='<div class="pl-h-title">📋 Cotizaciones de '+_esc(reg.cliente.empresa||('#'+reg.id))+
+      (reg.cliente.rut?' · RUT '+_esc(reg.cliente.rut):'')+'</div>'+
+      vigente+
+      (vers.length?('<div class="pl-v-sub">Cotizaciones anteriores ('+vers.length+')</div>'+versHtml)
+                  :'<div class="pl-v-none">Aún no hay cotizaciones anteriores para este cliente.</div>');
+    /* ── Sección 2: bitácora de movimientos (auditoría) ── */
     var h=(reg.historial||[]).slice().reverse();
     var filas=h.map(function(e){
       var camb=e.cambios&&Object.keys(e.cambios).length
@@ -7979,8 +8172,23 @@ function planillaHistorial(id){
         '<span class="pl-h-ts">'+_esc(_fechaISOaDMY(e.ts))+' '+_esc((e.ts||'').substr(11,5))+'</span>'+
         (e.ejecutivo?'<span class="pl-h-ej">'+_esc(e.ejecutivo)+'</span>':'')+'</div>'+camb+'</div>';
     }).join('');
-    document.getElementById('pl-hist-body').innerHTML='<div class="pl-h-title">Historial · registro #'+reg.id+' · '+_esc(reg.cliente.empresa||'')+'</div>'+(filas||'<div class="pl-h-empty">Sin movimientos.</div>');
+    var secLog='<div class="pl-h-title pl-h-title-2">🕘 Movimientos · registro #'+reg.id+'</div>'+(filas||'<div class="pl-h-empty">Sin movimientos.</div>');
+    document.getElementById('pl-hist-body').innerHTML=secCot+secLog;
     document.getElementById('pl-hist-modal').classList.add('on');
+  });
+}
+/* Carga una cotización anterior en la calculadora, solo como referencia. No la
+   liga a la sesión: si el usuario la guarda, el upsert por RUT la deja como
+   vigente y la que estaba pasa al historial. */
+function verVersionAnterior(id,idx){
+  DB.get(id).then(function(reg){
+    if(!reg||!reg.versiones||!reg.versiones[idx]){toast('✖ Versión no encontrada','err','global-toast');return;}
+    var v=reg.versiones[idx];
+    abrirRegistro({id:null,cliente:v.cliente,comercial:v.comercial,snapshot:v.snapshot});
+    SESION.registroId=null; SESION.dirty=true;
+    if(typeof actualizarBotonGuardar==='function')actualizarBotonGuardar();
+    cerrarHistorial(); if(typeof closePlanillaView==='function')closePlanillaView();
+    toast('👁 Cotización anterior cargada como referencia. Si la guardas, quedará como la vigente.','ok','global-toast');
   });
 }
 function cerrarHistorial(){ var m=document.getElementById('pl-hist-modal'); if(m)m.classList.remove('on'); }
