@@ -874,6 +874,30 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .uf-tool{display:flex;flex-direction:column;gap:14px;}
 .uf-tool .uf-r{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
 .uf-tool .res{font-size:1.05rem;font-weight:800;color:var(--y);padding-top:6px;}
+/* ── Conversor UF · Comisiones (rediseño) ── */
+.conv2{display:flex;flex-direction:column;gap:12px;}
+.conv-ufhoy{font-size:.82rem;color:var(--wa);text-align:center;}
+.conv-ufhoy b{color:var(--y);font-weight:800;}
+.conv-card{background:var(--g2);border:1px solid var(--g4);border-radius:12px;padding:12px 14px;}
+.conv-card.conv-com{border-color:rgba(240,192,64,.55);background:linear-gradient(180deg,rgba(240,192,64,.06),transparent);}
+.conv-t{font-size:.9rem;font-weight:800;color:var(--w);margin-bottom:9px;}
+.conv-in{display:flex;align-items:stretch;background:var(--g0);border:1.5px solid var(--g4);border-radius:9px;overflow:hidden;}
+.conv-in input{flex:1;min-width:0;border:none;background:transparent;color:var(--w);font-size:1.05rem;font-weight:800;padding:10px 12px;outline:none;}
+.conv-in input::-webkit-outer-spin-button,.conv-in input::-webkit-inner-spin-button{opacity:.5;}
+.conv-u{padding:0 13px;color:var(--wa);font-weight:800;font-size:.92rem;background:var(--g3);display:flex;align-items:center;}
+.conv-u-l{order:-1;}
+.conv-out{margin-top:9px;font-size:1rem;font-weight:700;color:var(--y);line-height:1.5;}
+.conv-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.conv-grid2>div{min-width:0;}
+.conv-grid2 label{display:block;font-size:.72rem;color:var(--wa);margin-bottom:4px;font-weight:700;}
+.conv-fill{margin-top:11px;font-size:.74rem;color:var(--wa);display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.conv-fbtn{background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:7px;padding:5px 11px;font-family:inherit;font-weight:700;font-size:.74rem;cursor:pointer;transition:background .14s,border-color .14s;}
+.conv-fbtn:hover{background:var(--g4);border-color:var(--y);}
+.conv-com-out{margin-top:12px;}
+.conv-big{color:var(--gn);font-size:1.6rem;font-weight:900;letter-spacing:.3px;}
+.conv-sub{display:block;font-size:.78rem;color:var(--wa);font-weight:600;margin-top:3px;}
+body.theme-light .conv-in input{color:#1a1a1a;}
+body.theme-light .conv-u{color:#555;}
 
 /* ── BIBLIOTECA DE CONOCIMIENTO COMERCIAL — vista completa (no modal) ── */
 body.bib-open #prodbar,body.bib-open #workstation,body.bib-open #mtoggle{display:none !important;}
@@ -1573,16 +1597,22 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
    Verde: intención positiva del cliente. Los aplica _plChequearVencidos() por
    data-estado; "venta_cerrada" usa pl-row-sold y "vencido" usa pl-row-overdue,
    que tienen prioridad. No usan !important para no pisar selección/hover. */
-/* !important: gana a la cebra (nth-child) y al fondo base; cede ante hover/selección/venta. */
-.pl-tr.pl-est-yellow{box-shadow:inset 3px 0 0 #f0c040;}
-.pl-tr.pl-est-yellow .pl-td{background:rgba(240,192,64,.15)!important;}
-.pl-tr.pl-est-red{box-shadow:inset 3px 0 0 #e0392c;}
-.pl-tr.pl-est-red .pl-td{background:rgba(224,57,44,.17)!important;}
-.pl-tr.pl-est-green{box-shadow:inset 3px 0 0 #2ecc71;}
-.pl-tr.pl-est-green .pl-td{background:rgba(46,204,113,.14)!important;}
-body.theme-light .pl-tr.pl-est-yellow .pl-td{background:rgba(214,158,0,.18)!important;}
-body.theme-light .pl-tr.pl-est-red .pl-td{background:rgba(200,35,25,.14)!important;}
-body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(26,140,70,.16)!important;}
+/* Tonos suaves y elegantes: barra lateral definida + tinte tenue. !important gana
+   a la cebra (nth-child) y al fondo base; cede ante hover/selección/venta. */
+.pl-tr.pl-est-yellow{box-shadow:inset 4px 0 0 #d9a326;}
+.pl-tr.pl-est-yellow .pl-td{background:rgba(217,163,38,.10)!important;}
+.pl-tr.pl-est-red{box-shadow:inset 4px 0 0 #d1544f;}
+.pl-tr.pl-est-red .pl-td{background:rgba(209,84,79,.11)!important;}
+.pl-tr.pl-est-green{box-shadow:inset 4px 0 0 #33ad68;}
+.pl-tr.pl-est-green .pl-td{background:rgba(51,173,104,.11)!important;}
+body.theme-light .pl-tr.pl-est-yellow .pl-td{background:rgba(190,140,20,.13)!important;}
+body.theme-light .pl-tr.pl-est-red .pl-td{background:rgba(190,60,55,.11)!important;}
+body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!important;}
+/* ✨ NEÓN al pasar el mouse — gana al tinte de color (más específico: #id + 3 clases). */
+#planilla-view .pl-tr:hover .pl-td{background:var(--pl-hover)!important;}
+#planilla-view .pl-tr:hover .pl-td:not(.pl-td-id){box-shadow:inset 0 0 14px rgba(26,115,232,.22)!important;}
+#planilla-view.pl-dark .pl-tr:hover .pl-td:not(.pl-td-id){box-shadow:inset 0 0 16px rgba(90,180,255,.40)!important;}
+#planilla-view .pl-tr:hover .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-sel),0 0 12px rgba(90,180,255,.45)!important;}
 /* Selector de tipificación (calculadora) + su gemelo en la Planilla — coloreados
    por categoría: verde bueno · amarillo neutro-sin-contacto · rojo malo. */
 .tipif-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -2116,24 +2146,29 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(26,140,70,.16)!impor
   <div class="modal-card" style="max-width:480px;">
     <div class="modal-head"><h3>⇄ Conversor UF / CLP</h3><button class="modal-x" onclick="closeModal('uf-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="uf-tool">
-        <div class="block" style="margin:0;">
-          <div class="block-t">UF → Pesos</div>
-          <div class="uf-r"><div class="fld" style="flex:1;"><label>Valor en UF</label><input type="number" id="uf-i" value="1" step="0.0001" oninput="cUF()"></div></div>
-          <div class="res" id="res-uf"></div>
+      <div class="conv2">
+        <div class="conv-ufhoy">Valor UF hoy: <b id="conv-uf-val"></b></div>
+
+        <div class="conv-card">
+          <div class="conv-t">💵 UF → Pesos</div>
+          <div class="conv-in"><input type="number" id="uf-i" value="1" step="0.01" oninput="cUF()"><span class="conv-u">UF</span></div>
+          <div class="conv-out" id="res-uf"></div>
         </div>
-        <div class="block" style="margin:0;">
-          <div class="block-t">Pesos → UF</div>
-          <div class="uf-r"><div class="fld" style="flex:1;"><label>Valor en $CLP</label><input type="number" id="clp-i" value="100000" step="1000" oninput="cCLP()"></div></div>
-          <div class="res" id="res-clp"></div>
+
+        <div class="conv-card">
+          <div class="conv-t">🔁 Pesos → UF</div>
+          <div class="conv-in"><span class="conv-u conv-u-l">$</span><input type="number" id="clp-i" value="100000" step="1000" oninput="cCLP()"></div>
+          <div class="conv-out" id="res-clp"></div>
         </div>
-        <div class="block" style="margin:0;">
-          <div class="block-t">Comisión por venta</div>
-          <div class="uf-r">
-            <div class="fld" style="flex:1;"><label>Venta (UF)</label><input type="number" id="com-u" value="200" oninput="cCom()"></div>
-            <div class="fld" style="flex:1;"><label>Comisión %</label><input type="number" id="com-p" value="0.5" step="0.1" oninput="cCom()"></div>
+
+        <div class="conv-card conv-com">
+          <div class="conv-t">🏆 ¿Cuánto comisiono por esta venta?</div>
+          <div class="conv-grid2">
+            <div><label>Monto de la venta</label><div class="conv-in"><input type="number" id="com-u" value="30" step="0.1" oninput="cCom()"><span class="conv-u">UF</span></div></div>
+            <div><label>Pago por cada UF</label><div class="conv-in"><input type="number" id="com-p" value="0.5" step="0.05" oninput="cCom()"><span class="conv-u">UF</span></div></div>
           </div>
-          <div class="res" id="res-com"></div>
+          <div class="conv-fill">Usar de la cotización actual:<button type="button" class="conv-fbtn" onclick="comUsar('mensual')">Mensual</button><button type="button" class="conv-fbtn" onclick="comUsar('anual')">Anual (×12)</button></div>
+          <div class="conv-out conv-com-out" id="res-com"></div>
         </div>
       </div>
     </div>
@@ -4280,11 +4315,39 @@ function ampliar(which){
 function closeModal(id){$(id).classList.remove('on');}
 
 /* ════════ CONVERSOR UF / CLP (herramienta) ════════ */
-function openUF(){cUF();cCLP();cCom();$('uf-modal').classList.add('on');}
+function openUF(){var b=document.getElementById('conv-uf-val');if(b)b.textContent=fmtN(getUF());cUF();cCLP();cCom();$('uf-modal').classList.add('on');}
 function srUF(id,h){var e=$(id);if(e)e.innerHTML=h;}
-function cUF(){var u=parseFloat(gv('uf-i'))||0;srUF('res-uf','<b>'+u+' UF</b> = '+fmtN(ufn(u))+' (sin IVA) · <span style="color:#2ecc71;">'+fmtN(ufc(u))+'</span> (c/IVA)');}
-function cCLP(){var c=parseFloat(gv('clp-i'))||0;srUF('res-clp',fmtN(c)+' = <b>'+(c/getUF()).toFixed(6)+' UF</b>');}
-function cCom(){var v=parseFloat(gv('com-u'))||0,p=parseFloat(gv('com-p'))||0,com=v*(p/100);srUF('res-com','Comisión: <b>'+fmtN(ufn(com))+'</b> ('+com.toFixed(6)+' UF)');}
+/* Formato de UF legible: 2 decimales (4 si es un monto muy chico), separador es-CL. */
+function _fUF(u){
+  u=u||0; var dec=(Math.abs(u)>0&&Math.abs(u)<1)?4:2;
+  return u.toLocaleString('es-CL',{minimumFractionDigits:dec,maximumFractionDigits:dec})+' UF';
+}
+function cUF(){
+  var u=parseFloat(gv('uf-i'))||0;
+  srUF('res-uf','<b>'+fmtN(ufn(u))+'</b> sin IVA &nbsp;·&nbsp; <span style="color:var(--gn);">'+fmtN(ufc(u))+'</span> con IVA');
+}
+function cCLP(){
+  var c=parseFloat(gv('clp-i'))||0;
+  srUF('res-clp','= <b>'+_fUF(c/getUF())+'</b>');
+}
+function cCom(){
+  /* Modelo real: por cada UF vendida pagan "f" UF de comisión → total UF → pesos por valor UF. */
+  var v=parseFloat(gv('com-u'))||0, f=parseFloat(gv('com-p'))||0, comUF=v*f;
+  var fTxt=f.toLocaleString('es-CL',{maximumFractionDigits:4});
+  srUF('res-com','Ganas <b class="conv-big">'+fmtN(ufn(comUF))+'</b>'+
+    '<span class="conv-sub">= '+_fUF(comUF)+' &nbsp;('+fTxt+' UF por cada UF · venta de '+_fUF(v)+')</span>');
+}
+/* Monto de venta actual (mensual, en UF): respeta el precio manual si lo hay. */
+function _ventaActualUF(){
+  try{ return (typeof CURRENT!=='undefined'&&CURRENT.override!==null)?CURRENT.override:((typeof LAST!=='undefined'&&LAST&&LAST.ufVenta)||0); }catch(e){ return 0; }
+}
+/* Rellena "Monto de la venta" desde la cotización abierta (mensual o anual ×12). */
+function comUsar(cual){
+  var m=_ventaActualUF();
+  if(!m){ if(typeof toast==='function')toast('Configura una cotización con precio primero','err','global-toast'); return; }
+  var v=(cual==='anual')?m*12:m;
+  var el=document.getElementById('com-u'); if(el){ el.value=(Math.round(v*100)/100); cCom(); }
+}
 
 /* ════════ DATOS DEL EJECUTIVO/A — FUENTE ÚNICA (localStorage) ════════
    Regla de oro:
@@ -7897,7 +7960,7 @@ function _estadoLabel(e){ return (typeof DB!=='undefined'&&DB.ESTADO_LABELS&&DB.
 /* ── TIPIFICACIÓN (estado del contacto) — categoría de color bueno/malo/neutro ── */
 function _tipifCat(estado){
   switch(estado){
-    case 'no_contesta': case 'buzon_voz': return 'warn';                       /* no se logró contactar */
+    case 'borrador': case 'no_contesta': case 'buzon_voz': return 'warn';      /* neutro / sin contacto */
     case 'no_quiere': case 'corta_llamada': case 'cliente_molesto': case 'no_credito': return 'bad';   /* rechazo */
     case 'enviada': case 'agendado': case 'agendado_futuro': case 'interesado': case 'negociacion': case 'pendiente_doc': case 'venta_cerrada': return 'good';  /* enviada + intención positiva */
     default: return 'neutral';                                                 /* borrador */
@@ -9057,8 +9120,8 @@ function _plChequearVencidos(){
 /* Semáforo de gestión por estado (ver CSS .pl-est-*). */
 function _estadoColor(estado){
   switch(estado){
-    case 'no_contesta': case 'buzon_voz':
-      return 'pl-est-yellow';                                   /* no se logró contactar */
+    case 'borrador': case 'no_contesta': case 'buzon_voz':
+      return 'pl-est-yellow';                                   /* neutro / sin contacto */
     case 'no_quiere': case 'corta_llamada': case 'cliente_molesto': case 'no_credito':
       return 'pl-est-red';                                      /* rechazo / no contacto voluntario */
     case 'enviada': case 'agendado': case 'agendado_futuro': case 'interesado': case 'negociacion': case 'pendiente_doc':
