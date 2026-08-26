@@ -8589,49 +8589,24 @@ _checkWednesdayNotice();  // aviso automático de los miércoles (una vez al dí
 /* ════════ AVISO AUTOMÁTICO DE LOS MIÉRCOLES ════════
    Salta una sola vez, la primera carga del día miércoles y LEE el mensaje en voz
    alta (síntesis de voz del navegador, en español). Break 11:15 · aseo de Clarita. */
-var _WED_MSG="Atención. Hoy es miércoles. Salimos al primer break a las once y cuarto, para que Clarita haga el aseo. ¡No lo olvides!";
-var _wedSpoken=false;
-/* Elige la voz en español más agradable disponible: prioriza neuronales
-   "Natural/Online" (Edge), luego Google (Chrome), y voces femeninas conocidas;
-   dentro de eso, español de Chile > LatAm > cualquier español. */
-function _wedPickVoice(){
-  try{
-    var voces=(window.speechSynthesis.getVoices()||[]);
-    var es=voces.filter(function(v){return /^es/i.test(v.lang)||/spanish|español/i.test(v.name);});
-    if(!es.length)return null;
-    var score=function(v){
-      var s=0, n=(v.name||''), l=(v.lang||'');
-      if(/natural|online/i.test(n))s+=100;                              /* neuronales (Edge) */
-      if(/google/i.test(n))s+=60;                                       /* Google (Chrome) */
-      if(/catalina|sabina|elvira|paloma|helena|dalia|lía|lia/i.test(n))s+=25; /* femeninas conocidas */
-      if(/es-?CL/i.test(l))s+=40; else if(/es-?(419|MX|US)/i.test(l))s+=30; else if(/^es/i.test(l))s+=20;
-      if(v.localService===false)s+=5;                                   /* online suele sonar mejor */
-      return s;
-    };
-    es.sort(function(a,b){return score(b)-score(a);});
-    return es[0];
-  }catch(e){return null;}
-}
+/* Audio del aviso: MP3 grabado (voz IA "Clarita"). Reemplaza la síntesis del
+   navegador para que suene siempre igual y bonito. */
+var _wedAudio=null, _wedSpoken=false;
 function _wedSpeak(){
   try{
-    if(!('speechSynthesis' in window))return;
-    var synth=window.speechSynthesis;
-    var u=new SpeechSynthesisUtterance(_WED_MSG);
-    u.rate=0.96; u.pitch=1.05; u.volume=1; u.lang='es-CL';
-    var v=_wedPickVoice(); if(v){u.voice=v; u.lang=v.lang||u.lang;}
-    u.onstart=function(){_wedSpoken=true;};
-    synth.cancel(); synth.speak(u);   /* cancel() limpia cualquier lectura previa */
+    if(!_wedAudio){ _wedAudio=new Audio('MP3/clarita.mp3'); _wedAudio.preload='auto'; }
+    _wedAudio.currentTime=0;
+    var p=_wedAudio.play();
+    if(p&&p.then)p.then(function(){_wedSpoken=true;}).catch(function(){});
   }catch(e){}
 }
 function _mostrarWedNotice(){
   var m=document.getElementById('wed-notice'); if(!m)return;
   m.classList.add('on');
-  /* Algunas voces cargan async: forzar su carga y leer. */
-  try{ if(window.speechSynthesis){ window.speechSynthesis.getVoices(); } }catch(e){}
   _wedSpeak();
-  /* Si el navegador bloqueó la voz (sin gesto previo), lee al primer clic/tecla. */
+  /* Si el navegador bloqueó el audio (sin gesto previo), suena al primer clic/tecla. */
   var fn=function(){
-    if(!_wedSpoken && !(window.speechSynthesis&&window.speechSynthesis.speaking)) _wedSpeak();
+    if(!_wedSpoken) _wedSpeak();
     document.removeEventListener('pointerdown',fn); document.removeEventListener('keydown',fn);
   };
   document.addEventListener('pointerdown',fn); document.addEventListener('keydown',fn);
