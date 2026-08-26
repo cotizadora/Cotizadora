@@ -7847,6 +7847,9 @@ function _playEnvioAudio(medio){
 function registrarEnvio(medio,silent){
   if(typeof DB==='undefined')return;
   if(!gv('me'))return;   // sin empresa no hay cotización real que registrar
+  /* La cotización pasa a ENVIADA: reflejarlo en el selector de tipificación de la
+     calculadora (verde) para que coincida con la Planilla y un 💾 posterior no lo revierta. */
+  var _tp=document.getElementById('cli-tipif'); if(_tp){ _tp.value='enviada'; if(typeof _tipifColor==='function')_tipifColor(_tp); }
   /* Voz: Gmail/Outlook (email) y WhatsApp. Outlook la reproduce aparte (archivo creado),
      por eso llega con silent=true para no encimar dos audios. */
   if(!silent&&(medio==='email'||medio==='whatsapp'))_playEnvioAudio(medio);
