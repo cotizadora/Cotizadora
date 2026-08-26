@@ -46,6 +46,20 @@ body.theme-light #mini-player .mp-title{color:#2a2417;}
 body.theme-light #mini-player .mp-sub{color:rgba(60,52,30,.6);}
 body.theme-light #mini-player .mp-time{color:rgba(60,52,30,.7);}
 @media(max-width:640px){#mini-player .mp-sub{display:none;}#mini-player .mp-time{display:none;}}
+/* ── Aviso automático de los MIÉRCOLES ── */
+#wed-notice{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.62);padding:20px;}
+#wed-notice.on{display:flex;}
+#wed-notice .wn-box{max-width:440px;width:100%;background:var(--g1);border:1px solid var(--g4);border-radius:18px;overflow:hidden;box-shadow:0 22px 64px rgba(0,0,0,.6);animation:wnPop .28s ease;}
+@keyframes wnPop{from{transform:translateY(14px) scale(.96);opacity:0;}to{transform:none;opacity:1;}}
+#wed-notice .wn-head{background:linear-gradient(135deg,#1f7a48,#2ecc71);padding:18px 22px;display:flex;align-items:center;gap:12px;}
+#wed-notice .wn-emo{font-size:2rem;line-height:1;}
+#wed-notice .wn-title{font-size:1.14rem;font-weight:900;color:#fff;letter-spacing:.2px;}
+#wed-notice .wn-body{padding:24px 22px 6px;color:var(--w);font-size:1.02rem;line-height:1.55;text-align:center;}
+#wed-notice .wn-body b{color:var(--y);font-weight:800;}
+#wed-notice .wn-time{display:block;font-size:2.1rem;font-weight:900;color:var(--y);margin:12px 0 6px;letter-spacing:1px;}
+#wed-notice .wn-foot{padding:18px 22px 24px;text-align:center;}
+#wed-notice .wn-ok{background:linear-gradient(135deg,#2ecc71,#1f7a48);border:none;color:#fff;font-family:inherit;font-weight:800;font-size:1rem;padding:12px 32px;border-radius:12px;cursor:pointer;box-shadow:0 8px 22px rgba(46,204,113,.4);transition:transform .14s;}
+#wed-notice .wn-ok:hover{transform:translateY(-2px);}
 .brand{display:flex;align-items:center;gap:12px;min-width:0;}
 .brand img{height:64px;width:auto;display:block;filter:brightness(0) invert(1);}
 .brand .nm{font-size:1.25rem;font-weight:900;letter-spacing:.5px;color:#fff;line-height:1;}
@@ -625,6 +639,8 @@ body.dens-amplio #left-panel .cfg-grid,body.dens-amplio #left-panel .cfg-2,body.
 .crm-paste-btn.crm-excel-green:hover{background:rgba(33,115,70,.20)!important;border-color:#2a9d5c!important;box-shadow:0 0 16px rgba(33,115,70,.55)!important;transform:translateY(-1px);}
 /* REQ 3+4 — grid compacto del bloque cliente: columna izq (Empresa↕RUT) + columna der (Pegar↕Copiar) */
 .dc-top-grid{display:grid;grid-template-columns:1fr minmax(160px,auto);gap:6px 10px;align-items:end;}
+#me{text-transform:uppercase;}   /* Empresa / Razón Social siempre en mayúscula */
+#me::placeholder{text-transform:none;}
 .crm-paste-btn.crm-grid{width:100%;align-self:end;height:37px;min-height:37px;margin:0;padding:0 12px;flex:0 0 auto;white-space:nowrap;gap:7px;border-radius:8px;animation:none!important;font-size:.86rem;}
 .crm-paste-btn.crm-grid .crm-sub{display:none;}
 .crm-paste-btn.crm-grid .crm-ico{font-size:1.15rem;}
@@ -1809,7 +1825,7 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
       <div id="dest-fields" class="cfg-grid">
         <!-- REQ 3+4 · Empresa↕RUT a la izquierda · Pegar↕Copiar apilados en la misma columna derecha -->
         <div class="dc-top-grid">
-          <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="Empresa SpA" oninput="onClientChange()"></div>
+          <div class="fld"><label>Empresa / Razón Social</label><input type="text" id="me" placeholder="EMPRESA SPA" oninput="_upperEmpresa(this);onClientChange()"></div>
           <button type="button" id="btn-crm-paste" class="crm-paste-btn crm-grid crm-excel-blue" onclick="pegarCRM();playClick();" title="Pega manualmente los datos copiados desde tu planilla Excel"><span class="crm-ico">📊</span><span class="crm-txt"><span class="crm-main">Pegar desde Excel</span></span></button>
           <div class="fld"><label>RUT</label><input type="text" id="mr" placeholder="76.123.456-7" oninput="normRutInput(this);onClientChange()"></div>
           <button type="button" id="btn-copy-excel" class="crm-paste-btn crm-grid crm-excel-green" onclick="copiarParaExcel();playClick();" title="Copia una fila lista para pegar desde la columna A: FECHA · EMPRESA · RUT · TELÉFONO · CORREO · REPRESENTANTE · SERVICIO OFRECIDO · UF del día · PRECIO VENTA · PRECIO LISTA · DESCUENTO · OBSERVACIÓN"><span class="crm-ico">📋</span><span class="crm-txt"><span class="crm-main">Copiar para Excel →</span></span></button>
@@ -2534,6 +2550,19 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 </div>
 
 <div id="zoom-hint"><span>🔍 El zoom del navegador cambió. Pulsa <b>Ctrl + 0</b> para volver al 100% y ver todos los botones.</span><button onclick="cerrarZoomHint()" title="Ocultar aviso">✕</button></div>
+<!-- Aviso automático de los MIÉRCOLES (una vez por miércoles, al cargar) -->
+<div id="wed-notice" onclick="if(event.target===this)cerrarWedNotice()">
+  <div class="wn-box" role="alertdialog" aria-modal="true" aria-labelledby="wn-title">
+    <div class="wn-head"><span class="wn-emo" aria-hidden="true">🧹</span><span class="wn-title" id="wn-title">Recordatorio del miércoles</span></div>
+    <div class="wn-body">
+      Hoy <b>miércoles</b> salimos al <b>primer break</b> a las
+      <span class="wn-time">11:15</span>
+      para que <b>Clarita</b> haga el aseo. 🧽✨<br>¡No lo olvides!
+    </div>
+    <div class="wn-foot"><button class="wn-ok" onclick="cerrarWedNotice()">¡Entendido! 👍</button></div>
+  </div>
+</div>
+
 <!-- Visor/editor de observación completa (Fase 4) — abierto desde la Planilla -->
 <div id="obs-viewer" role="dialog" aria-modal="true" aria-label="Observación completa" onclick="if(event.target===this)cerrarObsViewer()">
   <div class="obsv-card">
@@ -2573,6 +2602,13 @@ function gv(id){var e=$(id);return e?(''+e.value).trim():'';}
 function st(id,v){var e=$(id);if(e){e.textContent=v;if(id==='tpl-asunto'||id==='tpl-asunto-outlook')e.title=v;}}
 function sv(id,v){var e=$(id);if(e)e.innerHTML=v;}
 function setBridge(id,v){var e=$(id);if(e)e.value=(v===undefined||v===null)?'':v;}
+/* Empresa / Razón Social SIEMPRE en mayúscula (tecleo o pegado). toUpperCase no
+   cambia la longitud, así que el cursor se conserva exacto. */
+function _upperEmpresa(el){
+  if(!el)return;
+  var s=el.selectionStart, e=el.selectionEnd, up=(el.value||'').toUpperCase();
+  if(up!==el.value){ el.value=up; try{el.setSelectionRange(s,e);}catch(_){} }
+}
 function ufd(x){return (Math.round(x*10000)/10000).toString();}
 
 /* ── Catálogo: EXACTAMENTE los productos del index (fuente de verdad) ── */
@@ -6733,7 +6769,7 @@ function mapearCRM(txt){
      el representante va DESPUÉS del email → se toma como contacto, no como empresa). */
   var razon=libres.length?libres[0]:'';
   var ok=false;
-  if(razon){var e=$('me');if(e){e.value=razon;ok=true;} var _cc=$('cli-contacto');if(_cc)_cc.value='';}
+  if(razon){var e=$('me');if(e){e.value=(razon||'').toUpperCase();ok=true;} var _cc=$('cli-contacto');if(_cc)_cc.value='';}
   if(fono){var t2=$('cli-tel');if(t2){t2.value=fono.replace(/[^\d+]/g,'');ok=true;}}
   if(email){var em=$('cli-email');if(em){em.value=email;ok=true;}}
   var _rutEl=$('mr');if(_rutEl)_rutEl.value=(rut||'').replace(/[\s\u00a0]/g,'').toUpperCase();
@@ -7402,7 +7438,7 @@ function construirRegistro(){
   var com=(typeof _comercialExcel==='function')?_comercialExcel():{servicio:'',precioVenta:'',precioLista:'',descuento:'',observacion:''};
   return {
     cliente:{
-      empresa:gv('me'), rut:gv('mr'),
+      empresa:(gv('me')||'').toUpperCase(), rut:gv('mr'),
       telefono:(gv('cli-tel')||'').replace(/\s/g,''),
       correo:(gv('cli-email')||'').toLowerCase(),
       representante:(typeof _titleCase==='function')?_titleCase(gv('cli-contacto')||''):gv('cli-contacto'),
@@ -7461,7 +7497,7 @@ function abrirRegistro(reg){
   _restaurando=true;
   try{
     var c=reg.cliente||{};
-    setBridge('me',c.empresa); setBridge('mr',c.rut); setBridge('cli-tel',c.telefono);
+    setBridge('me',(c.empresa||'').toUpperCase()); setBridge('mr',c.rut); setBridge('cli-tel',c.telefono);
     setBridge('cli-email',c.correo); setBridge('cli-contacto',c.representante); setBridge('cli-obs',c.observacion);
     restaurarSnapshot(reg.snapshot);
     if(typeof onClientChange==='function')onClientChange();
@@ -8468,6 +8504,55 @@ setPreview('outlook');      // primera vista lista
 updateCRMWsp();           // estado inicial integración CRM/WhatsApp
 initRegistros();          // capa de datos + nexo 💾 + reactividad de la Planilla
 setTimeout(syncAdjOffset,0); setTimeout(syncAdjOffset,300); /* REQ 1 — offset de barra fija tras render completo */
+_checkWednesdayNotice();  // aviso automático de los miércoles (una vez al día)
+
+/* ════════ AVISO AUTOMÁTICO DE LOS MIÉRCOLES ════════
+   Salta una sola vez, la primera carga del día miércoles: break a las 11:15
+   para el aseo de Clarita. Acompañado de un pequeño repique (WebAudio). */
+var _wedAC=null, _wedPlayed=false;
+function _wedChime(){
+  if(_wedPlayed)return;
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext; if(!AC)return;
+    _wedAC=_wedAC||new AC();
+    var go=function(){
+      if(_wedPlayed||!_wedAC)return;
+      var t=_wedAC.currentTime, notas=[880,1174.66,1567.98];   /* La–Re–Sol, alegre */
+      notas.forEach(function(f,i){
+        var o=_wedAC.createOscillator(), g=_wedAC.createGain(), st=t+i*0.16;
+        o.type='sine'; o.frequency.value=f;
+        g.gain.setValueAtTime(0.0001,st); g.gain.linearRampToValueAtTime(0.26,st+0.03);
+        g.gain.exponentialRampToValueAtTime(0.0007,st+0.5);
+        o.connect(g); g.connect(_wedAC.destination); o.start(st); o.stop(st+0.52);
+      });
+      _wedPlayed=true;
+    };
+    if(_wedAC.state==='suspended'){ _wedAC.resume().then(go).catch(function(){}); }
+    else { go(); }
+  }catch(e){}
+}
+function _mostrarWedNotice(){
+  var m=document.getElementById('wed-notice'); if(!m)return;
+  m.classList.add('on');
+  _wedChime();
+  /* Si el navegador bloqueó el audio (sin gesto previo), suena al primer clic/tecla. */
+  if(!_wedPlayed){
+    var fn=function(){ _wedChime(); if(_wedPlayed){document.removeEventListener('pointerdown',fn);document.removeEventListener('keydown',fn);} };
+    document.addEventListener('pointerdown',fn); document.addEventListener('keydown',fn);
+  }
+}
+function cerrarWedNotice(){ var m=document.getElementById('wed-notice'); if(m)m.classList.remove('on'); }
+function _checkWednesdayNotice(){
+  try{
+    var hoy=new Date();
+    if(hoy.getDay()!==3)return;                     /* 3 = miércoles */
+    var p=function(n){return (n<10?'0':'')+n;};
+    var key=hoy.getFullYear()+'-'+p(hoy.getMonth()+1)+'-'+p(hoy.getDate());
+    if(localStorage.getItem('eq_wed_notice')===key)return;   /* ya se mostró hoy */
+    localStorage.setItem('eq_wed_notice',key);
+    setTimeout(_mostrarWedNotice,700);              /* deja que cargue la UI primero */
+  }catch(e){}
+}
 
 /* La UF global recalcula precios al instante */
 var _ufg=$('uf-global');
