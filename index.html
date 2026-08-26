@@ -4521,14 +4521,7 @@ function avisoPegado(destino){
   if(sub)sub.innerHTML='PÉGALO EN '+destino.toUpperCase()+' CON <b>CTRL+V</b>';
   var el=document.getElementById('paste-notice');
   if(el){el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('on');},3000);}
-  try{
-    if(_sndOn&&('speechSynthesis'in window)){
-      var _voz={'WhatsApp':'Mensaje copiado. Pega en WhatsApp.','Gmail':'Mensaje copiado. Pega en Gmail.','Outlook':'Mensaje copiado. Pega en Outlook.'};
-      var u=new SpeechSynthesisUtterance(_voz[destino]||('Mensaje copiado. Pégalo en '+destino+'.'));
-      u.lang='es-CL';u.rate=1.05;
-      window.speechSynthesis.cancel();window.speechSynthesis.speak(u);
-    }
-  }catch(e){}
+  /* Voz retirada: el aviso es solo visual (las voces de envío usan MP3 propios). */
 }
 
 function preloadLogo(cb){
@@ -5501,12 +5494,10 @@ function copHTML(){
 function copHTMLGmail(){
   var el=document.getElementById('tpl-rich-gmail');if(!el)return;
   _copHTMLEl(el,'📋 Plantilla Gmail copiada — pega directamente en el cuerpo del correo');
-  try{if(_sndOn&&'speechSynthesis'in window){var _ug=new SpeechSynthesisUtterance('Asunto copiado para Gmail.');_ug.lang='es-CL';_ug.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_ug);}}catch(e){}
 }
 function copHTMLOutlook(){
   var el=document.getElementById('tpl-rich-outlook');if(!el)return;
   _copHTMLEl(el,'📋 Plantilla Outlook copiada — pega en el cuerpo del mensaje');
-  try{if(_sndOn&&'speechSynthesis'in window){var _uo=new SpeechSynthesisUtterance('Asunto copiado para Outlook.');_uo.lang='es-CL';_uo.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_uo);}}catch(e){}
 }
 /* ═══ Cuentas de Gmail — desplegable propio junto al botón (0–6, sin configuración) ═══ */
 var _GMAIL_ACCT_SEL_KEY='eq_gmail_acct_sel';
@@ -5563,7 +5554,7 @@ function abrirGmail(){
   }catch(e){ alert('⚠ No se pudo abrir Gmail: '+e.message); }
 }
 async function descargarEML(){
-  try{ if(typeof registrarEnvio==='function')registrarEnvio('email'); }catch(_e){}   /* #7 · trazabilidad de envío */
+  try{ if(typeof registrarEnvio==='function')registrarEnvio('email',true); }catch(_e){}   /* #7 · trazabilidad; audio propio (archivo creado) más abajo */
   try{
     var elBody=document.getElementById('tpl-rich-outlook');
     if(!elBody){alert('ERROR: no se encontró la plantilla de Outlook.');return;}
@@ -5747,11 +5738,9 @@ async function descargarEML(){
           if(_pnTitleEl)_pnTitleEl.textContent='MENSAJE COPIADO'; /* texto original fijo, usado por Gmail/WhatsApp */
         },3000);
       }
-      if(_sndOn&&('speechSynthesis'in window)){
-        var _u=new SpeechSynthesisUtterance('Archivo creado, abre en Outlook.');
-        _u.lang='es-CL';_u.rate=1.05;
-        window.speechSynthesis.cancel();window.speechSynthesis.speak(_u);
-      }
+      /* Reproduce el MP3 "Archivo creado, abre en Outlook" (voz IA de Fish Audio),
+         en reemplazo de la voz vieja del navegador. */
+      try{ new Audio('MP3/outlook_creado.mp3').play().catch(function(){}); }catch(e){}
     }catch(e){}
   }catch(e){
     alert('⚠ Error generando el archivo .eml: '+e.message);
@@ -6272,7 +6261,6 @@ function copImgPC(){
     captureCardPC().then(function(cv){
       handleCopy(cv,'tpl-toast2');
       try{ if(typeof registrarEnvio==='function')registrarEnvio('ficha'); }catch(_e){}   /* #7 · trazabilidad de envío */
-      try{if(_sndOn&&'speechSynthesis'in window){var _ui=new SpeechSynthesisUtterance('Vista previa copiada.');_ui.lang='es-CL';_ui.rate=1.05;window.speechSynthesis.cancel();window.speechSynthesis.speak(_ui);}}catch(e){}
     }).catch(function(){toast('✖ No se pudo generar la imagen','err','tpl-toast2');});
   });
 }
@@ -7856,10 +7844,12 @@ function _playEnvioAudio(medio){
     var p=_envioAudio.play(); if(p&&p.catch)p.catch(function(){});
   }catch(e){}
 }
-function registrarEnvio(medio){
+function registrarEnvio(medio,silent){
   if(typeof DB==='undefined')return;
   if(!gv('me'))return;   // sin empresa no hay cotización real que registrar
-  if(medio==='email'||medio==='whatsapp')_playEnvioAudio(medio);   /* voz al enviar correo (Gmail/Outlook) o WhatsApp */
+  /* Voz: Gmail/Outlook (email) y WhatsApp. Outlook la reproduce aparte (archivo creado),
+     por eso llega con silent=true para no encimar dos audios. */
+  if(!silent&&(medio==='email'||medio==='whatsapp'))_playEnvioAudio(medio);
   var reg=construirRegistro(), ts=new Date().toISOString();
   var patch={cliente:reg.cliente,comercial:reg.comercial,snapshot:reg.snapshot,estado:'enviada',medioEnvio:medio,enviadoEn:ts};
   if(SESION.registroId==null){
