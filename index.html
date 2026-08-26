@@ -1580,6 +1580,21 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 body.theme-light .pl-tr.pl-est-yellow .pl-td{background:rgba(214,158,0,.16);}
 body.theme-light .pl-tr.pl-est-red .pl-td{background:rgba(200,35,25,.12);}
 body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(26,140,70,.14);}
+/* Selector de tipificación (calculadora) + su gemelo en la Planilla — coloreados
+   por categoría: verde bueno · amarillo neutro-sin-contacto · rojo malo. */
+.tipif-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.tipif-hint{font-size:.66rem;font-weight:600;color:var(--wa);opacity:.85;}
+.tipif-sel{width:100%;padding:9px 12px;border-radius:9px;font-family:inherit;font-weight:800;font-size:.92rem;cursor:pointer;
+  background:var(--g2);border:1.5px solid var(--g4);color:var(--w);transition:background .15s,border-color .15s,color .15s;}
+.tipif-sel.t-good{background:rgba(46,204,113,.16);border-color:#2ecc71;color:#2ecc71;}
+.tipif-sel.t-bad{background:rgba(224,57,44,.18);border-color:#e0392c;color:#ff7a6b;}
+.tipif-sel.t-warn{background:rgba(240,192,64,.18);border-color:#f0c040;color:#f0c040;}
+.tipif-sel.t-neutral{background:var(--g2);border-color:var(--g4);color:var(--w);}
+.tipif-sel option{background:var(--g1);color:var(--w);font-weight:700;}
+/* Gemelo en la Planilla (barra izquierda de color según categoría). */
+.pl-estado-sel.t-good{box-shadow:inset 3px 0 0 #2ecc71;}
+.pl-estado-sel.t-bad{box-shadow:inset 3px 0 0 #e0392c;}
+.pl-estado-sel.t-warn{box-shadow:inset 3px 0 0 #f0c040;}
 
 /* ⚪ Estado 3: AGENDADO VIGENTE — sin color, solo ícono reloj en columna # */
 .pl-tr[data-agenda-vigente="true"]{
@@ -1852,6 +1867,16 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(26,140,70,.14);}
         </div>
         <!-- campo oculto para compatibilidad -->
         <input type="hidden" id="mn">
+      </div>
+    </div>
+
+    <!-- Tipificación / estado del contacto (se sincroniza con la Planilla) -->
+    <div class="block">
+      <div class="block-t tipif-head"><span>🏷️ Tipificación del contacto</span><span class="tipif-hint">se sincroniza con la Planilla</span></div>
+      <div class="cfg-grid">
+        <div class="fld">
+          <select id="cli-tipif" class="tipif-sel" onchange="onTipifChange()" title="Marca el resultado del contacto. Verde = buena disposición · Amarillo = no se logró contactar · Rojo = rechazo/no contacto."></select>
+        </div>
       </div>
     </div>
 
@@ -6431,6 +6456,7 @@ function checkWspExecFormat(){
    desde Excel jamás herede datos del cliente anterior. */
 function limpiarDatosCliente(){
   ['me','cli-tel','cli-email','cli-contacto','mr','mn','cli-obs'].forEach(function(id){var e=$(id);if(e)e.value='';});
+  var _tp=$('cli-tipif'); if(_tp){_tp.value='borrador'; if(typeof _tipifColor==='function')_tipifColor(_tp);}
   var stt=$('cli-email-status');if(stt){stt.textContent='';stt.className='eml-status';}
   /* Cliente nuevo → descartar cualquier ajuste manual de precio del cliente anterior
      (mismo reinicio que hacen setProduct() y onConfigChange()). Ocurre antes de
@@ -7464,7 +7490,8 @@ function construirRegistro(){
       uf:Math.round(getUF()).toLocaleString('es-CL'),
       precioVenta:com.precioVenta, precioLista:com.precioLista, descuento:com.descuento
     },
-    snapshot:capturarSnapshot()
+    snapshot:capturarSnapshot(),
+    estado:(function(){var s=document.getElementById('cli-tipif');return (s&&s.value)?s.value:'borrador';})()
   };
 }
 
@@ -7515,6 +7542,7 @@ function abrirRegistro(reg){
     setBridge('me',(c.empresa||'').toUpperCase()); setBridge('mr',c.rut); setBridge('cli-tel',c.telefono);
     setBridge('cli-email',c.correo); setBridge('cli-contacto',c.representante); setBridge('cli-obs',c.observacion);
     restaurarSnapshot(reg.snapshot);
+    var _tp=document.getElementById('cli-tipif'); if(_tp){_tp.value=reg.estado||'borrador'; _tipifColor(_tp);}
     if(typeof onClientChange==='function')onClientChange();
     if(typeof validarEmailCliente==='function')validarEmailCliente();
   }finally{ _restaurando=false; }
@@ -7849,6 +7877,39 @@ function toggleFavBlink(){_EQFAV.toggle();}
 function _esc(s){return (''+(s==null?'':s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function _capitaliza(s){s=''+(s||'');return s.charAt(0).toUpperCase()+s.slice(1);}
 function _estadoLabel(e){ return (typeof DB!=='undefined'&&DB.ESTADO_LABELS&&DB.ESTADO_LABELS[e])||_capitaliza(e); }
+/* ── TIPIFICACIÓN (estado del contacto) — categoría de color bueno/malo/neutro ── */
+function _tipifCat(estado){
+  switch(estado){
+    case 'no_contesta': case 'buzon_voz': return 'warn';                       /* no se logró contactar */
+    case 'no_quiere': case 'corta_llamada': case 'cliente_molesto': case 'no_credito': return 'bad';   /* rechazo */
+    case 'agendado': case 'agendado_futuro': case 'interesado': case 'negociacion': case 'pendiente_doc': case 'venta_cerrada': return 'good';  /* intención positiva */
+    default: return 'neutral';                                                 /* borrador, enviada */
+  }
+}
+function _tipifColor(sel){
+  sel=sel||document.getElementById('cli-tipif'); if(!sel)return;
+  sel.classList.remove('t-good','t-bad','t-warn','t-neutral');
+  sel.classList.add('t-'+_tipifCat(sel.value));
+}
+/* Construye el selector de la calculadora desde la fuente única DB.ESTADOS. */
+function buildTipificacion(){
+  var sel=document.getElementById('cli-tipif'); if(!sel||typeof DB==='undefined')return;
+  if(sel.options.length)return;
+  var vivos=DB.ESTADOS.filter(function(e){return e!=='eliminado';});
+  sel.innerHTML=vivos.map(function(e){return '<option value="'+e+'">'+_estadoLabel(e)+'</option>';}).join('');
+  sel.value='borrador'; _tipifColor(sel);
+}
+/* Al cambiar la tipificación en la calculadora: recolorea y, si la cotización ya
+   está guardada, actualiza su estado al instante (se refleja en la Planilla). */
+function onTipifChange(){
+  var sel=document.getElementById('cli-tipif'); if(!sel)return;
+  _tipifColor(sel);
+  if(_restaurando)return;
+  var est=sel.value;
+  if(typeof SESION!=='undefined'&&SESION.registroId!=null&&typeof DB!=='undefined'){
+    DB.update(SESION.registroId,{estado:est}).then(function(){ toast('✔ Tipificación: '+_estadoLabel(est),'ok','global-toast'); }).catch(function(){});
+  }else if(typeof marcarSucio==='function'){ marcarSucio(); }
+}
 function _fechaISOaDMY(iso){
   if(!iso)return '';
   var d=new Date(iso); if(isNaN(d.getTime()))return '';
@@ -7952,7 +8013,7 @@ function _estadoSelect(r){
   var vivos=DB.ESTADOS.filter(function(e){return e!=='eliminado';});
   var opts=vivos.map(function(e){return '<option value="'+e+'"'+(r.estado===e?' selected':'')+'>'+_estadoLabel(e)+'</option>';}).join('');
   if(r.estado==='eliminado')opts='<option value="eliminado" selected>Eliminado</option>'+opts;
-  return '<select class="pl-estado-sel" onchange="planillaEstado('+r.id+',this.value)">'+opts+'</select>';
+  return '<select class="pl-estado-sel t-'+_tipifCat(r.estado)+'" onchange="planillaEstado('+r.id+',this.value)">'+opts+'</select>';
 }
 /* Letra de columna estilo hoja de cálculo (A, B, C…). */
 function _colLetra(i){var s='';i=i+1;while(i>0){var m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26);}return s;}
@@ -8518,6 +8579,7 @@ setProduct('bundle');     // PRODUCTO PREDETERMINADO OBLIGATORIO — valores mí
 setPreview('outlook');      // primera vista lista
 updateCRMWsp();           // estado inicial integración CRM/WhatsApp
 initRegistros();          // capa de datos + nexo 💾 + reactividad de la Planilla
+buildTipificacion();      // selector de tipificación de la calculadora
 setTimeout(syncAdjOffset,0); setTimeout(syncAdjOffset,300); /* REQ 1 — offset de barra fija tras render completo */
 _checkWednesdayNotice();  // aviso automático de los miércoles (una vez al día)
 
