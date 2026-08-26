@@ -7780,19 +7780,23 @@ function bkCompartir(ts){
 /* ════════ GUARDADO AUTOMÁTICO AL ENVIAR (#7) ════════
    Al usar un canal de envío (Outlook/Gmail/WhatsApp) la cotización se considera
    finalizada: se guarda/actualiza con estado 'enviada' + medio + timestamp. */
-/* Audio de confirmación al enviar un correo (voz IA). Archivo opcional: si no
-   existe todavía, play() falla en silencio y no molesta. */
+/* Audios de confirmación al enviar (voz IA). Correo: 4 variantes que rotan al
+   azar para no repetir siempre lo mismo. WhatsApp: su propia voz. Si algún
+   archivo falta, play() falla en silencio y no molesta. */
+var _CORREO_AUDIOS=['MP3/correo_enviado_1.mp3','MP3/correo_enviado_2.mp3','MP3/correo_enviado_3.mp3','MP3/correo_enviado_4.mp3'];
 var _envioAudio=null;
-function _playEnvioAudio(){
+function _playEnvioAudio(medio){
   try{
-    if(!_envioAudio){ _envioAudio=new Audio('MP3/correo_enviado.mp3'); _envioAudio.preload='auto'; }
-    _envioAudio.currentTime=0; var p=_envioAudio.play(); if(p&&p.catch)p.catch(function(){});
+    var src=(medio==='whatsapp')?'MP3/whatsapp_enviado.mp3':_CORREO_AUDIOS[Math.floor(Math.random()*_CORREO_AUDIOS.length)];
+    if(!_envioAudio)_envioAudio=new Audio();
+    _envioAudio.src=src; _envioAudio.currentTime=0;
+    var p=_envioAudio.play(); if(p&&p.catch)p.catch(function(){});
   }catch(e){}
 }
 function registrarEnvio(medio){
   if(typeof DB==='undefined')return;
   if(!gv('me'))return;   // sin empresa no hay cotización real que registrar
-  if(medio==='email')_playEnvioAudio();   /* sonido/voz al enviar correo (Gmail/Outlook) */
+  if(medio==='email'||medio==='whatsapp')_playEnvioAudio(medio);   /* voz al enviar correo (Gmail/Outlook) o WhatsApp */
   var reg=construirRegistro(), ts=new Date().toISOString();
   var patch={cliente:reg.cliente,comercial:reg.comercial,snapshot:reg.snapshot,estado:'enviada',medioEnvio:medio,enviadoEn:ts};
   if(SESION.registroId==null){
