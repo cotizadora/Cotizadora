@@ -1566,6 +1566,21 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
   background:rgba(46,204,113,.08)!important;
 }
 
+/* 🎨 COLOR POR ESTADO (semáforo de gestión) — tinte suave + barra lateral.
+   Amarillo: no se logró contactar. Rojo: rechazo/no-contacto voluntario.
+   Verde: intención positiva del cliente. Los aplica _plChequearVencidos() por
+   data-estado; "venta_cerrada" usa pl-row-sold y "vencido" usa pl-row-overdue,
+   que tienen prioridad. No usan !important para no pisar selección/hover. */
+.pl-tr.pl-est-yellow{box-shadow:inset 3px 0 0 #f0c040;}
+.pl-tr.pl-est-yellow .pl-td{background:rgba(240,192,64,.13);}
+.pl-tr.pl-est-red{box-shadow:inset 3px 0 0 #e0392c;}
+.pl-tr.pl-est-red .pl-td{background:rgba(224,57,44,.15);}
+.pl-tr.pl-est-green{box-shadow:inset 3px 0 0 #2ecc71;}
+.pl-tr.pl-est-green .pl-td{background:rgba(46,204,113,.12);}
+body.theme-light .pl-tr.pl-est-yellow .pl-td{background:rgba(214,158,0,.16);}
+body.theme-light .pl-tr.pl-est-red .pl-td{background:rgba(200,35,25,.12);}
+body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(26,140,70,.14);}
+
 /* ⚪ Estado 3: AGENDADO VIGENTE — sin color, solo ícono reloj en columna # */
 .pl-tr[data-agenda-vigente="true"]{
   /* Sin estilos especiales: apariencia completamente normal */
@@ -8952,18 +8967,36 @@ function _plChequearVencidos(){
     }
   });
   
-  /* PARTE 2: Procesar ventas cerradas (independiente de agenda) */
+  /* PARTE 2: Ventas cerradas + semáforo de color por estado. */
   Array.prototype.forEach.call(tbl.querySelectorAll('.pl-tr'),function(tr){
     var estado=tr.getAttribute('data-estado')||'';
-    
+    tr.classList.remove('pl-est-yellow','pl-est-red','pl-est-green');
     if(estado==='venta_cerrada'){
       tr.classList.remove('pl-row-overdue');
       tr.removeAttribute('data-agenda-vigente');
-      tr.classList.add('pl-row-sold');
+      tr.classList.add('pl-row-sold');   /* verde fuerte propio */
     } else {
       tr.classList.remove('pl-row-sold');
+      /* Color por estado, salvo eliminados o agenda vencida (rojo pulsante manda). */
+      if(!tr.classList.contains('pl-elim')&&!tr.classList.contains('pl-row-overdue')){
+        var col=_estadoColor(estado);
+        if(col)tr.classList.add(col);
+      }
     }
   });
+}
+/* Semáforo de gestión por estado (ver CSS .pl-est-*). */
+function _estadoColor(estado){
+  switch(estado){
+    case 'no_contesta': case 'buzon_voz':
+      return 'pl-est-yellow';                                   /* no se logró contactar */
+    case 'no_quiere': case 'corta_llamada': case 'cliente_molesto': case 'no_credito':
+      return 'pl-est-red';                                      /* rechazo / no contacto voluntario */
+    case 'agendado': case 'agendado_futuro': case 'interesado': case 'negociacion': case 'pendiente_doc':
+      return 'pl-est-green';                                    /* intención positiva del cliente */
+    default:
+      return '';                                                /* borrador, enviada → neutro */
+  }
 }
 function _agParseFecha(f){
   var p=(f||'').split('-');
