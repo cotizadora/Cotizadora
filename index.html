@@ -2996,7 +2996,11 @@ var TUTORIALES=[
   { titulo:'Formulario de clientes',
     desc:'Formulario que el cliente debe completar en cada venta. Ábrelo aquí o descárgalo para enviarlo o imprimirlo.',
     tag:'Formulario · PDF', tipo:'pdf', icon:'📝', fecha:'2026-08-27',
-    archivo:'Tutoriales/Formulario_Clientes.pdf', descarga:'Formulario_Clientes.pdf' }
+    archivo:'Tutoriales/Formulario_Clientes.pdf', descarga:'Formulario_Clientes.pdf' },
+  { titulo:'Verificar vigencia de cédula de identidad',
+    desc:'Consulta en el Registro Civil si la cédula de identidad del cliente está vigente. Se abre en una pestaña nueva.',
+    tag:'Enlace · Registro Civil', tipo:'link', icon:'🪪', fecha:'2026-08-27',
+    url:'https://www.registrocivil.cl/principal/servicios-en-linea/consulta-vigencia-documento-1' }
 ];
 /* Estado de la galería: búsqueda, filtro de formato, orden y vista. */
 var TUT_STATE={q:'',tipo:'',sort:'fecha_desc',vista:'grid'};
@@ -3004,6 +3008,7 @@ function _tutNorm(s){return (''+(s==null?'':s)).toLowerCase().normalize('NFD').r
 function _tutExt(t){var m=(''+(t.archivo||'')).match(/\.([a-z0-9]+)$/i);return m?m[1].toLowerCase():'';}
 /* Categoría de formato para el filtro (agrupa extensiones afines). */
 function _tutCat(t){
+  if(t.tipo==='link')return 'link';
   var e=_tutExt(t);
   if(t.tipo==='video'||/^(mp4|webm|mov|mkv)$/.test(e))return 'video';
   if(t.tipo==='pdf'||e==='pdf')return 'pdf';
@@ -3011,7 +3016,19 @@ function _tutCat(t){
   return e||'otro';
 }
 function _tutCatLabel(cat){
-  return {video:'🎬 Video',pdf:'📄 PDF',img:'🖼️ Imagen'}[cat]||('📁 '+cat.toUpperCase());
+  return {video:'🎬 Video',pdf:'📄 PDF',img:'🖼️ Imagen',link:'🔗 Enlace'}[cat]||('📁 '+cat.toUpperCase());
+}
+/* Acciones de una tarjeta/fila: enlaces abren en pestaña nueva (sin descarga). */
+function _tutActions(t,i,esLista){
+  if(t.tipo==='link'){
+    return '<div class="tut-actions'+(esLista?' tut-row-actions':'')+'">'+
+      '<a class="tut-btn tut-btn-ver" href="'+_esc(t.url)+'" target="_blank" rel="noopener noreferrer" onclick="playClick()">🔗 '+(esLista?'Abrir':'Abrir enlace')+'</a>'+
+    '</div>';
+  }
+  return '<div class="tut-actions'+(esLista?' tut-row-actions':'')+'">'+
+    '<button type="button" class="tut-btn tut-btn-ver" onclick="tutVer('+i+')">▶ '+(esLista?'Ver':'Ver aquí')+'</button>'+
+    '<a class="tut-btn tut-btn-dl" href="'+_esc(t.archivo)+'" download="'+_esc(t.descarga||'')+'" onclick="playClick()">⬇'+(esLista?'':' Descargar')+'</a>'+
+  '</div>';
 }
 /* Rellena el <select> de formatos con las categorías presentes (conserva selección). */
 function _tutPoblarFiltro(){
@@ -3059,10 +3076,7 @@ function renderTutoriales(){
           '<div class="tut-desc">'+_esc(t.desc||'')+'</div>'+
           '<div class="tut-row-meta"><span class="tut-tag">'+_esc(t.tag||'')+'</span>'+(fecha?'<span class="tut-fecha">'+_esc(fecha)+'</span>':'')+'</div>'+
         '</div>'+
-        '<div class="tut-actions tut-row-actions">'+
-          '<button type="button" class="tut-btn tut-btn-ver" onclick="tutVer('+i+')">▶ Ver</button>'+
-          '<a class="tut-btn tut-btn-dl" href="'+_esc(t.archivo)+'" download="'+_esc(t.descarga||'')+'" onclick="playClick()">⬇</a>'+
-        '</div>'+
+        _tutActions(t,i,true)+
       '</div>';
     }
     var thumb=(t.tipo==='video')
@@ -3074,10 +3088,7 @@ function renderTutoriales(){
         '<div class="tut-title">'+_esc(t.titulo||'')+'</div>'+
         '<div class="tut-desc">'+_esc(t.desc||'')+'</div>'+
         (fecha?'<div class="tut-fecha">📅 '+_esc(fecha)+'</div>':'')+
-        '<div class="tut-actions">'+
-          '<button type="button" class="tut-btn tut-btn-ver" onclick="tutVer('+i+')">▶ Ver aquí</button>'+
-          '<a class="tut-btn tut-btn-dl" href="'+_esc(t.archivo)+'" download="'+_esc(t.descarga||'')+'" onclick="playClick()">⬇ Descargar</a>'+
-        '</div>'+
+        _tutActions(t,i,false)+
       '</div>'+
     '</div>';
   }).join('');
@@ -3096,6 +3107,7 @@ function tutVista(v){
 }
 function tutVer(i){
   var t=TUTORIALES[i]; if(!t)return;
+  if(t.tipo==='link'){ try{window.open(t.url,'_blank','noopener');}catch(e){} playClick(); return; }
   var body=document.getElementById('tut-player-body'), tit=document.getElementById('tut-player-title');
   if(tit)tit.textContent=t.titulo||'Tutorial';
   if(body){
