@@ -1545,6 +1545,39 @@ body.dl-open #descargas-view.in{opacity:1;transform:translateY(0);}
 .dl-note{grid-column:1/-1;font-size:.82rem;color:var(--wb);line-height:1.6;
   background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:12px;padding:14px 18px;}
 
+/* ── TUTORIALES (galería + reproductor) ── */
+.vn-btn.vn-tut.on{border-color:#c0263b;color:#ff8a9a;}
+body.tut-open #prodbar,body.tut-open #workstation,body.tut-open #mtoggle{display:none !important;}
+#tutoriales-view{display:none;position:fixed;top:var(--headH);left:0;right:0;bottom:0;z-index:275;
+  background:var(--g1);flex-direction:column;opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;}
+body.tut-open #tutoriales-view{display:flex;}
+body.tut-open #tutoriales-view.in{opacity:1;transform:translateY(0);}
+.tut-card{background:var(--g2);border:1px solid var(--g3);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s,transform .15s;}
+.tut-card:hover{border-color:var(--g4);transform:translateY(-2px);}
+.tut-thumb{position:relative;height:172px;background:#000;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;}
+.tut-thumb video{width:100%;height:100%;object-fit:cover;}
+.tut-thumb .tut-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.34);color:#fff;font-size:3rem;transition:background .15s;text-shadow:0 2px 10px rgba(0,0,0,.6);}
+.tut-thumb:hover .tut-play{background:rgba(0,0,0,.12);}
+.tut-body{padding:16px 18px;display:flex;flex-direction:column;gap:8px;flex:1;}
+.tut-tag{align-self:flex-start;font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;padding:3px 10px;border-radius:11px;background:rgba(240,192,64,.16);color:var(--y);}
+.tut-title{font-size:1.02rem;font-weight:800;color:var(--w);line-height:1.2;}
+.tut-desc{font-size:.86rem;color:var(--wa);line-height:1.45;flex:1;}
+.tut-actions{display:flex;gap:9px;margin-top:6px;}
+.tut-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:.86rem;border-radius:9px;padding:10px;transition:background .14s,transform .14s,box-shadow .14s;}
+.tut-btn-ver{background:linear-gradient(135deg,#c0263b,#9b1c2e);color:#fff;}
+.tut-btn-ver:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(192,38,59,.4);}
+.tut-btn-dl{background:var(--g3);color:var(--w);border:1px solid var(--g4);}
+.tut-btn-dl:hover{background:var(--g4);border-color:var(--y);}
+.tut-empty{grid-column:1/-1;padding:36px;text-align:center;color:var(--wa);font-size:.95rem;}
+.tut-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:24px;}
+.tut-modal.on{display:flex;}
+.tut-modal-box{background:var(--g1);border:1px solid var(--g4);border-radius:14px;max-width:900px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.7);}
+.tut-modal-head{display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:1px solid var(--g4);gap:12px;}
+.tut-modal-head h3{font-size:1rem;color:#fff;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tut-modal-x{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1rem;flex:0 0 auto;}
+.tut-modal-body{background:#000;display:flex;align-items:center;justify-content:center;overflow:auto;}
+.tut-modal-body video{width:100%;max-height:80vh;display:block;background:#000;}
+
 /* ── SELECTOR DE HORA 24H ───────────────────────────────────────── */
 .ag-hora-select,.ag-minutos-select{background:var(--g2);border:1px solid var(--g4);color:#fff;border-radius:8px;padding:9px 11px;font-size:1.02rem;font-family:'Segoe UI',system-ui,Arial;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease;min-height:38px;text-align:center;}
 .ag-hora-select:hover,.ag-minutos-select:hover{border-color:var(--g5);}
@@ -1812,6 +1845,7 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
     <button type="button" class="vn-btn on" id="vnbtn-cotizador" data-target="cotizador" onclick="goToView(this.dataset.target)" title="Ir a la Cotizadora (pantalla principal)"><span class="vn-ic">🧮</span><span class="vn-lb">Cotizadora</span></button>
     <button type="button" class="vn-btn" id="vnbtn-planilla" data-target="planilla" onclick="goToView(this.dataset.target)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)"><span class="vn-ic">📋</span><span class="vn-lb">Planilla</span></button>
     <button type="button" class="vn-btn" id="vnbtn-biblioteca" data-target="biblioteca" onclick="goToView(this.dataset.target)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad"><span class="vn-ic">🎧</span><span class="vn-lb">Biblioteca</span></button>
+    <button type="button" class="vn-btn vn-tut" id="vnbtn-tutoriales" data-target="tutoriales" onclick="goToView(this.dataset.target)" title="Tutoriales: videos y guías para dominar la cotizadora — míralos aquí o descárgalos"><span class="vn-ic">🎓</span><span class="vn-lb">Tutoriales</span></button>
     <span class="vn-div" aria-hidden="true"></span>
     <a class="vn-btn vn-ext" style="--acc:var(--bl)" href="https://atlas.geimser.cl/app/calls/new?campaignId=b5df1732-476e-4475-a21a-bae8e0942829" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir Atlas (CRM · Geimser) en una pestaña nueva"><span class="vn-ic">🗂️</span><span class="vn-lb">Atlas</span><span class="vn-ext-go" aria-hidden="true">↗</span></a>
     <a class="vn-btn vn-ext" style="--acc:var(--gn)" href="https://cdn.s-br01a-product.prod1.vocalcomcx.com/hermes360/Admin/Launcher/dashboard?screen=workspace" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir Vocal (discador · Vocalcom) en una pestaña nueva"><span class="vn-ic">📞</span><span class="vn-lb">Vocal</span><span class="vn-ext-go" aria-hidden="true">↗</span></a>
@@ -2369,6 +2403,25 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
   </div>
 </div>
 
+<!-- ════════ TUTORIALES — galería de videos/guías (ver en la web o descargar) ════════ -->
+<div id="tutoriales-view">
+  <div class="bib-top">
+    <button class="bib-back" onclick="goToView('cotizador')">← Volver al Cotizador</button>
+    <h2>🎓 Tutoriales</h2>
+    <span class="bib-sub">Aprende a usar la cotizadora paso a paso · míralos aquí o descárgalos</span>
+  </div>
+  <div class="bib-body">
+    <div class="bib-grid" id="tut-grid"></div>
+  </div>
+</div>
+<!-- Reproductor de tutoriales (ver en la misma web) -->
+<div id="tut-player" class="tut-modal" onclick="if(event.target===this)cerrarTutPlayer()">
+  <div class="tut-modal-box">
+    <div class="tut-modal-head"><h3 id="tut-player-title">Tutorial</h3><button class="tut-modal-x" onclick="cerrarTutPlayer()" aria-label="Cerrar">✕</button></div>
+    <div class="tut-modal-body" id="tut-player-body"></div>
+  </div>
+</div>
+
 <!-- ════════ PLANILLA INTEGRADA — hoja de cálculo sobre la base de datos interna ════════ -->
 <div id="planilla-view" class="pl-theme-excel pl-dark pl-font-xl">
   <div class="pl-appbar">
@@ -2877,6 +2930,64 @@ function openDescargasView(){
 function closeDescargasView(){
   $('descargas-view').classList.remove('in');
   document.body.classList.remove('dl-open');
+  playClick();
+}
+
+/* ════════ TUTORIALES — galería de videos/guías ════════
+   Para agregar un tutorial nuevo, solo añade un objeto a este arreglo (fuente única).
+   tipo: 'video' (.mp4) · 'pdf' · 'img'. 'archivo' = ruta servida (relativa a la web). */
+var TUTORIALES=[
+  { titulo:'Firma electrónica del contrato',
+    desc:'Guía paso a paso para que el cliente firme el contrato de forma electrónica, sin errores.',
+    tag:'Video · MP4', tipo:'video', icon:'✍️',
+    archivo:'Tutoriales/Tutorial_Firma.mp4', descarga:'Tutorial_Firma.mp4' }
+];
+function renderTutoriales(){
+  var g=document.getElementById('tut-grid'); if(!g)return;
+  if(!TUTORIALES.length){ g.innerHTML='<div class="tut-empty">Aún no hay tutoriales publicados. Pronto se irán agregando aquí. 🎬</div>'; return; }
+  g.innerHTML=TUTORIALES.map(function(t,i){
+    var thumb=(t.tipo==='video')
+      ? '<div class="tut-thumb" onclick="tutVer('+i+')"><video muted preload="metadata" playsinline src="'+_esc(t.archivo)+'#t=0.3"></video><div class="tut-play">▶</div></div>'
+      : '<div class="tut-thumb" onclick="tutVer('+i+')"><div class="tut-play">'+_esc(t.icon||'📄')+'</div></div>';
+    return '<div class="tut-card">'+thumb+
+      '<div class="tut-body">'+
+        '<span class="tut-tag">'+_esc(t.tag||'Tutorial')+'</span>'+
+        '<div class="tut-title">'+_esc(t.titulo||'')+'</div>'+
+        '<div class="tut-desc">'+_esc(t.desc||'')+'</div>'+
+        '<div class="tut-actions">'+
+          '<button type="button" class="tut-btn tut-btn-ver" onclick="tutVer('+i+')">▶ Ver aquí</button>'+
+          '<a class="tut-btn tut-btn-dl" href="'+_esc(t.archivo)+'" download="'+_esc(t.descarga||'')+'" onclick="playClick()">⬇ Descargar</a>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function tutVer(i){
+  var t=TUTORIALES[i]; if(!t)return;
+  var body=document.getElementById('tut-player-body'), tit=document.getElementById('tut-player-title');
+  if(tit)tit.textContent=t.titulo||'Tutorial';
+  if(body){
+    if(t.tipo==='pdf')      body.innerHTML='<iframe src="'+_esc(t.archivo)+'" style="width:100%;height:80vh;border:none;background:#fff;"></iframe>';
+    else if(t.tipo==='img') body.innerHTML='<img src="'+_esc(t.archivo)+'" alt="'+_esc(t.titulo||'')+'" style="max-width:100%;max-height:80vh;display:block;">';
+    else                    body.innerHTML='<video controls autoplay playsinline src="'+_esc(t.archivo)+'"></video>';
+  }
+  var m=document.getElementById('tut-player'); if(m)m.classList.add('on');
+  playClick();
+}
+function cerrarTutPlayer(){
+  var m=document.getElementById('tut-player'); if(m)m.classList.remove('on');
+  var body=document.getElementById('tut-player-body'); if(body)body.innerHTML='';   /* detiene el video */
+}
+function openTutorialesView(){
+  document.body.classList.add('tut-open');
+  renderTutoriales();
+  requestAnimationFrame(function(){$('tutoriales-view').classList.add('in');});
+  playClick();
+}
+function closeTutorialesView(){
+  cerrarTutPlayer();
+  $('tutoriales-view').classList.remove('in');
+  document.body.classList.remove('tut-open');
   playClick();
 }
 function bibBack(){
@@ -7791,6 +7902,7 @@ function cerrarZoomHint(){ _zoomHintOff=true; var h=document.getElementById('zoo
 function irACotizadorPrincipal(){
   try{ if(document.body.classList.contains('bib-open')&&typeof closeBibliotecaView==='function')closeBibliotecaView(); }catch(e){}
   try{ if(document.body.classList.contains('dl-open')&&typeof closeDescargasView==='function')closeDescargasView(); }catch(e){}
+  try{ if(document.body.classList.contains('tut-open')&&typeof closeTutorialesView==='function')closeTutorialesView(); }catch(e){}
   try{ if(document.body.classList.contains('planilla-open')&&typeof closePlanillaView==='function')closePlanillaView(); }catch(e){}
   try{ if(window.matchMedia&&window.matchMedia('(max-width:880px)').matches&&typeof setMobileView==='function')setMobileView('config'); }catch(e){}
   _setViewNavActive('cotizador');
@@ -7807,6 +7919,7 @@ function goToView(target){
     if(target==='biblioteca'){openBibliotecaView();}
     else if(target==='planilla'){openPlanillaView();}
     else if(target==='descargas'){openDescargasView();}
+    else if(target==='tutoriales'){openTutorialesView();}
     else{target='cotizador';playClick();}
   }catch(e){
     /* Un error interno de la sección (ej. datos externos aún no cargados) no debe
@@ -7828,7 +7941,7 @@ function _watchClienteEntrante(){
     if(_cliSig===null){_cliSig=sig;return;}
     if(sig!==_cliSig){
       var hayDatos=sig.replace(/│/g,'').trim().length>0;
-      var overlay=document.body.classList.contains('bib-open')||document.body.classList.contains('dl-open')||document.body.classList.contains('planilla-open');
+      var overlay=document.body.classList.contains('bib-open')||document.body.classList.contains('dl-open')||document.body.classList.contains('tut-open')||document.body.classList.contains('planilla-open');
       _cliSig=sig;
       if(hayDatos&&overlay)irACotizadorPrincipal();
     }
