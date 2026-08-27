@@ -1577,6 +1577,39 @@ body.tut-open #tutoriales-view.in{opacity:1;transform:translateY(0);}
 .tut-modal-x{background:var(--g3);border:1px solid var(--g4);color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1rem;flex:0 0 auto;}
 .tut-modal-body{background:#000;display:flex;align-items:center;justify-content:center;overflow:auto;}
 .tut-modal-body video{width:100%;max-height:80vh;display:block;background:#000;}
+/* Grid (módulos) — reemplaza a bib-grid para poder alternar con la lista. */
+.tut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;padding:24px;}
+/* Barra de herramientas */
+.tut-toolbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 22px;
+  background:var(--g2);border-bottom:1px solid var(--g4);}
+.tut-search-wrap{position:relative;display:flex;align-items:center;flex:1 1 260px;min-width:200px;max-width:520px;
+  background:var(--g0);border:1.5px solid var(--g4);border-radius:10px;padding:0 8px 0 12px;transition:border-color .14s,box-shadow .14s;}
+.tut-search-wrap:focus-within{border-color:var(--y);box-shadow:0 0 0 3px rgba(240,192,64,.15);}
+.tut-search-ic{font-size:.95rem;opacity:.7;flex:0 0 auto;}
+.tut-search{flex:1;min-width:0;border:none;background:transparent;color:var(--w);font-family:inherit;font-size:.95rem;font-weight:600;padding:10px 8px;outline:none;}
+.tut-search::placeholder{color:var(--wb);font-weight:500;}
+.tut-search-clear{display:none;background:var(--g3);border:1px solid var(--g4);color:var(--w);border-radius:7px;width:24px;height:24px;cursor:pointer;flex:0 0 auto;font-size:.75rem;}
+.tut-search-wrap.has-text .tut-search-clear{display:block;}
+.tut-select{background:var(--g0);border:1.5px solid var(--g4);color:var(--w);border-radius:10px;padding:10px 12px;font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;flex:0 0 auto;}
+.tut-select:hover{border-color:var(--y);}
+.tut-select option{background:var(--g1);color:var(--w);}
+.tut-vista{display:flex;gap:2px;background:var(--g0);border:1.5px solid var(--g4);border-radius:10px;padding:3px;flex:0 0 auto;}
+.tut-vista-btn{background:transparent;border:none;color:var(--wa);width:34px;height:32px;border-radius:7px;cursor:pointer;font-size:1rem;line-height:1;transition:background .14s,color .14s;}
+.tut-vista-btn:hover{color:#fff;}
+.tut-vista-btn.on{background:var(--g3);color:var(--y);}
+.tut-count{font-size:.8rem;color:var(--wa);font-weight:600;margin-left:auto;white-space:nowrap;}
+.tut-fecha{font-size:.72rem;color:var(--wb);font-weight:600;}
+/* Vista LISTA */
+.tut-listview{display:flex;flex-direction:column;gap:10px;padding:22px;}
+.tut-row{display:flex;align-items:center;gap:14px;background:var(--g2);border:1px solid var(--g3);border-radius:12px;padding:12px 14px;transition:border-color .15s;}
+.tut-row:hover{border-color:var(--g4);}
+.tut-row-ic{flex:0 0 auto;width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,var(--g3),var(--g1));display:flex;align-items:center;justify-content:center;font-size:1.7rem;cursor:pointer;}
+.tut-row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.tut-row-main .tut-desc{-webkit-line-clamp:1;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;}
+.tut-row-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px;}
+.tut-row-actions{flex:0 0 auto;margin-top:0;}
+.tut-row-actions .tut-btn{flex:0 0 auto;padding:9px 14px;}
+@media(max-width:560px){.tut-count{display:none;}.tut-row{flex-wrap:wrap;}.tut-row-actions{width:100%;}}
 
 /* ── SELECTOR DE HORA 24H ───────────────────────────────────────── */
 .ag-hora-select,.ag-minutos-select{background:var(--g2);border:1px solid var(--g4);color:#fff;border-radius:8px;padding:9px 11px;font-size:1.02rem;font-family:'Segoe UI',system-ui,Arial;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease;min-height:38px;text-align:center;}
@@ -2410,8 +2443,27 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
     <h2>📚 Tutoriales y Recursos</h2>
     <span class="bib-sub">Videos, guías y formularios para tu trabajo · míralos aquí o descárgalos</span>
   </div>
+  <div class="tut-toolbar">
+    <div class="tut-search-wrap" id="tut-search-wrap">
+      <span class="tut-search-ic" aria-hidden="true">🔎</span>
+      <input type="text" id="tut-search" class="tut-search" placeholder="Buscar por nombre, tipo o formato…" oninput="tutBuscar(this.value)" autocomplete="off">
+      <button type="button" class="tut-search-clear" onclick="tutLimpiarBusqueda()" title="Limpiar búsqueda" aria-label="Limpiar">✕</button>
+    </div>
+    <select id="tut-tipo" class="tut-select" onchange="tutFiltroTipo(this.value)" title="Filtrar por formato"><option value="">Todos los formatos</option></select>
+    <select id="tut-orden" class="tut-select" onchange="tutOrden(this.value)" title="Ordenar">
+      <option value="fecha_desc">Más recientes</option>
+      <option value="fecha_asc">Más antiguos</option>
+      <option value="nombre_asc">Nombre A→Z</option>
+      <option value="nombre_desc">Nombre Z→A</option>
+    </select>
+    <div class="tut-vista" role="group" aria-label="Modo de vista">
+      <button type="button" id="tut-vista-grid" class="tut-vista-btn on" onclick="tutVista('grid')" title="Vista módulos">▦</button>
+      <button type="button" id="tut-vista-list" class="tut-vista-btn" onclick="tutVista('list')" title="Vista lista">☰</button>
+    </div>
+    <span class="tut-count" id="tut-count"></span>
+  </div>
   <div class="bib-body">
-    <div class="bib-grid" id="tut-grid"></div>
+    <div class="tut-grid" id="tut-grid"></div>
   </div>
 </div>
 <!-- Reproductor de tutoriales (ver en la misma web) -->
@@ -2939,17 +2991,80 @@ function closeDescargasView(){
 var TUTORIALES=[
   { titulo:'Firma electrónica del contrato',
     desc:'Guía paso a paso para que el cliente firme el contrato de forma electrónica, sin errores.',
-    tag:'Video · MP4', tipo:'video', icon:'✍️',
+    tag:'Video · MP4', tipo:'video', icon:'✍️', fecha:'2026-08-27',
     archivo:'Tutoriales/Tutorial_Firma.mp4', descarga:'Tutorial_Firma.mp4' },
   { titulo:'Formulario de clientes',
     desc:'Formulario que el cliente debe completar en cada venta. Ábrelo aquí o descárgalo para enviarlo o imprimirlo.',
-    tag:'Formulario · PDF', tipo:'pdf', icon:'📝',
+    tag:'Formulario · PDF', tipo:'pdf', icon:'📝', fecha:'2026-08-27',
     archivo:'Tutoriales/Formulario_Clientes.pdf', descarga:'Formulario_Clientes.pdf' }
 ];
+/* Estado de la galería: búsqueda, filtro de formato, orden y vista. */
+var TUT_STATE={q:'',tipo:'',sort:'fecha_desc',vista:'grid'};
+function _tutNorm(s){return (''+(s==null?'':s)).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+function _tutExt(t){var m=(''+(t.archivo||'')).match(/\.([a-z0-9]+)$/i);return m?m[1].toLowerCase():'';}
+/* Categoría de formato para el filtro (agrupa extensiones afines). */
+function _tutCat(t){
+  var e=_tutExt(t);
+  if(t.tipo==='video'||/^(mp4|webm|mov|mkv)$/.test(e))return 'video';
+  if(t.tipo==='pdf'||e==='pdf')return 'pdf';
+  if(t.tipo==='img'||/^(png|jpg|jpeg|webp|gif)$/.test(e))return 'img';
+  return e||'otro';
+}
+function _tutCatLabel(cat){
+  return {video:'🎬 Video',pdf:'📄 PDF',img:'🖼️ Imagen'}[cat]||('📁 '+cat.toUpperCase());
+}
+/* Rellena el <select> de formatos con las categorías presentes (conserva selección). */
+function _tutPoblarFiltro(){
+  var sel=document.getElementById('tut-tipo'); if(!sel)return;
+  var cats=[]; TUTORIALES.forEach(function(t){var c=_tutCat(t); if(cats.indexOf(c)<0)cats.push(c);});
+  var actual=sel.value;
+  sel.innerHTML='<option value="">Todos los formatos</option>'+cats.map(function(c){return '<option value="'+_esc(c)+'">'+_esc(_tutCatLabel(c))+'</option>';}).join('');
+  if(cats.indexOf(actual)>=0)sel.value=actual;
+}
 function renderTutoriales(){
   var g=document.getElementById('tut-grid'); if(!g)return;
-  if(!TUTORIALES.length){ g.innerHTML='<div class="tut-empty">Aún no hay tutoriales publicados. Pronto se irán agregando aquí. 🎬</div>'; return; }
-  g.innerHTML=TUTORIALES.map(function(t,i){
+  _tutPoblarFiltro();
+  var wrap=document.getElementById('tut-search-wrap'); if(wrap)wrap.classList.toggle('has-text',!!TUT_STATE.q);
+  /* índice + filtro, conservando el índice real para Ver/Descargar */
+  var nq=_tutNorm(TUT_STATE.q);
+  var lista=TUTORIALES.map(function(t,i){return {t:t,i:i};}).filter(function(o){
+    var t=o.t;
+    if(TUT_STATE.tipo && _tutCat(t)!==TUT_STATE.tipo)return false;
+    if(!nq)return true;
+    var blob=_tutNorm([t.titulo,t.desc,t.tag,_tutExt(t),_tutCat(t)].join(' '));
+    return blob.indexOf(nq)>-1;
+  });
+  /* orden */
+  var dir=(TUT_STATE.sort.indexOf('_desc')>-1)?-1:1;
+  var campo=(TUT_STATE.sort.indexOf('fecha')===0)?'fecha':'nombre';
+  lista.sort(function(a,b){
+    var va,vb;
+    if(campo==='fecha'){va=_tutNorm(a.t.fecha);vb=_tutNorm(b.t.fecha);}
+    else{va=_tutNorm(a.t.titulo);vb=_tutNorm(b.t.titulo);}
+    if(va<vb)return -1*dir; if(va>vb)return 1*dir; return 0;
+  });
+  /* contador */
+  var cnt=document.getElementById('tut-count'); if(cnt)cnt.textContent=lista.length+' recurso'+(lista.length===1?'':'s');
+  if(!lista.length){ g.className='tut-grid'; g.innerHTML='<div class="tut-empty">'+(TUTORIALES.length?'Ningún recurso coincide con tu búsqueda.':'Aún no hay recursos publicados. 🎬')+'</div>'; return; }
+  var esLista=(TUT_STATE.vista==='list');
+  g.className=esLista?'tut-listview':'tut-grid';
+  g.innerHTML=lista.map(function(o){
+    var t=o.t, i=o.i;
+    var fecha=t.fecha?_fechaISOaDMY(t.fecha):'';
+    if(esLista){
+      return '<div class="tut-row">'+
+        '<div class="tut-row-ic" onclick="tutVer('+i+')">'+(t.tipo==='video'?'🎬':_esc(t.icon||'📄'))+'</div>'+
+        '<div class="tut-row-main">'+
+          '<div class="tut-title">'+_esc(t.titulo||'')+'</div>'+
+          '<div class="tut-desc">'+_esc(t.desc||'')+'</div>'+
+          '<div class="tut-row-meta"><span class="tut-tag">'+_esc(t.tag||'')+'</span>'+(fecha?'<span class="tut-fecha">'+_esc(fecha)+'</span>':'')+'</div>'+
+        '</div>'+
+        '<div class="tut-actions tut-row-actions">'+
+          '<button type="button" class="tut-btn tut-btn-ver" onclick="tutVer('+i+')">▶ Ver</button>'+
+          '<a class="tut-btn tut-btn-dl" href="'+_esc(t.archivo)+'" download="'+_esc(t.descarga||'')+'" onclick="playClick()">⬇</a>'+
+        '</div>'+
+      '</div>';
+    }
     var thumb=(t.tipo==='video')
       ? '<div class="tut-thumb" onclick="tutVer('+i+')"><video muted preload="metadata" playsinline src="'+_esc(t.archivo)+'#t=0.3"></video><div class="tut-play">▶</div></div>'
       : '<div class="tut-thumb" onclick="tutVer('+i+')"><div class="tut-play">'+_esc(t.icon||'📄')+'</div></div>';
@@ -2958,6 +3073,7 @@ function renderTutoriales(){
         '<span class="tut-tag">'+_esc(t.tag||'Tutorial')+'</span>'+
         '<div class="tut-title">'+_esc(t.titulo||'')+'</div>'+
         '<div class="tut-desc">'+_esc(t.desc||'')+'</div>'+
+        (fecha?'<div class="tut-fecha">📅 '+_esc(fecha)+'</div>':'')+
         '<div class="tut-actions">'+
           '<button type="button" class="tut-btn tut-btn-ver" onclick="tutVer('+i+')">▶ Ver aquí</button>'+
           '<a class="tut-btn tut-btn-dl" href="'+_esc(t.archivo)+'" download="'+_esc(t.descarga||'')+'" onclick="playClick()">⬇ Descargar</a>'+
@@ -2965,6 +3081,18 @@ function renderTutoriales(){
       '</div>'+
     '</div>';
   }).join('');
+}
+/* ── Controles de la barra ── */
+function tutBuscar(v){ TUT_STATE.q=v||''; renderTutoriales(); }
+function tutLimpiarBusqueda(){ var inp=document.getElementById('tut-search'); if(inp){inp.value='';} TUT_STATE.q=''; renderTutoriales(); if(inp)inp.focus(); }
+function tutFiltroTipo(v){ TUT_STATE.tipo=v||''; renderTutoriales(); }
+function tutOrden(v){ TUT_STATE.sort=v||'fecha_desc'; renderTutoriales(); }
+function tutVista(v){
+  TUT_STATE.vista=(v==='list')?'list':'grid';
+  var bg=document.getElementById('tut-vista-grid'), bl=document.getElementById('tut-vista-list');
+  if(bg)bg.classList.toggle('on',TUT_STATE.vista==='grid');
+  if(bl)bl.classList.toggle('on',TUT_STATE.vista==='list');
+  renderTutoriales();
 }
 function tutVer(i){
   var t=TUTORIALES[i]; if(!t)return;
