@@ -1845,7 +1845,7 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
     <button type="button" class="vn-btn on" id="vnbtn-cotizador" data-target="cotizador" onclick="goToView(this.dataset.target)" title="Ir a la Cotizadora (pantalla principal)"><span class="vn-ic">🧮</span><span class="vn-lb">Cotizadora</span></button>
     <button type="button" class="vn-btn" id="vnbtn-planilla" data-target="planilla" onclick="goToView(this.dataset.target)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)"><span class="vn-ic">📋</span><span class="vn-lb">Planilla</span></button>
     <button type="button" class="vn-btn" id="vnbtn-biblioteca" data-target="biblioteca" onclick="goToView(this.dataset.target)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad"><span class="vn-ic">🎧</span><span class="vn-lb">Biblioteca</span></button>
-    <button type="button" class="vn-btn vn-tut" id="vnbtn-tutoriales" data-target="tutoriales" onclick="goToView(this.dataset.target)" title="Tutoriales: videos y guías para dominar la cotizadora — míralos aquí o descárgalos"><span class="vn-ic">🎓</span><span class="vn-lb">Tutoriales</span></button>
+    <button type="button" class="vn-btn vn-tut" id="vnbtn-tutoriales" data-target="tutoriales" onclick="goToView(this.dataset.target)" title="Recursos: tutoriales en video, guías y formularios para tu trabajo — míralos aquí o descárgalos"><span class="vn-ic">📚</span><span class="vn-lb">Recursos</span></button>
     <span class="vn-div" aria-hidden="true"></span>
     <a class="vn-btn vn-ext" style="--acc:var(--bl)" href="https://atlas.geimser.cl/app/calls/new?campaignId=b5df1732-476e-4475-a21a-bae8e0942829" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir Atlas (CRM · Geimser) en una pestaña nueva"><span class="vn-ic">🗂️</span><span class="vn-lb">Atlas</span><span class="vn-ext-go" aria-hidden="true">↗</span></a>
     <a class="vn-btn vn-ext" style="--acc:var(--gn)" href="https://cdn.s-br01a-product.prod1.vocalcomcx.com/hermes360/Admin/Launcher/dashboard?screen=workspace" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir Vocal (discador · Vocalcom) en una pestaña nueva"><span class="vn-ic">📞</span><span class="vn-lb">Vocal</span><span class="vn-ext-go" aria-hidden="true">↗</span></a>
@@ -2407,8 +2407,8 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
 <div id="tutoriales-view">
   <div class="bib-top">
     <button class="bib-back" onclick="goToView('cotizador')">← Volver al Cotizador</button>
-    <h2>🎓 Tutoriales</h2>
-    <span class="bib-sub">Aprende a usar la cotizadora paso a paso · míralos aquí o descárgalos</span>
+    <h2>📚 Tutoriales y Recursos</h2>
+    <span class="bib-sub">Videos, guías y formularios para tu trabajo · míralos aquí o descárgalos</span>
   </div>
   <div class="bib-body">
     <div class="bib-grid" id="tut-grid"></div>
@@ -2940,7 +2940,11 @@ var TUTORIALES=[
   { titulo:'Firma electrónica del contrato',
     desc:'Guía paso a paso para que el cliente firme el contrato de forma electrónica, sin errores.',
     tag:'Video · MP4', tipo:'video', icon:'✍️',
-    archivo:'Tutoriales/Tutorial_Firma.mp4', descarga:'Tutorial_Firma.mp4' }
+    archivo:'Tutoriales/Tutorial_Firma.mp4', descarga:'Tutorial_Firma.mp4' },
+  { titulo:'Formulario de clientes',
+    desc:'Formulario que el cliente debe completar en cada venta. Ábrelo aquí o descárgalo para enviarlo o imprimirlo.',
+    tag:'Formulario · PDF', tipo:'pdf', icon:'📝',
+    archivo:'Tutoriales/Formulario_Clientes.pdf', descarga:'Formulario_Clientes.pdf' }
 ];
 function renderTutoriales(){
   var g=document.getElementById('tut-grid'); if(!g)return;
