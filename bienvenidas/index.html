@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bienvenidas — Envío de correos</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#ffffff; --ink:#1e293b; --muted:#64748b;
+    --line:#e2e8f0; --brand:#c8102e; --brand-d:#9b0d24;
+    --ok:#16a34a; --okbg:#dcfce7; --warn:#b45309; --warnbg:#fef3c7;
+    --info:#2563eb; --infobg:#dbeafe; --gray:#f1f5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--ink);background:#f8fafc}
+  header{background:linear-gradient(135deg,#111827,#1f2937);color:#fff;padding:20px 24px}
+  header h1{margin:0;font-size:20px;font-weight:700}
+  header p{margin:4px 0 0;font-size:13px;color:#cbd5e1}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 60px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:16px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  label{font-size:13px;color:var(--muted);font-weight:600}
+  input[type=text],input[type=password]{padding:9px 11px;border:1px solid var(--line);
+    border-radius:8px;font-size:14px;min-width:260px}
+  input[type=text]:focus,input[type=password]:focus{outline:2px solid var(--info);border-color:var(--info)}
+  button{cursor:pointer;border:0;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary:hover{background:var(--brand-d)}
+  .btn-primary:disabled{background:#cbd5e1;cursor:not-allowed}
+  .btn-ghost{background:var(--gray);color:var(--ink)}
+  .btn-ghost:hover{background:#e2e8f0}
+  .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+  .b-prueba{background:var(--warnbg);color:var(--warn)}
+  .b-prod{background:#fee2e2;color:var(--brand-d)}
+  .b-info{background:var(--infobg);color:var(--info)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);
+    position:sticky;top:0;background:#fff}
+  tr:hover{background:#fafcff}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .t-env{background:var(--okbg);color:var(--ok)}
+  .t-err{background:#fee2e2;color:var(--brand-d)}
+  .t-omi{background:var(--gray);color:var(--muted)}
+  .t-pend{background:var(--infobg);color:var(--info)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .muted{color:var(--muted);font-size:13px}
+  .tablewrap{max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+  .selcount{font-weight:700}
+  .footer-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);
+    padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-radius:0 0 12px 12px}
+  .hidden{display:none}
+  .link{color:var(--info);cursor:pointer;text-decoration:underline;font-size:13px}
+  #status{font-size:13px}
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;
+    align-items:center;justify-content:center;padding:16px;z-index:50}
+  .modal{background:#fff;border-radius:12px;max-width:680px;width:100%;max-height:85vh;
+    overflow:auto;padding:0}
+  .modal .mhead{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center}
+  .modal .mbody{padding:18px}
+  details summary{cursor:pointer;font-weight:600;color:var(--ink)}
+  .checkcell{width:36px;text-align:center}
+  @media (max-width:640px){ th:nth-child(5),td:nth-child(5){display:none} }
+</style>
+</head>
+<body>
+<header>
+  <h1>✉️ Correos de Bienvenida</h1>
+  <p>Selecciona los clientes y envía. Los correos salen desde el buzón corporativo.</p>
+</header>
+
+<div class="wrap">
+
+  <!-- CONFIGURACIÓN (se guarda en el navegador; se llena una sola vez) -->
+  <div class="card">
+    <details id="cfgBox">
+      <summary>⚙️ Configuración (una sola vez)</summary>
+      <div style="margin-top:12px" class="row">
+        <div>
+          <label>URL del backend (Apps Script /exec)</label><br>
+          <input type="text" id="cfgUrl" placeholder="https://script.google.com/macros/s/AKfy.../exec">
+        </div>
+        <div>
+          <label>Token</label><br>
+          <input type="password" id="cfgToken" placeholder="tok-xxxx-xxxx">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn-ghost" onclick="guardarCfg()">Guardar</button>
+        </div>
+      </div>
+      <p class="muted" style="margin:10px 0 0">
+        La URL y el token los entrega el Apps Script del correo corporativo (ver instrucciones).
+        Se guardan solo en este navegador.
+      </p>
+    </details>
+  </div>
+
+  <!-- ESTADO / MODO -->
+  <div class="card">
+    <div class="toolbar">
+      <div class="row">
+        <span id="modoBadge" class="badge b-info">Sin conectar</span>
+        <span id="cuotaInfo" class="muted"></span>
+      </div>
+      <div class="row">
+        <input type="text" id="buscar" placeholder="Buscar empresa, contacto o correo…" oninput="render()">
+        <label class="muted" style="display:flex;align-items:center;gap:6px;font-weight:500">
+          <input type="checkbox" id="soloPend" onchange="render()"> Solo pendientes
+        </label>
+        <button class="btn-ghost" onclick="cargar()">↻ Actualizar</button>
+      </div>
+    </div>
+    <div id="status" class="muted">Configura el backend y presiona “Actualizar”.</div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="checkcell"><input type="checkbox" id="chkAll" onclick="marcarTodos(this.checked)"></th>
+            <th>Empresa</th>
+            <th>Contacto</th>
+            <th>Correo</th>
+            <th>Servicio</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="7" class="muted" style="padding:24px;text-align:center">Sin datos.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="footer-bar">
+      <div class="muted"><span class="selcount" id="selCount">0</span> seleccionados
+        · <span id="totalCount">0</span> en lista</div>
+      <button class="btn-primary" id="btnEnviar" onclick="enviar()" disabled>Enviar seleccionados</button>
+    </div>
+  </div>
+
+  <p class="muted" style="text-align:center">
+    Modo <b>PRUEBA</b>: solo llega a los correos autorizados en CONFIG. Modo <b>PRODUCCIÓN</b>: llega a clientes reales.
+    El sistema no reenvía a quien ya está <b>ENVIADO</b>.
+  </p>
+</div>
+
+<!-- Modal vista previa -->
+<div id="modal" class="modal-bg hidden" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal">
+    <div class="mhead">
+      <b>Vista previa del correo</b>
+      <button class="btn-ghost" onclick="cerrarModal()">Cerrar</button>
+    </div>
+    <div class="mbody" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const LS = 'bienvenidas_cfg';
+let CLIENTES = [];
+
+/* ---------- Config persistente ---------- */
+function cargarCfg(){
+  try{
+    const c = JSON.parse(localStorage.getItem(LS) || '{}');
+    document.getElementById('cfgUrl').value = c.url || '';
+    document.getElementById('cfgToken').value = c.token || '';
+    if(!c.url) document.getElementById('cfgBox').open = true;
+    return c;
+  }catch(e){ return {}; }
+}
+function guardarCfg(){
+  const url = document.getElementById('cfgUrl').value.trim();
+  const token = document.getElementById('cfgToken').value.trim();
+  localStorage.setItem(LS, JSON.stringify({url, token}));
+  setStatus('Configuración guardada.', 'ok');
+  if(url && token){ document.getElementById('cfgBox').open = false; cargar(); }
+}
+function getCfg(){
+  return { url: document.getElementById('cfgUrl').value.trim(),
+           token: document.getElementById('cfgToken').value.trim() };
+}
+
+/* ---------- Estado UI ---------- */
+function setStatus(msg, tipo){
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.style.color = tipo==='err' ? 'var(--brand-d)' : tipo==='ok' ? 'var(--ok)' : 'var(--muted)';
+}
+
+/* ---------- Cargar lista ---------- */
+async function cargar(){
+  const {url, token} = getCfg();
+  if(!url || !token){ setStatus('Falta configurar la URL del backend y el token.', 'err');
+    document.getElementById('cfgBox').open = true; return; }
+  setStatus('Cargando clientes…');
+  try{
+    const r = await fetch(url + '?action=list&token=' + encodeURIComponent(token));
+    const data = await r.json();
+    if(!data.ok) throw new Error(data.error || 'Respuesta no válida');
+    CLIENTES = data.clientes || [];
+    pintarModo(data.modo, data.cuota);
+    render();
+    setStatus('Lista cargada: ' + CLIENTES.length + ' clientes.', 'ok');
+  }catch(e){
+    setStatus('No se pudo cargar. Revisa la URL/token y que el Apps Script esté publicado. (' + e.message + ')', 'err');
+  }
+}
+
+function pintarModo(modo, cuota){
+  const b = document.getElementById('modoBadge');
+  if(modo === 'PRODUCCION'){ b.className='badge b-prod'; b.textContent='● PRODUCCIÓN (envía a clientes reales)'; }
+  else { b.className='badge b-prueba'; b.textContent='● PRUEBA (solo correos autorizados)'; }
+  document.getElementById('cuotaInfo').textContent = (cuota!=null? 'Cuota restante hoy: '+cuota : '');
+}
+
+/* ---------- Render tabla ---------- */
+function estadoTag(e){
+  const s = (e||'').toUpperCase();
+  if(s==='ENVIADO') return '<span class="tag t-env">ENVIADO</span>';
+  if(s==='ERROR')   return '<span class="tag t-err">ERROR</span>';
+  if(s==='OMITIDO') return '<span class="tag t-omi">OMITIDO</span>';
+  return '<span class="tag t-pend">PENDIENTE</span>';
+}
+function filtrados(){
+  const q = document.getElementById('buscar').value.toLowerCase().trim();
+  const soloPend = document.getElementById('soloPend').checked;
+  return CLIENTES.filter(c=>{
+    if(soloPend && (c.estado||'').toUpperCase()==='ENVIADO') return false;
+    if(!q) return true;
+    return (c.empresa+' '+c.contacto+' '+c.correo).toLowerCase().includes(q);
+  });
+}
+function render(){
+  const rows = filtrados();
+  const tb = document.getElementById('tbody');
+  if(rows.length===0){
+    tb.innerHTML = '<tr><td colspan="7" class="muted" style="padding:24px;text-align:center">Sin resultados.</td></tr>';
+  } else {
+    tb.innerHTML = rows.map(c=>{
+      const enviado = (c.estado||'').toUpperCase()==='ENVIADO';
+      return `<tr>
+        <td class="checkcell">
+          <input type="checkbox" class="rowchk" data-fila="${c.fila}" ${enviado?'title="Ya enviado"':''} onchange="actualizarSeleccion()">
+        </td>
+        <td><b>${esc(c.empresa)||'—'}</b></td>
+        <td>${esc(c.contacto)||'—'}</td>
+        <td>${esc(c.correo)||'—'}</td>
+        <td>${esc(c.servicio)||'—'}</td>
+        <td>${estadoTag(c.estado)}</td>
+        <td><span class="link" onclick='verPreview(${c.fila})'>Ver</span></td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('totalCount').textContent = CLIENTES.length;
+  document.getElementById('chkAll').checked = false;
+  actualizarSeleccion();
+}
+function esc(s){ return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+function marcarTodos(v){
+  document.querySelectorAll('.rowchk').forEach(ch=>ch.checked=v);
+  actualizarSeleccion();
+}
+function seleccionadas(){
+  return [...document.querySelectorAll('.rowchk:checked')].map(ch=>Number(ch.dataset.fila));
+}
+function actualizarSeleccion(){
+  const n = seleccionadas().length;
+  document.getElementById('selCount').textContent = n;
+  document.getElementById('btnEnviar').disabled = n===0;
+}
+
+/* ---------- Vista previa (usa la misma plantilla, en el cliente) ---------- */
+function verPreview(fila){
+  const c = CLIENTES.find(x=>x.fila===fila); if(!c) return;
+  document.getElementById('modalBody').innerHTML = plantilla(c);
+  document.getElementById('modal').classList.remove('hidden');
+}
+function cerrarModal(){ document.getElementById('modal').classList.add('hidden'); }
+function plantilla(c){
+  const contacto = c.contacto || 'Estimados/as';
+  const servicio = c.servicio || 'el servicio contratado';
+  const ejecutivo = c.ejecutivo || 'Equipo Equifax';
+  return `<div style="font-family:Arial;font-size:14px;color:#222;line-height:1.55">
+    <p>Estimados/as <b>${esc(contacto)}</b> (${esc(c.empresa)}):</p>
+    <p>Junto con saludar, aprovechamos esta oportunidad para darles la <b>bienvenida</b> y agradecer la oportunidad de ser su equipo comercial de Equifax.</p>
+    <p>Es clave realizar el proceso de <b>capacitación</b> para manejar correctamente la plataforma contratada. A su correo llegaron los accesos para la creación de usuario y contraseña; adjuntamos manuales de usuario para su autogestión. La facturación estará disponible a partir del último día hábil del mes en que fueron habilitados los servicios.</p>
+    <p><b>SERVICIOS CONTRATADOS</b><br>• ${esc(servicio)}</p>
+    <p><b>CANALES DE ATENCIÓN</b><br>• Call Center: 600 378 4329<br>• equifax@equifax.cl<br>• contactanos@equifax.cl</p>
+    <p><b>LINK DE ACCESO</b><br><a href="https://business.equifax.ca/auth/login">https://business.equifax.ca/auth/login</a></p>
+    <p><b>ACTIVACIÓN DE NUEVO USUARIO</b><br><a href="https://youtu.be/Umz78KI9LN0">Ver video</a></p>
+    <p><b>CANALES DE PAGO</b><br>• Servipag<br>• Transferencia a Servicios Equifax Chile Tda.<br>RUT: 85.896.100-9 · Cta Cte: 166143017 · Banco de Chile</p>
+    <p>Saludos cordiales,<br><b>${esc(ejecutivo)}</b><br>Equipo Equifax · INFOBUSINESS — Distribuidor autorizado Equifax</p>
+  </div>`;
+}
+
+/* ---------- Enviar ---------- */
+async function enviar(){
+  const filas = seleccionadas();
+  if(filas.length===0) return;
+  const {url, token} = getCfg();
+  const modoProd = document.getElementById('modoBadge').textContent.includes('PRODUCCIÓN');
+  const aviso = modoProd
+    ? `MODO PRODUCCIÓN.\n\nSe enviará el correo a ${filas.length} cliente(s) REAL(es).\n¿Confirmas el envío?`
+    : `MODO PRUEBA.\n\nSolo llegará a los correos autorizados; el resto quedará OMITIDO.\n¿Continuar con ${filas.length} seleccionado(s)?`;
+  if(!confirm(aviso)) return;
+
+  const btn = document.getElementById('btnEnviar');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  setStatus('Enviando ' + filas.length + ' correo(s)…');
+  try{
+    const r = await fetch(url, {
+      method:'POST',
+      // text/plain evita el preflight CORS de Apps Script
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'send', filas, token })
+    });
+    const data = await r.json();
+    if(!data.ok) throw new Error(data.error || 'Error del backend');
+    setStatus(`Listo (${data.modo}). Enviados: ${data.enviados} · Omitidos: ${data.omitidos} · Errores: ${data.errores} · Ya enviados: ${data.saltados}. Cuota: ${data.cuota}`, 'ok');
+    await cargar();
+  }catch(e){
+    setStatus('Falló el envío: ' + e.message, 'err');
+  }finally{
+    btn.textContent = 'Enviar seleccionados';
+    actualizarSeleccion();
+  }
+}
+
+/* ---------- init ---------- */
+cargarCfg();
+const c0 = getCfg();
+if(c0.url && c0.token) cargar();
+</script>
+</body>
+</html>
