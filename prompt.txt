@@ -1,0 +1,224 @@
+Antes de escribir una sola línea de código, lee completamente todos los archivos Markdown (MD) adjuntos, ya que constituyen la documentación oficial del proyecto y describen su arquitectura, flujos, convenciones, dependencias y responsabilidades.
+
+Además, analizarás el archivo Excel adjunto llamado:
+
+BASES.xlsx
+
+En particular, utiliza como fuente principal la hoja:
+
+FILTROS
+
+ya que contiene el catálogo completo de campos disponibles para el producto Base de Datos, separados entre Personas y Empresas. Este archivo representa la especificación funcional más actualizada del producto y debe prevalecer sobre la implementación actual cuando existan campos faltantes.
+
+──────────────────────────────────────
+
+OBJETIVO GENERAL
+
+Ampliar el producto Base de Datos para que permita solicitar, mediante checks, todos los campos que aparecen definidos en el Excel.
+
+No se trata simplemente de agregar checkboxes.
+
+Debes integrar esta ampliación respetando completamente la arquitectura existente del proyecto, sus patrones de desarrollo, la experiencia de usuario y el flujo actual del sistema.
+
+La nueva implementación debe sentirse como una evolución natural del sistema, no como un agregado.
+
+──────────────────────────────────────
+
+ANÁLISIS PREVIO OBLIGATORIO
+
+Antes de modificar cualquier archivo debes identificar:
+
+• cómo funciona actualmente el producto Base de Datos
+
+• cómo se almacenan los checks
+
+• cómo se construye el resumen
+
+• cómo se generan las plantillas
+
+• cómo se serializa la información
+
+• cómo se calcula la cotización
+
+• cómo se renderizan las opciones
+
+• cómo se estructuran actualmente las categorías
+
+• cómo interactúa Base de Datos con el resto del sistema
+
+No implementes nada hasta comprender completamente ese flujo.
+
+──────────────────────────────────────
+
+AMPLIACIÓN DEL PRODUCTO BASE DE DATOS
+
+Incorpora todos los campos disponibles del Excel que actualmente no existan.
+
+Los nuevos checks deben organizarse mediante agrupaciones lógicas para facilitar enormemente la navegación.
+
+Evita listas interminables.
+
+Propón una organización clara, por ejemplo (o una mejor si la arquitectura lo permite):
+
+PERSONAS
+
+• Identificación
+• Información personal
+• Información familiar
+• Información socioeconómica
+• Direcciones
+• Teléfonos
+• Correos
+• Antecedentes comerciales
+• Antecedentes bancarios
+• Bienes raíces
+• Vehículos
+• Participaciones societarias
+• Información tributaria
+• Quiebras
+• Otros antecedentes
+
+EMPRESAS
+
+• Identificación
+• Actividad económica
+• Tamaño
+• Facturación
+• Ejecutivos
+• Contactos
+• Direcciones
+• Teléfonos
+• Correos
+• Información bancaria
+• Información comercial
+• Participaciones
+• Bienes raíces
+• Vehículos
+• Información tributaria
+• Otros antecedentes
+
+Si encuentras una organización más lógica, utilízala.
+
+La prioridad es que el usuario pueda encontrar rápidamente cualquier dato sin recorrer una lista gigante.
+
+──────────────────────────────────────
+
+IMPORTANTE
+
+No elimines ninguna funcionalidad existente.
+
+No modifiques el comportamiento actual.
+
+Solo amplía el producto utilizando la arquitectura existente.
+
+──────────────────────────────────────
+
+ACTUALIZACIÓN DE DOCUMENTACIÓN
+
+Actualiza toda la documentación necesaria para reflejar:
+
+• nuevos grupos
+
+• nuevos checks
+
+• nuevo flujo
+
+• nuevos estados
+
+• nuevas dependencias
+
+• modificaciones del producto Base de Datos
+
+Si existe documentación de arquitectura o contexto, mantenla sincronizada.
+
+──────────────────────────────────────
+
+FAVORITOS
+
+Agregar una nueva funcionalidad independiente del sistema de agendamiento.
+
+Actualmente existe un indicador de reloj para las gestiones agendadas.
+
+Debes implementar un sistema paralelo de FAVORITOS.
+
+Requisitos:
+
+• agregar una estrella dorada
+
+• la estrella debe activarse y desactivarse con un clic
+
+• debe ubicarse inmediatamente después del número de la gestión
+
+• todo debe permanecer en una sola fila
+
+• la estrella debe ser completamente independiente del reloj
+
+• una gestión puede ser:
+
+    - solo favorita
+
+    - solo agendada
+
+    - ambas
+
+    - ninguna
+
+No reutilices la lógica del reloj.
+
+Comparte únicamente el patrón visual cuando sea conveniente, pero mantén estados completamente independientes.
+
+──────────────────────────────────────
+
+PRODUCTO ACTIVO
+
+Modificar la jerarquía visual del producto seleccionado.
+
+Actualmente el nombre del producto aparece junto al bloque "Calculadora".
+
+Ese indicador debe eliminarse completamente.
+
+En su lugar:
+
+• mostrar el nombre del producto activo en la parte superior central de la interfaz
+
+• utilizar la misma fila donde actualmente se encuentran los botones de productos
+
+• el nombre debe quedar centrado horizontalmente
+
+• debe convertirse en el elemento jerárquicamente más importante de esa barra
+
+• el usuario debe entender inmediatamente qué producto está cotizando
+
+• el nombre debe actualizarse automáticamente al cambiar de producto
+
+El indicador inferior junto al bloque Calculadora debe eliminarse para recuperar espacio vertical.
+
+──────────────────────────────────────
+
+CRITERIOS
+
+Toda la implementación debe sentirse nativa del proyecto.
+
+Respeta:
+
+• estilo visual
+
+• arquitectura
+
+• nomenclatura
+
+• convenciones
+
+• patrones de render
+
+• patrones de estado
+
+• componentes existentes
+
+Evita código duplicado.
+
+Reutiliza funciones cuando sea posible.
+
+Si detectas oportunidades de abstraer lógica repetida sin alterar el comportamiento, hazlo únicamente cuando reduzca complejidad y mejore mantenibilidad.
+
+Al finalizar, verifica que toda la documentación permanezca consistente con la implementación realizada.
