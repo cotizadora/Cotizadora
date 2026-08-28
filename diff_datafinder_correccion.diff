@@ -1,0 +1,209 @@
+--- C:/Users/eduardo.perez/Documents/index.html.bak-20260707-1742	2026-07-07 17:42:18.521773300 -0400
++++ C:/Users/eduardo.perez/Documents/index.html	2026-07-08 09:52:06.853598000 -0400
+@@ -1330,7 +1330,7 @@
+   {key:'bolsa', ic:'🎒',lb:'Reporte Interactivo Bolsa',      su:''},
+   {key:'pfm',   ic:'📡',lb:'Portfolio Monitor',su:'Monitoreo'},
+   {key:'pc',    ic:'🤝',lb:'Partner Check',   su:'Proveedores'},
+-  {key:'datafinder',ic:'🔎',lb:'Data Finder',su:'Búsqueda de contacto'},
++  {key:'datafinder',ic:'🔎',lb:'Data Finder',su:'Localización y contactabilidad'},
+   {key:'malla', ic:'🕸️',lb:'Malla Societaria',su:'Vinculaciones societarias'},
+   {key:'bdd',ic:'🗄️',lb:'Base de Datos',su:'Solicitud a medida'},
+   {key:'pub',ic:'📰',lb:'Publicación Única',su:'Documento en DICOM'},
+@@ -1572,9 +1572,6 @@
+   if(key==='soluciones'){
+     return '<div class="sol-head2">Productos a incluir</div><div class="sol-list">'+SOL_LIST.map(function(p){return '<label class="sol-item"><input type="checkbox" value="'+p[0]+'"'+(p[2]?' checked':'')+' onchange="refresh()"><span>'+p[1]+'</span></label>';}).join('')+'</div>';
+   }
+-  if(key==='datafinder'){
+-    return '<div class="note-inline" style="margin-top:2px;">🔎 <b>Data Finder</b> es un producto informativo (búsqueda y actualización de teléfonos, correos y direcciones de personas y empresas). No se cotiza desde la calculadora: esta ficha presenta sus situaciones, características y beneficios, lista para adjuntar o enviar al cliente.</div>';
+-  }
+   if(key==='bdd'){
+     var grupos=BDD_GROUPS.map(function(g){
+       return '<div class="bdd-grp-t">'+g.t+'</div><div class="sol-list bdd-cols">'+
+@@ -1637,6 +1634,11 @@
+       '<div class="fld"><label>Consultas / mes</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(MALLA_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>'+
+       dcSelect('c-dc',[0,10,15,20,25,35,50])+
+       '</div>';
++  if(key==='datafinder')
++    return '<div class="cfg-2">'+
++      '<div class="fld"><label>Consultas / mes</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(DF_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'" data-t="'+r.t+'"';})+'</select></div>'+
++      dcSelect('c-dc',[0,10,15,20,25,35,50])+
++      '</div>';
+   if(key==='bolsa')
+     return '<div class="fld"><label>Consultas totales (12 meses)</label><select id="c-cons" oninput="onConfigChange()" onchange="onConfigChange()">'+optsFrom(RIB_T,function(r){return r.u;},function(r){return r.c+' consultas';},function(r){return ' data-c="'+r.c+'"';})+'</select></div>';
+   if(key==='pfm')
+@@ -1683,6 +1685,13 @@
+     var cM=sM?parseInt(sM.options[sM.selectedIndex].dataset.c):0;
+     c.tipo='malla';c.ufLista=uM;c.base=uM*(1-dcM/100);c.cons=cM;
+     c.note='Plan mensual 12 meses · UF/consulta lista: <b>'+(uM/cM).toFixed(6)+'</b>';
++  }else if(k==='datafinder'){
++    var sD=$('c-cons'),uD=parseFloat(gv('c-cons')),dcD=parseInt(gv('c-dc'))||0;
++    var cD=sD?parseInt(sD.options[sD.selectedIndex].dataset.c):0;
++    var tD=sD?parseFloat(sD.options[sD.selectedIndex].dataset.t):0;
++    c.tipo='datafinder';c.ufLista=uD;c.base=uD*(1-dcD/100);c.cons=cD;
++    var tVenta=tD*(1-dcD/100);
++    c.note='Plan mensual 12 meses · Tarifa <b>'+tVenta.toFixed(4)+' UF/consulta</b> · Consulta adicional <b>'+(tVenta*1.2).toFixed(4)+' UF</b>';
+   }else if(k==='bolsa'){
+     var sB=$('c-cons'),uB=parseFloat(gv('c-cons'));
+     var cB=sB?parseInt(sB.options[sB.selectedIndex].dataset.c):0;
+@@ -1852,7 +1861,6 @@
+   if(CURRENT.key==='multi'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
+   if(CURRENT.key==='soluciones'){var sz=document.getElementById('summary-zone');if(sz)sz.innerHTML='';genMail();syncWA();return;}
+   if(CURRENT.key==='bdd'){var szb=document.getElementById('summary-zone');if(szb)szb.innerHTML='';genMail();syncWA();return;}
+-  if(CURRENT.key==='datafinder'){var szd=document.getElementById('summary-zone');if(szd)szd.innerHTML='';genMail();syncWA();return;}
+   if(CURRENT.key==='pub'){var szp=document.getElementById('summary-zone');if(szp)szp.innerHTML=pubResumenHTML();genMail();syncWA();return;}
+   if(CURRENT.key==='pago_pub'){var szpp=document.getElementById('summary-zone');if(szpp)szpp.innerHTML=pagoPubResumenHTML();genMail();syncWA();return;}
+   var c=computeCurrent();if(!c)return;LAST=c;
+@@ -1966,27 +1974,6 @@
+ }
+ 
+ /* ════════════════════════════════════════════════════════════════
+-   DATA FINDER — producto informativo (no cotizable). Reutiliza solBlocksInner
+-   con la clave 'datafinder' (SOL_SIT/SOL_CARAC/SOL_BENE ya existentes) y los
+-   mismos exportadores por canal. Espejo de renderPortafolioSoluciones / isPub.
+-   ════════════════════════════════════════════════════════════════ */
+-function renderDataFinder(target){
+-  var sel=['datafinder'];
+-  if(target==='card')return solBlocksInner(sel,'dark');
+-  if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,'light')+'</div>';
+-  if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,'light')+'</td></tr>';
+-  if(target==='wa'){
+-    var k='datafinder';
+-    var t='*Data Finder Equifax*\nBúsqueda y actualización de datos de contacto de personas y empresas\n';
+-    t+='\n_Situaciones:_\n'+(SOL_SIT[k]||[]).map(function(x){return '• '+x;}).join('\n')+'\n';
+-    t+='_Características:_\n'+solCarac(k).map(function(x){return '✔️ '+x;}).join('\n')+'\n';
+-    t+='_Beneficios:_\n'+(SOL_BENE[k]||[]).map(function(x){return '› '+x;}).join('\n')+'\n';
+-    return t;
+-  }
+-  return '';
+-}
+-
+-/* ════════════════════════════════════════════════════════════════
+    BASE DE DATOS — solicitud comercial a medida (sin precio fijo; el valor
+    lo informa BackOffice). Reutiliza genMail, la ficha y los exportadores,
+    igual que Soluciones. Aislado tras CURRENT.key==='bdd'. Rutas existentes
+@@ -2869,13 +2856,38 @@
+ var RI_T=[{c:10,u:0.11},{c:20,u:0.165},{c:30,u:0.2419},{c:40,u:0.3153},{c:50,u:0.3658},{c:60,u:0.4264},{c:70,u:0.4808},{c:80,u:0.5283},{c:90,u:0.5681},{c:100,u:0.627},{c:150,u:0.8359},{c:200,u:0.891},{c:250,u:0.9432},{c:300,u:0.9874},{c:350,u:1.017},{c:400,u:1.0365},{c:500,u:1.056},{c:1000,u:1.8612}];
+ var MALLA_T=[{c:10,u:0.45},{c:15,u:0.68},{c:20,u:0.9},{c:25,u:1.13},{c:30,u:1.35},{c:40,u:1.8},{c:50,u:2.16},{c:60,u:2.52},{c:70,u:2.88},{c:80,u:3.25},{c:90,u:3.52},{c:100,u:3.79},{c:150,u:5.19},{c:200,u:6.8},{c:250,u:7.45},{c:300,u:7.95},{c:500,u:9.3},{c:1000,u:16.6}];
+ var RIB_T=[{c:10,u:3},{c:20,u:5},{c:30,u:6},{c:40,u:7},{c:50,u:8},{c:60,u:9},{c:70,u:10},{c:80,u:11},{c:90,u:12},{c:100,u:14},{c:150,u:18},{c:200,u:19},{c:250,u:20},{c:300,u:21},{c:500,u:25},{c:1000,u:40}];
++/* DATA FINDER — plan mensual 12 meses por tramo de consultas.
++   CONVENCIÓN IVA: la hoja COTIZADOR DATA FINDER rotula el F.M.M. como "UF + IVA" (valor YA BRUTO)
++   y su columna de pesos como "VALOR PLAN PESOS + IVA". El sistema, en cambio, guarda UF NETA y
++   agrega el IVA en la vista (ufc()=u×UF×1.19). Por eso u = F.M.M._hoja / 1.19 (neto, 6 decimales):
++   así ufc() reproduce exactamente el "+IVA" que ya trae la hoja, sin duplicarlo.
++   Anclas (UF 39485.65): tramo 2500 → u 18.277311 → ufc = $858.812,89 ✓ · con 25% → $644.109,67 ✓.
++   t = tarifa UF/consulta (se muestra directo en la nota, NO pasa por ufc → se deja igual a la hoja);
++   consulta adicional = t×1.20.
++   ─────────────────────────────────────────────────────────────────────────────────────────────
++   NOTA CHECKLIST (leer antes de "corregir" esto): el checklist de la corrección original pedía ver
++   "21,75 UF" en pantalla para el tramo 2500. Ese 21,75 es el F.M.M. BRUTO de la hoja (YA incluye
++   IVA) y NO es lo que debe mostrar el titular, que sigue la convención NETA del sistema (ufc()
++   agrega el IVA en la vista, igual que RI/Malla). Por eso el titular correcto es 18,2773 UF (neto),
++   no 21,75. El criterio de aceptación real y ya validado es el PESO FINAL CON IVA — $858.812,89 sin
++   descuento y $644.109,67 con 25% — NO el número de UF en pantalla. NO revertir u a los valores
++   brutos (21,75, etc.) sin repetir este razonamiento: duplicaría el IVA (+19%). */
++var DF_T=[
++  {c:50,u:0.882353,t:0.021},{c:100,u:1.680672,t:0.02},{c:150,u:2.319328,t:0.0184},{c:200,u:2.857143,t:0.017},
++  {c:250,u:3.319328,t:0.0158},{c:300,u:3.705882,t:0.0147},{c:350,u:4.205882,t:0.0143},{c:400,u:4.672269,t:0.0139},
++  {c:450,u:5.142857,t:0.0136},{c:500,u:5.546218,t:0.0132},{c:750,u:7.878151,t:0.0125},{c:1000,u:10,t:0.0119},
++  {c:1500,u:13.487395,t:0.0107},{c:2000,u:16.134454,t:0.0096},{c:2500,u:18.277311,t:0.0087},{c:3000,u:19.915966,t:0.0079},
++  {c:3500,u:21.176471,t:0.0072},{c:4000,u:21.848739,t:0.0065},{c:5000,u:22.268908,t:0.0053},{c:7500,u:28.991597,t:0.0046},
++  {c:10000,u:33.613445,t:0.004},{c:15000,u:46.638655,t:0.0037},{c:20000,u:58.823529,t:0.0035},{c:30000,u:83.193277,t:0.0033},
++  {c:40000,u:104.201681,t:0.0031},{c:50000,u:121.848739,t:0.0029}
++];
+ var MC_P=[{id:'4100',lbl:'MC 4100',u:2.65,p:30},{id:'6900',lbl:'MC 6900',u:3.65,p:44},{id:'ilim',lbl:'MC Ilimitado',u:6.65,p:80}];
+ var PFM_S={1:0.0725,2:0.0711,3:0.0697,5:0.0683,10:0.067,20:0.065,30:0.063,40:0.062,50:0.060,60:0.058,70:0.056,80:0.054,90:0.052,100:0.050,200:0.039,300:0.035,500:0.029,1000:0.024};
+ var PFM_Q={1:0.0563,2:0.0554,3:0.0546,5:0.0538,10:0.053,20:0.051,30:0.050,40:0.048,50:0.046,60:0.045,70:0.043,80:0.041,90:0.039,100:0.038,200:0.029,300:0.025,500:0.021,1000:0.017};
+ var PFM_M={1:0.0447,2:0.0443,3:0.0439,5:0.0434,10:0.043,20:0.042,30:0.040,40:0.039,50:0.038,60:0.036,70:0.035,80:0.033,90:0.032,100:0.030,200:0.023,300:0.020,500:0.017,1000:0.013};
+ function pfmT(fr,r){var t=fr==='s'?PFM_S:fr==='q'?PFM_Q:PFM_M;var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});var tar=t[ks[0]];ks.forEach(function(k){if(r>=k)tar=t[k];});return tar;}
+-var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Comercial',sub:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA · 12 MESES',n:'Informes Comerciales Bolsa',sub:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},malla:{badge:'COMPLIANCE · VINCULACIONES',n:'Malla Societaria'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
+-var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000 desde una plataforma integral de cobranza','40 Emails + 10 Cartas + 5 SMS al mes, acciones marca DICOM','Informes comerciales Equifax incluidos para evaluar antes de vender','~70% de recuperación estimada en el primer mes','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA, sin tope de monto','40 Emails + 10 Cartas + 5 SMS al mes, acciones DICOM 6× más eficaces','Informes comerciales Equifax incluidos para evaluar antes de vender','Portal de autogestión de la cobranza disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Plataforma integral de cobranza con publicación en el Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS al mes para acelerar el recupero','Acciones de cobranza marca DICOM: 6× más probabilidades de recuperar','Administra y agrupa deudores; gestiona abonos y pagos parciales','Incorpora y elimina morosos en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de informes comerciales para consumir durante 12 meses','Pago único, sin cargo mensual','Los informes se utilizan a su propio ritmo dentro del período','Mismos datos del Reporte Interactivo: score, morosidades y comportamiento','Ideal para consultas puntuales, sin comprometer un plan mensual'],pfm:['Monitoreo continuo de su cartera de clientes y prospectos','Detecta variaciones comerciales y de morosidad con alertas oportunas','Indicadores analíticos de riesgo y marketing, individual o masivo','Anticípese al riesgo: potencie buenos clientes y limite los riesgosos','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],malla:['Socios y sociedades vinculadas a un RUT','Dos niveles de profundidad por consulta','Datos actualizados de personas y sus cónyuges','Comportamiento comercial de cada vinculado','Actualización permanente con fuentes propias Equifax'],combo3:['Evalúa clientes antes de otorgar crédito con score Equifax (RI)','Recupera deudas publicando en DICOM y gestionando la cobranza (MC)','Monitorea continuamente tu cartera y anticipa el riesgo (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio: evaluar, cobrar y monitorear']};
++var PINFO={bundle4100:{badge:'BUNDLE OFERTA',n:'Mora Control 4100 + Informes Comerciales'},bundleIlim:{badge:'BUNDLE PREMIUM',n:'Mora Control Ilimitado + Informes Comerciales'},mc_solo:{badge:'GESTIÓN DE CARTERA',n:'Mora Control'},ri_plan:{badge:'EVALUACIÓN CREDITICIA',n:'Reporte Comercial',sub:'Reporte Interactivo'},ri_bolsa:{badge:'BOLSA · 12 MESES',n:'Informes Comerciales Bolsa',sub:'Reporte Interactivo Bolsa'},pfm:{badge:'MONITOREO',n:'Portfolio Monitor'},pc:{badge:'PROVEEDORES',n:'Partner Check'},datafinder:{badge:'LOCALIZACIÓN · CONTACTABILIDAD',n:'Data Finder'},malla:{badge:'COMPLIANCE · VINCULACIONES',n:'Malla Societaria'},combo3:{badge:'PROPUESTA INTEGRAL',n:'RI + Mora Control + Portfolio Monitor'}};
++var PITEMS={bundle4100:['Publicación DICOM hasta $4.100.000 desde una plataforma integral de cobranza','40 Emails + 10 Cartas + 5 SMS al mes, acciones marca DICOM','Informes comerciales Equifax incluidos para evaluar antes de vender','~70% de recuperación estimada en el primer mes','Beneficio tributario por castigo de deuda'],bundleIlim:['Publicación DICOM ILIMITADA, sin tope de monto','40 Emails + 10 Cartas + 5 SMS al mes, acciones DICOM 6× más eficaces','Informes comerciales Equifax incluidos para evaluar antes de vender','Portal de autogestión de la cobranza disponible 24/7','Beneficio tributario por castigo de deuda'],mc_solo:['Plataforma integral de cobranza con publicación en el Boletín Electrónico DICOM','40 Emails + 10 Cartas + 5 SMS al mes para acelerar el recupero','Acciones de cobranza marca DICOM: 6× más probabilidades de recuperar','Administra y agrupa deudores; gestiona abonos y pagos parciales','Incorpora y elimina morosos en línea al regularizar la deuda'],ri_plan:['Score de riesgo crediticio Equifax','Morosidades y protestos actuales','Comportamiento financiero últimos 24 meses','Antecedentes patrimoniales y laborales','Datos de Registro Civil, DICOM, Insp. Laboral'],ri_bolsa:['Bolsa de informes comerciales para consumir durante 12 meses','Pago único, sin cargo mensual','Los informes se utilizan a su propio ritmo dentro del período','Mismos datos del Reporte Interactivo: score, morosidades y comportamiento','Ideal para consultas puntuales, sin comprometer un plan mensual'],pfm:['Monitoreo continuo de su cartera de clientes y prospectos','Detecta variaciones comerciales y de morosidad con alertas oportunas','Indicadores analíticos de riesgo y marketing, individual o masivo','Anticípese al riesgo: potencie buenos clientes y limite los riesgosos','Actualización semanal, quincenal o mensual'],pc:['Evaluación de proveedores en 30 minutos','Ranking verificado de desempeño','Marketplace de licitaciones y RFPs','Compliance y KYC integrado','Tecnología cloud disponible 24/7'],datafinder:['Búsqueda de teléfonos, correos y direcciones','Datos de personas y empresas','Múltiples fuentes consolidadas','Información de contacto actualizada','Enriquecimiento de bases de datos'],malla:['Socios y sociedades vinculadas a un RUT','Dos niveles de profundidad por consulta','Datos actualizados de personas y sus cónyuges','Comportamiento comercial de cada vinculado','Actualización permanente con fuentes propias Equifax'],combo3:['Evalúa clientes antes de otorgar crédito con score Equifax (RI)','Recupera deudas publicando en DICOM y gestionando la cobranza (MC)','Monitorea continuamente tu cartera y anticipa el riesgo (PFM)','Todo desde una sola relación comercial','Cobertura integral del ciclo crediticio: evaluar, cobrar y monitorear']};
+ /* ── BULLETS ENRIQUECIDOS — SOLO Gmail/Outlook (WhatsApp usa PITEMS) ── */
+ var PITEMS_MAIL={
+   bundle4100:['Publicación DICOM hasta $4.100.000 desde una plataforma integral de cobranza','40 Emails + 10 Cartas + 5 SMS al mes para acelerar el recupero','Informes comerciales Equifax incluidos para evaluar antes de vender','~70% de recuperación estimada en el primer mes','Beneficio tributario por castigo de deuda','Acciones de cobranza marca DICOM: hasta 6× más probabilidades de recuperar','Bloqueo comercial del deudor moroso que promueve el pago','Score de riesgo Equifax para respaldar cada decisión de crédito','Portal de autogestión de la cobranza disponible 24/7','Evalúa antes de otorgar crédito y recupera después, en una sola relación'],
+@@ -2906,9 +2918,8 @@
+   var isMulti=(typeof CURRENT!=='undefined'&&CURRENT.key==='multi');
+   var isBdd=(typeof CURRENT!=='undefined'&&CURRENT.key==='bdd');
+   var isPub=(typeof CURRENT!=='undefined'&&CURRENT.key==='pub');
+-  var isDataFinder=(typeof CURRENT!=='undefined'&&CURRENT.key==='datafinder');
+   var tipo=gv('mt');
+-  if(!isSol && !isMulti && !isBdd && !isPub && !isDataFinder && !tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
++  if(!isSol && !isMulti && !isBdd && !isPub && !tipo){toast('Selecciona un tipo de producto','err','mail-toast');return;}
+   var skip=document.getElementById('skip-dest')&&document.getElementById('skip-dest').checked;
+   var sal=saludoChile(); /* saludo según hora real de Chile, calculado al generar */
+   /* El nombre de contacto fue eliminado de todas las propuestas: solo empresa destinataria */
+@@ -2936,7 +2947,6 @@
+   if(isMulti){pi={badge:'PROPUESTA MULTIPRODUCTO',n:'Multiproducto Comercial'};}
+   if(isBdd){pi={badge:'SOLICITUD BASE DE DATOS',n:'Base de Datos Comercial'};}
+   if(isPub){pi={badge:'PUBLICACIÓN ÚNICA',n:'Publicación Única'};}
+-  if(isDataFinder){pi={badge:'BÚSQUEDA DE CONTACTO',n:'Data Finder'};}
+   /* ── Enlace de WhatsApp para la firma (cliente → ejecutivo) con mensaje contextual ── */
+   var _execNm=(as2&&as2!=='[Asesor]')?as2:'';
+   var _prodNm=(pi&&pi.n&&pi.n!=='[Producto]')?pi.n:'';
+@@ -2981,8 +2991,7 @@
+   if(isMulti){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
+   if(isBdd){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
+   if(isPub){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
+-  if(isDataFinder){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
+-  (function(){var _pz=document.getElementById('cc-price-zone'),_cz=document.getElementById('cc-contrato-zone');var _hide=isSol||isMulti||isBdd||isPub||isDataFinder;if(_pz)_pz.style.display=_hide?'none':'';if(_cz)_cz.style.display=_hide?'none':'';})();
++  (function(){var _pz=document.getElementById('cc-price-zone'),_cz=document.getElementById('cc-contrato-zone');var _hide=isSol||isMulti||isBdd||isPub;if(_pz)_pz.style.display=_hide?'none':'';if(_cz)_cz.style.display=_hide?'none':'';})();
+ 
+   // ── TARJETA PC ──────────────────────────────
+   st('cc-badge',pi.badge);st('cc-fecha',hoy());
+@@ -3042,9 +3051,8 @@
+   if(isMulti){sv('cc-prod-block',renderMultiproducto('card'));sv('cc-dcto-block','');var _wpbM=document.getElementById('wcc-prod-block');if(_wpbM)_wpbM.innerHTML=renderMultiproducto('card');var _wdbM=document.getElementById('wcc-dcto-block');if(_wdbM)_wdbM.innerHTML='';}
+   if(isBdd){sv('cc-prod-block',renderBaseDatos('card'));sv('cc-dcto-block','');var _wpbB=document.getElementById('wcc-prod-block');if(_wpbB)_wpbB.innerHTML=renderBaseDatos('card');var _wdbB=document.getElementById('wcc-dcto-block');if(_wdbB)_wdbB.innerHTML='';}
+   if(isPub){sv('cc-prod-block',renderPublicacion('card'));sv('cc-dcto-block','');var _wpbP=document.getElementById('wcc-prod-block');if(_wpbP)_wpbP.innerHTML=renderPublicacion('card');var _wdbP=document.getElementById('wcc-dcto-block');if(_wdbP)_wdbP.innerHTML='';}
+-  if(isDataFinder){sv('cc-prod-block',renderDataFinder('card'));sv('cc-dcto-block','');var _wpbD=document.getElementById('wcc-prod-block');if(_wpbD)_wpbD.innerHTML=renderDataFinder('card');var _wdbD=document.getElementById('wcc-dcto-block');if(_wdbD)_wdbD.innerHTML='';}
+   var aEmp=(em?' | '+em:'');
+-  var _asuntoSol=isSol?('Información de productos Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):(isDataFinder?('Data Finder Equifax'+(em?' — '+em:'')):null))));
++  var _asuntoSol=isSol?('Información de productos Equifax'+(em?' — '+em:'')):(isMulti?('Propuesta Multiproducto Equifax'+(em?' — '+em:'')):(isBdd?('Solicitud Base de Datos Equifax'+(em?' — '+em:'')):(isPub?('Publicación Única Equifax'+(em?' — '+em:'')):null)));
+   st('tpl-asunto',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+(pi.sub?' ('+pi.sub+')':'')+aEmp));
+   st('tpl-asunto-outlook',_asuntoSol||('Propuesta Comercial Equifax — '+pi.n+(pi.sub?' ('+pi.sub+')':'')+aEmp));
+ 
+@@ -3098,7 +3106,7 @@
+     (exFirma ? "_" + exFirma + "_\n" : "") +
+     (fo ? "\ud83d\udcf1 " + fo + "\n" : "") +
+     (ml ? "\u2709 " + ml + "\n" : "");
+-  document.getElementById('tpl-body').value=isDataFinder?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderDataFinder('wa')+_waFirma):(isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')+_waFirma):(isPub?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPublicacion('wa')+_waFirma):(isSol?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPortafolioSoluciones('wa')+_waFirma):(isMulti?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderMultiproducto('wa')+_waFirma):txt))));
++  document.getElementById('tpl-body').value=isBdd?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderBaseDatos('wa')+_waFirma):(isPub?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPublicacion('wa')+_waFirma):(isSol?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderPortafolioSoluciones('wa')+_waFirma):(isMulti?(_waSaludo+"\n"+_waEmpLn+_waRut+"\n"+renderMultiproducto('wa')+_waFirma):txt)));
+ 
+   // ── HTML ENRIQUECIDO — Diseño corporativo completo ──
+   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
+@@ -3150,7 +3158,7 @@
+     '</div>'+
+ 
+     // PRODUCTO/PRECIO/DOCS (soluciones: contenido multiproducto sin precio)
+-    (isDataFinder ? renderDataFinder('gmail') : (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
++    (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
+     '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
+       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
+       '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+(pi.sub?'<span style="display:block;font-size:12px;font-weight:600;color:#9b1c2e;margin-top:3px;">'+pi.sub+'</span>':'')+'</div>'+
+@@ -3195,7 +3203,7 @@
+     '<div style="background:#fffdf5;padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
+       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
+       '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">Ficha de contrataci&oacute;n &nbsp;&middot;&nbsp; C&eacute;dula representante legal &nbsp;&middot;&nbsp; Escritura con poderes de firma &nbsp;&middot;&nbsp; Carpeta tributaria</div>'+
+-    '</div>'))))))+
++    '</div>')))))+
+ 
+     // FIRMA — fondo oscuro corporativo
+     '<div style="background:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
+@@ -3342,7 +3350,7 @@
+     // DESTINATARIO — fondo claro, texto oscuro (garantizado Outlook)
+     // ══════════════════════════════════════════
+     _destOutlook+
+-    (isDataFinder ? renderDataFinder('outlook') : (isBdd ? renderBaseDatos('outlook') : (isPub ? renderPublicacion('outlook') : (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
++    (isBdd ? renderBaseDatos('outlook') : (isPub ? renderPublicacion('outlook') : (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
+     // ══════════════════════════════════════════
+     '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
+       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+@@ -3436,7 +3444,7 @@
+           '</table>'+
+         '</td>'+
+       '</tr></table>'+
+-    '</td></tr>'))))))+
++    '</td></tr>')))))+
+ 
+     // ══════════════════════════════════════════
+     // FIRMA — fondo gris claro, texto oscuro (garantizado Outlook)

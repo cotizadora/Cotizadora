@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Monitor | Equifax Chile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --equifax-red: #E31837;
+            --equifax-dark: #1A1A1A;
+            --equifax-gray: #4A4A4A;
+            --equifax-light-gray: #F5F5F5;
+            --equifax-border: #E0E0E0;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--equifax-gray);
+            background: var(--white);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 18mm 16mm;
+            background: var(--white);
+            position: relative;
+            page-break-after: always;
+            overflow: hidden;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+        }
+
+        /* Header with logo */
+        .header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 8mm;
+            padding-bottom: 4mm;
+            border-bottom: 1px solid var(--equifax-border);
+        }
+
+        .header-logo {
+            max-height: 14mm;
+            width: auto;
+        }
+
+        /* Cover page */
+        .cover {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 297mm;
+            padding: 20mm 16mm;
+            background: linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 100%);
+        }
+
+        .cover-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 10mm;
+        }
+
+        .cover-logo {
+            max-height: 35mm;
+            width: auto;
+        }
+
+        .cover-content {
+            text-align: center;
+            margin: 20mm 0;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: var(--equifax-red);
+            color: var(--white);
+            padding: 3mm 8mm;
+            border-radius: 30px;
+            font-size: 11pt;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 12mm;
+            text-transform: uppercase;
+        }
+
+        .cover-title {
+            font-size: 42pt;
+            font-weight: 800;
+            color: var(--equifax-dark);
+            line-height: 1.1;
+            margin-bottom: 8mm;
+            letter-spacing: -1px;
+        }
+
+        .cover-subtitle {
+            font-size: 16pt;
+            font-weight: 400;
+            color: var(--equifax-gray);
+            max-width: 140mm;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 80mm;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 10mm 0;
+        }
+
+        .cover-footer {
+            text-align: center;
+            font-size: 10pt;
+            color: var(--equifax-gray);
+            border-top: 1px solid var(--equifax-border);
+            padding-top: 6mm;
+        }
+
+        /* Section styles */
+        .section-badge {
+            display: inline-block;
+            background: var(--equifax-light-gray);
+            color: var(--equifax-red);
+            padding: 2mm 6mm;
+            border-radius: 20px;
+            font-size: 9pt;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 6mm;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-size: 28pt;
+            font-weight: 700;
+            color: var(--equifax-dark);
+            line-height: 1.2;
+            margin-bottom: 6mm;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            font-size: 14pt;
+            font-weight: 400;
+            color: var(--equifax-gray);
+            margin-bottom: 8mm;
+            line-height: 1.5;
+        }
+
+        .content-text {
+            font-size: 12pt;
+            line-height: 1.7;
+            color: var(--equifax-gray);
+            margin-bottom: 6mm;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border: 1px solid var(--equifax-border);
+            border-radius: 8px;
+            padding: 8mm;
+            margin-bottom: 6mm;
+            transition: all 0.3s ease;
+        }
+
+        .card-highlight {
+            border-left: 4px solid var(--equifax-red);
+        }
+
+        .card-title {
+            font-size: 14pt;
+            font-weight: 700;
+            color: var(--equifax-dark);
+            margin-bottom: 4mm;
+        }
+
+        .card-text {
+            font-size: 11pt;
+            color: var(--equifax-gray);
+            line-height: 1.6;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6mm;
+            margin-bottom: 6mm;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4mm;
+            margin-bottom: 6mm;
+        }
+
+        /* Images */
+        .section-image {
+            width: 100%;
+            height: 70mm;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 6mm;
+        }
+
+        .image-small {
+            width: 100%;
+            height: 45mm;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        /* CTA boxes */
+        .cta-box {
+            background: var(--equifax-red);
+            color: var(--white);
+            padding: 8mm;
+            border-radius: 8px;
+            text-align: center;
+            margin: 8mm 0;
+        }
+
+        .cta-title {
+            font-size: 14pt;
+            font-weight: 700;
+            margin-bottom: 3mm;
+        }
+
+        .cta-text {
+            font-size: 11pt;
+            opacity: 0.95;
+        }
+
+        .cta-light {
+            background: var(--equifax-light-gray);
+            color: var(--equifax-dark);
+            border-left: 4px solid var(--equifax-red);
+        }
+
+        .cta-light .cta-text {
+            color: var(--equifax-gray);
+        }
+
+        /* Icons */
+        .icon-circle {
+            width: 12mm;
+            height: 12mm;
+            border-radius: 50%;
+            background: var(--equifax-red);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14pt;
+            font-weight: 700;
+            margin-bottom: 4mm;
+        }
+
+        /* List styles */
+        .feature-list {
+            list-style: none;
+            margin-bottom: 6mm;
+        }
+
+        .feature-list li {
+            padding: 3mm 0;
+            padding-left: 8mm;
+            position: relative;
+            font-size: 11pt;
+            color: var(--equifax-gray);
+            border-bottom: 1px solid var(--equifax-border);
+        }
+
+        .feature-list li:before {
+            content: "▸";
+            color: var(--equifax-red);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Stats */
+        .stat-box {
+            text-align: center;
+            padding: 6mm 4mm;
+            background: var(--equifax-light-gray);
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 24pt;
+            font-weight: 800;
+            color: var(--equifax-red);
+            margin-bottom: 2mm;
+        }
+
+        .stat-label {
+            font-size: 10pt;
+            color: var(--equifax-gray);
+            font-weight: 500;
+        }
+
+        /* Footer */
+        .page-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 16mm;
+            right: 16mm;
+            border-top: 1px solid var(--equifax-border);
+            padding-top: 4mm;
+            display: flex;
+            justify-content: space-between;
+            font-size: 9pt;
+            color: var(--equifax-gray);
+        }
+
+        /* Final page */
+        .final-page {
+            background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 30mm 20mm;
+        }
+
+        .final-page .section-title {
+            color: var(--white);
+        }
+
+        .final-page .section-subtitle {
+            color: #CCCCCC;
+        }
+
+        .contact-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10mm;
+            border-radius: 8px;
+            margin: 10mm 0;
+            max-width: 140mm;
+        }
+
+        .contact-item {
+            font-size: 12pt;
+            margin: 4mm 0;
+            color: var(--white);
+        }
+
+        .contact-label {
+            font-size: 10pt;
+            color: #AAAAAA;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2mm;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="page cover">
+    <div class="cover-header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="cover-logo">
+    </div>
+    
+    <div class="cover-content">
+        <span class="cover-badge">Solución Empresarial</span>
+        <h1 class="cover-title">Portfolio Monitor</h1>
+        <p class="cover-subtitle">Inteligencia avanzada para la gestión proactiva de su cartera comercial</p>
+        
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Business Intelligence Dashboard" class="cover-image">
+    </div>
+    
+    <div class="cover-footer">
+        <p>Equifax Chile · Soluciones para Empresas</p>
+    </div>
+</div>
+
+<!-- PAGE 2: WHAT IS PORTFOLIO MONITOR -->
+<div class="page">
+    <div class="header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="header-logo">
+    </div>
+    
+    <span class="section-badge">Conozca la solución</span>
+    <h2 class="section-title">¿Qué es Portfolio Monitor?</h2>
+    <p class="section-subtitle">Una plataforma inteligente que transforma la manera en que su empresa gestiona el riesgo comercial.</p>
+    
+    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52e?w=800&q=80" alt="Data Analysis" class="section-image">
+    
+    <div class="card card-highlight">
+        <h3 class="card-title">Visión completa de su cartera</h3>
+        <p class="card-text">
+            Portfolio Monitor es una solución corporativa de Equifax que proporciona monitoreo continuo y análisis inteligente sobre el comportamiento crediticio de sus clientes comerciales, permitiéndole anticipar riesgos y tomar decisiones informadas en tiempo real.
+        </p>
+    </div>
+    
+    <p class="content-text">
+        Diseñada específicamente para empresas que manejan carteras comerciales activas, esta plataforma integra datos de múltiples fuentes para entregar una visión 360° del riesgo asociado a cada cliente, en cada momento del ciclo comercial.
+    </p>
+    
+    <div class="cta-box cta-light">
+        <p class="cta-title">¿Gestiona una cartera comercial activa?</p>
+        <p class="cta-text">Converse con su ejecutivo comercial sobre cómo Portfolio Monitor puede adaptarse a su realidad empresarial.</p>
+    </div>
+    
+    <div class="page-footer">
+        <span>Portfolio Monitor · Equifax Chile</span>
+        <span>02</span>
+    </div>
+</div>
+
+<!-- PAGE 3: PROBLEMS SOLVED -->
+<div class="page">
+    <div class="header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="header-logo">
+    </div>
+    
+    <span class="section-badge">Desafíos empresariales</span>
+    <h2 class="section-title">Problemas que ayuda a resolver</h2>
+    <p class="section-subtitle">Las empresas enfrentan desafíos crecientes en la gestión de riesgo comercial. Portfolio Monitor aborda los más críticos.</p>
+    
+    <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80" alt="Executive Meeting" class="section-image">
+    
+    <div class="grid-2">
+        <div class="card">
+            <div class="icon-circle">!</div>
+            <h3 class="card-title">Visibilidad limitada</h3>
+            <p class="card-text">Falta de información actualizada sobre el estado financiero real de los clientes comerciales.</p>
+        </div>
+        
+        <div class="card">
+            <div class="icon-circle">!</div>
+            <h3 class="card-title">Gestión reactiva</h3>
+            <p class="card-text">Detección tardía de clientes con riesgo de impago, cuando las opciones de acción son limitadas.</p>
+        </div>
+        
+        <div class="card">
+            <div class="icon-circle">!</div>
+            <h3 class="card-title">Análisis manual</h3>
+            <p class="card-text">Procesos lentos y propensos a errores que retrasan la toma de decisiones críticas.</p>
+        </div>
+        
+        <div class="card">
+            <div class="icon-circle">!</div>
+            <h3 class="card-title">Falta de alertas tempranas</h3>
+            <p class="card-text">Imposibilidad de identificar señales de deterioro antes de que impacten la cartera.</p>
+        </div>
+    </div>
+    
+    <div class="cta-box">
+        <p class="cta-title">¿Reconoce alguno de estos desafíos en su empresa?</p>
+        <p class="cta-text">Su ejecutivo comercial puede mostrarle cómo Portfolio Monitor los resuelve.</p>
+    </div>
+    
+    <div class="page-footer">
+        <span>Portfolio Monitor · Equifax Chile</span>
+        <span>03</span>
+    </div>
+</div>
+
+<!-- PAGE 4: KEY BENEFITS -->
+<div class="page">
+    <div class="header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="header-logo">
+    </div>
+    
+    <span class="section-badge">Beneficios principales</span>
+    <h2 class="section-title">Valor real para su empresa</h2>
+    <p class="section-subtitle">Más que funcionalidades, Portfolio Monitor entrega resultados tangibles que impactan directamente en su rentabilidad.</p>
+    
+    <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80" alt="Team Working" class="section-image">
+    
+    <div class="grid-3">
+        <div class="stat-box">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Monitoreo continuo</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">360°</div>
+            <div class="stat-label">Visión integral</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">Tiempo</div>
+            <div class="stat-label">Real</div>
+        </div>
+    </div>
+    
+    <ul class="feature-list">
+        <li><strong>Anticipación al riesgo:</strong> Identifique señales de deterioro antes de que se conviertan en pérdidas.</li>
+        <li><strong>Decisiones informadas:</strong> Acceda a información actualizada y confiable para respaldar cada decisión comercial.</li>
+        <li><strong>Eficiencia operativa:</strong> Reduzca el tiempo dedicado al análisis manual de cartera.</li>
+        <li><strong>Mejor calidad de cartera:</strong> Optimice la composición de su portafolio comercial con datos objetivos.</li>
+        <li><strong>Prevención de morosidad:</strong> Actúe proactivamente sobre clientes con riesgo creciente.</li>
+    </ul>
+    
+    <div class="cta-box cta-light">
+        <p class="cta-title">Cada empresa tiene necesidades únicas</p>
+        <p class="cta-text">Conversemos sobre cómo estos beneficios se traducen en valor concreto para su organización.</p>
+    </div>
+    
+    <div class="page-footer">
+        <span>Portfolio Monitor · Equifax Chile</span>
+        <span>04</span>
+    </div>
+</div>
+
+<!-- PAGE 5: FUNCTIONALITIES -->
+<div class="page">
+    <div class="header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="header-logo">
+    </div>
+    
+    <span class="section-badge">Capacidades de la plataforma</span>
+    <h2 class="section-title">Funcionalidades clave</h2>
+    <p class="section-subtitle">Herramientas diseñadas para entregar control total sobre su cartera comercial.</p>
+    
+    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Dashboard Analytics" class="section-image">
+    
+    <div class="grid-2">
+        <div class="card card-highlight">
+            <h3 class="card-title">Monitoreo continuo</h3>
+            <p class="card-text">Seguimiento permanente del comportamiento crediticio de cada cliente de su cartera.</p>
+        </div>
+        
+        <div class="card card-highlight">
+            <h3 class="card-title">Alertas tempranas</h3>
+            <p class="card-text">Notificaciones automáticas ante cambios relevantes en el perfil de riesgo.</p>
+        </div>
+        
+        <div class="card card-highlight">
+            <h3 class="card-title">Análisis de tendencias</h3>
+            <p class="card-text">Identificación de patrones de comportamiento y evolución del riesgo en el tiempo.</p>
+        </div>
+        
+        <div class="card card-highlight">
+            <h3 class="card-title">Reportes personalizados</h3>
+            <p class="card-text">Informes a medida según los requerimientos específicos de su empresa.</p>
+        </div>
+    </div>
+    
+    <div class="cta-box">
+        <p class="cta-title">¿Quiere ver Portfolio Monitor en acción?</p>
+        <p class="cta-text">Coordine una demostración personalizada con su ejecutivo comercial.</p>
+    </div>
+    
+    <div class="page-footer">
+        <span>Portfolio Monitor · Equifax Chile</span>
+        <span>05</span>
+    </div>
+</div>
+
+<!-- PAGE 6: VALUE FOR COMPANY -->
+<div class="page">
+    <div class="header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="header-logo">
+    </div>
+    
+    <span class="section-badge">Propuesta de valor</span>
+    <h2 class="section-title">Valor para su empresa</h2>
+    <p class="section-subtitle">Portfolio Monitor no es solo una herramienta de análisis. Es un activo estratégico para su organización.</p>
+    
+    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80" alt="Business Growth" class="section-image">
+    
+    <div class="card card-highlight">
+        <h3 class="card-title">Transformación del riesgo en oportunidad</h3>
+        <p class="card-text">
+            Al proporcionar visibilidad completa y alertas tempranas, Portfolio Monitor permite que su empresa transforme la gestión de riesgo de una función defensiva a una ventaja competitiva.
+        </p>
+    </div>
+    
+    <div class="grid-2">
+        <div>
+            <h3 class="card-title" style="color: var(--equifax-red);">Para Gerentes Comerciales</h3>
+            <p class="card-text">Mejor selección de clientes y condiciones comerciales más precisas basadas en datos objetivos.</p>
+        </div>
+        
+        <div>
+            <h3 class="card-title" style="color: var(--equifax-red);">Para Gerentes de Finanzas</h3>
+            <p class="card-text">Reducción de pérdidas por impago y optimización del capital de trabajo.</p>
+        </div>
+        
+        <div>
+            <h3 class="card-title" style="color: var(--equifax-red);">Para Analistas de Riesgo</h3>
+            <p class="card-text">Herramientas avanzadas para evaluación precisa y seguimiento continuo.</p>
+        </div>
+        
+        <div>
+            <h3 class="card-title" style="color: var(--equifax-red);">Para Ejecutivos de Crédito</h3>
+            <p class="card-text">Información en tiempo real para decisiones crediticias más seguras y rentables.</p>
+        </div>
+    </div>
+    
+    <div class="page-footer">
+        <span>Portfolio Monitor · Equifax Chile</span>
+        <span>06</span>
+    </div>
+</div>
+
+<!-- PAGE 7: DECISION MAKING -->
+<div class="page">
+    <div class="header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="header-logo">
+    </div>
+    
+    <span class="section-badge">Toma de decisiones</span>
+    <h2 class="section-title">Cómo mejora la toma de decisiones</h2>
+    <p class="section-subtitle">La información correcta, en el momento correcto, para las decisiones correctas.</p>
+    
+    <img src="https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=800&q=80" alt="Executive Decision" class="section-image">
+    
+    <div class="card">
+        <h3 class="card-title">De reactivo a proactivo</h3>
+        <p class="card-text">
+            Portfolio Monitor transforma el modelo de gestión de riesgo de reactivo a proactivo. En lugar de responder a problemas después de que ocurren, su empresa puede anticiparlos y mitigarlos antes de que impacten los resultados.
+        </p>
+    </div>
+    
+    <div class="grid-2">
+        <div class="card">
+            <h3 class="card-title">Información oportuna</h3>
+            <p class="card-text">Datos actualizados que reflejan la realidad actual de cada cliente.</p>
+        </div>
+        
+        <div class="card">
+            <h3 class="card-title">Análisis predictivo</h3>
+            <p class="card-text">Identificación de tendencias que anticipan comportamientos futuros.</p>
+        </div>
+        
+        <div class="card">
+            <h3 class="card-title">Segmentación inteligente</h3>
+            <p class="card-text">Clasificación de clientes según nivel de riesgo para acciones diferenciadas.</p>
+        </div>
+        
+        <div class="card">
+            <h3 class="card-title">Acción inmediata</h3>
+            <p class="card-text">Capacidad de respuesta rápida ante cambios en el perfil de riesgo.</p>
+        </div>
+    </div>
+    
+    <div class="cta-box cta-light">
+        <p class="cta-title">¿Cómo serían sus decisiones con mejor información?</p>
+        <p class="cta-text">Conversemos sobre el impacto en su empresa específica.</p>
+    </div>
+    
+    <div class="page-footer">
+        <span>Portfolio Monitor · Equifax Chile</span>
+        <span>07</span>
+    </div>
+</div>
+
+<!-- PAGE 8: USE CASES -->
+<div class="page">
+    <div class="header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="header-logo">
+    </div>
+    
+    <span class="section-badge">Aplicaciones prácticas</span>
+    <h2 class="section-title">Casos de aplicación</h2>
+    <p class="section-subtitle">Portfolio Monitor se adapta a diferentes realidades empresariales y sectores industriales.</p>
+    
+    <img src="https://images.unsplash.com/photo-1664575192807-0208d4022a73?w=800&q=80" alt="Modern Office" class="section-image">
+    
+    <div class="card card-highlight">
+        <h3 class="card-title">Gestión de cartera B2B</h3>
+        <p class="card-text">
+            Empresas con carteras comerciales activas pueden monitorear continuamente el comportamiento de pago de sus clientes, identificando señales tempranas de deterioro financiero.
+        </p>
+    </div>
+    
+    <div class="card card-highlight">
+        <h3 class="card-title">Control de riesgo crediticio</h3>
+        <p class="card-text">
+            Instituciones financieras y empresas de crédito utilizan Portfolio Monitor para evaluar y dar seguimiento al riesgo asociado a cada cliente durante todo el ciclo de la relación comercial.
+        </p>
+    </div>
+    
+    <div class="card card-highlight">
+        <h3 class="card-title">Optimización de políticas comerciales</h3>
+        <p class="card-text">
+            Las áreas comerciales ajustan sus políticas de crédito y condiciones comerciales basándose en datos objetivos del comportamiento real de los clientes.
+        </p>
+    </div>
+    
+    <div class="cta-box">
+        <p class="cta-title">¿Ve aplicación en su empresa?</p>
+        <p class="cta-text">Su ejecutivo comercial puede analizar su caso específico.</p>
+    </div>
+    
+    <div class="page-footer">
+        <span>Portfolio Monitor · Equifax Chile</span>
+        <span>08</span>
+    </div>
+</div>
+
+<!-- PAGE 9: INVITATION -->
+<div class="page">
+    <div class="header">
+        <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" class="header-logo">
+    </div>
+    
+    <span class="section-badge">Próximos pasos</span>
+    <h2 class="section-title">Conozca más en detalle</h2>
+    <p class="section-subtitle">Cada empresa enfrenta desafíos únicos. La mejor manera de evaluar Portfolio Monitor es conversando sobre su realidad específica.</p>
+    
+    <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80" alt="Business Meeting" class="section-image">
+    
+    <div class="card card-highlight">
+        <h3 class="card-title">Una conversación, no una venta</h3>
+        <p class="card-text">
+            Nuestro enfoque es consultivo. Queremos entender su situación actual, sus desafíos y objetivos, para luego evaluar si Portfolio Monitor es la solución adecuada para su empresa.
+        </p>
+    </div>
+    
+    <div class="grid-2">
+        <div class="card">
+            <div class="icon-circle">1</div>
+            <h3 class="card-title">Análisis de necesidades</h3>
+            <p class="card-text">Conversamos sobre su cartera actual y desafíos específicos.</p>
+        </div>
+        
+        <div class="card">
+            <div class="icon-circle">2</div>
+            <h3 class="card-title">Demostración personalizada</h3>
+            <p class="card-text">Le mostramos Portfolio Monitor aplicado a su caso real.</p>
+        </div>
+        
+        <div class="card">
+            <div class="icon-circle">3</div>
+            <h3 class="card-title">Evaluación de valor</h3>
+            <p class="card-text">Analizamos juntos el impacto potencial en su organización.</p>
+        </div>
+        
+        <div class="card">
+            <div class="icon-circle">4</div>
+            <h3 class="card-title">Propuesta a medida</h3>
+            <p class="card-text">Diseñamos una solución adaptada a sus requerimientos.</p>
+        </div>
+    </div>
+    
+    <div class="page-footer">
+        <span>Portfolio Monitor · Equifax Chile</span>
+        <span>09</span>
+    </div>
+</div>
+
+<!-- PAGE 10: CLOSING -->
+<div class="page final-page">
+    <img src="https://cotizadora.github.io/Cotizadora/logo-equifax.png" alt="Equifax" style="max-height: 30mm; margin-bottom: 15mm; filter: brightness(0) invert(1);">
+    
+    <h2 class="section-title" style="color: white;">Conversemos sobre su empresa</h2>
+    <p class="section-subtitle" style="color: #CCCCCC; max-width: 140mm; margin: 0 auto 10mm;">
+        Este documento es solo el comienzo. El verdadero valor de Portfolio Monitor se revela cuando lo analizamos en el contexto de sus desafíos específicos.
+    </p>
+    
+    <div class="contact-box">
+        <p class="contact-label">Su ejecutivo comercial</p>
+        <p class="contact-item">[Nombre del Ejecutivo]</p>
+        
+        <p class="contact-label" style="margin-top: 6mm;">Contacto directo</p>
+        <p class="contact-item">[Teléfono / WhatsApp]</p>
+        <p class="contact-item">[Correo electrónico]</p>
+    </div>
+    
+    <div style="margin-top: 10mm;">
+        <p style="font-size: 12pt; color: white; margin-bottom: 4mm;">
+            <strong>Responda este mensaje</strong>
+        </p>
+        <p style="font-size: 11pt; color: #CCCCCC;">
+            y coordine una conversación con su ejecutivo comercial
+        </p>
+    </div>
+    
+    <div style="margin-top: 20mm; padding-top: 10mm; border-top: 1px solid rgba(255,255,255,0.2); width: 100%; max-width: 160mm;">
+        <p style="font-size: 9pt; color: #888888;">
+            Equifax Chile · Soluciones para Empresas<br>
+            Portfolio Monitor · Gestión Inteligente de Cartera Comercial
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
