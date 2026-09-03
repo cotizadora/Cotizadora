@@ -8235,10 +8235,9 @@ function _estadoLabel(e){ return (typeof DB!=='undefined'&&DB.ESTADO_LABELS&&DB.
 /* ── TIPIFICACIÓN (estado del contacto) — categoría de color bueno/malo/neutro ── */
 function _tipifCat(estado){
   switch(estado){
-    case 'borrador': case 'no_contesta': case 'buzon_voz': return 'warn';      /* neutro / sin contacto */
-    case 'no_quiere': case 'corta_llamada': case 'cliente_molesto': case 'no_credito': return 'bad';   /* rechazo */
-    case 'enviada': case 'agendado': case 'agendado_futuro': case 'interesado': case 'negociacion': case 'pendiente_doc': case 'venta_cerrada': return 'good';  /* enviada + intención positiva */
-    default: return 'neutral';                                                 /* borrador */
+    case 'no_quiere': case 'corta_llamada': case 'cliente_molesto': return 'bad';      /* rechazo: no quiere / corta */
+    case 'interesado': case 'negociacion': case 'venta_cerrada': return 'good';        /* interés real / venta */
+    default: return 'neutral';                                                         /* resto: sin color */
   }
 }
 function _tipifColor(sel){
@@ -9395,14 +9394,12 @@ function _plChequearVencidos(){
 /* Semáforo de gestión por estado (ver CSS .pl-est-*). */
 function _estadoColor(estado){
   switch(estado){
-    case 'borrador': case 'no_contesta': case 'buzon_voz':
-      return 'pl-est-yellow';                                   /* neutro / sin contacto */
-    case 'no_quiere': case 'corta_llamada': case 'cliente_molesto': case 'no_credito':
-      return 'pl-est-red';                                      /* rechazo / no contacto voluntario */
-    case 'enviada': case 'agendado': case 'agendado_futuro': case 'interesado': case 'negociacion': case 'pendiente_doc':
-      return 'pl-est-green';                                    /* enviada + intención positiva del cliente */
+    case 'no_quiere': case 'corta_llamada': case 'cliente_molesto':
+      return 'pl-est-red';                                      /* rechazo: no quiere / corta */
+    case 'interesado': case 'negociacion': case 'venta_cerrada':
+      return 'pl-est-green';                                    /* interés real / venta */
     default:
-      return '';                                                /* borrador → neutro */
+      return '';                                                /* resto → sin color */
   }
 }
 function _agParseFecha(f){
