@@ -3348,12 +3348,12 @@ function cfgHTML(key){
   }
   if(key==='pub'){
     return '<div class="sol-head2">Documentos a publicar</div>'+
-      '<div class="fld"><label>% a cobrar sobre el monto a publicar (neto) — oficial 10%</label><input type="number" id="pub-pct" value="10" min="0" step="0.5" oninput="refresh()"></div>'+
+      '<div class="fld"><label>% a cobrar sobre el monto a publicar (neto) — por defecto 15%</label><input type="number" id="pub-pct" value="15" min="0" step="0.5" oninput="refresh()"></div>'+
       '<input type="hidden" id="pub-docs-json" value="[]">'+
       '<div class="pub-hd"><span>N°</span><span>Monto total del documento</span><span>Abonos</span><span>Monto a publicar</span><span></span></div>'+
       '<div id="pub-docs-rows">'+pubRowsHTML([{m:0,a:0}])+'</div>'+
       '<button type="button" class="pub-add" onclick="pubAddDoc();playClick();" title="Agrega otro documento a publicar">＋ Agregar otro documento</button>'+
-      '<div class="note-inline" style="margin-top:10px;">📰 <b>Publicación Única:</b> se cobra el <b>10% del monto a publicar</b>, y el monto a publicar es el <b>monto total del documento menos los abonos</b> que el deudor ya haya pagado. A ese neto se le suma el <b>IVA (19%)</b>. Puedes cargar varios documentos: el total a pagar es la suma de todos.</div>'+
+      '<div class="note-inline" style="margin-top:10px;">📰 <b>Publicación Única:</b> se cobra el <b>15% del monto a publicar</b> (editable), y el monto a publicar es el <b>monto total del documento menos los abonos</b> que el deudor ya haya pagado. A ese neto se le suma el <b>IVA (19%)</b>. Puedes cargar varios documentos: el total a pagar es la suma de todos.</div>'+
       '<button type="button" id="btn-add-pub-multi" class="exec-save" style="background:var(--rd);color:#fff;margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 16px;" onclick="addPubToMulti();playClick();" title="Agrega esta Publicación Única a la propuesta Multiproducto"><span style="font-size:1.4rem;line-height:1;">📦</span><span>Agregar a Multiproducto</span></button>';
   }
   if(key==='pago_pub'){
@@ -3369,14 +3369,14 @@ function cfgHTML(key){
         '<div class="fld"><label>Monto a publicar · calculado</label><input type="text" id="pp-pub-view" readonly value="—"></div>'+
       '</div>'+
       '<div class="cfg-2">'+
-        '<div class="fld"><label>% a cobrar (neto) — oficial 10%</label><input type="number" id="pp-pct" value="10" min="0" step="0.5" oninput="refresh()"></div>'+
+        '<div class="fld"><label>% a cobrar (neto) — por defecto 15%</label><input type="number" id="pp-pct" value="15" min="0" step="0.5" oninput="refresh()"></div>'+
         '<div class="fld"><label>Valor neto · calculado</label><input type="text" id="pp-neto-view" readonly value="—"></div>'+
       '</div>'+
       '<div class="cfg-2">'+
         '<div class="fld"><label>IVA (19%) · calculado</label><input type="text" id="pp-iva-view" readonly value="—"></div>'+
         '<div class="fld"><label>TOTAL A TRANSFERIR · calculado</label><input type="text" id="pp-total-view" readonly value="—" style="font-weight:800;color:var(--y);font-size:1.05rem;"></div>'+
       '</div>'+
-      '<div class="note-inline" style="margin-top:10px;">💳 <b>Pago Publicación Única:</b> ingresa el monto total del documento y los abonos. El <b>monto a publicar</b> (documento − abonos), el neto (<b>10%</b> por defecto, editable), el IVA y el total a transferir se calculan solos y son definitivos (no es una cotización).</div>';
+      '<div class="note-inline" style="margin-top:10px;">💳 <b>Pago Publicación Única:</b> ingresa el monto total del documento y los abonos. El <b>monto a publicar</b> (documento − abonos), el neto (<b>15%</b> por defecto, editable), el IVA y el total a transferir se calculan solos y son definitivos (no es una cotización).</div>';
   }
   if(key==='bundle')
     return '<div class="cfg-2">'+
@@ -3929,7 +3929,8 @@ function renderBaseDatos(target){
    igual que BDD. Fuente comercial: PPTX Mora Control (publicación DICOM).
    Fuente tarifa: cotizador oficial (hoja "COTIZADOR DOCUMENTO UNICO"):
    MONTO A PUBLICAR = monto total del documento − abonos;
-   PRECIO A COBRAR (NETO) = 10% del monto a publicar; IVA 19%; TOTAL = neto × 1,19.
+   PRECIO A COBRAR (NETO) = % del monto a publicar (15% por defecto, editable);
+   IVA 19%; TOTAL = neto × 1,19.
    Admite varios documentos: la fila TOTALES suma todas las columnas.
    ════════════════════════════════════════════════════════════════ */
 var PUB_DESC=[
@@ -3997,7 +3998,7 @@ function pubDelDoc(i){
 /* Tras restaurar una cotización guardada: reconstruye las filas desde el JSON. */
 function pubSyncFromHidden(){if(document.getElementById('pub-docs-json'))pubRepintar(pubDocs());}
 function pubMonto(){var t=0;pubDocs().forEach(function(d){t+=d.m;});return t;}
-function pubPct(){var v=parseFloat(gv('pub-pct'));return(isNaN(v)||v<0)?10:v;}
+function pubPct(){var v=parseFloat(gv('pub-pct'));return(isNaN(v)||v<0)?15:v;}
 /* Cotizador oficial: neto = % del MONTO A PUBLICAR (documento − abonos); IVA 19%. */
 function pubCalc(){
   var pct=pubPct(),rows=[],tM=0,tA=0,tP=0,tN=0,tI=0,tT=0;
@@ -4091,11 +4092,11 @@ function pubResumenHTML(){
 }
 /* ════════ PAGO PUBLICACIÓN ÚNICA — cálculo y resumen (independiente de la lógica UF/cotización) ════════
    El usuario ingresa el MONTO TOTAL DEL DOCUMENTO y los ABONOS; el monto a publicar
-   es la resta, y sobre él se aplica el % a cobrar (10% oficial por defecto).
+   es la resta, y sobre él se aplica el % a cobrar (15% por defecto).
    El neto, el IVA (19%) y el total a transferir se calculan automáticamente. */
 function ppMontoDoc(){var v=parseFloat(gv('pp-monto'));return(isNaN(v)||v<=0)?0:v;}
 function ppAbono(){var v=parseFloat(gv('pp-abono'));return(isNaN(v)||v<0)?0:v;}
-function ppPct(){var v=parseFloat(gv('pp-pct'));return(isNaN(v)||v<0)?10:v;}
+function ppPct(){var v=parseFloat(gv('pp-pct'));return(isNaN(v)||v<0)?15:v;}
 function ppCalc(){
   var monto=ppMontoDoc();if(!monto)return null;
   var abono=Math.min(ppAbono(),monto);
