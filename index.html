@@ -1988,16 +1988,6 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
       </div>
     </div>
 
-    <!-- Tipificación / estado del contacto (se sincroniza con la Planilla) -->
-    <div class="block">
-      <div class="block-t tipif-head"><span>🏷️ Tipificación del contacto</span><span class="tipif-hint">se sincroniza con la Planilla</span></div>
-      <div class="cfg-grid">
-        <div class="fld">
-          <select id="cli-tipif" class="tipif-sel" onchange="onTipifChange()" title="Marca el resultado del contacto. Verde = buena disposición · Amarillo = no se logró contactar · Rojo = rechazo/no contacto."></select>
-        </div>
-      </div>
-    </div>
-
     <!-- 2 · (selector de producto = barra superior fija, justo encima) -->
     <!-- 3 · CONFIGURACIÓN COMERCIAL del producto activo -->
     <div class="block">
@@ -2010,12 +2000,18 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
       <div id="summary-zone"></div>
     </div>
 
-    <!-- 7 · OBSERVACIONES (último paso, después del cálculo y resultados) -->
+    <!-- 7 · TIPIFICACIÓN + NOTA INTERNA (último paso, bajo la calculadora).
+         Van en un solo bloque: ambos se sincronizan con la Planilla y así no
+         alargan la parte de arriba de la web. -->
     <div class="block">
-      <div class="block-t">📝 Nota Interna</div>
+      <div class="block-t tipif-head"><span>🏷️ Tipificación y nota interna</span><span class="tipif-hint">se sincronizan con la Planilla</span></div>
       <div class="cfg-grid">
+        <div class="fld">
+          <label for="cli-tipif">Tipificación del contacto</label>
+          <select id="cli-tipif" class="tipif-sel" onchange="onTipifChange()" title="Marca el resultado del contacto. Verde = buena disposición · Rojo = rechazo (no quiere / corta) · Sin color = neutro."></select>
+        </div>
         <div class="fld obs-fld">
-          <label for="cli-obs"><span class="obs-hint">se sincronizan con la Planilla</span><button type="button" class="obs-stamp-btn" onclick="obsStampCalc();if(typeof playClick==='function')playClick();" title="Anteponer fecha y hora al comentario (25-08-2026 / 13:12)">🕒 Fecha/hora</button></label>
+          <label for="cli-obs"><span class="obs-hint">Nota interna</span><button type="button" class="obs-stamp-btn" onclick="obsStampCalc();if(typeof playClick==='function')playClick();" title="Anteponer fecha y hora al comentario (25-08-2026 / 13:12)">🕒 Fecha/hora</button></label>
           <textarea id="cli-obs" class="obs-textarea" rows="2" placeholder="Escriba aquí las observaciones de la cotización…" oninput="onObsInput()"></textarea>
         </div>
       </div>
