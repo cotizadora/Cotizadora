@@ -5524,8 +5524,9 @@ function genMail(){
       '</table>'+
     '</div>'+
 
-    // DESTINATARIO — sobre papel; el nombre de la empresa es el 2º tamaño de la pieza
-    '<div style="background:'+_P.sec+';padding:30px 34px 24px;">'+
+    // DESTINATARIO — sobre el papel de apoyo, para que se lea como membrete
+    // y no como una continuación de la sección de producto
+    '<div style="background:'+_P.secAlt+';padding:30px 34px 24px;">'+
       (em
         ? '<div style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:'+_P.lbl+';font-family:Arial,sans-serif;font-weight:bold;margin-bottom:10px;">Propuesta preparada para</div>'+
           '<div style="font-size:26px;font-weight:bold;color:'+_P.tit+';font-family:Arial,sans-serif;line-height:1.25;">'+em+'</div>'+
@@ -5536,7 +5537,7 @@ function genMail(){
           '<div style="margin-top:14px;font-size:15px;line-height:1.65;color:'+_P.txt+';font-family:Arial,sans-serif;">'+sal+'. Le presento la siguiente propuesta comercial:</div>'
       )+
     '</div>'+
-    _mailFilete('gmail')+
+    _mailFilete('gmail',MP().secAlt)+
 
     // PRODUCTO/PRECIO/DOCS (soluciones: contenido multiproducto sin precio)
     (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
@@ -5615,32 +5616,32 @@ function genMail(){
   /* P2 · DESTINATARIO Outlook — fuente única reutilizada por individual, multi y soluciones
      (mismo mecanismo que ya emite Gmail fuera de la rama). No duplica lógica. */
   var _destOutlook =
-    '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:30px 34px 24px;">'+
+    '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding:30px 34px 24px;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
         (em
-          ? '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-bottom:10px;">'+_mailRotulo('Propuesta preparada para')+'</td></tr>'+
-            '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-bottom:6px;">'+
+          ? '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding-bottom:10px;">'+_mailRotulo('Propuesta preparada para')+'</td></tr>'+
+            '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding-bottom:6px;">'+
               '<font face="Arial,sans-serif" color="'+_P.tit+'" style="font-size:26px;line-height:1.25;"><b><span style="color:'+_P.tit+';">'+em+'</span></b></font>'+
             '</td></tr>'+
-            (ru?'<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-bottom:10px;">'+
+            (ru?'<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding-bottom:10px;">'+
               '<font face="Arial,sans-serif" color="'+_P.suave+'" style="font-size:13px;"><span style="color:'+_P.suave+';">RUT '+ru+'</span></font>'+
             '</td></tr>':'')+
-            (_salNom?'<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:6px 0 4px;">'+
+            (_salNom?'<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding:6px 0 4px;">'+
               '<font face="Arial,sans-serif" color="'+_P.tit+'" style="font-size:15px;"><b><span style="color:'+_P.tit+';">'+_salNom+'</span></b></font>'+
             '</td></tr>':'')+
-            '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-top:8px;">'+
+            '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding-top:8px;">'+
               '<font face="Arial,sans-serif" color="'+_P.txt+'" style="font-size:15px;line-height:1.65;"><span style="color:'+_P.txt+';">'+sal+'. Le presento la siguiente propuesta comercial:</span></font>'+
             '</td></tr>'
-          : '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-bottom:12px;">'+
+          : '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding-bottom:12px;">'+
               '<font face="Arial,sans-serif" color="'+_P.tit+'" style="font-size:26px;line-height:1.25;"><b><span style="color:'+_P.tit+';">Propuesta Comercial</span></b></font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';">'+
+            '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';">'+
               '<font face="Arial,sans-serif" color="'+_P.txt+'" style="font-size:15px;line-height:1.65;"><span style="color:'+_P.txt+';">'+sal+'. Le presento la siguiente propuesta comercial:</span></font>'+
             '</td></tr>'
         )+
       '</table>'+
     '</td></tr>'+
-    _mailFilete('outlook');
+    _mailFilete('outlook',MP().secAlt);
 
   var _htmlOutlook =
     // MAT — tabla exterior a todo el ancho; dentro, la pieza de 600px centrada
