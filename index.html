@@ -5138,6 +5138,102 @@ function loadExecutivo(){
     },600);
   }
 }
+/* ════════ PIEZAS DEL CORREO CON LA DISTRIBUCIÓN DE LA FICHA ════════
+   La Ficha reparte la información en bandas y por eso se lee mejor: beneficios en
+   DOS columnas, el precio como un número grande solo (no como fila de tabla), una
+   franja Contrato · Modalidad · Descargas, y la firma con la foto del ejecutivo.
+   El correo llevaba todo apilado en una sola columna. Estas funciones arman esas
+   bandas UNA vez y las consumen Gmail y Outlook, así no se separan con el tiempo.
+   CONFIABILIDAD: todo con <table>/<td bgcolor> + color explícito en cada <font>,
+   que es lo único que respeta el motor Word de Outlook. */
+
+/* Beneficios en dos columnas, como el grid de la Ficha. */
+function _mailBenefCols(items){
+  var _P=MP(),linea=mailDark()?'#2e1a20':'#efe2e5';
+  var mid=Math.ceil(items.length/2);
+  function celda(arr){
+    return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+      arr.map(function(it){
+        return '<tr>'+
+          '<td valign="top" width="16" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:5px 6px 5px 0;border-bottom:1px solid '+linea+';">'+
+            '<font face="Arial,sans-serif" color="#9b1c2e" style="font-size:12px;"><b>&#10004;</b></font>'+
+          '</td>'+
+          '<td valign="top" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:5px 0;border-bottom:1px solid '+linea+';">'+
+            '<font face="Arial,sans-serif" color="'+_P.txt+'" style="font-size:12px;line-height:1.45;"><span style="color:'+_P.txt+';">'+it+'</span></font>'+
+          '</td>'+
+        '</tr>';
+      }).join('')+
+    '</table>';
+  }
+  return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+    '<td width="50%" valign="top" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-right:12px;">'+celda(items.slice(0,mid))+'</td>'+
+    '<td width="50%" valign="top" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-left:12px;">'+celda(items.slice(mid))+'</td>'+
+  '</tr></table>';
+}
+/* Precio como bloque grande: etiqueta pequeña arriba, número gigante, apoyo debajo. */
+function _mailPrecio(o,modo){
+  var bg='#7a1425';
+  var dentro='<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
+    '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding-bottom:5px;">'+
+      '<font face="Arial,sans-serif" color="#e8b8c0" style="font-size:9px;letter-spacing:2px;text-transform:uppercase;">'+(o.etiqueta||'Cargo fijo mensual')+'</font>'+
+      (o.hayDc?'&nbsp;&nbsp;<font face="Arial,sans-serif" color="#e8b8c0" style="font-size:10px;"><span style="text-decoration:line-through;">Lista '+o.ufL+' UF</span></font>':'')+
+    '</td></tr>'+
+    '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding-bottom:6px;">'+
+      '<font face="Arial,sans-serif" color="#f0c040" style="font-size:34px;line-height:1;"><b><span style="color:#f0c040;">'+o.precio+'</span></b></font>'+
+    '</td></tr>'+
+    (o.clp?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';">'+
+      '<font face="Arial,sans-serif" color="#f0d8dc" style="font-size:12px;"><span style="color:#f0d8dc;">'+o.clp+'</span></font>'+
+    '</td></tr>':'')+
+    (o.hayDc?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding-top:7px;">'+
+      '<font face="Arial,sans-serif" color="#4ade80" style="font-size:13px;"><b><span style="color:#4ade80;">&#8722;'+o.dc+'% sobre precio lista</span></b></font>'+
+    '</td></tr>':'')+
+  '</table>';
+  if(modo==='outlook')return '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:18px 28px;">'+dentro+'</td></tr>';
+  return '<div style="background-color:'+bg+';background-image:linear-gradient(135deg,#5a0e1a 0%,#7a1425 60%,#9b1c2e 100%);padding:18px 28px;">'+dentro+'</div>';
+}
+/* Franja de datos del contrato — la tira Contrato · Modalidad · … de la Ficha.
+   `celdas` = [[etiqueta, valor, colorOpcional], …] */
+function _mailFranja(celdas,modo){
+  celdas=(celdas||[]).filter(Boolean); if(!celdas.length)return '';
+  var bg=mailDark()?'#0c0508':'#f6f2f3';
+  var lbl=mailDark()?'#7a6a70':'#8a7a80';
+  var val=mailDark()?'#ffffff':'#1a1a1a';
+  var w=Math.floor(100/celdas.length);
+  var dentro='<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+    celdas.map(function(c){
+      var col=c[2]||val;
+      return '<td width="'+w+'%" valign="top" bgcolor="'+bg+'" style="background-color:'+bg+';padding-right:14px;">'+
+        '<font face="Arial,sans-serif" color="'+lbl+'" style="font-size:9px;letter-spacing:2px;text-transform:uppercase;">'+c[0]+'</font><br>'+
+        '<font face="Arial,sans-serif" color="'+col+'" style="font-size:13px;"><b><span style="color:'+col+';">'+c[1]+'</span></b></font>'+
+      '</td>';
+    }).join('')+
+  '</tr></table>';
+  if(modo==='outlook')return '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:13px 28px;">'+dentro+'</td></tr>';
+  return '<div style="background:'+bg+';padding:13px 28px;">'+dentro+'</div>';
+}
+/* Firma con la foto circular del ejecutivo, igual que el pie de la Ficha. */
+function _mailFirma(d,modo){
+  var bg='#1a0a0e';
+  var dentro='<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
+    (d.foto?'<td width="70" valign="top" bgcolor="'+bg+'" style="background-color:'+bg+';padding-right:14px;">'+
+      '<img src="'+d.foto+'" width="56" height="56" alt="" style="display:block;width:56px;height:56px;border-radius:50%;border:2px solid #f0c040;object-fit:cover;" />'+
+    '</td>':'')+
+    '<td valign="top" bgcolor="'+bg+'" style="background-color:'+bg+';">'+
+      '<font face="Arial,sans-serif" color="#8a7078" style="font-size:9px;letter-spacing:2px;text-transform:uppercase;">'+d.cargo+'</font><br>'+
+      '<font face="Arial,sans-serif" color="#ffffff" style="font-size:17px;"><b><span style="color:#ffffff;">'+d.nombre+'</span></b></font><br>'+
+      '<font face="Arial,sans-serif" color="#c8960a" style="font-size:11px;"><span style="color:#c8960a;">'+d.empresa+'</span></font>'+
+      (d.firma?'<br><font face="Arial,sans-serif" color="#b0b0b0" style="font-size:11px;"><i><span style="color:#b0b0b0;">'+d.firma+'</span></i></font>':'')+
+      (d.wsp?'<br><font face="Arial,sans-serif" color="#90d490" style="font-size:12px;"><b><span style="color:#90d490;">'+d.wsp+'</span></b></font>':'')+
+      (d.mail?'<br><font face="Arial,sans-serif" color="#90b8d4" style="font-size:12px;"><span style="color:#90b8d4;">&#9993; '+d.mail+'</span></font>':'')+
+    '</td>'+
+    '<td valign="bottom" align="right" bgcolor="'+bg+'" style="background-color:'+bg+';">'+
+      '<font face="Arial,sans-serif" color="#6a5058" style="font-size:10px;">'+d.fecha+'</font><br>'+
+      '<font face="Arial,sans-serif" color="#5a4048" style="font-size:10px;">Valores en UF + IVA</font>'+
+    '</td>'+
+  '</tr></table>';
+  if(modo==='outlook')return '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:16px 28px;">'+dentro+'</td></tr>';
+  return '<div style="background:'+bg+';padding:16px 28px;border-top:3px solid #9b1c2e;">'+dentro+'</div>';
+}
 function genMail(){
   if(typeof CURRENT!=='undefined'&&CURRENT.key==='pago_pub'){genMailPagoPub();return;}
   var isSol=(typeof CURRENT!=='undefined'&&CURRENT.key==='soluciones');
@@ -5371,47 +5467,21 @@ function genMail(){
     '<div style="background:'+_P.sec+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+
       '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:'+_P.lbl+';font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
       '<div style="font-size:18px;font-weight:800;color:'+_P.tit+';font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+(pi.sub?'<span style="display:block;font-size:12px;font-weight:600;color:'+(mailDark()?'#e0839a':'#9b1c2e')+';margin-top:3px;">'+pi.sub+'</span>':'')+'</div>'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+_listaItems+'</table>'+
+      _mailBenefCols(itMail)+
     '</div>'+
 
     // PRECIO — gradiente rojo oscuro (con respaldo sólido para Outlook)
-    '<div style="background-color:#7a1425;background-image:linear-gradient(135deg,#5a0e1a 0%,#7a1425 60%,#9b1c2e 100%);padding:22px 28px;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-        (hayDc?
-          '<tr>'+
-            '<td style="font-size:11px;color:#ddaaaa;font-family:Arial,sans-serif;padding:3px 0;">Precio lista</td>'+
-            '<td align="right" style="font-size:11px;color:#ddaaaa;text-decoration:line-through;font-family:Arial,sans-serif;padding:3px 0;">'+ufL+' UF + IVA</td>'+
-          '</tr>':'') +
-        '<tr>'+
-          '<td style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,220,220,.9);font-family:Arial,sans-serif;padding:8px 0 4px;vertical-align:bottom;">Precio ofrecido</td>'+
-          '<td align="right" style="padding:6px 0 4px;vertical-align:bottom;">'+
-            '<span style="font-size:34px;font-weight:900;color:#f0c040;font-family:Arial,sans-serif;line-height:1;">'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</span>'+
-          '</td>'+
-        '</tr>'+
-        (clp?
-          '<tr>'+
-            '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Aprox. mensual con IVA</td>'+
-            '<td align="right" style="font-size:14px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;padding:2px 0;">'+fmtN(clp)+'</td>'+
-          '</tr>':'') +
-        (hayDc?
-          '<tr>'+
-            '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:2px 0;">Descuento aplicado</td>'+
-            '<td align="right" style="font-size:14px;font-weight:800;color:#4ade80;font-family:Arial,sans-serif;padding:2px 0;">&#8722;'+dc+'% sobre precio lista</td>'+
-          '</tr>':'') +
-        '<tr>'+
-          '<td colspan="2" style="border-top:1px solid rgba(200,100,110,.5);padding-top:8px;margin-top:4px;"></td>'+
-        '</tr>'+
-        '<tr>'+
-          '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">Plazo / Modalidad</td>'+
-          '<td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</td>'+
-        '</tr>'+
-        (co>0&&(tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3')?
-          '<tr>'+
-            '<td style="font-size:11px;color:rgba(255,220,220,.75);font-family:Arial,sans-serif;padding:4px 0;">'+(tipo==='ri_bolsa'?'Descargas incluidas (bolsa)':'Descargas de Reporte Interactivo / mes')+'</td>'+
-            '<td align="right" style="font-size:13px;font-weight:600;color:#ffffff;font-family:Arial,sans-serif;padding:4px 0;">'+co+'</td>'+
-          '</tr>':'')+
-      '</table>'+
-    '</div>'+
+    _mailPrecio({etiqueta:'Cargo fijo mensual',precio:(ufV?ufV+' UF + IVA':'[X] UF + IVA'),
+                 clp:(clp?'Aprox. '+fmtN(clp)+' mensual con IVA incluido':''),
+                 hayDc:hayDc,ufL:ufL,dc:dc},'gmail')+
+
+    // FRANJA DE CONTRATO — la tira Contrato · Modalidad · Descargas de la Ficha
+    _mailFranja([
+      ['Contrato',pl+' meses'],
+      ['Modalidad','POSTPAGO &middot; 30 d&iacute;as','#2ecc71'],
+      (co>0&&(tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3')
+        ? [(tipo==='ri_bolsa'?'Descargas (bolsa)':'Descargas RI / mes'),''+co] : null)
+    ],'gmail')+
 
     // DOCUMENTOS — fondo ámbar muy suave
     '<div style="background:'+_P.secAlt+';padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid '+_P.docLine+';">'+
@@ -5419,27 +5489,9 @@ function genMail(){
       '<div style="font-size:12px;color:'+_P.docTxt+';font-family:Arial,sans-serif;">'+_docsInlineHTML()+'</div>'+
     '</div>')))))+
 
-    // FIRMA — fondo oscuro corporativo
-    '<div style="background:#120810;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-        '<tr>'+
-          '<td valign="top">'+
-            '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#666;font-family:Arial,sans-serif;margin-bottom:5px;">'+exCargo+'</div>'+
-            '<div style="font-size:17px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">'+as2+'</div>'+
-            '<div style="margin-top:3px;font-size:11px;color:#c8960a;font-family:Arial,sans-serif;">'+exEmpresa+'</div>'+
-            (exFirma?'<div style="margin-top:3px;font-size:11px;font-style:italic;color:#b0b0b0;font-family:Arial,sans-serif;">'+exFirma+'</div>':'')+
-            (fo?'<div style="margin-top:6px;font-size:12px;font-family:Arial,sans-serif;">'+
-                  '<span style="color:#90d490;font-weight:700;">'+fo+'</span>'+
-                '</div>':'')+
-            (ml?'<div style="margin-top:2px;font-size:12px;color:#90b8d4;font-family:Arial,sans-serif;">&#9993; '+ml+'</div>':'')+
-          '</td>'+
-          '<td valign="bottom" align="right">'+
-            '<div style="font-size:10px;color:#555;font-family:Arial,sans-serif;">'+hoy()+'</div>'+
-            '<div style="margin-top:2px;font-size:10px;color:#444;font-family:Arial,sans-serif;">Valores en UF + IVA</div>'+
-          '</td>'+
-        '</tr>'+
-      '</table>'+
-    '</div>'+
+    // FIRMA — pie de la Ficha: foto circular + datos del ejecutivo
+    _mailFirma({foto:exFoto,cargo:exCargo,nombre:as2,empresa:exEmpresa,firma:exFirma,
+                wsp:fo,mail:ml,fecha:hoy()},'gmail')+
 
     // PIE DE PÁGINA CORPORATIVO
     '<div style="background:#0d060a;padding:10px 28px;text-align:center;border-top:1px solid #2a1420;">'+
@@ -5581,76 +5633,25 @@ function genMail(){
           '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
             '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;font-size:2px;line-height:2px;height:2px;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
           '</table>'+
-          '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:14px;">'+_listaItemsOtl+'</table>'+
+          _mailBenefCols(itMail)+
         '</td>'+
       '</tr></table>'+
     '</td></tr>'+
 
     // ══════════════════════════════════════════
-    // PRECIO — fondo rojo oscuro
-    // ══════════════════════════════════════════
-    '<tr><td bgcolor="#7a1425" style="background-color:#7a1425;padding:22px 28px;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;color:#ffffff;">'+
-        (hayDc
-          ? '<tr>'+
-              '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;">'+
-                '<font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;">Precio lista</font>'+
-              '</td>'+
-              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:3px 0;">'+
-                '<font face="Arial,sans-serif" color="#f5e0e0" style="font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</font>'+
-              '</td>'+
-            '</tr>'
-          : '')+
-        '<tr>'+
-          '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;text-transform:uppercase;"><span style="color:#ffffff;"><b>Precio ofrecido</b></span></font>'+
-          '</td>'+
-          '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:6px 0 4px;vertical-align:bottom;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:34px;font-weight:bold;line-height:1;"><span style="color:#ffffff;"><b>'+(ufV?ufV+' UF + IVA':'[X] UF + IVA')+'</b></span></font>'+
-          '</td>'+
-        '</tr>'+
-        (clp
-          ? '<tr>'+
-              '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Aprox. mensual con IVA</b></span></font>'+
-              '</td>'+
-              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#ffffff" style="font-size:14px;font-weight:bold;"><span style="color:#ffffff;"><b>'+fmtN(clp)+'</b></span></font>'+
-              '</td>'+
-            '</tr>'
-          : '')+
-        (hayDc
-          ? '<tr>'+
-              '<td bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#f5e5e5" style="font-size:11px;">Descuento aplicado</font>'+
-              '</td>'+
-              '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;padding:2px 0;">'+
-                '<font face="Arial,sans-serif" color="#50e870" style="font-size:14px;font-weight:bold;"><b>&#8722;'+dc+'% sobre precio lista</b></font>'+
-              '</td>'+
-            '</tr>'
-          : '')+
-        '<tr><td colspan="2" bgcolor="#c07080" style="background-color:#c07080;font-size:1px;line-height:1px;height:1px;padding:0;mso-line-height-rule:exactly;">&nbsp;</td></tr>'+
-        '<tr>'+
-          '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>Plazo / Modalidad</b></span></font>'+
-          '</td>'+
-          '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-            '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+pl+' meses &middot; POSTPAGO 30 d&iacute;as</b></span></font>'+
-          '</td>'+
-        '</tr>'+
-        (co>0&&(tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3')?
-          '<tr>'+
-            '<td align="left" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:11px;"><span style="color:#ffffff;"><b>'+(tipo==='ri_bolsa'?'Descargas incluidas (bolsa)':'Descargas de Reporte Interactivo / mes')+'</b></span></font>'+
-            '</td>'+
-            '<td align="right" bgcolor="#7a1425" style="background-color:#7a1425;color:#ffffff;padding:8px 0 0;">'+
-              '<font face="Arial,sans-serif" color="#ffffff" style="font-size:13px;font-weight:bold;"><span style="color:#ffffff;"><b>'+co+'</b></span></font>'+
-            '</td>'+
-          '</tr>':'')+
-      '</table>'+
-    '</td></tr>'+
+    // PRECIO — bloque grande estilo Ficha
+    _mailPrecio({etiqueta:'Cargo fijo mensual',precio:(ufV?ufV+' UF + IVA':'[X] UF + IVA'),
+                 clp:(clp?'Aprox. '+fmtN(clp)+' mensual con IVA incluido':''),
+                 hayDc:hayDc,ufL:ufL,dc:dc},'outlook')+
 
-    // ══════════════════════════════════════════
+    // FRANJA DE CONTRATO — Contrato · Modalidad · Descargas
+    _mailFranja([
+      ['Contrato',pl+' meses'],
+      ['Modalidad','POSTPAGO &middot; 30 d&iacute;as','#2ecc71'],
+      (co>0&&(tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3')
+        ? [(tipo==='ri_bolsa'?'Descargas (bolsa)':'Descargas RI / mes'),''+co] : null)
+    ],'outlook')+
+
     // DOCUMENTOS — fondo crema claro
     // ══════════════════════════════════════════
     '<tr><td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';padding:0;">'+
@@ -5670,50 +5671,10 @@ function genMail(){
     '</td></tr>')))))+
 
     // ══════════════════════════════════════════
-    // FIRMA — fondo gris claro, texto oscuro (garantizado Outlook)
+    // FIRMA — pie de la Ficha: foto circular + datos del ejecutivo
     // ══════════════════════════════════════════
-    '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding:20px 28px;border-top:3px solid #9b1c2e;">'+
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td valign="top" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
-          '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-bottom:5px;">'+
-              '<font face="Arial,sans-serif" color="#666666"><font style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">'+exCargo+'</font></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
-              '<font face="Arial,sans-serif" color="#111111"><b><font style="font-size:17px;">'+as2+'</font></b></font>'+
-            '</td></tr>'+
-            '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:4px;">'+
-              '<font face="Arial,sans-serif" color="#9b1c2e"><b><font style="font-size:12px;">'+exEmpresa+'</font></b></font>'+
-            '</td></tr>'+
-            (exFirma
-              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
-                  '<font face="Arial,sans-serif" color="#555555"><i><font style="font-size:11px;">'+exFirma+'</font></i></font>'+
-                '</td></tr>'
-              : '')+
-            (fo
-              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:7px;">'+
-                  '<font face="Arial,sans-serif" color="#1a6e1a"><font style="font-size:12px;">'+fo+'</font></font>'+
-                '</td></tr>'
-              : '')+
-            (ml
-              ? '<tr><td bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
-                  '<font face="Arial,sans-serif" color="#1a4a7a"><font style="font-size:12px;">&#9993; '+ml+'</font></font>'+
-                '</td></tr>'
-              : '')+
-          '</table>'+
-        '</td>'+
-        '<td valign="bottom" align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
-          '<table cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:collapse;">'+
-            '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;">'+
-              '<font face="Arial,sans-serif" color="#555555"><font style="font-size:10px;">'+hoy()+'</font></font>'+
-            '</td></tr>'+
-            '<tr><td align="right" bgcolor="#eeeeee" style="background-color:#eeeeee;padding-top:3px;">'+
-              '<font face="Arial,sans-serif" color="#777777"><font style="font-size:10px;">Valores en UF + IVA</font></font>'+
-            '</td></tr>'+
-          '</table>'+
-        '</td>'+
-      '</tr></table>'+
-    '</td></tr>'+
+    _mailFirma({foto:exFoto,cargo:exCargo,nombre:as2,empresa:exEmpresa,firma:exFirma,
+                wsp:fo,mail:ml,fecha:hoy()},'outlook')+
 
     // ══════════════════════════════════════════
     // PIE — fondo gris medio, texto oscuro legible
