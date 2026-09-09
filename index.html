@@ -3947,6 +3947,24 @@ var PUB_REQ=[
   'No debe existir demanda judicial sobre el documento',
   'Personas naturales: autorización según Ley 19.628'
 ];
+/* Documentos a solicitar — lista oficial de la Publicación Única (hoja "DOCUMENTOS A
+   SOLICITAR" del cotizador). Es distinta del set genérico de contratación: aquí se
+   piden los documentos a publicar y el comprobante de la transferencia. */
+var PUB_DOCS_OF=[
+  'Cédula de identidad de los representantes legales (ambos lados).',
+  'Escritura de la empresa con firma de los representantes legales, o escritura donde consten los poderes de firma.',
+  'Facturas o documentos a publicar.',
+  'Si es factura: print de pantalla de la "DTE" de la factura donde se indica que está aceptada por el SII.',
+  'Comprobante de transferencia por el pago de la publicación en DICOM.'
+];
+var PUB_DTE_RUTA='Ruta en el SII: Home › Factura Electrónica › Registro de aceptación o reclamo DTE › Registro de aceptación o reclamos de un DTE (complete los datos y envíe una foto o print de la pantalla).';
+/* Datos de transferencia — hoja "DATOS TRANSFERENCIA BANCARIA" del cotizador oficial. */
+var PUB_BANCO=[
+  ['Nombre','Servicios Equifax Chile Limitada'],
+  ['RUT','85.896.100-9'],
+  ['Banco','Banco de Chile'],
+  ['Cuenta Corriente','166143017']
+];
 /* ── Lista de documentos a publicar ──────────────────────────────────────────
    Fuente única: el input oculto #pub-docs-json (así el snapshot de la cotización
    lo guarda y lo restaura como cualquier otro campo de la config). */
@@ -4141,16 +4159,39 @@ function pubBlocksInner(theme){
     '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Detalle del cobro</div>'+
     precioTxt+
   '</div>';
-  /* DOCUMENTOS SOLICITADOS — misma estructura del bloque "Documentos para contratar"
-     de los productos estándar (acento ámbar #c8960a); en la tarjeta (dark) se adapta el
-     fondo para no romper la estética oscura. Set estándar de contratación de la colección. */
+  /* DATOS DE TRANSFERENCIA — mismo bloque de la hoja oficial, con el monto a
+     transferir tomado del total calculado, para que el cliente pague sin pedir más datos. */
+  var cBanB=dark?'rgba(46,204,113,.08)':'#f1f9f4';
+  var cBanT=dark?'#7fe0a3':'#1a7a45';
+  var banco=!c?'':('<div style="margin-top:16px;background:'+cBanB+';padding:14px 16px;border-left:5px solid #1f9d55;'+(dark?'':'border:1px solid #cfe9da;')+'border-radius:6px;font-family:Arial,sans-serif;">'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cBanT+';font-weight:bold;margin-bottom:8px;">Datos de transferencia bancaria</div>'+
+    '<table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">'+
+      PUB_BANCO.map(function(f){
+        return '<tr>'+
+          '<td style="font-size:11px;color:'+(dark?'#9a9a9a':'#777777')+';font-family:Arial,sans-serif;padding:3px 0;width:130px;">'+_escHtmlDocs(f[0])+'</td>'+
+          '<td style="font-size:12px;color:'+(dark?'#ffffff':'#1a1a1a')+';font-family:Arial,sans-serif;font-weight:bold;padding:3px 0;">'+_escHtmlDocs(f[1])+'</td>'+
+        '</tr>';
+      }).join('')+
+      '<tr>'+
+        '<td style="font-size:11px;color:'+cBanT+';font-family:Arial,sans-serif;padding:8px 0 0;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;">Monto a transferir</td>'+
+        '<td style="font-size:15px;color:'+cBanT+';font-family:Arial,sans-serif;font-weight:bold;padding:8px 0 0;">'+fmtN(c.total)+'</td>'+
+      '</tr>'+
+    '</table>'+
+    '<div style="font-size:10px;color:'+(dark?'#9a9a9a':'#888888')+';padding:8px 0 0;line-height:1.4;">Monto total con IVA incluido. Una vez realizada la transferencia, env&iacute;enos el comprobante para gestionar la publicaci&oacute;n.</div>'+
+  '</div>');
+  /* DOCUMENTOS A SOLICITAR — lista oficial de la Publicación Única (numerada,
+     con la ruta del SII bajo el punto de la DTE). Acento ámbar #c8960a. */
   var docs='<div style="margin-top:16px;background:'+(dark?'rgba(240,192,64,.08)':'#fffdf5')+';padding:14px 16px;border-left:5px solid #c8960a;'+(dark?'':'border:1px solid #f0e0a0;')+'border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+(dark?'#f0c040':'#a07820')+';font-weight:bold;margin-bottom:6px;">Documentos solicitados</div>'+
-    '<div style="font-size:12px;color:'+(dark?cTxt:'#5a4a10')+';line-height:1.5;">'+_docsInlineHTML()+'</div>'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+(dark?'#f0c040':'#a07820')+';font-weight:bold;margin-bottom:6px;">Documentos a solicitar</div>'+
+    PUB_DOCS_OF.map(function(t,i){
+      var fila='<div style="font-size:12px;color:'+(dark?cTxt:'#5a4a10')+';line-height:1.5;padding:3px 0;"><b>'+(i+1)+'.</b> '+_escHtmlDocs(t)+'</div>';
+      if(i===3)fila+='<div style="font-size:10px;color:'+(dark?'#9a9a9a':'#8a7430')+';line-height:1.45;padding:1px 0 3px 15px;">'+_escHtmlDocs(PUB_DTE_RUTA)+'</div>';
+      return fila;
+    }).join('')+
   '</div>';
   return '<div style="margin:0;font-family:Arial,sans-serif;">'+
     '<div style="font-size:15px;font-weight:800;color:'+cTit+';margin-bottom:2px;">Publicación Única en DICOM</div>'+
-    desc+bene+req+resumen+docs+
+    desc+bene+req+resumen+banco+docs+
   '</div>';
 }
 function renderPublicacion(target){
@@ -4186,8 +4227,16 @@ function renderPublicacion(target){
     t+='\u2795 *IVA (19%):* '+fmtN(c.iva)+'\n';
     t+='\u2705 *TOTAL A PAGAR:* *'+fmtN(c.total)+'*\n';
     t+='_El '+ufd(c.pct)+'% se calcula sobre el monto a publicar (documento menos abonos)._\n';
-    t+='\n*DOCUMENTOS SOLICITADOS*\n';
-    t+=''+_docsChecks()+'';
+    t+='\n━━━━━━━━━━━━━━━━━━━━\n';
+    t+='🏦 *DATOS DE TRANSFERENCIA BANCARIA*\n';
+    PUB_BANCO.forEach(function(f){t+=f[0]+': *'+f[1]+'*\n';});
+    t+='💵 *Monto a transferir: '+fmtN(c.total)+'* (IVA incluido)\n';
+    t+='_Una vez realizada la transferencia, envíenos el comprobante para gestionar la publicación._\n';
+    t+='\n*DOCUMENTOS A SOLICITAR*\n';
+    PUB_DOCS_OF.forEach(function(d,i){
+      t+=(i+1)+'. '+d+'\n';
+      if(i===3)t+='   _'+PUB_DTE_RUTA+'_\n';
+    });
     return t;
   }
   return '';
