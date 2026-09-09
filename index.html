@@ -1687,6 +1687,10 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
    ocupa alto, así el botón sigue a la vista al recorrer la propuesta sin empujar
    nada. top = 51px de la barra superior + 60px de la barra de asunto, para caer
    justo debajo de ella. */
+/* El correo ya trae su propio fondo exterior, así que el lienzo de Gmail y
+   Outlook no aporta otro marco: dos marcos anidados y su borde redondeado
+   entrando bajo la barra fija era lo que se veía moverse al bajar. */
+#pane-gmail .pv-frame,#pane-outlook .pv-frame{background:transparent;padding:0;border-radius:0;}
 .mth-dock{position:sticky;top:111px;height:0;z-index:55;pointer-events:none;
   will-change:transform;transform:translateZ(0);}
 .pv-frame{position:relative;}
@@ -3551,7 +3555,7 @@ function MP(){
      claro estaban a 1.28:1 y 1.42:1, o sea invisibles. */
   return mailDark()
     ? {sec:'#121014',secAlt:'#191519',tit:'#ffffff',txt:'#ddd6da',lbl:'#a2939b',
-       docLbl:'#e0b453',docTxt:'#ddd6da',docLine:'#332a33',marco:'#3a2f38',mat:'#08070a',
+       docLbl:'#e0b453',docTxt:'#ddd6da',docLine:'#332a33',marco:'#3a2f38',mat:'#211c22',
        filete:'#332a33',suave:'#8d8189'}
     : {sec:'#ffffff',secAlt:'#f6f2f5',tit:'#16141a',txt:'#33303a',lbl:'#6f6472',
        docLbl:'#8a6316',docTxt:'#33303a',docLine:'#ddd3da',marco:'#bdb1bb',mat:'#e7e3e8',
@@ -3795,10 +3799,10 @@ function solCarac(k){
 }
 function solBlocksInner(sel,theme){
   var dark=(theme==='dark');
-  var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#333',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
+  var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#33303a',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
   function sec(titulo,items,icon,iconColor){
-    return '<div style="margin:13px 0 3px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;font-family:Arial,sans-serif;">'+titulo+'</div>'+
-      items.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:'+iconColor+';font-weight:bold;">'+icon+'</span> '+t+'</div>';}).join('');
+    return '<div style="margin:13px 0 3px;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+cSub+';font-weight:bold;font-family:Arial,sans-serif;">'+titulo+'</div>'+
+      items.map(function(t){return '<div style="font-size:14px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.6;"><span style="color:'+iconColor+';font-weight:bold;">'+icon+'</span> '+t+'</div>';}).join('');
   }
   return sel.map(function(k){
     return '<div style="margin:0 0 26px;padding-bottom:18px;border-bottom:2px solid '+cLine+';">'+
@@ -3918,42 +3922,42 @@ function bddVol(){var e=document.getElementById('bdd-vol');var n=e?parseInt(e.va
 function bddVal(){var e=document.getElementById('bdd-val');var v=e?parseFloat(e.value):NaN;return (!isNaN(v)&&v>0)?v:null;}
 function bddBlocksInner(theme){
   var dark=(theme==='dark');
-  var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#333',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
+  var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#33303a',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
   var cBox=dark?'rgba(240,192,64,.08)':'#f7eef0';
   var cEj=dark?'rgba(255,255,255,.05)':'#f4f6f8',cEjB=dark?'rgba(255,255,255,.12)':'#e2e6ea';
   var sel=bddSelected(),vol=bddVol(),enr=bddEnrich(),val=bddVal();
   function sec(titulo,items){
     if(!items.length)return '';
-    return '<div style="margin:13px 0 3px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;font-family:Arial,sans-serif;">'+titulo+'</div>'+
-      items.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
+    return '<div style="margin:13px 0 3px;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+cSub+';font-weight:bold;font-family:Arial,sans-serif;">'+titulo+'</div>'+
+      items.map(function(t){return '<div style="font-size:14px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.6;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
   }
   /* Punto 6 — valor comercial de una base segmentada (breve y profesional) */
   var valor='<div style="margin:0 0 14px;padding:13px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:6px;">Por qué una Base de Datos segmentada</div>'+
-    BDD_VALOR.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;line-height:1.4;"><span style="color:#1f9d55;font-weight:bold;">›</span> '+t+'</div>';}).join('')+
+    '<div style="font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:6px;">Por qué una Base de Datos segmentada</div>'+
+    BDD_VALOR.map(function(t){return '<div style="font-size:14px;color:'+cTxt+';padding:2px 0;line-height:1.6;"><span style="color:#1f9d55;font-weight:bold;">›</span> '+t+'</div>';}).join('')+
   '</div>';
   /* Atributos solicitados */
   var attrs=BDD_GROUPS.map(function(g){return sec(g.t,g.items.filter(function(it){return sel[it[0]];}).map(function(it){return it[1];}));}).join('');
   if(enr)attrs+=sec('Servicio adicional',['Enrichment — actualización y complemento de la base de datos existente del cliente']);
   /* Punto 5 — ejemplo referencial neutro de cómo quedará estructurado cada registro */
-  var ejItems=[];BDD_GROUPS.forEach(function(g){g.items.forEach(function(it){if(sel[it[0]])ejItems.push('<div style="font-size:11px;color:'+cTxt+';padding:3px 0;font-family:Arial,sans-serif;"><b style="color:'+cSub+';">'+it[1]+':</b> '+(BDD_EJEMPLOS[it[0]]||'—')+'</div>');});});
+  var ejItems=[];BDD_GROUPS.forEach(function(g){g.items.forEach(function(it){if(sel[it[0]])ejItems.push('<div style="font-size:13px;color:'+cTxt+';padding:3px 0;font-family:Arial,sans-serif;"><b style="color:'+cSub+';">'+it[1]+':</b> '+(BDD_EJEMPLOS[it[0]]||'—')+'</div>');});});
   var ejemplo=ejItems.length?('<div style="margin:14px 0 0;padding:13px 16px;background:'+cEj+';border:1px dashed '+cEjB+';border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:7px;">Ejemplo referencial de un registro <span style="color:#999;font-weight:600;text-transform:none;letter-spacing:0;">(datos genéricos, se reemplazan por los reales)</span></div>'+
+    '<div style="font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:7px;">Ejemplo referencial de un registro <span style="color:#655b6b;font-weight:600;text-transform:none;letter-spacing:0;">(datos genéricos, se reemplazan por los reales)</span></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px;">'+ejItems.join('')+'</div>'+
   '</div>'):'';
   /* Punto 7 — resumen + encadenamiento cliente → BackOffice → propuesta final */
   var valLine = (val!=null) ? (ufd(val)+' UF + IVA'+( (function(){var c=ufc(val);return c>0?(' · ≈'+fmtN(c)):'';})() )) : 'Por evaluar por BackOffice · referencia: desde 1.000 RUT por 10 UF + IVA';
   var resumen='<div style="margin-top:16px;padding:14px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Resumen de la solicitud</div>'+
-    (vol?'<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Volumen solicitado:</b> '+Math.round(vol).toLocaleString('es-CL')+' RUT</div>':'')+
-    '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Enrichment:</b> '+(enr?'Incluido':'No incluido')+'</div>'+
-    '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Valor:</b> '+valLine+'</div>'+
+    '<div style="font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Resumen de la solicitud</div>'+
+    (vol?'<div style="font-size:14px;color:'+cTxt+';padding:2px 0;"><b>Volumen solicitado:</b> '+Math.round(vol).toLocaleString('es-CL')+' RUT</div>':'')+
+    '<div style="font-size:14px;color:'+cTxt+';padding:2px 0;"><b>Enrichment:</b> '+(enr?'Incluido':'No incluido')+'</div>'+
+    '<div style="font-size:14px;color:'+cTxt+';padding:2px 0;"><b>Valor:</b> '+valLine+'</div>'+
   '</div>';
   return '<div style="margin:0;font-family:Arial,sans-serif;">'+
     '<div style="font-size:15px;font-weight:800;color:'+cTit+';margin-bottom:2px;">Propuesta de Base de Datos a medida</div>'+
     bddDescHTML(cTxt)+
     valor+
-    '<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;border-bottom:2px solid '+cLine+';padding-bottom:6px;margin-bottom:2px;">Atributos a incluir en la Base de Datos</div>'+
+    '<div style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;border-bottom:2px solid '+cLine+';padding-bottom:6px;margin-bottom:2px;">Atributos a incluir en la Base de Datos</div>'+
     attrs+ejemplo+resumen+
   '</div>';
 }
@@ -4211,23 +4215,23 @@ function pagoPubResumenHTML(){
 }
 function pubBlocksInner(theme){
   var dark=(theme==='dark');
-  var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#333',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
+  var cTit=dark?'#fff':'#1a1a1a',cTxt=dark?'#ccc':'#33303a',cSub=dark?'#f0c040':'#9b1c2e',cLine=dark?'rgba(155,28,46,.3)':'#e3c9cd';
   var cBox=dark?'rgba(240,192,64,.08)':'#f7eef0';
   var cReq=dark?'rgba(255,255,255,.05)':'#f4f6f8',cReqB=dark?'rgba(255,255,255,.12)':'#e2e6ea';
   var c=pubCalc();
-  var desc=PUB_DESC.map(function(p,i){return '<div style="font-size:12px;color:'+cTxt+';line-height:1.55;margin-bottom:'+(i===PUB_DESC.length-1?12:8)+'px;">'+p+'</div>';}).join('');
+  var desc=PUB_DESC.map(function(p,i){return '<div style="font-size:14px;color:'+cTxt+';line-height:1.65;margin-bottom:'+(i===PUB_DESC.length-1?12:8)+'px;">'+p+'</div>';}).join('');
   var bene='<div style="margin:0 0 14px;padding:13px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:6px;">Por qué publicar el documento</div>'+
-    PUB_BENE.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;line-height:1.4;"><span style="color:#1f9d55;font-weight:bold;">›</span> '+t+'</div>';}).join('')+
+    '<div style="font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:6px;">Por qué publicar el documento</div>'+
+    PUB_BENE.map(function(t){return '<div style="font-size:14px;color:'+cTxt+';padding:2px 0;line-height:1.6;"><span style="color:#1f9d55;font-weight:bold;">›</span> '+t+'</div>';}).join('')+
   '</div>';
-  var req='<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;border-bottom:2px solid '+cLine+';padding-bottom:6px;margin-bottom:2px;">Requisitos de publicación</div>'+
-    PUB_REQ.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
+  var req='<div style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;border-bottom:2px solid '+cLine+';padding-bottom:6px;margin-bottom:2px;">Requisitos de publicación</div>'+
+    PUB_REQ.map(function(t){return '<div style="font-size:14px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.6;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
   var precioTxt = c
     ? (pubTablaHTML(theme)+
-       '<div style="font-size:11px;color:'+cTxt+';padding:9px 0 0;line-height:1.45;">El <b>monto a publicar</b> es el monto total del documento menos los abonos ya pagados. Sobre ese monto se cobra el <b>'+ufd(c.pct)+'% (neto)</b>, más <b>IVA 19%</b>.</div>')
-    : '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;">Ingrese el monto del documento y los abonos para calcular el valor ('+ufd(pubPct())+'% del monto a publicar + IVA).</div>';
+       '<div style="font-size:13px;color:'+cTxt+';padding:9px 0 0;line-height:1.6;">El <b>monto a publicar</b> es el monto total del documento menos los abonos ya pagados. Sobre ese monto se cobra el <b>'+ufd(c.pct)+'% (neto)</b>, más <b>IVA 19%</b>.</div>')
+    : '<div style="font-size:14px;color:'+cTxt+';padding:2px 0;">Ingrese el monto del documento y los abonos para calcular el valor ('+ufd(pubPct())+'% del monto a publicar + IVA).</div>';
   var resumen='<div style="margin-top:16px;padding:14px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Detalle del cobro</div>'+
+    '<div style="font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Detalle del cobro</div>'+
     precioTxt+
   '</div>';
   /* DATOS DE TRANSFERENCIA — mismo bloque de la hoja oficial, con el monto a
@@ -4235,28 +4239,28 @@ function pubBlocksInner(theme){
   var cBanB=dark?'rgba(46,204,113,.08)':'#f1f9f4';
   var cBanT=dark?'#7fe0a3':'#1a7a45';
   var banco=!c?'':('<div style="margin-top:16px;background:'+cBanB+';padding:14px 16px;border-left:5px solid #1f9d55;'+(dark?'':'border:1px solid #cfe9da;')+'border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cBanT+';font-weight:bold;margin-bottom:8px;">Datos de transferencia bancaria</div>'+
+    '<div style="font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+cBanT+';font-weight:bold;margin-bottom:8px;">Datos de transferencia bancaria</div>'+
     '<table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">'+
       PUB_BANCO.map(function(f){
         return '<tr>'+
-          '<td style="font-size:11px;color:'+(dark?'#9a9a9a':'#777777')+';font-family:Arial,sans-serif;padding:3px 0;width:130px;">'+_escHtmlDocs(f[0])+'</td>'+
-          '<td style="font-size:12px;color:'+(dark?'#ffffff':'#1a1a1a')+';font-family:Arial,sans-serif;font-weight:bold;padding:3px 0;">'+_escHtmlDocs(f[1])+'</td>'+
+          '<td style="font-size:13px;color:'+(dark?'#a89ba1':'#5f5566')+';font-family:Arial,sans-serif;padding:4px 0;width:158px;">'+_escHtmlDocs(f[0])+'</td>'+
+          '<td style="font-size:14px;color:'+(dark?'#ffffff':'#1a1a1a')+';font-family:Arial,sans-serif;font-weight:bold;padding:3px 0;">'+_escHtmlDocs(f[1])+'</td>'+
         '</tr>';
       }).join('')+
       '<tr>'+
-        '<td style="font-size:11px;color:'+cBanT+';font-family:Arial,sans-serif;padding:8px 0 0;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;">Monto a transferir</td>'+
+        '<td style="font-size:13px;color:'+cBanT+';font-family:Arial,sans-serif;padding:12px 0 0;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;">Monto a transferir</td>'+
         '<td style="font-size:15px;color:'+cBanT+';font-family:Arial,sans-serif;font-weight:bold;padding:8px 0 0;">'+fmtN(c.total)+'</td>'+
       '</tr>'+
     '</table>'+
-    '<div style="font-size:10px;color:'+(dark?'#9a9a9a':'#888888')+';padding:8px 0 0;line-height:1.4;">Monto total con IVA incluido. Una vez realizada la transferencia, env&iacute;enos el comprobante para gestionar la publicaci&oacute;n.</div>'+
+    '<div style="font-size:10px;color:'+(dark?'#9a9099':'#655b6b')+';padding:8px 0 0;line-height:1.6;">Monto total con IVA incluido. Una vez realizada la transferencia, env&iacute;enos el comprobante para gestionar la publicaci&oacute;n.</div>'+
   '</div>');
   /* DOCUMENTOS A SOLICITAR — lista oficial de la Publicación Única (numerada,
      con la ruta del SII bajo el punto de la DTE). Acento ámbar #c8960a. */
   var docs='<div style="margin-top:16px;background:'+(dark?'rgba(240,192,64,.08)':'#fffdf5')+';padding:14px 16px;border-left:5px solid #c8960a;'+(dark?'':'border:1px solid #f0e0a0;')+'border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+(dark?'#f0c040':'#a07820')+';font-weight:bold;margin-bottom:6px;">Documentos a solicitar</div>'+
+    '<div style="font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:'+(dark?'#f0c040':'#a07820')+';font-weight:bold;margin-bottom:6px;">Documentos a solicitar</div>'+
     PUB_DOCS_OF.map(function(t,i){
-      var fila='<div style="font-size:12px;color:'+(dark?cTxt:'#5a4a10')+';line-height:1.5;padding:3px 0;"><b>'+(i+1)+'.</b> '+_escHtmlDocs(t)+'</div>';
-      if(i===3)fila+='<div style="font-size:10px;color:'+(dark?'#9a9a9a':'#8a7430')+';line-height:1.45;padding:1px 0 3px 15px;">'+_escHtmlDocs(PUB_DTE_RUTA)+'</div>';
+      var fila='<div style="font-size:14px;color:'+(dark?cTxt:'#5a4a10')+';line-height:1.6;padding:3px 0;"><b>'+(i+1)+'.</b> '+_escHtmlDocs(t)+'</div>';
+      if(i===3)fila+='<div style="font-size:10px;color:'+(dark?'#a89ba1':'#6b5a24')+';line-height:1.6;padding:1px 0 3px 15px;">'+_escHtmlDocs(PUB_DTE_RUTA)+'</div>';
       return fila;
     }).join('')+
   '</div>';
