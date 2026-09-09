@@ -5185,14 +5185,22 @@ function _mailBenefCols(items){
     '<td width="50%" valign="top" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-left:4px;">'+celda(items.slice(mid))+'</td>'+
   '</tr></table>';
 }
-/* Precio: misma zona que la Ficha — fondo casi negro, rótulo, cifra enorme en
-   ámbar, apoyo en pesos y la caja de descuento con el porcentaje grande junto al
-   desglose lista / precio final. El verde solo vive aquí: sobre este fondo da
-   ~9:1 de contraste, mientras que sobre el papel blanco daba 3.49:1. */
+/* Precio: misma composición que la Ficha — rótulo, cifra enorme en ámbar, apoyo
+   en pesos y la caja con el porcentaje junto al desglose lista / precio final.
+   El FONDO sigue al tema: en la Ficha el casi negro es el papel de toda la pieza,
+   pero en un correo claro esa misma banda se lee como una losa negra, así que ahí
+   va el rojo profundo de marca, que dialoga con la cabecera. */
 function _mailPrecio(o,modo){
-  var bg='#0e0a0d';
-  /* Equivalentes sólidos de los rgba de la Ficha, porque Outlook no compone alfa. */
-  var cajaBorde='#17442b',cajaFondo='#101a15',verde='#2ecc71';
+  var osc=mailDark();
+  var bg=osc?'#0e0a0d':'#7a1425';
+  /* Equivalentes sólidos: el motor Word de Outlook no compone transparencias. */
+  var cajaFondo=osc?'#101a15':'#5d0f1c';
+  var cajaBorde=osc?'#17442b':'#93293c';
+  var verde=osc?'#2ecc71':'#5ee88f';
+  var lblTachado=osc?'#8b8b8b':'#d9a8b2';
+  var lblFinal=osc?'#c4c4c4':'#f3dde1';
+  var rotulo=osc?'#8d8189':'#f0c3cc';
+  var apoyoCol=osc?'#9a9099':'#eccdd3';
   var caja=o.hayDc
     ? '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="left" bgcolor="'+cajaBorde+'" style="background-color:'+cajaBorde+';border-collapse:collapse;">'+
         '<tr><td style="padding:1px;">'+
@@ -5201,8 +5209,8 @@ function _mailPrecio(o,modo){
               '<font face="Arial,sans-serif" color="'+verde+'" style="font-size:30px;line-height:1;"><b><span style="color:'+verde+';">&#8722;'+o.dc+'%</span></b></font>'+
             '</td>'+
             '<td valign="middle" bgcolor="'+cajaFondo+'" style="background-color:'+cajaFondo+';padding:13px 22px 13px 0;">'+
-              '<font face="Arial,sans-serif" color="#8b8b8b" style="font-size:12px;line-height:1.5;"><span style="color:#8b8b8b;text-decoration:line-through;">Lista: '+o.ufL+' UF</span></font><br>'+
-              '<font face="Arial,sans-serif" color="#c4c4c4" style="font-size:13px;line-height:1.5;"><span style="color:#c4c4c4;">Precio final: '+(o.ufV||'')+' UF</span></font>'+
+              '<font face="Arial,sans-serif" color="'+lblTachado+'" style="font-size:12px;line-height:1.5;"><span style="color:'+lblTachado+';text-decoration:line-through;">Lista: '+o.ufL+' UF</span></font><br>'+
+              '<font face="Arial,sans-serif" color="'+lblFinal+'" style="font-size:13px;line-height:1.5;"><span style="color:'+lblFinal+';">Precio final: '+(o.ufV||'')+' UF</span></font>'+
             '</td>'+
           '</tr></table>'+
         '</td></tr>'+
@@ -5210,18 +5218,20 @@ function _mailPrecio(o,modo){
     : '';
   var dentro='<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
     '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:0 0 10px;">'+
-      '<font face="Arial,sans-serif" color="#8d8189" style="font-size:10px;letter-spacing:1.8px;text-transform:uppercase;"><b><span style="color:#8d8189;">'+(o.etiqueta||'Cargo fijo mensual')+'</span></b></font>'+
+      '<font face="Arial,sans-serif" color="'+rotulo+'" style="font-size:10px;letter-spacing:1.4px;text-transform:uppercase;"><b><span style="color:'+rotulo+';">'+(o.etiqueta||'Cargo fijo mensual')+'</span></b></font>'+
     '</td></tr>'+
     '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:0;">'+
       '<font face="Arial,sans-serif" color="#f0c040" style="font-size:42px;line-height:1.05;"><b><span style="color:#f0c040;">'+o.precio+'</span></b></font>'+
     '</td></tr>'+
     (o.clp?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:12px 0 0;">'+
-      '<font face="Arial,sans-serif" color="#9a9099" style="font-size:13px;line-height:1.5;"><span style="color:#9a9099;">'+o.clp+'</span></font>'+
+      '<font face="Arial,sans-serif" color="'+apoyoCol+'" style="font-size:13px;line-height:1.5;"><span style="color:'+apoyoCol+';">'+o.clp+'</span></font>'+
     '</td></tr>':'')+
     (caja?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:18px 0 0;">'+caja+'</td></tr>':'')+
   '</table>';
   if(modo==='outlook')return '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:30px 34px;">'+dentro+'</td></tr>';
-  return '<div style="background-color:'+bg+';background-image:linear-gradient(135deg,#0a0508 0%,#0e0a0d 55%,#140d12 100%);padding:30px 34px;">'+dentro+'</div>';
+  var grad=osc?'linear-gradient(135deg,#0a0508 0%,#0e0a0d 55%,#140d12 100%)'
+              :'linear-gradient(135deg,#5d0f1c 0%,#7a1425 62%,#8f1a2b 100%)';
+  return '<div style="background-color:'+bg+';background-image:'+grad+';padding:30px 34px;">'+dentro+'</div>';
 }
 /* Franja de datos del contrato: mismo papel que el resto, filete arriba y valores
    a 17px. Antes tenía fondo propio y competía con la banda de precio. */
@@ -5503,8 +5513,9 @@ function genMail(){
   var _htmlGmail =
     // MAT — fondo exterior; la pieza queda recortada sobre él y el blanco
     // interior se lee como hoja, no como el fondo del cliente de correo.
-    '<div style="background:'+_P.mat+';padding:26px 20px;">'+
-    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:602px;margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid '+_P.marco+';box-shadow:0 2px 10px rgba(0,0,0,.10);">'+
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="'+_P.mat+'" style="background-color:'+_P.mat+';border-collapse:collapse;">'+
+    '<tr><td align="center" bgcolor="'+_P.mat+'" style="background-color:'+_P.mat+';padding:26px 20px;">'+
+    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;width:602px;max-width:602px;margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid '+_P.marco+';box-shadow:0 2px 10px rgba(0,0,0,.10);">'+
 
     // HEADER — gradiente rojo con logo (con respaldo sólido para Outlook)
     '<div style="background-color:#9b1c2e;background-image:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:24px 28px 20px;">'+
@@ -5574,7 +5585,7 @@ function genMail(){
     '</div>'+
 
     '</div>'+
-    '</div>';
+    '</td></tr></table>';
 
   sv('tpl-rich-gmail', _htmlGmail);
   // Sync legacy div for image generation compatibility
@@ -5828,7 +5839,7 @@ function genMailPagoPub(){
 
   // ══════ GMAIL (div) ══════
   var _htmlGmail=
-    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:602px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
+    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;width:602px;max-width:602px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
     '<div style="background-color:#9b1c2e;background-image:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:24px 28px 20px;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:0;"><tr>'+
         '<td valign="middle">'+
