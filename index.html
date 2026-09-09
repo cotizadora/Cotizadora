@@ -5503,8 +5503,8 @@ function genMail(){
   var _htmlGmail =
     // MAT — fondo exterior; la pieza queda recortada sobre él y el blanco
     // interior se lee como hoja, no como el fondo del cliente de correo.
-    '<div style="background:'+_P.mat+';padding:26px 16px;">'+
-    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:620px;margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid '+_P.marco+';box-shadow:0 2px 10px rgba(0,0,0,.10);">'+
+    '<div style="background:'+_P.mat+';padding:26px 20px;">'+
+    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:602px;margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid '+_P.marco+';box-shadow:0 2px 10px rgba(0,0,0,.10);">'+
 
     // HEADER — gradiente rojo con logo (con respaldo sólido para Outlook)
     '<div style="background-color:#9b1c2e;background-image:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:24px 28px 20px;">'+
@@ -5645,7 +5645,7 @@ function genMail(){
   var _htmlOutlook =
     // MAT — tabla exterior a todo el ancho; dentro, la pieza de 600px centrada
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="'+_P.mat+'" style="background-color:'+_P.mat+';border-collapse:collapse;">'+
-    '<tr><td align="center" bgcolor="'+_P.mat+'" style="background-color:'+_P.mat+';padding:26px 16px;">'+
+    '<tr><td align="center" bgcolor="'+_P.mat+'" style="background-color:'+_P.mat+';padding:26px 20px;">'+
     '<table role="presentation" width="602" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="'+_P.marco+'" style="background-color:'+_P.marco+';border-collapse:collapse;">'+
     '<tr><td style="padding:1px;">'+
     '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:600px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">'+
@@ -5827,7 +5827,7 @@ function genMailPagoPub(){
 
   // ══════ GMAIL (div) ══════
   var _htmlGmail=
-    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:620px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
+    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:602px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
     '<div style="background-color:#9b1c2e;background-image:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:24px 28px 20px;">'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:0;"><tr>'+
         '<td valign="middle">'+
