@@ -1679,14 +1679,22 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
 #planilla-view .pl-tr:hover .pl-td:not(.pl-td-id){box-shadow:inset 0 0 14px rgba(26,115,232,.22)!important;}
 #planilla-view.pl-dark .pl-tr:hover .pl-td:not(.pl-td-id){box-shadow:inset 0 0 16px rgba(90,180,255,.40)!important;}
 #planilla-view .pl-tr:hover .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-sel),0 0 12px rgba(90,180,255,.45)!important;}
-/* ── Interruptor del tema del correo (bajo las pestañas de vista previa) ── */
-.mail-theme-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin:10px 0 2px;padding:9px 10px;
-  border-radius:10px;border:1.5px solid var(--g4);background:var(--g2);color:var(--wa);
-  font-family:inherit;font-weight:800;font-size:.74rem;letter-spacing:.2px;cursor:pointer;
-  transition:border-color .15s,background .15s,color .15s,box-shadow .15s;}
-.mail-theme-btn:hover{border-color:var(--y);color:var(--y);}
-.mail-theme-btn .mth-ico{font-size:.95rem;line-height:1;}
-.mail-theme-btn.on{background:rgba(240,192,64,.12);border-color:var(--y);color:var(--y);box-shadow:0 0 10px rgba(240,192,64,.25);}
+/* ── Sol/luna flotante: cambia el correo entre claro y oscuro ──
+   Vive en el margen del lienzo de la vista previa (fuera de #tpl-rich-*), así que
+   es un control de la VISTA y nunca forma parte del correo que se copia o envía.
+   Solo aparece en Gmail y Outlook; WhatsApp y la Ficha no lo llevan. */
+.pv-frame{position:relative;}
+.mth-float{position:absolute;top:12px;right:12px;z-index:6;
+  width:38px;height:38px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.05rem;line-height:1;font-family:inherit;
+  background:rgba(20,16,20,.72);border:1.5px solid rgba(255,255,255,.28);
+  color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  box-shadow:0 3px 12px rgba(0,0,0,.35);opacity:.55;
+  transition:opacity .16s,transform .16s,border-color .16s,box-shadow .16s;}
+.pv-frame:hover .mth-float{opacity:1;}
+.mth-float:hover{opacity:1;transform:scale(1.08);border-color:#f0c040;box-shadow:0 0 14px rgba(240,192,64,.5);}
+.mth-float.on{background:rgba(240,192,64,.9);border-color:#f0c040;color:#3a2a00;}
 /* ── Publicación Única: grilla de documentos (monto · abonos · monto a publicar) ──
    Réplica del cotizador oficial: se cobra un % del MONTO A PUBLICAR (documento − abonos). */
 .pub-hd{display:grid;grid-template-columns:26px 1fr 1fr 1fr 28px;gap:6px;align-items:end;margin:8px 0 4px;}
@@ -2075,12 +2083,6 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
       <span>Ficha de Oferta</span>
     </button>
 
-    <!-- Tema del correo: claro (por defecto) u oscuro con la estética de la Ficha.
-         Afecta a Gmail y Outlook de TODOS los productos. Se recuerda por navegador. -->
-    <button type="button" id="btn-mail-theme" class="mail-theme-btn" onclick="toggleMailTheme();playClick();">
-      <span class="mth-ico">☀️</span><span>Correo claro</span>
-    </button>
-
     <!-- ════════ ACCIONES PRINCIPALES (glass · neón) — #1/#2 ════════
          Reubicadas desde la calculadora para liberar altura. Pinned al fondo de la
          columna central; siempre visibles. IDs preservados (no cambia la lógica). -->
@@ -2145,7 +2147,12 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
             </button>
           </div>
         </div>
-        <div class="pv-frame"><div id="tpl-rich-gmail"></div></div>
+        <div class="pv-frame">
+          <!-- Control de la VISTA, no del contenido: queda fuera de #tpl-rich-gmail
+               (lo único que se copia/envía), así nunca viaja en el correo. -->
+          <button type="button" class="mth-float" onclick="toggleMailTheme();playClick();" aria-label="Cambiar el correo entre claro y oscuro"></button>
+          <div id="tpl-rich-gmail"></div>
+        </div>
         <div id="tpl-rich" style="display:none;"></div>
         <div class="outlook-note">✉️ <b>Nota Gmail:</b> "Abrir en Gmail" abre la redacción con <b>destinatario y asunto</b> cargados y el <b>cuerpo vacío</b>, y copia el correo <b>con diseño</b> al portapapeles. Solo haz clic en el cuerpo y pega con <b>Ctrl+V</b> — sin borrar nada. (Gmail no permite cargar el diseño por enlace; por eso se pega.)</div>
       </div>
@@ -2160,7 +2167,10 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
             </button>
           </div>
         </div>
-        <div class="pv-frame"><div id="tpl-rich-outlook"></div></div>
+        <div class="pv-frame">
+          <button type="button" class="mth-float" onclick="toggleMailTheme();playClick();" aria-label="Cambiar el correo entre claro y oscuro"></button>
+          <div id="tpl-rich-outlook"></div>
+        </div>
         <div class="outlook-note">⚠️ <b>Nota Outlook:</b> "Abrir en Outlook" descarga un <b>.eml</b> con todo precargado. Solo adjunta el PDF y envía. Si prefieres pegar manualmente, usa "Copiar Texto".</div>
       </div>
 
@@ -3548,13 +3558,17 @@ function toggleMailTheme(){
   if(typeof genMail==='function')genMail();
   if(typeof toast==='function')toast(mailDark()?'🌙 Correo en modo oscuro (como la Ficha)':'☀️ Correo en modo claro','ok','global-toast');
 }
+/* Hay un botón por vista (Gmail y Outlook): se sincronizan los dos. */
 function syncMailThemeBtn(){
-  var b=document.getElementById('btn-mail-theme');if(!b)return;
-  if(mailDark())b.classList.add('on');else b.classList.remove('on');
-  b.innerHTML='<span class="mth-ico">'+(mailDark()?'🌙':'☀️')+'</span><span>Correo '+(mailDark()?'oscuro':'claro')+'</span>';
-  b.title=mailDark()
-    ? 'El correo sale con la estética oscura de la Ficha. Clic para volver al fondo blanco.'
-    : 'El correo sale en claro (fondo blanco). Clic para usar la estética oscura de la Ficha.';
+  var bs=document.querySelectorAll('.mth-float');if(!bs.length)return;
+  var oscuro=mailDark();
+  Array.prototype.forEach.call(bs,function(b){
+    if(oscuro)b.classList.add('on');else b.classList.remove('on');
+    b.textContent=oscuro?'🌙':'☀️';
+    b.title=oscuro
+      ? 'Correo en modo OSCURO (estética de la Ficha). Clic para pasarlo a claro.'
+      : 'Correo en modo CLARO (fondo blanco). Clic para pasarlo al oscuro de la Ficha.';
+  });
 }
 
 /* ════════ RESUMEN COMERCIAL (panel izquierdo) ════════ */
