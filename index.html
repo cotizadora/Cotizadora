@@ -1679,6 +1679,14 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
 #planilla-view .pl-tr:hover .pl-td:not(.pl-td-id){box-shadow:inset 0 0 14px rgba(26,115,232,.22)!important;}
 #planilla-view.pl-dark .pl-tr:hover .pl-td:not(.pl-td-id){box-shadow:inset 0 0 16px rgba(90,180,255,.40)!important;}
 #planilla-view .pl-tr:hover .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-sel),0 0 12px rgba(90,180,255,.45)!important;}
+/* ── Interruptor del tema del correo (bajo las pestañas de vista previa) ── */
+.mail-theme-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin:10px 0 2px;padding:9px 10px;
+  border-radius:10px;border:1.5px solid var(--g4);background:var(--g2);color:var(--wa);
+  font-family:inherit;font-weight:800;font-size:.74rem;letter-spacing:.2px;cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s,box-shadow .15s;}
+.mail-theme-btn:hover{border-color:var(--y);color:var(--y);}
+.mail-theme-btn .mth-ico{font-size:.95rem;line-height:1;}
+.mail-theme-btn.on{background:rgba(240,192,64,.12);border-color:var(--y);color:var(--y);box-shadow:0 0 10px rgba(240,192,64,.25);}
 /* ── Publicación Única: grilla de documentos (monto · abonos · monto a publicar) ──
    Réplica del cotizador oficial: se cobra un % del MONTO A PUBLICAR (documento − abonos). */
 .pub-hd{display:grid;grid-template-columns:26px 1fr 1fr 1fr 28px;gap:6px;align-items:end;margin:8px 0 4px;}
@@ -2065,6 +2073,12 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
         <path d="M3.5 17.5 9 12.5l3.5 3.5 3-3 5 5" fill="none" stroke="#f0c040" stroke-width="1.8" stroke-linejoin="round"/>
       </svg>
       <span>Ficha de Oferta</span>
+    </button>
+
+    <!-- Tema del correo: claro (por defecto) u oscuro con la estética de la Ficha.
+         Afecta a Gmail y Outlook de TODOS los productos. Se recuerda por navegador. -->
+    <button type="button" id="btn-mail-theme" class="mail-theme-btn" onclick="toggleMailTheme();playClick();">
+      <span class="mth-ico">☀️</span><span>Correo claro</span>
     </button>
 
     <!-- ════════ ACCIONES PRINCIPALES (glass · neón) — #1/#2 ════════
@@ -3507,6 +3521,42 @@ function _docsShort(){
   return a.join(' · ');
 }
 
+/* ════════ TEMA DEL CORREO — claro (por defecto) u oscuro (estética de la Ficha) ════════
+   Aplica a TODOS los productos, en Gmail y en Outlook. El interruptor está sobre la
+   vista previa y se recuerda en este navegador.
+   CONFIABILIDAD: los dos temas se arman igual de blindados — bgcolor como ATRIBUTO en
+   cada celda + color explícito en cada texto — porque el motor Word de Outlook ignora
+   los fondos declarados solo por CSS y, sin color propio, hereda el negro del editor.
+   Las bandas que ya eran oscuras (cabecera roja, destinatario, precio, firma, pie) no
+   cambian: se ven bien en ambos temas. Lo que conmuta es el fondo de las secciones
+   de contenido (producto/propuesta y documentos). */
+var MAIL_THEME=(function(){try{return localStorage.getItem('cotiz_mail_theme')==='dark'?'dark':'light';}catch(e){return 'light';}})();
+function mailTheme(){return MAIL_THEME==='dark'?'dark':'light';}
+function mailDark(){return MAIL_THEME==='dark';}
+function MP(){
+  return mailDark()
+    ? {sec:'#141014',secAlt:'#1a1510',tit:'#ffffff',txt:'#dcdcdc',lbl:'#8f8f8f',
+       docLbl:'#f0c040',docTxt:'#e6dbbc',docLine:'#3d3320',marco:'#2a2a2a'}
+    : {sec:'#ffffff',secAlt:'#fffdf5',tit:'#1a1a1a',txt:'#333333',lbl:'#999999',
+       docLbl:'#a07820',docTxt:'#5a4a10',docLine:'#f0e0a0',marco:'#e0e0e0'};
+}
+function _mailSecBg(){return MP().sec;}
+function toggleMailTheme(){
+  MAIL_THEME=mailDark()?'light':'dark';
+  try{localStorage.setItem('cotiz_mail_theme',MAIL_THEME);}catch(e){}
+  syncMailThemeBtn();
+  if(typeof genMail==='function')genMail();
+  if(typeof toast==='function')toast(mailDark()?'🌙 Correo en modo oscuro (como la Ficha)':'☀️ Correo en modo claro','ok','global-toast');
+}
+function syncMailThemeBtn(){
+  var b=document.getElementById('btn-mail-theme');if(!b)return;
+  if(mailDark())b.classList.add('on');else b.classList.remove('on');
+  b.innerHTML='<span class="mth-ico">'+(mailDark()?'🌙':'☀️')+'</span><span>Correo '+(mailDark()?'oscuro':'claro')+'</span>';
+  b.title=mailDark()
+    ? 'El correo sale con la estética oscura de la Ficha. Clic para volver al fondo blanco.'
+    : 'El correo sale en claro (fondo blanco). Clic para usar la estética oscura de la Ficha.';
+}
+
 /* ════════ RESUMEN COMERCIAL (panel izquierdo) ════════ */
 function renderSummary(c){
   var pi=PINFO[c.tipo]||{badge:'COTIZACIÓN',n:'Producto'};
@@ -3746,8 +3796,8 @@ function renderPortafolioSoluciones(target){
     return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Seleccione productos para incluir en la presentación.</div>';
   }
   if(target==='card')return solBlocksInner(sel,'dark');
-  if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,'light')+'</div>';
-  if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,'light')+'</td></tr>';
+  if(target==='gmail')return '<div style="background:'+_mailSecBg()+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,mailTheme())+'</div>';
+  if(target==='outlook')return '<tr><td bgcolor="'+_mailSecBg()+'" style="background-color:'+_mailSecBg()+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+solBlocksInner(sel,mailTheme())+'</td></tr>';
   if(target==='wa'){
     var t='*Información de productos Equifax*\nSoluciones para evaluación, monitoreo y gestión de riesgo comercial\n';
     sel.forEach(function(k){
@@ -3894,8 +3944,8 @@ function renderBaseDatos(target){
     return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Seleccione atributos para construir la solicitud de Base de Datos.</div>';
   }
   if(target==='card')return bddBlocksInner('dark');
-  if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+bddBlocksInner('light')+'</div>';
-  if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+bddBlocksInner('light')+'</td></tr>';
+  if(target==='gmail')return '<div style="background:'+_mailSecBg()+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+bddBlocksInner(mailTheme())+'</div>';
+  if(target==='outlook')return '<tr><td bgcolor="'+_mailSecBg()+'" style="background-color:'+_mailSecBg()+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+bddBlocksInner(mailTheme())+'</td></tr>';
   if(target==='wa'){
     var vol=bddVol(),val=bddVal();
     var t='*Propuesta Base de Datos Equifax*\n\n'+bddDescWA();
@@ -4202,8 +4252,8 @@ function renderPublicacion(target){
     return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Ingrese el monto del documento y los abonos para construir la propuesta de Publicación Única.</div>';
   }
   if(target==='card')return pubBlocksInner('dark');
-  if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+pubBlocksInner('light')+'</div>';
-  if(target==='outlook')return '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+pubBlocksInner('light')+'</td></tr>';
+  if(target==='gmail')return '<div style="background:'+_mailSecBg()+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+pubBlocksInner(mailTheme())+'</div>';
+  if(target==='outlook')return '<tr><td bgcolor="'+_mailSecBg()+'" style="background-color:'+_mailSecBg()+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+pubBlocksInner(mailTheme())+'</td></tr>';
   if(target==='wa'){
     var t='*Publicación Única Equifax*\n\n'+PUB_DESC.join('\n\n')+'\n';
     t+='\n*POR QUÉ PUBLICAR EL DOCUMENTO*\n'+PUB_BENE.map(function(x){return '\u203a '+x;}).join('\n')+'\n';
@@ -4525,13 +4575,14 @@ function flyToMulti(meta){
 }
 /* ── Render del contenido central Multiproducto (mismos estilos que producto único) ── */
 function _multiGmailProduct(s,i){
+  var _P=MP();
   var lista=s.itemsMail.map(function(item){
     return '<tr><td valign="top" style="padding:5px 8px 5px 0;font-family:Arial,sans-serif;color:#9b1c2e;font-weight:900;font-size:13px;width:14px;">&#10004;</td>'+
-      '<td valign="top" style="padding:5px 0;font-family:Arial,sans-serif;color:#333;font-size:13px;line-height:1.4;">'+item+'</td></tr>';
+      '<td valign="top" style="padding:5px 0;font-family:Arial,sans-serif;color:'+_P.txt+';font-size:13px;line-height:1.4;">'+item+'</td></tr>';
   }).join('');
-  var blanco='<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
-    '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
-    '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+s.n+'</div>'+
+  var blanco='<div style="background:'+_P.sec+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+
+    '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:'+_P.lbl+';font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
+    '<div style="font-size:18px;font-weight:800;color:'+_P.tit+';font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+s.n+'</div>'+
     '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+lista+'</table>'+
   '</div>';
   var precio='<div style="background-color:#7a1425;background-image:linear-gradient(135deg,#5a0e1a 0%,#7a1425 60%,#9b1c2e 100%);padding:18px 28px;">'+
@@ -4557,16 +4608,17 @@ function _multiGmailTotal(){
   '</div>';
 }
 function _multiOutlookProduct(s,i){
+  var _P=MP();
   var lista=s.itemsMail.map(function(item){
-    return '<tr><td valign="top" width="16" bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 6px 4px 0;"><font face="Arial,sans-serif" color="#9b1c2e" style="font-size:13px;"><b>&#10004;</b></font></td>'+
-      '<td valign="top" bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 0;"><font face="Arial,sans-serif" color="#333333" style="font-size:13px;">'+item+'</font></td></tr>';
+    return '<tr><td valign="top" width="16" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:4px 6px 4px 0;"><font face="Arial,sans-serif" color="#9b1c2e" style="font-size:13px;"><b>&#10004;</b></font></td>'+
+      '<td valign="top" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:4px 0;"><font face="Arial,sans-serif" color="'+_P.txt+'" style="font-size:13px;"><span style="color:'+_P.txt+';">'+item+'</span></font></td></tr>';
   }).join('');
-  var blanco='<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
+  var blanco='<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:0;">'+
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
       '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:20px 28px;">'+
-        '<font face="Arial,sans-serif" color="#777777" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font><br>'+
-        '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;"><b>'+s.n+'</b></font>'+
+      '<td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:20px 28px;">'+
+        '<font face="Arial,sans-serif" color="'+_P.lbl+'" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font><br>'+
+        '<font face="Arial,sans-serif" color="'+_P.tit+'" style="font-size:18px;"><b><span style="color:'+_P.tit+';">'+s.n+'</span></b></font>'+
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;">'+
           '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;font-size:2px;line-height:2px;height:2px;mso-line-height-rule:exactly;">&nbsp;</td></tr></table>'+
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:12px;">'+lista+'</table>'+
@@ -4623,24 +4675,26 @@ function renderMultiproducto(target){
   }
   if(target==='gmail'){
     /* DOCUMENTOS PARA CONTRATAR — idéntico al bloque estándar Gmail (fondo #fffdf5, borde #c8960a). */
-    var mDocsGm='<div style="background:#fffdf5;padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
-      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
-      '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">'+_docsInlineHTML()+'</div>'+
+    var _Pg=MP();
+    var mDocsGm='<div style="background:'+_Pg.secAlt+';padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid '+_Pg.docLine+';">'+
+      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:'+_Pg.docLbl+';font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
+      '<div style="font-size:12px;color:'+_Pg.docTxt+';font-family:Arial,sans-serif;">'+_docsInlineHTML()+'</div>'+
     '</div>';
     return MULTI.map(_multiGmailProduct).join('')+mDocsGm;
   }
   if(target==='outlook'){
     /* DOCUMENTOS PARA CONTRATAR — idéntica estructura de tabla del bloque estándar Outlook. */
-    var mDocsOl='<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:0;">'+
+    var _Po=MP(),_oAlt=mailDark()?_Po.secAlt:'#fdf8e8',_oLbl=mailDark()?_Po.docLbl:'#7a5808',_oTxt=mailDark()?_Po.docTxt:'#3a2c04';
+    var mDocsOl='<tr><td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';padding:0;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
         '<td width="5" bgcolor="#c8960a" style="background-color:#c8960a;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-        '<td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:14px 28px;">'+
+        '<td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';padding:14px 28px;">'+
           '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding-bottom:4px;">'+
-              '<font face="Arial,sans-serif" color="#7a5808" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Documentos para contratar</font>'+
+            '<tr><td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';padding-bottom:4px;">'+
+              '<font face="Arial,sans-serif" color="'+_oLbl+'" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Documentos para contratar</font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;">'+
-              '<font face="Arial,sans-serif" color="#3a2c04" style="font-size:12px;">'+_docsInlineHTML()+'</font>'+
+            '<tr><td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';">'+
+              '<font face="Arial,sans-serif" color="'+_oTxt+'" style="font-size:12px;"><span style="color:'+_oTxt+';">'+_docsInlineHTML()+'</span></font>'+
             '</td></tr>'+
           '</table>'+
         '</td>'+
@@ -5264,10 +5318,13 @@ function genMail(){
   var listaRow=hayDc?'<tr><td style="padding:3px 10px;color:#666;font-size:11px;">Precio lista</td><td style="padding:3px 10px;color:#666;font-size:11px;text-decoration:line-through;">'+ufL+' UF + IVA</td></tr>':'';
   var saludoEmp=(!skip&&em)?'<p style="margin:0 0 2px;font-size:11px;color:#888;">'+em+'</p>':'';
   // ── EMAIL OUTLOOK-SAFE: bgcolor ATRIBUTO + style simultáneo ──
+  var _P=MP();   /* paleta del tema de correo activo (claro por defecto / oscuro = Ficha) */
+  /* Bloque ámbar de documentos en Outlook: el claro usa su crema propio (#fdf8e8). */
+  var _oAlt=mailDark()?_P.secAlt:'#fdf8e8',_oLbl=mailDark()?_P.docLbl:'#7a5808',_oTxt=mailDark()?_P.docTxt:'#3a2c04';
   var _listaItems = itMail.map(function(item){
     return '<tr>'+
       '<td valign="top" width="20" style="font-size:13px;color:#9b1c2e;font-weight:900;padding:5px 6px 5px 0;font-family:Arial,sans-serif;">&#10003;</td>'+
-      '<td style="font-size:13px;color:#333333;line-height:1.5;padding:5px 0;font-family:Arial,sans-serif;">'+item+'</td>'+
+      '<td style="font-size:13px;color:'+_P.txt+';line-height:1.5;padding:5px 0;font-family:Arial,sans-serif;">'+item+'</td>'+
     '</tr>';
   }).join('');
 
@@ -5276,7 +5333,7 @@ function genMail(){
   // ══════════════════════════════════════════════
   var _gmailLogoUrl = window.location.origin + (window.location.pathname.replace(/[^/]*$/, '')) + 'logo-equifax.png';
   var _htmlGmail =
-    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:620px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
+    '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:620px;margin:0 auto;border-radius:14px;overflow:hidden;border:1px solid '+_P.marco+';box-shadow:0 4px 24px rgba(0,0,0,.12);">'+
 
     // HEADER — gradiente rojo con logo (con respaldo sólido para Outlook)
     '<div style="background-color:#9b1c2e;background-image:linear-gradient(135deg,#6e1220 0%,#9b1c2e 55%,#c0263b 100%);padding:24px 28px 20px;">'+
@@ -5311,9 +5368,9 @@ function genMail(){
 
     // PRODUCTO/PRECIO/DOCS (soluciones: contenido multiproducto sin precio)
     (isBdd ? renderBaseDatos('gmail') : (isPub ? renderPublicacion('gmail') : (isSol ? renderPortafolioSoluciones('gmail') : (isMulti ? renderMultiproducto('gmail') : (''+
-    '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+
-      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
-      '<div style="font-size:18px;font-weight:800;color:#1a1a1a;font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+(pi.sub?'<span style="display:block;font-size:12px;font-weight:600;color:#9b1c2e;margin-top:3px;">'+pi.sub+'</span>':'')+'</div>'+
+    '<div style="background:'+_P.sec+';padding:22px 28px;border-left:5px solid #9b1c2e;">'+
+      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:'+_P.lbl+';font-family:Arial,sans-serif;margin-bottom:6px;">Producto cotizado</div>'+
+      '<div style="font-size:18px;font-weight:800;color:'+_P.tit+';font-family:Arial,sans-serif;padding-bottom:12px;border-bottom:2px solid #9b1c2e;margin-bottom:14px;">'+pi.n+(pi.sub?'<span style="display:block;font-size:12px;font-weight:600;color:'+(mailDark()?'#e0839a':'#9b1c2e')+';margin-top:3px;">'+pi.sub+'</span>':'')+'</div>'+
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+_listaItems+'</table>'+
     '</div>'+
 
@@ -5357,9 +5414,9 @@ function genMail(){
     '</div>'+
 
     // DOCUMENTOS — fondo ámbar muy suave
-    '<div style="background:#fffdf5;padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid #f0e0a0;">'+
-      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#a07820;font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
-      '<div style="font-size:12px;color:#5a4a10;font-family:Arial,sans-serif;">'+_docsInlineHTML()+'</div>'+
+    '<div style="background:'+_P.secAlt+';padding:14px 28px;border-left:5px solid #c8960a;border-top:1px solid '+_P.docLine+';">'+
+      '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:'+_P.docLbl+';font-family:Arial,sans-serif;margin-bottom:5px;">Documentos para contratar</div>'+
+      '<div style="font-size:12px;color:'+_P.docTxt+';font-family:Arial,sans-serif;">'+_docsInlineHTML()+'</div>'+
     '</div>')))))+
 
     // FIRMA — fondo oscuro corporativo
@@ -5419,11 +5476,11 @@ function genMail(){
   // Items de beneficios sobre fondo blanco — color oscuro, sin problema
   var _listaItemsOtl = itMail.map(function(item){
     return '<tr>'+
-      '<td valign="top" width="18" bgcolor="#ffffff" style="background-color:#ffffff;padding:5px 6px 5px 0;font-family:Arial,sans-serif;">'+
+      '<td valign="top" width="18" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:5px 6px 5px 0;font-family:Arial,sans-serif;">'+
         '<font color="#9b1c2e" style="font-size:13px;font-weight:bold;">&#10003;</font>'+
       '</td>'+
-      '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:5px 0;font-family:Arial,sans-serif;">'+
-        '<font color="#222222" style="font-size:13px;line-height:1.5;">'+item+'</font>'+
+      '<td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:5px 0;font-family:Arial,sans-serif;">'+
+        '<font color="'+_P.txt+'" style="font-size:13px;line-height:1.5;"><span style="color:'+_P.txt+';">'+item+'</span></font>'+
       '</td>'+
     '</tr>';
   }).join('');
@@ -5461,7 +5518,7 @@ function genMail(){
     '<tr><td bgcolor="#9b1c2e" style="background-color:#9b1c2e;mso-line-height-rule:exactly;line-height:3px;font-size:3px;" height="3">&nbsp;</td></tr>';
 
   var _htmlOutlook =
-    '<table role="presentation" width="602" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#e0e0e0" style="background-color:#e0e0e0;border-collapse:collapse;">'+
+    '<table role="presentation" width="602" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="'+_P.marco+'" style="background-color:'+_P.marco+';border-collapse:collapse;">'+
     '<tr><td style="padding:1px;">'+
     '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:600px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">'+
 
@@ -5509,16 +5566,16 @@ function genMail(){
     _destOutlook+
     (isBdd ? renderBaseDatos('outlook') : (isPub ? renderPublicacion('outlook') : (isSol ? renderPortafolioSoluciones('outlook') : (isMulti ? renderMultiproducto('outlook') : (''+
     // ══════════════════════════════════════════
-    '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:0;">'+
+    '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:0;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
         '<td width="5" bgcolor="#9b1c2e" style="background-color:#9b1c2e;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-        '<td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 28px;">'+
+        '<td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:22px 28px;">'+
           '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:5px;">'+
-              '<font face="Arial,sans-serif" color="#777777" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font>'+
+            '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-bottom:5px;">'+
+              '<font face="Arial,sans-serif" color="'+_P.lbl+'" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Producto cotizado</font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding-bottom:10px;">'+
-              '<font face="Arial,sans-serif" color="#1a1a1a" style="font-size:18px;font-weight:bold;"><b>'+pi.n+'</b></font>'+(pi.sub?'<br><font face="Arial,sans-serif" color="#9b1c2e" style="font-size:12px;"><b>'+pi.sub+'</b></font>':'')+''+
+            '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-bottom:10px;">'+
+              '<font face="Arial,sans-serif" color="'+_P.tit+'" style="font-size:18px;font-weight:bold;"><b><span style="color:'+_P.tit+';">'+pi.n+'</span></b></font>'+(pi.sub?'<br><font face="Arial,sans-serif" color="'+(mailDark()?'#e0839a':'#9b1c2e')+'" style="font-size:12px;"><b>'+pi.sub+'</b></font>':'')+''+
             '</td></tr>'+
           '</table>'+
           '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
@@ -5596,16 +5653,16 @@ function genMail(){
     // ══════════════════════════════════════════
     // DOCUMENTOS — fondo crema claro
     // ══════════════════════════════════════════
-    '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:0;">'+
+    '<tr><td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';padding:0;">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
         '<td width="5" bgcolor="#c8960a" style="background-color:#c8960a;width:5px;font-size:1px;line-height:1px;">&nbsp;</td>'+
-        '<td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding:14px 28px;">'+
+        '<td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';padding:14px 28px;">'+
           '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-            '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;padding-bottom:4px;">'+
-              '<font face="Arial,sans-serif" color="#7a5808" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Documentos para contratar</font>'+
+            '<tr><td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';padding-bottom:4px;">'+
+              '<font face="Arial,sans-serif" color="'+_oLbl+'" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;">Documentos para contratar</font>'+
             '</td></tr>'+
-            '<tr><td bgcolor="#fdf8e8" style="background-color:#fdf8e8;">'+
-              '<font face="Arial,sans-serif" color="#3a2c04" style="font-size:12px;">'+_docsInlineHTML()+'</font>'+
+            '<tr><td bgcolor="'+_oAlt+'" style="background-color:'+_oAlt+';">'+
+              '<font face="Arial,sans-serif" color="'+_oTxt+'" style="font-size:12px;"><span style="color:'+_oTxt+';">'+_docsInlineHTML()+'</span></font>'+
             '</td></tr>'+
           '</table>'+
         '</td>'+
@@ -9146,6 +9203,7 @@ setPreview('outlook');      // primera vista lista
 updateCRMWsp();           // estado inicial integración CRM/WhatsApp
 initRegistros();          // capa de datos + nexo 💾 + reactividad de la Planilla
 buildTipificacion();      // selector de tipificación de la calculadora
+syncMailThemeBtn();       // interruptor claro/oscuro del correo (recuerda la última elección)
 setTimeout(syncAdjOffset,0); setTimeout(syncAdjOffset,300); /* REQ 1 — offset de barra fija tras render completo */
 _checkWednesdayNotice();  // aviso automático de los miércoles (una vez al día)
 
