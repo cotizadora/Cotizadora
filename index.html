@@ -1679,6 +1679,24 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
 #planilla-view .pl-tr:hover .pl-td:not(.pl-td-id){box-shadow:inset 0 0 14px rgba(26,115,232,.22)!important;}
 #planilla-view.pl-dark .pl-tr:hover .pl-td:not(.pl-td-id){box-shadow:inset 0 0 16px rgba(90,180,255,.40)!important;}
 #planilla-view .pl-tr:hover .pl-td-id{box-shadow:inset 3px 0 0 var(--pl-sel),0 0 12px rgba(90,180,255,.45)!important;}
+/* ── Publicación Única: grilla de documentos (monto · abonos · monto a publicar) ──
+   Réplica del cotizador oficial: se cobra un % del MONTO A PUBLICAR (documento − abonos). */
+.pub-hd{display:grid;grid-template-columns:26px 1fr 1fr 1fr 28px;gap:6px;align-items:end;margin:8px 0 4px;}
+.pub-hd span{font-size:.6rem;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--wa);line-height:1.15;}
+.pub-row{display:grid;grid-template-columns:26px 1fr 1fr 1fr 28px;gap:6px;align-items:center;margin-bottom:6px;}
+.pub-row .pub-n{font-size:.72rem;font-weight:800;color:var(--y);text-align:center;}
+.pub-row input{width:100%;padding:8px 9px;border-radius:8px;background:var(--g2);border:1.5px solid var(--g4);color:var(--w);font-family:inherit;font-size:.85rem;}
+.pub-row .pub-calc{font-size:.8rem;font-weight:800;color:#2ecc71;text-align:right;padding-right:2px;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;}
+.pub-x{background:transparent;border:1.5px solid var(--g4);color:var(--wa);border-radius:7px;cursor:pointer;font-size:.75rem;line-height:1;padding:7px 0;font-family:inherit;}
+.pub-x:hover{border-color:#e0392c;color:#e0392c;}
+.pub-add{width:100%;margin-top:2px;padding:9px;border-radius:9px;border:1.5px dashed var(--g4);background:transparent;color:var(--y);font-family:inherit;font-weight:800;font-size:.8rem;cursor:pointer;}
+.pub-add:hover{border-color:var(--y);background:rgba(240,192,64,.08);}
+.pub-scroll{overflow-x:auto;margin-top:10px;}
+.pub-mini{width:100%;border-collapse:collapse;font-size:.67rem;}
+.pub-mini th,.pub-mini td{border:1px solid var(--g4);padding:4px 5px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.pub-mini th{background:var(--g2);color:var(--wa);font-size:.56rem;text-transform:uppercase;letter-spacing:.3px;text-align:center;line-height:1.2;}
+.pub-mini td:first-child,.pub-mini th:first-child{text-align:center;}
+.pub-mini tr.pub-tot td{font-weight:900;color:var(--y);background:rgba(240,192,64,.08);}
 /* Selector de tipificación (calculadora) + su gemelo en la Planilla — coloreados
    por categoría: verde bueno · amarillo neutro-sin-contacto · rojo malo. */
 .tipif-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -3329,10 +3347,13 @@ function cfgHTML(key){
       '<button type="button" id="btn-add-bdd-multi" class="exec-save" style="background:var(--rd);color:#fff;margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 16px;" onclick="addBddToMulti();playClick();" title="Agrega esta Base de Datos a la propuesta Multiproducto"><span style="font-size:1.4rem;line-height:1;">📦</span><span>Agregar a Multiproducto</span></button>';
   }
   if(key==='pub'){
-    return '<div class="sol-head2">Valor de la factura</div>'+
-      '<div class="fld"><label>Valor de la factura (documento a publicar)</label><input type="number" id="pub-monto" placeholder="Ej: 2615263" min="0" step="1000" oninput="refresh()"></div>'+
-      '<div class="fld"><label>% a cobrar (neto) — por defecto 15%</label><input type="number" id="pub-pct" value="15" min="0" step="0.5" oninput="refresh()"></div>'+
-      '<div class="note-inline" style="margin-top:10px;">📰 <b>Publicación Única:</b> el valor a cobrar es referencial y corresponde aproximadamente al <b>15% del monto del documento</b> (neto) más IVA. Sin tarifa fija; el valor final puede ajustarse al contratar.</div>'+
+    return '<div class="sol-head2">Documentos a publicar</div>'+
+      '<div class="fld"><label>% a cobrar sobre el monto a publicar (neto) — oficial 10%</label><input type="number" id="pub-pct" value="10" min="0" step="0.5" oninput="refresh()"></div>'+
+      '<input type="hidden" id="pub-docs-json" value="[]">'+
+      '<div class="pub-hd"><span>N°</span><span>Monto total del documento</span><span>Abonos</span><span>Monto a publicar</span><span></span></div>'+
+      '<div id="pub-docs-rows">'+pubRowsHTML([{m:0,a:0}])+'</div>'+
+      '<button type="button" class="pub-add" onclick="pubAddDoc();playClick();" title="Agrega otro documento a publicar">＋ Agregar otro documento</button>'+
+      '<div class="note-inline" style="margin-top:10px;">📰 <b>Publicación Única:</b> se cobra el <b>10% del monto a publicar</b>, y el monto a publicar es el <b>monto total del documento menos los abonos</b> que el deudor ya haya pagado. A ese neto se le suma el <b>IVA (19%)</b>. Puedes cargar varios documentos: el total a pagar es la suma de todos.</div>'+
       '<button type="button" id="btn-add-pub-multi" class="exec-save" style="background:var(--rd);color:#fff;margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 16px;" onclick="addPubToMulti();playClick();" title="Agrega esta Publicación Única a la propuesta Multiproducto"><span style="font-size:1.4rem;line-height:1;">📦</span><span>Agregar a Multiproducto</span></button>';
   }
   if(key==='pago_pub'){
@@ -3341,17 +3362,21 @@ function cfgHTML(key){
       '<div class="note-inline" style="margin-bottom:10px;">💳 Usa <b>Datos del cliente</b> (arriba) para Empresa · RUT · Contacto, y el botón <b>Ejecutivo/a</b> del encabezado para los datos del asesor. Aquí solo se completan los datos propios del pago.</div>'+
       '<div class="cfg-2">'+
         '<div class="fld"><label>Fecha del correo</label><input type="date" id="pp-fecha" value="'+_ppHoy+'" oninput="refresh()"></div>'+
-        '<div class="fld"><label>Deuda a Publicar</label><input type="number" id="pp-monto" placeholder="Ej: 304000" min="0" step="1000" oninput="refresh()"></div>'+
+        '<div class="fld"><label>Monto total del documento</label><input type="number" id="pp-monto" placeholder="Ej: 1000000" min="0" step="1000" oninput="refresh()"></div>'+
       '</div>'+
       '<div class="cfg-2">'+
-        '<div class="fld"><label>% a cobrar (neto) — por defecto 15%</label><input type="number" id="pp-pct" value="15" min="0" step="0.5" oninput="refresh()"></div>'+
+        '<div class="fld"><label>Abonos (lo que el deudor ya pagó)</label><input type="number" id="pp-abono" value="0" min="0" step="1000" oninput="refresh()"></div>'+
+        '<div class="fld"><label>Monto a publicar · calculado</label><input type="text" id="pp-pub-view" readonly value="—"></div>'+
+      '</div>'+
+      '<div class="cfg-2">'+
+        '<div class="fld"><label>% a cobrar (neto) — oficial 10%</label><input type="number" id="pp-pct" value="10" min="0" step="0.5" oninput="refresh()"></div>'+
         '<div class="fld"><label>Valor neto · calculado</label><input type="text" id="pp-neto-view" readonly value="—"></div>'+
       '</div>'+
       '<div class="cfg-2">'+
         '<div class="fld"><label>IVA (19%) · calculado</label><input type="text" id="pp-iva-view" readonly value="—"></div>'+
         '<div class="fld"><label>TOTAL A TRANSFERIR · calculado</label><input type="text" id="pp-total-view" readonly value="—" style="font-weight:800;color:var(--y);font-size:1.05rem;"></div>'+
       '</div>'+
-      '<div class="note-inline" style="margin-top:10px;">💳 <b>Pago Publicación Única:</b> ingresa solo la deuda a publicar. El neto se calcula solo (15% por defecto, editable si cobras otro %), el IVA y el total a transferir se calculan automáticamente y son definitivos (no es una cotización).</div>';
+      '<div class="note-inline" style="margin-top:10px;">💳 <b>Pago Publicación Única:</b> ingresa el monto total del documento y los abonos. El <b>monto a publicar</b> (documento − abonos), el neto (<b>10%</b> por defecto, editable), el IVA y el total a transferir se calculan solos y son definitivos (no es una cotización).</div>';
   }
   if(key==='bundle')
     return '<div class="cfg-2">'+
@@ -3902,8 +3927,10 @@ function renderBaseDatos(target){
    Producto de valor a medida en CLP (no UF): publicación puntual de un
    documento impago en DICOM (Mora Control D.U.). Motor UF neutralizado
    igual que BDD. Fuente comercial: PPTX Mora Control (publicación DICOM).
-   Fuente tarifa: hoja "COTIZADOR DOCUMENTO UNICO": neto = 15% del monto,
-   IVA 19%, total = neto × 1,19. Sin tarifa fija: cálculo referencial.
+   Fuente tarifa: cotizador oficial (hoja "COTIZADOR DOCUMENTO UNICO"):
+   MONTO A PUBLICAR = monto total del documento − abonos;
+   PRECIO A COBRAR (NETO) = 10% del monto a publicar; IVA 19%; TOTAL = neto × 1,19.
+   Admite varios documentos: la fila TOTALES suma todas las columnas.
    ════════════════════════════════════════════════════════════════ */
 var PUB_DESC=[
   'La Publicación Única permite publicar en DICOM un documento impago puntual —por ejemplo, una factura— sin necesidad de contratar un plan mensual de Mora Control.',
@@ -3923,9 +3950,123 @@ var PUB_REQ=[
   'No debe existir demanda judicial sobre el documento',
   'Personas naturales: autorización según Ley 19.628'
 ];
-function pubMonto(){var e=document.getElementById('pub-monto');var n=e?parseFloat((''+e.value).replace(/[^\d.]/g,'')):NaN;return (!isNaN(n)&&n>0)?n:0;}
-function pubPct(){var v=parseFloat(gv('pub-pct'));return(isNaN(v)||v<0)?15:v;}
-function pubCalc(){var m=pubMonto();if(!m)return null;var pct=pubPct();var neto=m*(pct/100),iva=neto*0.19,total=neto+iva;return {monto:m,pct:pct,neto:neto,iva:iva,total:total};}
+/* ── Lista de documentos a publicar ──────────────────────────────────────────
+   Fuente única: el input oculto #pub-docs-json (así el snapshot de la cotización
+   lo guarda y lo restaura como cualquier otro campo de la config). */
+function _pubN(v){var n=parseFloat((''+(v==null?'':v)).replace(/[^\d.]/g,''));return (isNaN(n)||n<0)?0:n;}
+function pubDocs(){
+  var el=document.getElementById('pub-docs-json'),arr=null;
+  if(el){try{arr=JSON.parse(el.value||'null');}catch(e){arr=null;}}
+  if(!Array.isArray(arr)||!arr.length)arr=[{m:0,a:0}];
+  return arr.map(function(d){return {m:_pubN(d&&d.m),a:_pubN(d&&d.a)};});
+}
+function pubSetDocs(arr){var el=document.getElementById('pub-docs-json');if(el)el.value=JSON.stringify(arr);}
+function pubRowsHTML(arr){
+  var ds=arr||pubDocs();
+  return ds.map(function(d,i){
+    var pv=Math.max(0,d.m-d.a);
+    return '<div class="pub-row">'+
+      '<div class="pub-n">'+(i+1)+'</div>'+
+      '<input type="number" min="0" step="1000" placeholder="Ej: 1000000" value="'+(d.m?d.m:'')+'" oninput="pubEdit('+i+',\'m\',this.value)" aria-label="Monto total del documento '+(i+1)+'">'+
+      '<input type="number" min="0" step="1000" placeholder="0" value="'+(d.a?d.a:'')+'" oninput="pubEdit('+i+',\'a\',this.value)" aria-label="Abonos del documento '+(i+1)+'">'+
+      '<div class="pub-calc" id="pub-rp-'+i+'">'+((d.m||d.a)?fmtN(pv):'—')+'</div>'+
+      (ds.length>1?'<button type="button" class="pub-x" onclick="pubDelDoc('+i+')" title="Quitar este documento">✕</button>':'<span></span>')+
+    '</div>';
+  }).join('');
+}
+function pubRepintar(ds){var z=document.getElementById('pub-docs-rows');if(z)z.innerHTML=pubRowsHTML(ds);}
+function pubEdit(i,campo,val){
+  var ds=pubDocs();
+  if(!ds[i])ds[i]={m:0,a:0};
+  ds[i][campo]=_pubN(val);
+  pubSetDocs(ds);
+  var cell=document.getElementById('pub-rp-'+i);
+  if(cell)cell.textContent=(ds[i].m||ds[i].a)?fmtN(Math.max(0,ds[i].m-ds[i].a)):'—';
+  refresh();
+}
+function pubAddDoc(){
+  var ds=pubDocs();
+  if(ds.length>=12){toast('Máximo 12 documentos por publicación','err','global-toast');return;}
+  ds.push({m:0,a:0});pubSetDocs(ds);pubRepintar(ds);refresh();
+}
+function pubDelDoc(i){
+  var ds=pubDocs();
+  if(ds.length<=1)return;
+  ds.splice(i,1);pubSetDocs(ds);pubRepintar(ds);refresh();
+}
+/* Tras restaurar una cotización guardada: reconstruye las filas desde el JSON. */
+function pubSyncFromHidden(){if(document.getElementById('pub-docs-json'))pubRepintar(pubDocs());}
+function pubMonto(){var t=0;pubDocs().forEach(function(d){t+=d.m;});return t;}
+function pubPct(){var v=parseFloat(gv('pub-pct'));return(isNaN(v)||v<0)?10:v;}
+/* Cotizador oficial: neto = % del MONTO A PUBLICAR (documento − abonos); IVA 19%. */
+function pubCalc(){
+  var pct=pubPct(),rows=[],tM=0,tA=0,tP=0,tN=0,tI=0,tT=0;
+  pubDocs().forEach(function(d){
+    if(!d.m&&!d.a)return;
+    var pub=Math.max(0,d.m-d.a);
+    var neto=Math.round(pub*pct/100),iva=Math.round(neto*0.19);
+    rows.push({monto:d.m,abono:d.a,publicar:pub,neto:neto,iva:iva,total:neto+iva});
+    tM+=d.m;tA+=d.a;tP+=pub;tN+=neto;tI+=iva;tT+=neto+iva;
+  });
+  if(!rows.length)return null;
+  var uf=(typeof getUF==='function')?getUF():0;
+  return {rows:rows,pct:pct,monto:tM,abonos:tA,publicar:tP,neto:tN,iva:tI,total:tT,ufNeta:uf>0?tN/uf:0};
+}
+/* Tabla del cotizador oficial (misma estructura de columnas), apta para correo. */
+function pubTablaHTML(theme){
+  var c=pubCalc();if(!c)return '';
+  var dark=(theme==='dark');
+  var bd=dark?'rgba(255,255,255,.18)':'#d8c2c6';
+  var hb=dark?'rgba(155,28,46,.55)':'#9b1c2e';
+  var tx=dark?'#e8e8e8':'#333333';
+  var tb=dark?'rgba(240,192,64,.10)':'#f7eef0';
+  var ty=dark?'#f0c040':'#9b1c2e';
+  var TH='padding:6px 6px;border:1px solid '+bd+';font-size:9px;line-height:1.25;text-transform:uppercase;letter-spacing:.3px;color:#ffffff;background:'+hb+';font-weight:bold;text-align:center;font-family:Arial,sans-serif;';
+  var TD='padding:6px 6px;border:1px solid '+bd+';font-size:11px;color:'+tx+';text-align:right;font-family:Arial,sans-serif;';
+  var TC='padding:6px 6px;border:1px solid '+bd+';font-size:11px;color:'+tx+';text-align:center;font-family:Arial,sans-serif;';
+  var TF='padding:7px 6px;border:1px solid '+bd+';font-size:11px;color:'+ty+';text-align:right;font-weight:bold;background:'+tb+';font-family:Arial,sans-serif;';
+  var h='<table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:4px 0 0;">'+
+    '<tr>'+
+      '<th style="'+TH+'">Documento</th>'+
+      '<th style="'+TH+'">Monto total<br>del documento</th>'+
+      '<th style="'+TH+'">Abonos</th>'+
+      '<th style="'+TH+'">Monto a<br>publicar</th>'+
+      '<th style="'+TH+'">Precio a cobrar<br>(neto '+ufd(c.pct)+'%)</th>'+
+      '<th style="'+TH+'">IVA (19%)</th>'+
+      '<th style="'+TH+'">Total a pagar</th>'+
+    '</tr>';
+  c.rows.forEach(function(r,i){
+    h+='<tr>'+
+      '<td style="'+TC+'">N° '+(i+1)+'</td>'+
+      '<td style="'+TD+'">'+fmtN(r.monto)+'</td>'+
+      '<td style="'+TD+'">'+fmtN(r.abono)+'</td>'+
+      '<td style="'+TD+'">'+fmtN(r.publicar)+'</td>'+
+      '<td style="'+TD+'">'+fmtN(r.neto)+'</td>'+
+      '<td style="'+TD+'">'+fmtN(r.iva)+'</td>'+
+      '<td style="'+TD+'">'+fmtN(r.total)+'</td>'+
+    '</tr>';
+  });
+  h+='<tr>'+
+      '<td style="'+TF+'text-align:center;">TOTALES</td>'+
+      '<td style="'+TF+'">'+fmtN(c.monto)+'</td>'+
+      '<td style="'+TF+'">'+fmtN(c.abonos)+'</td>'+
+      '<td style="'+TF+'">'+fmtN(c.publicar)+'</td>'+
+      '<td style="'+TF+'">'+fmtN(c.neto)+'</td>'+
+      '<td style="'+TF+'">'+fmtN(c.iva)+'</td>'+
+      '<td style="'+TF+'">'+fmtN(c.total)+'</td>'+
+    '</tr></table>';
+  return h;
+}
+/* Versión compacta para el panel de resumen (solo si hay más de un documento). */
+function pubMiniTablaHTML(){
+  var c=pubCalc();if(!c||c.rows.length<2)return '';
+  var h='<table class="pub-mini"><tr><th>N°</th><th>Documento</th><th>Abonos</th><th>A publicar</th><th>Neto</th><th>IVA</th><th>Total</th></tr>';
+  c.rows.forEach(function(r,i){
+    h+='<tr><td>'+(i+1)+'</td><td>'+fmtN(r.monto)+'</td><td>'+fmtN(r.abono)+'</td><td>'+fmtN(r.publicar)+'</td><td>'+fmtN(r.neto)+'</td><td>'+fmtN(r.iva)+'</td><td>'+fmtN(r.total)+'</td></tr>';
+  });
+  h+='<tr class="pub-tot"><td>Σ</td><td>'+fmtN(c.monto)+'</td><td>'+fmtN(c.abonos)+'</td><td>'+fmtN(c.publicar)+'</td><td>'+fmtN(c.neto)+'</td><td>'+fmtN(c.iva)+'</td><td>'+fmtN(c.total)+'</td></tr></table>';
+  return h;
+}
 /* Resumen de precio en el panel izquierdo (bloque summary-zone), MISMA fuente de
    datos que la vista previa: pubCalc(). No hay segundo motor. Se re-renderiza en
    la rama 'pub' de refresh() cada vez que cambia el monto → ambos lados sincronizados. */
@@ -3933,45 +4074,54 @@ function pubResumenHTML(){
   var c=pubCalc();
   var html='';
   if(!c){
-    return html+'<div class="note-inline" style="margin:0;">🧾 Ingresa el <b>valor de la factura</b> para ver el cálculo referencial ('+ufd(pubPct())+'% + IVA).</div>';
+    return html+'<div class="note-inline" style="margin:0;">🧾 Ingresa el <b>monto total del documento</b> (y los <b>abonos</b>, si el deudor ya pagó una parte) para ver el cálculo: '+ufd(pubPct())+'% del monto a publicar + IVA.</div>';
   }
   return html+
     '<div class="metrics">'+
-      metric('Monto documento','m-pub-monto','b',fmtN(c.monto))+
+      metric('Monto documento'+(c.rows.length>1?'s':''),'m-pub-monto','b',fmtN(c.monto))+
+      metric('Abonos','m-pub-abonos','wa',fmtN(c.abonos))+
+      metric('Monto a publicar','m-pub-pub','b',fmtN(c.publicar))+
       metric('Precio '+ufd(c.pct)+'% (neto)','m-pub-neto','g',fmtN(c.neto))+
       metric('IVA (19%)','m-pub-iva','wa',fmtN(c.iva))+
-      metricBig('Total aprox. a cobrar','m-pub-total','y',fmtN(c.total))+
+      metricBig('Total a pagar','m-pub-total','y',fmtN(c.total))+
     '</div>'+
-    '<div class="note-inline" style="margin-top:10px;">Valor referencial ('+ufd(c.pct)+'% del documento + IVA). El valor final puede ajustarse al contratar.</div>';
+    (c.rows.length>1?'<div class="pub-scroll">'+pubMiniTablaHTML()+'</div>':'')+
+    '<div class="note-inline" style="margin-top:10px;">'+ufd(c.pct)+'% sobre el <b>monto a publicar</b> (documento − abonos), más IVA 19%.'+
+      (c.ufNeta?' · <b>UF venta neta: '+ufd(Math.round(c.ufNeta*100)/100)+'</b>':'')+'</div>';
 }
 /* ════════ PAGO PUBLICACIÓN ÚNICA — cálculo y resumen (independiente de la lógica UF/cotización) ════════
-   El usuario solo ingresa la DEUDA A PUBLICAR y el % a cobrar (15% por defecto).
+   El usuario ingresa el MONTO TOTAL DEL DOCUMENTO y los ABONOS; el monto a publicar
+   es la resta, y sobre él se aplica el % a cobrar (10% oficial por defecto).
    El neto, el IVA (19%) y el total a transferir se calculan automáticamente. */
 function ppMontoDoc(){var v=parseFloat(gv('pp-monto'));return(isNaN(v)||v<=0)?0:v;}
-function ppPct(){var v=parseFloat(gv('pp-pct'));return(isNaN(v)||v<0)?15:v;}
+function ppAbono(){var v=parseFloat(gv('pp-abono'));return(isNaN(v)||v<0)?0:v;}
+function ppPct(){var v=parseFloat(gv('pp-pct'));return(isNaN(v)||v<0)?10:v;}
 function ppCalc(){
   var monto=ppMontoDoc();if(!monto)return null;
+  var abono=Math.min(ppAbono(),monto);
+  var publicar=monto-abono;
   var pct=ppPct();
-  var neto=Math.round(monto*pct/100);
+  var neto=Math.round(publicar*pct/100);
   var iva=Math.round(neto*0.19);
   var total=neto+iva;
-  return {monto:monto,pct:pct,neto:neto,iva:iva,total:total};
+  return {monto:monto,abono:abono,publicar:publicar,pct:pct,neto:neto,iva:iva,total:total};
 }
 function pagoPubResumenHTML(){
   var c=ppCalc();
   var html='';
   if(!c){
-    return html+'<div class="note-inline" style="margin:0;">💳 Ingresa la <b>deuda a publicar</b> para calcular el neto, el IVA y el total a transferir.</div>';
+    return html+'<div class="note-inline" style="margin:0;">💳 Ingresa el <b>monto total del documento</b> y los <b>abonos</b> para calcular el neto, el IVA y el total a transferir.</div>';
   }
   return html+
     '<div class="metrics">'+
-      metric('Deuda a publicar','m-pp-monto','b',fmtN(c.monto))+
-      metric('% aplicado','m-pp-pct','wa',ufd(c.pct)+'%')+
-      metric('Valor neto','m-pp-neto','g',fmtN(c.neto))+
+      metric('Monto documento','m-pp-monto','b',fmtN(c.monto))+
+      metric('Abonos','m-pp-abono','wa',fmtN(c.abono))+
+      metric('Monto a publicar','m-pp-pub','b',fmtN(c.publicar))+
+      metric('Valor neto ('+ufd(c.pct)+'%)','m-pp-neto','g',fmtN(c.neto))+
       metric('IVA (19%)','m-pp-iva','wa',fmtN(c.iva))+
       metricBig('Total a transferir','m-pp-total','y',fmtN(c.total))+
     '</div>'+
-    '<div class="note-inline" style="margin-top:10px;">💳 Neto calculado automáticamente como el <b>'+ufd(c.pct)+'%</b> de la deuda a publicar. El total es definitivo.</div>';
+    '<div class="note-inline" style="margin-top:10px;">💳 Neto calculado como el <b>'+ufd(c.pct)+'%</b> del <b>monto a publicar</b> (documento − abonos). El total es definitivo.</div>';
 }
 function pubBlocksInner(theme){
   var dark=(theme==='dark');
@@ -3987,15 +4137,12 @@ function pubBlocksInner(theme){
   var req='<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;border-bottom:2px solid '+cLine+';padding-bottom:6px;margin-bottom:2px;">Requisitos de publicación</div>'+
     PUB_REQ.map(function(t){return '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;font-family:Arial,sans-serif;line-height:1.4;"><span style="color:#9b1c2e;font-weight:bold;">✔</span> '+t+'</div>';}).join('');
   var precioTxt = c
-    ? ('<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Monto del documento a publicar (aprox.):</b> '+fmtN(c.monto)+'</div>'+
-       '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>Precio a cobrar (neto, '+ufd(c.pct)+'%):</b> '+fmtN(c.neto)+'</div>'+
-       '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;"><b>IVA (19%):</b> '+fmtN(c.iva)+'</div>'+
-       '<div style="font-size:13px;color:'+cSub+';padding:5px 0 0;font-weight:800;">Total a pagar: '+fmtN(c.total)+'</div>')
-    : '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;">Ingrese el valor de la factura para calcular el valor referencial ('+ufd(pubPct())+'% del documento + IVA).</div>';
+    ? (pubTablaHTML(theme)+
+       '<div style="font-size:11px;color:'+cTxt+';padding:9px 0 0;line-height:1.45;">El <b>monto a publicar</b> es el monto total del documento menos los abonos ya pagados. Sobre ese monto se cobra el <b>'+ufd(c.pct)+'% (neto)</b>, más <b>IVA 19%</b>.</div>')
+    : '<div style="font-size:12px;color:'+cTxt+';padding:2px 0;">Ingrese el monto del documento y los abonos para calcular el valor ('+ufd(pubPct())+'% del monto a publicar + IVA).</div>';
   var resumen='<div style="margin-top:16px;padding:14px 16px;background:'+cBox+';border-left:3px solid #9b1c2e;border-radius:6px;font-family:Arial,sans-serif;">'+
-    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Valor referencial de la publicación</div>'+
+    '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'+cSub+';font-weight:bold;margin-bottom:8px;">Detalle del cobro</div>'+
     precioTxt+
-    '<div style="font-size:10px;color:#999;padding:8px 0 0;line-height:1.4;">Valor referencial equivalente al '+ufd(c.pct)+'% del monto del documento. El valor final puede ajustarse al momento de la contratación.</div>'+
   '</div>';
   /* DOCUMENTOS SOLICITADOS — misma estructura del bloque "Documentos para contratar"
      de los productos estándar (acento ámbar #c8960a); en la tarjeta (dark) se adapta el
@@ -4012,9 +4159,9 @@ function pubBlocksInner(theme){
 function renderPublicacion(target){
   var c=pubCalc();
   if(!c){
-    if(target==='wa')return '*Publicación Única Equifax*\nIngrese el valor de la factura para calcular la propuesta.';
-    if(target==='outlook')return '<tr><td style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Ingrese el valor de la factura para construir la propuesta de Publicación Única.</td></tr>';
-    return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Ingrese el valor de la factura para construir la propuesta de Publicación Única.</div>';
+    if(target==='wa')return '*Publicación Única Equifax*\nIngrese el monto del documento (y los abonos) para calcular la propuesta.';
+    if(target==='outlook')return '<tr><td style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Ingrese el monto del documento y los abonos para construir la propuesta de Publicación Única.</td></tr>';
+    return '<div style="padding:18px 28px;color:#999;font-family:Arial,sans-serif;font-size:13px;">Ingrese el monto del documento y los abonos para construir la propuesta de Publicación Única.</div>';
   }
   if(target==='card')return pubBlocksInner('dark');
   if(target==='gmail')return '<div style="background:#ffffff;padding:22px 28px;border-left:5px solid #9b1c2e;">'+pubBlocksInner('light')+'</div>';
@@ -4024,11 +4171,24 @@ function renderPublicacion(target){
     t+='\n*POR QUÉ PUBLICAR EL DOCUMENTO*\n'+PUB_BENE.map(function(x){return '\u203a '+x;}).join('\n')+'\n';
     t+='\n*REQUISITOS DE PUBLICACIÓN*\n'+PUB_REQ.map(function(x){return '\u2714\ufe0f '+x;}).join('\n')+'\n';
     t+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n';
-    t+='\ud83e\uddfe *Monto del documento (aprox.):* '+fmtN(c.monto)+'\n';
+    t+='*DETALLE DEL COBRO*\n';
+    if(c.rows.length>1){
+      c.rows.forEach(function(r,i){
+        t+='\n\ud83e\uddfe *Documento N\u00b0 '+(i+1)+'*\n';
+        t+='   Monto total: '+fmtN(r.monto)+'\n';
+        t+='   Abonos: '+fmtN(r.abono)+'\n';
+        t+='   Monto a publicar: '+fmtN(r.publicar)+'\n';
+        t+='   Neto ('+ufd(c.pct)+'%): '+fmtN(r.neto)+' + IVA '+fmtN(r.iva)+' = *'+fmtN(r.total)+'*\n';
+      });
+      t+='\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n*TOTALES*\n';
+    }
+    t+='\ud83e\uddfe *Monto total del documento:* '+fmtN(c.monto)+'\n';
+    t+='\u2796 *Abonos:* '+fmtN(c.abonos)+'\n';
+    t+='\ud83d\udccb *Monto a publicar:* '+fmtN(c.publicar)+'\n';
     t+='\ud83d\udcb0 *Precio a cobrar (neto, '+ufd(c.pct)+'%):* '+fmtN(c.neto)+'\n';
     t+='\u2795 *IVA (19%):* '+fmtN(c.iva)+'\n';
-    t+='\u2705 *Total a pagar:* *'+fmtN(c.total)+'*\n';
-    t+='_Valor referencial ('+ufd(c.pct)+'% del documento). El valor final puede ajustarse al contratar._\n';
+    t+='\u2705 *TOTAL A PAGAR:* *'+fmtN(c.total)+'*\n';
+    t+='_El '+ufd(c.pct)+'% se calcula sobre el monto a publicar (documento menos abonos)._\n';
     t+='\n*DOCUMENTOS SOLICITADOS*\n';
     t+=''+_docsChecks()+'';
     return t;
@@ -4040,13 +4200,14 @@ function renderPublicacion(target){
    total UF/CLP mensual del paquete (ufV/ufL/clp = 0) para no falsear el total. */
 function addPubToMulti(){
   var c=pubCalc();
-  if(!c){toast('Ingresa el valor de la factura primero','err','global-toast');return;}
-  var sig='monto:'+c.monto+'|pct:'+c.pct;
+  if(!c){toast('Ingresa el monto del documento primero','err','global-toast');return;}
+  var sig='docs:'+c.rows.map(function(r){return r.monto+'/'+r.abono;}).join(',')+'|pct:'+c.pct;
   if(MULTI.some(function(s){return s.pub&&s.pubSig===sig;})){toast('Esa Publicación Única ya está en el Multiproducto','err','global-toast');return;}
   var labels=[
     'Publicación del documento en DICOM, registrada en el informe comercial del deudor',
     'Notificación al deudor y bloqueo comercial que incentiva el pago',
-    'Monto del documento (aprox.): '+fmtN(c.monto),
+    (c.rows.length>1?c.rows.length+' documentos · monto total ':'Monto total del documento: ')+fmtN(c.monto)+' · abonos '+fmtN(c.abonos),
+    'Monto a publicar: '+fmtN(c.publicar),
     'Precio a cobrar (neto, '+ufd(c.pct)+'%): '+fmtN(c.neto)+' · IVA: '+fmtN(c.iva)
   ];
   var valTxt=fmtN(c.total)+' total ('+ufd(c.pct)+'% + IVA)';
@@ -5507,7 +5668,8 @@ function genMailPagoPub(){
   }
 
   var c=ppCalc();
-  var _netoEl=$('pp-neto-view'),_ivaEl=$('pp-iva-view'),_totEl=$('pp-total-view');
+  var _netoEl=$('pp-neto-view'),_ivaEl=$('pp-iva-view'),_totEl=$('pp-total-view'),_pubEl=$('pp-pub-view');
+  if(_pubEl)_pubEl.value=c?fmtN(c.publicar):'—';
   if(_netoEl)_netoEl.value=c?fmtN(c.neto):'—';
   if(_ivaEl)_ivaEl.value=c?fmtN(c.iva):'—';
   if(_totEl)_totEl.value=c?fmtN(c.total):'—';
@@ -5530,7 +5692,9 @@ function genMailPagoPub(){
     '<div style="font-size:13px;color:#999;font-family:Arial,sans-serif;">Ingrese el valor neto para construir el resumen del pago.</div>'
     :
     '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-      (c.monto?'<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">Monto del documento publicado</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">'+fmtN(c.monto)+'</td></tr>':'')+
+      (c.monto?'<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">Monto total del documento</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">'+fmtN(c.monto)+'</td></tr>':'')+
+      (c.abono?'<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">Abonos</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">− '+fmtN(c.abono)+'</td></tr>':'')+
+      (c.abono?'<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">Monto a publicar</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">'+fmtN(c.publicar)+'</td></tr>':'')+
       '<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">Valor neto</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">'+fmtN(c.neto)+'</td></tr>'+
       '<tr><td style="font-size:12px;color:#666;font-family:Arial,sans-serif;padding:4px 0;">IVA (19%)</td><td align="right" style="font-size:13px;color:#1a1a1a;font-family:Arial,sans-serif;font-weight:700;padding:4px 0;">'+fmtN(c.iva)+'</td></tr>'+
       '<tr><td colspan="2" style="border-top:1px solid #e0c8ce;padding-top:8px;"></td></tr>'+
@@ -7057,13 +7221,13 @@ function _comercialExcel(){
   /* ── Publicación Única (montos en CLP, NO UF): sin columnas UF; total en OBSERVACIÓN. ── */
   if(key==='pub'){
     var cp=(typeof pubCalc==='function')?pubCalc():null;
-    if(cp)out.observacion=(obs?obs+' · ':'')+'Publicación DICOM ('+ufd(cp.pct)+'%) · Total a cobrar '+fmtN(cp.total);
+    if(cp)out.observacion=(obs?obs+' · ':'')+'Publicación DICOM ('+ufd(cp.pct)+'%) · '+cp.rows.length+' doc. · Monto '+fmtN(cp.monto)+(cp.abonos?' − abonos '+fmtN(cp.abonos):'')+' · A publicar '+fmtN(cp.publicar)+' · Neto '+fmtN(cp.neto)+' + IVA '+fmtN(cp.iva)+' · Total a cobrar '+fmtN(cp.total);
     return out;
   }
   /* ── Pago Publicación Única (CLP): total a transferir en OBSERVACIÓN. ── */
   if(key==='pago_pub'){
     var pp=(typeof ppCalc==='function')?ppCalc():null;
-    if(pp)out.observacion=(obs?obs+' · ':'')+'Pago publicación ('+ufd(pp.pct)+'%) · Total a transferir '+fmtN(pp.total);
+    if(pp)out.observacion=(obs?obs+' · ':'')+'Pago publicación ('+ufd(pp.pct)+'%) · Monto '+fmtN(pp.monto)+(pp.abono?' − abonos '+fmtN(pp.abono):'')+' · A publicar '+fmtN(pp.publicar)+' · Total a transferir '+fmtN(pp.total);
     return out;
   }
   /* ── Base de Datos (valorización a medida, CLP): volumen + valor en OBSERVACIÓN. ── */
@@ -7783,6 +7947,8 @@ function _restaurarConfig(cfg){
       if(!el.id&&el.value&&cfg.checksByValue[el.value]!==undefined)el.checked=!!cfg.checksByValue[el.value];
     });
   }
+  /* Publicación Única: las filas de documentos viven en #pub-docs-json → repintarlas. */
+  if(typeof pubSyncFromHidden==='function')pubSyncFromHidden();
 }
 function capturarSnapshot(){
   return {
