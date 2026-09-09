@@ -3546,13 +3546,16 @@ var MAIL_THEME=(function(){try{return localStorage.getItem('cotiz_mail_theme')==
 function mailTheme(){return MAIL_THEME==='dark'?'dark':'light';}
 function mailDark(){return MAIL_THEME==='dark';}
 function MP(){
+  /* `sec` = papel del cuerpo · `secAlt` = papel de la zona de apoyo (contrato y
+     documentos) · `filete` y `marco` llevan contraste suficiente para verse: en
+     claro estaban a 1.28:1 y 1.42:1, o sea invisibles. */
   return mailDark()
-    ? {sec:'#121014',secAlt:'#121014',tit:'#ffffff',txt:'#ddd6da',lbl:'#a2939b',
-       docLbl:'#e0b453',docTxt:'#ddd6da',docLine:'#2a2228',marco:'#241d22',
-       filete:'#2a2228',suave:'#8d8189'}
-    : {sec:'#ffffff',secAlt:'#ffffff',tit:'#16141a',txt:'#33303a',lbl:'#7d7280',
-       docLbl:'#a07520',docTxt:'#33303a',docLine:'#e8e2e6',marco:'#ddd7db',
-       filete:'#e8e2e6',suave:'#7d7280'};
+    ? {sec:'#121014',secAlt:'#191519',tit:'#ffffff',txt:'#ddd6da',lbl:'#a2939b',
+       docLbl:'#e0b453',docTxt:'#ddd6da',docLine:'#332a33',marco:'#3a2f38',
+       filete:'#332a33',suave:'#8d8189'}
+    : {sec:'#ffffff',secAlt:'#f6f2f5',tit:'#16141a',txt:'#33303a',lbl:'#6f6472',
+       docLbl:'#8a6316',docTxt:'#33303a',docLine:'#ddd3da',marco:'#bdb1bb',
+       filete:'#cfc6cc',suave:'#6f6472'};
 }
 function _mailSecBg(){return MP().sec;}
 function toggleMailTheme(){
@@ -4693,12 +4696,12 @@ function renderMultiproducto(target){
   }
   if(target==='gmail'){
     /* DOCUMENTOS PARA CONTRATAR — idéntico al bloque estándar Gmail (fondo #fffdf5, borde #c8960a). */
-    var mDocsGm=_mailFilete('gmail')+_mailDocs('gmail');
+    var mDocsGm=_mailFilete('gmail',MP().secAlt)+_mailDocs('gmail');
     return MULTI.map(_multiGmailProduct).join('')+mDocsGm;
   }
   if(target==='outlook'){
     /* DOCUMENTOS PARA CONTRATAR — idéntica estructura de tabla del bloque estándar Outlook. */
-    var mDocsOl=_mailFilete('outlook')+_mailDocs('outlook');
+    var mDocsOl=_mailFilete('outlook',MP().secAlt)+_mailDocs('outlook');
     return MULTI.map(_multiOutlookProduct).join('')+mDocsOl;
   }
   if(target==='wa'){
@@ -5216,7 +5219,7 @@ function _mailPrecio(o,modo){
    a 17px. Antes tenía fondo propio y competía con la banda de precio. */
 function _mailFranja(celdas,modo){
   celdas=(celdas||[]).filter(Boolean); if(!celdas.length)return '';
-  var _P=MP(),bg=_P.sec,w=Math.floor(100/celdas.length);
+  var _P=MP(),bg=_P.secAlt,w=Math.floor(100/celdas.length);
   var dentro='<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
     celdas.map(function(c,i){
       var col=c[2]||_P.tit;
@@ -5232,16 +5235,16 @@ function _mailFranja(celdas,modo){
 /* Documentos: pierde el fondo crema (competía con el precio por la atención) y
    pasa a ser una sección del mismo papel, marcada por filete y rótulo ámbar. */
 function _mailDocs(modo){
-  var _P=MP(),docs=_documentosArr();
+  var _P=MP(),docs=_documentosArr(),bg=_P.secAltAlt;
   var mid=Math.ceil(docs.length/2);
   function celda(arr){
     return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
       arr.map(function(d){
         return '<tr>'+
-          '<td valign="top" width="18" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:0 8px 10px 0;">'+
+          '<td valign="top" width="18" bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding:0 8px 10px 0;">'+
             '<font face="Arial,sans-serif" color="#c8960a" style="font-size:13px;"><b>&#10003;</b></font>'+
           '</td>'+
-          '<td valign="top" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:0 0 10px;">'+
+          '<td valign="top" bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding:0 0 10px;">'+
             '<font face="Arial,sans-serif" color="'+_P.docTxt+'" style="font-size:14px;line-height:1.6;"><span style="color:'+_P.docTxt+';">'+_escHtmlDocs(d)+'</span></font>'+
           '</td>'+
         '</tr>';
@@ -5249,29 +5252,30 @@ function _mailDocs(modo){
     '</table>';
   }
   var dentro='<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-    '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:0 0 16px;">'+
+    '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding:0 0 16px;">'+
       '<font face="Arial,sans-serif" color="'+_P.docLbl+'" style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase;"><b><span style="color:'+_P.docLbl+';">Documentos para contratar</span></b></font>'+
     '</td></tr>'+
-    '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';">'+
+    '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';">'+
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
-        '<td width="50%" valign="top" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-right:20px;">'+celda(docs.slice(0,mid))+'</td>'+
-        '<td width="50%" valign="top" bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding-left:4px;">'+celda(docs.slice(mid))+'</td>'+
+        '<td width="50%" valign="top" bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding-right:20px;">'+celda(docs.slice(0,mid))+'</td>'+
+        '<td width="50%" valign="top" bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding-left:4px;">'+celda(docs.slice(mid))+'</td>'+
       '</tr></table>'+
     '</td></tr>'+
   '</table>';
-  if(modo==='outlook')return '<tr><td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:0 34px 32px;">'+dentro+'</td></tr>';
-  return '<div style="background:'+_P.sec+';padding:0 34px 32px;">'+dentro+'</div>';
+  if(modo==='outlook')return '<tr><td bgcolor="'+_P.secAlt+'" style="background-color:'+_P.secAlt+';padding:0 34px 32px;">'+dentro+'</td></tr>';
+  return '<div style="background:'+_P.secAlt+';padding:0 34px 32px;">'+dentro+'</div>';
 }
-/* Filete de separación entre secciones del mismo papel. */
-function _mailFilete(modo){
-  var _P=MP();
-  var celda='<td bgcolor="'+_P.sec+'" style="background-color:'+_P.sec+';padding:0 34px;">'+
+/* Filete de separación. `papel` permite trazarlo tanto sobre el cuerpo blanco
+   como sobre la zona de apoyo tintada. */
+function _mailFilete(modo,papel){
+  var _P=MP(),bg=papel||_P.sec;
+  var celda='<td bgcolor="'+bg+'" style="background-color:'+bg+';padding:0 34px;">'+
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr>'+
       '<td bgcolor="'+_P.filete+'" style="background-color:'+_P.filete+';font-size:1px;line-height:1px;height:1px;mso-line-height-rule:exactly;">&nbsp;</td>'+
     '</tr></table>'+
   '</td>';
   if(modo==='outlook')return '<tr>'+celda+'</tr>';
-  return '<div style="background:'+_P.sec+';padding:0 34px;"><div style="height:1px;font-size:1px;line-height:1px;background:'+_P.filete+';">&nbsp;</div></div>';
+  return '<div style="background:'+bg+';padding:0 34px;"><div style="height:1px;font-size:1px;line-height:1px;background:'+_P.filete+';">&nbsp;</div></div>';
 }
 /* Firma: cierre oscuro de la pieza. Nombre a 20px, foto circular. */
 function _mailFirma(d,modo){
@@ -5539,13 +5543,13 @@ function genMail(){
     // FRANJA DE CONTRATO — la tira Contrato · Modalidad · Descargas de la Ficha
     _mailFranja([
       ['Contrato',pl+' meses'],
-      ['Modalidad','POSTPAGO 30 d&iacute;as','#1f9d55'],
+      ['Modalidad','POSTPAGO 30 d&iacute;as'],
       (co>0&&(tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3')
         ? ['Descargas',co+(tipo==='ri_bolsa'?' en bolsa':' al mes')] : null)
     ],'gmail')+
 
     // DOCUMENTOS — lista en dos columnas (ver _mailDocs)
-    _mailFilete('gmail')+
+    _mailFilete('gmail',MP().secAlt)+
     _mailDocs('gmail'))))))+
 
     // FIRMA — pie de la Ficha: foto circular + datos del ejecutivo
@@ -5694,13 +5698,13 @@ function genMail(){
     // FRANJA DE CONTRATO — Contrato · Modalidad · Descargas
     _mailFranja([
       ['Contrato',pl+' meses'],
-      ['Modalidad','POSTPAGO 30 d&iacute;as','#1f9d55'],
+      ['Modalidad','POSTPAGO 30 d&iacute;as'],
       (co>0&&(tipo==='bundle4100'||tipo==='bundleIlim'||tipo==='ri_plan'||tipo==='ri_bolsa'||tipo==='combo3')
         ? ['Descargas',co+(tipo==='ri_bolsa'?' en bolsa':' al mes')] : null)
     ],'outlook')+
 
     // DOCUMENTOS — lista en dos columnas (ver _mailDocs)
-    _mailFilete('outlook')+
+    _mailFilete('outlook',MP().secAlt)+
     _mailDocs('outlook'))))))+
 
     // ══════════════════════════════════════════
