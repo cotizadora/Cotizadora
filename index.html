@@ -1939,7 +1939,7 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
     <button type="button" class="vn-btn" id="vnbtn-planilla" data-target="planilla" onclick="goToView(this.dataset.target)" title="Planilla de cotizaciones guardadas (base de datos interna — reemplaza a Excel)"><span class="vn-ic">📋</span><span class="vn-lb">Planilla</span></button>
     <button type="button" class="vn-btn" id="vnbtn-biblioteca" data-target="biblioteca" onclick="goToView(this.dataset.target)" title="Biblioteca de conocimiento comercial: audios de llamadas reales, con transcripción sincronizada y análisis de calidad"><span class="vn-ic">🎧</span><span class="vn-lb">Biblioteca</span></button>
     <button type="button" class="vn-btn vn-tut" id="vnbtn-tutoriales" data-target="tutoriales" onclick="goToView(this.dataset.target)" title="Recursos: tutoriales en video, guías y formularios para tu trabajo — míralos aquí o descárgalos"><span class="vn-ic">📚</span><span class="vn-lb">Tutoriales y Recursos</span></button>
-    <button type="button" class="vn-btn" id="vnbtn-descargas" data-target="descargas" onclick="goToView(this.dataset.target)" title="Centro de Descargas — la extensión CRM Extractor + ShortCut VocalCRM y los programas del equipo (MuteReal, NotasSmart, Smart)"><span class="vn-ic">⬇</span><span class="vn-lb">Descargas</span></button>
+    <button type="button" class="vn-btn" id="vnbtn-descargas" data-target="descargas" onclick="goToView(this.dataset.target)" title="Centro de Descargas — la extensión CRM Extractor + ShortCut VocalCRM y los programas del equipo (MuteReal, Bloc de Notas Flotante)"><span class="vn-ic">⬇</span><span class="vn-lb">Descargas</span></button>
     <span class="vn-div" aria-hidden="true"></span>
     <a class="vn-btn vn-ext" style="--acc:var(--bl)" href="https://atlas.geimser.cl/app/calls/new?campaignId=b5df1732-476e-4475-a21a-bae8e0942829" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir Atlas (CRM · Geimser) en una pestaña nueva"><span class="vn-ic">🗂️</span><span class="vn-lb">Atlas</span><span class="vn-ext-go" aria-hidden="true">↗</span></a>
     <a class="vn-btn vn-ext" style="--acc:var(--gn)" href="https://cdn.s-br01a-product.prod1.vocalcomcx.com/hermes360/Admin/Launcher/dashboard?screen=workspace" target="_blank" rel="noopener noreferrer" onclick="playClick()" title="Abrir Vocal (discador · Vocalcom) en una pestaña nueva"><span class="vn-ic">📞</span><span class="vn-lb">Vocal</span><span class="vn-ext-go" aria-hidden="true">↗</span></a>
@@ -2451,28 +2451,16 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
         <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/MuteReal.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
       </div>
 
-      <!-- 4) NotasSmart (programa Windows) -->
+      <!-- 4) Bloc de Notas Flotante (programa Windows) -->
       <div class="dl-card">
-        <div class="dl-prev">🗒️</div>
+        <div class="dl-prev">📝</div>
         <div class="dl-head">
-          <div class="dl-title">NotasSmart</div>
+          <div class="dl-title">Bloc de Notas Flotante</div>
           <span class="dl-tag win">Programa Windows</span>
         </div>
-        <div class="dl-desc">Bloc de notas flotante que queda siempre a la vista. Guarda apuntes rápidos sin cambiar de ventana.</div>
-        <p class="dl-steps"><b>Instalar:</b> descarga y ejecuta el archivo. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
-        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/notassmart_v1.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
-      </div>
-
-      <!-- 5) Smart (programa Windows) -->
-      <div class="dl-card">
-        <div class="dl-prev">🧠</div>
-        <div class="dl-head">
-          <div class="dl-title">Smart</div>
-          <span class="dl-tag win">Programa Windows</span>
-        </div>
-        <div class="dl-desc">Panel de notas retráctil que se despliega desde el costado de la pantalla. Anota rápido sin cambiar de ventana y ocúltalo con un clic cuando no lo necesites.</div>
-        <p class="dl-steps"><b>Instalar:</b> descarga y ejecuta el archivo. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
-        <a class="dl-btn" href="https://github.com/cotizadora/Cotizadora/releases/download/bloc-notas-flotante/BlocNotasFlotante.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
+        <div class="dl-desc">Una pestañita en el borde de la pantalla: le haces clic y se despliega un bloc de notas encima de todo, sin cambiar de ventana. Varias notas con buscador, temas de color y guardado automático. Clic afuera y se oculta.</div>
+        <p class="dl-steps"><b>Instalar:</b> descarga el .zip, descomprímelo y ejecuta <b>BlocNotasFlotante.exe</b>. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
+        <a class="dl-btn" href="https://github.com/cotizadora/Cotizadora/releases/download/bloc-notas-flotante/BlocNotasFlotante.zip" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.zip)</a>
       </div>
 
       <div class="dl-note">💡 <b>Nota:</b> <b>CRM Extractor + ShortCut VocalCRM</b> unifica las dos extensiones anteriores; si ya tenías alguna, quítala en <b>edge://extensions</b> antes de cargar esta. Para pasar tus atajos: panel → <b>Configuración → Importar</b> → <code>mi-configuracion.json</code>. Los programas de Windows apuntan a sus archivos en <code>cotizadora.github.io/Cotizadora/</code>.</div>
