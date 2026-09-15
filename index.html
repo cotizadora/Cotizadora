@@ -1419,9 +1419,13 @@ body.planilla-open #planilla-view.in{opacity:1;transform:translateY(0);}
 /* ── HEADER REDISEÑADO (Fase 1): 3 zonas + UF destacada + menú Personalización ── */
 header{gap:18px;padding:0 20px;}
 .hz{display:flex;align-items:center;min-width:0;}
-.hz-left{gap:16px;flex:1 1 0;justify-content:flex-start;}
-.hz-right{gap:12px;flex:1 1 0;justify-content:flex-end;}
-header .view-nav{flex:0 0 auto;}
+/* Cada bloque lateral mide lo que su contenido necesita y la barra se centra en el
+   espacio que sobra. Antes los dos lados eran mitades iguales forzadas: el izquierdo
+   (logo + nombre + UF, ~470px) no cabía y se montaba sobre la UF incluso a 1920px,
+   mientras el derecho desperdiciaba espacio. */
+.hz-left{gap:16px;flex:0 0 auto;justify-content:flex-start;}
+.hz-right{gap:12px;flex:0 0 auto;justify-content:flex-end;}
+header .view-nav{flex:0 1 auto;margin:0 auto;}
 /* Indicador UF destacado (lado izquierdo, sección propia) */
 .uf-indicator{display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.34);
   border:1px solid rgba(240,192,64,.5);border-radius:12px;padding:6px 10px 6px 14px;
@@ -1464,6 +1468,19 @@ a.vn-btn{text-decoration:none;}
 .vn-btn.vn-ext .vn-ic{color:var(--acc);}
 .vn-btn.vn-ext:hover{background:color-mix(in srgb,var(--acc) 20%,rgba(0,0,0,.35));border-color:var(--acc);color:#fff;}
 .vn-ext-go{font-size:.66rem;opacity:.55;margin-left:1px;}
+/* Header compacto por pasos. Con 8 botones en la barra, en notebooks los bloques de
+   los lados no cabían: la zona derecha (Personalización + usuario) se desbordaba hacia
+   la izquierda y tapaba PeopleWork, y el logo/UF pisaba "Cotizadora". Se quitan
+   etiquetas de lo más prescindible a lo menos; todo conserva su icono y su tooltip. */
+/* Umbrales calculados con los anchos medidos (izq 470 · barra 954 · der 311 · márgenes 76):
+   cada paso libera justo lo necesario para el tramo siguiente. */
+@media(max-width:1960px){.brand .sb{display:none;}}
+@media(max-width:1860px){#settings-btn .set-lb{display:none;} #settings-btn{padding:9px 11px;}}
+@media(max-width:1720px){.brand .nm,.brand .sb{display:none;}}
+@media(max-width:1580px){.vn-btn.vn-ext .vn-lb{display:none;} .vn-btn.vn-ext{padding-left:10px;padding-right:10px;}}
+@media(max-width:1420px){.user-btn span{display:none;} .user-btn{padding:5px;}}
+@media(max-width:1330px){header{gap:12px;} .brand img{height:48px;} .uf-indicator input{width:74px;}}
+@media(max-width:1275px){.vn-btn .vn-lb{display:none;} .vn-btn{padding:7px 9px;}}
 #snd-toggle.off{opacity:.5;}
 .set-wide{width:100%;justify-content:flex-start;}
 .set-dl-ic{width:20px;height:20px;fill:#7ec8f0;flex-shrink:0;}
@@ -2431,7 +2448,7 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
         </div>
         <div class="dl-desc">Silencia y activa tu micrófono al instante, con indicador en pantalla. Ideal entre llamadas.</div>
         <p class="dl-steps"><b>Instalar:</b> descarga y ejecuta el archivo. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
-        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/mutereal_v1.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
+        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/MuteReal.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
       </div>
 
       <!-- 4) NotasSmart (programa Windows) -->
@@ -2454,8 +2471,8 @@ body.theme-light .pl-tr.pl-est-green .pl-td{background:rgba(28,135,72,.12)!impor
           <span class="dl-tag win">Programa Windows</span>
         </div>
         <div class="dl-desc">Panel de notas retráctil que se despliega desde el costado de la pantalla. Anota rápido sin cambiar de ventana y ocúltalo con un clic cuando no lo necesites.</div>
-        <p class="dl-steps"><b>Instalar:</b> 1) Descarga y <b>descomprime</b> el .zip. 2) Ejecuta el archivo. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
-        <a class="dl-btn" href="https://cotizadora.github.io/Cotizadora/BlocNotasFlotante.zip" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.zip)</a>
+        <p class="dl-steps"><b>Instalar:</b> descarga y ejecuta el archivo. Si Windows muestra un aviso azul, elige <b>Más información → Ejecutar de todos modos</b>.</p>
+        <a class="dl-btn" href="https://github.com/cotizadora/Cotizadora/releases/download/bloc-notas-flotante/BlocNotasFlotante.exe" download onclick="playClick()"><span class="dl-arrow">⬇</span> Descargar (.exe)</a>
       </div>
 
       <div class="dl-note">💡 <b>Nota:</b> <b>CRM Extractor + ShortCut VocalCRM</b> unifica las dos extensiones anteriores; si ya tenías alguna, quítala en <b>edge://extensions</b> antes de cargar esta. Para pasar tus atajos: panel → <b>Configuración → Importar</b> → <code>mi-configuracion.json</code>. Los programas de Windows apuntan a sus archivos en <code>cotizadora.github.io/Cotizadora/</code>.</div>
