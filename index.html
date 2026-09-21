@@ -5365,7 +5365,9 @@ function genMail(){
   })();
   var hayDc=ufL&&ufV&&ufV<ufL;
   var dc=hayDc?Math.round((1-ufV/ufL)*100):0;
-  var clp=ufV?ufc(ufV):null;
+  /* CLP de apoyo = NETO (sin IVA) + " + IVA": cifra más baja y coherente con el
+     "X UF + IVA" del titular. Antes mostraba el total con IVA (número más alto). */
+  var clp=ufV?ufn(ufV):null;
   if(isSol){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
   if(isMulti){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
   if(isBdd){hayDc=false;dc=0;clp=null;ufV=null;ufL=null;}
@@ -5376,7 +5378,7 @@ function genMail(){
   st('cc-badge',pi.badge);st('cc-fecha',hoy());
   st('cc-emp',em||'');st('cc-rut',ru?('RUT '+ru):'');
   st('cc-precio',ufV?ufV+' UF + IVA':'[precio] UF + IVA'); /* espaciado extra */
-  st('cc-clp',clp?'aprox. '+fmtN(clp)+' mensual con IVA incluido':'—');
+  st('cc-clp',clp?'aprox. '+fmtN(clp)+' mensual + IVA':'—');
   st('cc-plazo',pl+' meses');st('cc-asesor',as2);
   st('cc-docs',_docsShort());   /* incluye la DTE si es Publicación Única */
   st('cc-contacto',(fo||'')+(fo&&ml?' · ':'')+ml);
@@ -5385,7 +5387,7 @@ function genMail(){
   st('wcc-badge',pi.badge);st('wcc-fecha',hoy());
   st('wcc-emp',em||'');
   st('wcc-precio',ufV?ufV+' UF + IVA':'[precio] UF + IVA');
-  st('wcc-clp',clp?'aprox. '+fmtN(clp)+' mensual con IVA incluido':'—');
+  st('wcc-clp',clp?'aprox. '+fmtN(clp)+' mensual + IVA':'—');
   st('wcc-plazo',pl+' meses');st('wcc-asesor',as2);
   st('wcc-contacto',(fo||'')+(fo&&ml?' · ':'')+ml);
   var _fsrc=(typeof execPhoto==='function')?execPhoto():'';
@@ -5456,7 +5458,7 @@ function genMail(){
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n" +
     (hayDc ? "~Precio lista: " + ufL + " UF + IVA~\n" : "") +
     "*Precio ofrecido:* " + (ufV ? "*" + ufV + " UF* + IVA" : "[X] UF + IVA") + "\n" +
-    (clp ? "\ud83d\udcb0 _Aprox. " + fmtN(clp) + " mensual c/IVA_\n" : "") +
+    (clp ? "\ud83d\udcb0 _Aprox. " + fmtN(clp) + " mensual + IVA_\n" : "") +
     (hayDc ? "\ud83c\udfaf *Descuento: \u2212" + dc + "%*\n" : "") +
     "\ud83d\udcc5 Plazo: *" + pl + " meses*\n" +
     "\ud83d\udcb3 Modalidad: _POSTPAGO \u00b7 30 d\u00edas_\n" +
@@ -5553,7 +5555,7 @@ function genMail(){
 
     // PRECIO — gradiente rojo oscuro (con respaldo sólido para Outlook)
     _mailPrecio({etiqueta:'Cargo fijo mensual',precio:(ufV?ufV+' UF + IVA':'[X] UF + IVA'),
-                 clp:(clp?'Aprox. '+fmtN(clp)+' mensual con IVA incluido':''),
+                 clp:(clp?'Aprox. '+fmtN(clp)+' mensual + IVA':''),
                  hayDc:hayDc,ufL:ufL,ufV:ufV,dc:dc},'gmail')+
 
     // FRANJA DE CONTRATO — la tira Contrato · Modalidad · Descargas de la Ficha
@@ -5712,7 +5714,7 @@ function genMail(){
 
     // PRECIO — bloque grande estilo Ficha
     _mailPrecio({etiqueta:'Cargo fijo mensual',precio:(ufV?ufV+' UF + IVA':'[X] UF + IVA'),
-                 clp:(clp?'Aprox. '+fmtN(clp)+' mensual con IVA incluido':''),
+                 clp:(clp?'Aprox. '+fmtN(clp)+' mensual + IVA':''),
                  hayDc:hayDc,ufL:ufL,ufV:ufV,dc:dc},'outlook')+
 
     // FRANJA DE CONTRATO — Contrato · Modalidad · Descargas
