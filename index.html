@@ -5182,40 +5182,44 @@ function _mailBenefCols(items){
 function _mailPrecio(o,modo){
   var osc=mailDark();
   var bg=osc?'#0e0a0d':'#7a1425';
-  /* Equivalentes sólidos: el motor Word de Outlook no compone transparencias. */
-  var cajaFondo=osc?'#101a15':'#5d0f1c';
-  var cajaBorde=osc?'#17442b':'#93293c';
-  var verde=osc?'#2ecc71':'#5ee88f';
-  var lblTachado=osc?'#8b8b8b':'#d9a8b2';
-  var lblFinal=osc?'#c4c4c4':'#f3dde1';
   var rotulo=osc?'#8d8189':'#f0c3cc';
   var apoyoCol=osc?'#9a9099':'#eccdd3';
-  var caja=o.hayDc
-    ? '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="left" bgcolor="'+cajaBorde+'" style="background-color:'+cajaBorde+';border-collapse:collapse;">'+
-        '<tr><td style="padding:1px;">'+
-          '<table role="presentation" cellpadding="0" cellspacing="0" border="0" bgcolor="'+cajaFondo+'" style="background-color:'+cajaFondo+';border-collapse:collapse;"><tr>'+
-            '<td valign="middle" bgcolor="'+cajaFondo+'" style="background-color:'+cajaFondo+';padding:13px 18px;">'+
-              '<font face="Arial,sans-serif" color="'+verde+'" style="font-size:30px;line-height:1;"><b><span style="color:'+verde+';">&#8722;'+o.dc+'%</span></b></font>'+
-            '</td>'+
-            '<td valign="middle" bgcolor="'+cajaFondo+'" style="background-color:'+cajaFondo+';padding:13px 22px 13px 0;">'+
-              '<font face="Arial,sans-serif" color="'+lblTachado+'" style="font-size:12px;line-height:1.5;"><span style="color:'+lblTachado+';text-decoration:line-through;">Lista: '+o.ufL+' UF</span></font><br>'+
-              '<font face="Arial,sans-serif" color="'+lblFinal+'" style="font-size:13px;line-height:1.5;"><span style="color:'+lblFinal+';">Precio final: '+(o.ufV||'')+' UF</span></font>'+
-            '</td>'+
-          '</tr></table>'+
-        '</td></tr>'+
-      '</table>'
+  var amber='#f0c040';
+  /* La jerarquía manda: UNA cifra final grande, el descuento la acompaña arriba
+     (lista tachada + píldora verde) y una línea verde confirma que el precio
+     grande YA trae el descuento — se elimina la caja que repetía el precio. */
+  var listaLbl=osc?'#8d8189':'#f0c3cc';
+  var struckCol=osc?'#9b9097':'#e2aab3';
+  var pillBg=osc?'#2ecc71':'#5ee88f';
+  var pillTxt='#0c2417';
+  var microCol=osc?'#54d78d':'#9df0bb';
+  /* Kicker: precio lista tachado + píldora de descuento, en una sola línea. */
+  var kicker=o.hayDc
+    ? '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="left" style="border-collapse:collapse;"><tr>'+
+        '<td valign="middle" bgcolor="'+bg+'" style="background-color:'+bg+';padding:0 14px 0 0;">'+
+          '<font face="Arial,sans-serif" color="'+listaLbl+'" style="font-size:11px;letter-spacing:.8px;text-transform:uppercase;"><span style="color:'+listaLbl+';">Precio lista</span></font>'+
+          '&nbsp;&nbsp;'+
+          '<font face="Arial,sans-serif" color="'+struckCol+'" style="font-size:18px;line-height:1;"><span style="color:'+struckCol+';text-decoration:line-through;">'+(o.ufL||'')+' UF</span></font>'+
+        '</td>'+
+        '<td valign="middle" bgcolor="'+pillBg+'" style="background-color:'+pillBg+';padding:5px 13px;border-radius:20px;mso-padding-alt:5px 13px;">'+
+          '<font face="Arial,sans-serif" color="'+pillTxt+'" style="font-size:14px;line-height:1;"><b><span style="color:'+pillTxt+';">&#8722;'+o.dc+'%</span></b></font>'+
+        '</td>'+
+      '</tr></table>'
     : '';
   var dentro='<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">'+
-    '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:0 0 10px;">'+
+    '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:0 0 14px;">'+
       '<font face="Arial,sans-serif" color="'+rotulo+'" style="font-size:10px;letter-spacing:1.4px;text-transform:uppercase;"><b><span style="color:'+rotulo+';">'+(o.etiqueta||'Cargo fijo mensual')+'</span></b></font>'+
     '</td></tr>'+
+    (kicker?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:0 0 12px;">'+kicker+'</td></tr>':'')+
     '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:0;">'+
-      '<font face="Arial,sans-serif" color="#f0c040" style="font-size:42px;line-height:1.05;"><b><span style="color:#f0c040;">'+o.precio+'</span></b></font>'+
+      '<font face="Arial,sans-serif" color="'+amber+'" style="font-size:44px;line-height:1.02;"><b><span style="color:'+amber+';">'+o.precio+'</span></b></font>'+
     '</td></tr>'+
-    (o.clp?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:12px 0 0;">'+
+    (o.hayDc?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:9px 0 0;">'+
+      '<font face="Arial,sans-serif" color="'+microCol+'" style="font-size:13px;line-height:1.5;"><b><span style="color:'+microCol+';">&#10003; Precio final con '+o.dc+'% ya aplicado</span></b></font>'+
+    '</td></tr>':'')+
+    (o.clp?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:'+(o.hayDc?'5':'12')+'px 0 0;">'+
       '<font face="Arial,sans-serif" color="'+apoyoCol+'" style="font-size:13px;line-height:1.5;"><span style="color:'+apoyoCol+';">'+o.clp+'</span></font>'+
     '</td></tr>':'')+
-    (caja?'<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:18px 0 0;">'+caja+'</td></tr>':'')+
   '</table>';
   if(modo==='outlook')return '<tr><td bgcolor="'+bg+'" style="background-color:'+bg+';padding:30px 34px;">'+dentro+'</td></tr>';
   var grad=osc?'linear-gradient(135deg,#0a0508 0%,#0e0a0d 55%,#140d12 100%)'
