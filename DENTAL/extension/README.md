@@ -96,6 +96,28 @@ extensión. **Borrar listado** lo elimina, con confirmación.
 Las coordenadas son las que habilitan el orden por distancia. Sin ellas el
 buscador funciona igual, pero avisa que no puede ordenar por cercanía.
 
+### Comunas sin clínica
+
+El tercer botón, **Comunas**, carga las comunas de Chile con sus coordenadas:
+una por línea, `comuna | región | lat | lng`.
+
+Sirve para el caso más frecuente en la llamada: el cliente vive en una comuna
+donde no hay clínica. Con esta lista cargada, en vez de "no encuentro esa
+comuna" responde "no hay clínica en Peñalolén, las más cercanas son Macul a
+6,3 km y La Florida a 7,8 km".
+
+Rechaza las coordenadas que caen fuera de Chile, para atajar un error de tipeo
+antes de que produzca una distancia absurda.
+
+### Ambas redes siempre representadas
+
+Cuando muestra las más cercanas, toma las 3 mejores **de cada red**, no las 5
+mejores en total. Si no, una red con sucursales más lejanas no aparecería
+nunca, y justamente lo que se necesita es poder decirle al cliente que tiene
+opciones de una y de la otra.
+
+Arriba de los resultados hay un conteo por red, para responder de una mirada.
+
 La fecha de captura se muestra bajo los resultados, para saber qué tan viejo es
 el dato.
 
