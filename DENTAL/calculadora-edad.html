@@ -128,8 +128,8 @@
   <div class="card">
     <h2>3 · Plan</h2>
     <div class="planes" id="selPlanes">
-      <label id="lbl-basico"><input type="radio" name="plan" value="basico"> Plan 2 Básico</label>
-      <label id="lbl-full"><input type="radio" name="plan" value="full" checked> Plan 3 Full</label>
+      <label id="lbl-basico"><input type="radio" name="plan" value="basico" checked> Plan Urgencias</label>
+      <label id="lbl-full"><input type="radio" name="plan" value="full"> Plan 3 Full</label>
       <label id="lbl-ninos"><input type="radio" name="plan" value="ninos"> Plan 4 Full Niños</label>
     </div>
     <div class="nota n-ok" id="planNota"></div>
@@ -153,7 +153,7 @@
       <li><strong>Máximo 3 cargas.</strong> El Plan 4 Full Niños no tiene precio de titular solo: parte en titular + 1.</li>
     </ul>
     <h3>Tarifas</h3>
-    <p>Tabla del <em>Script Bci Dental Full, septiembre 2026</em>. El Plan 2 Básico cubre urgencia y prevención; el Plan 3 Full agrega operatoria; el Plan 4 Full Niños agrega odontología infantil. Carencia: 48 horas hábiles para urgencia dental, 30 días para el resto.</p>
+    <p>Tabla del <em>Script Bci Dental Full, septiembre 2026</em>. El Plan Urgencias (Plan 2 Básico en la documentación) cubre urgencia y prevención; el Plan 3 Full agrega operatoria; el Plan 4 Full Niños agrega odontología infantil. Carencia: 48 horas hábiles para urgencia dental, 30 días para el resto.</p>
     <p>La presentación de junio 2025 usaba tres decimales (0,258 / 0,325 / 0,392 / 0,459 · 0,434 / 0,676 / 0,919 / 1,162 · 0,502 / 0,814 / 1,125 / 1,436). Aquí se usan los valores de dos decimales del script vigente, que son los que se leen al cliente. Para cambiarlos, edita el objeto <code>PLANES</code> al inicio del script.</p>
     <h3>Valor UF</h3>
     <p>Se obtiene de <code>mindicador.cl</code> (respaldo <code>api.boostr.cl</code>), tal como lo publica el Banco Central. La conversión a pesos se hace con aritmética entera: se muestran todos los decimales y, entre paréntesis, el redondeo al peso.</p>
@@ -169,7 +169,7 @@
    null = esa composición no se vende.
    ========================================================= */
 const PLANES = {
-  basico: {nom:"Plan 2 Básico",     cob:"Urgencia + prevención",                         precios:[26, 33, 39, 46]},
+  basico: {nom:"Plan Urgencias",    cob:"Urgencia + prevención",                         precios:[26, 33, 39, 46]},
   full:   {nom:"Plan 3 Full",       cob:"Urgencia + prevención + operatoria",            precios:[43, 68, 92, 116]},
   ninos:  {nom:"Plan 4 Full Niños", cob:"+ odontología niños (dientes temporales)",      precios:[null, 81, 113, 144]}
 };
@@ -349,9 +349,9 @@ function pintarEdad(){
   }else if(evH.estado !== "ok"){
     badge.innerHTML = '<span class="badge b-warn">No califica como carga</span>';
   }else if(menor14){
-    badge.innerHTML = '<span class="badge b-bad">Menor de 14 — NO califica para el plan de Urgencia, exige Plan 4</span>';
+    badge.innerHTML = '<span class="badge b-bad">Menor de 14 — NO califica para Plan Urgencias, exige Plan 4</span>';
   }else{
-    badge.innerHTML = '<span class="badge b-ok">Califica para el plan de Urgencia y para cualquier otro</span>';
+    badge.innerHTML = '<span class="badge b-ok">Califica para Plan Urgencias y para cualquier otro</span>';
   }
 
   const filas = [
@@ -447,13 +447,13 @@ function recalcular(){
     // Cuánto cuesta la obligación, para poder explicárselo al cliente
     const base = PLANES.basico.precios[nCargas];
     if(UF_CENT && base!==null && planCent!==null && planCent>base){
-      html += " Diferencia respecto del plan de Urgencia: <strong>"+
+      html += " Diferencia respecto del Plan Urgencias: <strong>"+
               pesosExactos(UF_CENT, planCent-base).redondeado+"</strong> más al mes.";
     }
   }else{
     cls = "n-ok";
-    html = "Sin menores de 14 años: el cliente <strong>elige</strong> entre el plan de "+
-           "Urgencia (Plan 2 Básico) y el <strong>Plan 3 Full</strong>, que es el plan objetivo del script.";
+    html = "Sin menores de 14 años: se cotiza el <strong>Plan Urgencias</strong> por defecto. "+
+           "El cliente puede subir al <strong>Plan 3 Full</strong>, que agrega operatoria.";
   }
   if(planCent === null){
     cls = "n-warn";

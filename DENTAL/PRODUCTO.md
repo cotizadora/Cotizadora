@@ -81,8 +81,17 @@ diferencias que conviene tener presentes:
 
 ### Plan objetivo
 
-El script es explícito: *"FOCO y Plan Objetivo es ofrecer siempre: Plan 3 Full"*.
-El Plan 2 Básico se ofrece como retención si el cliente rechaza el Full.
+El script de septiembre 2026 es explícito: *"FOCO y Plan Objetivo es ofrecer
+siempre: Plan 3 Full"*, y deja el Plan 2 Básico como retención si el cliente
+rechaza el Full.
+
+**Las herramientas parten en el Plan Urgencias**, por decisión del equipo
+comercial, y desde ahí se sube a Full. Es el orden inverso al del script. Si
+esto viene de un cambio de campaña, conviene dejarlo escrito acá.
+
+**Nombre comercial:** al Plan 2 Básico se le llama **Plan Urgencias** en las
+herramientas y frente al cliente. En la documentación oficial aparece como
+Plan 2 Básico.
 
 ---
 

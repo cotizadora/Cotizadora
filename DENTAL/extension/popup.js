@@ -6,7 +6,7 @@
    El índice del arreglo es la cantidad de cargas (0 a 3).
    ========================================================= */
 const PLANES = [
-  {id:"basico", nom:"Plan 2 Básico",     precios:[26, 33, 39, 46]},
+  {id:"basico", nom:"Plan Urgencias",    precios:[26, 33, 39, 46]},
   {id:"full",   nom:"Plan 3 Full",       precios:[43, 68, 92, 116]},
   {id:"ninos",  nom:"Plan 4 Full Niños", precios:[null, 81, 113, 144]}
 ];
@@ -173,6 +173,7 @@ function guardarEstado(){
     n: nCargas,
     plan: planElegido,
     abierto: !document.getElementById("panelVerif").hidden,
+    guion: guionAbierto,
     cargas: cargas,
     cuando: Date.now()
   };
@@ -195,7 +196,8 @@ function restaurarEstado(cb){
     if(!e){ if(cb) cb(); return; }
     restaurando = true;
     nCargas = e.n || 0;
-    planElegido = e.plan || "full";
+    planElegido = e.plan || PLAN_POR_DEFECTO;
+    guionAbierto = (e.guion !== false);
     marcarCargas();
     const cont = document.getElementById("hijos");
     cont.innerHTML = "";
@@ -233,9 +235,9 @@ function veredictoPorFecha(nac, ref){
             texto:"No entra en ningún plan: "+ev.motivo+".", menor14:false, bloquea:true};
   if(ev.menor14)
     return {clase:"no", chip:"warn", corto:e+" · menor de 14",
-            texto:"Sólo Plan 4 Full Niños. No entra en Urgencia ni en Full.", menor14:true, bloquea:false};
+            texto:"Sólo Plan 4 Full Niños. No entra en Urgencias ni en Full.", menor14:true, bloquea:false};
   return {clase:"si", chip:"ok", corto:e+" · califica",
-          texto:"Entra en Urgencia, en Full y en Full Niños.", menor14:false, bloquea:false};
+          texto:"Entra en Urgencias, en Full y en Full Niños.", menor14:false, bloquea:false};
 }
 
 function veredictoPorEdad(a){
@@ -246,11 +248,11 @@ function veredictoPorEdad(a){
             menor14:true, bloquea:false, aprox:true};
   if(a < 14)
     return {clase:"no", chip:"warn", corto:a+" años · menor de 14",
-            texto:"Sólo Plan 4 Full Niños. No entra en Urgencia ni en Full.",
+            texto:"Sólo Plan 4 Full Niños. No entra en Urgencias ni en Full.",
             menor14:true, bloquea:false, aprox:true};
   if(a < 23)
     return {clase:"si", chip:"ok", corto:a+" años · califica",
-            texto:"Entra en Urgencia, en Full y en Full Niños.",
+            texto:"Entra en Urgencias, en Full y en Full Niños.",
             menor14:false, bloquea:false, aprox:true};
   if(a === 23)
     return {clase:"pide", chip:"warn", corto:"23 años · depende",
@@ -287,7 +289,10 @@ function filaHijo(silencioso){
 
 /* ---------- cálculo ---------- */
 let ultimaCotizacion = "";
-let planElegido = "full";
+/* Por defecto se cotiza el Plan Urgencias. Sin menores, el cliente puede
+   subir a Full. Con un menor de 14, el Plan 4 queda forzado. */
+const PLAN_POR_DEFECTO = "basico";
+let planElegido = PLAN_POR_DEFECTO;
 
 function calcular(){
   const ref = hoy();
@@ -345,7 +350,7 @@ function calcular(){
   const obliga = menores > 0;
   if(obliga) planElegido = "ninos";
   if(PLANES.filter(function(p){ return p.id===planElegido; })[0].precios[nCargas] === null && !obliga){
-    planElegido = "full";
+    planElegido = PLAN_POR_DEFECTO;
   }
   const plan = PLANES.filter(function(p){ return p.id===planElegido; })[0];
   const cent = plan.precios[nCargas];
@@ -357,12 +362,12 @@ function calcular(){
     clase = "aviso bad";
     const alt = PLANES[0].precios[nCargas];
     texto = "Hay "+menores+" menor"+(menores===1?"":"es")+" de 14: no entra"+(menores===1?"":"n")+
-            " en Urgencia ni en Full. Obligatorio Plan 4 Full Niños.";
-    if(UF && alt!==null && cent!==null) texto += " Son "+pesos(UF, cent-alt).redondo+" más al mes que Urgencia.";
+            " en Urgencias ni en Full. Obligatorio Plan 4 Full Niños.";
+    if(UF && alt!==null && cent!==null) texto += " Son "+pesos(UF, cent-alt).redondo+" más al mes que Urgencias.";
   }else if(evaluados > 0){
     clase = "aviso ok";
     texto = (evaluados===1 ? "La carga califica" : "Las "+evaluados+" cargas califican")+
-            ": el cliente elige entre Urgencia y Full.";
+            ": el cliente puede quedarse en Urgencias o subir a Full.";
   }
   if(cent === null){
     clase = "aviso warn";
@@ -392,12 +397,184 @@ function calcular(){
   ultimaCotizacion = v
     ? plan.nom+" · "+compos+" · "+ufTxt(cent)+" UF · "+v.redondo+" mensual (UF de hoy $"+ufTxt(UF)+")"
     : "";
+
+  if(typeof pintarGuion === "function") pintarGuion();
 }
 
 function marcarCargas(){
   [].forEach.call(document.querySelectorAll("#conteo button"), function(b){
     b.classList.toggle("on", +b.dataset.n === nCargas);
   });
+}
+
+/* ============================================================
+   GUION DE VENTA
+   Tomado del Script Bci Dental Full de septiembre 2026. Cada
+   seccion declara en que planes se lee, y los montos se
+   calculan en vivo con la UF del dia, para no leer cifras
+   congeladas al cliente.
+   ============================================================ */
+const GUION = [
+  {t:"Apertura", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Muy buenos días / tardes, usted habla con <em>[su nombre]</em>. Lo llamo por ser cliente Bci. ¿Cómo está?</p>'+
+    '<p>El motivo de mi llamado es entregarle una información importante, son buenas noticias, y no le quitaré mucho tiempo. '+
+    'Queremos agradecer su permanencia como cliente y contarle que Bci pone a su disposición una completa cobertura dental, '+
+    'que le cubrirá hasta el 100% en los tratamientos dentales más frecuentes. Y lo mejor es que la atención es exclusiva en la '+
+    'red de clínicas <strong>Uno Salud Dental</strong>, más de 80 clínicas a lo largo de todo Chile.</p>'; }},
+
+  {t:"Urgencias, a costo $0", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Tendrá los siguientes tratamientos de urgencia dental <strong>sin costo</strong>, en caso de dolor, inflamación o sangrado. Por ejemplo:</p>'+
+    '<ul><li>Extracciones simples</li>'+
+    '<li>Trepanación, que es la primera parte del tratamiento de conducto</li>'+
+    '<li>Colocación de cemento o tapadura temporal</li>'+
+    '<li>Urgencia protésica: recementación de corona, puentes, incrustaciones y reparación de prótesis</li></ul>'+
+    '<p class="nota">Sin tope. Carencia de 48 horas hábiles.</p>'; }},
+
+  {t:"Prevención", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Además le cubrimos tratamientos de prevención: evaluación y diagnóstico, radiografías pieza a pieza, y una '+
+    '<strong>limpieza profunda</strong> (profilaxis más remoción de cálculos supragingivales), para remover la placa '+
+    'bacteriana y el sarro acumulados entre los dientes.</p>'+
+    '<p>Los odontólogos recomiendan una limpieza al menos una vez al año, y usted la tendría sin costo con nosotros '+
+    'dentro de 30 días.</p>'; }},
+
+  {t:"Tratamientos con copago", p:["full","ninos"], html:function(d){ return ''+
+    '<p>Para los tratamientos más complejos, que de forma particular suelen ser los más costosos, también podrá acceder '+
+    'dentro de 30 días, con copagos claros y fijos conocidos antes de realizarlos:</p>'+
+    '<ul><li><strong>5 tapaduras en resina al año</strong>, a $12.000 cada una. En otras clínicas son unos $45.000.</li>'+
+    '<li><strong>2 tratamientos de conducto al año</strong>, en muelas, premolares o dientes anteriores, a $12.000 cada uno. '+
+    'El valor referencial en otras clínicas va de $150.000 a $300.000.</li></ul>'+
+    '<p>Y hasta un <strong>65% de descuento</strong> en: extracción de muelas del juicio, planos de relajación para el bruxismo, '+
+    'cambio de tapadura de amalgama a resina, tapaduras de resina adicionales y tratamientos de conducto adicionales.</p>'; }},
+
+  {t:"Odontología para niños", p:["ninos"], clase:"clave", html:function(d){ return ''+
+    '<p>Y como usted tiene niños menores de 14 años, le entregamos <strong>11 procedimientos adicionales</strong> asociados a '+
+    'dientes temporales, a costo cero y sin tope, que podrá utilizar dentro de 30 días.</p>'; }},
+
+  {t:"Programas de salud y bienestar", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Además, sin costo, accede al <strong>Programa de Salud y Bienestar de Bci</strong>, con 13 programas: telemedicina, '+
+    'salud mental, nutrición, kinesiología, fonoaudiología, entre otros. Uso ilimitado y atención multicanal.</p>'+
+    '<p>Para acceder debe descargar la aplicación <strong>Care Assistance</strong> y seguir las instrucciones que recibirá en el '+
+    'correo de bienvenida.</p>'; }},
+
+  {t:"Muerte accidental", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Complementando lo anterior, existe una protección frente a accidentes personales que terminen en fallecimiento '+
+    '(sólo titular), que entrega una indemnización a sus herederos legales de <span class="dato">50 UF</span>'+
+    (d.ap ? ', unos <span class="dato">'+d.ap+'</span>' : '')+'. Dinero de libre disposición.</p>'+
+    '<p>Es una cobertura completa, ¿verdad?</p>'; }},
+
+  {t:"Sin reembolsos", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Lo mejor es que no trabajamos con reembolso, así que puede olvidarse de comprar bonos y de los papeleos. '+
+    'Usted agenda la primera hora llamando al <strong>227501096</strong>, en cualquiera de las clínicas de la red Uno Salud, '+
+    'donde le aplicarán todos los descuentos y valores automáticamente en su presupuesto.</p>'; }},
+
+  {t:"Requisitos", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Usted cumple con los requisitos, ya que es mayor de 18 años y menor de 70 años. La permanencia máxima es hasta '+
+    'un día antes de cumplir los 71 años.</p>'+
+    (d.cargas > 0
+      ? '<p>Puede incorporar adicionales, cónyuge e hijos. La edad mínima de ingreso de sus hijos es de <strong>14 días</strong> '+
+        'y la permanencia es hasta los <strong>24 años y 0 días</strong>. Sus adicionales contarían con la cobertura dental y los programas.</p>'+
+        '<p class="nota">Necesito de cada adicional: nombre completo, RUT, fecha de nacimiento y parentesco. Los cuatro datos.</p>'
+      : ''); }},
+
+  {t:"El precio", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
+    '<p>Lo más importante: todas las coberturas, asistencias y beneficios mencionados tienen un costo de '+
+    '<span class="dato">'+d.uf+' UF</span> fijas, que son <span class="dato">'+d.clp+'</span> aproximadamente, '+
+    'que se cargarán automáticamente en su cuenta Bci terminada en los dígitos <em>[XXX]</em>, en su próximo estado de cuenta.</p>'+
+    '<p class="nota">'+d.plan+' · '+d.compos+' · calculado con la UF de hoy, $'+d.ufdia+'.</p>'+
+    '<p>Además, este mes tenemos una promoción especial: la compañía le otorga <em>[X]</em> cuota sin costo durante el primer '+
+    'año de vigencia. ¿Qué fecha de cargo le acomoda? ¿Lo incorporo, verdad?</p>'; }},
+
+  {t:"Si duda o lo rechaza", p:["full"], clase:"ojo", html:function(d){ return ''+
+    '<p>Como no queremos que se quede sin cobertura y lo tome por sorpresa un dolor de muelas, le ofrecemos por sólo '+
+    '<span class="dato">'+(d.clpBasico || '—')+'</span> mensuales, es decir <span class="dato">'+(d.ufBasico || '—')+' UF</span>, '+
+    'todas las urgencias dentales que ya le mencioné, más los tratamientos de prevención.</p>'+
+    '<p class="nota">Es el Plan Urgencias. Pincha esa fila para leer su script.</p>'; }},
+
+  {t:"Si quiere más cobertura", p:["basico"], clase:"ojo", html:function(d){ return ''+
+    '<p>Si además quiere cubrir tapaduras y tratamientos de conducto, tenemos el Plan Full por '+
+    '<span class="dato">'+(d.clpFull || '—')+'</span> mensuales: agrega 5 tapaduras y 2 tratamientos de conducto al año '+
+    'con copago de $12.000 cada uno, y hasta 65% de descuento en el resto.</p>'+
+    '<p class="nota">Pincha la fila del Plan 3 Full para leer su script completo.</p>'; }},
+
+  {t:"Por qué no puede quedar en un plan menor", p:["ninos"], clase:"ojo", html:function(d){ return ''+
+    '<p class="nota">Recordatorio interno, no se lee al cliente: hay un menor de 14 años en el grupo. La odontología infantil '+
+    'sólo existe en este plan, así que no corresponde ofrecer Urgencias ni Full.</p>'; }},
+
+  {t:"Pregunta de contratación · textual", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
+    '<p>Antes de continuar le informo que, para su tranquilidad y respaldo, esta conversación está siendo grabada.</p>'+
+    '<p>Señor o señora <em>[apellido]</em>, entonces con fecha <em>[DD/MM/AA]</em>, ¿acepta la contratación en forma '+
+    'voluntaria del <strong>Seguro Dental Modular Bci</strong>, con las coberturas detalladas anteriormente, con un valor '+
+    'mensual de <span class="dato">'+d.uf+' UF</span> fijas, <span class="dato">'+d.clp+'</span> aproximadamente, '+
+    'IVA incluido? ¿Acepta?</p>'+
+    '<p class="nota">Sólo vale “sí”, “acepto” o “de acuerdo”. No sirve “ok”, “ya” ni “correcto”.</p>'; }},
+
+  {t:"Datos y medio de pago", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Para cumplir con la normativa y poder enviarle su póliza, le voy a pedir que me confirme: fecha de nacimiento, '+
+    'domicilio completo, teléfono de contacto y correo electrónico. El correo es fundamental, la póliza se envía ahí.</p>'+
+    '<p>¿Autoriza el cargo de la prima mensual del seguro, que será descontado de su cuenta del banco Bci? ¿Acepta?</p>'+
+    '<p class="nota">Con link de pago: le llega un correo con el asunto “Multicotizador – Pago de primera cuota”, botón naranjo '+
+    '“Pagar aquí”. El link vence en 48 horas y mientras no pague, el seguro no está vigente.</p>'; }},
+
+  {t:"Exclusiones", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Estas son algunas de las principales exclusiones. No se cubre cuando el origen sean: guerra, peleas o riñas, actos '+
+    'delictivos, suicidio o intento, intoxicación o efecto de drogas, conducción en estado de ebriedad, negligencia o '+
+    'imprudencia, servicio en fuerzas armadas o policiales, sismos de grado 8 o superior, o vuelo en aeronave de itinerario '+
+    'no regular.</p>'+
+    '<p>En el programa dental se excluyen cirugías de alta complejidad, cirugías para implantes fuera de la red Uno Salud, '+
+    'costos de laboratorio y medicación.</p>'; }},
+
+  {t:"Cierre normativo", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Las condiciones generales están registradas en la CMF bajo el código <strong>POL 3 2013 0085 Alt. A</strong> para '+
+    'muerte accidental y <strong>POL 3 2019 0055</strong> para la cobertura dental.</p>'+
+    '<p>Bci Seguros Vida y Bci Corredores de Seguros tratarán sus datos para evaluar y mejorar sus servicios. '+
+    '¿Autoriza el tratamiento de los mismos?</p>'+
+    '<p>El código de operación asociado a esta venta es <em>[RUT o ID de venta]</em>. Guárdelo para futuras consultas. '+
+    'La grabación constituye prueba de la información entregada y de la aceptación del contrato.</p>'+
+    '<p>La vigencia comienza hoy, es anual y renovable automáticamente. Puede retractarse dentro de 10 días desde que '+
+    'reciba la póliza, sin causa ni cargo, con devolución de la prima pagada.</p>'+
+    '<p class="nota">Centro de Respuesta Inmediata 600 6000 292. Asistencia dental 227501096.</p>'; }},
+
+  {t:"Encuesta EPA", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>“Don o señorita <em>[nombre]</em>, para finalizar lo derivaré a una pequeña encuesta de 2 preguntas para que '+
+    'califique mi atención en esta llamada, ¿de acuerdo? Que tenga buen día.”</p>'+
+    '<p class="nota">En el sistema: Transfer-Conf → ingroup ENCUESTA_EPA → CLOSER LOCAL, y luego tipificar. '+
+    'Obligatoria salvo derivación a IVR por pago con tarjeta de crédito.</p>'; }}
+];
+
+let guionAbierto = true;
+
+function pintarGuion(){
+  const app = document.getElementById("app");
+  app.classList.toggle("abierto", guionAbierto);
+  if(!guionAbierto) return;
+
+  const plan = PLANES.filter(function(p){ return p.id===planElegido; })[0];
+  const cent = plan.precios[nCargas];
+  const basico = PLANES[0].precios[nCargas];
+  const full   = PLANES[1].precios[nCargas];
+
+  const d = {
+    plan:   plan.nom,
+    compos: ["titular solo","titular + 1 carga","titular + 2 cargas","titular + 3 cargas"][nCargas],
+    cargas: nCargas,
+    uf:     cent===null ? "—" : ufTxt(cent),
+    clp:    (UF && cent!==null)   ? pesos(UF, cent).redondo   : "—",
+    ufdia:  UF ? ufTxt(UF) : "—",
+    ap:     UF ? pesos(UF, 5000).redondo : "",          // 50 UF de muerte accidental
+    ufBasico:  basico!==null ? ufTxt(basico) : null,
+    clpBasico: (UF && basico!==null) ? pesos(UF, basico).redondo : null,
+    clpFull:   (UF && full!==null)   ? pesos(UF, full).redondo   : null
+  };
+
+  document.getElementById("guionTit").textContent = "Script · " + plan.nom;
+  document.getElementById("guionSub").textContent =
+    d.compos + " · " + d.uf + " UF · " + d.clp + " mensual";
+
+  document.getElementById("guionCuerpo").innerHTML = GUION
+    .filter(function(sec){ return sec.p.indexOf(planElegido) !== -1; })
+    .map(function(sec){
+      return '<div class="gs '+(sec.clase||"")+'"><h4>'+sec.t+"</h4>"+sec.html(d)+"</div>";
+    }).join("");
 }
 
 /* ---------- eventos ---------- */
@@ -429,12 +606,18 @@ document.getElementById("tbody").addEventListener("click", function(e){
   const tr = e.target.closest("tr");
   if(!tr || !tr.dataset.plan || tr.classList.contains("veta")) return;
   planElegido = tr.dataset.plan;
+  guionAbierto = true;                  // el script acompaña al plan que se cotiza
   calcular(); guardarEstado();
+});
+document.getElementById("cerrarGuion").addEventListener("click", function(){
+  guionAbierto = false;
+  pintarGuion();
+  guardarEstado();
 });
 document.getElementById("limpiar").addEventListener("click", function(){
   if(!confirm("¿Borrar los datos de este cliente y empezar de cero?")) return;
   almacen.borrar("estado");
-  nCargas = 0; planElegido = "full";
+  nCargas = 0; planElegido = PLAN_POR_DEFECTO; guionAbierto = true;
   document.getElementById("hijos").innerHTML = "";
   document.getElementById("panelVerif").hidden = true;
   document.getElementById("abrirVerif").classList.remove("open","hay");
