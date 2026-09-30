@@ -400,6 +400,12 @@ los que están implementados en las herramientas.
 | ¿El Plan 4 se vende con titular solo? | **No.** Parte en titular + 1, como muestra el script 2026. El precio de 0,502 UF de la presentación 2025 ya no aplica. |
 | Máximo de cargas | **3.** Rige el script de septiembre 2026 por sobre las 4 de la presentación de junio 2025. |
 | Tarifas vigentes | Las del script de septiembre 2026, con dos decimales. Son las que se leen al cliente. |
+| ¿E-dental es red de atención o administrador? | **Son dos redes de atención**: E-dental (i-dental) y Uno Salud Dental (dental 1). Ambas atienden a estos clientes, así que el buscador de clínicas muestra las dos, cada una marcada con su red. |
+
+> La presentación de junio 2025 habla sólo de red cerrada Uno Salud Dental. La
+> segunda red es posterior a ese documento o aplica a otro canal. Si en algún
+> momento un plan queda amarrado a una sola red, hay que marcarlo en el
+> buscador, porque hoy muestra ambas por igual.
 
 Si alguna de estas cambia, hay que tocar dos lugares: el objeto `PLANES` de
 `calculadora-edad.html` y el de `extension/popup.js`.
