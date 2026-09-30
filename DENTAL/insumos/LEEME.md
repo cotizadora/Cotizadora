@@ -37,8 +37,18 @@ Lo más útil para cotizar bien:
 - Reglas de quién puede entrar como adicional o carga.
 - Carencias, topes anuales, coberturas y exclusiones.
 
-## No subas acá
+## ATENCIÓN: este repositorio es PÚBLICO
 
-Datos de clientes reales, RUT, fichas médicas ni nada personal: este
-repositorio guarda historial y no es el lugar. Si hace falta un ejemplo,
-manda uno con datos inventados.
+`cotizadora/Cotizadora` es un repositorio público: cualquiera en internet
+puede ver lo que se suba acá, y queda en el historial de git aunque después
+se borre.
+
+**No subas a esta carpeta:**
+
+- Documentos internos de Bci: scripts de venta, tarifas, condiciones,
+  presentaciones comerciales.
+- Datos de clientes: nombres, RUT, teléfonos, correos, fichas médicas.
+- Cualquier cosa que tu empresa no publicaría en su sitio web.
+
+Mientras el repositorio siga siendo público, pásame los documentos
+arrastrándolos al chat. Los leo igual y no quedan publicados.
