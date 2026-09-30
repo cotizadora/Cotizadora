@@ -3,205 +3,146 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Calculadora de Edad y Plan</title>
+<title>Cotizador Dental Bci</title>
 <style>
   :root{
-    --bg:#f4f6fa; --card:#ffffff; --ink:#15202b; --muted:#5d6b7a;
-    --line:#dde3ec; --brand:#123a6d; --brand2:#1f6feb;
+    --bg:#f4f6fa; --card:#fff; --ink:#15202b; --muted:#5d6b7a; --line:#dde3ec;
+    --brand:#123a6d; --brand2:#1f6feb;
     --ok:#0f7b4f; --okbg:#e6f6ee; --warn:#8a5300; --warnbg:#fdf2dc;
-    --bad:#a11f2c; --badbg:#fdeaec; --radius:12px;
+    --bad:#a11f2c; --badbg:#fdeaec; --r:12px;
   }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#0e1319; --card:#151c25; --ink:#e8edf4; --muted:#9aa8b8;
-      --line:#26313d; --brand:#8ab4ff; --brand2:#4d90ff;
-      --ok:#5fd3a0; --okbg:#10291f; --warn:#f0c169; --warnbg:#2b2213;
-      --bad:#ff8b96; --badbg:#2d1519;
-    }
-  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0e1319; --card:#151c25; --ink:#e8edf4; --muted:#9aa8b8; --line:#26313d;
+    --brand:#8ab4ff; --brand2:#4d90ff;
+    --ok:#5fd3a0; --okbg:#10291f; --warn:#f0c169; --warnbg:#2b2213;
+    --bad:#ff8b96; --badbg:#2d1519;
+  }}
   :root[data-theme="dark"]{
-    --bg:#0e1319; --card:#151c25; --ink:#e8edf4; --muted:#9aa8b8;
-    --line:#26313d; --brand:#8ab4ff; --brand2:#4d90ff;
+    --bg:#0e1319; --card:#151c25; --ink:#e8edf4; --muted:#9aa8b8; --line:#26313d;
+    --brand:#8ab4ff; --brand2:#4d90ff;
     --ok:#5fd3a0; --okbg:#10291f; --warn:#f0c169; --warnbg:#2b2213;
     --bad:#ff8b96; --badbg:#2d1519;
   }
   *{box-sizing:border-box}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
-    font-size:15px; line-height:1.45;
-  }
-  .wrap{max-width:860px; margin:0 auto; padding:16px}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:16px}
 
-  /* ---------- Barra UF (siempre a la vista) ---------- */
-  .uf-bar{
-    position:sticky; top:0; z-index:20;
-    background:#123a6d; color:#fff;
-    border-bottom:1px solid rgba(0,0,0,.2);
-  }
-  .uf-inner{
-    max-width:860px; margin:0 auto; padding:10px 16px;
-    display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px;
-  }
-  .uf-tag{
-    font-size:11px; letter-spacing:.09em; text-transform:uppercase;
-    opacity:.8; font-weight:700;
-  }
-  .uf-val{font-size:20px; font-weight:800; font-variant-numeric:tabular-nums}
-  .uf-meta{font-size:12px; opacity:.85; flex:1 1 180px}
-  .uf-bar button{
-    background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.3);
-    border-radius:8px; padding:5px 10px; font-size:12px; cursor:pointer;
-  }
+  /* ---- barra UF ---- */
+  .uf-bar{position:sticky;top:0;z-index:20;background:#123a6d;color:#fff;border-bottom:1px solid rgba(0,0,0,.25)}
+  .uf-inner{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+  .uf-tag{font-size:11px;letter-spacing:.09em;text-transform:uppercase;opacity:.82;font-weight:700}
+  .uf-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .uf-meta{font-size:12px;opacity:.85;flex:1 1 170px}
+  .uf-bar button{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
   .uf-bar button:hover{background:rgba(255,255,255,.26)}
-  .uf-manual{display:none; align-items:center; gap:6px; font-size:12px}
-  .uf-manual input{
-    width:130px; padding:5px 8px; border-radius:7px; border:1px solid rgba(255,255,255,.35);
-    background:rgba(0,0,0,.2); color:#fff; font-variant-numeric:tabular-nums;
-  }
+  .uf-manual{display:none;align-items:center;gap:6px;font-size:12px}
+  .uf-manual input{width:120px;padding:5px 8px;border-radius:7px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.22);color:#fff;font-variant-numeric:tabular-nums}
 
-  h1{font-size:20px; margin:18px 0 2px}
-  .sub{color:var(--muted); font-size:13px; margin:0 0 16px}
-  h2{font-size:15px; margin:0 0 12px; letter-spacing:.01em}
+  h1{font-size:20px;margin:18px 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+  h2{font-size:15px;margin:0 0 12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px;scroll-margin-top:70px}
+  .btn,.persona{scroll-margin-top:70px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+  input[type=date],input[type=number],select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit}
+  input:focus,select:focus{outline:2px solid var(--brand2);outline-offset:1px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:600px){.grid2{grid-template-columns:1fr}}
 
-  .card{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px; margin-bottom:16px;
-  }
-  label{display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px}
-  input[type="date"], input[type="number"], select{
-    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:9px;
-    background:var(--bg); color:var(--ink); font-size:15px; font-family:inherit;
-  }
-  input:focus, select:focus{outline:2px solid var(--brand2); outline-offset:1px}
-  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-  @media (max-width:560px){ .grid2{grid-template-columns:1fr} }
+  .edad-big{font-size:29px;font-weight:800;font-variant-numeric:tabular-nums;margin:14px 0 2px;line-height:1.15}
+  .edad-sub{font-size:13px;color:var(--muted);margin-bottom:12px}
+  .badge{display:inline-block;padding:5px 11px;border-radius:999px;font-size:12.5px;font-weight:700;border:1px solid currentColor}
+  .b-ok{background:var(--okbg);color:var(--ok)} .b-warn{background:var(--warnbg);color:var(--warn)} .b-bad{background:var(--badbg);color:var(--bad)}
+  .nota{margin-top:12px;padding:11px 13px;border-radius:10px;font-size:13.5px;border-left:4px solid}
+  .n-ok{background:var(--okbg);border-color:var(--ok)} .n-warn{background:var(--warnbg);border-color:var(--warn)} .n-bad{background:var(--badbg);border-color:var(--bad)}
 
-  .edad-big{
-    font-size:30px; font-weight:800; font-variant-numeric:tabular-nums;
-    margin:14px 0 2px; line-height:1.15;
-  }
-  .edad-sub{font-size:13px; color:var(--muted); margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.hit td{background:var(--okbg);font-weight:700}
+  td.na{color:var(--muted)}
 
-  .badge{
-    display:inline-block; padding:5px 11px; border-radius:999px;
-    font-size:12.5px; font-weight:700; border:1px solid transparent;
-  }
-  .b-ok{background:var(--okbg); color:var(--ok); border-color:currentColor}
-  .b-warn{background:var(--warnbg); color:var(--warn); border-color:currentColor}
-  .b-bad{background:var(--badbg); color:var(--bad); border-color:currentColor}
-
-  .nota{
-    margin-top:12px; padding:11px 13px; border-radius:10px; font-size:13.5px;
-    border-left:4px solid;
-  }
-  .n-ok{background:var(--okbg); border-color:var(--ok)}
-  .n-warn{background:var(--warnbg); border-color:var(--warn)}
-  .n-bad{background:var(--badbg); border-color:var(--bad)}
-
-  table{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:6px}
-  th,td{text-align:left; padding:7px 8px; border-bottom:1px solid var(--line)}
-  th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:700}
-  td.num{text-align:right; font-variant-numeric:tabular-nums}
-  tr.hit td{background:var(--okbg); font-weight:700}
-
-  .adic{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:end; margin-bottom:10px}
-  .adic .chip{font-size:12px; padding:6px 9px; border-radius:8px; white-space:nowrap}
-  .btn{
-    border:1px solid var(--line); background:var(--bg); color:var(--ink);
-    border-radius:9px; padding:9px 13px; font-size:13.5px; cursor:pointer; font-family:inherit;
-  }
+  .persona{display:grid;grid-template-columns:130px 1fr auto auto;gap:10px;align-items:end;margin-bottom:10px}
+  @media (max-width:640px){.persona{grid-template-columns:1fr 1fr}}
+  .chip{font-size:12px;padding:6px 9px;border-radius:8px;white-space:nowrap;align-self:end}
+  .btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:9px 13px;font:inherit;font-size:13.5px;cursor:pointer}
   .btn:hover{border-color:var(--brand2)}
-  .btn-x{padding:9px 11px; color:var(--bad)}
-  .btn-main{background:var(--brand2); color:#fff; border-color:var(--brand2); font-weight:600}
-
-  .total{
-    display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
-    margin-top:14px; padding-top:14px; border-top:2px solid var(--line);
-  }
-  .total .uf{font-size:26px; font-weight:800; font-variant-numeric:tabular-nums}
-  .total .clp{font-size:19px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--brand)}
-  .total .exact{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; flex-basis:100%}
-
-  footer{font-size:12px; color:var(--muted); padding:4px 0 32px}
-  footer code{font-size:11.5px}
+  .btn-x{padding:9px 11px;color:var(--bad)}
+  .planes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .planes label{display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer;margin:0}
+  .planes input{accent-color:var(--brand2)}
+  .planes label.off{opacity:.45;cursor:not-allowed}
+  .total{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-top:14px;padding-top:14px;border-top:2px solid var(--line)}
+  .total .uf{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+  .total .clp{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--brand)}
+  .total .exact{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;flex-basis:100%}
+  footer{font-size:12px;color:var(--muted);padding:4px 0 32px}
+  footer h3{font-size:12.5px;color:var(--ink);margin:14px 0 4px}
+  footer ul{margin:4px 0;padding-left:18px}
 </style>
 </head>
 <body>
 
-<!-- ======= BARRA UF: valor vigente, siempre visible ======= -->
-<div class="uf-bar">
-  <div class="uf-inner">
-    <span class="uf-tag">UF hoy</span>
-    <span class="uf-val" id="ufVal">—</span>
-    <span class="uf-meta" id="ufMeta">Cargando valor desde mindicador.cl…</span>
-    <button id="ufReload" type="button">Actualizar</button>
-    <span class="uf-manual" id="ufManualBox">
-      <label for="ufManual" style="margin:0;color:#fff">UF manual:</label>
-      <input id="ufManual" type="number" step="0.01" min="0" placeholder="39.000,00" inputmode="decimal">
-    </span>
-  </div>
-</div>
+<div class="uf-bar"><div class="uf-inner">
+  <span class="uf-tag">UF hoy</span>
+  <span class="uf-val" id="ufVal">—</span>
+  <span class="uf-meta" id="ufMeta">Cargando valor…</span>
+  <button id="ufReload" type="button">Actualizar</button>
+  <span class="uf-manual" id="ufManualBox">
+    <label for="ufManual" style="margin:0;color:#fff">UF manual:</label>
+    <input id="ufManual" type="number" step="0.01" min="0" placeholder="39.000,00" inputmode="decimal">
+  </span>
+</div></div>
 
 <div class="wrap">
-  <h1>Calculadora de edad y plan</h1>
-  <p class="sub">Cortes de edad: <strong>14 años</strong> y <strong>24 años con cero días</strong>. Valores en UF convertidos al valor del día, sin redondeo.</p>
+  <h1>Cotizador Seguro Dental Modular Bci</h1>
+  <p class="sub">Calcula la edad exacta, valida la asegurabilidad y entrega el plan y el precio que corresponde. Valores convertidos con la UF del día, sin redondeo.</p>
 
-  <!-- ======= 1. EDAD ======= -->
+  <!-- 1. EDAD -->
   <div class="card">
-    <h2>1 · Edad de la persona</h2>
+    <h2>1 · Calculadora de edad</h2>
     <div class="grid2">
-      <div>
-        <label for="fnac">Fecha de nacimiento</label>
-        <input type="date" id="fnac">
-      </div>
-      <div>
-        <label for="fref">Fecha de evaluación</label>
-        <input type="date" id="fref">
-      </div>
+      <div><label for="fnac">Fecha de nacimiento</label><input type="date" id="fnac"></div>
+      <div><label for="fref">Fecha de evaluación</label><input type="date" id="fref"></div>
     </div>
-
     <div class="edad-big" id="edadBig">—</div>
     <div class="edad-sub" id="edadSub"></div>
     <div id="estadoBadge"></div>
-
     <table id="tablaCortes" style="display:none">
-      <thead><tr><th>Corte</th><th>Fecha exacta</th><th class="num">Estado</th></tr></thead>
-      <tbody>
-        <tr><td>Cumple 14 años</td><td id="f14">—</td><td class="num" id="e14">—</td></tr>
-        <tr><td>Cumple 24 años (cero días)</td><td id="f24">—</td><td class="num" id="e24">—</td></tr>
-      </tbody>
+      <thead><tr><th>Corte de edad</th><th>Fecha exacta</th><th class="num">Estado</th></tr></thead>
+      <tbody id="cuerpoCortes"></tbody>
     </table>
-
-    <div class="nota n-ok" id="notaEdad" style="display:none"></div>
   </div>
 
-  <!-- ======= 2. GRUPO ======= -->
+  <!-- 2. GRUPO -->
   <div class="card">
     <h2>2 · Grupo asegurado</h2>
-    <p class="sub" style="margin:-6px 0 12px">Titular + hasta 3 adicionales. Si se incorpora un menor de 14 años, el grupo pasa obligatoriamente al Plan 3 Full Niños.</p>
-
-    <label for="fnacTit">Fecha de nacimiento del titular <span style="font-weight:400">(opcional)</span></label>
-    <div class="adic" style="grid-template-columns:1fr auto">
-      <input type="date" id="fnacTit">
+    <p class="sub" style="margin:-6px 0 12px">Titular + hasta 3 cargas (cónyuge, unión civil o conviviente con hijos en común, hijos del titular o del cónyuge).</p>
+    <div class="persona">
+      <div><label>Parentesco</label><input value="Titular" disabled style="font-weight:600"></div>
+      <div><label for="fnacTit">Fecha de nacimiento</label><input type="date" id="fnacTit"></div>
       <span class="chip badge b-warn" id="chipTit">Sin fecha</span>
+      <span></span>
     </div>
-
-    <div id="adicionales"></div>
-    <button class="btn" id="addAdic" type="button">+ Agregar adicional</button>
+    <div id="cargas"></div>
+    <button class="btn" id="addCarga" type="button">+ Agregar carga</button>
   </div>
 
-  <!-- ======= 3. RESULTADO ======= -->
+  <!-- 3. PLAN -->
   <div class="card">
-    <h2>3 · Plan que corresponde</h2>
-    <div id="planBadge"></div>
+    <h2>3 · Plan</h2>
+    <div class="planes" id="selPlanes">
+      <label id="lbl-basico"><input type="radio" name="plan" value="basico"> Plan 2 Básico</label>
+      <label id="lbl-full"><input type="radio" name="plan" value="full" checked> Plan 3 Full</label>
+      <label id="lbl-ninos"><input type="radio" name="plan" value="ninos"> Plan 4 Full Niños</label>
+    </div>
     <div class="nota n-ok" id="planNota"></div>
-
     <table>
-      <thead><tr><th>Plan</th><th>Composición</th><th class="num">UF</th><th class="num">CLP</th></tr></thead>
+      <thead><tr><th>Plan</th><th>Cobertura</th><th class="num">UF</th><th class="num">CLP mensual</th></tr></thead>
       <tbody id="tablaPlanes"></tbody>
     </table>
-
     <div class="total">
       <span class="uf" id="totUF">—</span>
       <span class="clp" id="totCLP">—</span>
@@ -210,26 +151,60 @@
   </div>
 
   <footer>
-    <p><strong>Reglas aplicadas:</strong> el Seguro de Urgencia Simple (0,26 UF) no admite como adicionales a menores de 14 años; para incluirlos, el grupo debe contratar el Plan 3 Full Niños (0,81 / 1,13 / 1,44 UF según 1, 2 o 3 adicionales). A los 24 años con cero días la persona deja de calificar como adicional.</p>
-    <p>Valor UF obtenido de <code>mindicador.cl</code> (respaldo: <code>api.boostr.cl</code>), tal como lo publica el Banco Central, sin redondeos. Los montos en pesos se muestran con todos sus decimales; el valor entre paréntesis es el redondeo al peso.</p>
+    <h3>Reglas de asegurabilidad aplicadas</h3>
+    <ul>
+      <li><strong>Titular, cónyuge, unión civil o conviviente:</strong> ingreso desde los 18 años y hasta los 69 años y 364 días. Permanencia hasta los 70 años y 364 días (un día antes de cumplir 71).</li>
+      <li><strong>Hijos del titular o del cónyuge:</strong> ingreso desde los 14 días y hasta los 23 años y 0 días. Permanencia hasta los 24 años y 0 días.</li>
+      <li><strong>Menores de 14 años:</strong> la odontología infantil (11 procedimientos en dientes temporales) sólo existe en el Plan 4 Full Niños. Si se incorpora un menor de 14, el grupo debe ir en ese plan.</li>
+      <li><strong>Máximo 3 cargas.</strong> El Plan 4 Full Niños no tiene precio de titular solo: parte en titular + 1.</li>
+    </ul>
+    <h3>Tarifas</h3>
+    <p>Tabla del <em>Script Bci Dental Full, septiembre 2026</em>. El Plan 2 Básico cubre urgencia y prevención; el Plan 3 Full agrega operatoria; el Plan 4 Full Niños agrega odontología infantil. Carencia: 48 horas hábiles para urgencia dental, 30 días para el resto.</p>
+    <p>La presentación de junio 2025 usaba tres decimales (0,258 / 0,325 / 0,392 / 0,459 · 0,434 / 0,676 / 0,919 / 1,162 · 0,502 / 0,814 / 1,125 / 1,436). Aquí se usan los valores de dos decimales del script vigente, que son los que se leen al cliente. Para cambiarlos, edita el objeto <code>PLANES</code> al inicio del script.</p>
+    <h3>Valor UF</h3>
+    <p>Se obtiene de <code>mindicador.cl</code> (respaldo <code>api.boostr.cl</code>), tal como lo publica el Banco Central. La conversión a pesos se hace con aritmética entera: se muestran todos los decimales y, entre paréntesis, el redondeo al peso.</p>
   </footer>
 </div>
 
 <script>
 /* =========================================================
-   Precios del producto — editar sólo aquí si cambia la tarifa.
-   Se guardan en centésimas de UF (enteros) para evitar
-   errores de punto flotante en las conversiones a pesos.
+   TARIFAS — Script Bci Dental Full, septiembre 2026.
+   Valores en centésimas de UF (enteros) para evitar errores
+   de punto flotante al convertir a pesos.
+   Índice del arreglo = cantidad de cargas (0 a 3).
+   null = esa composición no se vende.
    ========================================================= */
-const PRECIOS = {
-  urgenciaSimple: 26,            // 0,26 UF
-  fullNinos: {1: 81, 2: 113, 3: 144}  // 0,81 / 1,13 / 1,44 UF
+const PLANES = {
+  basico: {nom:"Plan 2 Básico",     cob:"Urgencia + prevención",                         precios:[26, 33, 39, 46]},
+  full:   {nom:"Plan 3 Full",       cob:"Urgencia + prevención + operatoria",            precios:[43, 68, 92, 116]},
+  ninos:  {nom:"Plan 4 Full Niños", cob:"+ odontología niños (dientes temporales)",      precios:[null, 81, 113, 144]}
 };
-const CORTE_MENOR = 14;   // años: bajo este corte obliga Plan Full Niños
-const CORTE_TOPE  = 24;   // años con cero días: tope para seguir como adicional
-const MAX_ADIC    = 3;
+const MAX_CARGAS = 3;
+const EDAD_NINOS = 14;   // años: bajo esta edad se exige Plan 4 Full Niños
 
-/* ===================== utilidades de fecha ===================== */
+/* Reglas de asegurabilidad. Todo en {a:años, m:meses, d:días}. */
+const REGLAS = {
+  titular: {
+    etiqueta: "Titular",
+    min:        {a:18, m:0, d:0,   txt:"18 años"},
+    maxIngreso: {a:69, m:0, d:364, txt:"69 años y 364 días"},
+    maxPermanencia: {a:70, m:0, d:364, txt:"70 años y 364 días"}
+  },
+  conyuge: {
+    etiqueta: "Cónyuge / unión civil / conviviente",
+    min:        {a:18, m:0, d:0,   txt:"18 años"},
+    maxIngreso: {a:69, m:0, d:364, txt:"69 años y 364 días"},
+    maxPermanencia: {a:70, m:0, d:364, txt:"70 años y 364 días"}
+  },
+  hijo: {
+    etiqueta: "Hijo del titular o del cónyuge",
+    min:        {a:0,  m:0, d:14,  txt:"14 días"},
+    maxIngreso: {a:23, m:0, d:0,   txt:"23 años y 0 días"},
+    maxPermanencia: {a:24, m:0, d:0, txt:"24 años y 0 días"}
+  }
+};
+
+/* ===================== fechas ===================== */
 function parseISO(s){
   if(!s) return null;
   const p = s.split("-");
@@ -238,331 +213,311 @@ function parseISO(s){
   return isNaN(d) ? null : d;
 }
 function toISO(d){
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
 function fmtFecha(d){
-  return String(d.getDate()).padStart(2,"0") + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + d.getFullYear();
+  return String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+d.getFullYear();
 }
-function diffDias(a, b){ // días calendario entre a y b
-  const ua = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-  const ub = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-  return Math.round((ub - ua) / 86400000);
+function diffDias(a,b){
+  return Math.round((Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()) - Date.UTC(a.getFullYear(),a.getMonth(),a.getDate()))/86400000);
 }
-// Aniversario n de una fecha de nacimiento (29-feb cae al 1 de marzo en años no bisiestos)
-function aniversario(nac, n){
-  return new Date(nac.getFullYear() + n, nac.getMonth(), nac.getDate());
+// Fecha en que la persona alcanza exactamente {a años, m meses, d días}
+function fechaHito(nac, h){
+  const base = new Date(nac.getFullYear()+(h.a||0), nac.getMonth()+(h.m||0), nac.getDate());
+  base.setDate(base.getDate() + (h.d||0));
+  return base;
 }
-// Edad exacta en años, meses y días
 function edadExacta(nac, ref){
-  let y = ref.getFullYear() - nac.getFullYear();
-  let m = ref.getMonth() - nac.getMonth();
-  let d = ref.getDate() - nac.getDate();
-  if(d < 0){
-    m -= 1;
-    d += new Date(ref.getFullYear(), ref.getMonth(), 0).getDate(); // días del mes anterior
-  }
-  if(m < 0){ y -= 1; m += 12; }
+  let y = ref.getFullYear()-nac.getFullYear();
+  let m = ref.getMonth()-nac.getMonth();
+  let d = ref.getDate()-nac.getDate();
+  if(d<0){ m--; d += new Date(ref.getFullYear(), ref.getMonth(), 0).getDate(); }
+  if(m<0){ y--; m+=12; }
   return {y:y, m:m, d:d};
 }
+function edadCorta(nac, ref){
+  const e = edadExacta(nac, ref);
+  return e.y>0 ? e.y+"a "+e.m+"m" : (e.m>0 ? e.m+"m "+e.d+"d" : e.d+" días");
+}
 
-/* ===================== formato de números ===================== */
-function miles(entero){ // entero (string o number) -> 1.234.567
-  return String(entero).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-// UF en centésimas -> "39.454,17"
-function ufCentToStr(c){
-  return miles(Math.floor(c/100)) + "," + String(c%100).padStart(2,"0");
-}
-// UF-centésimas x plan-centésimas = pesos con 4 decimales exactos (sin float)
+/* ===================== números ===================== */
+function miles(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
+function ufCentToStr(c){ return miles(Math.floor(c/100))+","+String(c%100).padStart(2,"0"); }
 function pesosExactos(ufCent, planCent){
-  const bruto = ufCent * planCent;                // unidades de 0,0001 peso
-  const ent   = Math.floor(bruto / 10000);
-  const dec   = String(bruto % 10000).padStart(4,"0");
-  const redondeado = Math.round(bruto / 10000);   // al peso, media hacia arriba
+  const bruto = ufCent*planCent;                 // unidades de 0,0001 peso
   return {
-    texto: "$" + miles(ent) + "," + dec,
-    redondeado: "$" + miles(redondeado),
-    bruto: bruto
+    texto: "$"+miles(Math.floor(bruto/10000))+","+String(bruto%10000).padStart(4,"0"),
+    redondeado: "$"+miles(Math.round(bruto/10000))
   };
 }
 
 /* ===================== valor UF ===================== */
-let UF_CENT = null;   // valor UF en centésimas (entero)
-
+let UF_CENT = null;
 function pintarUF(cent, fechaTxt, fuente){
   UF_CENT = cent;
-  document.getElementById("ufVal").textContent = cent === null ? "—" : "$" + ufCentToStr(cent);
-  document.getElementById("ufMeta").textContent = cent === null ? "" : "al " + fechaTxt + " · fuente: " + fuente;
+  document.getElementById("ufVal").textContent  = cent===null ? "—" : "$"+ufCentToStr(cent);
+  document.getElementById("ufMeta").textContent = cent===null ? "" : "al "+fechaTxt+" · fuente: "+fuente;
   recalcular();
 }
-function guardarCache(cent, fechaTxt){
-  try{ localStorage.setItem("uf_cache", JSON.stringify({c:cent, f:fechaTxt, t:Date.now()})); }catch(e){}
-}
-function leerCache(){
-  try{ return JSON.parse(localStorage.getItem("uf_cache") || "null"); }catch(e){ return null; }
-}
+function guardarCache(c,f){ try{ localStorage.setItem("uf_cache", JSON.stringify({c:c,f:f})); }catch(e){} }
+function leerCache(){ try{ return JSON.parse(localStorage.getItem("uf_cache")||"null"); }catch(e){ return null; } }
 
 async function cargarUF(){
   const meta = document.getElementById("ufMeta");
   meta.textContent = "Actualizando…";
-
-  // 1) mindicador.cl
   try{
-    const r = await fetch("https://mindicador.cl/api/uf", {cache:"no-store"});
+    const r = await fetch("https://mindicador.cl/api/uf",{cache:"no-store"});
     if(r.ok){
-      const j = await r.json();
-      const s = j.serie && j.serie[0];
+      const j = await r.json(), s = j.serie && j.serie[0];
       if(s && s.valor){
-        const cent = Math.round(s.valor * 100);
-        const f = fmtFecha(parseISO(String(s.fecha).slice(0,10))); // sin desfase de zona horaria
-        guardarCache(cent, f);
-        pintarUF(cent, f, "mindicador.cl");
-        return;
+        const cent = Math.round(s.valor*100);
+        const f = fmtFecha(parseISO(String(s.fecha).slice(0,10)));   // sin desfase de zona horaria
+        guardarCache(cent,f); pintarUF(cent,f,"mindicador.cl"); return;
       }
     }
   }catch(e){}
-
-  // 2) respaldo: api.boostr.cl
   try{
-    const r = await fetch("https://api.boostr.cl/economy/uf.json", {cache:"no-store"});
+    const r = await fetch("https://api.boostr.cl/economy/uf.json",{cache:"no-store"});
     if(r.ok){
-      const j = await r.json();
-      const v = j && j.data && (j.data.value || j.data.valor);
+      const j = await r.json(), v = j && j.data && (j.data.value||j.data.valor);
       if(v){
-        const cent = Math.round(parseFloat(String(v).replace(/\./g,"").replace(",",".")) * 100);
+        const cent = Math.round(parseFloat(String(v).replace(/\./g,"").replace(",","."))*100);
         const f = fmtFecha(new Date());
-        guardarCache(cent, f);
-        pintarUF(cent, f, "api.boostr.cl");
-        return;
+        guardarCache(cent,f); pintarUF(cent,f,"api.boostr.cl"); return;
       }
     }
   }catch(e){}
-
-  // 3) último valor conocido, o ingreso manual
-  const cache = leerCache();
-  if(cache){
-    pintarUF(cache.c, cache.f, "último valor guardado (sin conexión)");
-  }else{
-    pintarUF(null, "", "");
-    meta.textContent = "No se pudo obtener la UF. Ingrésala manualmente →";
-  }
+  const c = leerCache();
+  if(c){ pintarUF(c.c, c.f, "último valor guardado (sin conexión)"); }
+  else { pintarUF(null,"",""); meta.textContent = "No se pudo obtener la UF. Ingrésala manualmente →"; }
   document.getElementById("ufManualBox").style.display = "inline-flex";
 }
-
 document.getElementById("ufReload").addEventListener("click", cargarUF);
 document.getElementById("ufManual").addEventListener("input", function(){
   const v = parseFloat(this.value);
-  if(v > 0) pintarUF(Math.round(v*100), fmtFecha(new Date()), "ingreso manual");
+  if(v>0) pintarUF(Math.round(v*100), fmtFecha(new Date()), "ingreso manual");
 });
 
-/* ===================== bloque 1: edad ===================== */
-function clasificar(nac, ref){
-  const e = edadExacta(nac, ref);
-  const f14 = aniversario(nac, CORTE_MENOR);
-  const f24 = aniversario(nac, CORTE_TOPE);
-  let estado;
-  if(ref < f14)       estado = "menor14";
-  else if(ref < f24)  estado = "adicional";
-  else                estado = "tope";
-  return {edad:e, f14:f14, f24:f24, estado:estado};
+/* ===================== evaluación de una persona ===================== */
+function evaluar(nac, ref, tipo){
+  const r = REGLAS[tipo];
+  const fMin = fechaHito(nac, r.min);
+  const fIng = fechaHito(nac, r.maxIngreso);
+  const fPer = fechaHito(nac, r.maxPermanencia);
+  let estado, motivo;
+  if(ref < fMin){
+    estado = "menor";
+    motivo = "Aún no cumple la edad mínima de ingreso ("+textoHito(r.min)+"). La cumple el "+fmtFecha(fMin)+".";
+  }else if(ref > fIng){
+    estado = (ref < fPer) ? "solo_permanencia" : "fuera";
+    motivo = (estado==="solo_permanencia")
+      ? "Supera la edad máxima de ingreso ("+textoHito(r.maxIngreso)+"), alcanzada el "+fmtFecha(fIng)+". Sólo podría permanecer si ya estuviera asegurado."
+      : "Superó la edad máxima de permanencia ("+textoHito(r.maxPermanencia)+") el "+fmtFecha(fPer)+".";
+  }else{
+    estado = "ok";
+    motivo = "Cumple los requisitos de ingreso.";
+  }
+  return {estado:estado, motivo:motivo, fMin:fMin, fIng:fIng, fPer:fPer,
+          edad:edadExacta(nac,ref), menorNinos: ref < fechaHito(nac,{a:EDAD_NINOS,m:0,d:0})};
+}
+function textoHito(h){
+  if(h.txt) return h.txt;
+  const p = [];
+  if(h.a) p.push(h.a+" año"+(h.a===1?"":"s"));
+  if(h.m) p.push(h.m+" mes"+(h.m===1?"":"es"));
+  if(h.d || !p.length) p.push(h.d+" día"+(h.d===1?"":"s"));
+  return p.join(" y ");
+}
+function textoRestante(ref, obj){
+  const d = diffDias(ref,obj);
+  if(d>0)  return "faltan "+miles(d)+" día"+(d===1?"":"s");
+  if(d===0) return "es hoy";
+  return "hace "+miles(-d)+" día"+(d===-1?"":"s");
 }
 
-function textoRestante(ref, objetivo){
-  const dias = diffDias(ref, objetivo);
-  if(dias > 0)  return "faltan " + miles(dias) + " día" + (dias===1?"":"s");
-  if(dias === 0) return "es hoy";
-  return "cumplido hace " + miles(-dias) + " día" + (dias===-1?"":"s");
-}
-
+/* ===================== bloque 1 ===================== */
 function pintarEdad(){
   const nac = parseISO(document.getElementById("fnac").value);
   const ref = parseISO(document.getElementById("fref").value) || new Date();
-  const big = document.getElementById("edadBig");
-  const sub = document.getElementById("edadSub");
-  const badge = document.getElementById("estadoBadge");
-  const tabla = document.getElementById("tablaCortes");
-  const nota = document.getElementById("notaEdad");
+  const big=document.getElementById("edadBig"), sub=document.getElementById("edadSub");
+  const badge=document.getElementById("estadoBadge"), tabla=document.getElementById("tablaCortes");
 
-  if(!nac){
-    big.textContent = "—"; sub.textContent = ""; badge.innerHTML = "";
-    tabla.style.display = "none"; nota.style.display = "none";
-    return;
-  }
-  if(nac > ref){
+  if(!nac || nac > ref){
     big.textContent = "—";
-    sub.textContent = "La fecha de nacimiento es posterior a la fecha de evaluación.";
-    badge.innerHTML = ""; tabla.style.display = "none"; nota.style.display = "none";
+    sub.textContent = nac ? "La fecha de nacimiento es posterior a la de evaluación." : "";
+    badge.innerHTML = ""; tabla.style.display = "none";
     return;
   }
+  const e = edadExacta(nac, ref);
+  big.textContent = e.y+" años, "+e.m+" meses, "+e.d+" días";
+  sub.textContent = "Nació el "+fmtFecha(nac)+" · evaluado al "+fmtFecha(ref)+" · "+miles(diffDias(nac,ref))+" días de vida";
 
-  const c = clasificar(nac, ref);
-  big.textContent = c.edad.y + " años, " + c.edad.m + " meses, " + c.edad.d + " días";
-  sub.textContent = "Nació el " + fmtFecha(nac) + " · evaluado al " + fmtFecha(ref) +
-                    " · " + miles(diffDias(nac, ref)) + " días de vida";
-
-  document.getElementById("f14").textContent = fmtFecha(c.f14);
-  document.getElementById("f24").textContent = fmtFecha(c.f24);
-  document.getElementById("e14").textContent = textoRestante(ref, c.f14);
-  document.getElementById("e24").textContent = textoRestante(ref, c.f24);
-  tabla.style.display = "";
-
-  nota.style.display = "";
-  if(c.estado === "menor14"){
-    badge.innerHTML = '<span class="badge b-bad">Menor de 14 años</span>';
-    nota.className = "nota n-bad";
-    nota.innerHTML = "<strong>No puede ir como adicional del plan de 0,26 UF.</strong> El Seguro de Urgencia Simple no cubre menores de 14 años. " +
-                     "Para incorporarlo, el titular debe pasar al <strong>Plan 3 Full Niños</strong>. Deja de ser menor de 14 el " + fmtFecha(c.f14) + ".";
-  }else if(c.estado === "adicional"){
-    badge.innerHTML = '<span class="badge b-ok">Entre 14 y 24 años — califica como adicional</span>';
-    nota.className = "nota n-ok";
-    nota.innerHTML = "Puede incorporarse como adicional del <strong>Seguro de Urgencia Simple (0,26 UF)</strong>. " +
-                     "Alcanza el corte de 24 años con cero días el <strong>" + fmtFecha(c.f24) + "</strong>.";
+  const menor14 = ref < fechaHito(nac,{a:EDAD_NINOS,m:0,d:0});
+  const evH = evaluar(nac, ref, "hijo");
+  const evT = evaluar(nac, ref, "titular");
+  if(menor14){
+    badge.innerHTML = '<span class="badge b-bad">Menor de 14 años — exige Plan 4 Full Niños</span>';
+  }else if(evH.estado==="ok"){
+    badge.innerHTML = '<span class="badge b-ok">Puede ingresar como hijo</span>';
+  }else if(evT.estado==="ok"){
+    badge.innerHTML = '<span class="badge b-ok">Puede ingresar como titular o cónyuge</span>';
   }else{
-    badge.innerHTML = '<span class="badge b-warn">24 años o más — fuera del corte</span>';
-    nota.className = "nota n-warn";
-    nota.innerHTML = "Cumplió el corte de <strong>24 años con cero días</strong> el " + fmtFecha(c.f24) +
-                     ", por lo que ya no califica como adicional del grupo.";
+    badge.innerHTML = '<span class="badge b-warn">Fuera de los rangos de ingreso</span>';
   }
+
+  const filas = [
+    ["Cumple 14 años (fin de odontología niños)", fechaHito(nac,{a:14,m:0,d:0})],
+    ["Hijo · edad máxima de ingreso (23 años y 0 días)", evH.fIng],
+    ["Hijo · edad máxima de permanencia (24 años y 0 días)", evH.fPer],
+    ["Titular · edad mínima (18 años)", evT.fMin],
+    ["Titular · edad máxima de ingreso (69 años y 364 días)", evT.fIng],
+    ["Titular · edad máxima de permanencia (70 años y 364 días)", evT.fPer]
+  ];
+  document.getElementById("cuerpoCortes").innerHTML = filas.map(function(f){
+    return "<tr><td>"+f[0]+"</td><td>"+fmtFecha(f[1])+'</td><td class="num">'+textoRestante(ref,f[1])+"</td></tr>";
+  }).join("");
+  tabla.style.display = "";
 }
 
-/* ===================== bloque 2: grupo ===================== */
-let adicCount = 0;
-
-function filaAdicional(){
-  if(adicCount >= MAX_ADIC) return;
-  adicCount++;
-  const id = "adic" + adicCount;
+/* ===================== bloque 2 ===================== */
+let nCargas = 0;
+function filaCarga(){
+  if(nCargas >= MAX_CARGAS) return;
+  nCargas++;
+  const id = "carga"+nCargas;
   const div = document.createElement("div");
-  div.className = "adic";
-  div.dataset.id = id;
+  div.className = "persona";
   div.innerHTML =
-    '<div><label for="' + id + '">Adicional ' + adicCount + ' — fecha de nacimiento</label>' +
-    '<input type="date" id="' + id + '" class="fnacAdic"></div>' +
-    '<span class="chip badge b-warn" data-chip>Sin fecha</span>' +
+    '<div><label for="'+id+'p">Parentesco</label>'+
+      '<select id="'+id+'p" class="parentesco"><option value="hijo">Hijo</option><option value="conyuge">Cónyuge / conviviente</option></select></div>'+
+    '<div><label for="'+id+'">Fecha de nacimiento</label><input type="date" id="'+id+'" class="fnacCarga"></div>'+
+    '<span class="chip badge b-warn" data-chip>Sin fecha</span>'+
     '<button class="btn btn-x" type="button" data-del>Quitar</button>';
-  document.getElementById("adicionales").appendChild(div);
+  document.getElementById("cargas").appendChild(div);
   div.querySelector("input").addEventListener("input", recalcular);
-  div.querySelector("[data-del]").addEventListener("click", function(){
-    div.remove();
-    renumerar();
-    recalcular();
-  });
-  document.getElementById("addAdic").style.display = adicCount >= MAX_ADIC ? "none" : "";
-  recalcular();
+  div.querySelector("select").addEventListener("change", recalcular);
+  div.querySelector("[data-del]").addEventListener("click", function(){ div.remove(); renumerar(); recalcular(); });
+  renumerar(); recalcular();
 }
 function renumerar(){
-  const filas = document.querySelectorAll("#adicionales .adic");
-  adicCount = filas.length;
-  filas.forEach(function(f, i){
-    f.querySelector("label").textContent = "Adicional " + (i+1) + " — fecha de nacimiento";
-  });
-  document.getElementById("addAdic").style.display = adicCount >= MAX_ADIC ? "none" : "";
+  nCargas = document.querySelectorAll("#cargas .persona").length;
+  document.getElementById("addCarga").style.display = nCargas>=MAX_CARGAS ? "none" : "";
 }
 
-/* ===================== bloque 3: plan y precio ===================== */
+/* ===================== bloque 3 ===================== */
+function planElegido(){
+  const r = document.querySelector('input[name="plan"]:checked');
+  return r ? r.value : "full";
+}
 function recalcular(){
   pintarEdad();
-
   const ref = parseISO(document.getElementById("fref").value) || new Date();
+  const avisos = [];
 
-  // Edad del titular (informativa)
+  // Titular
   const nacTit = parseISO(document.getElementById("fnacTit").value);
   const chipTit = document.getElementById("chipTit");
   if(!nacTit || nacTit > ref){
     chipTit.className = "chip badge b-warn"; chipTit.textContent = "Sin fecha";
   }else{
-    const eT = edadExacta(nacTit, ref);
-    chipTit.className = "chip badge b-ok";
-    chipTit.textContent = "Titular: " + eT.y + "a " + eT.m + "m " + eT.d + "d";
+    const ev = evaluar(nacTit, ref, "titular");
+    chipTit.className = "chip badge " + (ev.estado==="ok" ? "b-ok" : "b-bad");
+    chipTit.textContent = edadCorta(nacTit, ref) + (ev.estado==="ok" ? " — apto" : " — no apto");
+    if(ev.estado!=="ok") avisos.push("<strong>Titular:</strong> "+ev.motivo);
   }
 
-  const filas = Array.prototype.slice.call(document.querySelectorAll("#adicionales .adic"));
-
-  let conFecha = 0, menores = 0, fueraCorte = 0;
-  filas.forEach(function(f){
-    const nac = parseISO(f.querySelector("input").value);
+  // Cargas
+  let menores = 0;
+  const filas = Array.prototype.slice.call(document.querySelectorAll("#cargas .persona"));
+  filas.forEach(function(f, i){
+    const nac  = parseISO(f.querySelector("input").value);
+    const tipo = f.querySelector("select").value;
     const chip = f.querySelector("[data-chip]");
     if(!nac || nac > ref){
-      chip.className = "chip badge b-warn"; chip.textContent = "Sin fecha";
-      return;
+      chip.className = "chip badge b-warn"; chip.textContent = "Sin fecha"; return;
     }
-    conFecha++;
-    const c = clasificar(nac, ref);
-    if(c.estado === "menor14"){
-      menores++;
-      chip.className = "chip badge b-bad";
-      chip.textContent = c.edad.y + "a " + c.edad.m + "m — menor de 14";
-    }else if(c.estado === "adicional"){
-      chip.className = "chip badge b-ok";
-      chip.textContent = c.edad.y + "a " + c.edad.m + "m — califica";
-    }else{
-      fueraCorte++;
-      chip.className = "chip badge b-warn";
-      chip.textContent = c.edad.y + "a " + c.edad.m + "m — sobre 24";
-    }
+    const ev = evaluar(nac, ref, tipo);
+    if(ev.menorNinos && tipo==="hijo") menores++;
+    let cls = "b-ok", txt = edadCorta(nac,ref);
+    if(ev.estado!=="ok"){ cls = "b-bad"; txt += " — no apto"; avisos.push("<strong>Carga "+(i+1)+":</strong> "+ev.motivo); }
+    else if(ev.menorNinos && tipo==="hijo"){ cls = "b-bad"; txt += " — menor de 14"; }
+    chip.className = "chip badge "+cls; chip.textContent = txt;
   });
 
-  const nAdic = filas.length;
-  const plan = menores > 0 ? "full" : "simple";
-  const planCent = plan === "full"
-    ? (PRECIOS.fullNinos[Math.max(1, Math.min(MAX_ADIC, nAdic))] || PRECIOS.fullNinos[1])
-    : PRECIOS.urgenciaSimple;
+  // ¿Qué planes están disponibles?
+  const obligaNinos = menores > 0;
+  const lblN = document.getElementById("lbl-ninos");
+  const radN = lblN.querySelector("input");
+  const puedeNinos = nCargas >= 1;                 // no hay precio de titular solo
+  radN.disabled = !puedeNinos;
+  lblN.classList.toggle("off", !puedeNinos);
+  ["basico","full"].forEach(function(k){
+    const lbl = document.getElementById("lbl-"+k), rad = lbl.querySelector("input");
+    rad.disabled = obligaNinos;
+    lbl.classList.toggle("off", obligaNinos);
+  });
+  if(obligaNinos && puedeNinos) radN.checked = true;
+  if(!puedeNinos && radN.checked) document.getElementById("lbl-full").querySelector("input").checked = true;
 
-  // Aviso del plan
-  const badge = document.getElementById("planBadge");
-  const nota  = document.getElementById("planNota");
-  if(plan === "full"){
-    badge.innerHTML = '<span class="badge b-bad">Plan 3 · Full Niños (obligatorio)</span>';
-    nota.className = "nota n-bad";
-    nota.innerHTML = "Hay " + menores + " menor" + (menores===1?"":"es") + " de 14 años en el grupo. " +
-      "El Seguro de Urgencia Simple no los cubre como adicionales, por lo que el titular <strong>debe pasar al Plan 3 Full Niños</strong>.";
+  const plan = planElegido();
+  const planCent = PLANES[plan].precios[nCargas];
+
+  // Aviso
+  const nota = document.getElementById("planNota");
+  let html, cls;
+  if(obligaNinos){
+    cls = "n-bad";
+    html = "Hay "+menores+" hijo"+(menores===1?"":"s")+" menor"+(menores===1?"":"es")+" de 14 años en el grupo. "+
+           "La odontología infantil sólo existe en el <strong>Plan 4 Full Niños</strong>, así que el grupo debe contratar ese plan.";
   }else{
-    badge.innerHTML = '<span class="badge b-ok">Seguro de Urgencia Simple</span>';
-    nota.className = "nota n-ok";
-    nota.innerHTML = nAdic === 0
-      ? "Sólo titular. Sin menores de 14 años en el grupo, corresponde el plan de 0,26 UF."
-      : "Ningún adicional es menor de 14 años: se mantiene el plan de 0,26 UF.";
+    cls = "n-ok";
+    html = "Sin menores de 14 años en el grupo: se puede contratar cualquiera de los planes. "+
+           "El plan objetivo del script es el <strong>Plan 3 Full</strong>.";
   }
-  if(fueraCorte > 0){
-    nota.innerHTML += "<br><strong>Atención:</strong> " + fueraCorte + " persona" + (fueraCorte===1?"":"s") +
-      " del grupo ya cumplió 24 años con cero días y no califica como adicional.";
+  if(planCent === null){
+    cls = "n-warn";
+    html += "<br><strong>Atención:</strong> el Plan 4 Full Niños no se vende con titular solo. Agrega al menos una carga.";
   }
+  if(avisos.length){
+    cls = "n-bad";
+    html += "<br><br><strong>Problemas de asegurabilidad:</strong><br>" + avisos.join("<br>");
+  }
+  nota.className = "nota "+cls;
+  nota.innerHTML = html;
 
   // Tabla comparativa
-  const tb = document.getElementById("tablaPlanes");
-  const filasPlan = [
-    {k:"simple", nom:"Urgencia Simple", comp:"Titular (sin menores de 14)", cent:PRECIOS.urgenciaSimple, hit:(plan==="simple")},
-    {k:"full1",  nom:"Plan 3 Full Niños", comp:"Titular + 1 adicional",  cent:PRECIOS.fullNinos[1], hit:(plan==="full" && nAdic<=1)},
-    {k:"full2",  nom:"Plan 3 Full Niños", comp:"Titular + 2 adicionales", cent:PRECIOS.fullNinos[2], hit:(plan==="full" && nAdic===2)},
-    {k:"full3",  nom:"Plan 3 Full Niños", comp:"Titular + 3 adicionales", cent:PRECIOS.fullNinos[3], hit:(plan==="full" && nAdic>=3)}
-  ];
-  tb.innerHTML = filasPlan.map(function(f){
-    const p = UF_CENT ? pesosExactos(UF_CENT, f.cent) : null;
-    return '<tr class="' + (f.hit ? "hit" : "") + '">' +
-      "<td>" + f.nom + "</td><td>" + f.comp + "</td>" +
-      '<td class="num">' + ufCentToStr(f.cent) + "</td>" +
-      '<td class="num">' + (p ? p.redondeado : "—") + "</td></tr>";
+  const compos = ["Titular solo","Titular + 1","Titular + 2","Titular + 3"][nCargas];
+  document.getElementById("tablaPlanes").innerHTML = Object.keys(PLANES).map(function(k){
+    const p = PLANES[k], c = p.precios[nCargas];
+    const hit = (k===plan && c!==null);
+    if(c === null){
+      return '<tr><td>'+p.nom+"</td><td>"+p.cob+'</td><td class="num na">no aplica</td><td class="num na">—</td></tr>';
+    }
+    const v = UF_CENT ? pesosExactos(UF_CENT, c) : null;
+    return '<tr class="'+(hit?"hit":"")+'"><td>'+p.nom+"</td><td>"+p.cob+"</td>"+
+           '<td class="num">'+ufCentToStr(c)+'</td><td class="num">'+(v?v.redondeado:"—")+"</td></tr>";
   }).join("");
 
   // Total
-  const p = UF_CENT ? pesosExactos(UF_CENT, planCent) : null;
-  document.getElementById("totUF").textContent  = ufCentToStr(planCent) + " UF";
-  document.getElementById("totCLP").textContent = p ? p.redondeado + " mensual" : "— (sin valor UF)";
-  document.getElementById("totExact").textContent = p
-    ? "Cálculo exacto: " + ufCentToStr(planCent) + " UF × $" + ufCentToStr(UF_CENT) + " = " + p.texto + " (redondeado al peso: " + p.redondeado + ")"
+  const v = (UF_CENT && planCent!==null) ? pesosExactos(UF_CENT, planCent) : null;
+  document.getElementById("totUF").textContent  = planCent===null ? "—" : ufCentToStr(planCent)+" UF";
+  document.getElementById("totCLP").textContent = v ? v.redondeado+" mensual" : (planCent===null ? "composición no disponible" : "— (sin valor UF)");
+  document.getElementById("totExact").textContent = v
+    ? PLANES[plan].nom+" · "+compos+" · "+ufCentToStr(planCent)+" UF × $"+ufCentToStr(UF_CENT)+" = "+v.texto+" (redondeado al peso: "+v.redondeado+")"
     : "";
 }
 
 /* ===================== arranque ===================== */
 document.getElementById("fref").value = toISO(new Date());
-document.getElementById("fnac").addEventListener("input", recalcular);
-document.getElementById("fref").addEventListener("input", recalcular);
-document.getElementById("fnacTit").addEventListener("input", recalcular);
-document.getElementById("addAdic").addEventListener("click", filaAdicional);
+["fnac","fref","fnacTit"].forEach(function(id){
+  document.getElementById(id).addEventListener("input", recalcular);
+});
+document.querySelectorAll('input[name="plan"]').forEach(function(r){ r.addEventListener("change", recalcular); });
+document.getElementById("addCarga").addEventListener("click", filaCarga);
 
-filaAdicional();
+recalcular();
 cargarUF();
-setInterval(cargarUF, 30 * 60 * 1000); // refresco cada 30 minutos
+setInterval(cargarUF, 30*60*1000);
 </script>
 </body>
 </html>
