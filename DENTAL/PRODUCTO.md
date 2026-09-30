@@ -218,10 +218,18 @@ No tienen relación entre sí.
 
 ### La regla que define el plan
 
-Si en el grupo hay **un hijo menor de 14 años**, la cobertura que ese niño
-necesita (odontología infantil) **sólo existe en el Plan 4 Full Niños**. Por eso
-el grupo debe contratar ese plan: no es una preferencia comercial, es que los
-otros dos planes no tienen con qué atenderlo.
+**Sin menores de 14 en el grupo:** el cliente elige. Puede quedarse en el
+**Plan 2 Básico** (urgencia y prevención, el "plan de Urgencia") o tomar el
+**Plan 3 Full**. El script empuja el Full, y el Básico es la carta de retención
+si lo rechaza.
+
+**Con un hijo menor de 14 en el grupo:** el **Plan 4 Full Niños es obligatorio**.
+Un menor de 14 no entra como carga en el plan de Urgencia, y la cobertura que
+ese niño necesita (odontología infantil sobre dientes temporales) sólo existe
+en el Plan 4. No es una preferencia comercial: los otros dos planes no tienen
+con qué atenderlo.
+
+Dicho en una línea: **el menor no elige plan, lo impone.**
 
 ### Los tres cortes de edad que importan al cotizar
 
@@ -359,15 +367,19 @@ Nombre completo, RUT, fecha de nacimiento y parentesco. Los cuatro.
 
 ---
 
-## 10. Pendientes por confirmar
+## 10. Puntos confirmados
 
-1. **Listado completo de los 11 procedimientos de odontología niños.** La
-   documentación sólo enumera 5 o 6 y cierra con "entre otros".
-2. **Tope de exodoncias de urgencia.** El glosario dice 3 al año; la
-   presentación dice sin tope. El glosario podría ser de otro producto
-   ("Plan Odonto Acci-Dental").
-3. **Cuál es el programa 13** del ecosistema. Se identificaron 12.
-4. **¿El Plan 4 se vende con titular solo?** En 2025 sí (Plan 4 Total, 0,502 UF);
-   en el script 2026 esa celda está vacía.
-5. **Tarifas al día.** Las de este documento son del script de septiembre 2026.
-   Conviene verificar si hubo reajuste.
+Estos puntos no estaban escritos en la documentación, o aparecían distintos
+entre un documento y otro. Quedaron confirmados por el equipo comercial y son
+los que están implementados en las herramientas.
+
+| Punto | Resolución |
+|---|---|
+| ¿Un menor de 14 puede ir como carga en el plan de Urgencia? | **No.** Obliga a pasar al Plan 4 Full Niños. Esta es la regla que gatilla el salto de precio, y no figura en los documentos: sale del equipo comercial. |
+| ¿El cliente sin menores puede quedarse en el plan de Urgencia? | **Sí.** Sin menores elige libremente entre Plan 2 Básico y Plan 3 Full. |
+| ¿El Plan 4 se vende con titular solo? | **No.** Parte en titular + 1, como muestra el script 2026. El precio de 0,502 UF de la presentación 2025 ya no aplica. |
+| Máximo de cargas | **3.** Rige el script de septiembre 2026 por sobre las 4 de la presentación de junio 2025. |
+| Tarifas vigentes | Las del script de septiembre 2026, con dos decimales. Son las que se leen al cliente. |
+
+Si alguna de estas cambia, hay que tocar dos lugares: el objeto `PLANES` de
+`calculadora-edad.html` y el de `extension/popup.js`.

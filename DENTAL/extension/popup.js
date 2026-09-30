@@ -177,6 +177,9 @@ function filaHijo(){
 
 /* ---------- cálculo ---------- */
 let ultimaCotizacion = "";
+/* Sin menores el cliente elige entre Urgencia y Full (y puede tomar el 4).
+   Con un menor de 14, el Plan 4 es obligatorio y los otros se bloquean. */
+let planElegido = "full";
 
 function calcular(){
   const ref = hoy();
@@ -217,7 +220,12 @@ function calcular(){
 
   // Plan
   const obliga = menores > 0;
-  const idPlan = obliga ? "ninos" : "full";
+  if(obliga) planElegido = "ninos";
+  // Si la composición elegida no existe en ese plan, cae al Full
+  if(PLANES.filter(function(p){ return p.id===planElegido; })[0].precios[nCargas] === null && !obliga){
+    planElegido = "full";
+  }
+  const idPlan = planElegido;
   const plan   = PLANES.filter(function(p){ return p.id===idPlan; })[0];
   const cent   = plan.precios[nCargas];
 
@@ -234,8 +242,8 @@ function calcular(){
     }
   }else if(verificados > 0){
     clase = "aviso ok";
-    texto = verificados===1 ? "El hijo califica: puede ir en cualquier plan, incluido Urgencia."
-                            : "Los "+verificados+" hijos califican: pueden ir en cualquier plan, incluido Urgencia.";
+    texto = (verificados===1 ? "El hijo califica" : "Los "+verificados+" hijos califican")+
+            ": puede quedar en Urgencia o en Full, como prefiera el cliente.";
   }
   if(cent === null){
     clase = "aviso warn";
@@ -245,14 +253,16 @@ function calcular(){
   av.className = clase;
   av.textContent = texto;
 
-  // Tabla
+  // Tabla: cada fila disponible se puede elegir con un clic
   document.getElementById("tbody").innerHTML = PLANES.map(function(p){
     const c = p.precios[nCargas];
     const veta = (obliga && p.id!=="ninos");           // planes que el menor deja fuera
-    if(c === null) return '<tr><td class="off">'+p.nom+'</td><td class="n off">—</td><td class="n off">no aplica</td></tr>';
+    if(c === null){
+      return '<tr><td class="off">'+p.nom+'</td><td class="n off">—</td><td class="n off">no aplica</td></tr>';
+    }
     const v = UF ? pesos(UF, c) : null;
-    const cls = (p.id===idPlan) ? "hit" : (veta ? "veta" : "");
-    return '<tr class="'+cls+'"><td>'+p.nom+(veta ? " <small>(no admite menores)</small>" : "")+
+    const cls = (p.id===idPlan) ? "hit" : (veta ? "veta" : "sel");
+    return '<tr class="'+cls+'" data-plan="'+p.id+'"><td>'+p.nom+(veta ? ' <small>(no admite menores)</small>' : '')+
            '</td><td class="n">'+ufTxt(c)+'</td><td class="n">'+(v ? v.redondo : "—")+"</td></tr>";
   }).join("");
 
@@ -295,6 +305,12 @@ document.getElementById("abrirVerif").addEventListener("click", function(){
   if(!abierto && !document.querySelector("#hijos .fila")) filaHijo();
 });
 document.getElementById("masHijo").addEventListener("click", filaHijo);
+document.getElementById("tbody").addEventListener("click", function(e){
+  const tr = e.target.closest("tr");
+  if(!tr || !tr.dataset.plan || tr.classList.contains("veta")) return;
+  planElegido = tr.dataset.plan;
+  calcular();
+});
 document.getElementById("copiar").addEventListener("click", function(){
   if(!ultimaCotizacion) return;
   navigator.clipboard.writeText(ultimaCotizacion).then(function(){
