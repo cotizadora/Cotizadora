@@ -28,15 +28,29 @@ if ([string]::IsNullOrWhiteSpace($docs)) { $docs = Join-Path $env:USERPROFILE 'D
 $docsAlt = Join-Path $env:USERPROFILE 'Documents'
 
 $destino = Join-Path $docs 'DENTAL'
-$log     = Join-Path $docs 'INSTALAR-log.txt'
 
-
-function Anotar($m) {
-  $linea = (Get-Date).ToString('HH:mm:ss') + '  ' + $m
-  Add-Content -Path $log -Value $linea -Encoding UTF8
+# El registro se guarda dentro de la propia carpeta DENTAL. Si esa ruta no
+# admite escritura (antivirus, carpetas protegidas, OneDrive), se usa la
+# carpeta temporal. Y si tampoco, se sigue sin registro: anotar nunca puede
+# tumbar la instalacion, que es lo que importa.
+$log = $null
+foreach ($candidata in @($destino, $docs, $env:TEMP)) {
+  if ([string]::IsNullOrWhiteSpace($candidata)) { continue }
+  try {
+    if (-not (Test-Path $candidata)) { New-Item -ItemType Directory -Path $candidata -Force -ErrorAction Stop | Out-Null }
+    $intento = Join-Path $candidata 'INSTALAR-log.txt'
+    Set-Content -Path $intento -Value ('=== Instalacion DENTAL ' + (Get-Date) + ' ===') -Encoding UTF8 -ErrorAction Stop
+    $log = $intento
+    break
+  } catch { }
 }
 
-Set-Content -Path $log -Value ('=== Instalacion DENTAL ' + (Get-Date) + ' ===') -Encoding UTF8
+function Anotar($m) {
+  if (-not $log) { return }
+  try {
+    Add-Content -Path $log -Value ((Get-Date).ToString('HH:mm:ss') + '  ' + $m) -Encoding UTF8 -ErrorAction Stop
+  } catch { }
+}
 
 try {
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -58,6 +72,15 @@ try {
   } else {
     Write-Host '  La carpeta ya existe. Tus documentos no se tocan.'
     Anotar 'Carpeta existente, se conserva su contenido.'
+  }
+
+  # Comprobar que se puede escribir de verdad, antes de bajar nada
+  try {
+    $prueba = Join-Path $destino ('.prueba_' + [guid]::NewGuid().ToString('N') + '.tmp')
+    Set-Content -Path $prueba -Value 'x' -ErrorAction Stop
+    Remove-Item $prueba -Force -ErrorAction SilentlyContinue
+  } catch {
+    throw ('No se puede escribir en ' + $destino + '. Suele ser el Acceso controlado a carpetas de Windows Defender, o el antivirus de la empresa. Ruta a revisar: Seguridad de Windows, Proteccion contra virus, Proteccion contra ransomware, Acceso controlado a carpetas.')
   }
 
   Write-Host '  Consultando la lista de archivos...'
@@ -133,6 +156,8 @@ try {
   Write-Host ''
   Write-Host ('  ' + $_.Exception.Message)
   Write-Host ''
-  Write-Host ('  El detalle quedo en: ' + $log)
-  Write-Host '  Copiame ese texto en el chat y lo arreglo.'
+  if ($log) {
+    Write-Host ('  El detalle quedo en: ' + $log)
+  }
+  Write-Host '  Copiame este mensaje en el chat y lo arreglo.'
 }
