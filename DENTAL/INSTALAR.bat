@@ -1,129 +1,121 @@
 @echo off
 title Instalar carpeta DENTAL
-setlocal enabledelayedexpansion
-
-rem ============================================================
-rem  Deja C:\Users\<tu usuario>\Documents\DENTAL mostrando solo
-rem  el material dental, conectado al repositorio de GitHub.
-rem  Se ejecuta UNA SOLA VEZ. No borra nada: lo que ya tienes
-rem  se copia a insumos y se guarda un respaldo.
-rem ============================================================
-
-set "DOCS=%USERPROFILE%\Documents"
-set "LOCAL=%DOCS%\DENTAL"
-set "REPO=%DOCS%\Cotizadora"
-set "RESPALDO=%DOCS%\DENTAL_respaldo"
-set "RAMA=claude/age-calculator-insurance-plans-tbygz8"
-set "URL=https://github.com/cotizadora/Cotizadora.git"
-
 echo.
-echo ===========================================
-echo   INSTALACION DE LA CARPETA DENTAL
-echo ===========================================
+echo ==========================================
+echo    CARPETA DENTAL
+echo ==========================================
 echo.
-echo   Carpeta visible : %LOCAL%
-echo   Repositorio     : %REPO%
+echo  Copia los archivos del proyecto desde GitHub a
+echo  tu carpeta Documents\DENTAL.
 echo.
-
-rem ---------- 1. Comprobar que git existe ----------
-where git >nul 2>nul
-if errorlevel 1 (
-  echo [ERROR] No tienes Git instalado.
-  echo         Descargalo de https://git-scm.com/download/win
-  echo         Instalalo con las opciones por defecto y vuelve a ejecutar este archivo.
-  echo.
-  pause
-  exit /b 1
-)
-
-rem ---------- 2. Si ya esta instalado, no repetir ----------
-if exist "%LOCAL%\calculadora-edad.html" (
-  echo La carpeta ya estaba instalada. No hay nada que hacer.
-  echo Para subir archivos usa SUBIR.bat
-  echo.
-  pause
-  exit /b 0
-)
-
-rem ---------- 3. Clonar o actualizar el repositorio ----------
-if exist "%REPO%\.git" (
-  echo [1/4] El repositorio ya existe, actualizando...
-  git -C "%REPO%" fetch origin "%RAMA%"
-  git -C "%REPO%" checkout "%RAMA%"
-  git -C "%REPO%" pull origin "%RAMA%"
-) else (
-  echo [1/4] Descargando el repositorio ^(solo la parte dental^)...
-  git clone --filter=blob:none --sparse -b "%RAMA%" "%URL%" "%REPO%"
-  if errorlevel 1 (
-    echo.
-    echo [ERROR] No se pudo descargar el repositorio.
-    echo         Si te pidio usuario y clave, inicia sesion en GitHub y reintenta.
-    echo.
-    pause
-    exit /b 1
-  )
-  git -C "%REPO%" sparse-checkout set --no-cone "/DENTAL/" 2>nul
-  if errorlevel 1 git -C "%REPO%" sparse-checkout set DENTAL
-)
-
-if not exist "%REPO%\DENTAL" (
-  echo [ERROR] No aparecio la carpeta DENTAL dentro del repositorio.
-  pause
-  exit /b 1
-)
-
-rem ---------- 4. Guardar tus archivos actuales en insumos ----------
-if exist "%LOCAL%" (
-  if exist "%RESPALDO%" (
-    echo.
-    echo [ERROR] Ya existe %RESPALDO%
-    echo         Revisa esa carpeta, borrala o renombrala, y vuelve a ejecutar.
-    echo.
-    pause
-    exit /b 1
-  )
-  echo [2/4] Copiando tus archivos actuales a insumos...
-  if not exist "%REPO%\DENTAL\insumos" mkdir "%REPO%\DENTAL\insumos"
-  robocopy "%LOCAL%" "%REPO%\DENTAL\insumos" /E /NFL /NDL /NJH /NJS /NP >nul
-  if errorlevel 8 (
-    echo [ERROR] Fallo la copia de tus archivos. No se modifico nada.
-    pause
-    exit /b 1
-  )
-  echo [3/4] Guardando respaldo en %RESPALDO%
-  move "%LOCAL%" "%RESPALDO%" >nul
-  if errorlevel 1 (
-    echo [ERROR] No se pudo mover la carpeta. Cierrala en el Explorador y reintenta.
-    pause
-    exit /b 1
-  )
-) else (
-  echo [2/4] No habia carpeta previa, nada que respaldar.
-  echo [3/4] ...
-)
-
-rem ---------- 5. Crear el acceso directo ----------
-echo [4/4] Creando la carpeta DENTAL...
-mklink /J "%LOCAL%" "%REPO%\DENTAL" >nul
-if errorlevel 1 (
-  echo [ERROR] No se pudo crear el enlace.
-  echo         Tus archivos estan a salvo en %RESPALDO%
-  pause
-  exit /b 1
-)
-
+echo  No necesita Git. No borra nada tuyo.
+echo  Puedes volver a ejecutarlo para actualizar.
 echo.
-echo ===========================================
-echo   LISTO
-echo ===========================================
-echo.
-echo   Abre  %LOCAL%
-echo   y vas a ver la calculadora y la carpeta insumos.
-echo.
-echo   Tus 7 archivos quedaron copiados en  DENTAL\insumos
-echo   El respaldo quedo en  %RESPALDO%
-echo   Revisa que este todo y recien ahi borra el respaldo.
-echo.
-echo   Para subir cambios: doble clic en SUBIR.bat
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$c=[IO.File]::ReadAllText('%~f0'); $m='#P'+'S>'; Invoke-Expression $c.Substring($c.IndexOf($m)+$m.Length)"
 echo.
 pause
+exit /b
+#PS>
+$ErrorActionPreference = 'Stop'
+$ProgressPreference    = 'SilentlyContinue'
+
+$repo    = 'cotizadora/Cotizadora'
+$rama    = 'claude/age-calculator-insurance-plans-tbygz8'
+$destino = Join-Path $env:USERPROFILE 'Documents\DENTAL'
+$log     = Join-Path $env:USERPROFILE 'Documents\INSTALAR-log.txt'
+
+function Anotar($m) {
+  $linea = (Get-Date).ToString('HH:mm:ss') + '  ' + $m
+  Add-Content -Path $log -Value $linea -Encoding UTF8
+}
+
+Set-Content -Path $log -Value ('=== Instalacion DENTAL ' + (Get-Date) + ' ===') -Encoding UTF8
+
+try {
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+  Anotar ('Destino: ' + $destino)
+  Write-Host ('  Destino: ' + $destino)
+  Write-Host ''
+
+  if (-not (Test-Path $destino)) {
+    New-Item -ItemType Directory -Path $destino -Force | Out-Null
+    Write-Host '  Carpeta creada.'
+    Anotar 'Carpeta creada.'
+  } else {
+    Write-Host '  La carpeta ya existe. Tus documentos no se tocan.'
+    Anotar 'Carpeta existente, se conserva su contenido.'
+  }
+
+  Write-Host '  Consultando la lista de archivos...'
+  $api  = 'https://api.github.com/repos/' + $repo + '/git/trees/' + $rama + '?recursive=1'
+  $tree = Invoke-RestMethod -Uri $api -UseBasicParsing -Headers @{ 'User-Agent' = 'instalador-dental' }
+  $archivos = @($tree.tree | Where-Object { $_.type -eq 'blob' -and $_.path -like 'DENTAL/*' })
+
+  if ($archivos.Count -eq 0) { throw 'GitHub no devolvio archivos. Revisa que la rama exista.' }
+  Write-Host ('  Archivos a descargar: ' + $archivos.Count)
+  Anotar ('Archivos a descargar: ' + $archivos.Count)
+  Write-Host ''
+
+  $base = 'https://raw.githubusercontent.com/' + $repo + '/refs/heads/' + $rama + '/'
+  $n = 0
+  $fallos = 0
+
+  foreach ($a in $archivos) {
+    $n++
+    $rel = $a.path.Substring(7)
+    $dst = Join-Path $destino $rel
+    $dir = Split-Path $dst -Parent
+    try {
+      if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+      Invoke-WebRequest -Uri ($base + $a.path.Replace(' ', '%20')) -OutFile $dst -UseBasicParsing
+      Write-Host ('  [' + $n + '/' + $archivos.Count + '] ' + $rel)
+      Anotar ('OK  ' + $rel)
+    } catch {
+      $fallos++
+      Write-Host ('  [' + $n + '/' + $archivos.Count + '] ' + $rel + '  <-- no se pudo')
+      Anotar ('FALLO  ' + $rel + '  :  ' + $_.Exception.Message)
+    }
+  }
+
+  if (-not (Test-Path (Join-Path $destino 'calculadora-edad.html'))) {
+    throw 'La descarga termino pero no aparecio calculadora-edad.html'
+  }
+
+  Anotar ('Terminado. Fallos: ' + $fallos)
+  Write-Host ''
+  Write-Host '  =========================================='
+  if ($fallos -gt 0) {
+    Write-Host ('   LISTO, con ' + $fallos + ' archivo(s) sin bajar')
+  } else {
+    Write-Host '   LISTO'
+  }
+  Write-Host '  =========================================='
+  Write-Host ''
+  Write-Host ('  Abre: ' + $destino)
+  Write-Host ''
+  Write-Host '  Ahora tienes ahi:'
+  Write-Host '    calculadora-edad.html   el cotizador, doble clic'
+  Write-Host '    PRODUCTO.md             el analisis del producto'
+  Write-Host '    extension\              la extension de Chrome y Edge'
+  Write-Host '    insumos\                material de referencia'
+  Write-Host ''
+  Write-Host '  Tus documentos siguen donde estaban.'
+  Write-Host '  Para actualizar: vuelve a ejecutar este archivo.'
+  if ($fallos -gt 0) {
+    Write-Host ''
+    Write-Host ('  Revisa el detalle en: ' + $log)
+  }
+
+} catch {
+  Anotar ('ERROR: ' + $_.Exception.Message)
+  Write-Host ''
+  Write-Host '  =========================================='
+  Write-Host '   NO SE PUDO COMPLETAR'
+  Write-Host '  =========================================='
+  Write-Host ''
+  Write-Host ('  ' + $_.Exception.Message)
+  Write-Host ''
+  Write-Host ('  El detalle quedo en: ' + $log)
+  Write-Host '  Copiame ese texto en el chat y lo arreglo.'
+}

@@ -12,22 +12,31 @@ mezclarla con el resto del repositorio.
 | `PRODUCTO.md` | **Base de conocimiento del producto**: planes, tarifas, coberturas, asegurabilidad, exclusiones, script de venta. De aquí sale todo lo demás. |
 | `extension/` | Extensión de Chrome y Edge: popup para cotizar rápido. Ver `extension/README.md`. |
 | `extension-cotizador-dental.zip` | La misma extensión empaquetada, para descargar y descomprimir. |
-| `INSTALAR.bat` | Deja `Documents\DENTAL` conectada a este repositorio. Se ejecuta una sola vez. |
-| `SUBIR.bat` | Sube a GitHub lo que haya en la carpeta. Doble clic. |
+| `INSTALAR.bat` | Copia estos archivos a tu `Documents\DENTAL`. No necesita Git. Se puede repetir para actualizar. |
+| `SUBIR.bat` | Sube a GitHub lo que haya en la carpeta. **Requiere Git instalado.** |
 
 ## Cómo se usa desde Windows
 
-La carpeta `C:\Users\<usuario>\Documents\DENTAL` muestra directamente el
-contenido de esta carpeta del repositorio, mediante un enlace de directorio
-(`mklink /J`). El clon real vive en `Documents\Cotizadora`, fuera de la vista.
+`INSTALAR.bat` descarga estos archivos desde GitHub y los copia en
+`C:\Users\<usuario>\Documents\DENTAL`. Baja sólo los archivos de esta carpeta
+(unos 100 KB), no el repositorio completo.
 
-1. **Una sola vez:** doble clic en `INSTALAR.bat`. Descarga el repositorio,
-   copia a `insumos/` lo que ya hubiera en la carpeta, guarda un respaldo en
-   `Documents\DENTAL_respaldo` y crea el enlace.
-2. **Cada vez que agregues archivos:** doble clic en `SUBIR.bat`.
+- **No necesita Git.** Usa PowerShell, que ya viene en Windows.
+- **No borra nada.** Los documentos que ya tengas en la carpeta se quedan
+  donde están; sólo se agregan o actualizan los archivos del proyecto.
+- **Se puede repetir.** Cada vez que lo ejecutes, actualiza a la última versión.
+- Deja un registro en `Documents\INSTALAR-log.txt` con lo que hizo o el error
+  exacto si algo falló.
 
-Requiere Git para Windows (https://git-scm.com/download/win). Ninguno de los
-dos scripts borra archivos.
+Para mandar archivos en el otro sentido, lo más simple es arrastrarlos a la
+conversación. `SUBIR.bat` hace lo mismo vía GitHub, pero para eso sí hace falta
+Git para Windows (https://git-scm.com/download/win).
+
+### Este repositorio es público
+
+`cotizadora/Cotizadora` es público: lo que se sube queda visible para
+cualquiera y permanece en el historial de git. No dejes en `insumos/`
+documentos internos ni datos de clientes.
 
 ## calculadora-edad.html
 
