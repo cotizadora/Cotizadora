@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Cotizador Dental Bci",
+  "version": "1.0.0",
+  "description": "Calcula la edad, valida la asegurabilidad y cotiza el Seguro Dental Modular Bci con la UF del dia.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Cotizador Dental Bci",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://mindicador.cl/*",
+    "https://api.boostr.cl/*"
+  ]
+}

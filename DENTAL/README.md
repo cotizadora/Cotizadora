@@ -9,6 +9,9 @@ mezclarla con el resto del repositorio.
 |---|---|
 | `calculadora-edad.html` | Calculadora de edad y cotizador de plan. Archivo único, se abre con doble clic, sin dependencias ni servidor. |
 | `insumos/` | Material de referencia del producto (tarifas, condiciones, folletos). Ver `insumos/LEEME.md`. |
+| `PRODUCTO.md` | **Base de conocimiento del producto**: planes, tarifas, coberturas, asegurabilidad, exclusiones, script de venta. De aquí sale todo lo demás. |
+| `extension/` | Extensión de Chrome y Edge: popup para cotizar rápido. Ver `extension/README.md`. |
+| `extension-cotizador-dental.zip` | La misma extensión empaquetada, para descargar y descomprimir. |
 | `INSTALAR.bat` | Deja `Documents\DENTAL` conectada a este repositorio. Se ejecuta una sola vez. |
 | `SUBIR.bat` | Sube a GitHub lo que haya en la carpeta. Doble clic. |
 

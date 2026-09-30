@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<title>Cotizador Dental Bci</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+<div class="uf">
+  <span class="uf-t">UF</span>
+  <span class="uf-v" id="ufVal">—</span>
+  <span class="uf-f" id="ufFecha"></span>
+  <button id="ufReload" type="button" title="Actualizar UF">&#8635;</button>
+</div>
+<div class="uf-manual" id="ufManualBox">
+  <label for="ufManual">Sin conexión. Valor UF:</label>
+  <input id="ufManual" type="text" inputmode="decimal" placeholder="39454,17">
+</div>
+
+<div class="campo">
+  <label for="fTit">Fecha de nacimiento del titular</label>
+  <div class="fila">
+    <input type="text" id="fTit" class="fecha" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" autofocus>
+    <span class="chip" id="chipTit">—</span>
+  </div>
+</div>
+
+<div class="campo">
+  <label>Cargas</label>
+  <div class="conteo" id="conteo">
+    <button type="button" data-n="0" class="on">0</button>
+    <button type="button" data-n="1">1</button>
+    <button type="button" data-n="2">2</button>
+    <button type="button" data-n="3">3</button>
+  </div>
+</div>
+
+<div id="cargas"></div>
+
+<div class="aviso" id="aviso"></div>
+
+<table id="tabla">
+  <thead><tr><th>Plan</th><th class="n">UF</th><th class="n">Mensual</th></tr></thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<div class="total">
+  <div>
+    <span class="t-uf" id="tUF">—</span>
+    <span class="t-clp" id="tCLP"></span>
+  </div>
+  <button id="copiar" type="button">Copiar</button>
+</div>
+<div class="exacto" id="exacto"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>

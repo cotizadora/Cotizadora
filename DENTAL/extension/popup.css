@@ -1,0 +1,71 @@
+:root{
+  --bg:#fff; --ink:#15202b; --muted:#5d6b7a; --line:#dde3ec; --soft:#f4f6fa;
+  --brand:#123a6d; --brand2:#1f6feb;
+  --ok:#0f7b4f; --okbg:#e6f6ee; --warn:#8a5300; --warnbg:#fdf2dc; --bad:#a11f2c; --badbg:#fdeaec;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#151c25; --ink:#e8edf4; --muted:#9aa8b8; --line:#26313d; --soft:#0e1319;
+  --brand:#8ab4ff; --brand2:#4d90ff;
+  --ok:#5fd3a0; --okbg:#10291f; --warn:#f0c169; --warnbg:#2b2213; --bad:#ff8b96; --badbg:#2d1519;
+}}
+*{box-sizing:border-box}
+body{
+  width:360px; margin:0; padding:0 0 10px; background:var(--bg); color:var(--ink);
+  font:13px/1.35 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+.uf{display:flex;align-items:center;gap:7px;background:#123a6d;color:#fff;padding:7px 10px}
+.uf-t{font-size:10px;letter-spacing:.09em;font-weight:700;opacity:.8}
+.uf-v{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.uf-f{font-size:10.5px;opacity:.8;flex:1}
+.uf button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:13px;line-height:1}
+.uf button:hover{background:rgba(255,255,255,.3)}
+.uf-manual{display:none;gap:6px;align-items:center;padding:6px 10px;background:var(--warnbg);font-size:11.5px}
+.uf-manual input{width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:5px;
+  background:var(--bg);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
+
+.campo{padding:9px 10px 0}
+label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.fila{display:flex;gap:7px;align-items:center}
+input.fecha{
+  flex:0 0 108px;padding:7px 8px;border:1px solid var(--line);border-radius:7px;
+  background:var(--soft);color:var(--ink);font:inherit;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:.02em;
+}
+input.fecha:focus{outline:2px solid var(--brand2);outline-offset:1px}
+input.fecha.mal{border-color:var(--bad);background:var(--badbg)}
+select.par{flex:0 0 96px;padding:6px 5px;border:1px solid var(--line);border-radius:7px;background:var(--soft);color:var(--ink);font:inherit;font-size:11.5px}
+.chip{flex:1;font-size:11px;font-weight:700;padding:5px 7px;border-radius:6px;background:var(--soft);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.ok{background:var(--okbg);color:var(--ok)}
+.chip.bad{background:var(--badbg);color:var(--bad)}
+.chip.warn{background:var(--warnbg);color:var(--warn)}
+
+.conteo{display:flex;gap:5px}
+.conteo button{
+  flex:1;padding:6px 0;border:1px solid var(--line);border-radius:7px;background:var(--soft);
+  color:var(--ink);font:inherit;font-weight:700;cursor:pointer
+}
+.conteo button:hover{border-color:var(--brand2)}
+.conteo button.on{background:var(--brand2);color:#fff;border-color:var(--brand2)}
+
+#cargas{padding:0 10px}
+#cargas .fila{margin-top:6px}
+
+.aviso{margin:9px 10px 0;padding:7px 9px;border-radius:7px;font-size:11.5px;border-left:3px solid;display:none}
+.aviso.ok{display:block;background:var(--okbg);border-color:var(--ok)}
+.aviso.bad{display:block;background:var(--badbg);border-color:var(--bad)}
+.aviso.warn{display:block;background:var(--warnbg);border-color:var(--warn)}
+
+table{width:calc(100% - 20px);margin:9px 10px 0;border-collapse:collapse;font-size:12px}
+th,td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.hit td{background:var(--okbg);font-weight:700}
+td.off{color:var(--muted)}
+
+.total{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding-top:8px;border-top:2px solid var(--line)}
+.total>div{flex:1;display:flex;align-items:baseline;gap:7px}
+.t-uf{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.t-clp{font-size:15px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums}
+#copiar{padding:6px 11px;border:1px solid var(--line);border-radius:7px;background:var(--soft);color:var(--ink);font:inherit;font-size:11.5px;cursor:pointer}
+#copiar:hover{border-color:var(--brand2)}
+.exacto{margin:4px 10px 0;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
