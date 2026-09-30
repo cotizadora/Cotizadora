@@ -668,6 +668,192 @@ function pintarGuion(){
     }).join("");
 }
 
+/* ============================================================
+   BUSCADOR DE CLÍNICAS POR COMUNA
+   Tolera tildes, mayúsculas, la ñ y hasta dos letras mal
+   escritas, porque el nombre se escribe al vuelo mientras el
+   cliente habla. Los datos viven en clinicas.js.
+   ============================================================ */
+function norm(txt){
+  return String(txt || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")   // fuera las tildes y la ñ
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Distancia de edición, con corte temprano: si ya se pasó del máximo, no sigue
+function distancia(a, b, max){
+  if(Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = [], fila = [];
+  for(let j = 0; j <= b.length; j++) prev[j] = j;
+  for(let i = 1; i <= a.length; i++){
+    fila = [i];
+    let mejor = i;
+    for(let j = 1; j <= b.length; j++){
+      const costo = a.charCodeAt(i-1) === b.charCodeAt(j-1) ? 0 : 1;
+      fila[j] = Math.min(prev[j] + 1, fila[j-1] + 1, prev[j-1] + costo);
+      if(fila[j] < mejor) mejor = fila[j];
+    }
+    if(mejor > max) return max + 1;
+    prev = fila;
+  }
+  return prev[b.length];
+}
+
+// Puntaje: cuanto más bajo, mejor coincidencia
+function puntaje(consulta, candidato){
+  const q = norm(consulta), c = norm(candidato);
+  if(!q || !c) return null;
+  if(c === q) return 0;
+  if(c.startsWith(q)) return 1;
+  if(c.indexOf(q) !== -1) return 2;
+  const max = q.length <= 4 ? 1 : 2;      // en nombres cortos, menos tolerancia
+  const d = distancia(q, c, max);
+  return d <= max ? 3 + d : null;
+}
+
+function comunasConClinica(){
+  const vistas = {};
+  (CLINICAS.lista || []).forEach(function(cl){
+    const k = norm(cl.comuna);
+    if(k && !vistas[k]) vistas[k] = cl.comuna;
+  });
+  return vistas;
+}
+
+// Kilómetros entre dos coordenadas
+function km(aLat, aLng, bLat, bLng){
+  const R = 6371, r = Math.PI/180;
+  const dLat = (bLat-aLat)*r, dLng = (bLng-aLng)*r;
+  const x = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(aLat*r)*Math.cos(bLat*r)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+}
+
+// Punto de referencia de una comuna: su centro declarado, o el promedio de
+// las clínicas que tiene. Si no hay ninguna de las dos cosas, null.
+function puntoComuna(nombre){
+  const k = norm(nombre);
+  const c = CLINICAS.comunas && CLINICAS.comunas[k];
+  if(c && typeof c.lat === "number" && typeof c.lng === "number") return {lat:c.lat, lng:c.lng};
+  const dentro = (CLINICAS.lista || []).filter(function(x){
+    return norm(x.comuna) === k && typeof x.lat === "number" && typeof x.lng === "number";
+  });
+  if(!dentro.length) return null;
+  return {
+    lat: dentro.reduce(function(a,x){ return a + x.lat; }, 0) / dentro.length,
+    lng: dentro.reduce(function(a,x){ return a + x.lng; }, 0) / dentro.length
+  };
+}
+
+function regionDe(nombre){
+  const k = norm(nombre);
+  const c = CLINICAS.comunas && CLINICAS.comunas[k];
+  if(c && c.region) return c.region;
+  const cl = (CLINICAS.lista || []).filter(function(x){ return norm(x.comuna) === k; })[0];
+  return cl ? cl.region : null;
+}
+
+function buscarClinicas(consulta){
+  const lista = CLINICAS.lista || [];
+  if(!lista.length) return {estado:"sin-datos"};
+  if(norm(consulta).length < 2) return {estado:"corto"};
+
+  // 1. ¿Qué comuna quiso escribir?
+  const comunas = comunasConClinica();
+  const cand = [];
+  Object.keys(comunas).forEach(function(k){
+    const pt = puntaje(consulta, k);
+    if(pt !== null) cand.push({clave:k, nombre:comunas[k], pt:pt});
+  });
+  cand.sort(function(a,b){ return a.pt - b.pt || a.nombre.localeCompare(b.nombre); });
+
+  // 2. Clínicas en esa comuna
+  if(cand.length && cand[0].pt <= 2){
+    const exacta = cand[0];
+    const aqui = lista.filter(function(x){ return norm(x.comuna) === exacta.clave; });
+    const otras = cand.slice(1, 4).filter(function(c){ return c.pt <= 2; });
+    return {estado:"encontrada", comuna:exacta.nombre, clinicas:aqui, alternativas:otras};
+  }
+
+  // 3. Casi: se escribió con errores, pero se entiende
+  if(cand.length){
+    const q = cand[0];
+    const aqui = lista.filter(function(x){ return norm(x.comuna) === q.clave; });
+    return {estado:"aproximada", comuna:q.nombre, clinicas:aqui,
+            alternativas:cand.slice(1, 4)};
+  }
+
+  // 4. No hay clínica en esa comuna: lo más cercano que se pueda decir
+  const punto = puntoComuna(consulta);
+  if(punto){
+    const cerca = lista
+      .filter(function(x){ return typeof x.lat === "number" && typeof x.lng === "number"; })
+      .map(function(x){ return {cl:x, d:km(punto.lat, punto.lng, x.lat, x.lng)}; })
+      .sort(function(a,b){ return a.d - b.d; })
+      .slice(0, 5);
+    if(cerca.length) return {estado:"cercanas", comuna:consulta, cercanas:cerca};
+  }
+  const reg = regionDe(consulta);
+  if(reg){
+    const enRegion = lista.filter(function(x){ return x.region === reg; }).slice(0, 6);
+    if(enRegion.length) return {estado:"region", comuna:consulta, region:reg, clinicas:enRegion};
+  }
+  return {estado:"nada", comuna:consulta};
+}
+
+function pintarClinicas(){
+  const caja = document.getElementById("clinRes");
+  const consulta = document.getElementById("comuna").value;
+  const r = buscarClinicas(consulta);
+
+  function tarjeta(cl, dist){
+    return '<div class="clin">'+
+      '<div class="clin-n">'+cl.nombre+'</div>'+
+      '<div class="clin-d">'+(cl.direccion || "")+(cl.comuna ? " · "+cl.comuna : "")+'</div>'+
+      '<div class="clin-m">'+
+        '<span class="red '+(cl.red||"")+'">'+(cl.red === "edental" ? "E-dental" : "Uno Salud")+'</span>'+
+        (cl.telefono ? '<span class="dist">'+cl.telefono+'</span>' : '')+
+        (dist !== undefined ? '<span class="dist">a '+dist.toFixed(1).replace(".",",")+' km</span>' : '')+
+      '</div></div>';
+  }
+  function alternativas(lista){
+    if(!lista || !lista.length) return "";
+    return '<p class="sugerencias">¿O quisiste decir '+lista.map(function(c){
+      return '<button type="button" data-comuna="'+c.nombre+'">'+c.nombre+'</button>';
+    }).join(", ")+'?</p>';
+  }
+
+  let html = "";
+  if(r.estado === "sin-datos"){
+    html = '<p class="clin-vacio">Todavía no hay listado de clínicas cargado. '+
+           'Hay que extraerlo de <strong>unosalud.cl/clinicas</strong> y '+
+           '<strong>e-dentalsys.com</strong> y guardarlo en <strong>clinicas.js</strong>.</p>';
+  }else if(r.estado === "corto"){
+    html = '<p class="clin-vacio">Escribe al menos dos letras.</p>';
+  }else if(r.estado === "encontrada" || r.estado === "aproximada"){
+    html = (r.estado === "aproximada" ? '<p class="clin-vacio">Entendí <strong>'+r.comuna+'</strong>.</p>' : '')+
+           r.clinicas.map(function(c){ return tarjeta(c); }).join("") +
+           alternativas(r.alternativas);
+  }else if(r.estado === "cercanas"){
+    html = '<p class="clin-vacio">No hay clínica en <strong>'+r.comuna+'</strong>. Las más cercanas:</p>'+
+           r.cercanas.map(function(x){ return tarjeta(x.cl, x.d); }).join("");
+  }else if(r.estado === "region"){
+    html = '<p class="clin-vacio">No hay clínica en <strong>'+r.comuna+'</strong>. '+
+           'Estas son las de la región '+r.region+'. <em>Sin coordenadas no puedo ordenarlas por distancia.</em></p>'+
+           r.clinicas.map(function(c){ return tarjeta(c); }).join("");
+  }else{
+    html = '<p class="clin-vacio">No encuentro ninguna comuna parecida a <strong>'+
+           (consulta||"")+'</strong>.</p>';
+  }
+  if(CLINICAS.capturado && r.estado !== "sin-datos"){
+    html += '<p class="capturado">Listado capturado el '+CLINICAS.capturado+'.</p>';
+  }
+  caja.innerHTML = html;
+}
+
 /* ---------- eventos ---------- */
 document.getElementById("ufReload").addEventListener("click", cargarUF);
 document.getElementById("ufManual").addEventListener("input", function(){
@@ -693,6 +879,20 @@ document.getElementById("abrirVerif").addEventListener("click", function(){
   guardarEstado();
 });
 document.getElementById("masHijo").addEventListener("click", function(){ filaHijo(); });
+document.getElementById("abrirClin").addEventListener("click", function(){
+  const panel = document.getElementById("panelClin");
+  const abierto = !panel.hidden;
+  panel.hidden = abierto;
+  this.classList.toggle("open", !abierto);
+  if(!abierto){ pintarClinicas(); document.getElementById("comuna").focus(); }
+});
+document.getElementById("comuna").addEventListener("input", pintarClinicas);
+document.getElementById("clinRes").addEventListener("click", function(e){
+  const b = e.target.closest("button[data-comuna]");
+  if(!b) return;
+  document.getElementById("comuna").value = b.dataset.comuna;
+  pintarClinicas();
+});
 document.getElementById("envio").addEventListener("click", function(e){
   const b = e.target.closest("button");
   if(!b) return;

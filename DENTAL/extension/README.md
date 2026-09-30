@@ -61,6 +61,26 @@ Dos botones, porque el cierre de la llamada cambia según el cliente:
 El script muestra sólo el texto que corresponde, tal como está en el documento
 de venta. No hay que acordarse de saltarse el párrafo que no va.
 
+## Buscador de clínicas por comuna
+
+Escribes la comuna y salen las clínicas. La búsqueda es tolerante: da lo mismo
+tildes, mayúsculas o la ñ, y aguanta una o dos letras mal escritas. `nunoa`,
+`ÑUÑOA` y `nuñua` llegan todas a Ñuñoa; cuando corrige, lo dice ("Entendí
+Ñuñoa") para que no quede duda.
+
+Si la comuna no tiene clínica, muestra las más cercanas con la distancia en
+kilómetros, siempre que el listado traiga coordenadas. Si no las trae, cae a
+las clínicas de la misma región y avisa que no puede ordenarlas por distancia.
+
+**La extensión se entrega sin listado de clínicas.** `clinicas.js` está vacío a
+propósito: una clínica inventada termina leída a un cliente por teléfono. Para
+llenarlo hay que extraer los listados de `unosalud.cl/clinicas` y
+`e-dentalsys.com`, con el esquema documentado dentro de ese mismo archivo.
+Mientras esté vacío, el buscador lo dice en pantalla.
+
+La fecha de captura se muestra bajo los resultados, para saber qué tan viejo es
+el dato.
+
 ## No se pierde nada al cerrar
 
 El popup de Chrome se cierra cada vez que pinchas fuera, y en una llamada real

@@ -66,6 +66,18 @@
       <tbody id="tbody"></tbody>
     </table>
 
+    <div class="verif">
+      <button type="button" id="abrirClin" class="abrir">
+        <span>&#9656;</span> Clínica por comuna
+      </button>
+      <div id="panelClin" hidden>
+        <div class="fila">
+          <input type="text" id="comuna" class="comuna" placeholder="escribe la comuna" autocomplete="off">
+        </div>
+        <div id="clinRes"></div>
+      </div>
+    </div>
+
     <div class="guardado" id="guardado" hidden>
       <span id="guardadoTxt">Datos guardados</span>
       <button type="button" id="limpiar">Nuevo cliente</button>
@@ -93,6 +105,7 @@
   </aside>
 
 </div>
+<script src="clinicas.js"></script>
 <script src="popup.js"></script>
 </body>
 </html>
