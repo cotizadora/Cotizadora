@@ -30,12 +30,12 @@
 
 <div class="verif">
   <button type="button" id="abrirVerif" class="abrir">
-    <span>&#9656;</span> ¿Hay hijos menores de 14?
+    <span>&#9656;</span> Edad de las cargas
   </button>
   <div id="panelVerif" hidden>
-    <p class="pista">Escribe la fecha de nacimiento del hijo. Te digo si califica para el plan de Urgencia o si obliga a pasar al Plan 4.</p>
+    <p class="pista">Pregunta la edad y escríbela. Si durante la llamada consigues la fecha de nacimiento, escríbela también y el cálculo se vuelve exacto.</p>
     <div id="hijos"></div>
-    <button type="button" id="masHijo" class="mas">+ otro hijo</button>
+    <button type="button" id="masHijo" class="mas">+ otra carga</button>
   </div>
 </div>
 
@@ -45,6 +45,11 @@
   <thead><tr><th>Plan &middot; clic para elegir</th><th class="n">UF</th><th class="n">Mensual</th></tr></thead>
   <tbody id="tbody"></tbody>
 </table>
+
+<div class="guardado" id="guardado" hidden>
+  <span id="guardadoTxt">Datos guardados</span>
+  <button type="button" id="limpiar">Nuevo cliente</button>
+</div>
 
 <div class="total">
   <div>

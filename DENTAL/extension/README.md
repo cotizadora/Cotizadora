@@ -21,14 +21,36 @@ No sirve seleccionar el ZIP.
 
 - **Cargas:** botones 0 a 3. Con eso ya tienes el precio: no hace falta
   ninguna fecha.
-- **¿Hay hijos menores de 14?** Es un desplegable, cerrado por defecto. Ábrelo
-  sólo cuando sospeches que hay un menor. Escribes la fecha de nacimiento del
-  hijo y te dice derecho si califica para el plan de Urgencia o si obliga a
-  pasar al Plan 4, más la diferencia de precio.
-- **Fecha:** 8 dígitos seguidos, sin separadores. `05032016` se convierte solo
-  en `05/03/2016`.
-- **Plan:** se elige solo. Un hijo menor de 14 tacha los otros dos planes.
+- **Edad de las cargas:** desplegable, cerrado por defecto. Ábrelo cuando
+  necesites verificar a alguien.
+  - **Edad:** escribe los años y listo. Sirve para preguntar al vuelo.
+  - **Fecha de nacimiento:** si la consigues durante la llamada, escríbela y
+    el cálculo pasa a ser exacto. La edad se rellena sola y queda bloqueada;
+    para volver a escribirla a mano, borra la fecha.
+  - 8 dígitos seguidos, sin separadores: `05032016` se convierte en `05/03/2016`.
+- **Veredicto por carga:** dice en qué planes entra.
+  - Menor de 14 → sólo Plan 4 Full Niños.
+  - De 14 a 23 años y 0 días → entra en Urgencia, Full y Full Niños.
+  - 24 años y 0 días o más → no entra en ninguno.
+  - Con 23 años o menos de 1 año te pide la fecha, porque con la edad sola no
+    alcanza para decidir el borde.
+- **Plan:** clic en la fila de la tabla para elegirlo. Sin menores el cliente
+  elige entre Urgencia y Full; con un menor de 14 queda forzado el Plan 4 y
+  los otros dos se tachan.
 - **Copiar:** deja la cotización en el portapapeles, lista para pegar.
+
+## No se pierde nada al cerrar
+
+El popup de Chrome se cierra cada vez que pinchas fuera, y en una llamada real
+hay que salir a buscar datos a otro sistema. Todo lo que escribas se guarda en
+el momento y vuelve tal cual al abrir: cargas, edades, fechas, plan elegido y
+hasta si el desplegable estaba abierto.
+
+La barra gris de abajo indica a qué hora se guardó. Para empezar con otro
+cliente, el botón **Nuevo cliente** borra todo, y pide confirmación antes.
+
+Los datos quedan sólo en ese navegador, en ese equipo. No se suben a ninguna
+parte.
 
 **La edad del titular no se pide.** No cambia el plan ni el precio, así que
 sólo se miden las cargas contra el corte de 14 años.
