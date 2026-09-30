@@ -13,10 +13,11 @@ const PLANES = [
 const MAX_CARGAS = 3;
 const EDAD_NINOS = 14;
 
+/* Aqui NO se calcula la edad del titular: no cambia el plan ni el precio.
+   Lo unico que importa es la carga contra el corte de 14 anos.
+   Las reglas de titular y conyuge estan documentadas en ../PRODUCTO.md. */
 const REGLAS = {
-  titular: {min:{a:18,d:0,  txt:"18 años"},        ing:{a:69,d:364, txt:"69 años y 364 días"}, per:{a:70,d:364, txt:"70 años y 364 días"}},
-  conyuge: {min:{a:18,d:0,  txt:"18 años"},        ing:{a:69,d:364, txt:"69 años y 364 días"}, per:{a:70,d:364, txt:"70 años y 364 días"}},
-  hijo:    {min:{a:0, d:14, txt:"14 días"},        ing:{a:23,d:0,   txt:"23 años y 0 días"},   per:{a:24,d:0,   txt:"24 años y 0 días"}}
+  hijo: {min:{a:0, d:14, txt:"14 días"}, ing:{a:23,d:0, txt:"23 años y 0 días"}, per:{a:24,d:0, txt:"24 años y 0 días"}}
 };
 
 /* ---------- fechas ---------- */
@@ -137,74 +138,84 @@ function autoFecha(el){
   if(pos < largo) el.setSelectionRange(pos, pos);       // no saltar al final al editar en medio
 }
 
-/* ---------- cargas ---------- */
+/* ---------- verificador de hijos ----------
+   Las cargas se cuentan con los botones: eso basta para el precio.
+   Las fechas de los hijos son opcionales y sólo se piden cuando el
+   ejecutivo sospecha que hay un menor, que es lo que cambia el plan. */
 let nCargas = 0;
-function pintarCargas(){
-  const cont = document.getElementById("cargas");
-  const previo = [].map.call(cont.querySelectorAll(".fila"), function(f){
-    return {f:f.querySelector("input").value, p:f.querySelector("select").value};
-  });
-  cont.innerHTML = "";
-  for(let i=0; i<nCargas; i++){
-    const div = document.createElement("div");
-    div.className = "fila";
-    div.innerHTML =
-      '<select class="par"><option value="hijo">Hijo</option><option value="conyuge">Cónyuge</option></select>'+
+
+function veredictoHijo(nac, ref){
+  const ev = evaluar(nac, ref, "hijo");
+  const e  = edadTxt(nac, ref);
+  if(ev.estado === "menor")
+    return {clase:"no", chip:"bad", corto:e+" · aún no", texto:"Aún no puede ingresar: la edad mínima es 14 días.", menor14:false, bloquea:true};
+  if(ev.estado === "fuera")
+    return {clase:"no", chip:"bad", corto:e+" · fuera", texto:"No califica: "+ev.motivo+".", menor14:false, bloquea:true};
+  if(ev.menor14)
+    return {clase:"no", chip:"warn", corto:e+" · menor de 14",
+            texto:"NO califica para el plan de Urgencia. Obliga a pasar al Plan 4 Full Niños.", menor14:true, bloquea:false};
+  return {clase:"si", chip:"ok", corto:e+" · califica",
+          texto:"Sí califica para el plan de Urgencia y para cualquier otro.", menor14:false, bloquea:false};
+}
+
+function filaHijo(){
+  const cont = document.getElementById("hijos");
+  if(cont.querySelectorAll(".fila").length >= MAX_CARGAS) return;
+  const caja = document.createElement("div");
+  caja.innerHTML =
+    '<div class="fila">'+
       '<input type="text" class="fecha" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">'+
-      '<span class="chip">—</span>';
-    if(previo[i]){ div.querySelector("input").value = previo[i].f; div.querySelector("select").value = previo[i].p; }
-    div.querySelector("input").addEventListener("input", function(){ autoFecha(this); calcular(); });
-    div.querySelector("select").addEventListener("change", calcular);
-    cont.appendChild(div);
-  }
+      '<span class="chip">—</span>'+
+    '</div>'+
+    '<div class="veredicto n"></div>';
+  cont.appendChild(caja);
+  const inp = caja.querySelector("input");
+  inp.addEventListener("input", function(){ autoFecha(this); calcular(); });
+  inp.focus();
+  calcular();
 }
 
 /* ---------- cálculo ---------- */
 let ultimaCotizacion = "";
+
 function calcular(){
   const ref = hoy();
   const problemas = [];
 
-  // Titular
-  const inTit = document.getElementById("fTit");
-  const chipTit = document.getElementById("chipTit");
-  const nacTit = leerFecha(inTit.value);
-  inTit.classList.toggle("mal", inTit.value.length===10 && !nacTit);
-  if(!nacTit){
-    chipTit.className = "chip";
-    chipTit.textContent = !inTit.value ? "—" : (inTit.value.length===10 ? "fecha inválida" : "fecha incompleta");
-  }else{
-    const ev = evaluar(nacTit, ref, "titular");
-    chipTit.className = "chip " + (ev.estado==="ok" ? "ok" : "bad");
-    chipTit.textContent = edadTxt(nacTit, ref) + (ev.estado==="ok" ? " · apto" : " · NO apto");
-    if(ev.estado!=="ok") problemas.push("Titular "+ev.motivo+".");
-  }
-
-  // Cargas
-  let menores = 0;
-  [].forEach.call(document.querySelectorAll("#cargas .fila"), function(f, i){
+  // Hijos verificados (opcional)
+  let menores = 0, verificados = 0;
+  [].forEach.call(document.querySelectorAll("#hijos .fila"), function(f){
     const inp = f.querySelector("input"), chip = f.querySelector(".chip");
-    const tipo = f.querySelector("select").value;
+    const ver = f.parentNode.querySelector(".veredicto");
     const nac = leerFecha(inp.value);
     inp.classList.toggle("mal", inp.value.length===10 && !nac);
     if(!nac){
       chip.className = "chip";
       chip.textContent = !inp.value ? "—" : (inp.value.length===10 ? "fecha inválida" : "fecha incompleta");
+      ver.className = "veredicto n"; ver.textContent = "";
       return;
     }
-    const ev = evaluar(nac, ref, tipo);
-    if(ev.menor14 && tipo==="hijo") menores++;
-    if(ev.estado!=="ok"){
-      chip.className = "chip bad"; chip.textContent = edadTxt(nac,ref)+" · NO apto";
-      problemas.push("Carga "+(i+1)+" "+ev.motivo+".");
-    }else if(ev.menor14 && tipo==="hijo"){
-      chip.className = "chip warn"; chip.textContent = edadTxt(nac,ref)+" · menor de 14";
-    }else{
-      chip.className = "chip ok"; chip.textContent = edadTxt(nac,ref)+" · apto";
-    }
+    verificados++;
+    const v = veredictoHijo(nac, ref);
+    chip.className = "chip " + v.chip;
+    chip.textContent = v.corto;
+    ver.className = "veredicto " + v.clase;
+    ver.textContent = v.texto;
+    if(v.menor14) menores++;
+    if(v.bloquea) problemas.push("Un hijo no califica: "+v.texto.replace(/^No califica: /,"").replace(/^Aún no puede ingresar: /,""));
   });
 
-  // Plan que corresponde
+  // Si se verificaron más hijos que cargas marcadas, se ajusta el número
+  if(verificados > nCargas){
+    nCargas = Math.min(verificados, MAX_CARGAS);
+    marcarCargas();
+  }
+
+  // Aviso del botón del verificador
+  const btn = document.getElementById("abrirVerif");
+  btn.classList.toggle("hay", menores > 0);
+
+  // Plan
   const obliga = menores > 0;
   const idPlan = obliga ? "ninos" : "full";
   const plan   = PLANES.filter(function(p){ return p.id===idPlan; })[0];
@@ -212,26 +223,37 @@ function calcular(){
 
   // Aviso
   const av = document.getElementById("aviso");
-  if(problemas.length){
-    av.className = "aviso bad"; av.textContent = problemas.join(" ");
-  }else if(obliga && cent!==null){
-    av.className = "aviso bad";
-    av.textContent = "Hay "+menores+" menor"+(menores===1?"":"es")+" de 14: obligatorio Plan 4 Full Niños.";
-  }else if(obliga && cent===null){
-    av.className = "aviso warn";
-    av.textContent = "El Plan 4 Full Niños no se vende con titular solo.";
-  }else{
-    av.className = "aviso"; av.textContent = "";
+  let clase = "aviso", texto = "";
+  if(obliga){
+    clase = "aviso bad";
+    const alt = PLANES[0].precios[nCargas];
+    texto = "Hay "+menores+" menor"+(menores===1?"":"es")+" de 14: no entra"+(menores===1?"":"n")+
+            " en el plan de Urgencia. Obligatorio Plan 4 Full Niños.";
+    if(UF && alt!==null && cent!==null){
+      texto += " Diferencia con Urgencia: "+pesos(UF, cent-alt).redondo+" más al mes.";
+    }
+  }else if(verificados > 0){
+    clase = "aviso ok";
+    texto = verificados===1 ? "El hijo califica: puede ir en cualquier plan, incluido Urgencia."
+                            : "Los "+verificados+" hijos califican: pueden ir en cualquier plan, incluido Urgencia.";
   }
+  if(cent === null){
+    clase = "aviso warn";
+    texto = "El Plan 4 Full Niños no se vende con titular solo. Marca al menos 1 carga.";
+  }
+  if(problemas.length){ clase = "aviso bad"; texto = problemas.join(" "); }
+  av.className = clase;
+  av.textContent = texto;
 
   // Tabla
   document.getElementById("tbody").innerHTML = PLANES.map(function(p){
     const c = p.precios[nCargas];
+    const veta = (obliga && p.id!=="ninos");           // planes que el menor deja fuera
     if(c === null) return '<tr><td class="off">'+p.nom+'</td><td class="n off">—</td><td class="n off">no aplica</td></tr>';
     const v = UF ? pesos(UF, c) : null;
-    const hit = (p.id===idPlan);
-    return '<tr class="'+(hit?"hit":"")+'"><td>'+p.nom+'</td><td class="n">'+ufTxt(c)+
-           '</td><td class="n">'+(v ? v.redondo : "—")+"</td></tr>";
+    const cls = (p.id===idPlan) ? "hit" : (veta ? "veta" : "");
+    return '<tr class="'+cls+'"><td>'+p.nom+(veta ? " <small>(no admite menores)</small>" : "")+
+           '</td><td class="n">'+ufTxt(c)+'</td><td class="n">'+(v ? v.redondo : "—")+"</td></tr>";
   }).join("");
 
   // Total
@@ -239,17 +261,20 @@ function calcular(){
   const compos = ["titular solo","titular + 1","titular + 2","titular + 3"][nCargas];
   document.getElementById("tUF").textContent  = cent===null ? "—" : ufTxt(cent)+" UF";
   document.getElementById("tCLP").textContent = v ? v.redondo : "";
-  document.getElementById("exacto").textContent = v
-    ? ufTxt(cent)+" × $"+ufTxt(UF)+" = "+v.exacto
-    : (UF ? "" : "sin valor UF");
-
+  document.getElementById("exacto").textContent = v ? ufTxt(cent)+" × $"+ufTxt(UF)+" = "+v.exacto
+                                                    : (UF ? "" : "sin valor UF");
   ultimaCotizacion = v
     ? plan.nom+" · "+compos+" · "+ufTxt(cent)+" UF · "+v.redondo+" mensual (UF de hoy $"+ufTxt(UF)+")"
     : "";
 }
 
+function marcarCargas(){
+  [].forEach.call(document.querySelectorAll("#conteo button"), function(b){
+    b.classList.toggle("on", +b.dataset.n === nCargas);
+  });
+}
+
 /* ---------- eventos ---------- */
-document.getElementById("fTit").addEventListener("input", function(){ autoFecha(this); calcular(); });
 document.getElementById("ufReload").addEventListener("click", cargarUF);
 document.getElementById("ufManual").addEventListener("input", function(){
   const v = parseFloat(this.value.replace(/\./g,"").replace(",","."));
@@ -259,12 +284,17 @@ document.getElementById("conteo").addEventListener("click", function(e){
   const b = e.target.closest("button");
   if(!b) return;
   nCargas = +b.dataset.n;
-  [].forEach.call(this.querySelectorAll("button"), function(x){ x.classList.toggle("on", x===b); });
-  pintarCargas();
+  marcarCargas();
   calcular();
-  const primera = document.querySelector("#cargas input");
-  if(primera && !primera.value) primera.focus();
 });
+document.getElementById("abrirVerif").addEventListener("click", function(){
+  const panel = document.getElementById("panelVerif");
+  const abierto = !panel.hidden;
+  panel.hidden = abierto;
+  this.classList.toggle("open", !abierto);
+  if(!abierto && !document.querySelector("#hijos .fila")) filaHijo();
+});
+document.getElementById("masHijo").addEventListener("click", filaHijo);
 document.getElementById("copiar").addEventListener("click", function(){
   if(!ultimaCotizacion) return;
   navigator.clipboard.writeText(ultimaCotizacion).then(function(){

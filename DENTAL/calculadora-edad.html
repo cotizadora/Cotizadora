@@ -102,7 +102,7 @@
 
   <!-- 1. EDAD -->
   <div class="card">
-    <h2>1 · Calculadora de edad</h2>
+    <h2>1 · Edad de la carga</h2>
     <div class="grid2">
       <div><label for="fnac">Fecha de nacimiento</label><input type="date" id="fnac"></div>
       <div><label for="fref">Fecha de evaluación</label><input type="date" id="fref"></div>
@@ -119,13 +119,7 @@
   <!-- 2. GRUPO -->
   <div class="card">
     <h2>2 · Grupo asegurado</h2>
-    <p class="sub" style="margin:-6px 0 12px">Titular + hasta 3 cargas (cónyuge, unión civil o conviviente con hijos en común, hijos del titular o del cónyuge).</p>
-    <div class="persona">
-      <div><label>Parentesco</label><input value="Titular" disabled style="font-weight:600"></div>
-      <div><label for="fnacTit">Fecha de nacimiento</label><input type="date" id="fnacTit"></div>
-      <span class="chip badge b-warn" id="chipTit">Sin fecha</span>
-      <span></span>
-    </div>
+    <p class="sub" style="margin:-6px 0 12px">Hasta 3 cargas: cónyuge, unión civil o conviviente con hijos en común, hijos del titular o del cónyuge. La edad del titular no se calcula, porque no cambia el plan ni el precio.</p>
     <div id="cargas"></div>
     <button class="btn" id="addCarga" type="button">+ Agregar carga</button>
   </div>
@@ -153,7 +147,7 @@
   <footer>
     <h3>Reglas de asegurabilidad aplicadas</h3>
     <ul>
-      <li><strong>Titular, cónyuge, unión civil o conviviente:</strong> ingreso desde los 18 años y hasta los 69 años y 364 días. Permanencia hasta los 70 años y 364 días (un día antes de cumplir 71).</li>
+      <li><strong>Cónyuge, unión civil o conviviente:</strong> ingreso desde los 18 años y hasta los 69 años y 364 días. Permanencia hasta los 70 años y 364 días. El titular tiene los mismos rangos, pero su edad no se calcula aquí porque no altera el plan ni el precio.</li>
       <li><strong>Hijos del titular o del cónyuge:</strong> ingreso desde los 14 días y hasta los 23 años y 0 días. Permanencia hasta los 24 años y 0 días.</li>
       <li><strong>Menores de 14 años:</strong> la odontología infantil (11 procedimientos en dientes temporales) sólo existe en el Plan 4 Full Niños. Si se incorpora un menor de 14, el grupo debe ir en ese plan.</li>
       <li><strong>Máximo 3 cargas.</strong> El Plan 4 Full Niños no tiene precio de titular solo: parte en titular + 1.</li>
@@ -182,14 +176,10 @@ const PLANES = {
 const MAX_CARGAS = 3;
 const EDAD_NINOS = 14;   // años: bajo esta edad se exige Plan 4 Full Niños
 
-/* Reglas de asegurabilidad. Todo en {a:años, m:meses, d:días}. */
+/* Reglas de asegurabilidad de las CARGAS. Todo en {a:años, m:meses, d:días}.
+   La edad del titular no se calcula en esta herramienta: no cambia el plan ni
+   el precio. Sus rangos quedan documentados en PRODUCTO.md. */
 const REGLAS = {
-  titular: {
-    etiqueta: "Titular",
-    min:        {a:18, m:0, d:0,   txt:"18 años"},
-    maxIngreso: {a:69, m:0, d:364, txt:"69 años y 364 días"},
-    maxPermanencia: {a:70, m:0, d:364, txt:"70 años y 364 días"}
-  },
   conyuge: {
     etiqueta: "Cónyuge / unión civil / conviviente",
     min:        {a:18, m:0, d:0,   txt:"18 años"},
@@ -354,24 +344,20 @@ function pintarEdad(){
 
   const menor14 = ref < fechaHito(nac,{a:EDAD_NINOS,m:0,d:0});
   const evH = evaluar(nac, ref, "hijo");
-  const evT = evaluar(nac, ref, "titular");
-  if(menor14){
-    badge.innerHTML = '<span class="badge b-bad">Menor de 14 años — exige Plan 4 Full Niños</span>';
-  }else if(evH.estado==="ok"){
-    badge.innerHTML = '<span class="badge b-ok">Puede ingresar como hijo</span>';
-  }else if(evT.estado==="ok"){
-    badge.innerHTML = '<span class="badge b-ok">Puede ingresar como titular o cónyuge</span>';
+  if(evH.estado === "menor"){
+    badge.innerHTML = '<span class="badge b-bad">Aún no puede ingresar — la edad mínima es 14 días</span>';
+  }else if(evH.estado !== "ok"){
+    badge.innerHTML = '<span class="badge b-warn">No califica como carga</span>';
+  }else if(menor14){
+    badge.innerHTML = '<span class="badge b-bad">Menor de 14 — NO califica para el plan de Urgencia, exige Plan 4</span>';
   }else{
-    badge.innerHTML = '<span class="badge b-warn">Fuera de los rangos de ingreso</span>';
+    badge.innerHTML = '<span class="badge b-ok">Califica para el plan de Urgencia y para cualquier otro</span>';
   }
 
   const filas = [
-    ["Cumple 14 años (fin de odontología niños)", fechaHito(nac,{a:14,m:0,d:0})],
-    ["Hijo · edad máxima de ingreso (23 años y 0 días)", evH.fIng],
-    ["Hijo · edad máxima de permanencia (24 años y 0 días)", evH.fPer],
-    ["Titular · edad mínima (18 años)", evT.fMin],
-    ["Titular · edad máxima de ingreso (69 años y 364 días)", evT.fIng],
-    ["Titular · edad máxima de permanencia (70 años y 364 días)", evT.fPer]
+    ["Cumple 14 años · deja de exigir el Plan 4", fechaHito(nac,{a:14,m:0,d:0})],
+    ["Edad máxima de ingreso como hijo (23 años y 0 días)", evH.fIng],
+    ["Edad máxima de permanencia como hijo (24 años y 0 días)", evH.fPer]
   ];
   document.getElementById("cuerpoCortes").innerHTML = filas.map(function(f){
     return "<tr><td>"+f[0]+"</td><td>"+fmtFecha(f[1])+'</td><td class="num">'+textoRestante(ref,f[1])+"</td></tr>";
@@ -414,18 +400,6 @@ function recalcular(){
   const ref = parseISO(document.getElementById("fref").value) || new Date();
   const avisos = [];
 
-  // Titular
-  const nacTit = parseISO(document.getElementById("fnacTit").value);
-  const chipTit = document.getElementById("chipTit");
-  if(!nacTit || nacTit > ref){
-    chipTit.className = "chip badge b-warn"; chipTit.textContent = "Sin fecha";
-  }else{
-    const ev = evaluar(nacTit, ref, "titular");
-    chipTit.className = "chip badge " + (ev.estado==="ok" ? "b-ok" : "b-bad");
-    chipTit.textContent = edadCorta(nacTit, ref) + (ev.estado==="ok" ? " — apto" : " — no apto");
-    if(ev.estado!=="ok") avisos.push("<strong>Titular:</strong> "+ev.motivo);
-  }
-
   // Cargas
   let menores = 0;
   const filas = Array.prototype.slice.call(document.querySelectorAll("#cargas .persona"));
@@ -467,8 +441,15 @@ function recalcular(){
   let html, cls;
   if(obligaNinos){
     cls = "n-bad";
-    html = "Hay "+menores+" hijo"+(menores===1?"":"s")+" menor"+(menores===1?"":"es")+" de 14 años en el grupo. "+
+    html = "Hay "+menores+" hijo"+(menores===1?"":"s")+" menor"+(menores===1?"":"es")+" de 14 años en el grupo: "+
+           (menores===1?"no califica":"no califican")+" para el <strong>plan de Urgencia</strong>. "+
            "La odontología infantil sólo existe en el <strong>Plan 4 Full Niños</strong>, así que el grupo debe contratar ese plan.";
+    // Cuánto cuesta la obligación, para poder explicárselo al cliente
+    const base = PLANES.basico.precios[nCargas];
+    if(UF_CENT && base!==null && planCent!==null && planCent>base){
+      html += " Diferencia respecto del plan de Urgencia: <strong>"+
+              pesosExactos(UF_CENT, planCent-base).redondeado+"</strong> más al mes.";
+    }
   }else{
     cls = "n-ok";
     html = "Sin menores de 14 años en el grupo: se puede contratar cualquiera de los planes. "+
@@ -509,7 +490,7 @@ function recalcular(){
 
 /* ===================== arranque ===================== */
 document.getElementById("fref").value = toISO(new Date());
-["fnac","fref","fnacTit"].forEach(function(id){
+["fnac","fref"].forEach(function(id){
   document.getElementById(id).addEventListener("input", recalcular);
 });
 document.querySelectorAll('input[name="plan"]').forEach(function(r){ r.addEventListener("change", recalcular); });

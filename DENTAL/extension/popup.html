@@ -19,15 +19,7 @@
 </div>
 
 <div class="campo">
-  <label for="fTit">Fecha de nacimiento del titular</label>
-  <div class="fila">
-    <input type="text" id="fTit" class="fecha" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" autofocus>
-    <span class="chip" id="chipTit">—</span>
-  </div>
-</div>
-
-<div class="campo">
-  <label>Cargas</label>
+  <label>Cargas (adicionales del titular)</label>
   <div class="conteo" id="conteo">
     <button type="button" data-n="0" class="on">0</button>
     <button type="button" data-n="1">1</button>
@@ -36,7 +28,16 @@
   </div>
 </div>
 
-<div id="cargas"></div>
+<div class="verif">
+  <button type="button" id="abrirVerif" class="abrir">
+    <span>&#9656;</span> ¿Hay hijos menores de 14?
+  </button>
+  <div id="panelVerif" hidden>
+    <p class="pista">Escribe la fecha de nacimiento del hijo. Te digo si califica para el plan de Urgencia o si obliga a pasar al Plan 4.</p>
+    <div id="hijos"></div>
+    <button type="button" id="masHijo" class="mas">+ otro hijo</button>
+  </div>
+</div>
 
 <div class="aviso" id="aviso"></div>
 

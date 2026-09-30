@@ -19,12 +19,19 @@ No sirve seleccionar el ZIP.
 
 ## Usar
 
-- **Fecha:** escribe los 8 dígitos seguidos, sin separadores. `10041986` se
-  convierte solo en `10/04/1986`.
-- **Cargas:** botones 0 a 3. Aparece una fila por cada una, con su parentesco.
-- **Plan:** se elige solo. Si hay un hijo menor de 14, salta al Plan 4 Full
-  Niños y lo avisa.
+- **Cargas:** botones 0 a 3. Con eso ya tienes el precio: no hace falta
+  ninguna fecha.
+- **¿Hay hijos menores de 14?** Es un desplegable, cerrado por defecto. Ábrelo
+  sólo cuando sospeches que hay un menor. Escribes la fecha de nacimiento del
+  hijo y te dice derecho si califica para el plan de Urgencia o si obliga a
+  pasar al Plan 4, más la diferencia de precio.
+- **Fecha:** 8 dígitos seguidos, sin separadores. `05032016` se convierte solo
+  en `05/03/2016`.
+- **Plan:** se elige solo. Un hijo menor de 14 tacha los otros dos planes.
 - **Copiar:** deja la cotización en el portapapeles, lista para pegar.
+
+**La edad del titular no se pide.** No cambia el plan ni el precio, así que
+sólo se miden las cargas contra el corte de 14 años.
 
 La tabla muestra siempre los tres planes para la composición elegida, así que
 si el cliente pide otra opción está a la vista.
