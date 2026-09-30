@@ -21,8 +21,15 @@ $ProgressPreference    = 'SilentlyContinue'
 
 $repo    = 'cotizadora/Cotizadora'
 $rama    = 'claude/age-calculator-insurance-plans-tbygz8'
-$destino = Join-Path $env:USERPROFILE 'Documents\DENTAL'
-$log     = Join-Path $env:USERPROFILE 'Documents\INSTALAR-log.txt'
+# La carpeta Documentos puede estar redirigida a OneDrive. Se la pedimos al
+# sistema en vez de asumir %USERPROFILE%\Documents, que en ese caso es otra.
+$docs = [Environment]::GetFolderPath('MyDocuments')
+if ([string]::IsNullOrWhiteSpace($docs)) { $docs = Join-Path $env:USERPROFILE 'Documents' }
+$docsAlt = Join-Path $env:USERPROFILE 'Documents'
+
+$destino = Join-Path $docs 'DENTAL'
+$log     = Join-Path $docs 'INSTALAR-log.txt'
+
 
 function Anotar($m) {
   $linea = (Get-Date).ToString('HH:mm:ss') + '  ' + $m
@@ -36,6 +43,12 @@ try {
 
   Anotar ('Destino: ' + $destino)
   Write-Host ('  Destino: ' + $destino)
+  if ($docs -ne $docsAlt) {
+    Write-Host ''
+    Write-Host '  Nota: tu carpeta Documentos esta redirigida.'
+    Write-Host ('  La otra ruta posible seria: ' + (Join-Path $docsAlt 'DENTAL'))
+    Anotar ('Documentos redirigida. Alternativa: ' + (Join-Path $docsAlt 'DENTAL'))
+  }
   Write-Host ''
 
   if (-not (Test-Path $destino)) {
@@ -102,6 +115,10 @@ try {
   Write-Host ''
   Write-Host '  Tus documentos siguen donde estaban.'
   Write-Host '  Para actualizar: vuelve a ejecutar este archivo.'
+  Write-Host ''
+  Write-Host '  Abriendo la carpeta...'
+  Start-Process explorer.exe $destino
+
   if ($fallos -gt 0) {
     Write-Host ''
     Write-Host ('  Revisa el detalle en: ' + $log)
