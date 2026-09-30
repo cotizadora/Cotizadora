@@ -399,7 +399,11 @@ function calcular(){
     if(c === null) return '<tr><td class="off">'+p.nom+'</td><td class="n off">—</td><td class="n off">no aplica</td></tr>';
     const v = UF ? pesos(UF, c) : null;
     const cls = (p.id===planElegido) ? "hit" : (veta ? "veta" : "sel");
-    return '<tr class="'+cls+'" data-plan="'+p.id+'"><td>'+p.nom+(veta ? ' <small>(no admite menores)</small>' : '')+
+    const flecha = (guionAbierto && p.id===planElegido) ? '<span class="flecha">&#9656;</span>' : '';
+    const nombre = veta
+      ? p.nom + ' <small>(no admite menores)</small>'
+      : '<button type="button" class="nomplan" data-nombre="'+p.id+'">'+p.nom+flecha+'</button>';
+    return '<tr class="'+cls+'" data-plan="'+p.id+'"><td>'+nombre+
            '</td><td class="n">'+ufTxt(c)+'</td><td class="n">'+(v ? v.redondo : "—")+"</td></tr>";
   }).join("");
 
@@ -557,7 +561,7 @@ const GUION = [
     'Obligatoria salvo derivación a IVR por pago con tarjeta de crédito.</p>'; }}
 ];
 
-let guionAbierto = true;
+let guionAbierto = false;   // se abre sólo al pinchar el nombre del plan
 
 function pintarGuion(){
   const app = document.getElementById("app");
@@ -621,9 +625,17 @@ document.getElementById("masHijo").addEventListener("click", function(){ filaHij
 document.getElementById("tbody").addEventListener("click", function(e){
   const tr = e.target.closest("tr");
   if(!tr || !tr.dataset.plan || tr.classList.contains("veta")) return;
+
+  const porNombre = !!e.target.closest(".nomplan");
+  const mismoPlan = (tr.dataset.plan === planElegido);
+
   planElegido = tr.dataset.plan;
   planForzado = false;                  // elección del ejecutivo, no imposición
-  guionAbierto = true;                  // el script acompaña al plan que se cotiza
+
+  // El script se despliega sólo al pinchar el nombre. Pinchar el nombre del
+  // plan que ya está abierto lo cierra.
+  if(porNombre) guionAbierto = !(guionAbierto && mismoPlan);
+
   calcular(); guardarEstado();
 });
 document.getElementById("cerrarGuion").addEventListener("click", function(){

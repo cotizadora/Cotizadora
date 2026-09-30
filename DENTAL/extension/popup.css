@@ -13,17 +13,45 @@ body{
   margin:0; background:var(--bg); color:var(--ink);
   font:13px/1.35 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
 }
-.app{display:flex; align-items:flex-start; width:360px}
+.app{
+  display:flex; align-items:stretch; width:360px; overflow:hidden;
+  transition:width .26s cubic-bezier(.32,.72,0,1);
+}
 .app.abierto{width:780px}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
-/* ---- panel del script ---- */
+/* ---- panel del script: se despliega hacia la derecha ---- */
 .guion{
-  display:none; flex:1 1 auto; align-self:stretch; min-width:0;
-  border-left:1px solid var(--line); background:var(--soft);
-  max-height:580px; overflow-y:auto;
+  flex:0 0 auto; width:0; min-width:0; align-self:stretch;
+  background:var(--soft); border-left:0 solid var(--line);
+  max-height:580px; overflow:hidden;
+  opacity:0; transform:translateX(10px);
+  transition:width .26s cubic-bezier(.32,.72,0,1),
+             opacity .18s ease .06s,
+             transform .26s cubic-bezier(.32,.72,0,1),
+             border-left-width .26s step-end;
 }
-.app.abierto .guion{display:block}
+.app.abierto .guion{
+  width:420px; opacity:1; transform:none;
+  overflow-y:auto; border-left-width:1px;
+  transition:width .26s cubic-bezier(.32,.72,0,1),
+             opacity .2s ease .08s,
+             transform .26s cubic-bezier(.32,.72,0,1),
+             border-left-width .26s step-start;
+}
+@media (prefers-reduced-motion: reduce){
+  .app, .guion{transition:none}
+}
+
+/* ---- nombre del plan: es el que abre el script ---- */
+.nomplan{
+  background:none; border:0; padding:0; margin:0; font:inherit; color:inherit;
+  text-align:left; cursor:pointer; border-bottom:1px dotted var(--muted);
+}
+.nomplan:hover{color:var(--brand2); border-bottom-color:var(--brand2)}
+tr.hit .nomplan{font-weight:700}
+tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
+.nomplan .flecha{font-size:9px; opacity:.55; margin-left:3px}
 .guion-cab{
   position:sticky; top:0; z-index:2; display:flex; gap:8px; align-items:flex-start;
   padding:9px 11px; background:var(--brand); color:#fff;
