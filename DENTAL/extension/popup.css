@@ -182,6 +182,23 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 .sugerencias{font-size:11px; color:var(--muted); margin:4px 0 0}
 .sugerencias button{background:none;border:0;padding:0;font:inherit;color:var(--brand2);
   cursor:pointer;text-decoration:underline}
+#cargador{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+#cargador code{font-size:10px;background:var(--line);padding:0 3px;border-radius:3px}
+#redCarga{margin-bottom:6px}
+#redCarga button{font-size:11px}
+#pegado{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;
+  background:var(--soft);color:var(--ink);font:inherit;font-size:11px;resize:vertical;
+  font-family:ui-monospace,Consolas,monospace}
+#pegado:focus{outline:2px solid var(--brand2);outline-offset:1px}
+.cargador-bot{display:flex;gap:6px;margin-top:6px}
+.btn-ok{flex:1;padding:6px;border:1px solid var(--brand2);border-radius:7px;background:var(--brand2);
+  color:#fff;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.btn-x2{padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);
+  color:var(--bad);font:inherit;font-size:11.5px;cursor:pointer}
+#cargaRes{margin-top:6px;font-size:10.5px;line-height:1.4}
+#cargaRes .ok{color:var(--ok)} #cargaRes .mal{color:var(--bad)}
+.link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
+  color:var(--brand2);cursor:pointer;text-decoration:underline}
 .capturado{font-size:9.5px; color:var(--muted); margin-top:6px; font-style:italic}
 
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;

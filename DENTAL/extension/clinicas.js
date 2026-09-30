@@ -5,7 +5,16 @@
    ejemplo: un dato inventado acá termina leído a un cliente por
    teléfono, y eso es peor que no tener el buscador.
 
-   Para llenarlo hay que extraer los listados de:
+   NO hace falta editar este archivo a mano. La forma normal de
+   llenarlo es desde la propia extensión: abre "Clínica por
+   comuna", pincha "pégalo aquí", elige la red y pega el listado.
+   Queda guardado en el navegador y sobrevive a las
+   actualizaciones de la extensión.
+
+   Este archivo sirve para dejar el listado fijo dentro del
+   paquete, y así no tener que pegarlo en cada equipo.
+
+   Para obtener los listados hay que sacarlos de:
      - Uno Salud Dental   https://www.unosalud.cl/clinicas/
      - E-dental           https://www.e-dentalsys.com/#clinicas
 

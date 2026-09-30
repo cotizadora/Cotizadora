@@ -75,6 +75,19 @@
           <input type="text" id="comuna" class="comuna" placeholder="escribe la comuna" autocomplete="off">
         </div>
         <div id="clinRes"></div>
+        <div id="cargador" hidden>
+          <p class="pista">Pega el listado: JSON con los campos del esquema, o una línea por clínica separada por <code>|</code> en este orden: nombre | dirección | comuna | región | teléfono | lat | lng</p>
+          <div class="conteo" id="redCarga">
+            <button type="button" data-red="unosalud" class="on">Uno Salud</button>
+            <button type="button" data-red="edental">E-dental</button>
+          </div>
+          <textarea id="pegado" rows="5" placeholder="Pega aquí el listado de la red seleccionada"></textarea>
+          <div class="cargador-bot">
+            <button type="button" id="btnCargar" class="btn-ok">Cargar</button>
+            <button type="button" id="btnBorrar" class="btn-x2">Borrar listado</button>
+          </div>
+          <div id="cargaRes"></div>
+        </div>
       </div>
     </div>
 

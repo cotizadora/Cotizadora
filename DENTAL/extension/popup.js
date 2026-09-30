@@ -829,8 +829,8 @@ function pintarClinicas(){
   let html = "";
   if(r.estado === "sin-datos"){
     html = '<p class="clin-vacio">Todavía no hay listado de clínicas cargado. '+
-           'Hay que extraerlo de <strong>unosalud.cl/clinicas</strong> y '+
-           '<strong>e-dentalsys.com</strong> y guardarlo en <strong>clinicas.js</strong>.</p>';
+           'Sácalo de <strong>unosalud.cl/clinicas</strong> y <strong>e-dentalsys.com</strong>, '+
+           'y <button type="button" class="link-carga" id="abrirCarga">pégalo aquí</button>.</p>';
   }else if(r.estado === "corto"){
     html = '<p class="clin-vacio">Escribe al menos dos letras.</p>';
   }else if(r.estado === "encontrada" || r.estado === "aproximada"){
@@ -849,9 +849,133 @@ function pintarClinicas(){
            (consulta||"")+'</strong>.</p>';
   }
   if(CLINICAS.capturado && r.estado !== "sin-datos"){
-    html += '<p class="capturado">Listado capturado el '+CLINICAS.capturado+'.</p>';
+    html += '<p class="capturado">Listado cargado el '+CLINICAS.capturado+' · '+
+            (CLINICAS.lista||[]).length+' clínicas · '+
+            '<button type="button" class="link-carga" id="abrirCarga">actualizar</button></p>';
   }
   caja.innerHTML = html;
+  const ab = document.getElementById("abrirCarga");
+  if(ab) ab.addEventListener("click", function(){
+    const c = document.getElementById("cargador");
+    c.hidden = !c.hidden;
+    if(!c.hidden) document.getElementById("pegado").focus();
+  });
+}
+
+/* ============================================================
+   CARGA DEL LISTADO DE CLÍNICAS
+   El listado no viene con la extensión. Se pega acá y queda
+   guardado en el navegador, así el ejecutivo no depende de que
+   alguien reempaquete la extensión para actualizarlo.
+   ============================================================ */
+let redCarga = "unosalud";
+
+function num(v){
+  if(v === null || v === undefined || v === "") return null;
+  const n = parseFloat(String(v).replace(",", "."));
+  return isNaN(n) ? null : n;
+}
+function limpio(v){
+  const t = String(v === null || v === undefined ? "" : v).trim();
+  return t === "" || t.toLowerCase() === "null" ? null : t;
+}
+
+// Acepta JSON (arreglo, u objeto con lista) o una línea por clínica con |
+function interpretar(texto, red){
+  const filas = [], errores = [];
+  const t = texto.trim();
+  if(!t) return {filas:filas, errores:["No pegaste nada."]};
+
+  let crudo = null;
+  if(t[0] === "[" || t[0] === "{"){
+    try{
+      const j = JSON.parse(t);
+      crudo = Array.isArray(j) ? j : (j.lista || j.clinicas || null);
+      if(!crudo) errores.push("El JSON no trae un arreglo ni un campo 'lista'.");
+    }catch(e){
+      errores.push("El JSON está mal formado: " + e.message);
+    }
+  }
+  if(crudo){
+    crudo.forEach(function(o, i){
+      const nombre = limpio(o.nombre || o.name);
+      const comuna = limpio(o.comuna);
+      if(!nombre || !comuna){ errores.push("Fila "+(i+1)+": falta nombre o comuna."); return; }
+      filas.push({
+        nombre: nombre,
+        direccion: limpio(o.direccion || o.direccion_completa || o.address),
+        comuna: comuna,
+        region: limpio(o.region),
+        telefono: limpio(o.telefono || o.fono),
+        red: limpio(o.red) || red,
+        lat: num(o.lat), lng: num(o.lng)
+      });
+    });
+    return {filas:filas, errores:errores};
+  }
+
+  // Texto plano separado por |
+  t.split(/\r?\n/).forEach(function(linea, i){
+    const l = linea.trim();
+    if(!l) return;
+    const c = l.split("|").map(function(x){ return x.trim(); });
+    if(c.length < 3){ errores.push("Línea "+(i+1)+": necesita al menos nombre, dirección y comuna."); return; }
+    if(!c[0] || !c[2]){ errores.push("Línea "+(i+1)+": falta nombre o comuna."); return; }
+    filas.push({
+      nombre:c[0], direccion:limpio(c[1]), comuna:c[2], region:limpio(c[3]),
+      telefono:limpio(c[4]), red:red, lat:num(c[5]), lng:num(c[6])
+    });
+  });
+  return {filas:filas, errores:errores};
+}
+
+function guardarClinicas(){
+  almacen.escribir("clinicas_datos", {
+    capturado: CLINICAS.capturado,
+    lista: CLINICAS.lista,
+    comunas: CLINICAS.comunas
+  });
+}
+
+function cargarPegado(){
+  const caja = document.getElementById("cargaRes");
+  const r = interpretar(document.getElementById("pegado").value, redCarga);
+
+  if(!r.filas.length){
+    caja.innerHTML = '<span class="mal">No se pudo cargar nada.</span><br>' +
+                     r.errores.slice(0,5).map(function(e){ return "· "+e; }).join("<br>");
+    return;
+  }
+  // Reemplaza sólo la red que se está cargando, para poder cargarlas por separado
+  const otras = (CLINICAS.lista || []).filter(function(x){ return x.red !== redCarga; });
+  CLINICAS.lista = otras.concat(r.filas);
+  const d = new Date();
+  CLINICAS.capturado = String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+d.getFullYear();
+  guardarClinicas();
+
+  const conCoord = r.filas.filter(function(x){ return x.lat !== null && x.lng !== null; }).length;
+  let msg = '<span class="ok">Cargadas '+r.filas.length+' clínicas de '+
+            (redCarga === "edental" ? "E-dental" : "Uno Salud")+'.</span>';
+  msg += '<br>Con coordenadas: '+conCoord+' de '+r.filas.length+
+         (conCoord < r.filas.length ? ' · sin coordenadas no se puede ordenar por distancia' : '');
+  msg += '<br>Total en la extensión: '+CLINICAS.lista.length+' clínicas.';
+  if(r.errores.length){
+    msg += '<br><span class="mal">'+r.errores.length+' línea(s) rechazada(s):</span><br>'+
+           r.errores.slice(0,4).map(function(e){ return "· "+e; }).join("<br>");
+  }
+  caja.innerHTML = msg;
+  document.getElementById("pegado").value = "";
+  pintarClinicas();
+}
+
+function borrarClinicas(){
+  if(!confirm("¿Borrar todo el listado de clínicas guardado?")) return;
+  CLINICAS.lista = [];
+  CLINICAS.comunas = {};
+  CLINICAS.capturado = null;
+  almacen.borrar("clinicas_datos");
+  document.getElementById("cargaRes").innerHTML = '<span class="mal">Listado borrado.</span>';
+  pintarClinicas();
 }
 
 /* ---------- eventos ---------- */
@@ -887,6 +1011,14 @@ document.getElementById("abrirClin").addEventListener("click", function(){
   if(!abierto){ pintarClinicas(); document.getElementById("comuna").focus(); }
 });
 document.getElementById("comuna").addEventListener("input", pintarClinicas);
+document.getElementById("redCarga").addEventListener("click", function(e){
+  const b = e.target.closest("button");
+  if(!b) return;
+  redCarga = b.dataset.red;
+  [].forEach.call(this.querySelectorAll("button"), function(x){ x.classList.toggle("on", x===b); });
+});
+document.getElementById("btnCargar").addEventListener("click", cargarPegado);
+document.getElementById("btnBorrar").addEventListener("click", borrarClinicas);
 document.getElementById("clinRes").addEventListener("click", function(e){
   const b = e.target.closest("button[data-comuna]");
   if(!b) return;
@@ -941,6 +1073,15 @@ document.getElementById("copiar").addEventListener("click", function(){
 });
 
 /* ---------- arranque ---------- */
+almacen.leer("clinicas_datos", function(d){
+  if(d && d.lista && d.lista.length){
+    CLINICAS.lista = d.lista;
+    CLINICAS.comunas = d.comunas || {};
+    CLINICAS.capturado = d.capturado || null;
+    const pc = document.getElementById("panelClin");
+    if(pc && !pc.hidden) pintarClinicas();
+  }
+});
 almacen.leer("uf", function(u){
   if(u){ cacheUF = u; if(UF===null) pintarUF(u.c, u.f, "guardado"); }
   restaurarEstado(function(){ cargarUF(); });

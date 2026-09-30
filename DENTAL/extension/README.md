@@ -72,11 +72,29 @@ Si la comuna no tiene clínica, muestra las más cercanas con la distancia en
 kilómetros, siempre que el listado traiga coordenadas. Si no las trae, cae a
 las clínicas de la misma región y avisa que no puede ordenarlas por distancia.
 
-**La extensión se entrega sin listado de clínicas.** `clinicas.js` está vacío a
-propósito: una clínica inventada termina leída a un cliente por teléfono. Para
-llenarlo hay que extraer los listados de `unosalud.cl/clinicas` y
-`e-dentalsys.com`, con el esquema documentado dentro de ese mismo archivo.
-Mientras esté vacío, el buscador lo dice en pantalla.
+**La extensión se entrega sin listado de clínicas.** Una clínica inventada
+termina leída a un cliente por teléfono, así que va vacío a propósito y el
+buscador lo dice en pantalla.
+
+### Cargar el listado
+
+No hay que editar archivos. Abre **Clínica por comuna**, pincha **pégalo
+aquí**, elige la red y pega el listado. Acepta dos formatos:
+
+- **JSON**, con los campos del esquema (`nombre`, `direccion`, `comuna`,
+  `region`, `telefono`, `lat`, `lng`).
+- **Texto plano**, una línea por clínica separada por `|` en este orden:
+  `nombre | dirección | comuna | región | teléfono | lat | lng`
+
+Al cargar te dice cuántas entraron, cuántas traen coordenadas y qué líneas
+rechazó con el motivo. Cargar una red no borra la otra, así que puedes pegar
+Uno Salud y E-dental por separado y actualizar solo una cuando cambie.
+
+Queda guardado en el navegador y sobrevive a las actualizaciones de la
+extensión. **Borrar listado** lo elimina, con confirmación.
+
+Las coordenadas son las que habilitan el orden por distancia. Sin ellas el
+buscador funciona igual, pero avisa que no puede ordenar por cercanía.
 
 La fecha de captura se muestra bajo los resultados, para saber qué tan viejo es
 el dato.
