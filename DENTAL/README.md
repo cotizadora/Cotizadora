@@ -9,6 +9,22 @@ mezclarla con el resto del repositorio.
 |---|---|
 | `calculadora-edad.html` | Calculadora de edad y cotizador de plan. Archivo único, se abre con doble clic, sin dependencias ni servidor. |
 | `insumos/` | Material de referencia del producto (tarifas, condiciones, folletos). Ver `insumos/LEEME.md`. |
+| `INSTALAR.bat` | Deja `Documents\DENTAL` conectada a este repositorio. Se ejecuta una sola vez. |
+| `SUBIR.bat` | Sube a GitHub lo que haya en la carpeta. Doble clic. |
+
+## Cómo se usa desde Windows
+
+La carpeta `C:\Users\<usuario>\Documents\DENTAL` muestra directamente el
+contenido de esta carpeta del repositorio, mediante un enlace de directorio
+(`mklink /J`). El clon real vive en `Documents\Cotizadora`, fuera de la vista.
+
+1. **Una sola vez:** doble clic en `INSTALAR.bat`. Descarga el repositorio,
+   copia a `insumos/` lo que ya hubiera en la carpeta, guarda un respaldo en
+   `Documents\DENTAL_respaldo` y crea el enlace.
+2. **Cada vez que agregues archivos:** doble clic en `SUBIR.bat`.
+
+Requiere Git para Windows (https://git-scm.com/download/win). Ninguno de los
+dos scripts borra archivos.
 
 ## calculadora-edad.html
 

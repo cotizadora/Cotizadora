@@ -9,6 +9,11 @@ Yo (Claude) leo desde aquí para entender el producto antes de programar.
 Trabajo en un contenedor en la nube, **no veo tu disco**. Un archivo que dejes
 en esta carpeta en tu computador no me llega hasta que lo subas al repositorio:
 
+**Desde Windows es un doble clic:** deja los archivos en esta carpeta y
+ejecuta `SUBIR.bat`, que está un nivel más arriba. Eso es todo.
+
+Si prefieres la terminal:
+
 ```bash
 git add DENTAL/insumos/
 git commit -m "Insumos producto dental"
