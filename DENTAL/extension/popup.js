@@ -167,13 +167,14 @@ function guardarEstado(){
   const cargas = [].map.call(document.querySelectorAll("#hijos .fila"), function(f){
     return { edad: f.querySelector(".edad").value, fecha: f.querySelector(".fecha").value };
   });
-  const hayAlgo = nCargas > 0 || cargas.some(function(c){ return c.edad || c.fecha; });
+  const hayAlgo = nCargas > 0 || envio !== "linea" || cargas.some(function(c){ return c.edad || c.fecha; });
   if(!hayAlgo){ almacen.borrar("estado"); pintarGuardado(null); return; }
   const estado = {
     n: nCargas,
     plan: planElegido,
     abierto: !document.getElementById("panelVerif").hidden,
     guion: guionAbierto,
+    envio: envio,
     cargas: cargas,
     cuando: Date.now()
   };
@@ -198,6 +199,8 @@ function restaurarEstado(cb){
     nCargas = e.n || 0;
     planElegido = e.plan || PLAN_POR_DEFECTO;
     guionAbierto = (e.guion !== false);
+    envio = e.envio || "linea";
+    marcarEnvio();
     marcarCargas();
     const cont = document.getElementById("hijos");
     cont.innerHTML = "";
@@ -270,7 +273,13 @@ function filaHijo(silencioso){
   const caja = document.createElement("div");
   caja.innerHTML =
     '<div class="fila">'+
-      '<input type="text" class="edad" inputmode="numeric" placeholder="edad" maxlength="3">'+
+      '<span class="edadbox">'+
+        '<input type="text" class="edad" inputmode="numeric" placeholder="edad" maxlength="3">'+
+        '<span class="spin">'+
+          '<button type="button" class="up" tabindex="-1" title="Subir un año">&#9650;</button>'+
+          '<button type="button" class="down" tabindex="-1" title="Bajar un año">&#9660;</button>'+
+        '</span>'+
+      '</span>'+
       '<span class="sep">o</span>'+
       '<input type="text" class="fecha" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">'+
       '<span class="chip">—</span>'+
@@ -278,6 +287,22 @@ function filaHijo(silencioso){
     '<div class="veredicto n"></div>';
   cont.appendChild(caja);
   const ed = caja.querySelector(".edad"), fe = caja.querySelector(".fecha");
+
+  // Flechas: suben y bajan de a un año, entre 0 y 99
+  function mover(paso){
+    if(ed.readOnly) return;
+    const actual = ed.value === "" ? (paso > 0 ? -1 : 1) : parseInt(ed.value, 10);
+    const nuevo = Math.max(0, Math.min(99, (isNaN(actual) ? 0 : actual) + paso));
+    ed.value = String(nuevo);
+    calcular(); guardarEstado();
+  }
+  caja.querySelector(".up").addEventListener("click", function(){ mover(1); });
+  caja.querySelector(".down").addEventListener("click", function(){ mover(-1); });
+  // Y con las flechas del teclado, que es aún más rápido
+  ed.addEventListener("keydown", function(e){
+    if(e.key === "ArrowUp"){ e.preventDefault(); mover(1); }
+    else if(e.key === "ArrowDown"){ e.preventDefault(); mover(-1); }
+  });
   ed.addEventListener("input", function(){
     this.value = this.value.replace(/\D/g,"").slice(0,3);
     calcular(); guardarEstado();
@@ -414,11 +439,26 @@ function calcular(){
   document.getElementById("tCLP").textContent = v ? v.redondo : "";
   document.getElementById("exacto").textContent = v ? ufTxt(cent)+" × $"+ufTxt(UF)+" = "+v.exacto
                                                     : (UF ? "" : "sin valor UF");
+  // Resumen permanente arriba: siempre a la vista, cambie lo que cambie
+  document.getElementById("resPlan").textContent   = plan.nom;
+  document.getElementById("resCompos").textContent = compos;
+  document.getElementById("resUF").textContent     = cent===null ? "—" : ufTxt(cent)+" UF";
+  document.getElementById("resCLP").textContent    = v ? v.redondo : "—";
+
   ultimaCotizacion = v
     ? plan.nom+" · "+compos+" · "+ufTxt(cent)+" UF · "+v.redondo+" mensual (UF de hoy $"+ufTxt(UF)+")"
     : "";
 
   if(typeof pintarGuion === "function") pintarGuion();
+}
+
+function marcarEnvio(){
+  [].forEach.call(document.querySelectorAll("#envio button"), function(b){
+    b.classList.toggle("on", b.dataset.envio === envio);
+  });
+  document.getElementById("envioPista").textContent = (envio === "linea")
+    ? "Tiene cuenta Bci: se carga la prima a su cuenta corriente."
+    : "Sin cuenta Bci: se le envía el link de pago, con 48 horas de vigencia.";
 }
 
 function marcarCargas(){
@@ -528,12 +568,36 @@ const GUION = [
     'IVA incluido? ¿Acepta?</p>'+
     '<p class="nota">Sólo vale “sí”, “acepto” o “de acuerdo”. No sirve “ok”, “ya” ni “correcto”.</p>'; }},
 
-  {t:"Datos y medio de pago", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Para cumplir con la normativa y poder enviarle su póliza, le voy a pedir que me confirme: fecha de nacimiento, '+
-    'domicilio completo, teléfono de contacto y correo electrónico. El correo es fundamental, la póliza se envía ahí.</p>'+
-    '<p>¿Autoriza el cargo de la prima mensual del seguro, que será descontado de su cuenta del banco Bci? ¿Acepta?</p>'+
-    '<p class="nota">Con link de pago: le llega un correo con el asunto “Multicotizador – Pago de primera cuota”, botón naranjo '+
-    '“Pagar aquí”. El link vence en 48 horas y mientras no pague, el seguro no está vigente.</p>'; }},
+  {t:"Validación de datos", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Entonces, para cumplir con la normativa y poder realizar el correcto envío de su póliza, le voy a solicitar '+
+    'que me corrobore si los datos que tengo en pantalla están vigentes y correctos.</p>'+
+    '<ul><li>Fecha de nacimiento</li><li>Domicilio completo</li><li>Teléfono de contacto</li>'+
+    '<li>Correo electrónico <span class="nota">(fundamental para enviar la póliza vía email)</span></li>'+
+    '<li>Nombre completo y RUT</li></ul>'+
+    (d.cargas > 0 ? '<p class="nota">De cada asegurado adicional: nombre completo, RUT, fecha de nacimiento y parentesco. Los cuatro son obligatorios.</p>' : ''); }},
+
+  {t:"Medio de pago · póliza en línea", p:["basico","full","ninos"], envio:"linea", clase:"clave", html:function(d){ return ''+
+    '<p>“Sr./Sra. <em>[apellido]</em>, usted ¿autoriza el cargo de la prima mensual del seguro, el que será '+
+    'descontado de su cuenta corriente <em>[N.º medio de pago]</em> del banco Bci? ¿Acepta?”</p>'+
+    '<p class="nota">Esperar respuesta. Esta es la opción para el cliente que tiene cuenta Bci.</p>'; }},
+
+  {t:"Medio de pago · link de pago", p:["basico","full","ninos"], envio:"link", clase:"clave", html:function(d){ return ''+
+    '<p class="nota">Pago débito: cobro inmediato. Pago crédito: próximo ciclo de facturación.</p>'+
+    '<p>“Sr./Sra. <em>[apellido]</em>, en este momento le llegará a su correo electrónico un correo con el asunto '+
+    '<strong>Multicotizador – Pago de primera cuota</strong>, donde encontrará el link de pago, en naranjo: '+
+    '<strong>Pagar aquí</strong>.</p>'+
+    '<p>Autoriza el cargo de la prima mensual del Seguro Dental, el que será descontado en la forma de pago que '+
+    'usted seleccione cuando ingrese al link enviado a su correo. ¿Acepta?”</p>'+
+    '<p class="nota">Esperar respuesta.</p>'+
+    '<p>“Si no puede realizar el pago en este momento, le comento que este link tiene una vigencia de '+
+    '<strong>48 horas</strong>. Mientras no realice el pago, este seguro no está vigente y no puede hacer uso de '+
+    'las asistencias y las coberturas.”</p>'; }},
+
+  {t:"Después del pago", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>“Lo invitamos a siempre estar al día en el pago de su prima mensual, para así poder utilizar su cobertura '+
+    'cuando la necesite.</p>'+
+    '<p>Haremos llegar a su correo electrónico dentro de unos minutos, cuando registre su medio de pago, su póliza '+
+    'de seguro y todas las comunicaciones relativas a esta.”</p>'; }},
 
   {t:"Exclusiones", p:["basico","full","ninos"], html:function(d){ return ''+
     '<p>Estas son algunas de las principales exclusiones. No se cubre cuando el origen sean: guerra, peleas o riñas, actos '+
@@ -562,6 +626,9 @@ const GUION = [
 ];
 
 let guionAbierto = false;   // se abre sólo al pinchar el nombre del plan
+/* Por defecto se lee la opción de póliza en línea, porque el cliente tiene
+   cuenta Bci. Si no la tiene, se le envía el link de pago. */
+let envio = "linea";
 
 function pintarGuion(){
   const app = document.getElementById("app");
@@ -591,7 +658,11 @@ function pintarGuion(){
     d.compos + " · " + d.uf + " UF · " + d.clp + " mensual";
 
   document.getElementById("guionCuerpo").innerHTML = GUION
-    .filter(function(sec){ return sec.p.indexOf(planElegido) !== -1; })
+    .filter(function(sec){
+      if(sec.p.indexOf(planElegido) === -1) return false;
+      if(sec.envio && sec.envio !== envio) return false;    // sólo la opción de pago que corresponde
+      return true;
+    })
     .map(function(sec){
       return '<div class="gs '+(sec.clase||"")+'"><h4>'+sec.t+"</h4>"+sec.html(d)+"</div>";
     }).join("");
@@ -622,6 +693,13 @@ document.getElementById("abrirVerif").addEventListener("click", function(){
   guardarEstado();
 });
 document.getElementById("masHijo").addEventListener("click", function(){ filaHijo(); });
+document.getElementById("envio").addEventListener("click", function(e){
+  const b = e.target.closest("button");
+  if(!b) return;
+  envio = b.dataset.envio;
+  marcarEnvio();
+  pintarGuion(); guardarEstado();
+});
 document.getElementById("tbody").addEventListener("click", function(e){
   const tr = e.target.closest("tr");
   if(!tr || !tr.dataset.plan || tr.classList.contains("veta")) return;
@@ -646,7 +724,8 @@ document.getElementById("cerrarGuion").addEventListener("click", function(){
 document.getElementById("limpiar").addEventListener("click", function(){
   if(!confirm("¿Borrar los datos de este cliente y empezar de cero?")) return;
   almacen.borrar("estado");
-  nCargas = 0; planElegido = PLAN_POR_DEFECTO; planForzado = false; guionAbierto = true;
+  nCargas = 0; planElegido = PLAN_POR_DEFECTO; planForzado = false;
+  guionAbierto = false; envio = "linea"; marcarEnvio();
   document.getElementById("hijos").innerHTML = "";
   document.getElementById("panelVerif").hidden = true;
   document.getElementById("abrirVerif").classList.remove("open","hay");
@@ -666,4 +745,5 @@ almacen.leer("uf", function(u){
   if(u){ cacheUF = u; if(UF===null) pintarUF(u.c, u.f, "guardado"); }
   restaurarEstado(function(){ cargarUF(); });
 });
+marcarEnvio();
 calcular();

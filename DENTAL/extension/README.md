@@ -25,7 +25,8 @@ No sirve seleccionar el ZIP.
   el número que marcaste.
 - **Edad de las cargas:** desplegable, cerrado por defecto. Ábrelo cuando
   necesites verificar a alguien.
-  - **Edad:** escribe los años y listo. Sirve para preguntar al vuelo.
+  - **Edad:** escríbela, o súbela y bájala con las flechas del campo. También
+    con las flechas ↑ ↓ del teclado estando dentro del campo.
   - **Fecha de nacimiento:** si la consigues durante la llamada, escríbela y
     el cálculo pasa a ser exacto. La edad se rellena sola y queda bloqueada;
     para volver a escribirla a mano, borra la fecha.
@@ -40,6 +41,25 @@ No sirve seleccionar el ZIP.
   elige entre Urgencia y Full; con un menor de 14 queda forzado el Plan 4 y
   los otros dos se tachan.
 - **Copiar:** deja la cotización en el portapapeles, lista para pegar.
+
+## Resumen siempre arriba
+
+Bajo el valor UF hay una franja con lo que se está cotizando en ese momento:
+plan, composición del grupo, UF y precio mensual. Parte en Plan Urgencias sin
+cargas y cambia sola con cada ajuste, así no hay que mirar abajo para saber
+qué se va a leer.
+
+## Envío de la póliza
+
+Dos botones, porque el cierre de la llamada cambia según el cliente:
+
+- **En línea** (por defecto): el cliente tiene cuenta Bci y se le carga la prima
+  a su cuenta corriente.
+- **Link de pago**: no tiene cuenta Bci. Se le envía el correo con el link, que
+  vence en 48 horas.
+
+El script muestra sólo el texto que corresponde, tal como está en el documento
+de venta. No hay que acordarse de saltarse el párrafo que no va.
 
 ## No se pierde nada al cerrar
 

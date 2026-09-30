@@ -346,8 +346,19 @@ contraseña.
 13. **Exclusiones** — leerlas.
 14. **Pregunta de contratación** — textual, respuesta válida sólo "sí", "acepto"
     o "de acuerdo". **No** sirve "ok", "ya" ni "correcto".
-15. **Medio de pago** — cuenta corriente Bci, o link de pago con 48 horas de
-    vigencia (mientras no pague, el seguro no está vigente).
+15. **Medio de pago** — hay dos caminos, y el script trae el texto de cada uno:
+    - **Póliza en línea.** Para el cliente que tiene cuenta Bci. Se autoriza el
+      cargo de la prima mensual descontado de su cuenta corriente del banco Bci.
+      Es la opción por defecto.
+    - **Link de pago.** Para el que no tiene cuenta Bci. Le llega un correo con
+      el asunto *"Multicotizador – Pago de primera cuota"* y el botón naranjo
+      *"Pagar aquí"*. Pago débito: cobro inmediato. Pago crédito: próximo ciclo
+      de facturación. El link vence en **48 horas**, y mientras no pague, el
+      seguro no está vigente ni puede usar las asistencias y coberturas.
+
+    En ambos casos se cierra igual: se le invita a estar al día con la prima, y
+    la póliza le llega por correo dentro de unos minutos, una vez que registre
+    su medio de pago.
 16. **Cierre normativo** — tratamiento de datos, código de operación, inicio de
     vigencia, derecho a retracto de 10 días, causales de término.
 17. **Derivación a Encuesta EPA** — obligatoria salvo derivación a IVR por pago

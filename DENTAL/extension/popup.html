@@ -20,6 +20,15 @@
       <input id="ufManual" type="text" inputmode="decimal" placeholder="39454,17">
     </div>
 
+    <div class="resumen" id="resumen">
+      <div class="res-plan" id="resPlan">Plan Urgencias</div>
+      <div class="res-linea">
+        <span class="res-compos" id="resCompos">titular solo</span>
+        <span class="res-uf" id="resUF">—</span>
+        <span class="res-clp" id="resCLP">—</span>
+      </div>
+    </div>
+
     <div class="campo">
       <label>Cargas (adicionales del titular)</label>
       <div class="conteo" id="conteo">
@@ -42,6 +51,15 @@
     </div>
 
     <div class="aviso" id="aviso"></div>
+
+    <div class="campo">
+      <label>Envío de la póliza</label>
+      <div class="conteo" id="envio">
+        <button type="button" data-envio="linea" class="on">En línea</button>
+        <button type="button" data-envio="link">Link de pago</button>
+      </div>
+      <p class="pista" id="envioPista">Tiene cuenta Bci: se carga la prima a su cuenta corriente.</p>
+    </div>
 
     <table id="tabla">
       <thead><tr><th>Plan &middot; clic en el nombre para el script</th><th class="n">UF</th><th class="n">Mensual</th></tr></thead>
