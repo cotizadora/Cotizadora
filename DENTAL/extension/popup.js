@@ -293,6 +293,10 @@ let ultimaCotizacion = "";
    subir a Full. Con un menor de 14, el Plan 4 queda forzado. */
 const PLAN_POR_DEFECTO = "basico";
 let planElegido = PLAN_POR_DEFECTO;
+/* true cuando el Plan 4 lo impuso un menor, no el ejecutivo. Si el menor
+   desaparece (se corrige la edad, se quita la carga), se vuelve solo al plan
+   por defecto en vez de dejar cotizando el plan más caro sin razón. */
+let planForzado = false;
 
 function calcular(){
   const ref = hoy();
@@ -342,13 +346,19 @@ function calcular(){
     if(v.bloquea) problemas.push(v.texto);
   });
 
-  if(evaluados > nCargas){ nCargas = Math.min(evaluados, MAX_CARGAS); marcarCargas(); }
 
   document.getElementById("abrirVerif").classList.toggle("hay", menores > 0);
 
-  // Plan
-  const obliga = menores > 0;
-  if(obliga) planElegido = "ninos";
+  // Plan. Con cero cargas no se incorpora a nadie, asi que un menor escrito
+  // en el verificador no puede obligar al Plan 4: todavia no entra al grupo.
+  const obliga = menores > 0 && nCargas > 0;
+  if(obliga){
+    planElegido = "ninos";
+    planForzado = true;
+  }else if(planForzado){
+    planElegido = PLAN_POR_DEFECTO;     // se acabó la obligación: no dejar el caro puesto
+    planForzado = false;
+  }
   if(PLANES.filter(function(p){ return p.id===planElegido; })[0].precios[nCargas] === null && !obliga){
     planElegido = PLAN_POR_DEFECTO;
   }
@@ -368,6 +378,12 @@ function calcular(){
     clase = "aviso ok";
     texto = (evaluados===1 ? "La carga califica" : "Las "+evaluados+" cargas califican")+
             ": el cliente puede quedarse en Urgencias o subir a Full.";
+  }
+  if(evaluados > nCargas){
+    clase = "aviso warn";
+    texto = (nCargas === 0
+      ? "Marcaste 0 cargas, así que se cotiza sólo al titular. Hay "+evaluados+" edad"+(evaluados===1?"":"es")+" escrita"+(evaluados===1?"":"s")+": si esa persona entra, sube el número de cargas."
+      : "Marcaste "+nCargas+" carga"+(nCargas===1?"":"s")+" pero hay "+evaluados+" edades escritas. El precio va por el número de cargas.");
   }
   if(cent === null){
     clase = "aviso warn";
@@ -606,6 +622,7 @@ document.getElementById("tbody").addEventListener("click", function(e){
   const tr = e.target.closest("tr");
   if(!tr || !tr.dataset.plan || tr.classList.contains("veta")) return;
   planElegido = tr.dataset.plan;
+  planForzado = false;                  // elección del ejecutivo, no imposición
   guionAbierto = true;                  // el script acompaña al plan que se cotiza
   calcular(); guardarEstado();
 });
@@ -617,7 +634,7 @@ document.getElementById("cerrarGuion").addEventListener("click", function(){
 document.getElementById("limpiar").addEventListener("click", function(){
   if(!confirm("¿Borrar los datos de este cliente y empezar de cero?")) return;
   almacen.borrar("estado");
-  nCargas = 0; planElegido = PLAN_POR_DEFECTO; guionAbierto = true;
+  nCargas = 0; planElegido = PLAN_POR_DEFECTO; planForzado = false; guionAbierto = true;
   document.getElementById("hijos").innerHTML = "";
   document.getElementById("panelVerif").hidden = true;
   document.getElementById("abrirVerif").classList.remove("open","hay");

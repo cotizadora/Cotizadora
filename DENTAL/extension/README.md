@@ -20,7 +20,9 @@ No sirve seleccionar el ZIP.
 ## Usar
 
 - **Cargas:** botones 0 a 3. Con eso ya tienes el precio: no hace falta
-  ninguna fecha.
+  ninguna fecha. **El número lo mandas tú**: nada lo cambia solo. Si escribes
+  más edades que cargas marcadas, te lo avisa, pero el precio siempre va por
+  el número que marcaste.
 - **Edad de las cargas:** desplegable, cerrado por defecto. Ábrelo cuando
   necesites verificar a alguien.
   - **Edad:** escribe los años y listo. Sirve para preguntar al vuelo.
