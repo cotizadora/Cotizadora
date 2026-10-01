@@ -17,11 +17,12 @@ body{
   display:flex; align-items:stretch; width:360px; overflow:hidden;
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
-.app.abierto{width:calc(374px + var(--gw, 360px))}
-.app.arrastrando, .app.arrastrando .guion{transition:none}
+/* Con el script abierto el popup usa todo lo que permite Chrome (800 × 600):
+   la cotización arriba, repartida a lo ancho, y el script abajo. */
+.app.abierto{width:800px; height:600px; flex-direction:column}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
-/* ---- panel del script: se despliega hacia la derecha ---- */
+/* ---- panel del script: se despliega al pinchar el nombre del plan ---- */
 .guion{
   flex:0 0 auto; width:0; min-width:0; align-self:stretch;
   background:var(--soft); border-left:0 solid var(--line);
@@ -33,8 +34,8 @@ body{
              border-left-width .26s step-end;
 }
 .app.abierto .guion{
-  width:var(--gw, 360px); opacity:1; transform:none;
-  overflow-y:auto; border-left-width:1px;
+  width:auto; opacity:1; transform:none;
+  overflow:hidden; border-left-width:0;
   transition:width .26s cubic-bezier(.32,.72,0,1),
              opacity .2s ease .08s,
              transform .26s cubic-bezier(.32,.72,0,1),
@@ -66,26 +67,54 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 }
 #cerrarGuion:hover{background:rgba(255,255,255,.3)}
 
-/* ---- manija: se arrastra hacia la derecha para ensanchar el script ----
-   Franja del color de la cabecera del script, con flechas arriba y un
-   agarre al centro, para que se vea que se puede tirar. */
-.tirador{
-  flex:0 0 0; width:0; overflow:hidden; align-self:stretch; position:relative;
-  background:var(--brand); color:var(--bg); cursor:ew-resize; touch-action:none;
-  font:700 11px/1 "Segoe UI",system-ui,sans-serif; user-select:none;
+/* ---- script abierto: cotización arriba en columnas, script abajo ---- */
+.app.abierto .izq{
+  width:auto; flex:0 0 auto; padding-bottom:8px;
+  display:grid; grid-template-columns:236px 272px minmax(0, 1fr);
+  grid-template-areas:
+    "uf    uf     uf"
+    "ufm   ufm    ufm"
+    "res   cargas planes"
+    "envio cargas planes"
+    "aviso cargas planes"
+    "total cargas planes";
+  grid-template-rows:auto auto auto auto auto 1fr;
+  border-bottom:2px solid var(--brand);
 }
-.app.abierto .tirador{flex-basis:14px; width:14px}
-.tirador::before{
-  content:"\2194"; position:absolute; left:0; right:0; top:13px;
-  text-align:center; font-size:13px; font-weight:400; opacity:.95;
+.app.abierto .uf{grid-area:uf}
+.app.abierto .uf-manual{grid-area:ufm}
+.app.abierto .col{min-width:0}
+.app.abierto .col-res{grid-area:res}
+.app.abierto .col-aviso{grid-area:aviso}
+.app.abierto .col-total{grid-area:total; align-self:end}
+.app.abierto .col-cargas{grid-area:cargas; border-left:1px solid var(--line); border-right:1px solid var(--line)}
+.app.abierto .col-planes{grid-area:planes}
+.app.abierto .col-envio{grid-area:envio}
+
+/* En columnas, lo que sólo orienta se acorta para ganar alto de lectura */
+.app.abierto #bloqueCargas .pista,
+.app.abierto .ver-nota,
+.app.abierto .guardado-nota{display:none}
+.app.abierto #hijos .fila{gap:5px}
+.app.abierto #hijos input.fecha{min-width:0; width:116px; flex:0 0 116px}
+.app.abierto #hijos .fila .chip{flex:1 1 auto; min-width:0}
+.app.abierto .aviso{font-size:11px; padding:6px 8px}
+.app.abierto .guardado{margin-top:6px; padding:4px 8px}
+.app.abierto .t-uf{font-size:15px; white-space:nowrap}
+.app.abierto #panelClin{max-height:170px; overflow-y:auto}
+.app.abierto .col-envio .campo{margin-top:8px}
+
+/* El script ocupa el resto del alto: título y botones en una sola fila
+   y el texto, que es lo único que se desplaza, debajo. */
+.app.abierto .guion{
+  flex:1 1 auto; min-height:0; max-height:none;
+  display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto minmax(0, 1fr);
 }
-.tirador::after{
-  content:""; position:absolute; left:4px; top:50%; width:6px; height:46px; margin-top:-23px;
-  border-radius:3px; background:
-    radial-gradient(circle, currentColor 1.2px, transparent 1.6px) 0 0 / 6px 6px;
-  opacity:.85;
-}
-.tirador:hover, .tirador:focus-visible, .app.arrastrando .tirador{background:var(--brand2); outline:none}
+.app.abierto .guion-cab{position:static; grid-column:1; align-items:center; padding:6px 10px}
+.app.abierto .guion-sub{display:none}
+.app.abierto .guion-cab>div{flex:0 1 auto; white-space:nowrap}
+.app.abierto .guion-barra{position:static; grid-column:2}
+.app.abierto .guion-cuerpo{grid-column:1 / -1; overflow-y:auto; min-height:0; padding-left:16px; padding-right:16px}
 
 .guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
 .gs{margin:.9em 0 0}
@@ -236,7 +265,7 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;
   border-radius:7px;background:var(--soft);font-size:10.5px;color:var(--muted)}
-.guardado span{flex:1}
+.guardado > span{flex:1}
 #limpiar{border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--bad);
   font:inherit;font-size:10.5px;font-weight:700;padding:4px 8px;cursor:pointer}
 #limpiar:hover{border-color:var(--bad)}

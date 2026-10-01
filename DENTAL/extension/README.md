@@ -33,7 +33,7 @@ No sirve seleccionar el ZIP.
   - Con 23 años o menos de 1 año pide la fecha, porque la edad sola no basta.
 - **Plan:** clic en la fila. Sin menores se puede subir a Full; con un menor
   de 14 queda forzado el Plan 4 y los otros se tachan.
-- **Script:** clic en el **nombre** del plan y se despliega a la derecha.
+- **Script:** clic en el **nombre** del plan y se despliega abajo, a todo el ancho.
   Ver la sección *Leer el script*.
 - **Copiar:** deja la cotización en el portapapeles.
 - **Nuevo cliente:** dos toques. Deja todo en cero: titular solo, Plan
@@ -54,12 +54,13 @@ para el ejecutivo y no se leen al cliente.
 - **Tamaño de letra:** botones **A−** y **A+**, de 80 % a 220 %.
 - **Contraste:** Normal, **Negro** (fondo negro, letra clara), **Alto**
   (negro con amarillo) y **Sepia** (más suave para la vista).
-- **Ancho:** arrastra hacia la derecha la manija azul del borde derecho del
-  script (la franja con ↔ y puntos) y la zona de lectura se ensancha; el
-  texto se reacomoda. Abre en 360 px y se puede llevar hasta 426 px, que es el borde
-  máximo: Chrome y Edge no dejan que el popup pase de 800 px. Doble clic en
-  la franja vuelve al ancho normal.
-- Tamaño, ancho, contraste y lectura guiada se recuerdan siempre, también después
+- **Al abrir el script** el popup pasa a su tamaño máximo (800 × 600): la
+  cotización queda arriba, repartida en tres columnas (plan, envío y total
+  a la izquierda; cargas al centro; planes y clínica a la derecha), y el
+  script ocupa todo el ancho de abajo. Lo que sólo orienta (la ayuda de las
+  cargas, la nota "por edad") se oculta para dejarle más alto al texto. Al
+  cerrar el script vuelve a la columna angosta de siempre.
+- Tamaño, contraste y lectura guiada se recuerdan siempre, también después
   de *Nuevo cliente*. La frase en que vas se guarda por plan y se reinicia
   con cada cliente nuevo.
 - Las coberturas y exclusiones van en lista, una por línea, para leerlas sin
