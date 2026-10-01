@@ -1,3 +1,5 @@
+importScripts("historial-db.js");
+
 /* ============================================================
    LECTURA DE i-dental EN UNA PESTAÑA DE FONDO
    e-dentalsys.com arma su listado con JavaScript, así que se abre
@@ -91,3 +93,69 @@ chrome.runtime.onInstalled.addListener(function(d){
   if(d.reason === "install" || d.reason === "update") pedirLectura(true);
 });
 chrome.runtime.onStartup.addListener(function(){ pedirLectura(false); });
+
+/* ============================================================
+   HISTORIAL: captura automática y respaldos
+   - vicidial-captura.js (dentro de Vicidial) manda cada lead que
+     cae; aquí se guarda en el Historial.
+   - Respaldos: cada hora se revisa si toca uno. Se guarda un punto
+     de restauración interno y, una vez al día, un archivo JSON en
+     Descargas/DENTAL-respaldos/ que sobrevive aunque se borre o
+     reinstale la extensión.
+   ============================================================ */
+chrome.runtime.onMessage.addListener(function(msg, sender, responder){
+  if(!msg || msg.tipo !== "capturaVicidial") return;
+  const c = clienteDesdeCampos(msg.campos || {}, "");
+  HDB.capturar(c, {ejecutivo: msg.usuario || ""})
+    .then(function(r){ responder({ok: true, id: r && r.id}); })
+    .catch(function(e){ responder({ok: false, error: String(e && e.message || e)}); });
+  return true;
+});
+
+function hoyISO(){ const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+
+// Un documento oculto arma el archivo (un service worker no puede crear
+// enlaces a archivos); la descarga se hace desde aquí.
+async function urlDeArchivo(texto){
+  if(chrome.offscreen){
+    try{
+      const hay = chrome.runtime.getContexts ? (await chrome.runtime.getContexts({contextTypes: ["OFFSCREEN_DOCUMENT"]})).length : 0;
+      if(!hay) await chrome.offscreen.createDocument({url: "offscreen.html", reasons: ["BLOBS"], justification: "Respaldo del historial de clientes"});
+      const r = await chrome.runtime.sendMessage({tipo: "hacerBlob", texto: texto, destino: "offscreen"});
+      if(r && r.url) return r.url;
+    }catch(e){}
+  }
+  return "data:application/json;charset=utf-8," + encodeURIComponent(texto);
+}
+async function respaldoEnArchivo(motivo){
+  const datos = await HDB.exportar();
+  const url = await urlDeArchivo(JSON.stringify(datos));
+  const id = await chrome.downloads.download({
+    url: url, filename: "DENTAL-respaldos/historial-dental-" + hoyISO() + ".json",
+    conflictAction: "overwrite", saveAs: false
+  });
+  await HDB.meta("ultimoArchivo", {fecha: hoyISO(), ts: Date.now(), total: datos.total, motivo: motivo || "automático", descarga: id});
+  return {total: datos.total};
+}
+async function revisarRespaldos(){
+  try{
+    const cfg = await HDB.configRespaldo();
+    if(!cfg.auto) return;
+    const lista = await HDB.listarRespaldos();
+    const ultimo = lista[0] ? new Date(lista[0].ts).getTime() : 0;
+    if(Date.now() - ultimo >= cfg.cadaHoras * 3600 * 1000) await HDB.respaldar("automático");
+    if(cfg.archivo){
+      const ua = await HDB.meta("ultimoArchivo");
+      if(!ua || ua.fecha !== hoyISO()) await respaldoEnArchivo("automático");
+    }
+  }catch(e){}
+}
+chrome.runtime.onMessage.addListener(function(msg, sender, responder){
+  if(!msg || msg.tipo !== "respaldoArchivo") return;
+  respaldoEnArchivo(msg.motivo || "manual").then(responder, function(e){ responder({error: String(e && e.message || e)}); });
+  return true;
+});
+try{
+  chrome.alarms.create("respaldos", {periodInMinutes: 60, delayInMinutes: 1});
+  chrome.alarms.onAlarm.addListener(function(a){ if(a.name === "respaldos") revisarRespaldos(); });
+}catch(e){}

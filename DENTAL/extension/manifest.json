@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Cotizador Dental Bci",
-  "version": "2.4.0",
+  "version": "3.0.0",
   "description": "Cotiza el Seguro Dental Modular Bci con la UF del dia y busca sucursales de Uno Salud e i-dental por comuna.",
   "action": {
     "default_popup": "popup.html",
@@ -22,7 +22,11 @@
   },
   "permissions": [
     "storage",
-    "scripting"
+    "scripting",
+    "downloads",
+    "alarms",
+    "offscreen",
+    "unlimitedStorage"
   ],
   "host_permissions": [
     "https://mindicador.cl/*",
@@ -32,5 +36,16 @@
     "https://www.e-dentalsys.com/*",
     "https://e-dentalsys.com/*",
     "https://vicidial.recaall.simtastic.cl/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://vicidial.recaall.simtastic.cl/agc/*"
+      ],
+      "js": [
+        "vicidial-captura.js"
+      ],
+      "run_at": "document_idle"
+    }
   ]
 }

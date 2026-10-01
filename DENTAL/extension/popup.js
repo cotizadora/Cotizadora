@@ -492,6 +492,7 @@ function calcular(){
     : "";
 
   if(typeof pintarGuion === "function") pintarGuion();
+  if(typeof registrarCotizacion === "function") registrarCotizacion();
 }
 
 function marcarEnvio(){
@@ -1357,25 +1358,6 @@ function personalizar(h){
   return h;
 }
 
-// Fecha del FORM a dd/mm/aaaa; "DD/MM/YYYY" (vacío) o algo inválido -> ""
-function fechaVici(v){
-  v = String(v || "").trim();
-  let m = v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
-  if(m) return m[1].padStart(2, "0") + "/" + m[2].padStart(2, "0") + "/" + m[3];
-  m = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if(m && m[1] !== "0000") return m[3] + "/" + m[2] + "/" + m[1];
-  return "";
-}
-
-// Formato chileno: 19758650 + 8 -> 19.758.650-8
-function rutConPuntos(num, dv){
-  num = String(num || "").replace(/[^0-9kK]/g, "");
-  dv = String(dv || "").trim();
-  if(!num) return "";
-  if(!dv && num.length > 7){ dv = num.slice(-1); num = num.slice(0, -1); }
-  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + (dv ? "-" + dv.toUpperCase() : "");
-}
-
 async function leerVicidial(){
   if(ESWEB) return null;
   try{
@@ -1406,35 +1388,7 @@ async function leerVicidial(){
       Object.keys(x.result.campos).forEach(function(k){ if(!f[k]) f[k] = x.result.campos[k]; });
       if(x.result.agente) agente = x.result.agente;
     });
-    function val(){ for(let i = 0; i < arguments.length; i++){ const v = f[arguments[i]]; if(v && v !== "0") return v; } return ""; }
-    const ap = [val("apellido_pat"), val("apellido_mat")].filter(Boolean).join(" ");
-    const c = {
-      lead: val("lead_id"),
-      nombre: val("nombres", "nombre", "first_name"),
-      apellido: ap || val("apellidos", "last_name"),
-      rut: val("rut") ? rutConPuntos(val("rut"), val("dv")) : rutConPuntos(val("vendor_lead_code")),
-      fono: val("fono1", "phone_number"),
-      fono2: val("fono2", "alt_phone"),
-      comuna: val("comuna", "province"),
-      ciudad: val("ciudad", "city"),
-      region: val("region", "state"),
-      email: val("email"),
-      genero: (val("sexo", "gender").charAt(0) || "").toUpperCase(),
-      apellidoPat: val("apellido_pat") || val("last_name").split(" ")[0] || "",
-      direccion: val("direccion", "address1"),
-      fechaNac: fechaVici(val("fecha_nac", "date_of_birth")),
-      cta: val("cta_cte"),
-      agente: agente,
-      cargas: [],
-      info: [["Ciclo de vida", val("ciclo_vida")], ["Propensión", val("propension")],
-             ["Seguros actuales", val("seguros_actuales")], ["Mes sin costo", val("mes_sin_costo")]]
-             .filter(function(x){ return x[1]; })
-    };
-    // Cargas del FORM: Fec_nac1..4, Carga1..4 (nombre), Parentesco1..4, RUT1..4
-    for(let i = 1; i <= 4; i++){
-      const fecha = fechaVici(val("fec_nac" + i)), nombre = val("carga" + i), parentesco = val("parentesco" + i), rut = val("rut" + i);
-      if(fecha || nombre || rut) c.cargas.push({fecha: fecha, nombre: nombre, parentesco: parentesco});
-    }
+    const c = clienteDesdeCampos(f, agente);
     return c.lead || c.nombre || c.apellido ? c : null;
   }catch(e){ return null; }
 }
@@ -1484,6 +1438,7 @@ async function sincronizarVicidial(){
   if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now(), aplicado: true});
   cliente = c;
   pintarCliente();
+  registrarEnHistorial(c);
   // La comuna del cliente queda lista en el buscador de sucursales
   const com = nombrePropio(c.comuna || c.ciudad);
   const campo = document.getElementById("comuna");
@@ -1500,7 +1455,84 @@ async function sincronizarVicidial(){
   if(guionAbierto) pintarGuion();
 }
 
+/* ============================================================
+   HISTORIAL: el cliente en curso queda registrado (también lo
+   registra solo vicidial-captura.js, aunque no se abra esto), con
+   su tipificación, su nota y lo que se le cotizó.
+   ============================================================ */
+let registroActual = null;
+function hayHistorial(){ return !ESWEB && typeof HDB !== "undefined"; }
+
+function registrarEnHistorial(c){
+  if(!hayHistorial()) return;
+  HDB.capturar(c, {ejecutivo: c.agente || ""}).then(function(r){
+    registroActual = r;
+    pintarTipificacion();
+    registrarCotizacion();
+  }).catch(function(){});
+}
+function pintarTipificacion(){
+  const caja = document.getElementById("tipifCli");
+  if(!registroActual){ caja.hidden = true; return; }
+  const sel = document.getElementById("tipifSel");
+  if(!sel.options.length){
+    sel.innerHTML = HDB.ESTADOS.map(function(e){ return '<option value="' + e[0] + '">' + e[1] + "</option>"; }).join("");
+  }
+  sel.value = registroActual.estado || "sin_tipificar";
+  sel.className = HDB.TONO[sel.value] || "neutro";
+  const nota = document.getElementById("notaCli");
+  if(document.activeElement !== nota) nota.value = registroActual.observacion || "";
+  caja.hidden = false;
+}
+// Lo cotizado se guarda en el registro, sin tocar lo que haya editado a mano
+let cotizacionT = null;
+function registrarCotizacion(){
+  if(!hayHistorial() || !registroActual) return;
+  clearTimeout(cotizacionT);
+  cotizacionT = setTimeout(function(){
+    const edades = [].map.call(document.querySelectorAll("#hijos .fila"), function(f){
+      const fe = f.querySelector(".fecha").value, ed = f.querySelector(".edad").value;
+      return ed ? ed + " años" + (fe ? " (" + fe + ")" : "") : (fe || "?");
+    });
+    const cot = {
+      plan: document.getElementById("resPlan").textContent.trim(),
+      compos: document.getElementById("resCompos").textContent.trim(),
+      uf: document.getElementById("resUF").textContent.trim(),
+      clp: document.getElementById("resCLP").textContent.replace(/\s*mensual\s*/, "").trim(),
+      envio: envio === "link" ? "link de pago" : "en línea",
+      edades: edades.length ? edades.length + ": " + edades.join(", ") : "",
+      cuando: Date.now()
+    };
+    const ant = registroActual.cotizacion || {};
+    if(ant.plan === cot.plan && ant.compos === cot.compos && ant.uf === cot.uf && ant.clp === cot.clp && ant.envio === cot.envio && ant.edades === cot.edades) return;
+    HDB.actualizar(registroActual.id, {cotizacion: cot}, "cotización").then(function(r){ if(r) registroActual = r; }).catch(function(){});
+  }, 700);
+}
+document.getElementById("tipifSel").addEventListener("change", function(){
+  if(!registroActual) return;
+  const v = this.value;
+  this.className = HDB.TONO[v] || "neutro";
+  HDB.actualizar(registroActual.id, {estado: v}, "tipificado").then(function(r){ if(r) registroActual = r; });
+});
+let notaT = null;
+document.getElementById("notaCli").addEventListener("input", function(){
+  if(!registroActual) return;
+  const v = this.value;
+  clearTimeout(notaT);
+  notaT = setTimeout(function(){ HDB.actualizar(registroActual.id, {observacion: v.trim()}, "observación").then(function(r){ if(r) registroActual = r; }); }, 700);
+});
+document.getElementById("verHistorial").addEventListener("click", function(){
+  try{ chrome.tabs.create({url: chrome.runtime.getURL("historial.html")}); }catch(e){}
+});
+// Si se tipifica desde la planilla, se refleja aquí
+if(hayHistorial()) HDB.alCambiar(function(m){
+  if(registroActual && (!m.id || m.id === registroActual.id)){
+    HDB.obtener(registroActual.id).then(function(r){ if(r){ registroActual = r; pintarTipificacion(); } });
+  }
+});
+
 /* ---------- arranque ---------- */
+if(ESWEB) document.getElementById("verHistorial").hidden = true;
 // En la web el script no se cierra: es la segunda columna de la página
 if(ESWEB) document.getElementById("cerrarGuion").hidden = true;
 // La barra del script queda pegada bajo la cabecera, cuyo alto cambia con

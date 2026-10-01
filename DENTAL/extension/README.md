@@ -78,6 +78,52 @@ Fono1…) y, si alguno viene vacío, de los campos estándar de Vicidial:
 Sólo se leen esos campos de la pantalla; no se escribe nada en Vicidial.
 Sin la pestaña de Vicidial, todo funciona igual, sin el cliente.
 
+## Historial de clientes (planilla)
+
+Botón **📊** en la barra de la UF: abre la planilla en una pestaña.
+
+**Se llena solo.** Con Vicidial abierto, cada lead que cae queda registrado
+con todos sus datos del FORM (RUT, nombre, fonos, correo, dirección,
+comuna, cargas, ciclo de vida…), aunque no abras la cotizadora. Si la abres,
+también queda lo cotizado (plan, composición, UF, pesos, envío y edades),
+y desde ahí puedes **tipificar** y anotar una **nota** de la llamada. Si el
+mismo lead vuelve a caer más tarde, se suma como otra llamada en su fila.
+
+**Nunca se pierde nada.**
+- Eliminar sólo oculta: con **Eliminados** se ven y se restauran.
+- Cada cambio queda en el **🕘 Historial** de la fila (qué cambió, cuándo y
+  quién). Lo que corriges a mano no lo pisa la siguiente lectura de Vicidial.
+- **Respaldos automáticos**, aunque no tengas nada abierto (basta el
+  navegador): puntos de restauración internos y, una vez al día, un archivo
+  en `Descargas\DENTAL-respaldos\historial-dental-AAAA-MM-DD.json`, que
+  sobrevive aunque se borre o reinstale la extensión. Para recuperarlo:
+  **📥 Importar**. Se configuran en **🗄 Respaldos**.
+
+**Opciones de la planilla** (las mismas de la cotizadora de Equifax):
+- Buscar por nombre, RUT, fono, correo, comuna, nota o plan.
+- Filtrar por tipificación, por agenda (hoy / vencida / con agenda),
+  favoritos ★ y eliminados.
+- Ordenar con clic en el título de cada columna.
+- Clic en una celda: aparece en la barra de fórmula y se copia sola.
+- Doble clic: se edita en la misma celda. **✎** abre todos los datos.
+- **Tipificación** en un menú por fila, con colores (verde = positiva, rojo
+  = negativa).
+- **📅 Agenda** para volver a llamar: deja la tipificación en *Agendado*;
+  las vencidas se marcan en rojo.
+- Menú **⋮**: editar, agendar, observación, historial, duplicar, exportar
+  sólo esa fila, favorito, eliminar o restaurar.
+- Selección múltiple (casillas): cambiar tipificación, eliminar, restaurar
+  o exportar todas juntas.
+- **🧹 Eliminar duplicados**: una fila por RUT, la más reciente, con las
+  llamadas de las otras (reversible).
+- Exportar a **Excel**, **CSV** o la base completa (**JSON**); importar un
+  respaldo o una planilla CSV con encabezados (RUT, Nombres, Apellidos,
+  Teléfono, Correo, Comuna, Tipificación, Observación…). Importar nunca
+  borra: agrega lo nuevo y deja lo más reciente.
+- Tamaño de letra A / A+ / A++ y tema claro u oscuro.
+
+Las tipificaciones están al inicio de `historial-db.js` (`ESTADOS`).
+
 ## Leer el script
 
 El texto es el del script oficial, palabra por palabra y en su orden. No se

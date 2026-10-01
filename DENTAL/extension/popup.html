@@ -14,9 +14,14 @@
       <span class="uf-t">UF</span>
       <span class="uf-v" id="ufVal">—</span>
       <span class="uf-f" id="ufFecha"></span>
+      <button id="verHistorial" type="button" title="Historial de clientes (planilla)">&#128202;</button>
       <button id="ufReload" type="button" title="Actualizar UF">&#8635;</button>
     </div>
     <div class="cliente" id="cliente" hidden></div>
+    <div class="tipif-cli" id="tipifCli" hidden>
+      <select id="tipifSel" title="Tipificación de esta llamada (queda en el Historial)"></select>
+      <input id="notaCli" type="text" placeholder="nota de la llamada…" title="Queda como observación en el Historial">
+    </div>
     <div class="uf-manual" id="ufManualBox">
       <label for="ufManual">Valor UF:</label>
       <input id="ufManual" type="text" inputmode="decimal" placeholder="39454,17">
@@ -124,6 +129,7 @@
 
 </div>
 <script src="edental.js"></script>
+<script src="historial-db.js"></script>
 <script src="redes.js"></script>
 <script src="popup.js"></script>
 </body>

@@ -224,6 +224,13 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 .cliente[hidden]{display:none}
 .cliente b{font-size:12.5px}
 .cliente span{color:var(--muted)}
+.tipif-cli{display:flex;gap:6px;padding:6px 10px;background:var(--okbg);border-bottom:1px solid var(--line)}
+.tipif-cli[hidden]{display:none}
+.tipif-cli select{flex:0 0 auto;max-width:170px;border:1px solid var(--line);border-radius:6px;padding:3px 4px;font:inherit;font-size:11.5px;font-weight:700;background:var(--bg);color:var(--ink)}
+.tipif-cli select.bueno{color:var(--ok);border-color:var(--ok)}
+.tipif-cli select.malo{color:var(--bad);border-color:var(--bad)}
+.tipif-cli input{flex:1;min-width:0;border:1px solid var(--line);border-radius:6px;padding:3px 7px;font:inherit;font-size:11.5px;background:var(--bg);color:var(--ink)}
+#verHistorial{margin-left:auto}
 .cli-linea{flex-basis:100%;font-size:10.5px;color:var(--muted);line-height:1.35}
 .cli-linea i{font-style:normal;font-weight:700;color:var(--ink)}
 .guion-cuerpo .cli-dato{display:inline-block;margin-left:4px;padding:0 6px;border-radius:4px;background:var(--okbg);color:var(--ok);font-weight:700;font-style:normal}
