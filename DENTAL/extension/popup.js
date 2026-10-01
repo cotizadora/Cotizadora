@@ -224,7 +224,7 @@ function restaurarEstado(cb){
     restaurando = true;
     nCargas = Math.max(0, Math.min(MAX_CARGAS, e.n || 0));
     planElegido = e.plan || PLAN_POR_DEFECTO;
-    guionAbierto = !!e.guion;
+    guionAbierto = ESWEB || !!e.guion;
     if(e.pasos) pasos = Object.assign({basico: 0, full: 0, ninos: 0}, e.pasos);
     envio = e.envio || "linea";
     marcarEnvio();
@@ -744,7 +744,9 @@ const GUION = [
     'Obligatoria salvo derivación a IVR por pago con tarjeta de crédito.</p>'; }}
 ];
 
-let guionAbierto = false;   // se abre sólo al pinchar el nombre del plan
+// En la extensión se abre al pinchar el nombre del plan; en la página web
+// las dos columnas (cotización y script) están siempre a la vista.
+let guionAbierto = ESWEB;
 /* Por defecto se lee la opción de póliza en línea, porque el cliente tiene
    cuenta Bci. Si no la tiene, se le envía el link de pago. */
 let envio = "linea";
@@ -1181,7 +1183,7 @@ function reiniciar(){
   nCargas = 0;
   planElegido = PLAN_POR_DEFECTO;
   planForzado = false;
-  guionAbierto = false;
+  guionAbierto = ESWEB;
   envio = "linea";
   pasos = {basico: 0, full: 0, ninos: 0};
   document.getElementById("hijos").innerHTML = "";
@@ -1263,7 +1265,7 @@ document.getElementById("tbody").addEventListener("click", function(e){
   const mismoPlan = (tr.dataset.plan === planElegido);
   planElegido = tr.dataset.plan;
   planForzado = false;
-  if(porNombre) guionAbierto = !(guionAbierto && mismoPlan);
+  if(porNombre) guionAbierto = ESWEB ? true : !(guionAbierto && mismoPlan);
   calcular(); guardarEstado();
 });
 document.getElementById("cerrarGuion").addEventListener("click", function(){
@@ -1318,6 +1320,8 @@ document.getElementById("copiar").addEventListener("click", function(){
 });
 
 /* ---------- arranque ---------- */
+// En la web el script no se cierra: es la segunda columna de la página
+if(ESWEB) document.getElementById("cerrarGuion").hidden = true;
 // La barra del script queda pegada bajo la cabecera, cuyo alto cambia con
 // la letra, el subtítulo y al mostrarse (oculta mide 0): se sigue en vivo.
 (function(){
