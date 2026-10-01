@@ -824,6 +824,28 @@ function buscarClinicas(consulta){
   return {estado:"nada", comuna:consulta};
 }
 
+/* Enlaces al mapa: la respuesta que sirve en la llamada sin depender de
+   ningún listado. El teléfono abre Maps con las sucursales de esa red en
+   la comuna, ordenadas por cercanía y con la dirección al día. */
+function enlacesMapa(comuna){
+  const q = String(comuna || "").trim();
+  if(q.length < 3) return "";
+  const mapa = function(texto, etq, clase){
+    const u = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(texto + " " + q);
+    return '<a class="mapa '+clase+'" href="'+u+'" target="_blank" rel="noopener">'+etq+'</a>';
+  };
+  const slug = norm(q).replace(/\s+/g, "-");
+  return '<div class="mapas">'+
+    '<div class="mapas-t">Ver sucursales cerca de '+q+'</div>'+
+    '<div class="mapas-b">'+
+      mapa("Uno Salud Dental", "Uno Salud", "unosalud")+
+      mapa("clinica dental e-dental", "i-dental", "edental")+
+    '</div>'+
+    '<a class="oficial" href="https://www.unosalud.cl/region-comuna/'+slug+'/" target="_blank" rel="noopener">'+
+      'Listado oficial de Uno Salud en '+q+'</a>'+
+  '</div>';
+}
+
 function pintarClinicas(){
   const caja = document.getElementById("clinRes");
   const consulta = document.getElementById("comuna").value;
@@ -860,9 +882,9 @@ function pintarClinicas(){
 
   let html = "";
   if(r.estado === "sin-datos"){
-    html = '<p class="clin-vacio">Todavía no hay listado de clínicas cargado. '+
-           'Sácalo de <strong>unosalud.cl/clinicas</strong> y <strong>e-dentalsys.com</strong>, '+
-           'y <button type="button" class="link-carga" id="abrirCarga">pégalo aquí</button>.</p>';
+    html = norm(consulta).length < 3
+      ? '<p class="clin-vacio">Escribe la comuna del cliente.</p>'
+      : '';
   }else if(r.estado === "corto"){
     html = '<p class="clin-vacio">Escribe al menos dos letras.</p>';
   }else if(r.estado === "encontrada" || r.estado === "aproximada"){
@@ -889,10 +911,17 @@ function pintarClinicas(){
              : ', y no está en el listado de comunas cargado. Revisa cómo se escribe.')+
            '</p>';
   }
+  html += enlacesMapa(consulta);
+
   if(CLINICAS.capturado && r.estado !== "sin-datos"){
     html += '<p class="capturado">Listado cargado el '+CLINICAS.capturado+' · '+
             (CLINICAS.lista||[]).length+' clínicas · '+
             '<button type="button" class="link-carga" id="abrirCarga">actualizar</button></p>';
+  }
+  if(norm(consulta).length >= 3 && (!CLINICAS.lista || !CLINICAS.lista.length)){
+    html += '<p class="capturado">También puedes '+
+            '<button type="button" class="link-carga" id="abrirCarga">cargar el listado</button> '+
+            'para ver las sucursales aquí mismo, sin salir.</p>';
   }
   caja.innerHTML = html;
   const ab = document.getElementById("abrirCarga");

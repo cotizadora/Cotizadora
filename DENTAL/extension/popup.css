@@ -201,6 +201,15 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 #cargaRes .ok{color:var(--ok)} #cargaRes .mal{color:var(--bad)}
 .link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
   color:var(--brand2);cursor:pointer;text-decoration:underline}
+.mapas{margin-top:8px;padding:9px 10px;border-radius:9px;background:var(--soft);border:1px solid var(--line)}
+.mapas-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}
+.mapas-b{display:flex;gap:6px}
+.mapa{flex:1;display:block;text-align:center;padding:9px 6px;border-radius:8px;
+  font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid transparent}
+.mapa.unosalud{background:var(--okbg);color:var(--ok);border-color:currentColor}
+.mapa.edental{background:var(--warnbg);color:var(--warn);border-color:currentColor}
+.mapa:hover{filter:brightness(1.06)}
+.oficial{display:inline-block;margin-top:7px;font-size:10.5px;color:var(--brand2);text-decoration:underline}
 .capturado{font-size:9.5px; color:var(--muted); margin-top:6px; font-style:italic}
 
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;

@@ -88,7 +88,7 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 .uf button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
   border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:13px;line-height:1}
 .uf button:hover{background:rgba(255,255,255,.3)}
-.uf-manual{display:none;gap:6px;align-items:center;padding:7px 10px;background:var(--soft);border-bottom:1px solid var(--line);font-size:11.5px;font-weight:600}
+.uf-manual{display:none;gap:6px;align-items:center;padding:6px 10px;background:var(--warnbg);font-size:11.5px}
 .uf-manual input{width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:5px;
   background:var(--bg);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
 
@@ -203,6 +203,15 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 #cargaRes .ok{color:var(--ok)} #cargaRes .mal{color:var(--bad)}
 .link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
   color:var(--brand2);cursor:pointer;text-decoration:underline}
+.mapas{margin-top:8px;padding:9px 10px;border-radius:9px;background:var(--soft);border:1px solid var(--line)}
+.mapas-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}
+.mapas-b{display:flex;gap:6px}
+.mapa{flex:1;display:block;text-align:center;padding:9px 6px;border-radius:8px;
+  font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid transparent}
+.mapa.unosalud{background:var(--okbg);color:var(--ok);border-color:currentColor}
+.mapa.edental{background:var(--warnbg);color:var(--warn);border-color:currentColor}
+.mapa:hover{filter:brightness(1.06)}
+.oficial{display:inline-block;margin-top:7px;font-size:10.5px;color:var(--brand2);text-decoration:underline}
 .capturado{font-size:9.5px; color:var(--muted); margin-top:6px; font-style:italic}
 
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;
@@ -241,32 +250,21 @@ td.off{color:var(--muted)}
 #copiar:hover{border-color:var(--brand2)}
 .exacto{margin:4px 10px 0;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
 
-/* ============ ajustes de la versión web ============
-   El popup vive en 360 px fijos. Acá la misma interfaz tiene que
-   funcionar desde un teléfono hasta un escritorio, así que las dos
-   columnas se apilan cuando no caben. */
+/* ============ versión web ============ */
 :root{ color-scheme: light }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ color-scheme: dark } }
 :root[data-theme="dark"]{ color-scheme: dark }
-
 body{ padding-block: 14px; padding-inline: 16px; }
 .cab{ max-width: 812px; margin: 0 auto 12px; }
 .cab h1{ font-size: 17px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
 .cab p{ font-size: 12px; color: var(--muted); margin: 3px 0 0; line-height: 1.4; }
-.marco{
-  max-width: 812px; margin: 0 auto;
-  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
-  background: var(--card);
-}
+.marco{ max-width: 812px; margin: 0 auto; border: 1px solid var(--line);
+  border-radius: 14px; overflow: hidden; background: var(--card); }
 .app{ width: 100%; max-width: none; flex-wrap: wrap; overflow: visible; transition: none; }
 .app.abierto{ width: 100%; }
 .izq{ flex: 1 1 340px; width: auto; min-width: 0; }
-.guion{
-  flex: 1 1 360px; width: auto; min-width: 0; max-height: none;
-  opacity: 1; transform: none; transition: none;
-  border-left-width: 1px; overflow-y: visible;
-  display: none;
-}
+.guion{ flex: 1 1 360px; width: auto; min-width: 0; max-height: none; opacity: 1;
+  transform: none; transition: none; border-left-width: 1px; overflow-y: visible; display: none; }
 .app.abierto .guion{ display: block; width: auto; animation: entra .22s ease both; }
 @keyframes entra{ from{ opacity:0; transform: translateY(6px) } to{ opacity:1; transform:none } }
 @media (prefers-reduced-motion: reduce){ .app.abierto .guion{ animation: none } }
@@ -275,21 +273,18 @@ body{ padding-block: 14px; padding-inline: 16px; }
   .guion-cab{ position: static; }
 }
 .uf{ position: static; }
-.uf-vieja{
-  display: block; padding: 6px 10px; font-size: 11px; font-weight: 600;
-  background: var(--warnbg); color: var(--warn); border-bottom: 1px solid var(--line);
-}
-.pie{
-  max-width: 812px; margin: 12px auto 0; font-size: 11px; color: var(--muted);
-  line-height: 1.5;
-}
-.pie strong{ color: var(--ink); }
+.uf-manual{ background: var(--soft) !important; border-bottom: 1px solid var(--line); font-weight: 600 }
+.uf-vieja{ display: block; padding: 6px 10px; font-size: 11px; font-weight: 600;
+  background: var(--warnbg); color: var(--warn); border-bottom: 1px solid var(--line); }
+.mapa{ padding: 12px 6px; font-size: 13.5px }   /* dedo, no mouse */
+.pie{ max-width: 812px; margin: 12px auto 0; font-size: 11px; color: var(--muted); line-height: 1.5 }
+.pie strong{ color: var(--ink) }
 
 </style>
 
 <div class="cab">
   <h1>Cotizador Dental Bci</h1>
-  <p>Edad de las cargas, plan que corresponde, script de venta y clínicas por comuna.</p>
+  <p>Edad de las cargas, plan que corresponde, script de venta y sucursales por comuna.</p>
 </div>
 
 <div class="marco">
@@ -409,12 +404,7 @@ body{ padding-block: 14px; padding-inline: 16px; }
 </div>
 </div>
 
-<p class="pie">
-  <strong>Escribe la UF del día.</strong> Esta página no puede consultarla sola, así que el valor se
-  escribe a mano y queda guardado en este dispositivo. Todo lo demás funciona igual que la extensión:
-  lo que anotes se conserva aunque cierres la pestaña.
-  <br>Tarifas del script de septiembre 2026. Conversión a pesos con aritmética entera, sin redondeos.
-</p>
+<p class="pie"><strong>Escribe la UF del día</strong> para que calcule los pesos: esta página no puede consultarla sola. Queda guardada en este dispositivo, igual que el cliente que estés atendiendo.<br>Tarifas del script de septiembre 2026. Conversión con aritmética entera, sin redondeos.</p>
 
 <script>
 /* ============================================================
@@ -546,8 +536,6 @@ const ESWEB = (typeof chrome === "undefined" || !chrome.storage);
 
 async function cargarUF(){
   if(ESWEB){
-    // El visor de la página bloquea las consultas a otros sitios, así que
-    // acá la UF se escribe a mano y queda guardada en este navegador.
     document.getElementById("ufManualBox").style.display = "flex";
     const c = leerGuardado();
     if(c) pintarUF(c.c, c.f, "escrita a mano");
@@ -593,9 +581,8 @@ function guardar(c, f){ almacen.escribir("uf", {c:c, f:f}); }
 function avisarUFVieja(){
   const el = document.getElementById("ufVieja");
   if(!el) return;
-  const hoyTxt = fmt(hoy());
   const c = leerGuardado();
-  const vieja = UF !== null && c && c.f && c.f !== hoyTxt;
+  const vieja = UF !== null && c && c.f && c.f !== fmt(hoy());
   el.hidden = !vieja;
   if(vieja) el.textContent = "Ese valor es del " + c.f + ". Actualízalo con la UF de hoy.";
 }
@@ -1317,6 +1304,28 @@ function buscarClinicas(consulta){
   return {estado:"nada", comuna:consulta};
 }
 
+/* Enlaces al mapa: la respuesta que sirve en la llamada sin depender de
+   ningún listado. El teléfono abre Maps con las sucursales de esa red en
+   la comuna, ordenadas por cercanía y con la dirección al día. */
+function enlacesMapa(comuna){
+  const q = String(comuna || "").trim();
+  if(q.length < 3) return "";
+  const mapa = function(texto, etq, clase){
+    const u = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(texto + " " + q);
+    return '<a class="mapa '+clase+'" href="'+u+'" target="_blank" rel="noopener">'+etq+'</a>';
+  };
+  const slug = norm(q).replace(/\s+/g, "-");
+  return '<div class="mapas">'+
+    '<div class="mapas-t">Ver sucursales cerca de '+q+'</div>'+
+    '<div class="mapas-b">'+
+      mapa("Uno Salud Dental", "Uno Salud", "unosalud")+
+      mapa("clinica dental e-dental", "i-dental", "edental")+
+    '</div>'+
+    '<a class="oficial" href="https://www.unosalud.cl/region-comuna/'+slug+'/" target="_blank" rel="noopener">'+
+      'Listado oficial de Uno Salud en '+q+'</a>'+
+  '</div>';
+}
+
 function pintarClinicas(){
   const caja = document.getElementById("clinRes");
   const consulta = document.getElementById("comuna").value;
@@ -1353,9 +1362,9 @@ function pintarClinicas(){
 
   let html = "";
   if(r.estado === "sin-datos"){
-    html = '<p class="clin-vacio">Todavía no hay listado de clínicas cargado. '+
-           'Sácalo de <strong>unosalud.cl/clinicas</strong> y <strong>e-dentalsys.com</strong>, '+
-           'y <button type="button" class="link-carga" id="abrirCarga">pégalo aquí</button>.</p>';
+    html = norm(consulta).length < 3
+      ? '<p class="clin-vacio">Escribe la comuna del cliente.</p>'
+      : '';
   }else if(r.estado === "corto"){
     html = '<p class="clin-vacio">Escribe al menos dos letras.</p>';
   }else if(r.estado === "encontrada" || r.estado === "aproximada"){
@@ -1382,10 +1391,17 @@ function pintarClinicas(){
              : ', y no está en el listado de comunas cargado. Revisa cómo se escribe.')+
            '</p>';
   }
+  html += enlacesMapa(consulta);
+
   if(CLINICAS.capturado && r.estado !== "sin-datos"){
     html += '<p class="capturado">Listado cargado el '+CLINICAS.capturado+' · '+
             (CLINICAS.lista||[]).length+' clínicas · '+
             '<button type="button" class="link-carga" id="abrirCarga">actualizar</button></p>';
+  }
+  if(norm(consulta).length >= 3 && (!CLINICAS.lista || !CLINICAS.lista.length)){
+    html += '<p class="capturado">También puedes '+
+            '<button type="button" class="link-carga" id="abrirCarga">cargar el listado</button> '+
+            'para ver las sucursales aquí mismo, sin salir.</p>';
   }
   caja.innerHTML = html;
   const ab = document.getElementById("abrirCarga");
@@ -1666,19 +1682,13 @@ document.getElementById("cerrarGuion").addEventListener("click", function(){
 });
 function confirmarDosToques(btn, aviso, accion){
   if(btn.dataset.armado === "1"){
-    btn.dataset.armado = "";
-    btn.textContent = btn.dataset.original;
-    accion();
-    return;
+    btn.dataset.armado = ""; btn.textContent = btn.dataset.original; accion(); return;
   }
   btn.dataset.original = btn.textContent;
   btn.dataset.armado = "1";
   btn.textContent = aviso;
   setTimeout(function(){
-    if(btn.dataset.armado === "1"){
-      btn.dataset.armado = "";
-      btn.textContent = btn.dataset.original;
-    }
+    if(btn.dataset.armado === "1"){ btn.dataset.armado=""; btn.textContent=btn.dataset.original; }
   }, 3500);
 }
 
