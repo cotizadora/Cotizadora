@@ -71,6 +71,7 @@
         </div>
         <div id="sugComunas"></div>
         <div id="clinRes"></div>
+        <p class="capturado" id="lineaMapeo"><button type="button" class="link-carga" id="abrirMapeo">Mapeo completo de comunas</button></p>
       </div>
     </div>
 
@@ -97,10 +98,30 @@
       </div>
       <button type="button" id="cerrarGuion" title="Ocultar el script">&times;</button>
     </div>
+    <div class="guion-barra">
+      <div class="gb-grupo" title="Tamaño de la letra">
+        <button type="button" id="letraMenos" aria-label="Letra más chica">A&minus;</button>
+        <span id="letraTam" class="gb-val">100%</span>
+        <button type="button" id="letraMas" aria-label="Letra más grande">A+</button>
+      </div>
+      <div class="gb-grupo" id="contraste" title="Contraste">
+        <button type="button" data-c="normal" class="on">Normal</button>
+        <button type="button" data-c="negro">Negro</button>
+        <button type="button" data-c="alto">Alto</button>
+        <button type="button" data-c="sepia">Sepia</button>
+      </div>
+      <div class="gb-grupo" title="Lectura guiada: avanza y retrocede con las flechas ↑ ↓">
+        <button type="button" id="guiada" class="on">Guiada</button>
+        <button type="button" id="pasoAnt" aria-label="Frase anterior">&#9650;</button>
+        <span id="pasoNum" class="gb-val">—</span>
+        <button type="button" id="pasoSig" aria-label="Frase siguiente">&#9660;</button>
+      </div>
+    </div>
     <div class="guion-cuerpo" id="guionCuerpo"></div>
   </aside>
 
 </div>
+<script src="redes.js"></script>
 <script src="popup.js"></script>
 </body>
 </html>

@@ -64,21 +64,21 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
   border-radius:6px; width:22px; height:22px; font-size:15px; line-height:1; cursor:pointer; flex:0 0 auto;
 }
 #cerrarGuion:hover{background:rgba(255,255,255,.3)}
-.guion-cuerpo{padding:4px 11px 14px}
-.gs{margin:11px 0 0}
+.guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
+.gs{margin:.9em 0 0}
 .gs h4{
-  margin:0 0 3px; font-size:9.5px; text-transform:uppercase; letter-spacing:.07em;
-  color:var(--muted); font-weight:800;
+  margin:0 0 .3em; font-size:.74em; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--g-muted); font-weight:800;
 }
-.gs p{margin:0 0 5px; font-size:12px; line-height:1.45}
-.gs ul{margin:3px 0 5px; padding-left:16px; font-size:12px; line-height:1.4}
-.gs li{margin-bottom:2px}
-.gs .dato{font-weight:800; color:var(--brand); font-variant-numeric:tabular-nums}
+.gs p{margin:0 0 .35em; font-size:1em; line-height:1.5}
+.gs ul{margin:.2em 0 .45em; padding-left:1.25em; font-size:1em; line-height:1.45}
+.gs li{margin-bottom:.15em}
+.gs .dato{font-weight:800; color:var(--g-dato); font-variant-numeric:tabular-nums}
 .gs.clave{border-left:3px solid var(--bad); padding-left:8px; background:var(--badbg); border-radius:0 6px 6px 0; padding-top:6px; padding-bottom:2px}
 .gs.clave h4{color:var(--bad)}
 .gs.ojo{border-left:3px solid var(--warn); padding-left:8px; background:var(--warnbg); border-radius:0 6px 6px 0; padding-top:6px; padding-bottom:2px}
 .gs.ojo h4{color:var(--warn)}
-.gs .nota{font-size:10.5px; color:var(--muted); font-style:italic}
+.gs .nota{font-size:.85em; color:var(--g-muted); font-style:italic}
 .uf{display:flex;position:sticky;top:0;z-index:3;align-items:center;gap:7px;background:#123a6d;color:#fff;padding:7px 10px}
 .uf-t{font-size:10px;letter-spacing:.09em;font-weight:700;opacity:.8}
 .uf-v{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -246,3 +246,67 @@ td.off{color:var(--muted)}
 #copiar{padding:6px 11px;border:1px solid var(--line);border-radius:7px;background:var(--soft);color:var(--ink);font:inherit;font-size:11.5px;cursor:pointer}
 #copiar:hover{border-color:var(--brand2)}
 .exacto{margin:4px 10px 0;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ============ lectura del script: letra, contraste y modo guiado ============
+   Los colores del script viven en variables propias (--g-*), para que el
+   contraste elegido cambie sólo esta zona y no el resto del cotizador. */
+.guion{
+  --g-bg:var(--soft); --g-ink:var(--ink); --g-muted:var(--muted); --g-dato:var(--brand);
+  --g-cab:#123a6d; --g-cab-ink:#fff;
+  --g-mark:#fff1b8; --g-mark-ink:#15202b; --g-mark-borde:#d99a00;
+  background:var(--g-bg); color:var(--g-ink);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .guion{
+  --g-mark:#4a3d0f; --g-mark-ink:#fff6d6; --g-mark-borde:#f0c169;
+}}
+:root[data-theme="dark"] .guion{ --g-mark:#4a3d0f; --g-mark-ink:#fff6d6; --g-mark-borde:#f0c169; }
+
+.guion[data-contraste="negro"]{
+  --g-bg:#000; --g-ink:#fff; --g-muted:#c4c4c4; --g-dato:#8fdcff;
+  --g-cab:#000; --g-cab-ink:#fff; --g-mark:#ffe600; --g-mark-ink:#000; --g-mark-borde:#ffe600;
+}
+.guion[data-contraste="alto"]{
+  --g-bg:#fff; --g-ink:#000; --g-muted:#262626; --g-dato:#0030c0;
+  --g-cab:#000; --g-cab-ink:#fff; --g-mark:#000; --g-mark-ink:#fff; --g-mark-borde:#000;
+}
+.guion[data-contraste="sepia"]{
+  --g-bg:#f4ead3; --g-ink:#3a2c18; --g-muted:#6d5a3d; --g-dato:#8a3c00;
+  --g-cab:#5b4426; --g-cab-ink:#f4ead3; --g-mark:#e7cf95; --g-mark-ink:#2a1e0d; --g-mark-borde:#9a6a18;
+}
+.guion-cab{ background:var(--g-cab); color:var(--g-cab-ink); }
+.guion[data-contraste="negro"] .guion-cab{ border-bottom:1px solid #fff }
+.guion:not([data-contraste="normal"]) .gs.clave,
+.guion:not([data-contraste="normal"]) .gs.ojo{ background:transparent; border-left-color:var(--g-mark-borde) }
+.guion:not([data-contraste="normal"]) .gs.clave h4,
+.guion:not([data-contraste="normal"]) .gs.ojo h4{ color:var(--g-ink) }
+.guion[data-contraste="alto"] .paso.actual .dato,
+.guion[data-contraste="alto"] .paso.actual strong{ color:#fff }
+
+.guion-barra{
+  position:sticky; top:calc(var(--gb-top, 46px)); z-index:1;
+  display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center;
+  padding:6px 11px; background:var(--g-bg); border-bottom:1px solid var(--line);
+}
+.guion[data-contraste="negro"] .guion-barra{ border-bottom-color:#444 }
+.gb-grupo{ display:flex; align-items:center; gap:3px }
+.gb-grupo button{
+  min-width:26px; padding:3px 7px; border:1px solid var(--line); border-radius:6px;
+  background:transparent; color:var(--g-ink); font:inherit; font-size:11px; font-weight:700; cursor:pointer;
+}
+.gb-grupo button:hover{ border-color:var(--g-mark-borde) }
+.gb-grupo button.on{ background:var(--g-ink); color:var(--g-bg); border-color:var(--g-ink) }
+.gb-grupo button:focus-visible{ outline:2px solid var(--g-mark-borde); outline-offset:1px }
+.gb-val{ font-size:10.5px; color:var(--g-muted); min-width:3.6em; text-align:center; font-variant-numeric:tabular-nums }
+
+/* La frase que toca leer queda marcada; lo ya leído se atenúa. Así el
+   ejecutivo sabe dónde quedó aunque mire a otro lado. */
+.guion.guiada .paso{ cursor:pointer; border-radius:5px; transition:opacity .15s, background-color .15s }
+.guion.guiada p.paso{ padding:.12em .4em; margin-left:-.4em; margin-right:-.4em }
+.guion.guiada li.paso{ padding:.06em .3em; margin-left:-.3em }
+.guion.guiada .paso.leido{ opacity:.45 }
+.guion.guiada .paso.actual{
+  background:var(--g-mark); color:var(--g-mark-ink); opacity:1;
+  box-shadow:-.3em 0 0 var(--g-mark-borde);
+}
+.guion.guiada .paso.actual .nota{ color:inherit; opacity:.8 }
+@media (prefers-reduced-motion: reduce){ .guion.guiada .paso{ transition:none } }

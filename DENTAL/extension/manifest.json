@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Cotizador Dental Bci",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Cotiza el Seguro Dental Modular Bci con la UF del dia y busca sucursales de Uno Salud e i-dental por comuna.",
   "action": {
     "default_popup": "popup.html",

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<title>Mapeo de sucursales · Cotizador Dental</title>
+<link rel="stylesheet" href="popup.css">
+<link rel="stylesheet" href="mapeo.css">
+</head>
+<body>
+<main class="mp">
+  <header class="mp-cab">
+    <h1>Sucursales por comuna</h1>
+    <p>Recorre todas las comunas de <strong>Uno Salud</strong> y el listado completo de <strong>i-dental</strong>, y arma el mapa comuna por comuna. Con el mapa guardado, el buscador del cotizador responde al instante, sin consultar los sitios en cada llamada.</p>
+  </header>
+
+  <section class="mp-accion">
+    <button type="button" id="empezar" class="btn-prim">Hacer el mapeo</button>
+    <span id="vigente" class="mp-nota"></span>
+  </section>
+
+  <section id="progreso" class="mp-prog" hidden>
+    <div class="barra"><span id="barraIn"></span></div>
+    <p id="estado" class="mp-nota"></p>
+    <p class="mp-nota">Deja esta pestaña abierta hasta que termine. Tarda uno o dos minutos.</p>
+  </section>
+
+  <section id="resultado" hidden>
+    <div class="cifras" id="cifras"></div>
+    <div id="avisos"></div>
+    <div class="mp-bajar">
+      <button type="button" id="bajarCSV">Descargar CSV para Excel</button>
+      <button type="button" id="bajarJSON">Descargar JSON</button>
+      <button type="button" id="copiarCSV">Copiar CSV</button>
+    </div>
+
+    <div class="mp-filtro">
+      <input type="text" id="filtro" placeholder="Filtrar por comuna" autocomplete="off" spellcheck="false">
+      <label class="mp-solo"><input type="checkbox" id="soloAmbas"> Sólo comunas con las dos redes</label>
+    </div>
+    <div class="mp-tabla-env">
+      <table class="mp-tabla">
+        <thead><tr><th>Comuna</th><th class="n">Uno Salud</th><th class="n">i-dental</th></tr></thead>
+        <tbody id="filas"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script src="redes.js"></script>
+<script src="mapeo.js"></script>
+</body>
+</html>

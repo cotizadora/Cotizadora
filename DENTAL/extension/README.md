@@ -34,9 +34,33 @@ No sirve seleccionar el ZIP.
 - **Plan:** clic en la fila. Sin menores se puede subir a Full; con un menor
   de 14 queda forzado el Plan 4 y los otros se tachan.
 - **Script:** clic en el **nombre** del plan y se despliega a la derecha.
+  Ver la sección *Leer el script*.
 - **Copiar:** deja la cotización en el portapapeles.
 - **Nuevo cliente:** dos toques. Deja todo en cero: titular solo, Plan
   Urgencias, sin cargas, sin comuna, envío en línea.
+
+## Leer el script
+
+El texto es el del script oficial, palabra por palabra y en su orden. No se
+agregó ni se resumió nada. Lo que aparece en cursiva gris son notas internas
+para el ejecutivo y no se leen al cliente.
+
+- **Lectura guiada:** la frase que toca leer queda resaltada. Con **↓** (o
+  Av Pág) se avanza a la siguiente y con **↑** (o Re Pág) se vuelve. Inicio y
+  Fin van al principio y al final. Lo ya leído queda más tenue, así que al
+  volver de otra pantalla se sabe dónde quedó. Un clic en cualquier frase la
+  deja como la actual. Las flechas no mueven el script mientras se escribe en
+  un campo (edad, fecha, comuna).
+- **Tamaño de letra:** botones **A−** y **A+**, de 80 % a 220 %.
+- **Contraste:** Normal, **Negro** (fondo negro, letra clara), **Alto**
+  (negro con amarillo) y **Sepia** (más suave para la vista).
+- Tamaño, contraste y lectura guiada se recuerdan siempre, también después
+  de *Nuevo cliente*. La frase en que vas se guarda por plan y se reinicia
+  con cada cliente nuevo.
+- Las coberturas y exclusiones van en lista, una por línea, para leerlas sin
+  perderse.
+- Los textos de medio de pago cambian según **En línea** (cliente con cuenta
+  Bci, el que viene por defecto) o **Link de pago**.
 
 ## Sucursales por comuna
 
@@ -61,7 +85,21 @@ cuando el sitio los trae, y un enlace a la fuente.
 
 **Si una red no muestra resultados y debería**, el sitio puede haber cambiado
 su diseño. Pincha **copiar diagnóstico** y pega el texto en la conversación:
-trae lo que la extensión vio, y con eso se ajusta el lector.
+trae lo que la extensión vio (páginas probadas, cómo está hecho el sitio,
+scripts, iframes y posibles fuentes de datos), y con eso se ajusta el lector.
+
+### Mapeo completo de comunas
+
+En el panel de sucursales, el enlace **Mapeo completo de comunas** abre una pestaña que
+recorre todas las comunas de Uno Salud y el listado de i-dental, y arma una
+tabla comuna por comuna con las sucursales de ambas redes.
+
+- Tarda un par de minutos la primera vez. Se guarda 30 días.
+- Mientras exista el mapeo, el buscador del popup responde desde él, sin
+  consultar los sitios, al instante.
+- Se puede filtrar, ver sólo las comunas con ambas redes, y descargar en
+  **CSV** (abre en Excel) o **JSON**.
+- Las sucursales de i-dental se asignan a la comuna que dice su dirección.
 
 Esto funciona en la extensión. En la versión web no, porque una página no
 puede leer otros sitios.
@@ -75,6 +113,10 @@ hasta si el desplegable estaba abierto.
 
 La barra gris de abajo indica a qué hora se guardó. Para empezar con otro
 cliente, el botón **Nuevo cliente** borra todo, y pide confirmación antes.
+
+Si pasan **45 minutos sin tocar nada**, lo guardado se da por terminado y el
+popup abre limpio: Plan Urgencias, sin cargas, póliza en línea. Así no
+aparece el cliente de la llamada anterior.
 
 Los datos quedan sólo en ese navegador, en ese equipo. No se suben a ninguna
 parte.

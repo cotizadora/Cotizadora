@@ -164,22 +164,6 @@ function autoFecha(el){
    llamada real se sale a buscar datos a otro sistema. Nada de lo que
    escriba puede perderse: el estado se guarda en cada tecla y se
    restaura al abrir. Sólo el botón "Nuevo cliente" lo borra. */
-const almacen = {
-  leer: function(clave, cb){
-    try{ chrome.storage.local.get(clave, function(r){ cb(r ? r[clave] : null); }); }
-    catch(e){
-      try{ cb(JSON.parse(localStorage.getItem(clave) || "null")); }catch(e2){ cb(null); }
-    }
-  },
-  escribir: function(clave, valor){
-    try{ chrome.storage.local.set(Object.fromEntries([[clave, valor]])); }
-    catch(e){ try{ localStorage.setItem(clave, JSON.stringify(valor)); }catch(e2){} }
-  },
-  borrar: function(clave){
-    try{ chrome.storage.local.remove(clave); }
-    catch(e){ try{ localStorage.removeItem(clave); }catch(e2){} }
-  }
-};
 
 let restaurando = false;
 
@@ -196,6 +180,7 @@ function guardarEstado(){
     n: nCargas,
     plan: planElegido,
     guion: guionAbierto,
+    pasos: pasos,
     clinAbierto: !document.getElementById("panelClin").hidden,
     comuna: comuna,
     envio: envio,
@@ -213,16 +198,23 @@ function pintarGuardado(estado){
   const d = new Date(estado.cuando);
   document.getElementById("guardadoTxt").textContent =
     "Guardado a las " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0") +
-    ". Se mantiene aunque cierres el popup.";
+    ". Se mantiene durante la llamada; tras 45 min sin cambios vuelve a cero.";
 }
+
+/* Lo guardado es de la llamada en curso. Si pasaron 45 minutos sin cambios,
+   es de un cliente anterior: se descarta y se parte en Plan Urgencias, sin
+   cargas y póliza en línea. */
+const VIGENCIA_LLAMADA = 45 * 60 * 1000;
 
 function restaurarEstado(cb){
   almacen.leer("estado", function(e){
+    if(e && (!e.cuando || Date.now() - e.cuando > VIGENCIA_LLAMADA)){ almacen.borrar("estado"); e = null; }
     if(!e){ pintarBloqueCargas(); if(cb) cb(); return; }
     restaurando = true;
     nCargas = Math.max(0, Math.min(MAX_CARGAS, e.n || 0));
     planElegido = e.plan || PLAN_POR_DEFECTO;
     guionAbierto = !!e.guion;
+    if(e.pasos) pasos = Object.assign({basico: 0, full: 0, ninos: 0}, e.pasos);
     envio = e.envio || "linea";
     marcarEnvio();
 
@@ -514,153 +506,230 @@ function marcarCargas(){
    congeladas al cliente.
    ============================================================ */
 const GUION = [
+  /* Texto del Script Bci Dental Full de septiembre 2026, en su orden, con
+     sólo las faltas de tipeo corregidas. Cada <p> y cada <li> es una frase
+     de la lectura guiada. Lo que va en <p class="nota"> es instrucción para
+     el ejecutivo: no se lee al cliente y la lectura guiada lo salta. */
   {t:"Apertura", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Muy buenos días / tardes, usted habla con <em>[su nombre]</em>. Lo llamo por ser cliente Bci. ¿Cómo está?</p>'+
-    '<p>El motivo de mi llamado es entregarle una información importante, son buenas noticias, y no le quitaré mucho tiempo. '+
-    'Queremos agradecer su permanencia como cliente y contarle que Bci pone a su disposición una completa cobertura dental, '+
-    'que le cubrirá hasta el 100% en los tratamientos dentales más frecuentes. Y lo mejor es que la atención es exclusiva en la '+
-    'red de clínicas <strong>Uno Salud Dental</strong>, más de 80 clínicas a lo largo de todo Chile.</p>'; }},
+    '<p>Muy buenos días / tardes, usted habla con <em>[su nombre]</em>, lo llamo por ser cliente Bci.</p>'+
+    '<p>¿Cómo está?</p>'+
+    '<p class="nota">Empatizar.</p>'+
+    '<p>El motivo de mi llamado es para entregarle una información importante, son buenas noticias, no le quitaré mucho tiempo.</p>'+
+    '<p>Primero que todo, queremos agradecer su permanencia como cliente y contarle que Bci pone a su disposición el día de hoy '+
+    'una completa cobertura dental que le cubrirá hasta el 100% en los tratamientos dentales más frecuentes.</p>'+
+    '<p>Y lo mejor es que la atención es exclusiva en la red de clínicas <strong>Uno Salud Dental</strong>, '+
+    'que son más de 80 clínicas a lo largo de todo Chile.</p>'; }},
 
-  {t:"Urgencias, a costo $0", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Tendrá los siguientes tratamientos de urgencia dental <strong>sin costo</strong>, en caso de dolor, inflamación o sangrado. Por ejemplo:</p>'+
-    '<ul><li>Extracciones simples</li>'+
-    '<li>Trepanación, que es la primera parte del tratamiento de conducto</li>'+
-    '<li>Colocación de cemento o tapadura temporal</li>'+
-    '<li>Urgencia protésica: recementación de corona, puentes, incrustaciones y reparación de prótesis</li></ul>'+
-    '<p class="nota">Sin tope. Carencia de 48 horas hábiles.</p>'; }},
+  {t:"Urgencias dentales", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Tendrá los siguientes tratamientos de <strong>urgencias dentales, sin costo (a costo 0)</strong>, '+
+    'en caso de dolor, inflamación y sangrado, por ejemplo:</p>'+
+    '<ul>'+
+      '<li>Extracciones simples</li>'+
+      '<li>Trepanación, que es la primera parte del tratamiento de conducto (entre otros)</li>'+
+      '<li>Colocación de cemento o tapadura temporal</li>'+
+      '<li>Urgencia protésica: recementación de corona, puentes, incrustaciones y reparación en el sillón de otro tipo de prótesis</li>'+
+    '</ul>'; }},
 
   {t:"Prevención", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Además le cubrimos tratamientos de prevención: evaluación y diagnóstico, radiografías pieza a pieza, y una '+
-    '<strong>limpieza profunda</strong> (profilaxis más remoción de cálculos supragingivales), para remover la placa '+
-    'bacteriana y el sarro acumulados entre los dientes.</p>'+
-    '<p>Los odontólogos recomiendan una limpieza al menos una vez al año, y usted la tendría sin costo con nosotros '+
-    'dentro de 30 días.</p>'; }},
+    '<p>Lo mejor es que además le cubrimos tratamientos de prevención como:</p>'+
+    '<ul>'+
+      '<li>Evaluación y diagnóstico</li>'+
+      '<li>Radiografías pieza a pieza</li>'+
+      '<li>Extracciones simples</li>'+
+      '<li>Una limpieza profunda (profilaxis + remoción de cálculos supragingivales), para remover la placa bacteriana '+
+          'y el sarro acumulados entre los dientes</li>'+
+    '</ul>'+
+    '<p>Los odontólogos, don <em>[nombre]</em>, recomiendan realizar una limpieza al menos 1 vez al año, y usted la tendría '+
+    'sin costo con nosotros dentro de 30 días, al igual que el resto de los tratamientos.</p>'+
+    '<p>Y en el caso de urgencia dental, usted puede comenzar a utilizarlo en <strong>48 horas hábiles</strong>.</p>'; }},
 
-  {t:"Tratamientos con copago", p:["full","ninos"], html:function(d){ return ''+
-    '<p>Para los tratamientos más complejos, que de forma particular suelen ser los más costosos, también podrá acceder '+
-    'dentro de 30 días, con copagos claros y fijos conocidos antes de realizarlos:</p>'+
-    '<ul><li><strong>5 tapaduras en resina al año</strong>, a $12.000 cada una. En otras clínicas son unos $45.000.</li>'+
-    '<li><strong>2 tratamientos de conducto al año</strong>, en muelas, premolares o dientes anteriores, a $12.000 cada uno. '+
-    'El valor referencial en otras clínicas va de $150.000 a $300.000.</li></ul>'+
-    '<p>Y hasta un <strong>65% de descuento</strong> en: extracción de muelas del juicio, planos de relajación para el bruxismo, '+
-    'cambio de tapadura de amalgama a resina, tapaduras de resina adicionales y tratamientos de conducto adicionales.</p>'; }},
+  {t:"Tratamientos con copago · sólo Full y Full + Niños", p:["full","ninos"], html:function(d){ return ''+
+    '<p>Importante indicar, don <em>[nombre]</em>, que para los tratamientos más complejos y que suelen ser los más costosos '+
+    'en forma particular, usted también podrá acceder a ellos dentro de 30 días, a través de copagos claros y fijos antes '+
+    'de su realización. Se los detallo:</p>'+
+    '<ul>'+
+      '<li><strong>5 tapaduras en resina por año</strong> con un costo de $12.000 cada una '+
+          '($45.000 es el valor actual en otras clínicas)</li>'+
+      '<li><strong>2 tratamientos de conducto</strong> en muelas, premolares o dientes anteriores al año, con un costo de '+
+          '$12.000 cada uno ($150.000 a $300.000 aprox. es el valor referencial en otras clínicas)</li>'+
+    '</ul>'+
+    '<p>Contará además con <strong>hasta un 65% de descuento</strong> en precio promedio de mercado para los siguientes '+
+    'tratamientos más frecuentes de odontología general:</p>'+
+    '<ul>'+
+      '<li>Extracciones de las muelas del juicio</li>'+
+      '<li>Planos de relajación para el bruxismo</li>'+
+      '<li>Cambio de tapadura de amalgama a resina (cambio estético)</li>'+
+      '<li>Tapaduras de resina adicionales</li>'+
+      '<li>Tratamientos de conducto adicionales</li>'+
+    '</ul>'; }},
 
-  {t:"Odontología para niños", p:["ninos"], clase:"clave", html:function(d){ return ''+
-    '<p>Y como usted tiene niños menores de 14 años, le entregamos <strong>11 procedimientos adicionales</strong> asociados a '+
-    'dientes temporales, a costo cero y sin tope, que podrá utilizar dentro de 30 días.</p>'; }},
-
-  {t:"Programas de salud y bienestar", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Además, sin costo, accede al <strong>Programa de Salud y Bienestar de Bci</strong>, con 13 programas: telemedicina, '+
-    'salud mental, nutrición, kinesiología, fonoaudiología, entre otros. Uso ilimitado y atención multicanal.</p>'+
-    '<p>Para acceder debe descargar la aplicación <strong>Care Assistance</strong> y seguir las instrucciones que recibirá en el '+
-    'correo de bienvenida.</p>'; }},
+  {t:"Programa de Salud y Bienestar", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Y de manera adicional le quiero contar que con este seguro podrá acceder sin costo al '+
+    '<strong>Programa de Salud y Bienestar de Bci</strong>, el cual cuenta con 13 programas de salud, tales como:</p>'+
+    '<ul>'+
+      '<li>Telemedicina</li><li>Salud mental</li><li>Nutrición</li><li>Kinesiología</li><li>Fonoaudiología</li>'+
+      '<li>Entre otras</li>'+
+    '</ul>'+
+    '<p>Sin costo adicional, de uso ilimitado, con atención multicanal y profesionales de la salud altamente calificados.</p>'+
+    '<p>Para acceder debe descargar la aplicación de <strong>Care Assistance</strong> y seguir las instrucciones que recibirá '+
+    'en el correo de bienvenida.</p>'; }},
 
   {t:"Muerte accidental", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Complementando lo anterior, existe una protección frente a accidentes personales que terminen en fallecimiento '+
-    '(sólo titular), que entrega una indemnización a sus herederos legales de <span class="dato">50 UF</span>'+
-    (d.ap ? ', unos <span class="dato">'+d.ap+'</span>' : '')+'. Dinero de libre disposición.</p>'+
-    '<p>Es una cobertura completa, ¿verdad?</p>'; }},
+    '<p>Bueno, finalmente y complementando las asistencias indicadas, don <em>[nombre]</em>, existe una protección frente a '+
+    'accidentes personales que usted pueda sufrir y terminen en fallecimiento (sólo titular), entregando una indemnización '+
+    'a sus herederos legales de <span class="dato">50 UF</span>' + (d.ap ? ', <span class="dato">' + d.ap + '</span> aprox' : '') + '.</p>'+
+    '<p>Dinero de libre disposición.</p>'+
+    '<p>Es una cobertura full y completa, ¿verdad?</p>'; }},
 
   {t:"Sin reembolsos", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Lo mejor es que no trabajamos con reembolso, así que puede olvidarse de comprar bonos y de los papeleos. '+
-    'Usted agenda la primera hora llamando al <strong>227501096</strong>, en cualquiera de las clínicas de la red Uno Salud, '+
-    'donde le aplicarán todos los descuentos y valores automáticamente en su presupuesto.</p>'; }},
+    '<p>Lo mejor es que no trabajamos con reembolso, así que puede olvidarse de comprar bonos y los papeleos.</p>'+
+    '<p>Es muy simple: usted agenda la primera hora llamando al <strong>227501096</strong>, en cualquiera de las clínicas '+
+    'de la red Uno Salud, en donde le aplicarán todos los descuentos y valores que le he mencionado automáticamente '+
+    'en su presupuesto.</p>'; }},
 
   {t:"Requisitos", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Usted cumple con los requisitos, ya que es mayor de 18 años y menor de 70 años. La permanencia máxima es hasta '+
-    'un día antes de cumplir los 71 años.</p>'+
+    '<p>Usted, don <em>[nombre]</em>, cumple con los requisitos ya que es mayor de 18 años y menor de 70 años.</p>'+
+    '<p>Y la permanencia máxima es hasta un día antes de cumplir los 71 años.</p>'+
     (d.cargas > 0
-      ? '<p>Puede incorporar adicionales, cónyuge e hijos. La edad mínima de ingreso de sus hijos es de <strong>14 días</strong> '+
-        'y la permanencia es hasta los <strong>24 años y 0 días</strong>. Sus adicionales contarían con la cobertura dental y los programas.</p>'+
-        '<p class="nota">Necesito de cada adicional: nombre completo, RUT, fecha de nacimiento y parentesco. Los cuatro datos.</p>'
+      ? '<p>Don <em>[nombre]</em>, además usted puede incorporar adicionales (cónyuge e hijos).</p>'+
+        '<p>La edad mínima de ingreso de sus hijos es de <strong>14 días</strong> y la permanencia es hasta los '+
+        '<strong>24 años 0 días</strong>.</p>'+
+        '<p>Y sus adicionales contarían con la cobertura de asistencia dental y los 10 programas.</p>'+
+        '<p class="nota">Así dice el script: "10 programas" aquí y "13 programas" más arriba.</p>'
       : ''); }},
 
+  {t:"Si no quiere el Full · Plan Urgencia + prevención", p:["full"], clase:"ojo", html:function(d){ return ''+
+    '<p class="nota">Sólo si el cliente se niega a tomar el Plan Full.</p>'+
+    '<p>Como no queremos que se quede sin cobertura y lo tome por sorpresa un dolor en sus dientes, ofrecemos por sólo '+
+    '<span class="dato">' + (d.clpBasico || '—') + '</span> aproximadamente mensuales, es decir, '+
+    '<span class="dato">UF ' + (d.ufBasico || '—') + '</span>, todas las urgencias dentales que ya le mencioné más '+
+    'tratamientos de prevención.</p>'; }},
+
+  {t:"Plan niños", p:["ninos"], clase:"clave", html:function(d){ return ''+
+    '<p>Además, don <em>[nombre]</em>, en caso de tener niños menores de 14 años, le entregamos '+
+    '<strong>11 procedimientos asociados a dientes temporales</strong> adicionales, a costo cero y sin tope, '+
+    'las que podrá utilizar dentro de 30 días.</p>'+
+    '<p class="nota">Hay un menor de 14 en el grupo: no corresponde ofrecer Urgencias ni Full.</p>'; }},
+
   {t:"El precio", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
-    '<p>Lo más importante: todas las coberturas, asistencias y beneficios mencionados tienen un costo de '+
-    '<span class="dato">'+d.uf+' UF</span> fijas, que son <span class="dato">'+d.clp+'</span> aproximadamente, '+
-    'que se cargarán automáticamente en su cuenta Bci terminada en los dígitos <em>[XXX]</em>, en su próximo estado de cuenta.</p>'+
-    '<p class="nota">'+d.plan+' · '+d.compos+' · calculado con la UF de hoy, $'+d.ufdia+'.</p>'+
-    '<p>Además, este mes tenemos una promoción especial: la compañía le otorga <em>[X]</em> cuota sin costo durante el primer '+
-    'año de vigencia. ¿Qué fecha de cargo le acomoda? ¿Lo incorporo, verdad?</p>'; }},
+    '<p>Lo más importante, don <em>[nombre]</em>, es que todas las coberturas, asistencias y beneficios mencionados tienen '+
+    'un costo de <span class="dato">UF ' + d.uf + '</span> fijas, que son <span class="dato">' + d.clp + '</span> aprox.</p>'+
+    '<p>Serán cargados automáticamente en su cuenta Bci terminada en los dígitos <em>[XXX]</em>, recién en su próximo '+
+    'estado de cuenta.</p>'+
+    '<p class="nota">' + d.plan + ' · ' + d.compos + ' · calculado con la UF de hoy, $' + d.ufdia + '.</p>'+
+    '<p>Además, don <em>[nombre]</em>, este mes nos encontramos con una promoción especial, donde la compañía durante este '+
+    'mes le otorgará <em>[X]</em> cuota sin costo para usted en el primer año de vigencia.</p>'+
+    '<p>¿Qué fecha de cargo le acomoda?</p>'+
+    '<p>¿Lo incorporo, verdad?</p>' +
+    (d.plan === "Plan Urgencias"
+      ? '<p class="nota">Para ofrecer más cobertura, elige el Plan 3 Full: su script agrega los tratamientos con copago.</p>' : ''); }},
 
-  {t:"Si duda o lo rechaza", p:["full"], clase:"ojo", html:function(d){ return ''+
-    '<p>Como no queremos que se quede sin cobertura y lo tome por sorpresa un dolor de muelas, le ofrecemos por sólo '+
-    '<span class="dato">'+(d.clpBasico || '—')+'</span> mensuales, es decir <span class="dato">'+(d.ufBasico || '—')+' UF</span>, '+
-    'todas las urgencias dentales que ya le mencioné, más los tratamientos de prevención.</p>'+
-    '<p class="nota">Es el Plan Urgencias. Pincha esa fila para leer su script.</p>'; }},
+  {t:"Opcional · sólo como argumento", p:["basico","full","ninos"], clase:"ojo", html:function(d){ return ''+
+    '<p class="nota">Opcional. Úsalo sólo como argumento.</p>'+
+    '<p>Le otorgaremos además 3 meses gratuitos del seguro de sala de urgencia, con el que tendrá una cobertura de '+
+    '500 UF en caso de muerte accidental para sus herederos legales ($20.500.000 aprox.) y a su vez 9 UF ($370.000) '+
+    'para cubrir los gastos de atención inicial de una urgencia médica por accidentes de manera ilimitada y hasta 3 veces '+
+    'por enfermedad.</p>'; }},
 
-  {t:"Si quiere más cobertura", p:["basico"], clase:"ojo", html:function(d){ return ''+
-    '<p>Si además quiere cubrir tapaduras y tratamientos de conducto, tenemos el Plan Full por '+
-    '<span class="dato">'+(d.clpFull || '—')+'</span> mensuales: agrega 5 tapaduras y 2 tratamientos de conducto al año '+
-    'con copago de $12.000 cada uno, y hasta 65% de descuento en el resto.</p>'+
-    '<p class="nota">Pincha la fila del Plan 3 Full para leer su script completo.</p>'; }},
-
-  {t:"Por qué no puede quedar en un plan menor", p:["ninos"], clase:"ojo", html:function(d){ return ''+
-    '<p class="nota">Recordatorio interno, no se lee al cliente: hay un menor de 14 años en el grupo. La odontología infantil '+
-    'sólo existe en este plan, así que no corresponde ofrecer Urgencias ni Full.</p>'; }},
-
-  {t:"Pregunta de contratación · textual", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
-    '<p>Antes de continuar le informo que, para su tranquilidad y respaldo, esta conversación está siendo grabada.</p>'+
-    '<p>Señor o señora <em>[apellido]</em>, entonces con fecha <em>[DD/MM/AA]</em>, ¿acepta la contratación en forma '+
-    'voluntaria del <strong>Seguro Dental Modular Bci</strong>, con las coberturas detalladas anteriormente, con un valor '+
-    'mensual de <span class="dato">'+d.uf+' UF</span> fijas, <span class="dato">'+d.clp+'</span> aproximadamente, '+
-    'IVA incluido? ¿Acepta?</p>'+
-    '<p class="nota">Sólo vale “sí”, “acepto” o “de acuerdo”. No sirve “ok”, “ya” ni “correcto”.</p>'; }},
+  {t:"Compañía", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Don <em>[nombre]</em>, estas coberturas son otorgadas por Bci Seguros Vida en conjunto con Bci Corredores de Seguros.</p>'; }},
 
   {t:"Validación de datos", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Entonces, para cumplir con la normativa y poder realizar el correcto envío de su póliza, le voy a solicitar '+
-    'que me corrobore si los datos que tengo en pantalla están vigentes y correctos.</p>'+
-    '<ul><li>Fecha de nacimiento</li><li>Domicilio completo</li><li>Teléfono de contacto</li>'+
-    '<li>Correo electrónico <span class="nota">(fundamental para enviar la póliza vía email)</span></li>'+
-    '<li>Nombre completo y RUT</li></ul>'+
-    (d.cargas > 0 ? '<p class="nota">De cada asegurado adicional: nombre completo, RUT, fecha de nacimiento y parentesco. Los cuatro son obligatorios.</p>' : ''); }},
+    '<p>Entonces, para cumplir con la normativa y poder realizar el correcto envío de su póliza, le voy a solicitar que me '+
+    'corrobore si los datos que tengo en pantalla están vigentes y correctos.</p>'+
+    '<ul>'+
+      '<li>Fecha de nacimiento</li>'+
+      '<li>Domicilio completo</li>'+
+      '<li>Teléfono de contacto</li>'+
+      '<li>Correo electrónico <span class="nota">(fundamental para enviar la póliza vía email)</span></li>'+
+      '<li>Nombre completo del titular <span class="nota">(en negación, 50/50)</span></li>'+
+      '<li>RUT <span class="nota">(en negación, 50/50)</span></li>'+
+    '</ul>'+
+    (d.cargas > 0
+      ? '<p class="nota">De cada asegurado adicional, obligatorio: nombre completo, RUT, fecha de nacimiento y parentesco.</p>'
+      : ''); }},
+
+  {t:"Grabación", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Antes de continuar le informo que, para su tranquilidad y respaldo, esta conversación está siendo grabada.</p>'; }},
+
+  {t:"Exclusiones del seguro", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Estas son algunas de las principales exclusiones de esta póliza. No se cubrirá en caso de que el origen o '+
+    'consecuencia de los daños sean por:</p>'+
+    '<ul>'+
+      '<li>Guerra, peleas, riñas, actos delictivos</li>'+
+      '<li>Suicidio o intento de suicidio</li>'+
+      '<li>Intoxicación o encontrarse bajo el efecto de cualquier narcótico o droga</li>'+
+      '<li>Conducción en estado de ebriedad</li>'+
+      '<li>Negligencia o imprudencia</li>'+
+      '<li>Prestación de servicios en las fuerzas armadas o funciones policiales</li>'+
+      '<li>Movimientos sísmicos desde el grado 8 inclusive en la escala de Mercalli</li>'+
+      '<li>Viaje o vuelo en vehículo aéreo de itinerario no regular</li>'+
+    '</ul>'+
+    '<p>En relación con el Programa Dental, se excluyen:</p>'+
+    '<ul>'+
+      '<li>Las cirugías de alta complejidad</li>'+
+      '<li>Cirugías para implantes que se realicen fuera de la red Uno Salud</li>'+
+      '<li>Costos de laboratorio y medicación</li>'+
+    '</ul>'; }},
+
+  {t:"Pregunta de contratación · textual", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
+    '<p>Sr.(a) <em>[apellido]</em>, entonces con fecha <em>[DD/MM/AA]</em>, ¿acepta la contratación en forma voluntaria del '+
+    '<strong>Seguro Dental Modular Bci</strong> con las coberturas detalladas anteriormente, con un valor mensual de '+
+    '<span class="dato">UF ' + d.uf + '</span> fijas, <span class="dato">' + d.clp + '</span> aprox., IVA incluido? ¿Acepta?</p>'+
+    '<p class="nota">La respuesta puede ser sí, acepto o de acuerdo. No se acepta ok, ya, correcto, etc.</p>'; }},
 
   {t:"Medio de pago · póliza en línea", p:["basico","full","ninos"], envio:"linea", clase:"clave", html:function(d){ return ''+
-    '<p>“Sr./Sra. <em>[apellido]</em>, usted ¿autoriza el cargo de la prima mensual del seguro, el que será '+
-    'descontado de su cuenta corriente <em>[N.º medio de pago]</em> del banco Bci? ¿Acepta?”</p>'+
-    '<p class="nota">Esperar respuesta. Esta es la opción para el cliente que tiene cuenta Bci.</p>'; }},
+    '<p>Sr./Sra. <em>[apellido]</em>, usted ¿autoriza el cargo de la prima mensual del seguro, el que será descontado de su '+
+    'cuenta corriente <em>[N.º medio de pago]</em> del banco Bci? ¿Acepta?</p>'+
+    '<p class="nota">Esperar respuesta.</p>'; }},
 
   {t:"Medio de pago · link de pago", p:["basico","full","ninos"], envio:"link", clase:"clave", html:function(d){ return ''+
     '<p class="nota">Pago débito: cobro inmediato. Pago crédito: próximo ciclo de facturación.</p>'+
-    '<p>“Sr./Sra. <em>[apellido]</em>, en este momento le llegará a su correo electrónico un correo con el asunto '+
-    '<strong>Multicotizador – Pago de primera cuota</strong>, donde encontrará el link de pago, en naranjo: '+
-    '<strong>Pagar aquí</strong>.</p>'+
-    '<p>Autoriza el cargo de la prima mensual del Seguro Dental, el que será descontado en la forma de pago que '+
-    'usted seleccione cuando ingrese al link enviado a su correo. ¿Acepta?”</p>'+
+    '<p>Sr./Sra. <em>[apellido]</em>, en este momento le llegará a su correo electrónico un correo con el asunto '+
+    '<strong>“Multicotizador – Pago de primera cuota”</strong>, donde encontrará el link de pago (en naranjo: '+
+    '<strong>“Pagar aquí”</strong>).</p>'+
+    '<p>¿Autoriza el cargo de la prima mensual del Seguro Dental, el que será descontado en la forma de pago que usted '+
+    'seleccione cuando ingrese al link enviado a su correo? ¿Acepta?</p>'+
     '<p class="nota">Esperar respuesta.</p>'+
-    '<p>“Si no puede realizar el pago en este momento, le comento que este link tiene una vigencia de '+
-    '<strong>48 horas</strong>. Mientras no realice el pago, este seguro no está vigente y no puede hacer uso de '+
-    'las asistencias y las coberturas.”</p>'; }},
+    '<p>Si no puede realizar el pago en este momento, le comento que este link tiene una vigencia de <strong>48 horas</strong>.</p>'+
+    '<p>Mientras no realice el pago, este seguro no está vigente y no puede hacer uso de las asistencias y las coberturas.</p>'; }},
 
   {t:"Después del pago", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>“Lo invitamos a siempre estar al día en el pago de su prima mensual, para así poder utilizar su cobertura '+
-    'cuando la necesite.</p>'+
-    '<p>Haremos llegar a su correo electrónico dentro de unos minutos, cuando registre su medio de pago, su póliza '+
-    'de seguro y todas las comunicaciones relativas a esta.”</p>'; }},
-
-  {t:"Exclusiones", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Estas son algunas de las principales exclusiones. No se cubre cuando el origen sean: guerra, peleas o riñas, actos '+
-    'delictivos, suicidio o intento, intoxicación o efecto de drogas, conducción en estado de ebriedad, negligencia o '+
-    'imprudencia, servicio en fuerzas armadas o policiales, sismos de grado 8 o superior, o vuelo en aeronave de itinerario '+
-    'no regular.</p>'+
-    '<p>En el programa dental se excluyen cirugías de alta complejidad, cirugías para implantes fuera de la red Uno Salud, '+
-    'costos de laboratorio y medicación.</p>'; }},
+    '<p>Lo invitamos a siempre estar al día en el pago de su prima mensual, para así poder utilizar su cobertura cuando la necesite.</p>'+
+    '<p>Haremos llegar a su correo electrónico dentro de unos minutos (cuando registre su medio de pago) su póliza de seguro '+
+    'y todas las comunicaciones relativas a esta.</p>'; }},
 
   {t:"Cierre normativo", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Las condiciones generales están registradas en la CMF bajo el código <strong>POL 3 2013 0085 Alt. A</strong> para '+
-    'muerte accidental y <strong>POL 3 2019 0055</strong> para la cobertura dental.</p>'+
-    '<p>Bci Seguros Vida y Bci Corredores de Seguros tratarán sus datos para evaluar y mejorar sus servicios. '+
-    '¿Autoriza el tratamiento de los mismos?</p>'+
-    '<p>El código de operación asociado a esta venta es <em>[RUT o ID de venta]</em>. Guárdelo para futuras consultas. '+
-    'La grabación constituye prueba de la información entregada y de la aceptación del contrato.</p>'+
-    '<p>La vigencia comienza hoy, es anual y renovable automáticamente. Puede retractarse dentro de 10 días desde que '+
-    'reciba la póliza, sin causa ni cargo, con devolución de la prima pagada.</p>'+
-    '<p class="nota">Centro de Respuesta Inmediata 600 6000 292. Asistencia dental 227501096.</p>'; }},
+    '<p>Las condiciones generales de su póliza están registradas en la CMF bajo el código <strong>POL 3 2013 0085 Alt. A</strong> '+
+    'para muerte accidental y <strong>POL 3 2019 0055</strong> para la cobertura dental.</p>'+
+    '<p>Don/Sra. <em>[nombre y apellido]</em>, le comento que la compañía Bci Seguros Vida y Bci Corredores de Seguros '+
+    'tratarán sus datos para evaluar y mejorar sus servicios por medio de análisis de datos y estudios analíticos, '+
+    'resolver consultas, publicidad y realizar gestiones propias de sus negocios.</p>'+
+    '<p>¿Autoriza el tratamiento de los mismos?</p>'+
+    '<p>Don/Sra., el código de operación asociado a esta venta es <em>[RUT del cliente o ID de venta]</em>.</p>'+
+    '<p>Guárdelo para futuras consultas o modificaciones a la póliza.</p>'+
+    '<p>La grabación de esta conversación constituye prueba de la información proporcionada y la aceptación de este contrato.</p>'+
+    '<p>Le informo que la vigencia de su seguro comenzará a regir a contar de hoy <em>[DD/MM/AAAA]</em> y tendrá vigencia '+
+    'anual y renovable automáticamente por periodos iguales y sucesivos de un año.</p>'+
+    '<p>El asegurado podrá poner término unilateral al seguro en cualquier momento, sin expresión de causa, '+
+    'comunicándolo al asegurador.</p>'+
+    '<p>Le recuerdo que la contratación es de carácter voluntario y usted puede retractarse del seguro dentro del plazo '+
+    'de diez días contado desde que reciba la póliza, sin expresión de causa ni cargo alguno, teniendo el derecho a la '+
+    'devolución de la prima que hubiere pagado.</p>'+
+    '<p>El seguro terminará en caso de no pago de prima, al cumplir la edad de permanencia y/o en caso de fallecimiento.</p>'+
+    '<p>Las demás causales de término anticipado están señaladas en las respectivas POL.</p>'+
+    '<p>Visítenos en el sitio web www.bci.cl/corredora-de-seguros/diversificacion-de-cartera</p>'+
+    '<p>Desde ya le damos la más cordial bienvenida a Bci Corredores de Seguros y a Bci Seguros Vida S.A.</p>'+
+    '<p>Revise su póliza una vez recibida y ante cualquier consulta, solicitud de grabación, entre otros, puede contactarnos '+
+    'al Centro de Respuesta Inmediata al fono <strong>600 6000 292</strong>.</p>'+
+    '<p>En caso de que el asegurado requiera los servicios de asistencia dental, deberá comunicarse al número telefónico '+
+    '<strong>227501096</strong>.</p>'; }},
 
   {t:"Encuesta EPA", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>“Don o señorita <em>[nombre]</em>, para finalizar lo derivaré a una pequeña encuesta de 2 preguntas para que '+
-    'califique mi atención en esta llamada, ¿de acuerdo? Que tenga buen día.”</p>'+
-    '<p class="nota">En el sistema: Transfer-Conf → ingroup ENCUESTA_EPA → CLOSER LOCAL, y luego tipificar. '+
+    '<p>Don/Srta. <em>[nombre]</em>, para finalizar lo derivaré a una pequeña encuesta de 2 preguntas para que califique '+
+    'mi atención en esta llamada, ¿de acuerdo?</p>'+
+    '<p>Que tenga buen día / tarde.</p>'+
+    '<p class="nota">En el sistema: Transfer-Conf → ingroup ENCUESTA_EPA → CLOSER LOCAL, y tipificar. '+
     'Obligatoria salvo derivación a IVR por pago con tarjeta de crédito.</p>'; }}
 ];
 
@@ -671,8 +740,11 @@ let envio = "linea";
 
 function pintarGuion(){
   const app = document.getElementById("app");
+  const yaAbierto = app.classList.contains("abierto");
   app.classList.toggle("abierto", guionAbierto);
   if(!guionAbierto) return;
+  const caja = document.getElementById("guion");
+  const scroll = caja.scrollTop;
 
   const plan = PLANES.filter(function(p){ return p.id===planElegido; })[0];
   const cent = plan.precios[nCargas];
@@ -705,375 +777,68 @@ function pintarGuion(){
     .map(function(sec){
       return '<div class="gs '+(sec.clase||"")+'"><h4>'+sec.t+"</h4>"+sec.html(d)+"</div>";
     }).join("");
+
+  // Se redibuja con cada cambio (una edad, el envío): que no salte de lugar.
+  // Al abrirlo, en cambio, se lleva a la frase donde se quedó.
+  caja.scrollTop = scroll;
+  marcarPasos(!yaAbierto);
 }
 
 /* ============================================================
-   SUCURSALES POR COMUNA, LEÍDAS DE LOS SITIOS DE CADA RED
-   La extensión corre en el Chrome del ejecutivo, así que lee
-   unosalud.cl y e-dentalsys.com directamente (los permisos están
-   en el manifest). Lo leído se guarda un día, para no consultar
-   el sitio en cada llamada.
+   LECTURA GUIADA, LETRA Y CONTRASTE
+   Cada frase del script es un paso. Las flechas ↑ ↓ avanzan y
+   retroceden, la frase actual queda marcada y lo ya leído se
+   atenúa. Se recuerda en qué frase quedó cada plan.
+   La letra, el contraste y el modo guiado son preferencias del
+   ejecutivo: no se borran con "Nuevo cliente".
    ============================================================ */
-const RED = {
-  unosalud: {
-    nombre: "Uno Salud",
-    sitio: "https://www.unosalud.cl/region-comuna/",
-    indices: ["https://www.unosalud.cl/region-comuna/", "https://www.unosalud.cl/clinicas/"],
-    comuna: function(slug){ return "https://www.unosalud.cl/region-comuna/" + slug + "/"; }
-  },
-  edental: {
-    nombre: "i-dental",
-    sitio: "https://www.e-dentalsys.com/#clinicas",
-    portada: "https://www.e-dentalsys.com/"
+const prefs = {letra: 100, contraste: "normal", guiada: true};
+let pasos = {basico: 0, full: 0, ninos: 0};
+
+function aplicarPrefs(){
+  const g = document.getElementById("guion");
+  g.style.setProperty("--gfs", (13 * prefs.letra / 100).toFixed(1) + "px");
+  g.dataset.contraste = prefs.contraste;
+  g.classList.toggle("guiada", prefs.guiada);
+  document.getElementById("letraTam").textContent = prefs.letra + "%";
+  document.getElementById("letraMenos").disabled = prefs.letra <= 80;
+  document.getElementById("letraMas").disabled = prefs.letra >= 220;
+  [].forEach.call(document.querySelectorAll("#contraste button"), function(b){
+    b.classList.toggle("on", b.dataset.c === prefs.contraste);
+  });
+  document.getElementById("guiada").classList.toggle("on", prefs.guiada);
+  document.getElementById("pasoAnt").disabled = !prefs.guiada;
+  document.getElementById("pasoSig").disabled = !prefs.guiada;
+  // La barra queda pegada bajo la cabecera, cuya altura cambia con la letra
+  const cab = g.querySelector(".guion-cab");
+  if(cab) g.style.setProperty("--gb-top", cab.offsetHeight + "px");
+}
+function guardarPrefs(){ almacen.escribir("prefs", prefs); }
+
+function frases(){
+  return [].slice.call(document.querySelectorAll("#guionCuerpo .gs p:not(.nota), #guionCuerpo .gs li"));
+}
+function marcarPasos(llevar){
+  const ps = frases();
+  const n = ps.length;
+  const i = n ? Math.max(0, Math.min(n - 1, pasos[planElegido] || 0)) : 0;
+  pasos[planElegido] = i;
+  ps.forEach(function(el, k){
+    el.classList.add("paso");
+    el.dataset.i = k;
+    el.classList.toggle("actual", prefs.guiada && k === i);
+    el.classList.toggle("leido", prefs.guiada && k < i);
+  });
+  document.getElementById("pasoNum").textContent = n ? (i + 1) + " / " + n : "—";
+  if(llevar && prefs.guiada && ps[i]){
+    const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    ps[i].scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"});
   }
-};
-const DIA = 24 * 60 * 60 * 1000;
-const diag = {};   // lo que vio la última lectura de cada red, para depurar
-
-/* ---------- texto ---------- */
-function norm(t){
-  return String(t || "").toLowerCase()
-    .normalize("NFD").replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 }
-function esc(t){
-  return String(t == null ? "" : t).replace(/[&<>"']/g, function(c){
-    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
-  });
-}
-function urlSegura(u){ return /^https:\/\//i.test(String(u || "")) ? u : ""; }
-function humanizar(slug){
-  return String(slug || "").split("-").filter(Boolean).map(function(w){
-    return w.charAt(0).toUpperCase() + w.slice(1);
-  }).join(" ");
-}
-function txt(el){ return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : ""; }
-
-// Texto de un bloque separado en líneas, cortando donde corta el diseño
-const BLOQUE = /^(ADDRESS|ARTICLE|ASIDE|BLOCKQUOTE|BR|DD|DIV|DL|DT|FIGCAPTION|FIGURE|FOOTER|FORM|H[1-6]|HEADER|HR|LI|MAIN|NAV|OL|P|SECTION|TABLE|TBODY|TD|TH|TR|UL)$/;
-function lineas(el){
-  const out = []; let buf = "";
-  function cortar(){ const t = buf.replace(/\s+/g, " ").trim(); if(t) out.push(t); buf = ""; }
-  (function rec(n){
-    n.childNodes.forEach(function(c){
-      if(c.nodeType === 3){ buf += c.textContent; return; }
-      if(c.nodeType !== 1 || /^(SCRIPT|STYLE|NOSCRIPT|SVG|BUTTON|IFRAME|SELECT|TEMPLATE)$/.test(c.tagName)) return;
-      const b = BLOQUE.test(c.tagName);
-      if(b) cortar();
-      rec(c);
-      if(b) cortar();
-    });
-  })(el);
-  cortar();
-  return out;
-}
-
-const RE_FONO = /(\+?56[\s-]?)?(600[\s-]?\d{3}[\s-]?\d{4}|\(?22?\)?[\s-]?\d{3,4}[\s-]?\d{4}|9[\s-]?\d{4}[\s-]?\d{4})/;
-function pareceHorario(l){
-  return /(lunes|martes|miercoles|jueves|viernes|sabado|domingo|\blun\b|\bvie\b|\bsab\b)/.test(norm(l)) &&
-         /\d{1,2}[:.]\d{2}/.test(l);
-}
-function pareceDireccion(l){
-  if(l.length < 6 || l.length > 160 || !/\d/.test(l)) return false;
-  if(pareceHorario(l)) return false;
-  const sinFono = l.replace(RE_FONO, "").trim();
-  if(!/[a-záéíóúñ]{3,}/i.test(sinFono)) return false;          // sólo un teléfono
-  if(/^(tel|fono|telefono|whatsapp|llama)/.test(norm(l))) return false;
-  return /(\bav\b|av\.|avenida|calle|pasaje|camino|paseo|alameda|mall|local|piso|esquina|esq\.|n°|nº|#|\bsur\b|\bnorte\b|oriente|poniente)/i.test(l) ||
-         /[a-záéíóúñ]{3,}[^0-9]{0,40}\d{2,5}/i.test(l);
-}
-
-/* ---------- búsqueda tolerante ---------- */
-function distancia(a, b, max){
-  if(Math.abs(a.length - b.length) > max) return max + 1;
-  let prev = [], fila = [];
-  for(let j = 0; j <= b.length; j++) prev[j] = j;
-  for(let i = 1; i <= a.length; i++){
-    fila = [i]; let mejor = i;
-    for(let j = 1; j <= b.length; j++){
-      const costo = a.charCodeAt(i-1) === b.charCodeAt(j-1) ? 0 : 1;
-      fila[j] = Math.min(prev[j] + 1, fila[j-1] + 1, prev[j-1] + costo);
-      if(fila[j] < mejor) mejor = fila[j];
-    }
-    if(mejor > max) return max + 1;
-    prev = fila;
-  }
-  return prev[b.length];
-}
-function puntaje(consulta, candidato){
-  const q = norm(consulta), c = norm(candidato);
-  if(!q || !c) return null;
-  if(c === q) return 0;
-  if(c.startsWith(q)) return 1;
-  if(c.indexOf(q) !== -1) return 2;
-  const max = q.length <= 4 ? 1 : 2;
-  const d = distancia(q, c, max);
-  return d <= max ? 3 + d : null;
-}
-
-/* ---------- red y caché ---------- */
-async function traer(url){
-  const ctl = new AbortController();
-  const t = setTimeout(function(){ ctl.abort(); }, 12000);
-  try{
-    const r = await fetch(url, {signal: ctl.signal, credentials: "omit"});
-    const html = await r.text();
-    return {ok: r.ok, status: r.status, html: html, url: r.url || url};
-  }catch(e){
-    return {ok: false, status: 0, html: "", url: url,
-            error: e.name === "AbortError" ? "el sitio tardó demasiado" : "no hubo respuesta del sitio"};
-  }finally{ clearTimeout(t); }
-}
-function docDe(html){ return new DOMParser().parseFromString(html, "text/html"); }
-function cacheLeer(clave, maxEdad){
-  return new Promise(function(res){
-    almacen.leer(clave, function(v){ res(v && v.t && (Date.now() - v.t) < maxEdad ? v.d : null); });
-  });
-}
-function cacheEscribir(clave, d){ almacen.escribir(clave, {t: Date.now(), d: d}); }
-function muestraHTML(doc){
-  const b = doc.body ? doc.body.cloneNode(true) : null;
-  if(!b) return "";
-  b.querySelectorAll("script,style,noscript,svg,iframe,link,meta").forEach(function(x){ x.remove(); });
-  return b.innerHTML.replace(/\s+/g, " ").slice(0, 12000);
-}
-
-/* ---------- lectura de datos estructurados (JSON-LD) ---------- */
-function desdeJsonLd(doc){
-  const out = [];
-  doc.querySelectorAll('script[type="application/ld+json"]').forEach(function(s){
-    let j; try{ j = JSON.parse(s.textContent); }catch(e){ return; }
-    const pila = Array.isArray(j) ? j.slice() : [j];
-    while(pila.length){
-      const o = pila.pop();
-      if(!o || typeof o !== "object") continue;
-      ["@graph","location","department","subOrganization"].forEach(function(k){
-        if(Array.isArray(o[k])) pila.push.apply(pila, o[k]);
-      });
-      const tipo = [].concat(o["@type"] || []).join(" ");
-      if(!/Dentist|MedicalClinic|MedicalBusiness|LocalBusiness|Hospital/i.test(tipo)) continue;
-      const ad = o.address;
-      const dir = !ad ? "" : (typeof ad === "string" ? ad :
-                  [ad.streetAddress, ad.addressLocality].filter(Boolean).join(", "));
-      if(dir && o.name){
-        out.push({nombre: String(o.name), direccion: dir, telefono: o.telephone || "", horario: "",
-                  url: urlSegura(o.url), texto: o.name + " " + dir});
-      }
-    }
-  });
-  return out;
-}
-
-/* ---------- tarjetas: la caja que rodea a una clínica ---------- */
-const GENERICO = /^(ver|ver mas|agenda|agendar|reserva|reservar|mas info|mas informacion|como llegar|llamar|whatsapp|ir|detalle|conoce mas|leer mas|ver ficha|ver clinica)$/;
-function fuera(el){ return !!el.closest("header,nav,footer,[role=navigation],.menu,[class*='menu'],[id*='menu']"); }
-
-function tarjetaDe(a, esEnlace){
-  let n = a, previo = null;
-  for(let i = 0; i < 8 && n && n.tagName !== "BODY"; i++){
-    const propios = new Set([].filter.call(n.querySelectorAll ? n.querySelectorAll("a[href]") : [], esEnlace)
-      .map(function(x){ return (x.getAttribute("href") || "").replace(/[#?].*$/, "").replace(/\/+$/, ""); }));
-    if(propios.size > 1) return previo;              // ya abarca otra clínica: me quedo con el anterior
-    if(lineas(n).some(pareceDireccion)) return n;
-    previo = n; n = n.parentElement;
-  }
-  return null;
-}
-
-function datosDeTarjeta(card, a, base){
-  const ls = lineas(card);
-  const h = card.querySelector("h1,h2,h3,h4,h5,h6,strong,b,.title,[class*='titulo'],[class*='title'],[class*='nombre']");
-  let nombre = h ? txt(h) : "";
-  if(GENERICO.test(norm(nombre)) || nombre.length > 90 || pareceDireccion(nombre)) nombre = "";
-  if(!nombre && a){ const t = txt(a); if(t && !GENERICO.test(norm(t)) && t.length < 80 && !pareceDireccion(t)) nombre = t; }
-  if(!nombre){
-    nombre = ls.find(function(l){
-      return !pareceDireccion(l) && !RE_FONO.test(l) && !pareceHorario(l) && !GENERICO.test(norm(l)) && l.length < 70;
-    }) || "";
-  }
-  const direccion = ls.find(pareceDireccion) || "";
-  const fono = ls.join("  ").match(RE_FONO);
-  let url = "";
-  if(a){ try{ url = urlSegura(new URL(a.getAttribute("href"), base).href); }catch(e){} }
-  return {nombre: nombre, direccion: direccion, telefono: fono ? fono[0].trim() : "",
-          horario: ls.filter(pareceHorario).slice(0, 2).join(" · "), url: url, texto: ls.join(" ")};
-}
-
-// Último recurso: un título con una dirección justo debajo
-function desdeEncabezados(doc){
-  const out = [], vistas = {};
-  doc.querySelectorAll("h2,h3,h4,h5").forEach(function(h){
-    if(fuera(h)) return;
-    const nombre = txt(h);
-    if(!nombre || nombre.length > 80 || GENERICO.test(norm(nombre))) return;
-    let ls = [], n = h.nextElementSibling, k = 0;
-    while(n && k < 5 && !/^H[1-5]$/.test(n.tagName)){ ls = ls.concat(lineas(n)); n = n.nextElementSibling; k++; }
-    const dir = ls.find(pareceDireccion);
-    if(!dir || vistas[norm(dir)]) return;
-    vistas[norm(dir)] = 1;
-    const fono = ls.join("  ").match(RE_FONO);
-    out.push({nombre: nombre, direccion: dir, telefono: fono ? fono[0].trim() : "",
-              horario: ls.filter(pareceHorario).slice(0, 2).join(" · "), url: "", texto: nombre + " " + ls.join(" ")});
-  });
-  return out;
-}
-
-/* ---------- Uno Salud ---------- */
-function parsearIndiceUnoSalud(html){
-  const doc = docDe(html), m = {};
-  function agregar(slug, nombre){
-    slug = String(slug || "").toLowerCase();
-    if(!/^(?=.*[a-z])[a-z0-9-]{2,50}$/.test(slug) || m[slug]) return;
-    nombre = String(nombre || "").replace(/\s+/g, " ").trim();
-    if(!nombre || nombre.length > 60 || GENERICO.test(norm(nombre)) || /\d/.test(nombre)) nombre = humanizar(slug);
-    m[slug] = nombre.replace(/^cl[ií]nicas? dentales? en (la comuna de )?/i, "");
-  }
-  doc.querySelectorAll('a[href*="/region-comuna/"]').forEach(function(a){
-    const mm = (a.getAttribute("href") || "").match(/\/region-comuna\/([^\/?#]+)\/?/i);
-    if(mm) agregar(mm[1], txt(a));
-  });
-  doc.querySelectorAll("option").forEach(function(o){
-    const v = (o.getAttribute("value") || "").trim(), t = txt(o);
-    if(/\/region-comuna\//.test(v)){ const mm = v.match(/\/region-comuna\/([^\/?#]+)/); if(mm) agregar(mm[1], t); }
-    else if(t && !/selecciona|todas|elige/i.test(t)) agregar(v, t);
-  });
-  return Object.keys(m).map(function(slug){ return {slug: slug, nombre: m[slug]}; });
-}
-
-function parsearComunaUnoSalud(html, base){
-  const doc = docDe(html);
-  const d = {titulo: txt(doc.querySelector("title")), estrategia: "", muestra: muestraHTML(doc)};
-  const esFicha = function(a){
-    const h = a.getAttribute("href") || "";
-    return /\/clinicas\/[^\/?#]+\/?(?:[?#].*)?$/i.test(h) && !fuera(a);
-  };
-  const vistas = {}, porEnlace = [];
-  [].filter.call(doc.querySelectorAll("a[href]"), esFicha).forEach(function(a){
-    let k = ""; try{ k = new URL(a.getAttribute("href"), base).pathname.replace(/\/+$/, ""); }catch(e){ return; }
-    if(vistas[k]) return;
-    const card = tarjetaDe(a, esFicha);
-    if(!card) return;
-    const x = datosDeTarjeta(card, a, base);
-    if(!x.direccion) return;                         // sin dirección no es una sucursal (menús, migas)
-    if(!x.nombre) x.nombre = humanizar(k.split("/").pop());
-    vistas[k] = 1;
-    porEnlace.push(x);
-  });
-  const ld = desdeJsonLd(doc);
-  let lista = porEnlace.length >= ld.length ? porEnlace : ld;
-  d.estrategia = lista === porEnlace ? "enlaces a fichas" : "datos estructurados";
-  if(!lista.length){ lista = desdeEncabezados(doc); d.estrategia = "títulos"; }
-  d.encontradas = lista.length;
-  d.enlacesFicha = [].filter.call(doc.querySelectorAll("a[href]"), esFicha).length;
-  return {lista: lista, diag: d};
-}
-
-async function indiceUnoSalud(){
-  const c = await cacheLeer("red_uno_indice", 7 * DIA);
-  if(c && c.length) return c;
-  const m = {};
-  diag.indice = [];
-  for(const u of RED.unosalud.indices){
-    const r = await traer(u);
-    diag.indice.push({url: u, status: r.status, error: r.error || ""});
-    if(r.ok) parsearIndiceUnoSalud(r.html).forEach(function(x){ if(!m[x.slug]) m[x.slug] = x; });
-  }
-  const lista = Object.keys(m).map(function(k){ return m[k]; });
-  if(lista.length) cacheEscribir("red_uno_indice", lista);
-  return lista;
-}
-
-async function clinicasUnoSalud(comuna){
-  const clave = "red_uno_" + comuna.slug;
-  const c = await cacheLeer(clave, DIA);
-  if(c) return c;
-  const url = RED.unosalud.comuna(comuna.slug);
-  const r = await traer(url);
-  diag.unosalud = {url: url, status: r.status, error: r.error || ""};
-  if(r.status === 404) return {lista: [], url: url, error: "", sinPagina: true};
-  if(!r.ok) return {lista: [], url: url, error: r.error || ("el sitio respondió " + r.status)};
-  const p = parsearComunaUnoSalud(r.html, r.url);
-  Object.assign(diag.unosalud, p.diag);
-  const res = {lista: p.lista, url: url, error: ""};
-  if(p.lista.length) cacheEscribir(clave, res);       // un cero puede ser un fallo de lectura: no se guarda
-  return res;
-}
-
-/* ---------- i-dental ---------- */
-function parsearEdental(html, base){
-  const doc = docDe(html);
-  const d = {titulo: txt(doc.querySelector("title")), muestra: muestraHTML(doc)};
-  const zona = doc.getElementById("clinicas") ||
-               doc.querySelector('[id*="clinica" i],[class*="clinica" i],[id*="sucursal" i],[class*="sucursal" i],[id*="sede" i],[class*="sede" i]') ||
-               doc.body;
-  d.zona = zona === doc.body ? "toda la página" : (zona.id ? "#" + zona.id : "." + String(zona.className).split(/\s+/)[0]);
-
-  // Tarjetas: bloques chicos con una dirección, que no contengan otras tarjetas
-  const cand = [].filter.call(zona.querySelectorAll("article,li,div,tr,section"), function(el){
-    if(fuera(el)) return false;
-    const largo = (el.textContent || "").length;
-    if(largo < 12 || largo > 700) return false;
-    const ls = lineas(el);
-    return ls.length >= 2 && ls.length <= 14 && ls.some(pareceDireccion);
-  });
-  const minimas = cand.filter(function(el){ return !cand.some(function(o){ return o !== el && el.contains(o); }); });
-
-  // El título de sección que precede a cada tarjeta suele ser la región o la
-  // comuna. Los títulos que están dentro de otra tarjeta no cuentan: son el
-  // nombre de esa clínica, no una sección.
-  const titulos = [].filter.call(doc.querySelectorAll("h1,h2,h3,h4,h5,h6"), function(h){
-    return !minimas.some(function(c){ return c.contains(h); });
-  });
-  function contexto(el){
-    let t = "";
-    titulos.forEach(function(h){
-      if(!el.contains(h) && (h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) t = txt(h);
-    });
-    return t;
-  }
-  const vistas = {}, lista = [];
-  minimas.forEach(function(card){
-    const a = card.querySelector("a[href]");
-    const x = datosDeTarjeta(card, a, base);
-    if(!x.direccion || !x.nombre || vistas[norm(x.direccion)]) return;
-    vistas[norm(x.direccion)] = 1;
-    x.contexto = contexto(card);
-    lista.push(x);
-  });
-  const ld = desdeJsonLd(doc);
-  const final = lista.length >= ld.length ? lista : ld;
-  d.encontradas = final.length;
-  d.estrategia = final === lista ? "tarjetas" : "datos estructurados";
-  return {lista: final, diag: d, doc: doc};
-}
-
-async function clinicasEdental(){
-  const c = await cacheLeer("red_edental", DIA);
-  if(c) return c;
-  const r = await traer(RED.edental.portada);
-  diag.edental = {url: RED.edental.portada, status: r.status, error: r.error || ""};
-  if(!r.ok) return {lista: [], error: r.error || ("el sitio respondió " + r.status)};
-  let p = parsearEdental(r.html, r.url);
-  Object.assign(diag.edental, p.diag);
-
-  // Si la portada no trae las clínicas, se sigue el enlace a la página que sí
-  if(!p.lista.length){
-    const link = [].find.call(p.doc.querySelectorAll("a[href]"), function(a){
-      const h = a.getAttribute("href") || "";
-      return !/^#|preguntas|mailto:|tel:/i.test(h) && /cl[ií]nicas|sucursales|sedes|red|centros/i.test(h + " " + txt(a));
-    });
-    if(link){
-      let u = ""; try{ u = new URL(link.getAttribute("href"), r.url).href; }catch(e){}
-      if(u){
-        const r2 = await traer(u);
-        diag.edental.segunda = {url: u, status: r2.status};
-        if(r2.ok){ p = parsearEdental(r2.html, r2.url); Object.assign(diag.edental, p.diag); }
-      }
-    }
-  }
-  const res = {lista: p.lista.map(function(x){ delete x.doc; return x; }), error: ""};
-  if(res.lista.length) cacheEscribir("red_edental", res);
-  return res;
+function moverPaso(delta){
+  pasos[planElegido] = (pasos[planElegido] || 0) + delta;
+  marcarPasos(true);
+  guardarEstado();
 }
 
 /* ---------- búsqueda y resultados ---------- */
@@ -1086,47 +851,76 @@ function alEscribirComuna(){
   temporizador = setTimeout(function(){ buscarComuna(q); }, 380);
 }
 
+// Elige la comuna entre los candidatos. Sólo la da por elegida si no hay
+// empate: con "las c" ofrece Las Cabras y Las Condes en vez de adivinar.
+function elegirComuna(q, candidatos){
+  const cand = candidatos
+    .map(function(x){ return {x: x, pt: puntaje(q, x.nombre)}; })
+    .filter(function(c){ return c.pt !== null; })
+    .sort(function(a, b){ return a.pt - b.pt || a.x.nombre.localeCompare(b.x.nombre, "es"); });
+  const claro = cand.length && (cand.length === 1 || cand[0].pt < cand[1].pt || cand[0].pt === 0);
+  return {comuna: claro ? cand[0].x : null, sugerencias: cand.slice(0, 5).map(function(c){ return c.x; })};
+}
+
 async function buscarComuna(q, elegida){
   const id = ++busquedaId;
   pintarResultados({cargando: true, comuna: q});
 
-  let comuna = elegida || null, sugerencias = [];
-  if(!comuna){
-    const indice = await indiceUnoSalud();
-    if(id !== busquedaId) return;
-    if(indice.length){
-      const cand = indice
-        .map(function(x){ return {x: x, pt: puntaje(q, x.nombre)}; })
-        .filter(function(c){ return c.pt !== null; })
-        .sort(function(a, b){ return a.pt - b.pt || a.x.nombre.localeCompare(b.x.nombre); });
-      sugerencias = cand.slice(0, 5).map(function(c){ return c.x; });
-      const claro = cand.length && (cand.length === 1 || cand[0].pt < cand[1].pt || cand[0].pt === 0);
-      if(claro) comuna = cand[0].x;
-    }else{
-      // Sin índice se arma la dirección con el nombre escrito
-      comuna = {slug: norm(q).replace(/\s+/g, "-"), nombre: q.trim()};
-    }
-  }
-  pintarSugerencias(comuna ? sugerencias.filter(function(s){ return s.slug !== comuna.slug; }).slice(0, 4) : sugerencias, !!comuna);
-  if(!comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !sugerencias.length}); return; }
-
-  const res = await Promise.all([clinicasUnoSalud(comuna), clinicasEdental()]);
+  // 1. Con mapeo guardado, la respuesta es inmediata y no se consulta nada
+  const m = await leerMapeo();
   if(id !== busquedaId) return;
-  const clave = norm(comuna.nombre);
-  const ede = res[1], todas = ede.lista || [];
-  // Primero las que nombran la comuna en su propia tarjeta. Sólo si no hay
-  // ninguna, las que están bajo un título de sección con ese nombre.
-  let enComuna = todas.filter(function(c){ return norm(c.texto || "").indexOf(clave) !== -1; });
-  let porSeccion = false;
-  if(!enComuna.length){
-    enComuna = todas.filter(function(c){ return norm(c.contexto || "").indexOf(clave) !== -1; });
-    porSeccion = enComuna.length > 0;
+  if(m){
+    const r = elegida ? {comuna: m.comunas.find(function(c){ return norm(c.nombre) === norm(elegida.nombre); }), sugerencias: []}
+                      : elegirComuna(q, m.comunas);
+    mostrarEleccion(r);
+    if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length}); return; }
+    const c = r.comuna;
+    pintarResultados({
+      comuna: c.nombre, mapeo: m,
+      uno: {lista: c.uno, url: c.slug ? RED.unosalud.comuna(c.slug) : RED.unosalud.sitio, error: "", sinPagina: !c.uno.length},
+      ede: {lista: c.ede, error: m.resumen.edeError, total: m.resumen.sucursalesEde}
+    });
+    return;
   }
-  pintarResultados({
-    comuna: comuna.nombre,
-    uno: res[0],
-    ede: {lista: enComuna, error: ede.error, total: todas.length, porSeccion: porSeccion}
+
+  // 2. Sin mapeo: se lee en vivo. Las comunas candidatas son las de Uno Salud
+  //    más las que aparecen en el listado de i-dental.
+  const leido = await Promise.all([indiceUnoSalud(), clinicasEdental()]);
+  if(id !== busquedaId) return;
+  const indice = leido[0], ede = leido[1];
+  const conocidas = indice.map(function(x){ return x.nombre; });
+  const porComuna = {};
+  indice.forEach(function(x){ porComuna[norm(x.nombre)] = {nombre: x.nombre, slug: x.slug, ede: []}; });
+  (ede.lista || []).forEach(function(c){
+    const u = ubicarClinica(c, conocidas);
+    if(!u.comuna) return;
+    const k = norm(u.comuna);
+    if(!porComuna[k]) porComuna[k] = {nombre: u.comuna, slug: "", ede: []};
+    porComuna[k].ede.push(Object.assign({}, c, u.porSeccion ? {porSeccion: true} : {}));
   });
+  const candidatos = Object.keys(porComuna).map(function(k){ return porComuna[k]; });
+
+  let r;
+  if(elegida) r = {comuna: porComuna[norm(elegida.nombre)] || {nombre: elegida.nombre, slug: elegida.slug, ede: []}, sugerencias: []};
+  else if(candidatos.length) r = elegirComuna(q, candidatos);
+  else r = {comuna: {nombre: q.trim(), slug: norm(q).replace(/\s+/g, "-"), ede: []}, sugerencias: []};  // sin nada leído
+  mostrarEleccion(r);
+  if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length}); return; }
+
+  const c = r.comuna;
+  const uno = c.slug ? await clinicasUnoSalud(c) : {lista: [], url: RED.unosalud.sitio, error: "", sinPagina: true};
+  if(id !== busquedaId) return;
+  pintarResultados({
+    comuna: c.nombre,
+    uno: uno,
+    ede: {lista: c.ede, error: ede.error, total: (ede.lista || []).length}
+  });
+}
+
+function mostrarEleccion(r){
+  const elegida = r.comuna;
+  pintarSugerencias(elegida ? r.sugerencias.filter(function(s){ return norm(s.nombre) !== norm(elegida.nombre); }).slice(0, 4)
+                            : r.sugerencias, !!elegida);
 }
 
 function pintarSugerencias(lista, hayElegida){
@@ -1169,17 +963,17 @@ function bloqueRed(red, comuna, r){
       (ESWEB ? '' : ' <button type="button" class="link-carga" data-diag="' + red + '">copiar diagnóstico</button>') + '</p>';
   }else if(!lista.length){
     let motivo;
-    if(red === "unosalud" && r.sinPagina) motivo = "Uno Salud no tiene página para esta comuna.";
+    if(red === "unosalud" && r.sinPagina) motivo = "Uno Salud no tiene sucursales en esta comuna.";
     else if(red === "edental" && !r.total) motivo = "No encontré el listado de clínicas en el sitio de i-dental.";
-    else if(red === "edental") motivo = "El listado de i-dental no tiene clínicas en esta comuna.";
+    else if(red === "edental") motivo = "i-dental no tiene sucursales en esta comuna.";
     else motivo = "No encontré sucursales en la página de esta comuna.";
     h += '<p class="clin-vacio">' + motivo +
          (red === "unosalud" && r.sinPagina || red === "edental" && r.total ? '' :
           ' <button type="button" class="link-carga" data-diag="' + red + '">copiar diagnóstico</button>') + '</p>';
   }else{
-    if(r.porSeccion){
-      h += '<p class="clin-vacio">El sitio no dice la comuna de cada clínica. Éstas aparecen bajo el título <strong>' +
-           esc(comuna) + '</strong>: confirma la dirección antes de dársela al cliente.</p>';
+    if(lista.some(function(c){ return c.porSeccion; })){
+      h += '<p class="clin-vacio">El sitio no dice la comuna de alguna de estas clínicas: aparece bajo el título <strong>' +
+           esc(comuna) + '</strong>. Confirma la dirección antes de dársela al cliente.</p>';
     }
     h += lista.map(tarjetaHTML).join("");
   }
@@ -1192,15 +986,18 @@ function pintarResultados(e){
   if(e.cargando){ caja.innerHTML = '<p class="clin-vacio">Buscando sucursales en ' + esc(e.comuna) + '…</p>'; return; }
   if(e.sinElegir){
     caja.innerHTML = e.nada
-      ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas de Uno Salud. Revisa cómo se escribe.</p>'
+      ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas con sucursales de Uno Salud o i-dental. Revisa cómo se escribe.</p>'
       : '';
     return;
   }
   caja.innerHTML = '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong></p>' +
     bloqueRed("unosalud", e.comuna, e.uno) +
     bloqueRed("edental", e.comuna, e.ede) +
-    '<p class="capturado">Leído de unosalud.cl y e-dentalsys.com. Se guarda un día. ' +
-    '<button type="button" class="link-carga" id="refrescarRedes">volver a leer</button></p>';
+    (e.mapeo
+      ? '<p class="capturado">Del mapeo del ' + fmt(new Date(e.mapeo.generado)) + ' (' + e.mapeo.resumen.comunas + ' comunas). ' +
+        '<button type="button" class="link-carga" data-abrir-mapeo="1">ver mapeo completo</button></p>'
+      : '<p class="capturado">Leído en este momento de unosalud.cl y e-dentalsys.com. ' +
+        '<button type="button" class="link-carga" data-abrir-mapeo="1">Haz el mapeo completo</button> para que responda al instante.</p>');
 }
 
 async function copiarDiagnostico(red, btn){
@@ -1210,18 +1007,6 @@ async function copiarDiagnostico(red, btn){
   catch(e){ btn.textContent = "no se pudo copiar"; }
 }
 
-function olvidarRedes(cb){
-  try{
-    chrome.storage.local.get(null, function(todo){
-      const claves = Object.keys(todo || {}).filter(function(k){ return k.indexOf("red_") === 0; });
-      chrome.storage.local.remove(claves, cb);
-    });
-  }catch(e){
-    try{ Object.keys(localStorage).filter(function(k){ return k.indexOf("red_") === 0; })
-           .forEach(function(k){ localStorage.removeItem(k); }); }catch(e2){}
-    cb();
-  }
-}
 
 /* ---------- eventos ---------- */
 function confirmarDosToques(btn, aviso, accion){
@@ -1246,6 +1031,7 @@ function reiniciar(){
   planForzado = false;
   guionAbierto = false;
   envio = "linea";
+  pasos = {basico: 0, full: 0, ninos: 0};
   document.getElementById("hijos").innerHTML = "";
   document.getElementById("comuna").value = "";
   document.getElementById("sugComunas").innerHTML = "";
@@ -1301,13 +1087,16 @@ document.getElementById("sugComunas").addEventListener("click", function(e){
   guardarEstado();
   buscarComuna(b.dataset.nombre, {slug: b.dataset.slug, nombre: b.dataset.nombre});
 });
+function abrirMapeo(){
+  try{ chrome.tabs.create({url: chrome.runtime.getURL("mapeo.html")}); }
+  catch(e){ window.open("mapeo.html", "_blank"); }
+}
 document.getElementById("clinRes").addEventListener("click", function(e){
   const d = e.target.closest("[data-diag]");
   if(d){ copiarDiagnostico(d.dataset.diag, d); return; }
-  if(e.target.closest("#refrescarRedes")){
-    olvidarRedes(function(){ buscarComuna(document.getElementById("comuna").value); });
-  }
+  if(e.target.closest("[data-abrir-mapeo]")) abrirMapeo();
 });
+document.getElementById("abrirMapeo").addEventListener("click", abrirMapeo);
 document.getElementById("envio").addEventListener("click", function(e){
   const b = e.target.closest("button");
   if(!b) return;
@@ -1329,6 +1118,41 @@ document.getElementById("cerrarGuion").addEventListener("click", function(){
   guionAbierto = false;
   pintarGuion(); guardarEstado();
 });
+document.getElementById("letraMenos").addEventListener("click", function(){
+  prefs.letra = Math.max(80, prefs.letra - 10); aplicarPrefs(); guardarPrefs(); marcarPasos(true);
+});
+document.getElementById("letraMas").addEventListener("click", function(){
+  prefs.letra = Math.min(220, prefs.letra + 10); aplicarPrefs(); guardarPrefs(); marcarPasos(true);
+});
+document.getElementById("contraste").addEventListener("click", function(e){
+  const b = e.target.closest("button");
+  if(!b) return;
+  prefs.contraste = b.dataset.c; aplicarPrefs(); guardarPrefs();
+});
+document.getElementById("guiada").addEventListener("click", function(){
+  prefs.guiada = !prefs.guiada; aplicarPrefs(); guardarPrefs(); marcarPasos(prefs.guiada);
+});
+document.getElementById("pasoAnt").addEventListener("click", function(){ moverPaso(-1); });
+document.getElementById("pasoSig").addEventListener("click", function(){ moverPaso(1); });
+document.getElementById("guionCuerpo").addEventListener("click", function(e){
+  const el = e.target.closest(".paso");
+  if(!el || !prefs.guiada) return;
+  pasos[planElegido] = +el.dataset.i;          // pinchar una frase la deja como actual
+  marcarPasos(false); guardarEstado();
+});
+// Flechas ↑ ↓ en cualquier parte, salvo mientras se escribe en un campo
+document.addEventListener("keydown", function(e){
+  if(!guionAbierto || !prefs.guiada || e.altKey || e.ctrlKey || e.metaKey) return;
+  const t = e.target;
+  const escribiendo = t && (t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable ||
+                      (t.tagName === "INPUT" && !/^(checkbox|radio|button|submit)$/i.test(t.type)));
+  if(escribiendo) return;
+  if(e.key === "ArrowDown" || e.key === "PageDown"){ e.preventDefault(); moverPaso(1); }
+  else if(e.key === "ArrowUp" || e.key === "PageUp"){ e.preventDefault(); moverPaso(-1); }
+  else if(e.key === "Home"){ e.preventDefault(); pasos[planElegido] = 0; marcarPasos(true); guardarEstado(); }
+  else if(e.key === "End"){ e.preventDefault(); pasos[planElegido] = 9999; marcarPasos(true); guardarEstado(); }
+});
+
 document.getElementById("limpiar").addEventListener("click", function(){
   confirmarDosToques(this, "¿Seguro? Toca otra vez", reiniciar);
 });
@@ -1342,6 +1166,13 @@ document.getElementById("copiar").addEventListener("click", function(){
 });
 
 /* ---------- arranque ---------- */
+// La pestaña de mapeo necesita leer otros sitios: en la web no aplica
+if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
+almacen.leer("prefs", function(v){
+  if(v) Object.assign(prefs, v);
+  aplicarPrefs();
+  if(guionAbierto) marcarPasos(false);
+});
 almacen.leer("uf", function(u){
   if(u){ cacheUF = u; if(UF === null) pintarUF(u.c, u.f, ESWEB ? "escrita a mano" : "guardado"); }
   restaurarEstado(function(){ cargarUF(); });
