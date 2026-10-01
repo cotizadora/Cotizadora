@@ -1307,6 +1307,12 @@ document.getElementById("copiar").addEventListener("click", function(){
 });
 
 /* ---------- arranque ---------- */
+// La barra del script queda pegada bajo la cabecera, cuyo alto cambia con
+// la letra, el subtítulo y al mostrarse (oculta mide 0): se sigue en vivo.
+(function(){
+  const g = document.getElementById("guion"), cab = g.querySelector(".guion-cab");
+  try{ new ResizeObserver(function(){ g.style.setProperty("--gb-top", cab.offsetHeight + "px"); }).observe(cab); }catch(e){}
+})();
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){

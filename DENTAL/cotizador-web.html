@@ -351,35 +351,43 @@ td.off{color:var(--muted)}
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ color-scheme: dark } }
 :root[data-theme="dark"]{ color-scheme: dark }
 body{ padding-block: 14px; padding-inline: 16px; }
-.cab{ max-width: 812px; margin: 0 auto 12px; }
+.cab{ max-width: 1400px; margin: 0 auto 10px; }
 .cab h1{ font-size: 17px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
 .cab p{ font-size: 12px; color: var(--muted); margin: 3px 0 0; line-height: 1.4; }
-.marco{ max-width: 812px; margin: 0 auto; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--card); }
-.app{ width: 100%; max-width: none; flex-wrap: wrap; overflow: visible; transition: none; }
-.app.abierto{ width: 100%; }
+.marco{ max-width: 420px; margin: 0 auto; border: 1px solid var(--line); border-radius: 14px; overflow: clip; background: var(--bg); }
+.marco:has(.app.abierto){ max-width: 1400px; }
+.app, .app.abierto{ width: 100%; max-width: none; flex-wrap: wrap; overflow: visible; transition: none; }
 .izq{ flex: 1 1 340px; width: auto; min-width: 0; }
 .guion{ flex: 1 1 360px; width: auto; min-width: 0; max-height: none; opacity: 1; transform: none; transition: none; border-left-width: 1px; overflow-y: visible; display: none; }
 .app.abierto .guion{ display: block; width: auto; animation: entra .22s ease both; }
 @keyframes entra{ from{ opacity:0; transform: translateY(6px) } to{ opacity:1; transform:none } }
 @media (prefers-reduced-motion: reduce){ .app.abierto .guion{ animation: none } }
-@media (max-width: 760px){ .guion{ border-left: 0; border-top: 1px solid var(--line); } .guion-cab{ position: static; } }
-.tirador{ display: none; }
-@media (min-width: 761px){
-  .marco:has(.app.abierto){ max-width: calc(376px + var(--gw, 760px)); }
-  .app.abierto{ flex-wrap: nowrap; }
-  .app.abierto .izq{ flex: 0 0 360px; }
-  .app.abierto .guion{ flex: 1 1 auto; }
-  .app.abierto .tirador{ display: block; flex: 0 0 14px; width: 14px; }
-  .tirador::before, .tirador::after{ position: sticky; display: block; }
-  .tirador::before{ top: 15px; }
-  .tirador::after{ top: calc(50vh - 23px); margin: 50vh 0 0 4px; }
+.tirador{ display: none !important; }
+.pie{ max-width: 1400px; margin: 10px auto 0; font-size: 11px; color: var(--muted); line-height: 1.5 }
+.pie strong{ color: var(--ink) }
+
+/* Computador: la página ocupa la ventana. Cotización a la izquierda y el
+   script a la derecha con todo el ancho que queda; cada columna se
+   desplaza por su cuenta, así el precio no se pierde de vista. */
+@media (min-width: 900px) and (min-height: 480px){
+  body{ height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  .cab, .pie{ flex: none; width: 100%; }
+  .marco{ flex: 0 1 auto; min-height: 0; width: 100%; display: flex; }
+  .marco:has(.app.abierto){ flex: 1 1 auto; }
+  .app, .app.abierto{ flex: 1 1 auto; min-height: 0; flex-wrap: nowrap; align-items: stretch; }
+  .izq{ overflow-y: auto; }
+  .app.abierto .izq{ flex: 0 0 380px; width: 380px; }
+  .app.abierto .guion{ flex: 1 1 auto; overflow-y: auto; border-left: 1px solid var(--line); }
+}
+/* Teléfono y ventanas angostas: una columna, el script debajo */
+@media (max-width: 899px){
+  .guion{ border-left: 0; border-top: 1px solid var(--line); }
+  .guion-cab{ position: static; }
 }
 .uf{ position: static; }
 .uf-manual{ background: var(--soft) !important; border-bottom: 1px solid var(--line); font-weight: 600 }
 .uf-vieja{ display: block; padding: 6px 10px; font-size: 11px; font-weight: 600; background: var(--warnbg); color: var(--warn); border-bottom: 1px solid var(--line); }
 .uf-vieja[hidden]{ display: none }
-.pie{ max-width: 812px; margin: 12px auto 0; font-size: 11px; color: var(--muted); line-height: 1.5 }
-.pie strong{ color: var(--ink) }
 
 </style>
 
@@ -509,7 +517,7 @@ body{ padding-block: 14px; padding-inline: 16px; }
 </div>
 </div>
 
-<p class="pie"><strong>Escribe la UF del día</strong> para que calcule los pesos: esta página no puede consultarla sola. El buscador de sucursales tampoco funciona aquí, porque necesita leer los sitios de las redes: úsalo desde la extensión de Chrome.<br>Tarifas del script de septiembre 2026. Conversión con aritmética entera, sin redondeos.</p>
+<p class="pie"><strong>Escribe la UF del día</strong> para que calcule los pesos: una página web no puede consultarla sola. Por lo mismo, el buscador de sucursales no funciona aquí: los sitios de Uno Salud e i-dental no dejan que otra página los lea.<br>Tarifas del script de septiembre 2026. Conversión con aritmética entera, sin redondeos.</p>
 
 <script>
 /* ============================================================
@@ -2558,6 +2566,12 @@ document.getElementById("copiar").addEventListener("click", function(){
 });
 
 /* ---------- arranque ---------- */
+// La barra del script queda pegada bajo la cabecera, cuyo alto cambia con
+// la letra, el subtítulo y al mostrarse (oculta mide 0): se sigue en vivo.
+(function(){
+  const g = document.getElementById("guion"), cab = g.querySelector(".guion-cab");
+  try{ new ResizeObserver(function(){ g.style.setProperty("--gb-top", cab.offsetHeight + "px"); }).observe(cab); }catch(e){}
+})();
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){
