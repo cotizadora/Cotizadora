@@ -56,6 +56,13 @@ Fono1…) y, si alguno viene vacío, de los campos estándar de Vicidial:
   nombre completo y **[su nombre]** el nombre del ejecutivo conectado.
   "Don/Sra." se elige según el sexo del lead; si es mujer, "don" pasa a
   "Sra.".
+- **Cargas:** las fechas de nacimiento del FORM (Fec_nac1 a Fec_nac4) entran
+  solas a la cotización, con su edad, su veredicto y el plan que
+  corresponde (un menor de 14 lleva a Plan 4). Se cargan una vez por
+  llamada: si después las cambias a mano, no se pisan al reabrir. Arriba se
+  ve quién es cada carga (Carga y Parentesco). El seguro admite hasta 3.
+- También se muestran Ciclo de vida, Propensión, Seguros actuales y Mes sin
+  costo, cuando vienen.
 - La comuna queda escrita en el buscador de sucursales: basta abrir
   *Clínica por comuna*.
 - Si el lead cambió (entró otra llamada), la cotización parte de cero sola:

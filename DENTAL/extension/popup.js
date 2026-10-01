@@ -1325,6 +1325,16 @@ function personalizar(h){
   return h;
 }
 
+// Fecha del FORM a dd/mm/aaaa; "DD/MM/YYYY" (vacío) o algo inválido -> ""
+function fechaVici(v){
+  v = String(v || "").trim();
+  let m = v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+  if(m) return m[1].padStart(2, "0") + "/" + m[2].padStart(2, "0") + "/" + m[3];
+  m = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m && m[1] !== "0000") return m[3] + "/" + m[2] + "/" + m[1];
+  return "";
+}
+
 // Formato chileno: 19758650 + 8 -> 19.758.650-8
 function rutConPuntos(num, dv){
   num = String(num || "").replace(/[^0-9kK]/g, "");
@@ -1378,8 +1388,17 @@ async function leerVicidial(){
       region: val("region", "state"),
       email: val("email"),
       genero: (val("sexo", "gender").charAt(0) || "").toUpperCase(),
-      agente: agente
+      agente: agente,
+      cargas: [],
+      info: [["Ciclo de vida", val("ciclo_vida")], ["Propensión", val("propension")],
+             ["Seguros actuales", val("seguros_actuales")], ["Mes sin costo", val("mes_sin_costo")]]
+             .filter(function(x){ return x[1]; })
     };
+    // Cargas del FORM: Fec_nac1..4, Carga1..4 (nombre), Parentesco1..4, RUT1..4
+    for(let i = 1; i <= 4; i++){
+      const fecha = fechaVici(val("fec_nac" + i)), nombre = val("carga" + i), parentesco = val("parentesco" + i), rut = val("rut" + i);
+      if(fecha || nombre || rut) c.cargas.push({fecha: fecha, nombre: nombre, parentesco: parentesco});
+    }
     return c.lead || c.nombre || c.apellido ? c : null;
   }catch(e){ return null; }
 }
@@ -1389,7 +1408,17 @@ function pintarCliente(){
   if(!cliente || !(cliente.nombre || cliente.apellido)){ el.hidden = true; el.innerHTML = ""; return; }
   const nombre = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
   const datos = [cliente.rut ? "RUT " + cliente.rut : "", cliente.fono, nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean);
-  el.innerHTML = "<b>" + escCli(nombre) + "</b>" + datos.map(function(d){ return "<span>" + escCli(d) + "</span>"; }).join("");
+  let h = "<b>" + escCli(nombre) + "</b>" + datos.map(function(d){ return "<span>" + escCli(d) + "</span>"; }).join("");
+  if(cliente.cargas && cliente.cargas.length){
+    h += '<div class="cli-linea"><i>Cargas en Vicidial:</i> ' + cliente.cargas.map(function(c, i){
+      const quien = [nombrePropio(c.nombre), c.parentesco ? "(" + nombrePropio(c.parentesco) + ")" : ""].filter(Boolean).join(" ");
+      return escCli((quien || "Carga " + (i + 1)) + (c.fecha ? " " + c.fecha : " sin fecha"));
+    }).join(" · ") + (cliente.cargas.length > MAX_CARGAS ? " · <b>el seguro admite hasta " + MAX_CARGAS + "</b>" : "") + "</div>";
+  }
+  if(cliente.info && cliente.info.length){
+    h += '<div class="cli-linea">' + cliente.info.map(function(x){ return "<i>" + escCli(x[0]) + ":</i> " + escCli(x[1]); }).join(" · ") + "</div>";
+  }
+  el.innerHTML = h;
   el.hidden = false;
 }
 
@@ -1399,7 +1428,23 @@ async function sincronizarVicidial(){
   const previo = await new Promise(function(res){ almacen.leer("lead", res); });
   const nuevaLlamada = c.lead && previo && previo.id && previo.id !== c.lead;
   if(nuevaLlamada) reiniciar();
-  if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now()});
+  // Las cargas del FORM se cargan una vez por llamada: si después el
+  // ejecutivo las cambia a mano, no se le pisan al reabrir.
+  const yaAplicadas = previo && previo.id === c.lead && previo.cargas;
+  if(c.cargas.length && !yaAplicadas){
+    nCargas = Math.min(MAX_CARGAS, c.cargas.length);
+    const cont = document.getElementById("hijos");
+    cont.innerHTML = "";
+    for(let k = 0; k < nCargas; k++){
+      const caja = filaHijo(true);
+      caja.querySelector(".fecha").value = c.cargas[k].fecha || "";
+      caja.querySelector(".edad").value = "";
+    }
+    pintarBloqueCargas();
+    calcular();
+    guardarEstado();
+  }
+  if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now(), cargas: !!(yaAplicadas || c.cargas.length)});
   cliente = c;
   pintarCliente();
   // La comuna del cliente queda lista en el buscador de sucursales

@@ -224,6 +224,8 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 .cliente[hidden]{display:none}
 .cliente b{font-size:12.5px}
 .cliente span{color:var(--muted)}
+.cli-linea{flex-basis:100%;font-size:10.5px;color:var(--muted);line-height:1.35}
+.cli-linea i{font-style:normal;font-weight:700;color:var(--ink)}
 .guion-cuerpo em.cli{font-style:normal;font-weight:700;color:var(--g-dato, inherit)}
 .guardado span{flex:1}
 #limpiar{border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--bad);
