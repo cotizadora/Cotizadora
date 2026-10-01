@@ -17,7 +17,7 @@ body{
   display:flex; align-items:stretch; width:360px; overflow:hidden;
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
-.app.abierto{width:calc(368px + var(--gw, 412px))}
+.app.abierto{width:calc(368px + var(--gw, 360px))}
 .app.arrastrando, .app.arrastrando .guion{transition:none}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
@@ -33,7 +33,7 @@ body{
              border-left-width .26s step-end;
 }
 .app.abierto .guion{
-  width:var(--gw, 412px); opacity:1; transform:none;
+  width:var(--gw, 360px); opacity:1; transform:none;
   overflow-y:auto; border-left-width:1px;
   transition:width .26s cubic-bezier(.32,.72,0,1),
              opacity .2s ease .08s,

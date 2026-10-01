@@ -4,13 +4,25 @@
    el sitio en una pestaña que no se activa, se espera a que
    aparezcan las tarjetas, se leen y se cierra la pestaña.
 
-   Vive aquí y no en el popup para que termine aunque el popup se
-   cierre a mitad de camino: el resultado queda guardado y la
-   próxima búsqueda lo usa al instante.
+   Vive aquí y no en el popup para que el buscador nunca espere ni
+   dependa de esto: la lectura corre aparte, deja el listado
+   guardado y el popup lo muestra apenas está.
+
+   Cuándo se lee:
+   - al instalar o actualizar la extensión, y al abrir el navegador
+     si lo guardado tiene más de una semana;
+   - cuando una búsqueda no encuentra el listado guardado;
+   - desde el mapeo completo, siempre (lectura forzada).
+   Si una lectura no encontró nada, no se reintenta sola antes de
+   6 horas, para no abrir pestañas en cada búsqueda.
    ============================================================ */
 
 const EDE_URL = "https://www.e-dentalsys.com/#clinicas";
+const SEMANA = 7 * 24 * 60 * 60 * 1000;
+const ESPERA_REINTENTO = 6 * 60 * 60 * 1000;
 let enCurso = null;
+
+function leerGuardado(claves){ return chrome.storage.local.get(claves); }
 
 function esperarCarga(tabId, maxMs){
   return new Promise(function(resolver){
@@ -35,24 +47,47 @@ async function leerEdentalEnPestana(){
       func: function(){ return leerEdentalVivo(20000); }
     });
     const v = (r && r[0] && r[0].result) || {lista: []};
-    Object.assign(diag, {encontradas: v.lista.length, ms: v.ms, titulo: v.titulo, urlFinal: v.url,
+    Object.assign(diag, {encontradas: v.lista.length, como: v.via, api: v.api, apiClinicas: v.apiClinicas,
+                         ms: v.ms, titulo: v.titulo, urlFinal: v.url,
                          recursos: v.recursos, paginacion: v.paginacion, texto: v.texto});
     const res = {lista: v.lista, error: ""};
-    if(v.lista.length) await chrome.storage.local.set({red_edental: {t: Date.now(), d: res}});
+    const guardar = {};
+    if(v.lista.length) guardar.red_edental = {t: Date.now(), d: res};
+    // La dirección de datos queda anotada: la próxima vez se lee directo, sin pestaña
+    if(v.api) guardar.ede_api = v.api;
+    await chrome.storage.local.set(guardar);
     return {res: res, diag: diag};
   }catch(e){
     diag.error = String(e && e.message || e);
     return {res: {lista: [], error: "no pude abrir el sitio en una pestaña de fondo"}, diag: diag};
   }finally{
     if(tab) chrome.tabs.remove(tab.id).catch(function(){});
-    await chrome.storage.local.set({diag_edental_vivo: diag});
+    await chrome.storage.local.set({diag_edental_vivo: diag, ede_intento: {t: Date.now(), n: diag.encontradas || 0}});
   }
+}
+
+async function pedirLectura(forzar){
+  if(enCurso) return enCurso;   // otra búsqueda o el mapeo ya la pidió
+  if(!forzar){
+    const g = await leerGuardado(["red_edental", "ede_intento", "diag_edental_vivo"]);
+    if(g.red_edental && Date.now() - g.red_edental.t < SEMANA) return {res: g.red_edental.d, diag: g.diag_edental_vivo || null};
+    if(g.ede_intento && !g.ede_intento.n && Date.now() - g.ede_intento.t < ESPERA_REINTENTO){
+      return {res: {lista: [], error: ""}, diag: g.diag_edental_vivo || null, omitida: true};
+    }
+  }
+  enCurso = leerEdentalEnPestana().finally(function(){ enCurso = null; });
+  return enCurso;
 }
 
 chrome.runtime.onMessage.addListener(function(msg, sender, responder){
   if(!msg || msg.tipo !== "edentalVivo") return;
-  // Si ya hay una lectura andando (otra búsqueda, el mapeo), se comparte
-  if(!enCurso) enCurso = leerEdentalEnPestana().finally(function(){ enCurso = null; });
-  enCurso.then(responder);
+  pedirLectura(!!msg.forzar).then(responder);
   return true;
 });
+
+// Al instalar o actualizar se lee de inmediato; al abrir el navegador, sólo
+// si lo guardado ya venció.
+chrome.runtime.onInstalled.addListener(function(d){
+  if(d.reason === "install" || d.reason === "update") pedirLectura(true);
+});
+chrome.runtime.onStartup.addListener(function(){ pedirLectura(false); });

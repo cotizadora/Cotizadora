@@ -56,8 +56,9 @@ para el ejecutivo y no se leen al cliente.
   (negro con amarillo) y **Sepia** (más suave para la vista).
 - **Ancho:** arrastra hacia la derecha el borde derecho del script (la
   franja con puntos) y la zona de lectura se ensancha; el texto se
-  reacomoda. Doble clic en esa franja vuelve al ancho normal. Chrome y Edge
-  no dejan que el popup pase de 800 px, así que ese es el borde máximo.
+  reacomoda. Abre en 360 px y se puede llevar hasta 432 px, que es el borde
+  máximo: Chrome y Edge no dejan que el popup pase de 800 px. Doble clic en
+  la franja vuelve al ancho normal.
 - Tamaño, ancho, contraste y lectura guiada se recuerdan siempre, también después
   de *Nuevo cliente*. La frase en que vas se guarda por plan y se reinicia
   con cada cliente nuevo.
@@ -72,20 +73,29 @@ Escribe la comuna del cliente y la extensión lee, en ese momento:
 
 - **Uno Salud:** la página de esa comuna en `unosalud.cl/region-comuna/`.
 - **i-dental:** el listado de clínicas de `e-dentalsys.com`. Ese sitio arma
-  su listado después de cargar, así que la extensión lo abre unos segundos en
-  una **pestaña de fondo**, lee las tarjetas y la cierra sola. Cada tarjeta
-  dice `Comuna - Provincia - REGIÓN`, y de ahí sale la comuna exacta.
+  su listado después de cargar, así que la extensión lo lee **aparte**, sin
+  que el buscador lo espere: abre el sitio unos segundos en una pestaña de
+  fondo, lee las tarjetas y la cierra sola. Cada tarjeta dice
+  `Comuna - Provincia - REGIÓN`, y de ahí sale la comuna exacta. Si las
+  tarjetas no se pueden leer, usa los datos que el propio sitio descarga, y
+  anota esa dirección para leerla directo las veces siguientes.
+- El listado de i-dental se carga solo al instalar o actualizar la extensión
+  y al abrir el navegador si tiene más de una semana. Si en una búsqueda
+  todavía no está, dice *cargando aparte…* y aparece solo, sin volver a
+  buscar. Si una lectura no encuentra nada, no se reintenta antes de 6
+  horas (salvo desde el mapeo completo).
 
 Muestra las sucursales de cada red con nombre, dirección, teléfono y horario
 cuando el sitio los trae, y un enlace a la fuente.
 
-- La búsqueda tolera tildes, mayúsculas, la ñ y errores de tipeo. Si lo
+- La búsqueda tolera tildes, mayúsculas, la ñ, espacios de menos y errores
+  de tipeo (`providensia`, `lascondes`, `nunoa`). Entiende abreviaturas:
+  `valpo`, `stgo`, `conce`, `pto montt`, `pta arenas`, `sta`, `gral`. Si lo
   escrito calza con varias comunas (`las c`), ofrece las opciones.
+- Si algo falla, el panel lo dice con un botón **copiar diagnóstico**.
 - La lista de comunas sale del propio sitio de Uno Salud, así que funciona
   aunque la dirección de la página no sea el nombre de la comuna
   (Valparaíso es `rv-rv`).
-- Uno Salud se muestra apenas llega; i-dental aparece unos segundos después
-  la primera vez (dice *leyendo…*).
 - Lo leído se guarda: Uno Salud un día, i-dental una semana. Las búsquedas
   siguientes son instantáneas. El mapeo completo vuelve a leer todo.
 - Si el popup se cierra mientras se lee i-dental, la lectura termina igual

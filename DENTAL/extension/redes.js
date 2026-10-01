@@ -496,12 +496,12 @@ function parsearEdental(html, base){
 const EDE_VIGENCIA = 7 * DIA;
 function edentalGuardado(){ return cacheLeer("red_edental", EDE_VIGENCIA); }
 
-// Pide al service worker (background.js) que abra el sitio en una pestaña
-// de fondo y lea las tarjetas ya armadas.
-function edentalEnPestana(){
+// Pide al service worker (background.js) que lea el sitio en una pestaña
+// de fondo. forzar: aunque haya un intento reciente sin resultados.
+function edentalEnPestana(forzar){
   return new Promise(function(resolver){
     try{
-      chrome.runtime.sendMessage({tipo: "edentalVivo"}, function(r){
+      chrome.runtime.sendMessage({tipo: "edentalVivo", forzar: !!forzar}, function(r){
         if(chrome.runtime.lastError || !r) resolver(null); else resolver(r);
       });
     }catch(e){ resolver(null); }
@@ -511,31 +511,60 @@ function hayPestanas(){
   try{ return !!(chrome && chrome.runtime && chrome.runtime.id && chrome.runtime.sendMessage); }catch(e){ return false; }
 }
 
-async function clinicasEdental(fresco){
+// opciones.esperar: el mapeo espera la lectura en pestaña; el buscador no,
+// sólo la encarga y sigue (el listado aparece solo cuando queda guardado).
+async function clinicasEdental(fresco, opciones){
+  opciones = opciones || {};
   const c = fresco ? null : await edentalGuardado();
   if(c) return c;
+  diag.edental = {};
 
-  // 1. El HTML tal cual: rápido, y basta si algún día el sitio lo trae armado
+  // 1. La dirección de datos que usa el propio sitio, si ya se conoce
+  const api = await new Promise(function(res){ almacen.leer("ede_api", res); });
+  if(api && typeof clinicasDeJson === "function"){
+    const r = await traer(api);
+    diag.edental.api = {url: api, status: r.status, error: r.error || ""};
+    if(r.ok){
+      let lista = [];
+      try{ lista = clinicasDeJson(JSON.parse(r.html)); }catch(e){ diag.edental.api.error = "no es JSON"; }
+      diag.edental.api.encontradas = lista.length;
+      if(lista.length){
+        const res = {lista: lista, error: ""};
+        cacheEscribir("red_edental", res);
+        return res;
+      }
+    }
+  }
+
+  // 2. El HTML tal cual: rápido, y basta si algún día el sitio lo trae armado
   const r = await traer(RED.edental.portada);
-  diag.edental = {url: RED.edental.portada, status: r.status, error: r.error || ""};
+  Object.assign(diag.edental, {url: RED.edental.portada, status: r.status, error: r.error || ""});
   let res = {lista: [], error: r.ok ? "" : (r.error || ("el sitio respondió " + r.status))};
   if(r.ok){
     const p = parsearEdental(r.html, r.url);
     Object.assign(diag.edental, p.diag);
     res.lista = p.lista;
   }
+  if(res.lista.length){ cacheEscribir("red_edental", res); return res; }
 
-  // 2. Sin tarjetas en el HTML: el sitio las arma con JavaScript. Se abre en
-  //    una pestaña de fondo, se leen ya armadas y se cierra sola.
-  if(!res.lista.length && hayPestanas()){
-    const v = await edentalEnPestana();
-    if(v){
-      diag.edental.pestana = v.diag;
-      if(v.res.lista.length){ delete diag.edental.radiografia; delete diag.edental.muestra; }
-      res = v.res;
+  // 3. El sitio arma el listado con JavaScript: se lee en una pestaña de fondo
+  if(!hayPestanas()) return res;
+  if(!opciones.esperar){
+    // Si la última lectura aparte no encontró nada hace poco, no se insiste
+    const intento = await new Promise(function(res){ almacen.leer("ede_intento", res); });
+    if(intento && !intento.n && Date.now() - intento.t < 6 * 60 * 60 * 1000){
+      diag.edental.pestana = await new Promise(function(res){ almacen.leer("diag_edental_vivo", res); });
+      return res;
     }
+    edentalEnPestana(false);
+    return {lista: [], error: "", pendiente: true};
   }
-  if(res.lista.length) cacheEscribir("red_edental", res);
+  const v = await edentalEnPestana(fresco);
+  if(v){
+    diag.edental.pestana = v.diag;
+    if(v.res.lista.length){ delete diag.edental.radiografia; delete diag.edental.muestra; }
+    res = v.res;
+  }
   return res;
 }
 

@@ -19,7 +19,7 @@ body{
   display:flex; align-items:stretch; width:360px; overflow:hidden;
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
-.app.abierto{width:calc(368px + var(--gw, 412px))}
+.app.abierto{width:calc(368px + var(--gw, 360px))}
 .app.arrastrando, .app.arrastrando .guion{transition:none}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
@@ -35,7 +35,7 @@ body{
              border-left-width .26s step-end;
 }
 .app.abierto .guion{
-  width:var(--gw, 412px); opacity:1; transform:none;
+  width:var(--gw, 360px); opacity:1; transform:none;
   overflow-y:auto; border-left-width:1px;
   transition:width .26s cubic-bezier(.32,.72,0,1),
              opacity .2s ease .08s,
@@ -347,7 +347,7 @@ body{ padding-block: 14px; padding-inline: 16px; }
 @media (max-width: 760px){ .guion{ border-left: 0; border-top: 1px solid var(--line); } .guion-cab{ position: static; } }
 .tirador{ display: none; }
 @media (min-width: 761px){
-  .marco:has(.app.abierto){ max-width: calc(370px + var(--gw, 412px)); }
+  .marco:has(.app.abierto){ max-width: calc(370px + var(--gw, 360px)); }
   .app.abierto{ flex-wrap: nowrap; }
   .app.abierto .izq{ flex: 0 0 360px; }
   .app.abierto .guion{ flex: 1 1 auto; }
@@ -990,12 +990,12 @@ function parsearEdental(html, base){
 const EDE_VIGENCIA = 7 * DIA;
 function edentalGuardado(){ return cacheLeer("red_edental", EDE_VIGENCIA); }
 
-// Pide al service worker (background.js) que abra el sitio en una pestaña
-// de fondo y lea las tarjetas ya armadas.
-function edentalEnPestana(){
+// Pide al service worker (background.js) que lea el sitio en una pestaña
+// de fondo. forzar: aunque haya un intento reciente sin resultados.
+function edentalEnPestana(forzar){
   return new Promise(function(resolver){
     try{
-      chrome.runtime.sendMessage({tipo: "edentalVivo"}, function(r){
+      chrome.runtime.sendMessage({tipo: "edentalVivo", forzar: !!forzar}, function(r){
         if(chrome.runtime.lastError || !r) resolver(null); else resolver(r);
       });
     }catch(e){ resolver(null); }
@@ -1005,31 +1005,60 @@ function hayPestanas(){
   try{ return !!(chrome && chrome.runtime && chrome.runtime.id && chrome.runtime.sendMessage); }catch(e){ return false; }
 }
 
-async function clinicasEdental(fresco){
+// opciones.esperar: el mapeo espera la lectura en pestaña; el buscador no,
+// sólo la encarga y sigue (el listado aparece solo cuando queda guardado).
+async function clinicasEdental(fresco, opciones){
+  opciones = opciones || {};
   const c = fresco ? null : await edentalGuardado();
   if(c) return c;
+  diag.edental = {};
 
-  // 1. El HTML tal cual: rápido, y basta si algún día el sitio lo trae armado
+  // 1. La dirección de datos que usa el propio sitio, si ya se conoce
+  const api = await new Promise(function(res){ almacen.leer("ede_api", res); });
+  if(api && typeof clinicasDeJson === "function"){
+    const r = await traer(api);
+    diag.edental.api = {url: api, status: r.status, error: r.error || ""};
+    if(r.ok){
+      let lista = [];
+      try{ lista = clinicasDeJson(JSON.parse(r.html)); }catch(e){ diag.edental.api.error = "no es JSON"; }
+      diag.edental.api.encontradas = lista.length;
+      if(lista.length){
+        const res = {lista: lista, error: ""};
+        cacheEscribir("red_edental", res);
+        return res;
+      }
+    }
+  }
+
+  // 2. El HTML tal cual: rápido, y basta si algún día el sitio lo trae armado
   const r = await traer(RED.edental.portada);
-  diag.edental = {url: RED.edental.portada, status: r.status, error: r.error || ""};
+  Object.assign(diag.edental, {url: RED.edental.portada, status: r.status, error: r.error || ""});
   let res = {lista: [], error: r.ok ? "" : (r.error || ("el sitio respondió " + r.status))};
   if(r.ok){
     const p = parsearEdental(r.html, r.url);
     Object.assign(diag.edental, p.diag);
     res.lista = p.lista;
   }
+  if(res.lista.length){ cacheEscribir("red_edental", res); return res; }
 
-  // 2. Sin tarjetas en el HTML: el sitio las arma con JavaScript. Se abre en
-  //    una pestaña de fondo, se leen ya armadas y se cierra sola.
-  if(!res.lista.length && hayPestanas()){
-    const v = await edentalEnPestana();
-    if(v){
-      diag.edental.pestana = v.diag;
-      if(v.res.lista.length){ delete diag.edental.radiografia; delete diag.edental.muestra; }
-      res = v.res;
+  // 3. El sitio arma el listado con JavaScript: se lee en una pestaña de fondo
+  if(!hayPestanas()) return res;
+  if(!opciones.esperar){
+    // Si la última lectura aparte no encontró nada hace poco, no se insiste
+    const intento = await new Promise(function(res){ almacen.leer("ede_intento", res); });
+    if(intento && !intento.n && Date.now() - intento.t < 6 * 60 * 60 * 1000){
+      diag.edental.pestana = await new Promise(function(res){ almacen.leer("diag_edental_vivo", res); });
+      return res;
     }
+    edentalEnPestana(false);
+    return {lista: [], error: "", pendiente: true};
   }
-  if(res.lista.length) cacheEscribir("red_edental", res);
+  const v = await edentalEnPestana(fresco);
+  if(v){
+    diag.edental.pestana = v.diag;
+    if(v.res.lista.length){ delete diag.edental.radiografia; delete diag.edental.muestra; }
+    res = v.res;
+  }
   return res;
 }
 
@@ -1994,7 +2023,7 @@ function pintarGuion(){
    La letra, el contraste y el modo guiado son preferencias del
    ejecutivo: no se borran con "Nuevo cliente".
    ============================================================ */
-const prefs = {letra: 100, contraste: "normal", guiada: true, ancho: 412};
+const prefs = {letra: 100, contraste: "normal", guiada: true, ancho: 360};
 let pasos = {basico: 0, full: 0, ninos: 0};
 
 function aplicarPrefs(){
@@ -2022,7 +2051,7 @@ function guardarPrefs(){ almacen.escribir("prefs", prefs); }
    El tirador del borde derecho ensancha sólo la zona de lectura y el
    texto se reacomoda. El popup de Chrome no pasa de 800 px, así que ahí
    el script puede llegar hasta ese borde; en la web, hasta el de la pantalla. */
-const ANCHO_MIN = 300, ANCHO_NORMAL = 412, IZQ = 368;
+const ANCHO_MIN = 300, ANCHO_NORMAL = 360, IZQ = 368;
 function anchoMax(){
   if(ESWEB) return Math.max(ANCHO_MIN, window.innerWidth - IZQ - 40);
   return 800 - IZQ;   // tope de Chrome y Edge para un popup
@@ -2106,16 +2135,50 @@ function alEscribirComuna(){
 
 // Elige la comuna entre los candidatos. Sólo la da por elegida si no hay
 // empate: con "las c" ofrece Las Cabras y Las Condes en vez de adivinar.
+// Abreviaturas de uso común al escribir comunas
+const ABREV = {pto: "puerto", pta: "punta", sta: "santa", sto: "santo", gral: "general", sn: "san",
+               stgo: "santiago", valpo: "valparaiso", conce: "concepcion", vina: "vina del mar"};
+function expandirAbrev(q){
+  return norm(q).split(" ").map(function(w){ return ABREV[w] || w; }).join(" ");
+}
 function elegirComuna(q, candidatos){
+  const q2 = expandirAbrev(q);
+  function pt(n){
+    const a = puntaje(q, n), b = q2 !== norm(q) ? puntaje(q2, n) : null;
+    return a === null ? b : (b === null ? a : Math.min(a, b));
+  }
   const cand = candidatos
-    .map(function(x){ return {x: x, pt: puntaje(q, x.nombre)}; })
+    .map(function(x){ return {x: x, pt: pt(x.nombre)}; })
     .filter(function(c){ return c.pt !== null; })
     .sort(function(a, b){ return a.pt - b.pt || a.x.nombre.localeCompare(b.x.nombre, "es"); });
   const claro = cand.length && (cand.length === 1 || cand[0].pt < cand[1].pt || cand[0].pt === 0);
   return {comuna: claro ? cand[0].x : null, sugerencias: cand.slice(0, 5).map(function(c){ return c.x; })};
 }
 
+// Si algo falla, se dice en el panel en vez de quedar en silencio
+let ultimaBusqueda = null;
 async function buscarComuna(q, elegida){
+  ultimaBusqueda = {q: q, elegida: elegida || null};
+  try{ await buscarComunaAdentro(q, elegida); }
+  catch(e){
+    document.getElementById("clinRes").innerHTML =
+      '<p class="clin-vacio">Algo falló al buscar: ' + esc(String(e && e.message || e)) +
+      '. <button type="button" class="link-carga" data-diag="error">copiar diagnóstico</button></p>';
+    diag.error = {mensaje: String(e && e.message || e), pila: String(e && e.stack || "").slice(0, 1500)};
+  }
+}
+// Cuando el listado de i-dental termina de leerse en segundo plano, la
+// búsqueda que está en pantalla se repite sola para mostrarlo.
+try{
+  chrome.storage.onChanged.addListener(function(cambios, zona){
+    if(zona !== "local" || !(cambios.red_edental || cambios.ede_intento) || !ultimaBusqueda) return;
+    if(document.getElementById("panelClin").hidden) return;
+    if(norm(document.getElementById("comuna").value) !== norm(ultimaBusqueda.q) && !ultimaBusqueda.elegida) return;
+    buscarComuna(ultimaBusqueda.q, ultimaBusqueda.elegida);
+  });
+}catch(e){}
+
+async function buscarComunaAdentro(q, elegida){
   const id = ++busquedaId;
   pintarResultados({cargando: true, comuna: q});
 
@@ -2164,7 +2227,7 @@ async function buscarComuna(q, elegida){
     return {comuna: {nombre: q.trim(), slug: norm(q).replace(/\s+/g, "-"), ede: []}, sugerencias: []};  // sin nada leído
   }
   function edeDe(c){
-    return {lista: c.ede, error: ede.error, total: (ede.lista || []).length};
+    return {lista: c.ede, error: ede.error, total: (ede.lista || []).length, pendiente: !!ede.pendiente};
   }
 
   let r = elegir(agrupar());
@@ -2226,8 +2289,15 @@ function bloqueRed(red, comuna, r){
       '<span class="redn">leyendo…</span></div>' +
       '<p class="clin-vacio">Leyendo el listado de ' + nom + '. La primera vez tarda unos segundos: se abre y se cierra sola una pestaña de fondo. Después queda guardado una semana.</p></div>';
   }
+  if(r.pendiente){
+    return '<div class="redblq"><div class="redcab"><span class="red ' + red + '">' + nom + '</span>' +
+      '<span class="redn">cargando aparte…</span>' +
+      '<a class="fuente" href="' + esc(RED[red].sitio) + '" target="_blank" rel="noopener">ver en el sitio &#8599;</a></div>' +
+      '<p class="clin-vacio">El listado de ' + nom + ' se está cargando aparte (unos segundos, una sola vez por semana). Aparece aquí solo, sin volver a buscar.</p></div>';
+  }
   if(r.error) estado = "sin respuesta";
   else if(lista.length) estado = lista.length + (lista.length === 1 ? " sucursal" : " sucursales");
+  else if(red === "edental" && !r.total) estado = "sin listado";
   else estado = "ninguna en " + esc(comuna);
   let h = '<div class="redblq"><div class="redcab">' +
     '<span class="red ' + red + '">' + nom + '</span>' +
@@ -2454,6 +2524,7 @@ document.getElementById("copiar").addEventListener("click", function(){
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){
+  if(v && v.ancho === 412) delete v.ancho;   // el ancho normal anterior: pasa al nuevo
   if(v) Object.assign(prefs, v);
   aplicarPrefs();
   if(guionAbierto) marcarPasos(false);

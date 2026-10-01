@@ -792,7 +792,7 @@ function pintarGuion(){
    La letra, el contraste y el modo guiado son preferencias del
    ejecutivo: no se borran con "Nuevo cliente".
    ============================================================ */
-const prefs = {letra: 100, contraste: "normal", guiada: true, ancho: 412};
+const prefs = {letra: 100, contraste: "normal", guiada: true, ancho: 360};
 let pasos = {basico: 0, full: 0, ninos: 0};
 
 function aplicarPrefs(){
@@ -820,7 +820,7 @@ function guardarPrefs(){ almacen.escribir("prefs", prefs); }
    El tirador del borde derecho ensancha sólo la zona de lectura y el
    texto se reacomoda. El popup de Chrome no pasa de 800 px, así que ahí
    el script puede llegar hasta ese borde; en la web, hasta el de la pantalla. */
-const ANCHO_MIN = 300, ANCHO_NORMAL = 412, IZQ = 368;
+const ANCHO_MIN = 300, ANCHO_NORMAL = 360, IZQ = 368;
 function anchoMax(){
   if(ESWEB) return Math.max(ANCHO_MIN, window.innerWidth - IZQ - 40);
   return 800 - IZQ;   // tope de Chrome y Edge para un popup
@@ -904,16 +904,50 @@ function alEscribirComuna(){
 
 // Elige la comuna entre los candidatos. Sólo la da por elegida si no hay
 // empate: con "las c" ofrece Las Cabras y Las Condes en vez de adivinar.
+// Abreviaturas de uso común al escribir comunas
+const ABREV = {pto: "puerto", pta: "punta", sta: "santa", sto: "santo", gral: "general", sn: "san",
+               stgo: "santiago", valpo: "valparaiso", conce: "concepcion", vina: "vina del mar"};
+function expandirAbrev(q){
+  return norm(q).split(" ").map(function(w){ return ABREV[w] || w; }).join(" ");
+}
 function elegirComuna(q, candidatos){
+  const q2 = expandirAbrev(q);
+  function pt(n){
+    const a = puntaje(q, n), b = q2 !== norm(q) ? puntaje(q2, n) : null;
+    return a === null ? b : (b === null ? a : Math.min(a, b));
+  }
   const cand = candidatos
-    .map(function(x){ return {x: x, pt: puntaje(q, x.nombre)}; })
+    .map(function(x){ return {x: x, pt: pt(x.nombre)}; })
     .filter(function(c){ return c.pt !== null; })
     .sort(function(a, b){ return a.pt - b.pt || a.x.nombre.localeCompare(b.x.nombre, "es"); });
   const claro = cand.length && (cand.length === 1 || cand[0].pt < cand[1].pt || cand[0].pt === 0);
   return {comuna: claro ? cand[0].x : null, sugerencias: cand.slice(0, 5).map(function(c){ return c.x; })};
 }
 
+// Si algo falla, se dice en el panel en vez de quedar en silencio
+let ultimaBusqueda = null;
 async function buscarComuna(q, elegida){
+  ultimaBusqueda = {q: q, elegida: elegida || null};
+  try{ await buscarComunaAdentro(q, elegida); }
+  catch(e){
+    document.getElementById("clinRes").innerHTML =
+      '<p class="clin-vacio">Algo falló al buscar: ' + esc(String(e && e.message || e)) +
+      '. <button type="button" class="link-carga" data-diag="error">copiar diagnóstico</button></p>';
+    diag.error = {mensaje: String(e && e.message || e), pila: String(e && e.stack || "").slice(0, 1500)};
+  }
+}
+// Cuando el listado de i-dental termina de leerse en segundo plano, la
+// búsqueda que está en pantalla se repite sola para mostrarlo.
+try{
+  chrome.storage.onChanged.addListener(function(cambios, zona){
+    if(zona !== "local" || !(cambios.red_edental || cambios.ede_intento) || !ultimaBusqueda) return;
+    if(document.getElementById("panelClin").hidden) return;
+    if(norm(document.getElementById("comuna").value) !== norm(ultimaBusqueda.q) && !ultimaBusqueda.elegida) return;
+    buscarComuna(ultimaBusqueda.q, ultimaBusqueda.elegida);
+  });
+}catch(e){}
+
+async function buscarComunaAdentro(q, elegida){
   const id = ++busquedaId;
   pintarResultados({cargando: true, comuna: q});
 
@@ -962,7 +996,7 @@ async function buscarComuna(q, elegida){
     return {comuna: {nombre: q.trim(), slug: norm(q).replace(/\s+/g, "-"), ede: []}, sugerencias: []};  // sin nada leído
   }
   function edeDe(c){
-    return {lista: c.ede, error: ede.error, total: (ede.lista || []).length};
+    return {lista: c.ede, error: ede.error, total: (ede.lista || []).length, pendiente: !!ede.pendiente};
   }
 
   let r = elegir(agrupar());
@@ -1024,8 +1058,15 @@ function bloqueRed(red, comuna, r){
       '<span class="redn">leyendo…</span></div>' +
       '<p class="clin-vacio">Leyendo el listado de ' + nom + '. La primera vez tarda unos segundos: se abre y se cierra sola una pestaña de fondo. Después queda guardado una semana.</p></div>';
   }
+  if(r.pendiente){
+    return '<div class="redblq"><div class="redcab"><span class="red ' + red + '">' + nom + '</span>' +
+      '<span class="redn">cargando aparte…</span>' +
+      '<a class="fuente" href="' + esc(RED[red].sitio) + '" target="_blank" rel="noopener">ver en el sitio &#8599;</a></div>' +
+      '<p class="clin-vacio">El listado de ' + nom + ' se está cargando aparte (unos segundos, una sola vez por semana). Aparece aquí solo, sin volver a buscar.</p></div>';
+  }
   if(r.error) estado = "sin respuesta";
   else if(lista.length) estado = lista.length + (lista.length === 1 ? " sucursal" : " sucursales");
+  else if(red === "edental" && !r.total) estado = "sin listado";
   else estado = "ninguna en " + esc(comuna);
   let h = '<div class="redblq"><div class="redcab">' +
     '<span class="red ' + red + '">' + nom + '</span>' +
@@ -1252,6 +1293,7 @@ document.getElementById("copiar").addEventListener("click", function(){
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){
+  if(v && v.ancho === 412) delete v.ancho;   // el ancho normal anterior: pasa al nuevo
   if(v) Object.assign(prefs, v);
   aplicarPrefs();
   if(guionAbierto) marcarPasos(false);
