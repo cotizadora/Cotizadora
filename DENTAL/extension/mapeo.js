@@ -45,7 +45,7 @@ async function hacerMapeo(){
     await pausa(400);
   }
 
-  progreso(hechas, total, "Leyendo el listado de i-dental…");
+  progreso(hechas, total, "Leyendo el listado de i-dental (se abre unos segundos en una pestaña de fondo)…");
   const ede = await clinicasEdental(true);
   progreso(total, total, "Listo.");
 

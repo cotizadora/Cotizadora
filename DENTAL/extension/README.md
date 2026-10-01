@@ -54,7 +54,16 @@ para el ejecutivo y no se leen al cliente.
 - **Tamaño de letra:** botones **A−** y **A+**, de 80 % a 220 %.
 - **Contraste:** Normal, **Negro** (fondo negro, letra clara), **Alto**
   (negro con amarillo) y **Sepia** (más suave para la vista).
-- Tamaño, contraste y lectura guiada se recuerdan siempre, también después
+- **Ancho:** arrastra hacia la derecha el borde derecho del script (la
+  franja con puntos) y la zona de lectura se ensancha; el texto se
+  reacomoda. Doble clic en esa franja vuelve al ancho normal. El popup de
+  Chrome no pasa de 800 px, así que ahí se gana poco: para ensancharlo de
+  verdad usa **⧉ ventana aparte**.
+- **⧉ Ventana aparte** (botón en la cabecera del script): abre el cotizador
+  en su propia ventana, con los mismos datos. Ahí el script se ensancha todo
+  lo que quieras (la ventana crece hacia la derecha) y **no se cierra** al
+  hacer clic en otro programa durante la llamada.
+- Tamaño, ancho, contraste y lectura guiada se recuerdan siempre, también después
   de *Nuevo cliente*. La frase en que vas se guarda por plan y se reinicia
   con cada cliente nuevo.
 - Las coberturas y exclusiones van en lista, una por línea, para leerlas sin
@@ -67,7 +76,10 @@ para el ejecutivo y no se leen al cliente.
 Escribe la comuna del cliente y la extensión lee, en ese momento:
 
 - **Uno Salud:** la página de esa comuna en `unosalud.cl/region-comuna/`.
-- **i-dental:** el listado de clínicas de `e-dentalsys.com`.
+- **i-dental:** el listado de clínicas de `e-dentalsys.com`. Ese sitio arma
+  su listado después de cargar, así que la extensión lo abre unos segundos en
+  una **pestaña de fondo**, lee las tarjetas y la cierra sola. Cada tarjeta
+  dice `Comuna - Provincia - REGIÓN`, y de ahí sale la comuna exacta.
 
 Muestra las sucursales de cada red con nombre, dirección, teléfono y horario
 cuando el sitio los trae, y un enlace a la fuente.
@@ -77,11 +89,12 @@ cuando el sitio los trae, y un enlace a la fuente.
 - La lista de comunas sale del propio sitio de Uno Salud, así que funciona
   aunque la dirección de la página no sea el nombre de la comuna
   (Valparaíso es `rv-rv`).
-- Lo leído se guarda un día. La segunda búsqueda de la misma comuna es
-  instantánea y no vuelve a consultar el sitio. "Volver a leer" fuerza una
-  lectura nueva.
-- Si i-dental no indica la comuna en cada clínica y sólo las agrupa bajo un
-  título, lo avisa y pide confirmar la dirección.
+- Uno Salud se muestra apenas llega; i-dental aparece unos segundos después
+  la primera vez (dice *leyendo…*).
+- Lo leído se guarda: Uno Salud un día, i-dental una semana. Las búsquedas
+  siguientes son instantáneas. El mapeo completo vuelve a leer todo.
+- Si el popup se cierra mientras se lee i-dental, la lectura termina igual
+  y queda guardada para la próxima búsqueda.
 
 **Si una red no muestra resultados y debería**, el sitio puede haber cambiado
 su diseño. Pincha **copiar diagnóstico** y pega el texto en la conversación:

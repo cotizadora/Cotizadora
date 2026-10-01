@@ -17,7 +17,8 @@ body{
   display:flex; align-items:stretch; width:360px; overflow:hidden;
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
-.app.abierto{width:780px}
+.app.abierto{width:calc(368px + var(--gw, 412px))}
+.app.arrastrando, .app.arrastrando .guion{transition:none}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
 /* ---- panel del script: se despliega hacia la derecha ---- */
@@ -32,7 +33,7 @@ body{
              border-left-width .26s step-end;
 }
 .app.abierto .guion{
-  width:420px; opacity:1; transform:none;
+  width:var(--gw, 412px); opacity:1; transform:none;
   overflow-y:auto; border-left-width:1px;
   transition:width .26s cubic-bezier(.32,.72,0,1),
              opacity .2s ease .08s,
@@ -59,11 +60,36 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 .guion-tit{font-size:13px; font-weight:800; line-height:1.2}
 .guion-sub{font-size:10.5px; opacity:.85; margin-top:2px}
 .guion-cab>div{flex:1; min-width:0}
-#cerrarGuion{
+#cerrarGuion, #enVentana{
   background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3);
   border-radius:6px; width:22px; height:22px; font-size:15px; line-height:1; cursor:pointer; flex:0 0 auto;
 }
-#cerrarGuion:hover{background:rgba(255,255,255,.3)}
+#cerrarGuion:hover, #enVentana:hover{background:rgba(255,255,255,.3)}
+#enVentana{font-size:13px}
+#enVentana.pulso{animation:pulso .5s ease 3}
+@keyframes pulso{ 50%{ background:#fff; color:var(--brand) } }
+
+/* ---- tirador: se arrastra hacia la derecha para ensanchar el script ---- */
+.tirador{
+  flex:0 0 0; width:0; overflow:hidden; align-self:stretch; position:relative;
+  background:var(--soft); cursor:ew-resize; touch-action:none;
+}
+.app.abierto .tirador{flex-basis:8px; width:8px; border-left:1px solid var(--line)}
+.tirador::after{
+  content:""; position:absolute; left:2px; top:50%; width:3px; height:34px; margin-top:-17px;
+  border-left:1px dotted var(--muted); border-right:1px dotted var(--muted); opacity:.6;
+}
+.tirador:hover, .tirador:focus-visible, .app.arrastrando .tirador{background:var(--brand2)}
+.tirador:hover::after, .app.arrastrando .tirador::after{border-color:#fff; opacity:1}
+.tope{
+  margin:6px 11px 0; padding:6px 8px; border-radius:6px; font-size:11px; line-height:1.35;
+  background:var(--warnbg); color:var(--warn);
+}
+
+/* ---- abierto en su propia ventana: ocupa todo el alto ---- */
+body.ventana .app{height:100vh}
+body.ventana .izq{overflow-y:auto}
+body.ventana .guion{max-height:none}
 .guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
 .gs{margin:.9em 0 0}
 .gs h4{

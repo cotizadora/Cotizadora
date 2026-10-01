@@ -74,6 +74,8 @@ function pintarUF(cent, fecha, fuente){
 /* Abierta como página web (no como extensión) no hay chrome.storage ni se
    puede consultar otro sitio, así que la UF se escribe a mano. */
 const ESWEB = (typeof chrome === "undefined" || !chrome.storage);
+// Abierto con el botón ⧉ en una ventana propia, no como popup
+const VENTANA = /[?&]ventana=1/.test(location.search);
 
 async function cargarUF(){
   if(ESWEB){
@@ -173,7 +175,7 @@ function guardarEstado(){
     return { edad: f.querySelector(".edad").value, fecha: f.querySelector(".fecha").value };
   });
   const comuna = document.getElementById("comuna").value;
-  const hayAlgo = nCargas > 0 || envio !== "linea" || planElegido !== PLAN_POR_DEFECTO ||
+  const hayAlgo = nCargas > 0 || envio !== "linea" || planElegido !== PLAN_POR_DEFECTO || guionAbierto ||
                   !document.getElementById("panelClin").hidden || comuna !== "";
   if(!hayAlgo){ almacen.borrar("estado"); pintarGuardado(null); return; }
   const estado = {
@@ -742,6 +744,7 @@ function pintarGuion(){
   const app = document.getElementById("app");
   const yaAbierto = app.classList.contains("abierto");
   app.classList.toggle("abierto", guionAbierto);
+  if(VENTANA && guionAbierto && !yaAbierto) crecerVentana();
   if(!guionAbierto) return;
   const caja = document.getElementById("guion");
   const scroll = caja.scrollTop;
@@ -792,7 +795,7 @@ function pintarGuion(){
    La letra, el contraste y el modo guiado son preferencias del
    ejecutivo: no se borran con "Nuevo cliente".
    ============================================================ */
-const prefs = {letra: 100, contraste: "normal", guiada: true};
+const prefs = {letra: 100, contraste: "normal", guiada: true, ancho: 412};
 let pasos = {basico: 0, full: 0, ninos: 0};
 
 function aplicarPrefs(){
@@ -809,11 +812,105 @@ function aplicarPrefs(){
   document.getElementById("guiada").classList.toggle("on", prefs.guiada);
   document.getElementById("pasoAnt").disabled = !prefs.guiada;
   document.getElementById("pasoSig").disabled = !prefs.guiada;
+  aplicarAncho();
   // La barra queda pegada bajo la cabecera, cuya altura cambia con la letra
   const cab = g.querySelector(".guion-cab");
   if(cab) g.style.setProperty("--gb-top", cab.offsetHeight + "px");
 }
 function guardarPrefs(){ almacen.escribir("prefs", prefs); }
+
+/* ---------- ancho del script ----------
+   El tirador del borde derecho ensancha sólo la zona de lectura y el
+   texto se reacomoda. El popup de Chrome no pasa de 800 px, así que ahí
+   el margen es poco; en ventana aparte (botón ⧉) o en la web no hay tope. */
+const ANCHO_MIN = 300, ANCHO_NORMAL = 412, IZQ = 368;
+function anchoMax(){
+  if(ESWEB) return Math.max(ANCHO_MIN, window.innerWidth - IZQ - 40);
+  if(VENTANA) return Math.max(ANCHO_MIN, (screen.availWidth || 1600) - IZQ - 20);
+  return 800 - IZQ;   // tope de Chrome y Edge para un popup
+}
+function anchoActual(){ return Math.max(ANCHO_MIN, Math.min(prefs.ancho || ANCHO_NORMAL, anchoMax())); }
+function aplicarAncho(){
+  document.documentElement.style.setProperty("--gw", anchoActual() + "px");
+  if(VENTANA) crecerVentana();
+}
+// En ventana aparte, si el script ya no cabe, la ventana crece hacia la derecha
+let creciendo = false;
+function crecerVentana(){
+  if(creciendo || !guionAbierto) return;
+  const falta = IZQ + anchoActual() + 4 - window.innerWidth;
+  if(falta <= 0) return;
+  creciendo = true;
+  try{
+    chrome.windows.getCurrent(function(w){
+      chrome.windows.update(w.id, {width: w.width + falta}, function(){ creciendo = false; });
+    });
+  }catch(e){ creciendo = false; }
+}
+let topeTimer = null;
+function avisarTope(si){
+  const t = document.getElementById("topeAviso");
+  clearTimeout(topeTimer);
+  if(si){
+    t.hidden = false;
+    document.getElementById("enVentana").classList.add("pulso");
+    topeTimer = setTimeout(function(){ t.hidden = true; document.getElementById("enVentana").classList.remove("pulso"); }, 6000);
+  }
+}
+(function(){
+  const tir = document.getElementById("tirador"), app = document.getElementById("app");
+  let x0 = null, w0 = 0;
+  tir.addEventListener("pointerdown", function(e){
+    if(e.button !== 0) return;
+    x0 = e.clientX; w0 = anchoActual();
+    tir.setPointerCapture(e.pointerId);
+    app.classList.add("arrastrando");
+    e.preventDefault();
+  });
+  tir.addEventListener("pointermove", function(e){
+    if(x0 === null) return;
+    const quiere = w0 + (e.clientX - x0);
+    prefs.ancho = Math.round(Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere)));
+    aplicarAncho();
+    if(quiere > anchoMax() + 6 && !ESWEB && !VENTANA) avisarTope(true);
+  });
+  function soltar(){
+    if(x0 === null) return;
+    x0 = null;
+    app.classList.remove("arrastrando");
+    guardarPrefs();
+  }
+  tir.addEventListener("pointerup", soltar);
+  tir.addEventListener("pointercancel", soltar);
+  tir.addEventListener("dblclick", function(){ prefs.ancho = ANCHO_NORMAL; aplicarAncho(); guardarPrefs(); });
+  // Con teclado: ← y → de a 20 px
+  tir.addEventListener("keydown", function(e){
+    if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const quiere = anchoActual() + (e.key === "ArrowRight" ? 20 : -20);
+    prefs.ancho = Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere));
+    aplicarAncho(); guardarPrefs();
+    if(quiere > anchoMax() && !ESWEB && !VENTANA) avisarTope(true);
+    e.preventDefault();
+  });
+  if(!ESWEB) window.addEventListener("resize", function(){ if(VENTANA) aplicarAncho(); });
+  else window.addEventListener("resize", aplicarAncho);
+})();
+
+// Abre el cotizador en una ventana propia: no se cierra al hacer clic
+// afuera y el script se ensancha sin tope. Los datos del cliente ya están
+// guardados, así que aparecen tal cual.
+document.getElementById("enVentana").addEventListener("click", function(){
+  guardarEstado();
+  try{
+    chrome.windows.create({
+      url: chrome.runtime.getURL("popup.html?ventana=1"), type: "popup",
+      width: Math.min(screen.availWidth || 1600, IZQ + anchoActual() + 24),
+      height: Math.min(screen.availHeight || 900, 780)
+    }, function(){ window.close(); });
+  }catch(e){}
+});
+if(ESWEB || VENTANA) document.getElementById("enVentana").hidden = true;
+if(VENTANA){ document.body.classList.add("ventana"); document.title = "Cotizador Dental Bci"; }
 
 function frases(){
   return [].slice.call(document.querySelectorAll("#guionCuerpo .gs p:not(.nota), #guionCuerpo .gs li"));
@@ -884,37 +981,57 @@ async function buscarComuna(q, elegida){
   }
 
   // 2. Sin mapeo: se lee en vivo. Las comunas candidatas son las de Uno Salud
-  //    más las que aparecen en el listado de i-dental.
-  const leido = await Promise.all([indiceUnoSalud(), clinicasEdental()]);
+  //    más las que aparecen en el listado de i-dental. Uno Salud no espera a
+  //    i-dental: si i-dental aún no está guardado (la primera lectura tarda
+  //    unos segundos), se muestra Uno Salud y i-dental llega después.
+  const indice = await indiceUnoSalud();
   if(id !== busquedaId) return;
-  const indice = leido[0], ede = leido[1];
+  let ede = await edentalGuardado();
+  const pEde = ede ? null : clinicasEdental();
   const conocidas = indice.map(function(x){ return x.nombre; });
-  const porComuna = {};
-  indice.forEach(function(x){ porComuna[norm(x.nombre)] = {nombre: x.nombre, slug: x.slug, ede: []}; });
-  (ede.lista || []).forEach(function(c){
-    const u = ubicarClinica(c, conocidas);
-    if(!u.comuna) return;
-    const k = norm(u.comuna);
-    if(!porComuna[k]) porComuna[k] = {nombre: u.comuna, slug: "", ede: []};
-    porComuna[k].ede.push(Object.assign({}, c, u.porSeccion ? {porSeccion: true} : {}));
-  });
-  const candidatos = Object.keys(porComuna).map(function(k){ return porComuna[k]; });
+  function agrupar(){
+    const porComuna = {};
+    indice.forEach(function(x){ porComuna[norm(x.nombre)] = {nombre: x.nombre, slug: x.slug, ede: []}; });
+    ((ede && ede.lista) || []).forEach(function(c){
+      const u = ubicarClinica(c, conocidas);
+      if(!u.comuna) return;
+      const k = norm(u.comuna);
+      if(!porComuna[k]) porComuna[k] = {nombre: u.comuna, slug: "", ede: []};
+      porComuna[k].ede.push(Object.assign({}, c, u.porSeccion ? {porSeccion: true} : {}));
+    });
+    return porComuna;
+  }
+  function elegir(porComuna){
+    const candidatos = Object.keys(porComuna).map(function(k){ return porComuna[k]; });
+    if(elegida) return {comuna: porComuna[norm(elegida.nombre)] || {nombre: elegida.nombre, slug: elegida.slug, ede: []}, sugerencias: []};
+    if(candidatos.length) return elegirComuna(q, candidatos);
+    return {comuna: {nombre: q.trim(), slug: norm(q).replace(/\s+/g, "-"), ede: []}, sugerencias: []};  // sin nada leído
+  }
+  function edeDe(c){
+    return {lista: c.ede, error: ede.error, total: (ede.lista || []).length};
+  }
 
-  let r;
-  if(elegida) r = {comuna: porComuna[norm(elegida.nombre)] || {nombre: elegida.nombre, slug: elegida.slug, ede: []}, sugerencias: []};
-  else if(candidatos.length) r = elegirComuna(q, candidatos);
-  else r = {comuna: {nombre: q.trim(), slug: norm(q).replace(/\s+/g, "-"), ede: []}, sugerencias: []};  // sin nada leído
+  let r = elegir(agrupar());
+  // La comuna puede tener sólo i-dental: sin calce en Uno Salud se espera el listado
+  if(!r.comuna && pEde){
+    pintarResultados({cargando: true, comuna: q, ede: true});
+    ede = await pEde;
+    if(id !== busquedaId) return;
+    r = elegir(agrupar());
+  }
   mostrarEleccion(r);
   if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length}); return; }
 
   const c = r.comuna;
   const uno = c.slug ? await clinicasUnoSalud(c) : {lista: [], url: RED.unosalud.sitio, error: "", sinPagina: true};
   if(id !== busquedaId) return;
-  pintarResultados({
-    comuna: c.nombre,
-    uno: uno,
-    ede: {lista: c.ede, error: ede.error, total: (ede.lista || []).length}
-  });
+  pintarResultados({comuna: c.nombre, uno: uno, ede: ede ? edeDe(c) : {cargando: true, lista: []}});
+  if(ede) return;
+
+  ede = await pEde;
+  if(id !== busquedaId) return;
+  const c2 = agrupar()[norm(c.nombre)] || {ede: []};
+  pintarResultados({comuna: c.nombre, uno: uno, ede: edeDe(c2)});
 }
 
 function mostrarEleccion(r){
@@ -948,6 +1065,11 @@ function bloqueRed(red, comuna, r){
   const nom = RED[red].nombre;
   const lista = r.lista || [];
   let estado;
+  if(r.cargando){
+    return '<div class="redblq"><div class="redcab"><span class="red ' + red + '">' + nom + '</span>' +
+      '<span class="redn">leyendo…</span></div>' +
+      '<p class="clin-vacio">Leyendo el listado de ' + nom + '. La primera vez tarda unos segundos: se abre y se cierra sola una pestaña de fondo. Después queda guardado una semana.</p></div>';
+  }
   if(r.error) estado = "sin respuesta";
   else if(lista.length) estado = lista.length + (lista.length === 1 ? " sucursal" : " sucursales");
   else estado = "ninguna en " + esc(comuna);
@@ -983,7 +1105,11 @@ function bloqueRed(red, comuna, r){
 function pintarResultados(e){
   const caja = document.getElementById("clinRes");
   if(!e){ caja.innerHTML = ""; return; }
-  if(e.cargando){ caja.innerHTML = '<p class="clin-vacio">Buscando sucursales en ' + esc(e.comuna) + '…</p>'; return; }
+  if(e.cargando){
+    caja.innerHTML = '<p class="clin-vacio">Buscando sucursales en ' + esc(e.comuna) + '…' +
+      (e.ede ? ' Leyendo el listado de i-dental: la primera vez tarda unos segundos.' : '') + '</p>';
+    return;
+  }
   if(e.sinElegir){
     caja.innerHTML = e.nada
       ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas con sucursales de Uno Salud o i-dental. Revisa cómo se escribe.</p>'
@@ -1002,6 +1128,9 @@ function pintarResultados(e){
 
 async function copiarDiagnostico(red, btn){
   const info = {red: red, cuando: new Date().toISOString(), indice: diag.indice || null, lectura: diag[red] || null};
+  if(red === "edental"){
+    info.ultimaPestana = await new Promise(function(res){ almacen.leer("diag_edental_vivo", res); });
+  }
   const texto = "DIAGNOSTICO BUSCADOR " + red.toUpperCase() + "\n" + JSON.stringify(info, null, 1);
   try{ await navigator.clipboard.writeText(texto); btn.textContent = "copiado: pégalo en el chat"; }
   catch(e){ btn.textContent = "no se pudo copiar"; }

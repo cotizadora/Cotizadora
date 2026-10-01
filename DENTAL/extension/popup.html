@@ -96,6 +96,7 @@
         <div class="guion-tit" id="guionTit">Script</div>
         <div class="guion-sub" id="guionSub"></div>
       </div>
+      <button type="button" id="enVentana" title="Abrir en una ventana aparte: se ensancha todo lo que quieras y no se cierra al hacer clic afuera">&#10697;</button>
       <button type="button" id="cerrarGuion" title="Ocultar el script">&times;</button>
     </div>
     <div class="guion-barra">
@@ -117,10 +118,14 @@
         <button type="button" id="pasoSig" aria-label="Frase siguiente">&#9660;</button>
       </div>
     </div>
+    <p class="tope" id="topeAviso" hidden>Es lo más ancho que permite Chrome en esta ventanita. Para seguir ensanchando, abre el cotizador en su propia ventana con el botón &#10697; de arriba.</p>
     <div class="guion-cuerpo" id="guionCuerpo"></div>
   </aside>
+  <div class="tirador" id="tirador" role="separator" aria-orientation="vertical" tabindex="0"
+       aria-label="Ancho del script" title="Arrastra hacia la derecha para ensanchar el script · doble clic: ancho normal"></div>
 
 </div>
+<script src="edental.js"></script>
 <script src="redes.js"></script>
 <script src="popup.js"></script>
 </body>

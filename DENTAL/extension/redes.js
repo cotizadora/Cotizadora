@@ -478,49 +478,63 @@ function parsearEdental(html, base){
   });
   const ld = desdeJsonLd(doc);
   const js = desdeScripts(doc);
-  let final = lista, estrategia = "tarjetas";
+  // Tarjetas con la línea "comuna - provincia - región" (edental.js)
+  const ub = typeof tarjetasPorUbicacion === "function" && doc.body ? tarjetasPorUbicacion(doc.body) : [];
+  let final = ub, estrategia = "línea de ubicación";
+  if(lista.length > final.length){ final = lista; estrategia = "tarjetas"; }
   if(ld.length > final.length){ final = ld; estrategia = "datos estructurados"; }
   if(js.length > final.length){ final = js; estrategia = "datos dentro de los scripts"; }
   d.encontradas = final.length;
   d.estrategia = final.length ? estrategia : "ninguna";
-  d.porEstrategia = {tarjetas: lista.length, jsonld: ld.length, scripts: js.length};
+  d.porEstrategia = {ubicacion: ub.length, tarjetas: lista.length, jsonld: ld.length, scripts: js.length};
   if(!final.length) d.radiografia = radiografia(doc, html);
   return {lista: final, diag: d, doc: doc};
 }
 
+// El listado de i-dental cambia poco y leerlo abre una pestaña de fondo,
+// así que se guarda una semana. "Volver a leer" fuerza una lectura nueva.
+const EDE_VIGENCIA = 7 * DIA;
+function edentalGuardado(){ return cacheLeer("red_edental", EDE_VIGENCIA); }
+
+// Pide al service worker (background.js) que abra el sitio en una pestaña
+// de fondo y lea las tarjetas ya armadas.
+function edentalEnPestana(){
+  return new Promise(function(resolver){
+    try{
+      chrome.runtime.sendMessage({tipo: "edentalVivo"}, function(r){
+        if(chrome.runtime.lastError || !r) resolver(null); else resolver(r);
+      });
+    }catch(e){ resolver(null); }
+  });
+}
+function hayPestanas(){
+  try{ return !!(chrome && chrome.runtime && chrome.runtime.id && chrome.runtime.sendMessage); }catch(e){ return false; }
+}
+
 async function clinicasEdental(fresco){
-  const c = fresco ? null : await cacheLeer("red_edental", DIA);
+  const c = fresco ? null : await edentalGuardado();
   if(c) return c;
+
+  // 1. El HTML tal cual: rápido, y basta si algún día el sitio lo trae armado
   const r = await traer(RED.edental.portada);
   diag.edental = {url: RED.edental.portada, status: r.status, error: r.error || ""};
-  if(!r.ok) return {lista: [], error: r.error || ("el sitio respondió " + r.status)};
-  let p = parsearEdental(r.html, r.url);
-  Object.assign(diag.edental, p.diag);
-
-  // Si la portada no trae las clínicas, se prueban las páginas donde suelen
-  // estar: las que enlaza la portada y las rutas habituales de estos sitios.
-  if(!p.lista.length){
-    const candidatas = [];
-    [].forEach.call(p.doc.querySelectorAll("a[href]"), function(a){
-      const h = a.getAttribute("href") || "";
-      if(/^#|preguntas|mailto:|tel:|whatsapp|facebook|instagram|linkedin|youtube/i.test(h)) return;
-      if(!/cl[ií]nicas|sucursales|sedes|\bred\b|centros|ubicaci|donde/i.test(h + " " + txt(a))) return;
-      try{ candidatas.push(new URL(h, r.url).href); }catch(e){}
-    });
-    ["/clinicas", "/clinicas/", "/nuestras-clinicas", "/red-de-clinicas", "/red-clinicas", "/sucursales", "/sedes", "/red"].forEach(function(ruta){
-      try{ candidatas.push(new URL(ruta, r.url).href); }catch(e){}
-    });
-    const probadas = [];
-    for(const u of candidatas.filter(function(x, i, a){ return a.indexOf(x) === i; }).slice(0, 10)){
-      const r2 = await traer(u);
-      probadas.push(u + " → " + (r2.error || r2.status));
-      if(!r2.ok) continue;
-      const p2 = parsearEdental(r2.html, r2.url);
-      if(p2.lista.length){ p = p2; Object.assign(diag.edental, p2.diag, {paginaUsada: u}); break; }
-    }
-    diag.edental.paginasProbadas = probadas;
+  let res = {lista: [], error: r.ok ? "" : (r.error || ("el sitio respondió " + r.status))};
+  if(r.ok){
+    const p = parsearEdental(r.html, r.url);
+    Object.assign(diag.edental, p.diag);
+    res.lista = p.lista;
   }
-  const res = {lista: p.lista.map(function(x){ delete x.doc; return x; }), error: ""};
+
+  // 2. Sin tarjetas en el HTML: el sitio las arma con JavaScript. Se abre en
+  //    una pestaña de fondo, se leen ya armadas y se cierra sola.
+  if(!res.lista.length && hayPestanas()){
+    const v = await edentalEnPestana();
+    if(v){
+      diag.edental.pestana = v.diag;
+      if(v.res.lista.length){ delete diag.edental.radiografia; delete diag.edental.muestra; }
+      res = v.res;
+    }
+  }
   if(res.lista.length) cacheEscribir("red_edental", res);
   return res;
 }
@@ -556,6 +570,12 @@ function sucursalLimpia(c){
 // comuna conocida dentro de la dirección, dentro de la tarjeta, y por
 // último el título de la sección.
 function ubicarClinica(c, conocidas){
+  // La tarjeta dice la comuna ("Providencia - Santiago - REGIÓN ...")
+  if(c.comuna){
+    const exacta = conocidas.find(function(n){ return norm(n) === norm(c.comuna); }) ||
+                   conocidas.find(function(n){ const p = puntaje(c.comuna, n); return p !== null && p <= 3 && Math.abs(norm(n).length - norm(c.comuna).length) <= 2; });
+    return {comuna: exacta || nombreComuna(c.comuna), porSeccion: false};
+  }
   function mejor(texto){
     return conocidas.filter(function(n){ return contienePalabra(texto, n); })
                     .sort(function(a, b){ return b.length - a.length; })[0] || "";
@@ -573,6 +593,13 @@ function ubicarClinica(c, conocidas){
   if(propia) return {comuna: propia, porSeccion: false};
   const seccion = mejor(c.contexto);
   return {comuna: seccion, porSeccion: !!seccion};
+}
+// "SAN PEDRO DE LA PAZ" -> "San Pedro De La Paz" con las partículas en minúscula
+function nombreComuna(t){
+  t = String(t || "").trim();
+  if(t !== t.toUpperCase()) return t;
+  return t.toLowerCase().replace(/(^|[\s-])(\S)/g, function(m, a, b){ return a + b.toUpperCase(); })
+          .replace(/ (De|Del|La|Las|Los|El|Y)(?= )/g, function(m){ return m.toLowerCase(); });
 }
 function comunaDeClinica(c, conocidas){ return ubicarClinica(c, conocidas).comuna; }
 
