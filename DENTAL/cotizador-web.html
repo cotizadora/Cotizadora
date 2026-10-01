@@ -19,12 +19,21 @@ body{
   display:flex; align-items:stretch; width:360px; overflow:hidden;
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
-/* Con el script abierto el popup usa todo lo que permite Chrome (800 × 600):
-   la cotización arriba, repartida a lo ancho, y el script abajo. */
-.app.abierto{width:800px; height:600px; flex-direction:column}
+.app.abierto{width:calc(374px + var(--gw, 760px))}
+.app.arrastrando, .app.arrastrando .guion{transition:none}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
-/* ---- panel del script: se despliega al pinchar el nombre del plan ---- */
+/* ---- como página propia (pestaña de la extensión) ----
+   Ocupa todo el alto de la ventana: la cotización a la izquierda y el
+   script a la derecha, cada uno con su propio desplazamiento. A la derecha
+   del script queda el fondo, para ensancharlo con la manija. */
+html:has(body.pagina){height:100%}
+body.pagina{height:100%; background:var(--soft); overflow:hidden}
+body.pagina .app{height:100vh; background:var(--bg); box-shadow:0 0 0 1px var(--line), 4px 0 18px rgba(0,0,0,.06)}
+body.pagina .izq{height:100%; overflow-y:auto}
+body.pagina .guion{max-height:none; height:100%}
+
+/* ---- panel del script: se despliega hacia la derecha ---- */
 .guion{
   flex:0 0 auto; width:0; min-width:0; align-self:stretch;
   background:var(--soft); border-left:0 solid var(--line);
@@ -36,8 +45,8 @@ body{
              border-left-width .26s step-end;
 }
 .app.abierto .guion{
-  width:auto; opacity:1; transform:none;
-  overflow:hidden; border-left-width:0;
+  width:var(--gw, 760px); opacity:1; transform:none;
+  overflow-y:auto; border-left-width:1px;
   transition:width .26s cubic-bezier(.32,.72,0,1),
              opacity .2s ease .08s,
              transform .26s cubic-bezier(.32,.72,0,1),
@@ -69,54 +78,26 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 }
 #cerrarGuion:hover{background:rgba(255,255,255,.3)}
 
-/* ---- script abierto: cotización arriba en columnas, script abajo ---- */
-.app.abierto .izq{
-  width:auto; flex:0 0 auto; padding-bottom:8px;
-  display:grid; grid-template-columns:236px 272px minmax(0, 1fr);
-  grid-template-areas:
-    "uf    uf     uf"
-    "ufm   ufm    ufm"
-    "res   cargas planes"
-    "envio cargas planes"
-    "aviso cargas planes"
-    "total cargas planes";
-  grid-template-rows:auto auto auto auto auto 1fr;
-  border-bottom:2px solid var(--brand);
+/* ---- manija: se arrastra hacia la derecha para ensanchar el script ----
+   Franja del color de la cabecera del script, con flechas arriba y un
+   agarre al centro, para que se vea que se puede tirar. */
+.tirador{
+  flex:0 0 0; width:0; overflow:hidden; align-self:stretch; position:relative;
+  background:var(--brand); color:var(--bg); cursor:ew-resize; touch-action:none;
+  font:700 11px/1 "Segoe UI",system-ui,sans-serif; user-select:none;
 }
-.app.abierto .uf{grid-area:uf}
-.app.abierto .uf-manual{grid-area:ufm}
-.app.abierto .col{min-width:0}
-.app.abierto .col-res{grid-area:res}
-.app.abierto .col-aviso{grid-area:aviso}
-.app.abierto .col-total{grid-area:total; align-self:end}
-.app.abierto .col-cargas{grid-area:cargas; border-left:1px solid var(--line); border-right:1px solid var(--line)}
-.app.abierto .col-planes{grid-area:planes}
-.app.abierto .col-envio{grid-area:envio}
-
-/* En columnas, lo que sólo orienta se acorta para ganar alto de lectura */
-.app.abierto #bloqueCargas .pista,
-.app.abierto .ver-nota,
-.app.abierto .guardado-nota{display:none}
-.app.abierto #hijos .fila{gap:5px}
-.app.abierto #hijos input.fecha{min-width:0; width:116px; flex:0 0 116px}
-.app.abierto #hijos .fila .chip{flex:1 1 auto; min-width:0}
-.app.abierto .aviso{font-size:11px; padding:6px 8px}
-.app.abierto .guardado{margin-top:6px; padding:4px 8px}
-.app.abierto .t-uf{font-size:15px; white-space:nowrap}
-.app.abierto #panelClin{max-height:170px; overflow-y:auto}
-.app.abierto .col-envio .campo{margin-top:8px}
-
-/* El script ocupa el resto del alto: título y botones en una sola fila
-   y el texto, que es lo único que se desplaza, debajo. */
-.app.abierto .guion{
-  flex:1 1 auto; min-height:0; max-height:none;
-  display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto minmax(0, 1fr);
+.app.abierto .tirador{flex-basis:14px; width:14px}
+.tirador::before{
+  content:"\2194"; position:absolute; left:0; right:0; top:13px;
+  text-align:center; font-size:13px; font-weight:400; opacity:.95;
 }
-.app.abierto .guion-cab{position:static; grid-column:1; align-items:center; padding:6px 10px}
-.app.abierto .guion-sub{display:none}
-.app.abierto .guion-cab>div{flex:0 1 auto; white-space:nowrap}
-.app.abierto .guion-barra{position:static; grid-column:2}
-.app.abierto .guion-cuerpo{grid-column:1 / -1; overflow-y:auto; min-height:0; padding-left:16px; padding-right:16px}
+.tirador::after{
+  content:""; position:absolute; left:4px; top:50%; width:6px; height:46px; margin-top:-23px;
+  border-radius:3px; background:
+    radial-gradient(circle, currentColor 1.2px, transparent 1.6px) 0 0 / 6px 6px;
+  opacity:.85;
+}
+.tirador:hover, .tirador:focus-visible, .app.arrastrando .tirador{background:var(--brand2); outline:none}
 
 .guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
 .gs{margin:.9em 0 0}
@@ -267,7 +248,7 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;
   border-radius:7px;background:var(--soft);font-size:10.5px;color:var(--muted)}
-.guardado > span{flex:1}
+.guardado span{flex:1}
 #limpiar{border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--bad);
   font:inherit;font-size:10.5px;font-weight:700;padding:4px 8px;cursor:pointer}
 #limpiar:hover{border-color:var(--bad)}
@@ -373,28 +354,25 @@ body{ padding-block: 14px; padding-inline: 16px; }
 .cab{ max-width: 812px; margin: 0 auto 12px; }
 .cab h1{ font-size: 17px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
 .cab p{ font-size: 12px; color: var(--muted); margin: 3px 0 0; line-height: 1.4; }
-.marco{ max-width: 812px; margin: 0 auto; border: 1px solid var(--line); border-radius: 14px; overflow: clip; background: var(--card); }
+.marco{ max-width: 812px; margin: 0 auto; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--card); }
 .app{ width: 100%; max-width: none; flex-wrap: wrap; overflow: visible; transition: none; }
+.app.abierto{ width: 100%; }
 .izq{ flex: 1 1 340px; width: auto; min-width: 0; }
-.guion{ flex: 1 1 360px; width: auto; min-width: 0; max-height: none; opacity: 1; transform: none; transition: none; overflow-y: visible; display: none; }
-/* Script abierto: la cotización arriba en columnas y el script abajo, con la
-   página desplazándose (no hay tope de alto como en el popup). */
-.app.abierto{ width: 100%; height: auto; }
-.app.abierto .izq{ grid-template-areas: "uf uf uf" "vieja vieja vieja" "ufm ufm ufm" "res cargas planes" "envio cargas planes" "aviso cargas planes" "total cargas planes";
-                   grid-template-rows: auto auto auto auto auto auto 1fr; }
-.app.abierto .uf-vieja{ grid-area: vieja; }
-.app.abierto .guion{ display: grid; overflow: visible; animation: entra .22s ease both; }
-.app.abierto .guion-cuerpo{ overflow: visible; }
-.app.abierto .guion-cab, .app.abierto .guion-barra{ position: sticky; top: 0; z-index: 2; }
+.guion{ flex: 1 1 360px; width: auto; min-width: 0; max-height: none; opacity: 1; transform: none; transition: none; border-left-width: 1px; overflow-y: visible; display: none; }
+.app.abierto .guion{ display: block; width: auto; animation: entra .22s ease both; }
 @keyframes entra{ from{ opacity:0; transform: translateY(6px) } to{ opacity:1; transform:none } }
 @media (prefers-reduced-motion: reduce){ .app.abierto .guion{ animation: none } }
-/* En el teléfono todo va en una sola columna */
-@media (max-width: 760px){
-  .app.abierto .izq{ display: block; }
-  .app.abierto .col-cargas{ border: 0; }
-  .app.abierto .guion{ display: block; }
-  .app.abierto .guion-cab, .app.abierto .guion-barra{ position: static; }
-  .app.abierto #bloqueCargas .pista, .app.abierto .ver-nota{ display: revert; }
+@media (max-width: 760px){ .guion{ border-left: 0; border-top: 1px solid var(--line); } .guion-cab{ position: static; } }
+.tirador{ display: none; }
+@media (min-width: 761px){
+  .marco:has(.app.abierto){ max-width: calc(376px + var(--gw, 760px)); }
+  .app.abierto{ flex-wrap: nowrap; }
+  .app.abierto .izq{ flex: 0 0 360px; }
+  .app.abierto .guion{ flex: 1 1 auto; }
+  .app.abierto .tirador{ display: block; flex: 0 0 14px; width: 14px; }
+  .tirador::before, .tirador::after{ position: sticky; display: block; }
+  .tirador::before{ top: 15px; }
+  .tirador::after{ top: calc(50vh - 23px); margin: 50vh 0 0 4px; }
 }
 .uf{ position: static; }
 .uf-manual{ background: var(--soft) !important; border-bottom: 1px solid var(--line); font-weight: 600 }
@@ -426,9 +404,6 @@ body{ padding-block: 14px; padding-inline: 16px; }
       <input id="ufManual" type="text" inputmode="decimal" placeholder="39454,17">
     </div>
 
-    <!-- Con el script abierto, estos grupos se reparten en columnas
-         a lo ancho, sobre el script. Cerrado, se leen uno bajo otro. -->
-    <div class="col col-res">
     <div class="resumen" id="resumen">
       <div class="res-plan" id="resPlan">Plan Urgencias</div>
       <div class="res-linea">
@@ -438,9 +413,6 @@ body{ padding-block: 14px; padding-inline: 16px; }
       </div>
     </div>
 
-    </div>
-
-    <div class="col col-cargas">
     <div class="campo">
       <label class="check" for="tieneCargas">
         <input type="checkbox" id="tieneCargas">
@@ -457,13 +429,7 @@ body{ padding-block: 14px; padding-inline: 16px; }
       </div>
     </div>
 
-    </div>
-
-    <div class="col col-aviso">
     <div class="aviso" id="aviso"></div>
-    </div>
-
-    <div class="col col-envio">
 
     <div class="campo">
       <label>Envío de la póliza</label>
@@ -474,9 +440,6 @@ body{ padding-block: 14px; padding-inline: 16px; }
       <p class="pista" id="envioPista">Tiene cuenta Bci: se carga la prima a su cuenta corriente.</p>
     </div>
 
-    </div>
-
-    <div class="col col-planes">
     <table id="tabla">
       <thead><tr><th>Plan &middot; clic en el nombre para el script</th><th class="n">UF</th><th class="n">Mensual</th></tr></thead>
       <tbody id="tbody"></tbody>
@@ -496,9 +459,6 @@ body{ padding-block: 14px; padding-inline: 16px; }
       </div>
     </div>
 
-    </div>
-
-    <div class="col col-total">
     <div class="guardado" id="guardado" hidden>
       <span id="guardadoTxt">Datos guardados</span>
       <button type="button" id="limpiar">Nuevo cliente</button>
@@ -512,7 +472,6 @@ body{ padding-block: 14px; padding-inline: 16px; }
       <button id="copiar" type="button">Copiar</button>
     </div>
     <div class="exacto" id="exacto"></div>
-    </div>
   </div>
 
   <aside class="guion" id="guion">
@@ -544,6 +503,8 @@ body{ padding-block: 14px; padding-inline: 16px; }
     </div>
     <div class="guion-cuerpo" id="guionCuerpo"></div>
   </aside>
+  <div class="tirador" id="tirador" role="separator" aria-orientation="vertical" tabindex="0"
+       aria-label="Ancho del script" title="Arrastra hacia la derecha para ensanchar el script · doble clic: ancho normal"></div>
 
 </div>
 </div>
@@ -1486,12 +1447,9 @@ function pintarGuardado(estado){
   if(!estado){ barra.hidden = true; return; }
   barra.hidden = false;
   const d = new Date(estado.cuando);
-  const t = document.getElementById("guardadoTxt");
-  t.textContent = "Guardado a las " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
-  const nota = document.createElement("span");
-  nota.className = "guardado-nota";
-  nota.textContent = ". Se mantiene durante la llamada; tras 45 min sin cambios vuelve a cero.";
-  t.appendChild(nota);
+  document.getElementById("guardadoTxt").textContent =
+    "Guardado a las " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0") +
+    ". Se mantiene durante la llamada; tras 45 min sin cambios vuelve a cero.";
 }
 
 /* Lo guardado es de la llamada en curso. Si pasaron 45 minutos sin cambios,
@@ -1697,13 +1655,7 @@ function calcular(){
     chip.className = "chip " + v.chip;
     chip.textContent = v.corto;
     ver.className = "veredicto " + v.clase;
-    ver.textContent = v.texto;
-    if(v.aprox && v.clase !== "pide"){
-      const nota = document.createElement("span");
-      nota.className = "ver-nota";
-      nota.textContent = " (por edad; con la fecha queda exacto)";
-      ver.appendChild(nota);
-    }
+    ver.textContent = v.texto + (v.aprox && v.clase!=="pide" ? " (por edad; con la fecha queda exacto)" : "");
     if(v.menor14) menores++;
     if(v.bloquea) problemas.push(v.texto);
   });
@@ -2043,8 +1995,8 @@ function pintarGuion(){
   if(guionAbierto && !yaAbierto) abriendoHasta = Date.now() + 300;
   app.classList.toggle("abierto", guionAbierto);
   if(!guionAbierto) return;
-  const caja = document.getElementById("guion"), texto = document.getElementById("guionCuerpo");
-  const scroll = caja.scrollTop, scrollTexto = texto.scrollTop;
+  const caja = document.getElementById("guion");
+  const scroll = caja.scrollTop;
 
   const plan = PLANES.filter(function(p){ return p.id===planElegido; })[0];
   const cent = plan.precios[nCargas];
@@ -2081,7 +2033,6 @@ function pintarGuion(){
   // Se redibuja con cada cambio (una edad, el envío): que no salte de lugar.
   // Al abrirlo, en cambio, se lleva a la frase donde se quedó.
   caja.scrollTop = scroll;
-  texto.scrollTop = scrollTexto;
   marcarPasos(!yaAbierto);
 }
 
@@ -2093,7 +2044,7 @@ function pintarGuion(){
    La letra, el contraste y el modo guiado son preferencias del
    ejecutivo: no se borran con "Nuevo cliente".
    ============================================================ */
-const prefs = {letra: 100, contraste: "normal", guiada: true};
+const prefs = {letra: 100, contraste: "normal", guiada: true, ancho: 760};
 let pasos = {basico: 0, full: 0, ninos: 0};
 
 function aplicarPrefs(){
@@ -2110,12 +2061,59 @@ function aplicarPrefs(){
   document.getElementById("guiada").classList.toggle("on", prefs.guiada);
   document.getElementById("pasoAnt").disabled = !prefs.guiada;
   document.getElementById("pasoSig").disabled = !prefs.guiada;
+  aplicarAncho();
   // La barra queda pegada bajo la cabecera, cuya altura cambia con la letra
   const cab = g.querySelector(".guion-cab");
   if(cab) g.style.setProperty("--gb-top", cab.offsetHeight + "px");
 }
 function guardarPrefs(){ almacen.escribir("prefs", prefs); }
 
+/* ---------- ancho del script ----------
+   La manija del borde derecho ensancha sólo la zona de lectura y el texto
+   se reacomoda, hasta el borde de la ventana. */
+const ANCHO_MIN = 300, ANCHO_NORMAL = 760, IZQ = 374;   // 360 de la cotización + 14 de la manija
+function anchoMax(){
+  return Math.max(ANCHO_MIN, window.innerWidth - IZQ - (ESWEB ? 40 : 6));
+}
+function anchoActual(){ return Math.max(ANCHO_MIN, Math.min(prefs.ancho || ANCHO_NORMAL, anchoMax())); }
+function aplicarAncho(){
+  document.documentElement.style.setProperty("--gw", anchoActual() + "px");
+}
+(function(){
+  const tir = document.getElementById("tirador"), app = document.getElementById("app");
+  let x0 = null, w0 = 0;
+  tir.addEventListener("pointerdown", function(e){
+    if(e.button !== 0) return;
+    x0 = e.clientX; w0 = anchoActual();
+    tir.setPointerCapture(e.pointerId);
+    app.classList.add("arrastrando");
+    e.preventDefault();
+  });
+  tir.addEventListener("pointermove", function(e){
+    if(x0 === null) return;
+    const quiere = w0 + (e.clientX - x0);
+    prefs.ancho = Math.round(Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere)));
+    aplicarAncho();
+  });
+  function soltar(){
+    if(x0 === null) return;
+    x0 = null;
+    app.classList.remove("arrastrando");
+    guardarPrefs();
+  }
+  tir.addEventListener("pointerup", soltar);
+  tir.addEventListener("pointercancel", soltar);
+  tir.addEventListener("dblclick", function(){ prefs.ancho = ANCHO_NORMAL; aplicarAncho(); guardarPrefs(); });
+  // Con teclado: ← y → de a 20 px
+  tir.addEventListener("keydown", function(e){
+    if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const quiere = anchoActual() + (e.key === "ArrowRight" ? 20 : -20);
+    prefs.ancho = Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere));
+    aplicarAncho(); guardarPrefs();
+    e.preventDefault();
+  });
+  window.addEventListener("resize", aplicarAncho);
+})();
 
 
 function frases(){
@@ -2141,26 +2139,20 @@ function marcarPasos(llevar){
   }
 }
 let abriendoHasta = 0;
-// El que se desplaza es el texto del script (popup), el panel entero o,
-// en la web, la página.
-function desplazable(){
-  const c = document.getElementById("guionCuerpo"), g = document.getElementById("guion");
-  return [c, g].find(function(x){
-    return x.scrollHeight > x.clientHeight + 2 && /(auto|scroll)/.test(getComputedStyle(x).overflowY);
-  }) || null;
-}
-// Deja la frase a la vista, bajo lo que quede fijo arriba
+// Deja la frase a la vista, justo bajo la cabecera y la barra fijas
 function llevarAlPaso(el){
-  const sc = desplazable();
-  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(!sc){ el.scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"}); return; }
   const g = document.getElementById("guion");
-  const tapa = sc === g ? g.querySelector(".guion-cab").offsetHeight + g.querySelector(".guion-barra").offsetHeight : 0;
-  const rs = sc.getBoundingClientRect(), re = el.getBoundingClientRect();
-  const libre = sc.clientHeight - tapa;
+  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(g.scrollHeight <= g.clientHeight + 2){   // la web: se desplaza la página
+    el.scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"});
+    return;
+  }
+  const tapa = g.querySelector(".guion-cab").offsetHeight + g.querySelector(".guion-barra").offsetHeight;
+  const rg = g.getBoundingClientRect(), re = el.getBoundingClientRect();
+  const libre = g.clientHeight - tapa;
   const margen = Math.max(10, Math.min((libre - re.height) / 3, 120));
-  const destino = sc.scrollTop + (re.top - rs.top) - tapa - margen;
-  sc.scrollTo({top: Math.max(0, destino), behavior: suave ? "smooth" : "auto"});
+  const destino = g.scrollTop + (re.top - rg.top) - tapa - margen;
+  g.scrollTo({top: Math.max(0, destino), behavior: suave ? "smooth" : "auto"});
 }
 function moverPaso(delta){
   pasos[planElegido] = (pasos[planElegido] || 0) + delta;
@@ -2569,7 +2561,8 @@ document.getElementById("copiar").addEventListener("click", function(){
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){
-  if(v) delete v.ancho;   // de cuando el script se ensanchaba con una manija
+  // Anchos de cuando era un popup de 800 px: pasan al normal de la página
+  if(v && v.ancho && v.ancho <= 432) delete v.ancho;
   if(v) Object.assign(prefs, v);
   aplicarPrefs();
   if(guionAbierto) marcarPasos(false);

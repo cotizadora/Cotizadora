@@ -91,3 +91,20 @@ chrome.runtime.onInstalled.addListener(function(d){
   if(d.reason === "install" || d.reason === "update") pedirLectura(true);
 });
 chrome.runtime.onStartup.addListener(function(){ pedirLectura(false); });
+
+/* ---------- el ícono abre el cotizador como página ----------
+   Si ya hay una pestaña con el cotizador, se va a ella en vez de abrir
+   otra (así no quedan dos con datos distintos). */
+chrome.action.onClicked.addListener(async function(){
+  const url = chrome.runtime.getURL("popup.html");
+  try{
+    const abiertas = await chrome.runtime.getContexts({contextTypes: ["TAB"], documentUrls: [url]});
+    const t = abiertas.find(function(c){ return c.tabId >= 0; });
+    if(t){
+      await chrome.tabs.update(t.tabId, {active: true});
+      if(t.windowId >= 0) await chrome.windows.update(t.windowId, {focused: true});
+      return;
+    }
+  }catch(e){}
+  chrome.tabs.create({url: url});
+});

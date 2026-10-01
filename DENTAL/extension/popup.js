@@ -196,12 +196,9 @@ function pintarGuardado(estado){
   if(!estado){ barra.hidden = true; return; }
   barra.hidden = false;
   const d = new Date(estado.cuando);
-  const t = document.getElementById("guardadoTxt");
-  t.textContent = "Guardado a las " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
-  const nota = document.createElement("span");
-  nota.className = "guardado-nota";
-  nota.textContent = ". Se mantiene durante la llamada; tras 45 min sin cambios vuelve a cero.";
-  t.appendChild(nota);
+  document.getElementById("guardadoTxt").textContent =
+    "Guardado a las " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0") +
+    ". Se mantiene durante la llamada; tras 45 min sin cambios vuelve a cero.";
 }
 
 /* Lo guardado es de la llamada en curso. Si pasaron 45 minutos sin cambios,
@@ -407,13 +404,7 @@ function calcular(){
     chip.className = "chip " + v.chip;
     chip.textContent = v.corto;
     ver.className = "veredicto " + v.clase;
-    ver.textContent = v.texto;
-    if(v.aprox && v.clase !== "pide"){
-      const nota = document.createElement("span");
-      nota.className = "ver-nota";
-      nota.textContent = " (por edad; con la fecha queda exacto)";
-      ver.appendChild(nota);
-    }
+    ver.textContent = v.texto + (v.aprox && v.clase!=="pide" ? " (por edad; con la fecha queda exacto)" : "");
     if(v.menor14) menores++;
     if(v.bloquea) problemas.push(v.texto);
   });
@@ -753,8 +744,8 @@ function pintarGuion(){
   if(guionAbierto && !yaAbierto) abriendoHasta = Date.now() + 300;
   app.classList.toggle("abierto", guionAbierto);
   if(!guionAbierto) return;
-  const caja = document.getElementById("guion"), texto = document.getElementById("guionCuerpo");
-  const scroll = caja.scrollTop, scrollTexto = texto.scrollTop;
+  const caja = document.getElementById("guion");
+  const scroll = caja.scrollTop;
 
   const plan = PLANES.filter(function(p){ return p.id===planElegido; })[0];
   const cent = plan.precios[nCargas];
@@ -791,7 +782,6 @@ function pintarGuion(){
   // Se redibuja con cada cambio (una edad, el envío): que no salte de lugar.
   // Al abrirlo, en cambio, se lleva a la frase donde se quedó.
   caja.scrollTop = scroll;
-  texto.scrollTop = scrollTexto;
   marcarPasos(!yaAbierto);
 }
 
@@ -803,7 +793,7 @@ function pintarGuion(){
    La letra, el contraste y el modo guiado son preferencias del
    ejecutivo: no se borran con "Nuevo cliente".
    ============================================================ */
-const prefs = {letra: 100, contraste: "normal", guiada: true};
+const prefs = {letra: 100, contraste: "normal", guiada: true, ancho: 760};
 let pasos = {basico: 0, full: 0, ninos: 0};
 
 function aplicarPrefs(){
@@ -820,12 +810,59 @@ function aplicarPrefs(){
   document.getElementById("guiada").classList.toggle("on", prefs.guiada);
   document.getElementById("pasoAnt").disabled = !prefs.guiada;
   document.getElementById("pasoSig").disabled = !prefs.guiada;
+  aplicarAncho();
   // La barra queda pegada bajo la cabecera, cuya altura cambia con la letra
   const cab = g.querySelector(".guion-cab");
   if(cab) g.style.setProperty("--gb-top", cab.offsetHeight + "px");
 }
 function guardarPrefs(){ almacen.escribir("prefs", prefs); }
 
+/* ---------- ancho del script ----------
+   La manija del borde derecho ensancha sólo la zona de lectura y el texto
+   se reacomoda, hasta el borde de la ventana. */
+const ANCHO_MIN = 300, ANCHO_NORMAL = 760, IZQ = 374;   // 360 de la cotización + 14 de la manija
+function anchoMax(){
+  return Math.max(ANCHO_MIN, window.innerWidth - IZQ - (ESWEB ? 40 : 6));
+}
+function anchoActual(){ return Math.max(ANCHO_MIN, Math.min(prefs.ancho || ANCHO_NORMAL, anchoMax())); }
+function aplicarAncho(){
+  document.documentElement.style.setProperty("--gw", anchoActual() + "px");
+}
+(function(){
+  const tir = document.getElementById("tirador"), app = document.getElementById("app");
+  let x0 = null, w0 = 0;
+  tir.addEventListener("pointerdown", function(e){
+    if(e.button !== 0) return;
+    x0 = e.clientX; w0 = anchoActual();
+    tir.setPointerCapture(e.pointerId);
+    app.classList.add("arrastrando");
+    e.preventDefault();
+  });
+  tir.addEventListener("pointermove", function(e){
+    if(x0 === null) return;
+    const quiere = w0 + (e.clientX - x0);
+    prefs.ancho = Math.round(Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere)));
+    aplicarAncho();
+  });
+  function soltar(){
+    if(x0 === null) return;
+    x0 = null;
+    app.classList.remove("arrastrando");
+    guardarPrefs();
+  }
+  tir.addEventListener("pointerup", soltar);
+  tir.addEventListener("pointercancel", soltar);
+  tir.addEventListener("dblclick", function(){ prefs.ancho = ANCHO_NORMAL; aplicarAncho(); guardarPrefs(); });
+  // Con teclado: ← y → de a 20 px
+  tir.addEventListener("keydown", function(e){
+    if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const quiere = anchoActual() + (e.key === "ArrowRight" ? 20 : -20);
+    prefs.ancho = Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere));
+    aplicarAncho(); guardarPrefs();
+    e.preventDefault();
+  });
+  window.addEventListener("resize", aplicarAncho);
+})();
 
 
 function frases(){
@@ -851,26 +888,20 @@ function marcarPasos(llevar){
   }
 }
 let abriendoHasta = 0;
-// El que se desplaza es el texto del script (popup), el panel entero o,
-// en la web, la página.
-function desplazable(){
-  const c = document.getElementById("guionCuerpo"), g = document.getElementById("guion");
-  return [c, g].find(function(x){
-    return x.scrollHeight > x.clientHeight + 2 && /(auto|scroll)/.test(getComputedStyle(x).overflowY);
-  }) || null;
-}
-// Deja la frase a la vista, bajo lo que quede fijo arriba
+// Deja la frase a la vista, justo bajo la cabecera y la barra fijas
 function llevarAlPaso(el){
-  const sc = desplazable();
-  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(!sc){ el.scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"}); return; }
   const g = document.getElementById("guion");
-  const tapa = sc === g ? g.querySelector(".guion-cab").offsetHeight + g.querySelector(".guion-barra").offsetHeight : 0;
-  const rs = sc.getBoundingClientRect(), re = el.getBoundingClientRect();
-  const libre = sc.clientHeight - tapa;
+  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(g.scrollHeight <= g.clientHeight + 2){   // la web: se desplaza la página
+    el.scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"});
+    return;
+  }
+  const tapa = g.querySelector(".guion-cab").offsetHeight + g.querySelector(".guion-barra").offsetHeight;
+  const rg = g.getBoundingClientRect(), re = el.getBoundingClientRect();
+  const libre = g.clientHeight - tapa;
   const margen = Math.max(10, Math.min((libre - re.height) / 3, 120));
-  const destino = sc.scrollTop + (re.top - rs.top) - tapa - margen;
-  sc.scrollTo({top: Math.max(0, destino), behavior: suave ? "smooth" : "auto"});
+  const destino = g.scrollTop + (re.top - rg.top) - tapa - margen;
+  g.scrollTo({top: Math.max(0, destino), behavior: suave ? "smooth" : "auto"});
 }
 function moverPaso(delta){
   pasos[planElegido] = (pasos[planElegido] || 0) + delta;
@@ -1279,7 +1310,8 @@ document.getElementById("copiar").addEventListener("click", function(){
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){
-  if(v) delete v.ancho;   // de cuando el script se ensanchaba con una manija
+  // Anchos de cuando era un popup de 800 px: pasan al normal de la página
+  if(v && v.ancho && v.ancho <= 432) delete v.ancho;
   if(v) Object.assign(prefs, v);
   aplicarPrefs();
   if(guionAbierto) marcarPasos(false);

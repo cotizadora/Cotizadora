@@ -1,7 +1,8 @@
 # Extensión Cotizador Dental Bci
 
-Popup para Chrome y Edge. Se escribe la fecha de nacimiento, se elige cuántas
-cargas van, y muestra el plan que corresponde y lo que se paga con la UF del día.
+Página para Chrome y Edge. Se marca si hay cargas y su edad (o fecha de
+nacimiento), y muestra el plan que corresponde y lo que se paga con la UF del
+día, junto al script de venta y las sucursales por comuna.
 
 ## Instalar
 
@@ -19,6 +20,11 @@ No sirve seleccionar el ZIP.
 
 ## Usar
 
+- **Abrir:** clic en el ícono de la extensión. El cotizador se abre como
+  página en una pestaña; si ya estaba abierta, salta a esa pestaña en vez de
+  abrir otra. No se cierra al hacer clic en otro lado. Conviene **fijarla**
+  (clic derecho en la pestaña → Anclar) o arrastrarla a su propia ventana y
+  dejarla al lado de Vicidial.
 - **Al abrir** se cotiza al titular solo, en Plan Urgencias.
 - **Tiene cargas:** marca la casilla sólo si el cliente quiere sumar
   adicionales. Ahí aparece el número de cargas (1 a 3) y una fila de edad por
@@ -54,12 +60,11 @@ para el ejecutivo y no se leen al cliente.
 - **Tamaño de letra:** botones **A−** y **A+**, de 80 % a 220 %.
 - **Contraste:** Normal, **Negro** (fondo negro, letra clara), **Alto**
   (negro con amarillo) y **Sepia** (más suave para la vista).
-- **Al abrir el script** el popup pasa a su tamaño máximo (800 × 600): la
-  cotización queda arriba, repartida en tres columnas (plan, envío y total
-  a la izquierda; cargas al centro; planes y clínica a la derecha), y el
-  script ocupa todo el ancho de abajo. Lo que sólo orienta (la ayuda de las
-  cargas, la nota "por edad") se oculta para dejarle más alto al texto. Al
-  cerrar el script vuelve a la columna angosta de siempre.
+- **Ancho:** el script se abre a la derecha de la cotización, a todo el alto
+  de la ventana. Arrastra hacia la derecha la manija azul de su borde (la
+  franja con ↔ y puntos) y la zona de lectura se ensancha hasta el borde de
+  la pantalla; el texto se reacomoda. Doble clic en la manija vuelve al
+  ancho normal. El ancho elegido se recuerda.
 - Tamaño, contraste y lectura guiada se recuerdan siempre, también después
   de *Nuevo cliente*. La frase en que vas se guarda por plan y se reinicia
   con cada cliente nuevo.
@@ -99,7 +104,7 @@ cuando el sitio los trae, y un enlace a la fuente.
   (Valparaíso es `rv-rv`).
 - Lo leído se guarda: Uno Salud un día, i-dental una semana. Las búsquedas
   siguientes son instantáneas. El mapeo completo vuelve a leer todo.
-- Si el popup se cierra mientras se lee i-dental, la lectura termina igual
+- Si se cierra el cotizador mientras se lee i-dental, la lectura termina igual
   y queda guardada para la próxima búsqueda.
 
 **Si una red no muestra resultados y debería**, el sitio puede haber cambiado
@@ -114,7 +119,7 @@ recorre todas las comunas de Uno Salud y el listado de i-dental, y arma una
 tabla comuna por comuna con las sucursales de ambas redes.
 
 - Tarda un par de minutos la primera vez. Se guarda 30 días.
-- Mientras exista el mapeo, el buscador del popup responde desde él, sin
+- Mientras exista el mapeo, el buscador responde desde él, sin
   consultar los sitios, al instante.
 - Se puede filtrar, ver sólo las comunas con ambas redes, y descargar en
   **CSV** (abre en Excel) o **JSON**.
@@ -125,16 +130,15 @@ puede leer otros sitios.
 
 ## No se pierde nada al cerrar
 
-El popup de Chrome se cierra cada vez que pinchas fuera, y en una llamada real
-hay que salir a buscar datos a otro sistema. Todo lo que escribas se guarda en
-el momento y vuelve tal cual al abrir: cargas, edades, fechas, plan elegido y
-hasta si el desplegable estaba abierto.
+Todo lo que escribas se guarda en el momento y vuelve tal cual si cierras la
+pestaña o el navegador: cargas, edades, fechas, plan elegido, script abierto
+y hasta si el desplegable estaba abierto.
 
 La barra gris de abajo indica a qué hora se guardó. Para empezar con otro
 cliente, el botón **Nuevo cliente** borra todo, y pide confirmación antes.
 
 Si pasan **45 minutos sin tocar nada**, lo guardado se da por terminado y el
-popup abre limpio: Plan Urgencias, sin cargas, póliza en línea. Así no
+cotizador abre limpio: Plan Urgencias, sin cargas, póliza en línea. Así no
 aparece el cliente de la llamada anterior.
 
 Los datos quedan sólo en ese navegador, en ese equipo. No se suben a ninguna
@@ -148,7 +152,7 @@ si el cliente pide otra opción está a la vista.
 
 ## Valor UF
 
-Se actualiza solo al abrir el popup, desde `mindicador.cl` (respaldo
+Se actualiza solo al abrir el cotizador, desde `mindicador.cl` (respaldo
 `api.boostr.cl`). El último valor queda guardado, así que si un día no hay
 conexión sigue funcionando con el último conocido, y lo dice. También se puede
 escribir a mano.

@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <title>Cotizador Dental Bci</title>
+<link rel="icon" href="icons/icon48.png">
 <link rel="stylesheet" href="popup.css">
 </head>
-<body>
+<body class="pagina">
 <div class="app" id="app">
 
   <div class="izq">
@@ -20,9 +21,6 @@
       <input id="ufManual" type="text" inputmode="decimal" placeholder="39454,17">
     </div>
 
-    <!-- Con el script abierto, estos grupos se reparten en columnas
-         a lo ancho, sobre el script. Cerrado, se leen uno bajo otro. -->
-    <div class="col col-res">
     <div class="resumen" id="resumen">
       <div class="res-plan" id="resPlan">Plan Urgencias</div>
       <div class="res-linea">
@@ -32,9 +30,6 @@
       </div>
     </div>
 
-    </div>
-
-    <div class="col col-cargas">
     <div class="campo">
       <label class="check" for="tieneCargas">
         <input type="checkbox" id="tieneCargas">
@@ -51,13 +46,7 @@
       </div>
     </div>
 
-    </div>
-
-    <div class="col col-aviso">
     <div class="aviso" id="aviso"></div>
-    </div>
-
-    <div class="col col-envio">
 
     <div class="campo">
       <label>Envío de la póliza</label>
@@ -68,9 +57,6 @@
       <p class="pista" id="envioPista">Tiene cuenta Bci: se carga la prima a su cuenta corriente.</p>
     </div>
 
-    </div>
-
-    <div class="col col-planes">
     <table id="tabla">
       <thead><tr><th>Plan &middot; clic en el nombre para el script</th><th class="n">UF</th><th class="n">Mensual</th></tr></thead>
       <tbody id="tbody"></tbody>
@@ -90,9 +76,6 @@
       </div>
     </div>
 
-    </div>
-
-    <div class="col col-total">
     <div class="guardado" id="guardado" hidden>
       <span id="guardadoTxt">Datos guardados</span>
       <button type="button" id="limpiar">Nuevo cliente</button>
@@ -106,7 +89,6 @@
       <button id="copiar" type="button">Copiar</button>
     </div>
     <div class="exacto" id="exacto"></div>
-    </div>
   </div>
 
   <aside class="guion" id="guion">
@@ -138,6 +120,8 @@
     </div>
     <div class="guion-cuerpo" id="guionCuerpo"></div>
   </aside>
+  <div class="tirador" id="tirador" role="separator" aria-orientation="vertical" tabindex="0"
+       aria-label="Ancho del script" title="Arrastra hacia la derecha para ensanchar el script · doble clic: ancho normal"></div>
 
 </div>
 <script src="edental.js"></script>
