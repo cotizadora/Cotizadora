@@ -17,19 +17,9 @@ body{
   display:flex; align-items:stretch; width:360px; overflow:hidden;
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
-.app.abierto{width:calc(374px + var(--gw, 760px))}
+.app.abierto{width:780px}
 .app.arrastrando, .app.arrastrando .guion{transition:none}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
-
-/* ---- como página propia (pestaña de la extensión) ----
-   Ocupa todo el alto de la ventana: la cotización a la izquierda y el
-   script a la derecha, cada uno con su propio desplazamiento. A la derecha
-   del script queda el fondo, para ensancharlo con la manija. */
-html:has(body.pagina){height:100%}
-body.pagina{height:100%; background:var(--soft); overflow:hidden}
-body.pagina .app{height:100vh; background:var(--bg); box-shadow:0 0 0 1px var(--line), 4px 0 18px rgba(0,0,0,.06)}
-body.pagina .izq{height:100%; overflow-y:auto}
-body.pagina .guion{max-height:none; height:100%}
 
 /* ---- panel del script: se despliega hacia la derecha ---- */
 .guion{
@@ -43,7 +33,7 @@ body.pagina .guion{max-height:none; height:100%}
              border-left-width .26s step-end;
 }
 .app.abierto .guion{
-  width:var(--gw, 760px); opacity:1; transform:none;
+  width:420px; opacity:1; transform:none;
   overflow-y:auto; border-left-width:1px;
   transition:width .26s cubic-bezier(.32,.72,0,1),
              opacity .2s ease .08s,
@@ -76,26 +66,6 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 }
 #cerrarGuion:hover{background:rgba(255,255,255,.3)}
 
-/* ---- manija: se arrastra hacia la derecha para ensanchar el script ----
-   Franja del color de la cabecera del script, con flechas arriba y un
-   agarre al centro, para que se vea que se puede tirar. */
-.tirador{
-  flex:0 0 0; width:0; overflow:hidden; align-self:stretch; position:relative;
-  background:var(--brand); color:var(--bg); cursor:ew-resize; touch-action:none;
-  font:700 11px/1 "Segoe UI",system-ui,sans-serif; user-select:none;
-}
-.app.abierto .tirador{flex-basis:14px; width:14px}
-.tirador::before{
-  content:"\2194"; position:absolute; left:0; right:0; top:13px;
-  text-align:center; font-size:13px; font-weight:400; opacity:.95;
-}
-.tirador::after{
-  content:""; position:absolute; left:4px; top:50%; width:6px; height:46px; margin-top:-23px;
-  border-radius:3px; background:
-    radial-gradient(circle, currentColor 1.2px, transparent 1.6px) 0 0 / 6px 6px;
-  opacity:.85;
-}
-.tirador:hover, .tirador:focus-visible, .app.arrastrando .tirador{background:var(--brand2); outline:none}
 
 .guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
 .gs{margin:.9em 0 0}
@@ -246,6 +216,7 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;
   border-radius:7px;background:var(--soft);font-size:10.5px;color:var(--muted)}
+.guardado[hidden]{display:none}
 .guardado span{flex:1}
 #limpiar{border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--bad);
   font:inherit;font-size:10.5px;font-weight:700;padding:4px 8px;cursor:pointer}

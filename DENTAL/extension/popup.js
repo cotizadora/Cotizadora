@@ -184,7 +184,7 @@ function guardarEstado(){
     return { edad: f.querySelector(".edad").value, fecha: f.querySelector(".fecha").value };
   });
   const comuna = document.getElementById("comuna").value;
-  const hayAlgo = nCargas > 0 || envio !== "linea" || planElegido !== PLAN_POR_DEFECTO || guionAbierto ||
+  const hayAlgo = nCargas > 0 || envio !== "linea" || planElegido !== PLAN_POR_DEFECTO || guionAbierto !== GUION_POR_DEFECTO ||
                   !document.getElementById("panelClin").hidden || comuna !== "";
   if(!hayAlgo){ almacen.borrar("estado"); pintarGuardado(null); return; }
   const estado = {
@@ -224,7 +224,7 @@ function restaurarEstado(cb){
     restaurando = true;
     nCargas = Math.max(0, Math.min(MAX_CARGAS, e.n || 0));
     planElegido = e.plan || PLAN_POR_DEFECTO;
-    guionAbierto = ESWEB || !!e.guion;
+    guionAbierto = ESWEB || (e.guion === undefined ? GUION_POR_DEFECTO : !!e.guion);
     if(e.pasos) pasos = Object.assign({basico: 0, full: 0, ninos: 0}, e.pasos);
     envio = e.envio || "linea";
     marcarEnvio();
@@ -744,9 +744,11 @@ const GUION = [
     'Obligatoria salvo derivación a IVR por pago con tarjeta de crédito.</p>'; }}
 ];
 
-// En la extensión se abre al pinchar el nombre del plan; en la página web
-// las dos columnas (cotización y script) están siempre a la vista.
-let guionAbierto = ESWEB;
+// Dos columnas: la cotización y, a su derecha, el script del plan elegido,
+// abierto desde el inicio. En la extensión se puede cerrar con la ×; en la
+// página web queda siempre a la vista.
+const GUION_POR_DEFECTO = true;
+let guionAbierto = GUION_POR_DEFECTO;
 /* Por defecto se lee la opción de póliza en línea, porque el cliente tiene
    cuenta Bci. Si no la tiene, se le envía el link de pago. */
 let envio = "linea";
@@ -806,7 +808,7 @@ function pintarGuion(){
    La letra, el contraste y el modo guiado son preferencias del
    ejecutivo: no se borran con "Nuevo cliente".
    ============================================================ */
-const prefs = {letra: 100, contraste: "normal", guiada: true, ancho: 760};
+const prefs = {letra: 100, contraste: "normal", guiada: true};
 let pasos = {basico: 0, full: 0, ninos: 0};
 
 function aplicarPrefs(){
@@ -823,59 +825,12 @@ function aplicarPrefs(){
   document.getElementById("guiada").classList.toggle("on", prefs.guiada);
   document.getElementById("pasoAnt").disabled = !prefs.guiada;
   document.getElementById("pasoSig").disabled = !prefs.guiada;
-  aplicarAncho();
   // La barra queda pegada bajo la cabecera, cuya altura cambia con la letra
   const cab = g.querySelector(".guion-cab");
   if(cab) g.style.setProperty("--gb-top", cab.offsetHeight + "px");
 }
 function guardarPrefs(){ almacen.escribir("prefs", prefs); }
 
-/* ---------- ancho del script ----------
-   La manija del borde derecho ensancha sólo la zona de lectura y el texto
-   se reacomoda, hasta el borde de la ventana. */
-const ANCHO_MIN = 300, ANCHO_NORMAL = 760, IZQ = 374;   // 360 de la cotización + 14 de la manija
-function anchoMax(){
-  return Math.max(ANCHO_MIN, window.innerWidth - IZQ - (ESWEB ? 40 : 6));
-}
-function anchoActual(){ return Math.max(ANCHO_MIN, Math.min(prefs.ancho || ANCHO_NORMAL, anchoMax())); }
-function aplicarAncho(){
-  document.documentElement.style.setProperty("--gw", anchoActual() + "px");
-}
-(function(){
-  const tir = document.getElementById("tirador"), app = document.getElementById("app");
-  let x0 = null, w0 = 0;
-  tir.addEventListener("pointerdown", function(e){
-    if(e.button !== 0) return;
-    x0 = e.clientX; w0 = anchoActual();
-    tir.setPointerCapture(e.pointerId);
-    app.classList.add("arrastrando");
-    e.preventDefault();
-  });
-  tir.addEventListener("pointermove", function(e){
-    if(x0 === null) return;
-    const quiere = w0 + (e.clientX - x0);
-    prefs.ancho = Math.round(Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere)));
-    aplicarAncho();
-  });
-  function soltar(){
-    if(x0 === null) return;
-    x0 = null;
-    app.classList.remove("arrastrando");
-    guardarPrefs();
-  }
-  tir.addEventListener("pointerup", soltar);
-  tir.addEventListener("pointercancel", soltar);
-  tir.addEventListener("dblclick", function(){ prefs.ancho = ANCHO_NORMAL; aplicarAncho(); guardarPrefs(); });
-  // Con teclado: ← y → de a 20 px
-  tir.addEventListener("keydown", function(e){
-    if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-    const quiere = anchoActual() + (e.key === "ArrowRight" ? 20 : -20);
-    prefs.ancho = Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere));
-    aplicarAncho(); guardarPrefs();
-    e.preventDefault();
-  });
-  window.addEventListener("resize", aplicarAncho);
-})();
 
 
 function frases(){
@@ -1183,7 +1138,7 @@ function reiniciar(){
   nCargas = 0;
   planElegido = PLAN_POR_DEFECTO;
   planForzado = false;
-  guionAbierto = ESWEB;
+  guionAbierto = GUION_POR_DEFECTO;
   envio = "linea";
   pasos = {basico: 0, full: 0, ninos: 0};
   document.getElementById("hijos").innerHTML = "";
@@ -1331,8 +1286,7 @@ if(ESWEB) document.getElementById("cerrarGuion").hidden = true;
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){
-  // Anchos de cuando era un popup de 800 px: pasan al normal de la página
-  if(v && v.ancho && v.ancho <= 432) delete v.ancho;
+  if(v) delete v.ancho;   // de cuando el script se ensanchaba con una manija
   if(v) Object.assign(prefs, v);
   aplicarPrefs();
   if(guionAbierto) marcarPasos(false);

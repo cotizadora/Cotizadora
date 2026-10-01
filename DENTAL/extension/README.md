@@ -20,11 +20,9 @@ No sirve seleccionar el ZIP.
 
 ## Usar
 
-- **Abrir:** clic en el ícono de la extensión. El cotizador se abre como
-  página en una pestaña; si ya estaba abierta, salta a esa pestaña en vez de
-  abrir otra. No se cierra al hacer clic en otro lado. Conviene **fijarla**
-  (clic derecho en la pestaña → Anclar) o arrastrarla a su propia ventana y
-  dejarla al lado de Vicidial.
+- **Abrir:** clic en el ícono de la extensión. Se abre en dos columnas: la
+  cotización a la izquierda y, a la derecha, el script del plan elegido. La
+  × del script lo oculta; clic en el nombre de un plan lo vuelve a mostrar.
 - **Al abrir** se cotiza al titular solo, en Plan Urgencias.
 - **Tiene cargas:** marca la casilla sólo si el cliente quiere sumar
   adicionales. Ahí aparece el número de cargas (1 a 3) y una fila de edad por
@@ -39,7 +37,7 @@ No sirve seleccionar el ZIP.
   - Con 23 años o menos de 1 año pide la fecha, porque la edad sola no basta.
 - **Plan:** clic en la fila. Sin menores se puede subir a Full; con un menor
   de 14 queda forzado el Plan 4 y los otros se tachan.
-- **Script:** clic en el **nombre** del plan y se despliega abajo, a todo el ancho.
+- **Script:** clic en el **nombre** de un plan para ver su script a la derecha.
   Ver la sección *Leer el script*.
 - **Copiar:** deja la cotización en el portapapeles.
 - **Nuevo cliente:** dos toques. Deja todo en cero: titular solo, Plan
@@ -60,11 +58,6 @@ para el ejecutivo y no se leen al cliente.
 - **Tamaño de letra:** botones **A−** y **A+**, de 80 % a 220 %.
 - **Contraste:** Normal, **Negro** (fondo negro, letra clara), **Alto**
   (negro con amarillo) y **Sepia** (más suave para la vista).
-- **Ancho:** el script se abre a la derecha de la cotización, a todo el alto
-  de la ventana. Arrastra hacia la derecha la manija azul de su borde (la
-  franja con ↔ y puntos) y la zona de lectura se ensancha hasta el borde de
-  la pantalla; el texto se reacomoda. Doble clic en la manija vuelve al
-  ancho normal. El ancho elegido se recuerda.
 - Tamaño, contraste y lectura guiada se recuerdan siempre, también después
   de *Nuevo cliente*. La frase en que vas se guarda por plan y se reinicia
   con cada cliente nuevo.
