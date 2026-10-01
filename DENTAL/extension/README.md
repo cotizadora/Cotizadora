@@ -56,13 +56,8 @@ para el ejecutivo y no se leen al cliente.
   (negro con amarillo) y **Sepia** (más suave para la vista).
 - **Ancho:** arrastra hacia la derecha el borde derecho del script (la
   franja con puntos) y la zona de lectura se ensancha; el texto se
-  reacomoda. Doble clic en esa franja vuelve al ancho normal. El popup de
-  Chrome no pasa de 800 px, así que ahí se gana poco: para ensancharlo de
-  verdad usa **⧉ ventana aparte**.
-- **⧉ Ventana aparte** (botón en la cabecera del script): abre el cotizador
-  en su propia ventana, con los mismos datos. Ahí el script se ensancha todo
-  lo que quieras (la ventana crece hacia la derecha) y **no se cierra** al
-  hacer clic en otro programa durante la llamada.
+  reacomoda. Doble clic en esa franja vuelve al ancho normal. Chrome y Edge
+  no dejan que el popup pase de 800 px, así que ese es el borde máximo.
 - Tamaño, ancho, contraste y lectura guiada se recuerdan siempre, también después
   de *Nuevo cliente*. La frase en que vas se guarda por plan y se reinicia
   con cada cliente nuevo.

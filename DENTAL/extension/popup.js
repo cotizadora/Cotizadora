@@ -74,8 +74,6 @@ function pintarUF(cent, fecha, fuente){
 /* Abierta como página web (no como extensión) no hay chrome.storage ni se
    puede consultar otro sitio, así que la UF se escribe a mano. */
 const ESWEB = (typeof chrome === "undefined" || !chrome.storage);
-// Abierto con el botón ⧉ en una ventana propia, no como popup
-const VENTANA = /[?&]ventana=1/.test(location.search);
 
 async function cargarUF(){
   if(ESWEB){
@@ -744,7 +742,6 @@ function pintarGuion(){
   const app = document.getElementById("app");
   const yaAbierto = app.classList.contains("abierto");
   app.classList.toggle("abierto", guionAbierto);
-  if(VENTANA && guionAbierto && !yaAbierto) crecerVentana();
   if(!guionAbierto) return;
   const caja = document.getElementById("guion");
   const scroll = caja.scrollTop;
@@ -822,40 +819,15 @@ function guardarPrefs(){ almacen.escribir("prefs", prefs); }
 /* ---------- ancho del script ----------
    El tirador del borde derecho ensancha sólo la zona de lectura y el
    texto se reacomoda. El popup de Chrome no pasa de 800 px, así que ahí
-   el margen es poco; en ventana aparte (botón ⧉) o en la web no hay tope. */
+   el script puede llegar hasta ese borde; en la web, hasta el de la pantalla. */
 const ANCHO_MIN = 300, ANCHO_NORMAL = 412, IZQ = 368;
 function anchoMax(){
   if(ESWEB) return Math.max(ANCHO_MIN, window.innerWidth - IZQ - 40);
-  if(VENTANA) return Math.max(ANCHO_MIN, (screen.availWidth || 1600) - IZQ - 20);
   return 800 - IZQ;   // tope de Chrome y Edge para un popup
 }
 function anchoActual(){ return Math.max(ANCHO_MIN, Math.min(prefs.ancho || ANCHO_NORMAL, anchoMax())); }
 function aplicarAncho(){
   document.documentElement.style.setProperty("--gw", anchoActual() + "px");
-  if(VENTANA) crecerVentana();
-}
-// En ventana aparte, si el script ya no cabe, la ventana crece hacia la derecha
-let creciendo = false;
-function crecerVentana(){
-  if(creciendo || !guionAbierto) return;
-  const falta = IZQ + anchoActual() + 4 - window.innerWidth;
-  if(falta <= 0) return;
-  creciendo = true;
-  try{
-    chrome.windows.getCurrent(function(w){
-      chrome.windows.update(w.id, {width: w.width + falta}, function(){ creciendo = false; });
-    });
-  }catch(e){ creciendo = false; }
-}
-let topeTimer = null;
-function avisarTope(si){
-  const t = document.getElementById("topeAviso");
-  clearTimeout(topeTimer);
-  if(si){
-    t.hidden = false;
-    document.getElementById("enVentana").classList.add("pulso");
-    topeTimer = setTimeout(function(){ t.hidden = true; document.getElementById("enVentana").classList.remove("pulso"); }, 6000);
-  }
 }
 (function(){
   const tir = document.getElementById("tirador"), app = document.getElementById("app");
@@ -872,7 +844,6 @@ function avisarTope(si){
     const quiere = w0 + (e.clientX - x0);
     prefs.ancho = Math.round(Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere)));
     aplicarAncho();
-    if(quiere > anchoMax() + 6 && !ESWEB && !VENTANA) avisarTope(true);
   });
   function soltar(){
     if(x0 === null) return;
@@ -889,28 +860,11 @@ function avisarTope(si){
     const quiere = anchoActual() + (e.key === "ArrowRight" ? 20 : -20);
     prefs.ancho = Math.max(ANCHO_MIN, Math.min(anchoMax(), quiere));
     aplicarAncho(); guardarPrefs();
-    if(quiere > anchoMax() && !ESWEB && !VENTANA) avisarTope(true);
     e.preventDefault();
   });
-  if(!ESWEB) window.addEventListener("resize", function(){ if(VENTANA) aplicarAncho(); });
-  else window.addEventListener("resize", aplicarAncho);
+  if(ESWEB) window.addEventListener("resize", aplicarAncho);
 })();
 
-// Abre el cotizador en una ventana propia: no se cierra al hacer clic
-// afuera y el script se ensancha sin tope. Los datos del cliente ya están
-// guardados, así que aparecen tal cual.
-document.getElementById("enVentana").addEventListener("click", function(){
-  guardarEstado();
-  try{
-    chrome.windows.create({
-      url: chrome.runtime.getURL("popup.html?ventana=1"), type: "popup",
-      width: Math.min(screen.availWidth || 1600, IZQ + anchoActual() + 24),
-      height: Math.min(screen.availHeight || 900, 780)
-    }, function(){ window.close(); });
-  }catch(e){}
-});
-if(ESWEB || VENTANA) document.getElementById("enVentana").hidden = true;
-if(VENTANA){ document.body.classList.add("ventana"); document.title = "Cotizador Dental Bci"; }
 
 function frases(){
   return [].slice.call(document.querySelectorAll("#guionCuerpo .gs p:not(.nota), #guionCuerpo .gs li"));
