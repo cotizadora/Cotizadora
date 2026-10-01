@@ -217,6 +217,14 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;
   border-radius:7px;background:var(--soft);font-size:10.5px;color:var(--muted)}
 .guardado[hidden]{display:none}
+
+/* ---- cliente leído de Vicidial ---- */
+.cliente{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:6px 10px;
+  background:var(--okbg);border-bottom:1px solid var(--line);font-size:11px;color:var(--ink)}
+.cliente[hidden]{display:none}
+.cliente b{font-size:12.5px}
+.cliente span{color:var(--muted)}
+.guion-cuerpo em.cli{font-style:normal;font-weight:700;color:var(--g-dato, inherit)}
 .guardado span{flex:1}
 #limpiar{border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--bad);
   font:inherit;font-size:10.5px;font-weight:700;padding:4px 8px;cursor:pointer}

@@ -43,6 +43,25 @@ No sirve seleccionar el ZIP.
 - **Nuevo cliente:** dos toques. Deja todo en cero: titular solo, Plan
   Urgencias, sin cargas, sin comuna, envío en línea.
 
+## Datos del cliente desde Vicidial
+
+Si Vicidial está abierto en otra pestaña
+(`vicidial.recaall.simtastic.cl/agc/`), al abrir la extensión se lee el
+cliente que está en pantalla:
+
+- Arriba de la cotización aparecen su nombre, RUT, fono y comuna.
+- En el script, **[nombre]** pasa a ser su nombre, **[nombre y apellido]** su
+  nombre completo y **[su nombre]** el nombre del ejecutivo conectado.
+  "Don/Sra." se elige según el sexo del lead; si es mujer, "don" pasa a
+  "Sra.".
+- La comuna queda escrita en el buscador de sucursales: basta abrir
+  *Clínica por comuna*.
+- Si el lead cambió (entró otra llamada), la cotización parte de cero sola:
+  Plan Urgencias, sin cargas, póliza en línea.
+
+Sólo se leen esos campos de la pantalla; no se escribe nada en Vicidial.
+Sin la pestaña de Vicidial, todo funciona igual, sin el cliente.
+
 ## Leer el script
 
 El texto es el del script oficial, palabra por palabra y en su orden. No se

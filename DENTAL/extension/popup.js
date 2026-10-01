@@ -791,7 +791,7 @@ function pintarGuion(){
       return true;
     })
     .map(function(sec){
-      return '<div class="gs '+(sec.clase||"")+'"><h4>'+sec.t+"</h4>"+sec.html(d)+"</div>";
+      return '<div class="gs '+(sec.clase||"")+'"><h4>'+sec.t+"</h4>"+personalizar(sec.html(d))+"</div>";
     }).join("");
 
   // Se redibuja con cada cambio (una edad, el envío): que no salte de lugar.
@@ -1182,7 +1182,11 @@ document.getElementById("abrirClin").addEventListener("click", function(){
   const abierto = !panel.hidden;
   panel.hidden = abierto;
   this.classList.toggle("open", !abierto);
-  if(!abierto) document.getElementById("comuna").focus();
+  if(!abierto){
+    const campo = document.getElementById("comuna");
+    campo.focus();
+    if(norm(campo.value).length >= 3 && !document.getElementById("clinRes").innerHTML) alEscribirComuna();
+  }
   guardarEstado();
 });
 document.getElementById("comuna").addEventListener("input", function(){ alEscribirComuna(); guardarEstado(); });
@@ -1274,6 +1278,104 @@ document.getElementById("copiar").addEventListener("click", function(){
   }, function(){ b.textContent = "No se pudo"; setTimeout(function(){ b.textContent = "Copiar"; }, 1500); });
 });
 
+/* ============================================================
+   CLIENTE DESDE VICIDIAL
+   Al abrir, se lee el lead que está en pantalla en la pestaña de
+   Vicidial (nombre, RUT, fonos, comuna, sexo y el nombre del
+   ejecutivo). Con eso:
+   - se muestra el cliente arriba de la cotización;
+   - el script dice su nombre donde tenía [nombre] y el del ejecutivo
+     donde tenía [su nombre]; "Don/Sra." se elige según el sexo;
+   - la comuna queda escrita en el buscador de sucursales;
+   - si el lead cambió (otra llamada), la cotización parte de cero.
+   ============================================================ */
+const VICIDIAL = "https://vicidial.recaall.simtastic.cl/agc/*";
+let cliente = null;
+
+function nombrePropio(t){
+  t = String(t || "").replace(/\s+/g, " ").trim();
+  if(!t) return "";
+  if(t !== t.toUpperCase() && t !== t.toLowerCase()) return t;   // ya viene bien escrito
+  return t.toLowerCase().replace(/(^|[\s-])(\S)/g, function(m, a, b){ return a + b.toUpperCase(); })
+          .replace(/ (De|Del|La|Las|Los|Y) /g, function(m){ return m.toLowerCase(); });
+}
+// "Eduardo Rodrigo Perez Moya" -> "Eduardo Perez" (primer nombre y primer apellido)
+function nombreCorto(full){
+  const w = nombrePropio(full).split(" ").filter(Boolean);
+  if(w.length >= 4) return w[0] + " " + w[2];
+  if(w.length === 3) return w[0] + " " + w[1];
+  return w.join(" ");
+}
+function escCli(t){ return String(t).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+function personalizar(h){
+  if(!cliente) return h;
+  const nom = nombrePropio(cliente.nombre).split(" ")[0] || "";
+  const completo = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
+  const mujer = cliente.genero === "F", hombre = cliente.genero === "M";
+  if(cliente.agente) h = h.split("<em>[su nombre]</em>").join('<em class="cli">' + escCli(nombreCorto(cliente.agente)) + "</em>");
+  if(completo){
+    h = h.split("Don/Sra. <em>[nombre y apellido]</em>").join((mujer ? "Sra." : hombre ? "Don" : "Don/Sra.") + ' <em class="cli">' + escCli(completo) + "</em>");
+    h = h.split("<em>[nombre y apellido]</em>").join('<em class="cli">' + escCli(completo) + "</em>");
+  }
+  if(nom){
+    if(mujer) h = h.split("don <em>[nombre]</em>").join("Sra. <em>[nombre]</em>");
+    h = h.split("<em>[nombre]</em>").join('<em class="cli">' + escCli(nom) + "</em>");
+  }
+  return h;
+}
+
+async function leerVicidial(){
+  if(ESWEB) return null;
+  try{
+    const tabs = await chrome.tabs.query({url: VICIDIAL});
+    if(!tabs.length) return null;
+    tabs.sort(function(a, b){ return (b.lastAccessed || 0) - (a.lastAccessed || 0); });
+    const r = await chrome.scripting.executeScript({
+      target: {tabId: tabs[0].id},
+      world: "MAIN",
+      func: function(){
+        function v(id){ const e = document.getElementById(id); return e ? String(e.value || "").trim() : ""; }
+        return {lead: v("lead_id"), nombre: v("first_name"), apellido: v("last_name"), rut: v("vendor_lead_code"),
+                fono: v("phone_number"), fono2: v("alt_phone"), comuna: v("province"), ciudad: v("city"),
+                region: v("state"), email: v("email"), genero: v("gender").toUpperCase(),
+                agente: typeof LOGfullname === "string" ? LOGfullname : ""};
+      }
+    });
+    const c = r && r[0] && r[0].result;
+    return c && (c.lead || c.nombre || c.apellido) ? c : null;
+  }catch(e){ return null; }
+}
+
+function pintarCliente(){
+  const el = document.getElementById("cliente");
+  if(!cliente || !(cliente.nombre || cliente.apellido)){ el.hidden = true; el.innerHTML = ""; return; }
+  const nombre = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
+  const datos = [cliente.rut ? "RUT " + cliente.rut : "", cliente.fono, nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean);
+  el.innerHTML = "<b>" + escCli(nombre) + "</b>" + datos.map(function(d){ return "<span>" + escCli(d) + "</span>"; }).join("");
+  el.hidden = false;
+}
+
+async function sincronizarVicidial(){
+  const c = await leerVicidial();
+  if(!c) return;
+  const previo = await new Promise(function(res){ almacen.leer("lead", res); });
+  const nuevaLlamada = c.lead && previo && previo.id && previo.id !== c.lead;
+  if(nuevaLlamada) reiniciar();
+  if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now()});
+  cliente = c;
+  pintarCliente();
+  // La comuna del cliente queda lista en el buscador de sucursales
+  const com = nombrePropio(c.comuna || c.ciudad);
+  const campo = document.getElementById("comuna");
+  if(com && (nuevaLlamada || !campo.value)){
+    campo.value = com;
+    if(!document.getElementById("panelClin").hidden) alEscribirComuna();
+    guardarEstado();
+  }
+  if(guionAbierto) pintarGuion();
+}
+
 /* ---------- arranque ---------- */
 // En la web el script no se cierra: es la segunda columna de la página
 if(ESWEB) document.getElementById("cerrarGuion").hidden = true;
@@ -1293,7 +1395,7 @@ almacen.leer("prefs", function(v){
 });
 almacen.leer("uf", function(u){
   if(u){ cacheUF = u; if(UF === null) pintarUF(u.c, u.f, "guardada"); }
-  restaurarEstado(function(){ cargarUF(); });
+  restaurarEstado(function(){ cargarUF(); sincronizarVicidial(); });
 });
 marcarEnvio();
 pintarBloqueCargas();
