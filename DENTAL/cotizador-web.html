@@ -517,7 +517,7 @@ body{ padding-block: 14px; padding-inline: 16px; }
 </div>
 </div>
 
-<p class="pie"><strong>Escribe la UF del día</strong> para que calcule los pesos: una página web no puede consultarla sola. Por lo mismo, el buscador de sucursales no funciona aquí: los sitios de Uno Salud e i-dental no dejan que otra página los lea.<br>Tarifas del script de septiembre 2026. Conversión con aritmética entera, sin redondeos.</p>
+<p class="pie">La UF del día se actualiza sola desde mindicador.cl (respaldo: boostr.cl); si no hay conexión, se puede escribir a mano. El buscador de sucursales no funciona en la página web: los sitios de Uno Salud e i-dental no dejan que otra página los lea.<br>Tarifas del script de septiembre 2026. Conversión con aritmética entera, sin redondeos.</p>
 
 <script>
 /* ============================================================
@@ -1330,51 +1330,62 @@ function pintarUF(cent, fecha, fuente){
   document.getElementById("ufFecha").textContent = cent===null ? "" : fecha+" · "+fuente;
   calcular();
 }
-/* Abierta como página web (no como extensión) no hay chrome.storage ni se
-   puede consultar otro sitio, así que la UF se escribe a mano. */
+/* Abierta como página web (no como extensión) no hay chrome.storage: se
+   guarda en el navegador (localStorage) y no se leen los sitios de las redes. */
 const ESWEB = (typeof chrome === "undefined" || !chrome.storage);
 
+// Pide un JSON con un tope de 8 segundos; null si no responde
+async function traerJSON(url){
+  const ctl = new AbortController();
+  const t = setTimeout(function(){ ctl.abort(); }, 8000);
+  try{
+    const r = await fetch(url, {cache: "no-store", signal: ctl.signal});
+    return r.ok ? await r.json() : null;
+  }catch(e){ return null; }
+  finally{ clearTimeout(t); }
+}
+
+// Acepta 39485.65 (número o texto) y 39.485,65 (formato chileno)
+function numeroUF(v){
+  if(typeof v === "number") return v;
+  const t = String(v).trim();
+  if(t.indexOf(",") >= 0) return parseFloat(t.replace(/\./g, "").replace(",", "."));
+  return parseFloat(t);
+}
+
+// La UF del día se trae sola, también en la página web: primero de
+// mindicador.cl y, si no responde, de boostr.cl. Sólo si ninguna responde
+// se usa la última guardada y se ofrece escribirla a mano.
 async function cargarUF(){
-  if(ESWEB){
-    document.getElementById("ufManualBox").style.display = "flex";
-    const c = leerGuardado();
-    if(c) pintarUF(c.c, c.f, "escrita a mano");
-    else  document.getElementById("ufFecha").textContent = "escríbela aquí abajo";
+  document.getElementById("ufFecha").textContent = "actualizando…";
+  const m = await traerJSON("https://mindicador.cl/api/uf");
+  const s = m && m.serie && m.serie[0];
+  if(s && s.valor){
+    const cent = Math.round(s.valor*100);
+    const iso = String(s.fecha).slice(0,10).split("-");          // sin desfase de zona horaria
+    const f = iso[2]+"-"+iso[1]+"-"+iso[0];
+    guardar(cent, f);
+    pintarUF(cent, f, "mindicador");
+    document.getElementById("ufManualBox").style.display = "";
     avisarUFVieja();
     return;
   }
-  document.getElementById("ufFecha").textContent = "actualizando…";
-  try{
-    const r = await fetch("https://mindicador.cl/api/uf", {cache:"no-store"});
-    if(r.ok){
-      const j = await r.json(), s = j.serie && j.serie[0];
-      if(s && s.valor){
-        const cent = Math.round(s.valor*100);
-        const iso = String(s.fecha).slice(0,10).split("-");          // sin desfase de zona horaria
-        const f = iso[2]+"-"+iso[1]+"-"+iso[0];
-        guardar(cent, f);
-        pintarUF(cent, f, "mindicador");
-        return;
-      }
-    }
-  }catch(e){}
-  try{
-    const r = await fetch("https://api.boostr.cl/economy/uf.json", {cache:"no-store"});
-    if(r.ok){
-      const j = await r.json(), v = j && j.data && (j.data.value || j.data.valor);
-      if(v){
-        const cent = Math.round(parseFloat(String(v).replace(/\./g,"").replace(",","."))*100);
-        const f = fmt(hoy());
-        guardar(cent, f);
-        pintarUF(cent, f, "boostr");
-        return;
-      }
-    }
-  }catch(e){}
+  const b = await traerJSON("https://api.boostr.cl/economy/uf.json");
+  const v = b && b.data && (b.data.value || b.data.valor);
+  if(v){
+    const cent = Math.round(numeroUF(v)*100);
+    const f = fmt(hoy());
+    guardar(cent, f);
+    pintarUF(cent, f, "boostr");
+    document.getElementById("ufManualBox").style.display = "";
+    avisarUFVieja();
+    return;
+  }
   const c = leerGuardado();
-  if(c){ pintarUF(c.c, c.f, "guardado"); }
-  else  { pintarUF(null, "", ""); }
+  if(c){ pintarUF(c.c, c.f, ESWEB ? "sin conexión · guardada" : "guardado"); }
+  else  { pintarUF(null, "", ""); document.getElementById("ufFecha").textContent = "sin conexión: escríbela aquí abajo"; }
   document.getElementById("ufManualBox").style.display = "flex";
+  avisarUFVieja();
 }
 function guardar(c, f){ almacen.escribir("uf", {c:c, f:f}); }
 
@@ -2582,7 +2593,7 @@ almacen.leer("prefs", function(v){
   if(guionAbierto) marcarPasos(false);
 });
 almacen.leer("uf", function(u){
-  if(u){ cacheUF = u; if(UF === null) pintarUF(u.c, u.f, ESWEB ? "escrita a mano" : "guardado"); }
+  if(u){ cacheUF = u; if(UF === null) pintarUF(u.c, u.f, "guardada"); }
   restaurarEstado(function(){ cargarUF(); });
 });
 marcarEnvio();
