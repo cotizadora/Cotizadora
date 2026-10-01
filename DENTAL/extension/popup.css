@@ -150,8 +150,6 @@ select.par{flex:0 0 96px;padding:6px 5px;border:1px solid var(--line);border-rad
 #envioPista{margin:5px 0 0}
 #envio button{font-size:11.5px}
 #hijos .fila{margin-bottom:6px}
-.mas{border:none;background:none;color:var(--brand2);font:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:2px 0}
-.mas:hover{text-decoration:underline}
 .veredicto{font-size:10.5px;line-height:1.3;margin:-2px 0 7px 0;padding-left:2px}
 .veredicto.pide{color:var(--warn)}
 input.edad{flex:0 0 46px;padding:7px 6px;border:1px solid var(--line);border-radius:7px;
@@ -184,32 +182,33 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 .sugerencias{font-size:11px; color:var(--muted); margin:4px 0 0}
 .sugerencias button{background:none;border:0;padding:0;font:inherit;color:var(--brand2);
   cursor:pointer;text-decoration:underline}
-#cargador{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
-#cargador code{font-size:10px;background:var(--line);padding:0 3px;border-radius:3px}
-#redCarga{margin-bottom:6px}
-#redCarga button{font-size:11px}
-#pegado{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;
-  background:var(--soft);color:var(--ink);font:inherit;font-size:11px;resize:vertical;
-  font-family:ui-monospace,Consolas,monospace}
-#pegado:focus{outline:2px solid var(--brand2);outline-offset:1px}
-.cargador-bot{display:flex;gap:6px;margin-top:6px}
-.btn-ok{flex:1;padding:6px;border:1px solid var(--brand2);border-radius:7px;background:var(--brand2);
-  color:#fff;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
-.btn-x2{padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);
-  color:var(--bad);font:inherit;font-size:11.5px;cursor:pointer}
-#cargaRes{margin-top:6px;font-size:10.5px;line-height:1.4}
-#cargaRes .ok{color:var(--ok)} #cargaRes .mal{color:var(--bad)}
-.link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
+ .link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
   color:var(--brand2);cursor:pointer;text-decoration:underline}
-.mapas{margin-top:8px;padding:9px 10px;border-radius:9px;background:var(--soft);border:1px solid var(--line)}
-.mapas-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}
-.mapas-b{display:flex;gap:6px}
-.mapa{flex:1;display:block;text-align:center;padding:9px 6px;border-radius:8px;
-  font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid transparent}
 .mapa.unosalud{background:var(--okbg);color:var(--ok);border-color:currentColor}
-.mapa.edental{background:var(--warnbg);color:var(--warn);border-color:currentColor}
-.mapa:hover{filter:brightness(1.06)}
-.oficial{display:inline-block;margin-top:7px;font-size:10.5px;color:var(--brand2);text-decoration:underline}
+/* ---- casilla de cargas ---- */
+.check{display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;
+  font-size:12.5px;font-weight:700;color:var(--ink);margin:0;padding:7px 9px;border:1px solid var(--line);
+  border-radius:8px;background:var(--soft)}
+.check input{width:16px;height:16px;margin:0;accent-color:var(--brand2);cursor:pointer}
+.check:has(input:checked){border-color:var(--brand2)}
+#bloqueCargas{margin-top:8px}
+#bloqueCargas .pista{margin:7px 0 6px}
+
+/* ---- sucursales por red ---- */
+#sugComunas{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px}
+#sugComunas:empty{display:none}
+.sug-t{font-size:10.5px;color:var(--muted)}
+.sug{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;
+  padding:3px 9px;font:inherit;font-size:11px;cursor:pointer}
+.sug:hover{border-color:var(--brand2);color:var(--brand2)}
+.clin-titulo{margin:8px 0 4px;font-size:11.5px;color:var(--muted)}
+.clin-titulo strong{color:var(--ink)}
+.redblq{margin-top:7px}
+.redcab{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.redn{font-size:11px;font-weight:700;color:var(--ink);flex:1}
+.fuente{font-size:10.5px;color:var(--brand2);text-decoration:none;white-space:nowrap}
+.fuente:hover{text-decoration:underline}
+
 .capturado{font-size:9.5px; color:var(--muted); margin-top:6px; font-style:italic}
 
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;

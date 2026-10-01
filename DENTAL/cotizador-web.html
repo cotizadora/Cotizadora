@@ -152,8 +152,6 @@ select.par{flex:0 0 96px;padding:6px 5px;border:1px solid var(--line);border-rad
 #envioPista{margin:5px 0 0}
 #envio button{font-size:11.5px}
 #hijos .fila{margin-bottom:6px}
-.mas{border:none;background:none;color:var(--brand2);font:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:2px 0}
-.mas:hover{text-decoration:underline}
 .veredicto{font-size:10.5px;line-height:1.3;margin:-2px 0 7px 0;padding-left:2px}
 .veredicto.pide{color:var(--warn)}
 input.edad{flex:0 0 46px;padding:7px 6px;border:1px solid var(--line);border-radius:7px;
@@ -186,32 +184,33 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 .sugerencias{font-size:11px; color:var(--muted); margin:4px 0 0}
 .sugerencias button{background:none;border:0;padding:0;font:inherit;color:var(--brand2);
   cursor:pointer;text-decoration:underline}
-#cargador{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
-#cargador code{font-size:10px;background:var(--line);padding:0 3px;border-radius:3px}
-#redCarga{margin-bottom:6px}
-#redCarga button{font-size:11px}
-#pegado{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;
-  background:var(--soft);color:var(--ink);font:inherit;font-size:11px;resize:vertical;
-  font-family:ui-monospace,Consolas,monospace}
-#pegado:focus{outline:2px solid var(--brand2);outline-offset:1px}
-.cargador-bot{display:flex;gap:6px;margin-top:6px}
-.btn-ok{flex:1;padding:6px;border:1px solid var(--brand2);border-radius:7px;background:var(--brand2);
-  color:#fff;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
-.btn-x2{padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);
-  color:var(--bad);font:inherit;font-size:11.5px;cursor:pointer}
-#cargaRes{margin-top:6px;font-size:10.5px;line-height:1.4}
-#cargaRes .ok{color:var(--ok)} #cargaRes .mal{color:var(--bad)}
-.link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
+ .link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
   color:var(--brand2);cursor:pointer;text-decoration:underline}
-.mapas{margin-top:8px;padding:9px 10px;border-radius:9px;background:var(--soft);border:1px solid var(--line)}
-.mapas-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}
-.mapas-b{display:flex;gap:6px}
-.mapa{flex:1;display:block;text-align:center;padding:9px 6px;border-radius:8px;
-  font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid transparent}
 .mapa.unosalud{background:var(--okbg);color:var(--ok);border-color:currentColor}
-.mapa.edental{background:var(--warnbg);color:var(--warn);border-color:currentColor}
-.mapa:hover{filter:brightness(1.06)}
-.oficial{display:inline-block;margin-top:7px;font-size:10.5px;color:var(--brand2);text-decoration:underline}
+/* ---- casilla de cargas ---- */
+.check{display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;
+  font-size:12.5px;font-weight:700;color:var(--ink);margin:0;padding:7px 9px;border:1px solid var(--line);
+  border-radius:8px;background:var(--soft)}
+.check input{width:16px;height:16px;margin:0;accent-color:var(--brand2);cursor:pointer}
+.check:has(input:checked){border-color:var(--brand2)}
+#bloqueCargas{margin-top:8px}
+#bloqueCargas .pista{margin:7px 0 6px}
+
+/* ---- sucursales por red ---- */
+#sugComunas{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px}
+#sugComunas:empty{display:none}
+.sug-t{font-size:10.5px;color:var(--muted)}
+.sug{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;
+  padding:3px 9px;font:inherit;font-size:11px;cursor:pointer}
+.sug:hover{border-color:var(--brand2);color:var(--brand2)}
+.clin-titulo{margin:8px 0 4px;font-size:11.5px;color:var(--muted)}
+.clin-titulo strong{color:var(--ink)}
+.redblq{margin-top:7px}
+.redcab{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.redn{font-size:11px;font-weight:700;color:var(--ink);flex:1}
+.fuente{font-size:10.5px;color:var(--brand2);text-decoration:none;white-space:nowrap}
+.fuente:hover{text-decoration:underline}
+
 .capturado{font-size:9.5px; color:var(--muted); margin-top:6px; font-style:italic}
 
 .guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;
@@ -258,25 +257,18 @@ body{ padding-block: 14px; padding-inline: 16px; }
 .cab{ max-width: 812px; margin: 0 auto 12px; }
 .cab h1{ font-size: 17px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
 .cab p{ font-size: 12px; color: var(--muted); margin: 3px 0 0; line-height: 1.4; }
-.marco{ max-width: 812px; margin: 0 auto; border: 1px solid var(--line);
-  border-radius: 14px; overflow: hidden; background: var(--card); }
+.marco{ max-width: 812px; margin: 0 auto; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--card); }
 .app{ width: 100%; max-width: none; flex-wrap: wrap; overflow: visible; transition: none; }
 .app.abierto{ width: 100%; }
 .izq{ flex: 1 1 340px; width: auto; min-width: 0; }
-.guion{ flex: 1 1 360px; width: auto; min-width: 0; max-height: none; opacity: 1;
-  transform: none; transition: none; border-left-width: 1px; overflow-y: visible; display: none; }
+.guion{ flex: 1 1 360px; width: auto; min-width: 0; max-height: none; opacity: 1; transform: none; transition: none; border-left-width: 1px; overflow-y: visible; display: none; }
 .app.abierto .guion{ display: block; width: auto; animation: entra .22s ease both; }
 @keyframes entra{ from{ opacity:0; transform: translateY(6px) } to{ opacity:1; transform:none } }
 @media (prefers-reduced-motion: reduce){ .app.abierto .guion{ animation: none } }
-@media (max-width: 760px){
-  .guion{ border-left: 0; border-top: 1px solid var(--line); }
-  .guion-cab{ position: static; }
-}
+@media (max-width: 760px){ .guion{ border-left: 0; border-top: 1px solid var(--line); } .guion-cab{ position: static; } }
 .uf{ position: static; }
 .uf-manual{ background: var(--soft) !important; border-bottom: 1px solid var(--line); font-weight: 600 }
-.uf-vieja{ display: block; padding: 6px 10px; font-size: 11px; font-weight: 600;
-  background: var(--warnbg); color: var(--warn); border-bottom: 1px solid var(--line); }
-.mapa{ padding: 12px 6px; font-size: 13.5px }   /* dedo, no mouse */
+.uf-vieja{ display: block; padding: 6px 10px; font-size: 11px; font-weight: 600; background: var(--warnbg); color: var(--warn); border-bottom: 1px solid var(--line); }
 .pie{ max-width: 812px; margin: 12px auto 0; font-size: 11px; color: var(--muted); line-height: 1.5 }
 .pie strong{ color: var(--ink) }
 
@@ -284,7 +276,7 @@ body{ padding-block: 14px; padding-inline: 16px; }
 
 <div class="cab">
   <h1>Cotizador Dental Bci</h1>
-  <p>Edad de las cargas, plan que corresponde, script de venta y sucursales por comuna.</p>
+  <p>Edad de las cargas, plan que corresponde y script de venta.</p>
 </div>
 
 <div class="marco">
@@ -313,23 +305,18 @@ body{ padding-block: 14px; padding-inline: 16px; }
     </div>
 
     <div class="campo">
-      <label>Cargas (adicionales del titular)</label>
-      <div class="conteo" id="conteo">
-        <button type="button" data-n="0" class="on">0</button>
-        <button type="button" data-n="1">1</button>
-        <button type="button" data-n="2">2</button>
-        <button type="button" data-n="3">3</button>
-      </div>
-    </div>
-
-    <div class="verif">
-      <button type="button" id="abrirVerif" class="abrir">
-        <span>&#9656;</span> Edad de las cargas
-      </button>
-      <div id="panelVerif" hidden>
-        <p class="pista">Pregunta la edad y escríbela. Si durante la llamada consigues la fecha de nacimiento, escríbela también y el cálculo se vuelve exacto.</p>
+      <label class="check" for="tieneCargas">
+        <input type="checkbox" id="tieneCargas">
+        <span>Tiene cargas (adicionales del titular)</span>
+      </label>
+      <div id="bloqueCargas" hidden>
+        <div class="conteo" id="conteo">
+          <button type="button" data-n="1">1</button>
+          <button type="button" data-n="2">2</button>
+          <button type="button" data-n="3">3</button>
+        </div>
+        <p class="pista">Edad de cada carga. Escríbela o súbela con las flechas. Si consigues la fecha de nacimiento, escríbela y el cálculo se vuelve exacto.</p>
         <div id="hijos"></div>
-        <button type="button" id="masHijo" class="mas">+ otra carga</button>
       </div>
     </div>
 
@@ -355,23 +342,10 @@ body{ padding-block: 14px; padding-inline: 16px; }
       </button>
       <div id="panelClin" hidden>
         <div class="fila">
-          <input type="text" id="comuna" class="comuna" placeholder="escribe la comuna" autocomplete="off">
+          <input type="text" id="comuna" class="comuna" placeholder="escribe la comuna del cliente" autocomplete="off" spellcheck="false">
         </div>
+        <div id="sugComunas"></div>
         <div id="clinRes"></div>
-        <div id="cargador" hidden>
-          <p class="pista" id="pistaCarga">Pega el listado: JSON con los campos del esquema, o una línea por clínica separada por <code>|</code> en este orden: nombre | dirección | comuna | región | teléfono | lat | lng</p>
-          <div class="conteo" id="redCarga">
-            <button type="button" data-red="unosalud" class="on">Uno Salud</button>
-            <button type="button" data-red="edental">E-dental</button>
-            <button type="button" data-red="comunas">Comunas</button>
-          </div>
-          <textarea id="pegado" rows="5" placeholder="Pega aquí el listado de la red seleccionada"></textarea>
-          <div class="cargador-bot">
-            <button type="button" id="btnCargar" class="btn-ok">Cargar</button>
-            <button type="button" id="btnBorrar" class="btn-x2">Borrar listado</button>
-          </div>
-          <div id="cargaRes"></div>
-        </div>
       </div>
     </div>
 
@@ -404,61 +378,9 @@ body{ padding-block: 14px; padding-inline: 16px; }
 </div>
 </div>
 
-<p class="pie"><strong>Escribe la UF del día</strong> para que calcule los pesos: esta página no puede consultarla sola. Queda guardada en este dispositivo, igual que el cliente que estés atendiendo.<br>Tarifas del script de septiembre 2026. Conversión con aritmética entera, sin redondeos.</p>
+<p class="pie"><strong>Escribe la UF del día</strong> para que calcule los pesos: esta página no puede consultarla sola. El buscador de sucursales tampoco funciona aquí, porque necesita leer los sitios de las redes: úsalo desde la extensión de Chrome.<br>Tarifas del script de septiembre 2026. Conversión con aritmética entera, sin redondeos.</p>
 
 <script>
-/* ============================================================
-   RED DE CLÍNICAS
-   ------------------------------------------------------------
-   Este archivo está VACÍO a propósito. No trae clínicas de
-   ejemplo: un dato inventado acá termina leído a un cliente por
-   teléfono, y eso es peor que no tener el buscador.
-
-   NO hace falta editar este archivo a mano. La forma normal de
-   llenarlo es desde la propia extensión: abre "Clínica por
-   comuna", pincha "pégalo aquí", elige la red y pega el listado.
-   Queda guardado en el navegador y sobrevive a las
-   actualizaciones de la extensión.
-
-   Este archivo sirve para dejar el listado fijo dentro del
-   paquete, y así no tener que pegarlo en cada equipo.
-
-   Para obtener los listados hay que sacarlos de:
-     - Uno Salud Dental   https://www.unosalud.cl/clinicas/
-     - E-dental           https://www.e-dentalsys.com/#clinicas
-
-   ------------------------------------------------------------
-   ESQUEMA
-
-   capturado : "DD-MM-AAAA", la fecha en que se extrajeron los
-               datos. Se muestra en pantalla para que el
-               ejecutivo sepa qué tan viejos son.
-
-   lista     : un objeto por clínica.
-       nombre    texto
-       direccion texto
-       comuna    texto
-       region    texto
-       telefono  texto o null
-       red       "unosalud" o "edental"
-       lat, lng  número, o null si el sitio no las publica.
-                 NUNCA estimadas: sin coordenadas el buscador
-                 cae a búsqueda por comuna y región, que es
-                 menos útil pero no miente.
-
-   comunas   : opcional, para ordenar por cercanía cuando la
-               comuna buscada no tiene ninguna clínica. Mapea el
-               nombre de la comuna a su centro geográfico.
-                 "providencia": {region:"...", lat:-33.43, lng:-70.61}
-               Mientras esté vacío, el buscador responde con las
-               clínicas de la región y lo dice.
-   ============================================================ */
-const CLINICAS = {
-  capturado: null,
-  lista: [],
-  comunas: {}
-};
-
 /* =========================================================
    Cotizador Dental Bci — popup
    Tarifas: Script Bci Dental Full, septiembre 2026.
@@ -532,6 +454,8 @@ function pintarUF(cent, fecha, fuente){
   document.getElementById("ufFecha").textContent = cent===null ? "" : fecha+" · "+fuente;
   calcular();
 }
+/* Abierta como página web (no como extensión) no hay chrome.storage ni se
+   puede consultar otro sitio, así que la UF se escribe a mano. */
 const ESWEB = (typeof chrome === "undefined" || !chrome.storage);
 
 async function cargarUF(){
@@ -647,17 +571,16 @@ function guardarEstado(){
   const cargas = [].map.call(document.querySelectorAll("#hijos .fila"), function(f){
     return { edad: f.querySelector(".edad").value, fecha: f.querySelector(".fecha").value };
   });
-  const hayAlgo = nCargas > 0 || envio !== "linea" ||
-                  !document.getElementById("panelClin").hidden ||
-                  cargas.some(function(c){ return c.edad || c.fecha; });
+  const comuna = document.getElementById("comuna").value;
+  const hayAlgo = nCargas > 0 || envio !== "linea" || planElegido !== PLAN_POR_DEFECTO ||
+                  !document.getElementById("panelClin").hidden || comuna !== "";
   if(!hayAlgo){ almacen.borrar("estado"); pintarGuardado(null); return; }
   const estado = {
     n: nCargas,
     plan: planElegido,
-    abierto: !document.getElementById("panelVerif").hidden,
     guion: guionAbierto,
     clinAbierto: !document.getElementById("panelClin").hidden,
-    comuna: document.getElementById("comuna").value,
+    comuna: comuna,
     envio: envio,
     cargas: cargas,
     cuando: Date.now()
@@ -678,34 +601,34 @@ function pintarGuardado(estado){
 
 function restaurarEstado(cb){
   almacen.leer("estado", function(e){
-    if(!e){ if(cb) cb(); return; }
+    if(!e){ pintarBloqueCargas(); if(cb) cb(); return; }
     restaurando = true;
-    nCargas = e.n || 0;
+    nCargas = Math.max(0, Math.min(MAX_CARGAS, e.n || 0));
     planElegido = e.plan || PLAN_POR_DEFECTO;
-    guionAbierto = (e.guion !== false);
+    guionAbierto = !!e.guion;
+    envio = e.envio || "linea";
+    marcarEnvio();
+
+    // Una fila por carga, con lo que se había escrito
+    const cont = document.getElementById("hijos");
+    cont.innerHTML = "";
+    for(let k = 0; k < nCargas; k++){
+      const caja = filaHijo(true);
+      const c = (e.cargas || [])[k] || {};
+      caja.querySelector(".edad").value  = c.edad  || "";
+      caja.querySelector(".fecha").value = c.fecha || "";
+    }
+    pintarBloqueCargas();
+
     if(e.clinAbierto){
       document.getElementById("panelClin").hidden = false;
       document.getElementById("abrirClin").classList.add("open");
-      document.getElementById("comuna").value = e.comuna || "";
     }
-    envio = e.envio || "linea";
-    marcarEnvio();
-    marcarCargas();
-    const cont = document.getElementById("hijos");
-    cont.innerHTML = "";
-    (e.cargas || []).forEach(function(c){
-      const caja = filaHijo(true);
-      caja.querySelector(".edad").value  = c.edad  || "";
-      caja.querySelector(".fecha").value = c.fecha || "";
-    });
-    if(e.abierto){
-      document.getElementById("panelVerif").hidden = false;
-      document.getElementById("abrirVerif").classList.add("open");
-    }
+    document.getElementById("comuna").value = e.comuna || "";
     restaurando = false;
     pintarGuardado(e);
     calcular();
-    if(!document.getElementById("panelClin").hidden) pintarClinicas();
+    if(e.comuna && norm(e.comuna).length >= 3) buscarComuna(e.comuna);
     if(cb) cb();
   });
 }
@@ -802,6 +725,22 @@ function filaHijo(silencioso){
   return caja;
 }
 
+/* La casilla "tiene cargas" es la que habilita todo lo de las cargas.
+   Sin marcarla se cotiza al titular solo. Marcada, hay una fila de edad
+   por cada carga: 1 carga, 1 fila. */
+function sincronizarFilas(){
+  const cont = document.getElementById("hijos");
+  while(cont.children.length < nCargas) filaHijo(true);
+  while(cont.children.length > nCargas) cont.removeChild(cont.lastElementChild);
+}
+
+function pintarBloqueCargas(){
+  document.getElementById("tieneCargas").checked = nCargas > 0;
+  document.getElementById("bloqueCargas").hidden = nCargas === 0;
+  marcarCargas();
+  sincronizarFilas();
+}
+
 /* ---------- cálculo ---------- */
 let ultimaCotizacion = "";
 /* Por defecto se cotiza el Plan Urgencias. Sin menores, el cliente puede
@@ -862,7 +801,6 @@ function calcular(){
   });
 
 
-  document.getElementById("abrirVerif").classList.toggle("hay", menores > 0);
 
   // Plan. Con cero cargas no se incorpora a nadie, asi que un menor escrito
   // en el verificador no puede obligar al Plan 4: todavia no entra al grupo.
@@ -893,12 +831,6 @@ function calcular(){
     clase = "aviso ok";
     texto = (evaluados===1 ? "La carga califica" : "Las "+evaluados+" cargas califican")+
             ": el cliente puede quedarse en Urgencias o subir a Full.";
-  }
-  if(evaluados > nCargas){
-    clase = "aviso warn";
-    texto = (nCargas === 0
-      ? "Marcaste 0 cargas, así que se cotiza sólo al titular. Hay "+evaluados+" edad"+(evaluados===1?"":"es")+" escrita"+(evaluados===1?"":"s")+": si esa persona entra, sube el número de cargas."
-      : "Marcaste "+nCargas+" carga"+(nCargas===1?"":"s")+" pero hay "+evaluados+" edades escritas. El precio va por el número de cargas.");
   }
   if(cent === null){
     clase = "aviso warn";
@@ -1159,28 +1091,88 @@ function pintarGuion(){
 }
 
 /* ============================================================
-   BUSCADOR DE CLÍNICAS POR COMUNA
-   Tolera tildes, mayúsculas, la ñ y hasta dos letras mal
-   escritas, porque el nombre se escribe al vuelo mientras el
-   cliente habla. Los datos viven en clinicas.js.
+   SUCURSALES POR COMUNA, LEÍDAS DE LOS SITIOS DE CADA RED
+   La extensión corre en el Chrome del ejecutivo, así que lee
+   unosalud.cl y e-dentalsys.com directamente (los permisos están
+   en el manifest). Lo leído se guarda un día, para no consultar
+   el sitio en cada llamada.
    ============================================================ */
-function norm(txt){
-  return String(txt || "")
-    .toLowerCase()
-    .normalize("NFD").replace(/[̀-ͯ]/g, "")   // fuera las tildes y la ñ
-    .replace(/[^a-z0-9 ]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+const RED = {
+  unosalud: {
+    nombre: "Uno Salud",
+    sitio: "https://www.unosalud.cl/region-comuna/",
+    indices: ["https://www.unosalud.cl/region-comuna/", "https://www.unosalud.cl/clinicas/"],
+    comuna: function(slug){ return "https://www.unosalud.cl/region-comuna/" + slug + "/"; }
+  },
+  edental: {
+    nombre: "i-dental",
+    sitio: "https://www.e-dentalsys.com/#clinicas",
+    portada: "https://www.e-dentalsys.com/"
+  }
+};
+const DIA = 24 * 60 * 60 * 1000;
+const diag = {};   // lo que vio la última lectura de cada red, para depurar
+
+/* ---------- texto ---------- */
+function norm(t){
+  return String(t || "").toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+}
+function esc(t){
+  return String(t == null ? "" : t).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function urlSegura(u){ return /^https:\/\//i.test(String(u || "")) ? u : ""; }
+function humanizar(slug){
+  return String(slug || "").split("-").filter(Boolean).map(function(w){
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(" ");
+}
+function txt(el){ return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : ""; }
+
+// Texto de un bloque separado en líneas, cortando donde corta el diseño
+const BLOQUE = /^(ADDRESS|ARTICLE|ASIDE|BLOCKQUOTE|BR|DD|DIV|DL|DT|FIGCAPTION|FIGURE|FOOTER|FORM|H[1-6]|HEADER|HR|LI|MAIN|NAV|OL|P|SECTION|TABLE|TBODY|TD|TH|TR|UL)$/;
+function lineas(el){
+  const out = []; let buf = "";
+  function cortar(){ const t = buf.replace(/\s+/g, " ").trim(); if(t) out.push(t); buf = ""; }
+  (function rec(n){
+    n.childNodes.forEach(function(c){
+      if(c.nodeType === 3){ buf += c.textContent; return; }
+      if(c.nodeType !== 1 || /^(SCRIPT|STYLE|NOSCRIPT|SVG|BUTTON|IFRAME|SELECT|TEMPLATE)$/.test(c.tagName)) return;
+      const b = BLOQUE.test(c.tagName);
+      if(b) cortar();
+      rec(c);
+      if(b) cortar();
+    });
+  })(el);
+  cortar();
+  return out;
 }
 
-// Distancia de edición, con corte temprano: si ya se pasó del máximo, no sigue
+const RE_FONO = /(\+?56[\s-]?)?(600[\s-]?\d{3}[\s-]?\d{4}|\(?22?\)?[\s-]?\d{3,4}[\s-]?\d{4}|9[\s-]?\d{4}[\s-]?\d{4})/;
+function pareceHorario(l){
+  return /(lunes|martes|miercoles|jueves|viernes|sabado|domingo|\blun\b|\bvie\b|\bsab\b)/.test(norm(l)) &&
+         /\d{1,2}[:.]\d{2}/.test(l);
+}
+function pareceDireccion(l){
+  if(l.length < 6 || l.length > 160 || !/\d/.test(l)) return false;
+  if(pareceHorario(l)) return false;
+  const sinFono = l.replace(RE_FONO, "").trim();
+  if(!/[a-záéíóúñ]{3,}/i.test(sinFono)) return false;          // sólo un teléfono
+  if(/^(tel|fono|telefono|whatsapp|llama)/.test(norm(l))) return false;
+  return /(\bav\b|av\.|avenida|calle|pasaje|camino|paseo|alameda|mall|local|piso|esquina|esq\.|n°|nº|#|\bsur\b|\bnorte\b|oriente|poniente)/i.test(l) ||
+         /[a-záéíóúñ]{3,}[^0-9]{0,40}\d{2,5}/i.test(l);
+}
+
+/* ---------- búsqueda tolerante ---------- */
 function distancia(a, b, max){
   if(Math.abs(a.length - b.length) > max) return max + 1;
   let prev = [], fila = [];
   for(let j = 0; j <= b.length; j++) prev[j] = j;
   for(let i = 1; i <= a.length; i++){
-    fila = [i];
-    let mejor = i;
+    fila = [i]; let mejor = i;
     for(let j = 1; j <= b.length; j++){
       const costo = a.charCodeAt(i-1) === b.charCodeAt(j-1) ? 0 : 1;
       fila[j] = Math.min(prev[j] + 1, fila[j-1] + 1, prev[j-1] + costo);
@@ -1191,466 +1183,513 @@ function distancia(a, b, max){
   }
   return prev[b.length];
 }
-
-// Puntaje: cuanto más bajo, mejor coincidencia
 function puntaje(consulta, candidato){
   const q = norm(consulta), c = norm(candidato);
   if(!q || !c) return null;
   if(c === q) return 0;
   if(c.startsWith(q)) return 1;
   if(c.indexOf(q) !== -1) return 2;
-  const max = q.length <= 4 ? 1 : 2;      // en nombres cortos, menos tolerancia
+  const max = q.length <= 4 ? 1 : 2;
   const d = distancia(q, c, max);
   return d <= max ? 3 + d : null;
 }
 
-function comunasConClinica(){
-  const vistas = {};
-  (CLINICAS.lista || []).forEach(function(cl){
-    const k = norm(cl.comuna);
-    if(k && !vistas[k]) vistas[k] = cl.comuna;
+/* ---------- red y caché ---------- */
+async function traer(url){
+  const ctl = new AbortController();
+  const t = setTimeout(function(){ ctl.abort(); }, 12000);
+  try{
+    const r = await fetch(url, {signal: ctl.signal, credentials: "omit"});
+    const html = await r.text();
+    return {ok: r.ok, status: r.status, html: html, url: r.url || url};
+  }catch(e){
+    return {ok: false, status: 0, html: "", url: url,
+            error: e.name === "AbortError" ? "el sitio tardó demasiado" : "no hubo respuesta del sitio"};
+  }finally{ clearTimeout(t); }
+}
+function docDe(html){ return new DOMParser().parseFromString(html, "text/html"); }
+function cacheLeer(clave, maxEdad){
+  return new Promise(function(res){
+    almacen.leer(clave, function(v){ res(v && v.t && (Date.now() - v.t) < maxEdad ? v.d : null); });
   });
-  return vistas;
+}
+function cacheEscribir(clave, d){ almacen.escribir(clave, {t: Date.now(), d: d}); }
+function muestraHTML(doc){
+  const b = doc.body ? doc.body.cloneNode(true) : null;
+  if(!b) return "";
+  b.querySelectorAll("script,style,noscript,svg,iframe,link,meta").forEach(function(x){ x.remove(); });
+  return b.innerHTML.replace(/\s+/g, " ").slice(0, 12000);
 }
 
-// Kilómetros entre dos coordenadas
-function km(aLat, aLng, bLat, bLng){
-  const R = 6371, r = Math.PI/180;
-  const dLat = (bLat-aLat)*r, dLng = (bLng-aLng)*r;
-  const x = Math.sin(dLat/2)*Math.sin(dLat/2) +
-            Math.cos(aLat*r)*Math.cos(bLat*r)*Math.sin(dLng/2)*Math.sin(dLng/2);
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+/* ---------- lectura de datos estructurados (JSON-LD) ---------- */
+function desdeJsonLd(doc){
+  const out = [];
+  doc.querySelectorAll('script[type="application/ld+json"]').forEach(function(s){
+    let j; try{ j = JSON.parse(s.textContent); }catch(e){ return; }
+    const pila = Array.isArray(j) ? j.slice() : [j];
+    while(pila.length){
+      const o = pila.pop();
+      if(!o || typeof o !== "object") continue;
+      ["@graph","location","department","subOrganization"].forEach(function(k){
+        if(Array.isArray(o[k])) pila.push.apply(pila, o[k]);
+      });
+      const tipo = [].concat(o["@type"] || []).join(" ");
+      if(!/Dentist|MedicalClinic|MedicalBusiness|LocalBusiness|Hospital/i.test(tipo)) continue;
+      const ad = o.address;
+      const dir = !ad ? "" : (typeof ad === "string" ? ad :
+                  [ad.streetAddress, ad.addressLocality].filter(Boolean).join(", "));
+      if(dir && o.name){
+        out.push({nombre: String(o.name), direccion: dir, telefono: o.telephone || "", horario: "",
+                  url: urlSegura(o.url), texto: o.name + " " + dir});
+      }
+    }
+  });
+  return out;
 }
 
-// Punto de referencia de una comuna: su centro declarado, o el promedio de
-// las clínicas que tiene. Si no hay ninguna de las dos cosas, null.
-function puntoComuna(nombre){
-  const k = norm(nombre);
-  const c = CLINICAS.comunas && CLINICAS.comunas[k];
-  if(c && typeof c.lat === "number" && typeof c.lng === "number") return {lat:c.lat, lng:c.lng};
-  const dentro = (CLINICAS.lista || []).filter(function(x){
-    return norm(x.comuna) === k && typeof x.lat === "number" && typeof x.lng === "number";
+/* ---------- tarjetas: la caja que rodea a una clínica ---------- */
+const GENERICO = /^(ver|ver mas|agenda|agendar|reserva|reservar|mas info|mas informacion|como llegar|llamar|whatsapp|ir|detalle|conoce mas|leer mas|ver ficha|ver clinica)$/;
+function fuera(el){ return !!el.closest("header,nav,footer,[role=navigation],.menu,[class*='menu'],[id*='menu']"); }
+
+function tarjetaDe(a, esEnlace){
+  let n = a, previo = null;
+  for(let i = 0; i < 8 && n && n.tagName !== "BODY"; i++){
+    const propios = new Set([].filter.call(n.querySelectorAll ? n.querySelectorAll("a[href]") : [], esEnlace)
+      .map(function(x){ return (x.getAttribute("href") || "").replace(/[#?].*$/, "").replace(/\/+$/, ""); }));
+    if(propios.size > 1) return previo;              // ya abarca otra clínica: me quedo con el anterior
+    if(lineas(n).some(pareceDireccion)) return n;
+    previo = n; n = n.parentElement;
+  }
+  return null;
+}
+
+function datosDeTarjeta(card, a, base){
+  const ls = lineas(card);
+  const h = card.querySelector("h1,h2,h3,h4,h5,h6,strong,b,.title,[class*='titulo'],[class*='title'],[class*='nombre']");
+  let nombre = h ? txt(h) : "";
+  if(GENERICO.test(norm(nombre)) || nombre.length > 90 || pareceDireccion(nombre)) nombre = "";
+  if(!nombre && a){ const t = txt(a); if(t && !GENERICO.test(norm(t)) && t.length < 80 && !pareceDireccion(t)) nombre = t; }
+  if(!nombre){
+    nombre = ls.find(function(l){
+      return !pareceDireccion(l) && !RE_FONO.test(l) && !pareceHorario(l) && !GENERICO.test(norm(l)) && l.length < 70;
+    }) || "";
+  }
+  const direccion = ls.find(pareceDireccion) || "";
+  const fono = ls.join("  ").match(RE_FONO);
+  let url = "";
+  if(a){ try{ url = urlSegura(new URL(a.getAttribute("href"), base).href); }catch(e){} }
+  return {nombre: nombre, direccion: direccion, telefono: fono ? fono[0].trim() : "",
+          horario: ls.filter(pareceHorario).slice(0, 2).join(" · "), url: url, texto: ls.join(" ")};
+}
+
+// Último recurso: un título con una dirección justo debajo
+function desdeEncabezados(doc){
+  const out = [], vistas = {};
+  doc.querySelectorAll("h2,h3,h4,h5").forEach(function(h){
+    if(fuera(h)) return;
+    const nombre = txt(h);
+    if(!nombre || nombre.length > 80 || GENERICO.test(norm(nombre))) return;
+    let ls = [], n = h.nextElementSibling, k = 0;
+    while(n && k < 5 && !/^H[1-5]$/.test(n.tagName)){ ls = ls.concat(lineas(n)); n = n.nextElementSibling; k++; }
+    const dir = ls.find(pareceDireccion);
+    if(!dir || vistas[norm(dir)]) return;
+    vistas[norm(dir)] = 1;
+    const fono = ls.join("  ").match(RE_FONO);
+    out.push({nombre: nombre, direccion: dir, telefono: fono ? fono[0].trim() : "",
+              horario: ls.filter(pareceHorario).slice(0, 2).join(" · "), url: "", texto: nombre + " " + ls.join(" ")});
   });
-  if(!dentro.length) return null;
-  return {
-    lat: dentro.reduce(function(a,x){ return a + x.lat; }, 0) / dentro.length,
-    lng: dentro.reduce(function(a,x){ return a + x.lng; }, 0) / dentro.length
+  return out;
+}
+
+/* ---------- Uno Salud ---------- */
+function parsearIndiceUnoSalud(html){
+  const doc = docDe(html), m = {};
+  function agregar(slug, nombre){
+    slug = String(slug || "").toLowerCase();
+    if(!/^(?=.*[a-z])[a-z0-9-]{2,50}$/.test(slug) || m[slug]) return;
+    nombre = String(nombre || "").replace(/\s+/g, " ").trim();
+    if(!nombre || nombre.length > 60 || GENERICO.test(norm(nombre)) || /\d/.test(nombre)) nombre = humanizar(slug);
+    m[slug] = nombre.replace(/^cl[ií]nicas? dentales? en (la comuna de )?/i, "");
+  }
+  doc.querySelectorAll('a[href*="/region-comuna/"]').forEach(function(a){
+    const mm = (a.getAttribute("href") || "").match(/\/region-comuna\/([^\/?#]+)\/?/i);
+    if(mm) agregar(mm[1], txt(a));
+  });
+  doc.querySelectorAll("option").forEach(function(o){
+    const v = (o.getAttribute("value") || "").trim(), t = txt(o);
+    if(/\/region-comuna\//.test(v)){ const mm = v.match(/\/region-comuna\/([^\/?#]+)/); if(mm) agregar(mm[1], t); }
+    else if(t && !/selecciona|todas|elige/i.test(t)) agregar(v, t);
+  });
+  return Object.keys(m).map(function(slug){ return {slug: slug, nombre: m[slug]}; });
+}
+
+function parsearComunaUnoSalud(html, base){
+  const doc = docDe(html);
+  const d = {titulo: txt(doc.querySelector("title")), estrategia: "", muestra: muestraHTML(doc)};
+  const esFicha = function(a){
+    const h = a.getAttribute("href") || "";
+    return /\/clinicas\/[^\/?#]+\/?(?:[?#].*)?$/i.test(h) && !fuera(a);
   };
-}
-
-function regionDe(nombre){
-  const k = norm(nombre);
-  const c = CLINICAS.comunas && CLINICAS.comunas[k];
-  if(c && c.region) return c.region;
-  const cl = (CLINICAS.lista || []).filter(function(x){ return norm(x.comuna) === k; })[0];
-  return cl ? cl.region : null;
-}
-
-function buscarClinicas(consulta){
-  const lista = CLINICAS.lista || [];
-  if(!lista.length) return {estado:"sin-datos"};
-  if(norm(consulta).length < 2) return {estado:"corto"};
-
-  // 1. ¿Qué comuna quiso escribir?
-  const comunas = comunasConClinica();
-  const cand = [];
-  Object.keys(comunas).forEach(function(k){
-    const pt = puntaje(consulta, k);
-    if(pt !== null) cand.push({clave:k, nombre:comunas[k], pt:pt});
+  const vistas = {}, porEnlace = [];
+  [].filter.call(doc.querySelectorAll("a[href]"), esFicha).forEach(function(a){
+    let k = ""; try{ k = new URL(a.getAttribute("href"), base).pathname.replace(/\/+$/, ""); }catch(e){ return; }
+    if(vistas[k]) return;
+    const card = tarjetaDe(a, esFicha);
+    if(!card) return;
+    const x = datosDeTarjeta(card, a, base);
+    if(!x.direccion) return;                         // sin dirección no es una sucursal (menús, migas)
+    if(!x.nombre) x.nombre = humanizar(k.split("/").pop());
+    vistas[k] = 1;
+    porEnlace.push(x);
   });
-  cand.sort(function(a,b){ return a.pt - b.pt || a.nombre.localeCompare(b.nombre); });
+  const ld = desdeJsonLd(doc);
+  let lista = porEnlace.length >= ld.length ? porEnlace : ld;
+  d.estrategia = lista === porEnlace ? "enlaces a fichas" : "datos estructurados";
+  if(!lista.length){ lista = desdeEncabezados(doc); d.estrategia = "títulos"; }
+  d.encontradas = lista.length;
+  d.enlacesFicha = [].filter.call(doc.querySelectorAll("a[href]"), esFicha).length;
+  return {lista: lista, diag: d};
+}
 
-  // 2. Clínicas en esa comuna
-  if(cand.length && cand[0].pt <= 2){
-    const exacta = cand[0];
-    const aqui = lista.filter(function(x){ return norm(x.comuna) === exacta.clave; });
-    const otras = cand.slice(1, 4).filter(function(c){ return c.pt <= 2; });
-    return {estado:"encontrada", comuna:exacta.nombre, clinicas:aqui, alternativas:otras};
+async function indiceUnoSalud(){
+  const c = await cacheLeer("red_uno_indice", 7 * DIA);
+  if(c && c.length) return c;
+  const m = {};
+  diag.indice = [];
+  for(const u of RED.unosalud.indices){
+    const r = await traer(u);
+    diag.indice.push({url: u, status: r.status, error: r.error || ""});
+    if(r.ok) parsearIndiceUnoSalud(r.html).forEach(function(x){ if(!m[x.slug]) m[x.slug] = x; });
   }
+  const lista = Object.keys(m).map(function(k){ return m[k]; });
+  if(lista.length) cacheEscribir("red_uno_indice", lista);
+  return lista;
+}
 
-  // 3. Casi: se escribió con errores, pero se entiende
-  if(cand.length){
-    const q = cand[0];
-    const aqui = lista.filter(function(x){ return norm(x.comuna) === q.clave; });
-    return {estado:"aproximada", comuna:q.nombre, clinicas:aqui,
-            alternativas:cand.slice(1, 4)};
-  }
+async function clinicasUnoSalud(comuna){
+  const clave = "red_uno_" + comuna.slug;
+  const c = await cacheLeer(clave, DIA);
+  if(c) return c;
+  const url = RED.unosalud.comuna(comuna.slug);
+  const r = await traer(url);
+  diag.unosalud = {url: url, status: r.status, error: r.error || ""};
+  if(r.status === 404) return {lista: [], url: url, error: "", sinPagina: true};
+  if(!r.ok) return {lista: [], url: url, error: r.error || ("el sitio respondió " + r.status)};
+  const p = parsearComunaUnoSalud(r.html, r.url);
+  Object.assign(diag.unosalud, p.diag);
+  const res = {lista: p.lista, url: url, error: ""};
+  if(p.lista.length) cacheEscribir(clave, res);       // un cero puede ser un fallo de lectura: no se guarda
+  return res;
+}
 
-  // 4. No hay clínica en esa comuna: lo más cercano que se pueda decir
-  const punto = puntoComuna(consulta);
-  if(punto){
-    const conCoord = lista
-      .filter(function(x){ return typeof x.lat === "number" && typeof x.lng === "number"; })
-      .map(function(x){ return {cl:x, d:km(punto.lat, punto.lng, x.lat, x.lng)}; })
-      .sort(function(a,b){ return a.d - b.d; });
-    // Las 3 más cercanas de cada red, para poder decirle al cliente que tiene
-    // sucursales de una y de la otra. Si sólo se tomaran las 5 más cercanas,
-    // una red podría no aparecer nunca.
-    const porRed = {};
-    const cerca = [];
-    conCoord.forEach(function(x){
-      const r = x.cl.red || "otra";
-      porRed[r] = (porRed[r] || 0) + 1;
-      if(porRed[r] <= 3) cerca.push(x);
+/* ---------- i-dental ---------- */
+function parsearEdental(html, base){
+  const doc = docDe(html);
+  const d = {titulo: txt(doc.querySelector("title")), muestra: muestraHTML(doc)};
+  const zona = doc.getElementById("clinicas") ||
+               doc.querySelector('[id*="clinica" i],[class*="clinica" i],[id*="sucursal" i],[class*="sucursal" i],[id*="sede" i],[class*="sede" i]') ||
+               doc.body;
+  d.zona = zona === doc.body ? "toda la página" : (zona.id ? "#" + zona.id : "." + String(zona.className).split(/\s+/)[0]);
+
+  // Tarjetas: bloques chicos con una dirección, que no contengan otras tarjetas
+  const cand = [].filter.call(zona.querySelectorAll("article,li,div,tr,section"), function(el){
+    if(fuera(el)) return false;
+    const largo = (el.textContent || "").length;
+    if(largo < 12 || largo > 700) return false;
+    const ls = lineas(el);
+    return ls.length >= 2 && ls.length <= 14 && ls.some(pareceDireccion);
+  });
+  const minimas = cand.filter(function(el){ return !cand.some(function(o){ return o !== el && el.contains(o); }); });
+
+  // El título de sección que precede a cada tarjeta suele ser la región o la
+  // comuna. Los títulos que están dentro de otra tarjeta no cuentan: son el
+  // nombre de esa clínica, no una sección.
+  const titulos = [].filter.call(doc.querySelectorAll("h1,h2,h3,h4,h5,h6"), function(h){
+    return !minimas.some(function(c){ return c.contains(h); });
+  });
+  function contexto(el){
+    let t = "";
+    titulos.forEach(function(h){
+      if(!el.contains(h) && (h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) t = txt(h);
     });
-    cerca.sort(function(a,b){ return a.d - b.d; });
-    if(cerca.length) return {estado:"cercanas", comuna:consulta, cercanas:cerca};
+    return t;
   }
-  const reg = regionDe(consulta);
-  if(reg){
-    const enRegion = lista.filter(function(x){ return x.region === reg; }).slice(0, 6);
-    if(enRegion.length) return {estado:"region", comuna:consulta, region:reg, clinicas:enRegion};
-  }
-  return {estado:"nada", comuna:consulta};
+  const vistas = {}, lista = [];
+  minimas.forEach(function(card){
+    const a = card.querySelector("a[href]");
+    const x = datosDeTarjeta(card, a, base);
+    if(!x.direccion || !x.nombre || vistas[norm(x.direccion)]) return;
+    vistas[norm(x.direccion)] = 1;
+    x.contexto = contexto(card);
+    lista.push(x);
+  });
+  const ld = desdeJsonLd(doc);
+  const final = lista.length >= ld.length ? lista : ld;
+  d.encontradas = final.length;
+  d.estrategia = final === lista ? "tarjetas" : "datos estructurados";
+  return {lista: final, diag: d, doc: doc};
 }
 
-/* Enlaces al mapa: la respuesta que sirve en la llamada sin depender de
-   ningún listado. El teléfono abre Maps con las sucursales de esa red en
-   la comuna, ordenadas por cercanía y con la dirección al día. */
-function enlacesMapa(comuna){
-  const q = String(comuna || "").trim();
-  if(q.length < 3) return "";
-  const mapa = function(texto, etq, clase){
-    const u = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(texto + " " + q);
-    return '<a class="mapa '+clase+'" href="'+u+'" target="_blank" rel="noopener">'+etq+'</a>';
-  };
-  const slug = norm(q).replace(/\s+/g, "-");
-  return '<div class="mapas">'+
-    '<div class="mapas-t">Ver sucursales cerca de '+q+'</div>'+
-    '<div class="mapas-b">'+
-      mapa("Uno Salud Dental", "Uno Salud", "unosalud")+
-      mapa("clinica dental e-dental", "i-dental", "edental")+
-    '</div>'+
-    '<a class="oficial" href="https://www.unosalud.cl/region-comuna/'+slug+'/" target="_blank" rel="noopener">'+
-      'Listado oficial de Uno Salud en '+q+'</a>'+
+async function clinicasEdental(){
+  const c = await cacheLeer("red_edental", DIA);
+  if(c) return c;
+  const r = await traer(RED.edental.portada);
+  diag.edental = {url: RED.edental.portada, status: r.status, error: r.error || ""};
+  if(!r.ok) return {lista: [], error: r.error || ("el sitio respondió " + r.status)};
+  let p = parsearEdental(r.html, r.url);
+  Object.assign(diag.edental, p.diag);
+
+  // Si la portada no trae las clínicas, se sigue el enlace a la página que sí
+  if(!p.lista.length){
+    const link = [].find.call(p.doc.querySelectorAll("a[href]"), function(a){
+      const h = a.getAttribute("href") || "";
+      return !/^#|preguntas|mailto:|tel:/i.test(h) && /cl[ií]nicas|sucursales|sedes|red|centros/i.test(h + " " + txt(a));
+    });
+    if(link){
+      let u = ""; try{ u = new URL(link.getAttribute("href"), r.url).href; }catch(e){}
+      if(u){
+        const r2 = await traer(u);
+        diag.edental.segunda = {url: u, status: r2.status};
+        if(r2.ok){ p = parsearEdental(r2.html, r2.url); Object.assign(diag.edental, p.diag); }
+      }
+    }
+  }
+  const res = {lista: p.lista.map(function(x){ delete x.doc; return x; }), error: ""};
+  if(res.lista.length) cacheEscribir("red_edental", res);
+  return res;
+}
+
+/* ---------- búsqueda y resultados ---------- */
+let busquedaId = 0, temporizador = null;
+
+function alEscribirComuna(){
+  clearTimeout(temporizador);
+  const q = document.getElementById("comuna").value;
+  if(norm(q).length < 3){ pintarSugerencias([], false); pintarResultados(null); return; }
+  temporizador = setTimeout(function(){ buscarComuna(q); }, 380);
+}
+
+async function buscarComuna(q, elegida){
+  const id = ++busquedaId;
+  pintarResultados({cargando: true, comuna: q});
+
+  let comuna = elegida || null, sugerencias = [];
+  if(!comuna){
+    const indice = await indiceUnoSalud();
+    if(id !== busquedaId) return;
+    if(indice.length){
+      const cand = indice
+        .map(function(x){ return {x: x, pt: puntaje(q, x.nombre)}; })
+        .filter(function(c){ return c.pt !== null; })
+        .sort(function(a, b){ return a.pt - b.pt || a.x.nombre.localeCompare(b.x.nombre); });
+      sugerencias = cand.slice(0, 5).map(function(c){ return c.x; });
+      const claro = cand.length && (cand.length === 1 || cand[0].pt < cand[1].pt || cand[0].pt === 0);
+      if(claro) comuna = cand[0].x;
+    }else{
+      // Sin índice se arma la dirección con el nombre escrito
+      comuna = {slug: norm(q).replace(/\s+/g, "-"), nombre: q.trim()};
+    }
+  }
+  pintarSugerencias(comuna ? sugerencias.filter(function(s){ return s.slug !== comuna.slug; }).slice(0, 4) : sugerencias, !!comuna);
+  if(!comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !sugerencias.length}); return; }
+
+  const res = await Promise.all([clinicasUnoSalud(comuna), clinicasEdental()]);
+  if(id !== busquedaId) return;
+  const clave = norm(comuna.nombre);
+  const ede = res[1], todas = ede.lista || [];
+  // Primero las que nombran la comuna en su propia tarjeta. Sólo si no hay
+  // ninguna, las que están bajo un título de sección con ese nombre.
+  let enComuna = todas.filter(function(c){ return norm(c.texto || "").indexOf(clave) !== -1; });
+  let porSeccion = false;
+  if(!enComuna.length){
+    enComuna = todas.filter(function(c){ return norm(c.contexto || "").indexOf(clave) !== -1; });
+    porSeccion = enComuna.length > 0;
+  }
+  pintarResultados({
+    comuna: comuna.nombre,
+    uno: res[0],
+    ede: {lista: enComuna, error: ede.error, total: todas.length, porSeccion: porSeccion}
+  });
+}
+
+function pintarSugerencias(lista, hayElegida){
+  const c = document.getElementById("sugComunas");
+  if(!lista.length){ c.innerHTML = ""; return; }
+  c.innerHTML = '<span class="sug-t">' + (hayElegida ? "¿O era…?" : "¿Cuál comuna?") + '</span>' +
+    lista.map(function(x){
+      return '<button type="button" class="sug" data-slug="' + esc(x.slug) + '" data-nombre="' + esc(x.nombre) + '">' + esc(x.nombre) + '</button>';
+    }).join("");
+}
+
+function tarjetaHTML(c){
+  return '<div class="clin">' +
+    '<div class="clin-n">' + esc(c.nombre) + '</div>' +
+    (c.direccion ? '<div class="clin-d">' + esc(c.direccion) + '</div>' : '') +
+    ((c.telefono || c.horario || c.url) ? '<div class="clin-m">' +
+      (c.telefono ? '<span class="dist">' + esc(c.telefono) + '</span>' : '') +
+      (c.horario ? '<span class="dist">' + esc(c.horario) + '</span>' : '') +
+      (urlSegura(c.url) ? '<a class="fuente" href="' + esc(c.url) + '" target="_blank" rel="noopener">ficha &#8599;</a>' : '') +
+    '</div>' : '') +
   '</div>';
 }
 
-function pintarClinicas(){
-  const caja = document.getElementById("clinRes");
-  const consulta = document.getElementById("comuna").value;
-  const r = buscarClinicas(consulta);
-
-  function tarjeta(cl, dist){
-    return '<div class="clin">'+
-      '<div class="clin-n">'+cl.nombre+'</div>'+
-      '<div class="clin-d">'+(cl.direccion || "")+(cl.comuna ? " · "+cl.comuna : "")+'</div>'+
-      '<div class="clin-m">'+
-        '<span class="red '+(cl.red||"")+'">'+(cl.red === "edental" ? "E-dental" : "Uno Salud")+'</span>'+
-        (cl.telefono ? '<span class="dist">'+cl.telefono+'</span>' : '')+
-        (dist !== undefined ? '<span class="dist">a '+dist.toFixed(1).replace(".",",")+' km</span>' : '')+
-      '</div></div>';
-  }
-  function alternativas(lista){
-    if(!lista || !lista.length) return "";
-    return '<p class="sugerencias">¿O quisiste decir '+lista.map(function(c){
-      return '<button type="button" data-comuna="'+c.nombre+'">'+c.nombre+'</button>';
-    }).join(", ")+'?</p>';
-  }
-
-  // Cuántas hay de cada red, para responder de una sola mirada
-  function resumenRedes(clinicas){
-    if(!clinicas || !clinicas.length) return "";
-    const n = {};
-    clinicas.forEach(function(c){ const k = c.red || "otra"; n[k] = (n[k]||0) + 1; });
-    const partes = [];
-    if(n.unosalud) partes.push('<span class="red unosalud">Uno Salud '+n.unosalud+'</span>');
-    if(n.edental)  partes.push('<span class="red edental">E-dental '+n.edental+'</span>');
-    if(n.otra)     partes.push('<span class="red">Otra '+n.otra+'</span>');
-    return '<div class="conteo-redes">'+partes.join(" ")+'</div>';
-  }
-
-  let html = "";
-  if(r.estado === "sin-datos"){
-    html = norm(consulta).length < 3
-      ? '<p class="clin-vacio">Escribe la comuna del cliente.</p>'
-      : '';
-  }else if(r.estado === "corto"){
-    html = '<p class="clin-vacio">Escribe al menos dos letras.</p>';
-  }else if(r.estado === "encontrada" || r.estado === "aproximada"){
-    html = (r.estado === "aproximada" ? '<p class="clin-vacio">Entendí <strong>'+r.comuna+'</strong>.</p>' : '')+
-           resumenRedes(r.clinicas)+
-           r.clinicas.map(function(c){ return tarjeta(c); }).join("") +
-           alternativas(r.alternativas);
-  }else if(r.estado === "cercanas"){
-    html = '<p class="clin-vacio">No hay clínica en <strong>'+r.comuna+'</strong>. Las más cercanas:</p>'+
-           resumenRedes(r.cercanas.map(function(x){ return x.cl; }))+
-           r.cercanas.map(function(x){ return tarjeta(x.cl, x.d); }).join("");
-  }else if(r.estado === "region"){
-    html = '<p class="clin-vacio">No hay clínica en <strong>'+r.comuna+'</strong>. '+
-           'Estas son las de la región '+r.region+'. <em>Sin coordenadas no puedo ordenarlas por distancia.</em></p>'+
-           resumenRedes(r.clinicas)+
-           r.clinicas.map(function(c){ return tarjeta(c); }).join("");
+function bloqueRed(red, comuna, r){
+  const nom = RED[red].nombre;
+  const lista = r.lista || [];
+  let estado;
+  if(r.error) estado = "sin respuesta";
+  else if(lista.length) estado = lista.length + (lista.length === 1 ? " sucursal" : " sucursales");
+  else estado = "ninguna en " + esc(comuna);
+  let h = '<div class="redblq"><div class="redcab">' +
+    '<span class="red ' + red + '">' + nom + '</span>' +
+    '<span class="redn">' + estado + '</span>' +
+    '<a class="fuente" href="' + esc(red === "unosalud" && r.url ? r.url : RED[red].sitio) + '" target="_blank" rel="noopener">ver en el sitio &#8599;</a>' +
+    '</div>';
+  if(r.error){
+    h += '<p class="clin-vacio">' + (ESWEB
+      ? 'Desde la página web no se pueden consultar otros sitios. En la extensión de Chrome sí.'
+      : 'No pude leer el sitio: ' + esc(r.error) + '.') +
+      (ESWEB ? '' : ' <button type="button" class="link-carga" data-diag="' + red + '">copiar diagnóstico</button>') + '</p>';
+  }else if(!lista.length){
+    let motivo;
+    if(red === "unosalud" && r.sinPagina) motivo = "Uno Salud no tiene página para esta comuna.";
+    else if(red === "edental" && !r.total) motivo = "No encontré el listado de clínicas en el sitio de i-dental.";
+    else if(red === "edental") motivo = "El listado de i-dental no tiene clínicas en esta comuna.";
+    else motivo = "No encontré sucursales en la página de esta comuna.";
+    h += '<p class="clin-vacio">' + motivo +
+         (red === "unosalud" && r.sinPagina || red === "edental" && r.total ? '' :
+          ' <button type="button" class="link-carga" data-diag="' + red + '">copiar diagnóstico</button>') + '</p>';
   }else{
-    const sinCentroides = !CLINICAS.comunas || !Object.keys(CLINICAS.comunas).length;
-    html = '<p class="clin-vacio">No hay clínica en <strong>'+(consulta||"")+'</strong>'+
-           (sinCentroides
-             ? ', y no sé dónde queda esa comuna para buscarte la más cercana. '+
-               'Carga el listado de comunas con coordenadas desde '+
-               '<button type="button" class="link-carga" id="abrirCarga">aquí</button>.'
-             : ', y no está en el listado de comunas cargado. Revisa cómo se escribe.')+
-           '</p>';
-  }
-  html += enlacesMapa(consulta);
-
-  if(CLINICAS.capturado && r.estado !== "sin-datos"){
-    html += '<p class="capturado">Listado cargado el '+CLINICAS.capturado+' · '+
-            (CLINICAS.lista||[]).length+' clínicas · '+
-            '<button type="button" class="link-carga" id="abrirCarga">actualizar</button></p>';
-  }
-  if(norm(consulta).length >= 3 && (!CLINICAS.lista || !CLINICAS.lista.length)){
-    html += '<p class="capturado">También puedes '+
-            '<button type="button" class="link-carga" id="abrirCarga">cargar el listado</button> '+
-            'para ver las sucursales aquí mismo, sin salir.</p>';
-  }
-  caja.innerHTML = html;
-  const ab = document.getElementById("abrirCarga");
-  if(ab) ab.addEventListener("click", function(){
-    const c = document.getElementById("cargador");
-    c.hidden = !c.hidden;
-    if(!c.hidden) document.getElementById("pegado").focus();
-  });
-}
-
-/* ============================================================
-   CARGA DEL LISTADO DE CLÍNICAS
-   El listado no viene con la extensión. Se pega acá y queda
-   guardado en el navegador, así el ejecutivo no depende de que
-   alguien reempaquete la extensión para actualizarlo.
-   ============================================================ */
-let redCarga = "unosalud";
-
-function num(v){
-  if(v === null || v === undefined || v === "") return null;
-  const n = parseFloat(String(v).replace(",", "."));
-  return isNaN(n) ? null : n;
-}
-function limpio(v){
-  const t = String(v === null || v === undefined ? "" : v).trim();
-  return t === "" || t.toLowerCase() === "null" ? null : t;
-}
-
-// Acepta JSON (arreglo, u objeto con lista) o una línea por clínica con |
-function interpretar(texto, red){
-  const filas = [], errores = [];
-  const t = texto.trim();
-  if(!t) return {filas:filas, errores:["No pegaste nada."]};
-
-  let crudo = null;
-  if(t[0] === "[" || t[0] === "{"){
-    try{
-      const j = JSON.parse(t);
-      crudo = Array.isArray(j) ? j : (j.lista || j.clinicas || null);
-      if(!crudo) errores.push("El JSON no trae un arreglo ni un campo 'lista'.");
-    }catch(e){
-      errores.push("El JSON está mal formado: " + e.message);
+    if(r.porSeccion){
+      h += '<p class="clin-vacio">El sitio no dice la comuna de cada clínica. Éstas aparecen bajo el título <strong>' +
+           esc(comuna) + '</strong>: confirma la dirección antes de dársela al cliente.</p>';
     }
+    h += lista.map(tarjetaHTML).join("");
   }
-  if(crudo){
-    crudo.forEach(function(o, i){
-      const nombre = limpio(o.nombre || o.name);
-      const comuna = limpio(o.comuna);
-      if(!nombre || !comuna){ errores.push("Fila "+(i+1)+": falta nombre o comuna."); return; }
-      filas.push({
-        nombre: nombre,
-        direccion: limpio(o.direccion || o.direccion_completa || o.address),
-        comuna: comuna,
-        region: limpio(o.region),
-        telefono: limpio(o.telefono || o.fono),
-        red: limpio(o.red) || red,
-        lat: num(o.lat), lng: num(o.lng)
-      });
-    });
-    return {filas:filas, errores:errores};
-  }
-
-  // Texto plano separado por |
-  t.split(/\r?\n/).forEach(function(linea, i){
-    const l = linea.trim();
-    if(!l) return;
-    const c = l.split("|").map(function(x){ return x.trim(); });
-    if(c.length < 3){ errores.push("Línea "+(i+1)+": necesita al menos nombre, dirección y comuna."); return; }
-    if(!c[0] || !c[2]){ errores.push("Línea "+(i+1)+": falta nombre o comuna."); return; }
-    filas.push({
-      nombre:c[0], direccion:limpio(c[1]), comuna:c[2], region:limpio(c[3]),
-      telefono:limpio(c[4]), red:red, lat:num(c[5]), lng:num(c[6])
-    });
-  });
-  return {filas:filas, errores:errores};
+  return h + '</div>';
 }
 
-// Centroides de comunas: "comuna | región | lat | lng", o JSON equivalente.
-// Sirven para responder "la más cercana" en comunas que no tienen clínica.
-function interpretarComunas(texto){
-  const mapa = {}, errores = [];
-  let n = 0;
-  const t = texto.trim();
-  if(!t) return {mapa:mapa, n:0, errores:["No pegaste nada."]};
-
-  function meter(nombre, region, lat, lng, ref){
-    const k = norm(nombre);
-    if(!k){ errores.push(ref+": falta el nombre de la comuna."); return; }
-    const la = num(lat), ln = num(lng);
-    if(la === null || ln === null){ errores.push(ref+" ("+nombre+"): faltan coordenadas."); return; }
-    if(la < -56 || la > -17 || ln < -110 || ln > -66){
-      errores.push(ref+" ("+nombre+"): las coordenadas caen fuera de Chile.");
-      return;
-    }
-    mapa[k] = {region: limpio(region), lat: la, lng: ln};
-    n++;
-  }
-
-  if(t[0] === "[" || t[0] === "{"){
-    try{
-      const j = JSON.parse(t);
-      const arr = Array.isArray(j) ? j : (j.comunas || j.lista || []);
-      if(Array.isArray(arr)){
-        arr.forEach(function(o,i){ meter(o.comuna || o.nombre || o.name, o.region, o.lat, o.lng, "Fila "+(i+1)); });
-      }else{
-        Object.keys(arr).forEach(function(k){ meter(k, arr[k].region, arr[k].lat, arr[k].lng, k); });
-      }
-    }catch(e){ errores.push("El JSON está mal formado: " + e.message); }
-    return {mapa:mapa, n:n, errores:errores};
-  }
-
-  t.split(/\r?\n/).forEach(function(linea, i){
-    const l = linea.trim();
-    if(!l) return;
-    const c = l.split("|").map(function(x){ return x.trim(); });
-    if(c.length < 3){ errores.push("Línea "+(i+1)+": necesita comuna, región, lat y lng."); return; }
-    meter(c[0], c.length >= 4 ? c[1] : null, c[c.length-2], c[c.length-1], "Línea "+(i+1));
-  });
-  return {mapa:mapa, n:n, errores:errores};
-}
-
-function guardarClinicas(){
-  almacen.escribir("clinicas_datos", {
-    capturado: CLINICAS.capturado,
-    lista: CLINICAS.lista,
-    comunas: CLINICAS.comunas
-  });
-}
-
-function cargarPegado(){
-  const caja = document.getElementById("cargaRes");
-  const texto = document.getElementById("pegado").value;
-
-  if(redCarga === "comunas"){
-    const c = interpretarComunas(texto);
-    if(!c.n){
-      caja.innerHTML = '<span class="mal">No se cargó ninguna comuna.</span><br>'+
-                       c.errores.slice(0,5).map(function(e){ return "· "+e; }).join("<br>");
-      return;
-    }
-    CLINICAS.comunas = Object.assign(CLINICAS.comunas || {}, c.mapa);
-    guardarClinicas();
-    let m = '<span class="ok">Cargadas '+c.n+' comunas con coordenadas.</span>'+
-            '<br>Total: '+Object.keys(CLINICAS.comunas).length+' comunas. '+
-            'Ahora puedo responder "la más cercana" también en comunas sin clínica.';
-    if(c.errores.length){
-      m += '<br><span class="mal">'+c.errores.length+' rechazada(s):</span><br>'+
-           c.errores.slice(0,4).map(function(e){ return "· "+e; }).join("<br>");
-    }
-    caja.innerHTML = m;
-    document.getElementById("pegado").value = "";
-    pintarClinicas();
+function pintarResultados(e){
+  const caja = document.getElementById("clinRes");
+  if(!e){ caja.innerHTML = ""; return; }
+  if(e.cargando){ caja.innerHTML = '<p class="clin-vacio">Buscando sucursales en ' + esc(e.comuna) + '…</p>'; return; }
+  if(e.sinElegir){
+    caja.innerHTML = e.nada
+      ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas de Uno Salud. Revisa cómo se escribe.</p>'
+      : '';
     return;
   }
-
-  const r = interpretar(texto, redCarga);
-
-  if(!r.filas.length){
-    caja.innerHTML = '<span class="mal">No se pudo cargar nada.</span><br>' +
-                     r.errores.slice(0,5).map(function(e){ return "· "+e; }).join("<br>");
-    return;
-  }
-  // Reemplaza sólo la red que se está cargando, para poder cargarlas por separado
-  const otras = (CLINICAS.lista || []).filter(function(x){ return x.red !== redCarga; });
-  CLINICAS.lista = otras.concat(r.filas);
-  const d = new Date();
-  CLINICAS.capturado = String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+d.getFullYear();
-  guardarClinicas();
-
-  const conCoord = r.filas.filter(function(x){ return x.lat !== null && x.lng !== null; }).length;
-  let msg = '<span class="ok">Cargadas '+r.filas.length+' clínicas de '+
-            (redCarga === "edental" ? "E-dental" : "Uno Salud")+'.</span>';
-  msg += '<br>Con coordenadas: '+conCoord+' de '+r.filas.length+
-         (conCoord < r.filas.length ? ' · sin coordenadas no se puede ordenar por distancia' : '');
-  msg += '<br>Total en la extensión: '+CLINICAS.lista.length+' clínicas.';
-  if(r.errores.length){
-    msg += '<br><span class="mal">'+r.errores.length+' línea(s) rechazada(s):</span><br>'+
-           r.errores.slice(0,4).map(function(e){ return "· "+e; }).join("<br>");
-  }
-  caja.innerHTML = msg;
-  document.getElementById("pegado").value = "";
-  pintarClinicas();
+  caja.innerHTML = '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong></p>' +
+    bloqueRed("unosalud", e.comuna, e.uno) +
+    bloqueRed("edental", e.comuna, e.ede) +
+    '<p class="capturado">Leído de unosalud.cl y e-dentalsys.com. Se guarda un día. ' +
+    '<button type="button" class="link-carga" id="refrescarRedes">volver a leer</button></p>';
 }
 
-function borrarClinicas(){
-  CLINICAS.lista = [];
-  CLINICAS.comunas = {};
-  CLINICAS.capturado = null;
-  almacen.borrar("clinicas_datos");
-  document.getElementById("cargaRes").innerHTML = '<span class="mal">Listado borrado.</span>';
-  pintarClinicas();
+async function copiarDiagnostico(red, btn){
+  const info = {red: red, cuando: new Date().toISOString(), indice: diag.indice || null, lectura: diag[red] || null};
+  const texto = "DIAGNOSTICO BUSCADOR " + red.toUpperCase() + "\n" + JSON.stringify(info, null, 1);
+  try{ await navigator.clipboard.writeText(texto); btn.textContent = "copiado: pégalo en el chat"; }
+  catch(e){ btn.textContent = "no se pudo copiar"; }
+}
+
+function olvidarRedes(cb){
+  try{
+    chrome.storage.local.get(null, function(todo){
+      const claves = Object.keys(todo || {}).filter(function(k){ return k.indexOf("red_") === 0; });
+      chrome.storage.local.remove(claves, cb);
+    });
+  }catch(e){
+    try{ Object.keys(localStorage).filter(function(k){ return k.indexOf("red_") === 0; })
+           .forEach(function(k){ localStorage.removeItem(k); }); }catch(e2){}
+    cb();
+  }
 }
 
 /* ---------- eventos ---------- */
+function confirmarDosToques(btn, aviso, accion){
+  if(btn.dataset.armado === "1"){
+    btn.dataset.armado = ""; btn.textContent = btn.dataset.original; accion(); return;
+  }
+  btn.dataset.original = btn.textContent;
+  btn.dataset.armado = "1";
+  btn.textContent = aviso;
+  setTimeout(function(){
+    if(btn.dataset.armado === "1"){ btn.dataset.armado = ""; btn.textContent = btn.dataset.original; }
+  }, 3500);
+}
+
+// Nuevo cliente: todo a cero. Titular solo, Plan Urgencias, sin nada escrito.
+function reiniciar(){
+  almacen.borrar("estado");
+  busquedaId++;
+  clearTimeout(temporizador);
+  nCargas = 0;
+  planElegido = PLAN_POR_DEFECTO;
+  planForzado = false;
+  guionAbierto = false;
+  envio = "linea";
+  document.getElementById("hijos").innerHTML = "";
+  document.getElementById("comuna").value = "";
+  document.getElementById("sugComunas").innerHTML = "";
+  document.getElementById("clinRes").innerHTML = "";
+  document.getElementById("panelClin").hidden = true;
+  document.getElementById("abrirClin").classList.remove("open");
+  pintarBloqueCargas();
+  marcarEnvio();
+  pintarGuardado(null);
+  calcular();
+}
+
 document.getElementById("ufReload").addEventListener("click", cargarUF);
 document.getElementById("ufManual").addEventListener("input", function(){
-  const v = parseFloat(this.value.replace(/\./g,"").replace(",","."));
+  const v = parseFloat(this.value.replace(/\./g, "").replace(",", "."));
   if(v > 0){
-    const cent = Math.round(v*100), f = fmt(hoy());
-    guardar(cent, f);                      // la UF escrita a mano también se recuerda
-    pintarUF(cent, f, "escrita a mano");
+    const cent = Math.round(v * 100), f = fmt(hoy());
+    guardar(cent, f);
+    cacheUF = {c: cent, f: f};
+    pintarUF(cent, f, ESWEB ? "escrita a mano" : "manual");
     avisarUFVieja();
   }
+});
+document.getElementById("tieneCargas").addEventListener("change", function(){
+  nCargas = this.checked ? Math.max(1, nCargas) : 0;
+  pintarBloqueCargas();
+  calcular(); guardarEstado();
+  if(this.checked){ const ed = document.querySelector("#hijos .edad"); if(ed) ed.focus(); }
 });
 document.getElementById("conteo").addEventListener("click", function(e){
   const b = e.target.closest("button");
   if(!b) return;
   nCargas = +b.dataset.n;
-  marcarCargas(); calcular(); guardarEstado();
+  pintarBloqueCargas();
+  calcular(); guardarEstado();
 });
-document.getElementById("abrirVerif").addEventListener("click", function(){
-  const panel = document.getElementById("panelVerif");
-  const abierto = !panel.hidden;
-  panel.hidden = abierto;
-  this.classList.toggle("open", !abierto);
-  if(!abierto && !document.querySelector("#hijos .fila")) filaHijo();
-  guardarEstado();
-});
-document.getElementById("masHijo").addEventListener("click", function(){ filaHijo(); });
 document.getElementById("abrirClin").addEventListener("click", function(){
   const panel = document.getElementById("panelClin");
   const abierto = !panel.hidden;
   panel.hidden = abierto;
   this.classList.toggle("open", !abierto);
-  if(!abierto){ pintarClinicas(); document.getElementById("comuna").focus(); }
+  if(!abierto) document.getElementById("comuna").focus();
   guardarEstado();
 });
-document.getElementById("comuna").addEventListener("input", function(){ pintarClinicas(); guardarEstado(); });
-document.getElementById("redCarga").addEventListener("click", function(e){
-  const b = e.target.closest("button");
-  if(!b) return;
-  redCarga = b.dataset.red;
-  [].forEach.call(this.querySelectorAll("button"), function(x){ x.classList.toggle("on", x===b); });
-  document.getElementById("pistaCarga").innerHTML = (redCarga === "comunas")
-    ? 'Pega las comunas de Chile con sus coordenadas, una por línea: <code>comuna | región | lat | lng</code>. Sirven para responder cuál es la clínica más cercana cuando la comuna no tiene ninguna.'
-    : 'Pega el listado: JSON con los campos del esquema, o una línea por clínica separada por <code>|</code> en este orden: nombre | dirección | comuna | región | teléfono | lat | lng';
-  document.getElementById("pegado").placeholder = (redCarga === "comunas")
-    ? "Peñalolén | Metropolitana | -33.4780 | -70.5320"
-    : "Pega aquí el listado de la red seleccionada";
+document.getElementById("comuna").addEventListener("input", function(){ alEscribirComuna(); guardarEstado(); });
+document.getElementById("comuna").addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ e.preventDefault(); clearTimeout(temporizador); if(norm(this.value).length >= 3) buscarComuna(this.value); }
 });
-document.getElementById("btnCargar").addEventListener("click", cargarPegado);
-document.getElementById("btnBorrar").addEventListener("click", function(){
-  confirmarDosToques(this, "¿Seguro? Toca otra vez", borrarClinicas);
+document.getElementById("sugComunas").addEventListener("click", function(e){
+  const b = e.target.closest("button.sug");
+  if(!b) return;
+  document.getElementById("comuna").value = b.dataset.nombre;
+  guardarEstado();
+  buscarComuna(b.dataset.nombre, {slug: b.dataset.slug, nombre: b.dataset.nombre});
 });
 document.getElementById("clinRes").addEventListener("click", function(e){
-  const b = e.target.closest("button[data-comuna]");
-  if(!b) return;
-  document.getElementById("comuna").value = b.dataset.comuna;
-  pintarClinicas();
+  const d = e.target.closest("[data-diag]");
+  if(d){ copiarDiagnostico(d.dataset.diag, d); return; }
+  if(e.target.closest("#refrescarRedes")){
+    olvidarRedes(function(){ buscarComuna(document.getElementById("comuna").value); });
+  }
 });
 document.getElementById("envio").addEventListener("click", function(e){
   const b = e.target.closest("button");
@@ -1662,72 +1701,36 @@ document.getElementById("envio").addEventListener("click", function(e){
 document.getElementById("tbody").addEventListener("click", function(e){
   const tr = e.target.closest("tr");
   if(!tr || !tr.dataset.plan || tr.classList.contains("veta")) return;
-
   const porNombre = !!e.target.closest(".nomplan");
   const mismoPlan = (tr.dataset.plan === planElegido);
-
   planElegido = tr.dataset.plan;
-  planForzado = false;                  // elección del ejecutivo, no imposición
-
-  // El script se despliega sólo al pinchar el nombre. Pinchar el nombre del
-  // plan que ya está abierto lo cierra.
+  planForzado = false;
   if(porNombre) guionAbierto = !(guionAbierto && mismoPlan);
-
   calcular(); guardarEstado();
 });
 document.getElementById("cerrarGuion").addEventListener("click", function(){
   guionAbierto = false;
-  pintarGuion();
-  guardarEstado();
+  pintarGuion(); guardarEstado();
 });
-function confirmarDosToques(btn, aviso, accion){
-  if(btn.dataset.armado === "1"){
-    btn.dataset.armado = ""; btn.textContent = btn.dataset.original; accion(); return;
-  }
-  btn.dataset.original = btn.textContent;
-  btn.dataset.armado = "1";
-  btn.textContent = aviso;
-  setTimeout(function(){
-    if(btn.dataset.armado === "1"){ btn.dataset.armado=""; btn.textContent=btn.dataset.original; }
-  }, 3500);
-}
-
 document.getElementById("limpiar").addEventListener("click", function(){
-  const btn = this;
-  if(btn.dataset.armado !== "1"){ confirmarDosToques(btn, "¿Seguro? Toca otra vez", function(){}); return; }
-  btn.dataset.armado = ""; btn.textContent = btn.dataset.original;
-  almacen.borrar("estado");
-  nCargas = 0; planElegido = PLAN_POR_DEFECTO; planForzado = false;
-  guionAbierto = false; envio = "linea"; marcarEnvio();
-  document.getElementById("hijos").innerHTML = "";
-  document.getElementById("panelVerif").hidden = true;
-  document.getElementById("abrirVerif").classList.remove("open","hay");
-  marcarCargas(); pintarGuardado(null); calcular();
+  confirmarDosToques(this, "¿Seguro? Toca otra vez", reiniciar);
 });
 document.getElementById("copiar").addEventListener("click", function(){
   if(!ultimaCotizacion) return;
+  const b = this;
   navigator.clipboard.writeText(ultimaCotizacion).then(function(){
-    const b = document.getElementById("copiar");
     b.textContent = "Copiado";
     setTimeout(function(){ b.textContent = "Copiar"; }, 1200);
-  });
+  }, function(){ b.textContent = "No se pudo"; setTimeout(function(){ b.textContent = "Copiar"; }, 1500); });
 });
 
 /* ---------- arranque ---------- */
-almacen.leer("clinicas_datos", function(d){
-  if(d && d.lista && d.lista.length){
-    CLINICAS.lista = d.lista;
-    CLINICAS.comunas = d.comunas || {};
-    CLINICAS.capturado = d.capturado || null;
-    const pc = document.getElementById("panelClin");
-    if(pc && !pc.hidden) pintarClinicas();
-  }
-});
 almacen.leer("uf", function(u){
-  if(u){ cacheUF = u; if(UF===null) pintarUF(u.c, u.f, "guardado"); }
+  if(u){ cacheUF = u; if(UF === null) pintarUF(u.c, u.f, ESWEB ? "escrita a mano" : "guardado"); }
   restaurarEstado(function(){ cargarUF(); });
 });
 marcarEnvio();
+pintarBloqueCargas();
 calcular();
 
 </script>

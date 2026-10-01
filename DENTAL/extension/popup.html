@@ -16,7 +16,7 @@
       <button id="ufReload" type="button" title="Actualizar UF">&#8635;</button>
     </div>
     <div class="uf-manual" id="ufManualBox">
-      <label for="ufManual">Sin conexión. Valor UF:</label>
+      <label for="ufManual">Valor UF:</label>
       <input id="ufManual" type="text" inputmode="decimal" placeholder="39454,17">
     </div>
 
@@ -30,23 +30,18 @@
     </div>
 
     <div class="campo">
-      <label>Cargas (adicionales del titular)</label>
-      <div class="conteo" id="conteo">
-        <button type="button" data-n="0" class="on">0</button>
-        <button type="button" data-n="1">1</button>
-        <button type="button" data-n="2">2</button>
-        <button type="button" data-n="3">3</button>
-      </div>
-    </div>
-
-    <div class="verif">
-      <button type="button" id="abrirVerif" class="abrir">
-        <span>&#9656;</span> Edad de las cargas
-      </button>
-      <div id="panelVerif" hidden>
-        <p class="pista">Pregunta la edad y escríbela. Si durante la llamada consigues la fecha de nacimiento, escríbela también y el cálculo se vuelve exacto.</p>
+      <label class="check" for="tieneCargas">
+        <input type="checkbox" id="tieneCargas">
+        <span>Tiene cargas (adicionales del titular)</span>
+      </label>
+      <div id="bloqueCargas" hidden>
+        <div class="conteo" id="conteo">
+          <button type="button" data-n="1">1</button>
+          <button type="button" data-n="2">2</button>
+          <button type="button" data-n="3">3</button>
+        </div>
+        <p class="pista">Edad de cada carga. Escríbela o súbela con las flechas. Si consigues la fecha de nacimiento, escríbela y el cálculo se vuelve exacto.</p>
         <div id="hijos"></div>
-        <button type="button" id="masHijo" class="mas">+ otra carga</button>
       </div>
     </div>
 
@@ -72,23 +67,10 @@
       </button>
       <div id="panelClin" hidden>
         <div class="fila">
-          <input type="text" id="comuna" class="comuna" placeholder="escribe la comuna" autocomplete="off">
+          <input type="text" id="comuna" class="comuna" placeholder="escribe la comuna del cliente" autocomplete="off" spellcheck="false">
         </div>
+        <div id="sugComunas"></div>
         <div id="clinRes"></div>
-        <div id="cargador" hidden>
-          <p class="pista" id="pistaCarga">Pega el listado: JSON con los campos del esquema, o una línea por clínica separada por <code>|</code> en este orden: nombre | dirección | comuna | región | teléfono | lat | lng</p>
-          <div class="conteo" id="redCarga">
-            <button type="button" data-red="unosalud" class="on">Uno Salud</button>
-            <button type="button" data-red="edental">E-dental</button>
-            <button type="button" data-red="comunas">Comunas</button>
-          </div>
-          <textarea id="pegado" rows="5" placeholder="Pega aquí el listado de la red seleccionada"></textarea>
-          <div class="cargador-bot">
-            <button type="button" id="btnCargar" class="btn-ok">Cargar</button>
-            <button type="button" id="btnBorrar" class="btn-x2">Borrar listado</button>
-          </div>
-          <div id="cargaRes"></div>
-        </div>
       </div>
     </div>
 
@@ -119,7 +101,6 @@
   </aside>
 
 </div>
-<script src="clinicas.js"></script>
 <script src="popup.js"></script>
 </body>
 </html>

@@ -19,107 +19,52 @@ No sirve seleccionar el ZIP.
 
 ## Usar
 
-- **Cargas:** botones 0 a 3. Con eso ya tienes el precio: no hace falta
-  ninguna fecha. **El número lo mandas tú**: nada lo cambia solo. Si escribes
-  más edades que cargas marcadas, te lo avisa, pero el precio siempre va por
-  el número que marcaste.
-- **Edad de las cargas:** desplegable, cerrado por defecto. Ábrelo cuando
-  necesites verificar a alguien.
-  - **Edad:** escríbela, o súbela y bájala con las flechas del campo. También
-    con las flechas ↑ ↓ del teclado estando dentro del campo.
-  - **Fecha de nacimiento:** si la consigues durante la llamada, escríbela y
-    el cálculo pasa a ser exacto. La edad se rellena sola y queda bloqueada;
-    para volver a escribirla a mano, borra la fecha.
-  - 8 dígitos seguidos, sin separadores: `05032016` se convierte en `05/03/2016`.
-- **Veredicto por carga:** dice en qué planes entra.
+- **Al abrir** se cotiza al titular solo, en Plan Urgencias.
+- **Tiene cargas:** marca la casilla sólo si el cliente quiere sumar
+  adicionales. Ahí aparece el número de cargas (1 a 3) y una fila de edad por
+  cada una. Sin la casilla no se pide ninguna edad.
+- **Edad de cada carga:** escríbela, o súbela y bájala con las flechas del
+  campo o del teclado. Si consigues la fecha de nacimiento (8 dígitos
+  seguidos, `05032016`), el cálculo pasa a ser exacto.
+- **Veredicto por carga:**
   - Menor de 14 → sólo Plan 4 Full Niños.
-  - De 14 a 23 años y 0 días → entra en Urgencia, Full y Full Niños.
+  - De 14 a 23 años y 0 días → entra en Urgencias, Full y Full Niños.
   - 24 años y 0 días o más → no entra en ninguno.
-  - Con 23 años o menos de 1 año te pide la fecha, porque con la edad sola no
-    alcanza para decidir el borde.
-- **Plan:** clic en la fila de la tabla para elegirlo. Sin menores el cliente
-  elige entre Urgencia y Full; con un menor de 14 queda forzado el Plan 4 y
-  los otros dos se tachan.
-- **Copiar:** deja la cotización en el portapapeles, lista para pegar.
+  - Con 23 años o menos de 1 año pide la fecha, porque la edad sola no basta.
+- **Plan:** clic en la fila. Sin menores se puede subir a Full; con un menor
+  de 14 queda forzado el Plan 4 y los otros se tachan.
+- **Script:** clic en el **nombre** del plan y se despliega a la derecha.
+- **Copiar:** deja la cotización en el portapapeles.
+- **Nuevo cliente:** dos toques. Deja todo en cero: titular solo, Plan
+  Urgencias, sin cargas, sin comuna, envío en línea.
 
-## Resumen siempre arriba
+## Sucursales por comuna
 
-Bajo el valor UF hay una franja con lo que se está cotizando en ese momento:
-plan, composición del grupo, UF y precio mensual. Parte en Plan Urgencias sin
-cargas y cambia sola con cada ajuste, así no hay que mirar abajo para saber
-qué se va a leer.
+Escribe la comuna del cliente y la extensión lee, en ese momento:
 
-## Envío de la póliza
+- **Uno Salud:** la página de esa comuna en `unosalud.cl/region-comuna/`.
+- **i-dental:** el listado de clínicas de `e-dentalsys.com`.
 
-Dos botones, porque el cierre de la llamada cambia según el cliente:
+Muestra las sucursales de cada red con nombre, dirección, teléfono y horario
+cuando el sitio los trae, y un enlace a la fuente.
 
-- **En línea** (por defecto): el cliente tiene cuenta Bci y se le carga la prima
-  a su cuenta corriente.
-- **Link de pago**: no tiene cuenta Bci. Se le envía el correo con el link, que
-  vence en 48 horas.
+- La búsqueda tolera tildes, mayúsculas, la ñ y errores de tipeo. Si lo
+  escrito calza con varias comunas (`las c`), ofrece las opciones.
+- La lista de comunas sale del propio sitio de Uno Salud, así que funciona
+  aunque la dirección de la página no sea el nombre de la comuna
+  (Valparaíso es `rv-rv`).
+- Lo leído se guarda un día. La segunda búsqueda de la misma comuna es
+  instantánea y no vuelve a consultar el sitio. "Volver a leer" fuerza una
+  lectura nueva.
+- Si i-dental no indica la comuna en cada clínica y sólo las agrupa bajo un
+  título, lo avisa y pide confirmar la dirección.
 
-El script muestra sólo el texto que corresponde, tal como está en el documento
-de venta. No hay que acordarse de saltarse el párrafo que no va.
+**Si una red no muestra resultados y debería**, el sitio puede haber cambiado
+su diseño. Pincha **copiar diagnóstico** y pega el texto en la conversación:
+trae lo que la extensión vio, y con eso se ajusta el lector.
 
-## Buscador de clínicas por comuna
-
-Escribes la comuna y salen las clínicas. La búsqueda es tolerante: da lo mismo
-tildes, mayúsculas o la ñ, y aguanta una o dos letras mal escritas. `nunoa`,
-`ÑUÑOA` y `nuñua` llegan todas a Ñuñoa; cuando corrige, lo dice ("Entendí
-Ñuñoa") para que no quede duda.
-
-Si la comuna no tiene clínica, muestra las más cercanas con la distancia en
-kilómetros, siempre que el listado traiga coordenadas. Si no las trae, cae a
-las clínicas de la misma región y avisa que no puede ordenarlas por distancia.
-
-**La extensión se entrega sin listado de clínicas.** Una clínica inventada
-termina leída a un cliente por teléfono, así que va vacío a propósito y el
-buscador lo dice en pantalla.
-
-### Cargar el listado
-
-No hay que editar archivos. Abre **Clínica por comuna**, pincha **pégalo
-aquí**, elige la red y pega el listado. Acepta dos formatos:
-
-- **JSON**, con los campos del esquema (`nombre`, `direccion`, `comuna`,
-  `region`, `telefono`, `lat`, `lng`).
-- **Texto plano**, una línea por clínica separada por `|` en este orden:
-  `nombre | dirección | comuna | región | teléfono | lat | lng`
-
-Al cargar te dice cuántas entraron, cuántas traen coordenadas y qué líneas
-rechazó con el motivo. Cargar una red no borra la otra, así que puedes pegar
-Uno Salud y E-dental por separado y actualizar solo una cuando cambie.
-
-Queda guardado en el navegador y sobrevive a las actualizaciones de la
-extensión. **Borrar listado** lo elimina, con confirmación.
-
-Las coordenadas son las que habilitan el orden por distancia. Sin ellas el
-buscador funciona igual, pero avisa que no puede ordenar por cercanía.
-
-### Comunas sin clínica
-
-El tercer botón, **Comunas**, carga las comunas de Chile con sus coordenadas:
-una por línea, `comuna | región | lat | lng`.
-
-Sirve para el caso más frecuente en la llamada: el cliente vive en una comuna
-donde no hay clínica. Con esta lista cargada, en vez de "no encuentro esa
-comuna" responde "no hay clínica en Peñalolén, las más cercanas son Macul a
-6,3 km y La Florida a 7,8 km".
-
-Rechaza las coordenadas que caen fuera de Chile, para atajar un error de tipeo
-antes de que produzca una distancia absurda.
-
-### Ambas redes siempre representadas
-
-Cuando muestra las más cercanas, toma las 3 mejores **de cada red**, no las 5
-mejores en total. Si no, una red con sucursales más lejanas no aparecería
-nunca, y justamente lo que se necesita es poder decirle al cliente que tiene
-opciones de una y de la otra.
-
-Arriba de los resultados hay un conteo por red, para responder de una mirada.
-
-La fecha de captura se muestra bajo los resultados, para saber qué tan viejo es
-el dato.
+Esto funciona en la extensión. En la versión web no, porque una página no
+puede leer otros sitios.
 
 ## No se pierde nada al cerrar
 
