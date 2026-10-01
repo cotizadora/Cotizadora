@@ -1325,25 +1325,62 @@ function personalizar(h){
   return h;
 }
 
+// Formato chileno: 19758650 + 8 -> 19.758.650-8
+function rutConPuntos(num, dv){
+  num = String(num || "").replace(/[^0-9kK]/g, "");
+  dv = String(dv || "").trim();
+  if(!num) return "";
+  if(!dv && num.length > 7){ dv = num.slice(-1); num = num.slice(0, -1); }
+  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + (dv ? "-" + dv.toUpperCase() : "");
+}
+
 async function leerVicidial(){
   if(ESWEB) return null;
   try{
     const tabs = await chrome.tabs.query({url: VICIDIAL});
     if(!tabs.length) return null;
     tabs.sort(function(a, b){ return (b.lastAccessed || 0) - (a.lastAccessed || 0); });
+    // Se leen todos los marcos: la pantalla principal (lead_id, campos
+    // estándar, nombre del ejecutivo) y la pestaña FORM, que es un marco
+    // aparte con los campos de la campaña (RUT, DV, Nombres, Apellido_Pat…).
     const r = await chrome.scripting.executeScript({
-      target: {tabId: tabs[0].id},
+      target: {tabId: tabs[0].id, allFrames: true},
       world: "MAIN",
       func: function(){
-        function v(id){ const e = document.getElementById(id); return e ? String(e.value || "").trim() : ""; }
-        return {lead: v("lead_id"), nombre: v("first_name"), apellido: v("last_name"), rut: v("vendor_lead_code"),
-                fono: v("phone_number"), fono2: v("alt_phone"), comuna: v("province"), ciudad: v("city"),
-                region: v("state"), email: v("email"), genero: v("gender").toUpperCase(),
-                agente: typeof LOGfullname === "string" ? LOGfullname : ""};
+        const campos = {};
+        document.querySelectorAll("input, select, textarea").forEach(function(e){
+          const k = String(e.name || e.id || "").toLowerCase();
+          if(!k || e.type === "password" || e.type === "button" || e.type === "submit") return;
+          const v = String(e.value || "").trim();
+          if(v && !campos[k]) campos[k] = v;
+        });
+        return {campos: campos, agente: typeof LOGfullname === "string" ? LOGfullname : ""};
       }
     });
-    const c = r && r[0] && r[0].result;
-    return c && (c.lead || c.nombre || c.apellido) ? c : null;
+    // Se juntan los marcos; lo de la pestaña FORM manda sobre lo estándar
+    const f = {}; let agente = "";
+    (r || []).forEach(function(x){
+      if(!x || !x.result) return;
+      Object.keys(x.result.campos).forEach(function(k){ if(!f[k]) f[k] = x.result.campos[k]; });
+      if(x.result.agente) agente = x.result.agente;
+    });
+    function val(){ for(let i = 0; i < arguments.length; i++){ const v = f[arguments[i]]; if(v && v !== "0") return v; } return ""; }
+    const ap = [val("apellido_pat"), val("apellido_mat")].filter(Boolean).join(" ");
+    const c = {
+      lead: val("lead_id"),
+      nombre: val("nombres", "nombre", "first_name"),
+      apellido: ap || val("apellidos", "last_name"),
+      rut: val("rut") ? rutConPuntos(val("rut"), val("dv")) : rutConPuntos(val("vendor_lead_code")),
+      fono: val("fono1", "phone_number"),
+      fono2: val("fono2", "alt_phone"),
+      comuna: val("comuna", "province"),
+      ciudad: val("ciudad", "city"),
+      region: val("region", "state"),
+      email: val("email"),
+      genero: (val("sexo", "gender").charAt(0) || "").toUpperCase(),
+      agente: agente
+    };
+    return c.lead || c.nombre || c.apellido ? c : null;
   }catch(e){ return null; }
 }
 

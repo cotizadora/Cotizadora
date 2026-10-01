@@ -47,7 +47,9 @@ No sirve seleccionar el ZIP.
 
 Si Vicidial está abierto en otra pestaña
 (`vicidial.recaall.simtastic.cl/agc/`), al abrir la extensión se lee el
-cliente que está en pantalla:
+cliente que está en pantalla. Los datos salen de la pestaña **FORM** de la
+campaña (RUT, DV, Nombres, Apellido_Pat, Apellido_Mat, Sexo, Comuna,
+Fono1…) y, si alguno viene vacío, de los campos estándar de Vicidial:
 
 - Arriba de la cotización aparecen su nombre, RUT, fono y comuna.
 - En el script, **[nombre]** pasa a ser su nombre, **[nombre y apellido]** su
