@@ -54,9 +54,9 @@ para el ejecutivo y no se leen al cliente.
 - **Tamaño de letra:** botones **A−** y **A+**, de 80 % a 220 %.
 - **Contraste:** Normal, **Negro** (fondo negro, letra clara), **Alto**
   (negro con amarillo) y **Sepia** (más suave para la vista).
-- **Ancho:** arrastra hacia la derecha el borde derecho del script (la
-  franja con puntos) y la zona de lectura se ensancha; el texto se
-  reacomoda. Abre en 360 px y se puede llevar hasta 432 px, que es el borde
+- **Ancho:** arrastra hacia la derecha la manija azul del borde derecho del
+  script (la franja con ↔ y puntos) y la zona de lectura se ensancha; el
+  texto se reacomoda. Abre en 360 px y se puede llevar hasta 426 px, que es el borde
   máximo: Chrome y Edge no dejan que el popup pase de 800 px. Doble clic en
   la franja vuelve al ancho normal.
 - Tamaño, ancho, contraste y lectura guiada se recuerdan siempre, también después

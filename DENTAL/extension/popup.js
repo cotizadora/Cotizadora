@@ -741,6 +741,7 @@ let envio = "linea";
 function pintarGuion(){
   const app = document.getElementById("app");
   const yaAbierto = app.classList.contains("abierto");
+  if(guionAbierto && !yaAbierto) abriendoHasta = Date.now() + 300;
   app.classList.toggle("abierto", guionAbierto);
   if(!guionAbierto) return;
   const caja = document.getElementById("guion");
@@ -820,7 +821,7 @@ function guardarPrefs(){ almacen.escribir("prefs", prefs); }
    El tirador del borde derecho ensancha sólo la zona de lectura y el
    texto se reacomoda. El popup de Chrome no pasa de 800 px, así que ahí
    el script puede llegar hasta ese borde; en la web, hasta el de la pantalla. */
-const ANCHO_MIN = 300, ANCHO_NORMAL = 360, IZQ = 368;
+const ANCHO_MIN = 300, ANCHO_NORMAL = 360, IZQ = 374;   // 360 de la cotización + 14 de la manija
 function anchoMax(){
   if(ESWEB) return Math.max(ANCHO_MIN, window.innerWidth - IZQ - 40);
   return 800 - IZQ;   // tope de Chrome y Edge para un popup
@@ -882,9 +883,27 @@ function marcarPasos(llevar){
   });
   document.getElementById("pasoNum").textContent = n ? (i + 1) + " / " + n : "—";
   if(llevar && prefs.guiada && ps[i]){
-    const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    ps[i].scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"});
+    // Recién abierto, el panel todavía se está desplegando (el texto está
+    // más angosto y alto): se espera a que termine para ubicar la frase.
+    const espera = Math.max(0, abriendoHasta - Date.now());
+    setTimeout(function(){ llevarAlPaso(ps[i]); }, espera);
   }
+}
+let abriendoHasta = 0;
+// Deja la frase a la vista, justo bajo la cabecera y la barra fijas
+function llevarAlPaso(el){
+  const g = document.getElementById("guion");
+  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(g.scrollHeight <= g.clientHeight + 2){   // la web: se desplaza la página
+    el.scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"});
+    return;
+  }
+  const tapa = g.querySelector(".guion-cab").offsetHeight + g.querySelector(".guion-barra").offsetHeight;
+  const rg = g.getBoundingClientRect(), re = el.getBoundingClientRect();
+  const libre = g.clientHeight - tapa;
+  const margen = Math.max(10, Math.min((libre - re.height) / 3, 120));
+  const destino = g.scrollTop + (re.top - rg.top) - tapa - margen;
+  g.scrollTo({top: Math.max(0, destino), behavior: suave ? "smooth" : "auto"});
 }
 function moverPaso(delta){
   pasos[planElegido] = (pasos[planElegido] || 0) + delta;

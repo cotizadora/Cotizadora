@@ -19,7 +19,7 @@ body{
   display:flex; align-items:stretch; width:360px; overflow:hidden;
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
-.app.abierto{width:calc(368px + var(--gw, 360px))}
+.app.abierto{width:calc(374px + var(--gw, 360px))}
 .app.arrastrando, .app.arrastrando .guion{transition:none}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
@@ -68,18 +68,26 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 }
 #cerrarGuion:hover{background:rgba(255,255,255,.3)}
 
-/* ---- tirador: se arrastra hacia la derecha para ensanchar el script ---- */
+/* ---- manija: se arrastra hacia la derecha para ensanchar el script ----
+   Franja del color de la cabecera del script, con flechas arriba y un
+   agarre al centro, para que se vea que se puede tirar. */
 .tirador{
   flex:0 0 0; width:0; overflow:hidden; align-self:stretch; position:relative;
-  background:var(--soft); cursor:ew-resize; touch-action:none;
+  background:var(--brand); color:var(--bg); cursor:ew-resize; touch-action:none;
+  font:700 11px/1 "Segoe UI",system-ui,sans-serif; user-select:none;
 }
-.app.abierto .tirador{flex-basis:8px; width:8px; border-left:1px solid var(--line)}
+.app.abierto .tirador{flex-basis:14px; width:14px}
+.tirador::before{
+  content:"\2194"; position:absolute; left:0; right:0; top:13px;
+  text-align:center; font-size:13px; font-weight:400; opacity:.95;
+}
 .tirador::after{
-  content:""; position:absolute; left:2px; top:50%; width:3px; height:34px; margin-top:-17px;
-  border-left:1px dotted var(--muted); border-right:1px dotted var(--muted); opacity:.6;
+  content:""; position:absolute; left:4px; top:50%; width:6px; height:46px; margin-top:-23px;
+  border-radius:3px; background:
+    radial-gradient(circle, currentColor 1.2px, transparent 1.6px) 0 0 / 6px 6px;
+  opacity:.85;
 }
-.tirador:hover, .tirador:focus-visible, .app.arrastrando .tirador{background:var(--brand2)}
-.tirador:hover::after, .app.arrastrando .tirador::after{border-color:#fff; opacity:1}
+.tirador:hover, .tirador:focus-visible, .app.arrastrando .tirador{background:var(--brand2); outline:none}
 
 .guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
 .gs{margin:.9em 0 0}
@@ -347,12 +355,14 @@ body{ padding-block: 14px; padding-inline: 16px; }
 @media (max-width: 760px){ .guion{ border-left: 0; border-top: 1px solid var(--line); } .guion-cab{ position: static; } }
 .tirador{ display: none; }
 @media (min-width: 761px){
-  .marco:has(.app.abierto){ max-width: calc(370px + var(--gw, 360px)); }
+  .marco:has(.app.abierto){ max-width: calc(376px + var(--gw, 360px)); }
   .app.abierto{ flex-wrap: nowrap; }
   .app.abierto .izq{ flex: 0 0 360px; }
   .app.abierto .guion{ flex: 1 1 auto; }
-  .app.abierto .tirador{ display: block; flex: 0 0 8px; width: 8px; }
-  .tirador::after{ position: sticky; display: block; top: calc(50vh - 17px); margin: 0 0 0 2px; }
+  .app.abierto .tirador{ display: block; flex: 0 0 14px; width: 14px; }
+  .tirador::before, .tirador::after{ position: sticky; display: block; }
+  .tirador::before{ top: 15px; }
+  .tirador::after{ top: calc(50vh - 23px); margin: 50vh 0 0 4px; }
 }
 .uf{ position: static; }
 .uf-manual{ background: var(--soft) !important; border-bottom: 1px solid var(--line); font-weight: 600 }
@@ -1972,6 +1982,7 @@ let envio = "linea";
 function pintarGuion(){
   const app = document.getElementById("app");
   const yaAbierto = app.classList.contains("abierto");
+  if(guionAbierto && !yaAbierto) abriendoHasta = Date.now() + 300;
   app.classList.toggle("abierto", guionAbierto);
   if(!guionAbierto) return;
   const caja = document.getElementById("guion");
@@ -2051,7 +2062,7 @@ function guardarPrefs(){ almacen.escribir("prefs", prefs); }
    El tirador del borde derecho ensancha sólo la zona de lectura y el
    texto se reacomoda. El popup de Chrome no pasa de 800 px, así que ahí
    el script puede llegar hasta ese borde; en la web, hasta el de la pantalla. */
-const ANCHO_MIN = 300, ANCHO_NORMAL = 360, IZQ = 368;
+const ANCHO_MIN = 300, ANCHO_NORMAL = 360, IZQ = 374;   // 360 de la cotización + 14 de la manija
 function anchoMax(){
   if(ESWEB) return Math.max(ANCHO_MIN, window.innerWidth - IZQ - 40);
   return 800 - IZQ;   // tope de Chrome y Edge para un popup
@@ -2113,9 +2124,27 @@ function marcarPasos(llevar){
   });
   document.getElementById("pasoNum").textContent = n ? (i + 1) + " / " + n : "—";
   if(llevar && prefs.guiada && ps[i]){
-    const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    ps[i].scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"});
+    // Recién abierto, el panel todavía se está desplegando (el texto está
+    // más angosto y alto): se espera a que termine para ubicar la frase.
+    const espera = Math.max(0, abriendoHasta - Date.now());
+    setTimeout(function(){ llevarAlPaso(ps[i]); }, espera);
   }
+}
+let abriendoHasta = 0;
+// Deja la frase a la vista, justo bajo la cabecera y la barra fijas
+function llevarAlPaso(el){
+  const g = document.getElementById("guion");
+  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(g.scrollHeight <= g.clientHeight + 2){   // la web: se desplaza la página
+    el.scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"});
+    return;
+  }
+  const tapa = g.querySelector(".guion-cab").offsetHeight + g.querySelector(".guion-barra").offsetHeight;
+  const rg = g.getBoundingClientRect(), re = el.getBoundingClientRect();
+  const libre = g.clientHeight - tapa;
+  const margen = Math.max(10, Math.min((libre - re.height) / 3, 120));
+  const destino = g.scrollTop + (re.top - rg.top) - tapa - margen;
+  g.scrollTo({top: Math.max(0, destino), behavior: suave ? "smooth" : "auto"});
 }
 function moverPaso(delta){
   pasos[planElegido] = (pasos[planElegido] || 0) + delta;

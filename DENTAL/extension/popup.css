@@ -17,7 +17,7 @@ body{
   display:flex; align-items:stretch; width:360px; overflow:hidden;
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
-.app.abierto{width:calc(368px + var(--gw, 360px))}
+.app.abierto{width:calc(374px + var(--gw, 360px))}
 .app.arrastrando, .app.arrastrando .guion{transition:none}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
@@ -66,18 +66,26 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 }
 #cerrarGuion:hover{background:rgba(255,255,255,.3)}
 
-/* ---- tirador: se arrastra hacia la derecha para ensanchar el script ---- */
+/* ---- manija: se arrastra hacia la derecha para ensanchar el script ----
+   Franja del color de la cabecera del script, con flechas arriba y un
+   agarre al centro, para que se vea que se puede tirar. */
 .tirador{
   flex:0 0 0; width:0; overflow:hidden; align-self:stretch; position:relative;
-  background:var(--soft); cursor:ew-resize; touch-action:none;
+  background:var(--brand); color:var(--bg); cursor:ew-resize; touch-action:none;
+  font:700 11px/1 "Segoe UI",system-ui,sans-serif; user-select:none;
 }
-.app.abierto .tirador{flex-basis:8px; width:8px; border-left:1px solid var(--line)}
+.app.abierto .tirador{flex-basis:14px; width:14px}
+.tirador::before{
+  content:"\2194"; position:absolute; left:0; right:0; top:13px;
+  text-align:center; font-size:13px; font-weight:400; opacity:.95;
+}
 .tirador::after{
-  content:""; position:absolute; left:2px; top:50%; width:3px; height:34px; margin-top:-17px;
-  border-left:1px dotted var(--muted); border-right:1px dotted var(--muted); opacity:.6;
+  content:""; position:absolute; left:4px; top:50%; width:6px; height:46px; margin-top:-23px;
+  border-radius:3px; background:
+    radial-gradient(circle, currentColor 1.2px, transparent 1.6px) 0 0 / 6px 6px;
+  opacity:.85;
 }
-.tirador:hover, .tirador:focus-visible, .app.arrastrando .tirador{background:var(--brand2)}
-.tirador:hover::after, .app.arrastrando .tirador::after{border-color:#fff; opacity:1}
+.tirador:hover, .tirador:focus-visible, .app.arrastrando .tirador{background:var(--brand2); outline:none}
 
 .guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
 .gs{margin:.9em 0 0}
