@@ -228,6 +228,7 @@ input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
 .cliente span{color:var(--muted)}
 .cli-linea{flex-basis:100%;font-size:10.5px;color:var(--muted);line-height:1.35}
 .cli-linea i{font-style:normal;font-weight:700;color:var(--ink)}
+.guion-cuerpo .cli-dato{display:inline-block;margin-left:4px;padding:0 6px;border-radius:4px;background:var(--okbg);color:var(--ok);font-weight:700;font-style:normal}
 .guion-cuerpo em.cli{font-style:normal;font-weight:700;color:var(--g-dato, inherit)}
 .guardado span{flex:1}
 #limpiar{border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--bad);
@@ -2547,20 +2548,52 @@ function nombreCorto(full){
 }
 function escCli(t){ return String(t).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
+function hoyTexto(anioCorto){
+  const f = hoy(), dd = String(f.getDate()).padStart(2, "0"), mm = String(f.getMonth() + 1).padStart(2, "0");
+  return dd + "/" + mm + "/" + (anioCorto ? String(f.getFullYear()).slice(2) : f.getFullYear());
+}
+function datoCli(t){ return ' <span class="cli-dato">' + escCli(t) + "</span>"; }
+
 function personalizar(h){
+  // Las fechas del cierre son las de hoy, haya o no cliente leído
+  h = h.split("<em>[DD/MM/AA]</em>").join('<em class="cli">' + hoyTexto(true) + "</em>");
+  h = h.split("<em>[DD/MM/AAAA]</em>").join('<em class="cli">' + hoyTexto(false) + "</em>");
   if(!cliente) return h;
   const nom = nombrePropio(cliente.nombre).split(" ")[0] || "";
   const completo = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
+  const apellido = nombrePropio(cliente.apellidoPat);
   const mujer = cliente.genero === "F", hombre = cliente.genero === "M";
-  if(cliente.agente) h = h.split("<em>[su nombre]</em>").join('<em class="cli">' + escCli(nombreCorto(cliente.agente)) + "</em>");
+  const em = function(t){ return '<em class="cli">' + escCli(t) + "</em>"; };
+  if(cliente.agente) h = h.split("<em>[su nombre]</em>").join(em(nombreCorto(cliente.agente)));
   if(completo){
-    h = h.split("Don/Sra. <em>[nombre y apellido]</em>").join((mujer ? "Sra." : hombre ? "Don" : "Don/Sra.") + ' <em class="cli">' + escCli(completo) + "</em>");
-    h = h.split("<em>[nombre y apellido]</em>").join('<em class="cli">' + escCli(completo) + "</em>");
+    h = h.split("Don/Sra. <em>[nombre y apellido]</em>").join((mujer ? "Sra." : hombre ? "Don" : "Don/Sra.") + " " + em(completo));
+    h = h.split("<em>[nombre y apellido]</em>").join(em(completo));
   }
   if(nom){
-    if(mujer) h = h.split("don <em>[nombre]</em>").join("Sra. <em>[nombre]</em>");
-    h = h.split("<em>[nombre]</em>").join('<em class="cli">' + escCli(nom) + "</em>");
+    if(mujer) h = h.split("don <em>[nombre]</em>").join("Sra. <em>[nombre]</em>").split("Don <em>[nombre]</em>").join("Sra. <em>[nombre]</em>");
+    h = h.split("<em>[nombre]</em>").join(em(nom));
   }
+  if(apellido){
+    const trato = mujer ? "Sra." : hombre ? "Sr." : null;
+    if(trato){
+      h = h.split("Sr./Sra. <em>[apellido]</em>").join(trato + " <em>[apellido]</em>");
+      h = h.split("Sr.(a) <em>[apellido]</em>").join(trato + " <em>[apellido]</em>");
+    }
+    h = h.split("<em>[apellido]</em>").join(em(apellido));
+  }
+  if(mujer || hombre) h = h.split("Don/Sra., ").join((mujer ? "Sra." : "Don") + (nom ? " " + em(nom) : "") + ", ");
+  if(cliente.cta) h = h.split("<em>[XXX]</em>").join(em(cliente.cta));
+  if(cliente.rut) h = h.split("<em>[RUT del cliente o ID de venta]</em>").join(em(cliente.rut));
+
+  // Validación de datos: junto a cada ítem, lo que trae Vicidial
+  const domicilio = [nombrePropio(cliente.direccion), nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean).join(", ");
+  const fonos = [cliente.fono, cliente.fono2].filter(Boolean).join(" · ");
+  if(cliente.fechaNac) h = h.split("<li>Fecha de nacimiento</li>").join("<li>Fecha de nacimiento" + datoCli(cliente.fechaNac) + "</li>");
+  if(domicilio) h = h.split("<li>Domicilio completo</li>").join("<li>Domicilio completo" + datoCli(domicilio) + "</li>");
+  if(fonos) h = h.split("<li>Teléfono de contacto</li>").join("<li>Teléfono de contacto" + datoCli(fonos) + "</li>");
+  if(cliente.email) h = h.split("<li>Correo electrónico <span").join("<li>Correo electrónico" + datoCli(cliente.email.toLowerCase()) + " <span");
+  if(completo) h = h.split("<li>Nombre completo del titular <span").join("<li>Nombre completo del titular" + datoCli(completo) + " <span");
+  if(cliente.rut) h = h.split("<li>RUT <span").join("<li>RUT" + datoCli(cliente.rut) + " <span");
   return h;
 }
 
@@ -2627,6 +2660,10 @@ async function leerVicidial(){
       region: val("region", "state"),
       email: val("email"),
       genero: (val("sexo", "gender").charAt(0) || "").toUpperCase(),
+      apellidoPat: val("apellido_pat") || val("last_name").split(" ")[0] || "",
+      direccion: val("direccion", "address1"),
+      fechaNac: fechaVici(val("fecha_nac", "date_of_birth")),
+      cta: val("cta_cte"),
       agente: agente,
       cargas: [],
       info: [["Ciclo de vida", val("ciclo_vida")], ["Propensión", val("propension")],
@@ -2646,7 +2683,8 @@ function pintarCliente(){
   const el = document.getElementById("cliente");
   if(!cliente || !(cliente.nombre || cliente.apellido)){ el.hidden = true; el.innerHTML = ""; return; }
   const nombre = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
-  const datos = [cliente.rut ? "RUT " + cliente.rut : "", cliente.fono, nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean);
+  const datos = [cliente.rut ? "RUT " + cliente.rut : "", [cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
+                 cliente.email ? cliente.email.toLowerCase() : "", nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean);
   let h = "<b>" + escCli(nombre) + "</b>" + datos.map(function(d){ return "<span>" + escCli(d) + "</span>"; }).join("");
   if(cliente.cargas && cliente.cargas.length){
     h += '<div class="cli-linea"><i>Cargas en Vicidial:</i> ' + cliente.cargas.map(function(c, i){
@@ -2669,7 +2707,7 @@ async function sincronizarVicidial(){
   if(nuevaLlamada) reiniciar();
   // Las cargas del FORM se cargan una vez por llamada: si después el
   // ejecutivo las cambia a mano, no se le pisan al reabrir.
-  const yaAplicadas = previo && previo.id === c.lead && previo.cargas;
+  const yaAplicadas = previo && previo.id === c.lead && (previo.aplicado || previo.cargas);
   if(c.cargas.length && !yaAplicadas){
     nCargas = Math.min(MAX_CARGAS, c.cargas.length);
     const cont = document.getElementById("hijos");
@@ -2683,15 +2721,20 @@ async function sincronizarVicidial(){
     calcular();
     guardarEstado();
   }
-  if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now(), cargas: !!(yaAplicadas || c.cargas.length)});
+  if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now(), aplicado: true});
   cliente = c;
   pintarCliente();
   // La comuna del cliente queda lista en el buscador de sucursales
   const com = nombrePropio(c.comuna || c.ciudad);
   const campo = document.getElementById("comuna");
-  if(com && (nuevaLlamada || !campo.value)){
+  // Al entrar la llamada, el buscador de sucursales queda abierto y con la
+  // búsqueda hecha en la comuna del cliente (una vez por llamada)
+  if(com && (!yaAplicadas || !campo.value)){
     campo.value = com;
-    if(!document.getElementById("panelClin").hidden) alEscribirComuna();
+    document.getElementById("panelClin").hidden = false;
+    document.getElementById("abrirClin").classList.add("open");
+    clearTimeout(temporizador);
+    buscarComuna(com);
     guardarEstado();
   }
   if(guionAbierto) pintarGuion();

@@ -63,8 +63,15 @@ Fono1…) y, si alguno viene vacío, de los campos estándar de Vicidial:
   ve quién es cada carga (Carga y Parentesco). El seguro admite hasta 3.
 - También se muestran Ciclo de vida, Propensión, Seguros actuales y Mes sin
   costo, cuando vienen.
-- La comuna queda escrita en el buscador de sucursales: basta abrir
-  *Clínica por comuna*.
+- **Validación de datos:** junto a cada ítem del script aparece lo que trae
+  Vicidial (fecha de nacimiento, domicilio, teléfonos, correo, nombre
+  completo y RUT), para que el ejecutivo sólo lo corrobore.
+- También se llenan **[apellido]** (con Sr. o Sra.), los dígitos de la
+  cuenta **[XXX]** (Cta_Cte), el código de operación (el RUT) y las fechas
+  de aceptación y de vigencia (hoy). No se cambia ninguna palabra del
+  script: sólo se agrega el dato.
+- **Comuna:** al entrar la llamada, el panel *Clínica por comuna* se abre
+  solo con la búsqueda hecha en la comuna del cliente.
 - Si el lead cambió (entró otra llamada), la cotización parte de cero sola:
   Plan Urgencias, sin cargas, póliza en línea.
 
