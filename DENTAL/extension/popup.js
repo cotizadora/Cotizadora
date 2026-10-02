@@ -1594,6 +1594,100 @@ try{ document.getElementById("verExt").textContent = "v" + chrome.runtime.getMan
     c.addEventListener("change", function(){ chrome.storage.local.set({autoAbrir: c.checked}); });
   }catch(e){ linea.hidden = true; }
 })();
+/* ============================================================
+   ATAJOS DE TIPIFICACIÓN (los de ShortCut-Vicidial-GO)
+   Lo grabado en ShortCut queda en la pestaña de Vicidial (su
+   localStorage). Aquí se leen esos atajos sin volver a grabarlos y
+   se muestran los 6 más usados en 2 filas × 3 botones. Un clic deja
+   el atajo en cola igual que el ▶ de ShortCut (se aplica en cuanto
+   se pueda); otro clic lo cancela. Las pausas no se muestran.
+   Necesita ShortCut-Vicidial-GO 1.0.3 o más nuevo.
+   ============================================================ */
+const ATAJOS_MAX = 6;
+let atajosSig = "";
+let usoAtajos = {};
+try{ chrome.storage.local.get("usoAtajos", function(r){ usoAtajos = r.usoAtajos || {}; }); }catch(e){}
+function textoPasos(s){ return JSON.stringify(s.steps || []); }
+function esPausa(s){
+  return /PauseCodeSelect|VDADpause|VDADready/.test(textoPasos(s)) || /ba[ñn]o|break|colaci|almuerzo|pausa|capacitaci|reuni/i.test(s.label || "");
+}
+function tonoAtajo(s){
+  if(s.color === "green") return "verde";
+  if(s.color === "red") return "rojo";
+  const t = String(s.label || "").toLowerCase();
+  if(/no le|no interes|no inere|equivoc|ya tiene|no desea|no califica|fallec|molest/.test(t)) return "rojo";
+  if(/pensar|pensa|agend|llamar|despu|ocupad|buz|no contesta|volver/.test(t)) return "ambar";
+  if(/interes|venta|acept|contrat|cerrad/.test(t)) return "verde";
+  return "azul";
+}
+async function pestanaVicidial(){
+  const tabs = await chrome.tabs.query({url: VICIDIAL});
+  if(!tabs.length) return null;
+  tabs.sort(function(a, b){ return (b.lastAccessed || 0) - (a.lastAccessed || 0); });
+  return tabs[0];
+}
+async function refrescarAtajos(){
+  if(ESWEB) return;
+  const caja = document.getElementById("atajos");
+  let d = null;
+  try{
+    const tab = await pestanaVicidial();
+    if(tab){
+      const r = await chrome.scripting.executeScript({target: {tabId: tab.id}, func: function(){
+        function g(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+        return {states: g("vca_states") || [], armado: g("vca2_armed")};
+      }});
+      d = r && r[0] && r[0].result;
+    }
+  }catch(e){}
+  const lista = d ? d.states.filter(function(s){ return s && s.id && !esPausa(s); }) : [];
+  lista.forEach(function(s, i){ s.__orden = i; });
+  lista.sort(function(a, b){ return ((usoAtajos[b.id] || 0) - (usoAtajos[a.id] || 0)) || (a.__orden - b.__orden); });
+  const ver = lista.slice(0, ATAJOS_MAX);
+  const armado = d && d.armado ? d.armado.id : "";
+  const sig = JSON.stringify(ver.map(function(s){ return [s.id, s.label, s.color]; })) + "|" + armado;
+  if(sig === atajosSig) return;
+  atajosSig = sig;
+  caja.hidden = !ver.length;
+  caja.innerHTML = "";
+  ver.forEach(function(s){
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "atajo " + tonoAtajo(s) + (s.id === armado ? " armado" : "");
+    b.textContent = (s.id === armado ? "⏳ " : "") + (s.label || "Atajo");
+    b.title = s.id === armado
+      ? (s.label + ": en cola, se aplica en cuanto se pueda. Clic para cancelar.")
+      : (s.label + " · " + (s.steps || []).length + " pasos · clic: tipificar con ShortCut (se aplica en cuanto se pueda)");
+    b.addEventListener("click", function(){ armarAtajo(s.id); });
+    caja.appendChild(b);
+  });
+}
+async function armarAtajo(id){
+  try{
+    const tab = await pestanaVicidial();
+    if(!tab) return;
+    const r = await chrome.scripting.executeScript({target: {tabId: tab.id}, args: [id], func: function(id){
+      function g(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+      const st = (g("vca_states") || []).find(function(x){ return x.id === id; });
+      if(!st) return "";
+      const a = g("vca2_armed");
+      if(a && a.id === id){ localStorage.removeItem("vca2_armed"); localStorage.setItem("vca_armping", JSON.stringify(Date.now())); return "cancelado"; }
+      // Igual que el ▶ de ShortCut: en cola, sin espera mínima ni cooldown
+      localStorage.setItem("vca2_armed", JSON.stringify({id: st.id, label: st.label, steps: st.steps || (st.desc ? [st.desc] : []), __armedAt: 0, immediate: true}));
+      localStorage.setItem("vca_lastfire", "0");
+      localStorage.setItem("vca_armping", JSON.stringify(Date.now()));
+      return "armado";
+    }});
+    if(r && r[0] && r[0].result === "armado"){
+      usoAtajos[id] = (usoAtajos[id] || 0) + 1;
+      try{ chrome.storage.local.set({usoAtajos: usoAtajos}); }catch(e){}
+    }
+  }catch(e){}
+  atajosSig = "";
+  refrescarAtajos();
+}
+if(!ESWEB){ refrescarAtajos(); setInterval(refrescarAtajos, 1500); }
+
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){

@@ -108,23 +108,26 @@
       <button type="button" id="cerrarGuion" title="Ocultar el script">&times;</button>
     </div>
     <div class="guion-barra">
-      <div class="gb-grupo" title="Tamaño de la letra">
-        <button type="button" id="letraMenos" aria-label="Letra más chica">A&minus;</button>
-        <span id="letraTam" class="gb-val">100%</span>
-        <button type="button" id="letraMas" aria-label="Letra más grande">A+</button>
+      <div class="gb-fila">
+        <div class="gb-grupo" title="Tamaño de la letra">
+          <button type="button" id="letraMenos" class="gb-ic" aria-label="Letra más chica" title="Letra más chica"><span class="a-chica">A</span><span class="a-flecha">&#8595;</span></button>
+          <button type="button" id="letraMas" class="gb-ic" aria-label="Letra más grande" title="Letra más grande"><span class="a-grande">A</span><span class="a-flecha">&#8593;</span></button>
+          <span id="letraTam" class="gb-val gb-mini">100%</span>
+        </div>
+        <div class="gb-grupo gb-tonos" id="contraste" title="Contraste">
+          <button type="button" data-c="normal" class="on tono t-normal" title="Normal" aria-label="Normal"></button>
+          <button type="button" data-c="negro" class="tono t-negro" title="Fondo negro" aria-label="Fondo negro"></button>
+          <button type="button" data-c="alto" class="tono t-alto" title="Alto contraste" aria-label="Alto contraste"></button>
+          <button type="button" data-c="sepia" class="tono t-sepia" title="Sepia" aria-label="Sepia"></button>
+        </div>
+        <div class="gb-grupo" title="Lectura guiada: avanza y retrocede con las flechas ↑ ↓">
+          <button type="button" id="guiada" class="on gb-ic" title="Lectura guiada (marca la frase que toca)" aria-label="Lectura guiada">&#182;</button>
+          <button type="button" id="pasoAnt" class="gb-ic" aria-label="Frase anterior">&#9650;</button>
+          <span id="pasoNum" class="gb-val">—</span>
+          <button type="button" id="pasoSig" class="gb-ic" aria-label="Frase siguiente">&#9660;</button>
+        </div>
       </div>
-      <div class="gb-grupo" id="contraste" title="Contraste">
-        <button type="button" data-c="normal" class="on">Normal</button>
-        <button type="button" data-c="negro">Negro</button>
-        <button type="button" data-c="alto">Alto</button>
-        <button type="button" data-c="sepia">Sepia</button>
-      </div>
-      <div class="gb-grupo" title="Lectura guiada: avanza y retrocede con las flechas ↑ ↓">
-        <button type="button" id="guiada" class="on">Guiada</button>
-        <button type="button" id="pasoAnt" aria-label="Frase anterior">&#9650;</button>
-        <span id="pasoNum" class="gb-val">—</span>
-        <button type="button" id="pasoSig" aria-label="Frase siguiente">&#9660;</button>
-      </div>
+      <div class="atajos" id="atajos" hidden></div>
     </div>
     <div class="guion-cuerpo" id="guionCuerpo"></div>
   </aside>
