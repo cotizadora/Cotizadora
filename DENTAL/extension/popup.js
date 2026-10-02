@@ -543,7 +543,7 @@ const GUION = [
      de la lectura guiada. Lo que va en <p class="nota"> es instrucción para
      el ejecutivo: no se lee al cliente y la lectura guiada lo salta. */
   {t:"Apertura", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Muy buenos días / tardes, usted habla con <em>[su nombre]</em>, lo llamo por ser cliente Bci.</p>'+
+    '<p>Muy <em>[saludo]</em>, ¿me comunico con <em>[nombre y apellido del cliente]</em>? Mi nombre es <em>[su nombre]</em>, llamo desde Bci.</p>'+
     '<p>¿Cómo está?</p>'+
     '<p class="nota">Empatizar.</p>'+
     '<p>El motivo de mi llamado es para entregarle una información importante, son buenas noticias, no le quitaré mucho tiempo.</p>'+
@@ -1313,12 +1313,25 @@ document.getElementById("copiar").addEventListener("click", function(){
 const VICIDIAL = "https://vicidial.recaall.simtastic.cl/agc/*";
 let cliente = null;
 
+// Vicidial guarda los nombres en mayúsculas y sin tildes. Se reponen las de
+// los nombres y apellidos más comunes, para leerlos bien en el script.
+const TILDES = {};
+("Pérez González Rodríguez Martínez Fernández López Gómez Sánchez Díaz Hernández Ramírez Álvarez " +
+ "Jiménez Gutiérrez Vásquez Velásquez Núñez Benítez Domínguez Suárez Méndez Márquez Chávez Ríos Peña " +
+ "Muñoz Ibáñez Valdés Cáceres Sáez Galdámez Céspedes Bermúdez Rubén Raúl Héctor Víctor Óscar Ángel " +
+ "José María Andrés Matías Sebastián Martín Joaquín Agustín Cristián Iván Ramón Germán Julián Nicolás " +
+ "Tomás Mónica Verónica Inés Sofía Lucía Belén Héctor Ángela Darío Efraín Facundo Fabián Damián Adrián " +
+ "Simón Elías Jesús Ruth Débora Bárbara Noemí Zoé Rocío Ximena").split(" ").forEach(function(w){
+  if(w) TILDES[w.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()] = w;
+});
 function nombrePropio(t){
   t = String(t || "").replace(/\s+/g, " ").trim();
   if(!t) return "";
-  if(t !== t.toUpperCase() && t !== t.toLowerCase()) return t;   // ya viene bien escrito
-  return t.toLowerCase().replace(/(^|[\s-])(\S)/g, function(m, a, b){ return a + b.toUpperCase(); })
-          .replace(/ (De|Del|La|Las|Los|Y) /g, function(m){ return m.toLowerCase(); });
+  if(t === t.toUpperCase() || t === t.toLowerCase()){   // si ya viene bien escrito, se respeta
+    t = t.toLowerCase().replace(/(^|[\s-])(\S)/g, function(m, a, b){ return a + b.toUpperCase(); })
+         .replace(/ (De|Del|La|Las|Los|Y) /g, function(m){ return m.toLowerCase(); });
+  }
+  return t.replace(/[A-Za-z]+/g, function(w){ return TILDES[w.toLowerCase()] || w; });
 }
 // "Eduardo Rodrigo Perez Moya" -> "Eduardo Perez" (primer nombre y primer apellido)
 function nombreCorto(full){
@@ -1339,6 +1352,8 @@ function personalizar(h){
   // Las fechas del cierre son las de hoy, haya o no cliente leído
   h = h.split("<em>[DD/MM/AA]</em>").join('<em class="cli">' + hoyTexto(true) + "</em>");
   h = h.split("<em>[DD/MM/AAAA]</em>").join('<em class="cli">' + hoyTexto(false) + "</em>");
+  // Saludo según la hora: buenos días hasta las 12:00, después buenas tardes
+  h = h.split("<em>[saludo]</em>").join(new Date().getHours() < 12 ? "buenos días" : "buenas tardes");
   if(!cliente) return h;
   const nom = nombrePropio(cliente.nombre).split(" ")[0] || "";
   const completo = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
@@ -1346,6 +1361,9 @@ function personalizar(h){
   const mujer = cliente.genero === "F", hombre = cliente.genero === "M";
   const em = function(t){ return '<em class="cli">' + escCli(t) + "</em>"; };
   if(cliente.agente) h = h.split("<em>[su nombre]</em>").join(em(nombreCorto(cliente.agente)));
+  // Apertura: primer nombre y primer apellido ("Kevin Salazar")
+  const corto = (nom + " " + apellido).trim();
+  if(corto) h = h.split("<em>[nombre y apellido del cliente]</em>").join(em(corto));
   if(completo){
     h = h.split("Don/Sra. <em>[nombre y apellido]</em>").join((mujer ? "Sra." : hombre ? "Don" : "Don/Sra.") + " " + em(completo));
     h = h.split("<em>[nombre y apellido]</em>").join(em(completo));
