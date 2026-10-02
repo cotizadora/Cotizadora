@@ -20,6 +20,27 @@ body{
   transition:width .26s cubic-bezier(.32,.72,0,1);
 }
 .app.abierto{width:780px}
+
+/* ---- marco del popup (sólo en la extensión) ----
+   Sobre la pantalla blanca de Vicidial el popup se perdía. Un fondo azul
+   grisáceo alrededor y la tarjeta con borde fino, esquinas redondeadas y
+   sombra suave lo despegan del fondo. Medidas: 780 + 2·7 + 2 = 796 px de
+   ancho y 580 + 16 de alto, dentro del máximo de Chrome (800 × 600). */
+body.ext{
+  padding:7px;
+  background:linear-gradient(160deg,#e3e9f2 0%,#cbd5e3 100%);
+}
+body.ext .app{
+  background:var(--bg);
+  border:1px solid rgba(18,58,109,.38);
+  border-radius:12px;
+  box-shadow:0 1px 2px rgba(12,28,56,.16), 0 4px 14px rgba(12,28,56,.20),
+             inset 0 1px 0 rgba(255,255,255,.7);
+}
+@media (prefers-color-scheme:dark){
+  body.ext{ background:linear-gradient(160deg,#0b1017 0%,#05080c 100%); }
+  body.ext .app{ border-color:rgba(138,180,255,.30); box-shadow:0 4px 16px rgba(0,0,0,.6); }
+}
 .app.arrastrando, .app.arrastrando .guion{transition:none}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
