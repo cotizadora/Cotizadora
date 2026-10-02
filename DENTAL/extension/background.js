@@ -106,11 +106,33 @@ chrome.runtime.onStartup.addListener(function(){ pedirLectura(false); });
 chrome.runtime.onMessage.addListener(function(msg, sender, responder){
   if(!msg || msg.tipo !== "capturaVicidial") return;
   const c = clienteDesdeCampos(msg.campos || {}, "");
+  abrirAlEntrarLlamada(c.lead, sender && sender.tab);
   HDB.capturar(c, {ejecutivo: msg.usuario || ""})
     .then(function(r){ responder({ok: true, id: r && r.id}); })
     .catch(function(e){ responder({ok: false, error: String(e && e.message || e)}); });
   return true;
 });
+
+/* ============================================================
+   ABRIR EL COTIZADOR SOLO CUANDO ENTRA UNA LLAMADA
+   Cuando cae un lead nuevo en Vicidial se abre el popup, esté el
+   ejecutivo en la pestaña que esté. Una vez por lead: si se cierra,
+   no vuelve a abrirse hasta el próximo cliente. Se apaga desde la
+   casilla "Abrir solo al entrar una llamada" del cotizador.
+   Chrome sólo lo abre si su ventana está al frente: no se le quita
+   el foco a otro programa.
+   ============================================================ */
+async function abrirAlEntrarLlamada(lead, tab){
+  if(!lead || !chrome.action || !chrome.action.openPopup) return;
+  const g = await chrome.storage.local.get(["autoAbrir", "ultimoLeadAbierto"]);
+  if(g.autoAbrir === false || g.ultimoLeadAbierto === lead) return;
+  await chrome.storage.local.set({ultimoLeadAbierto: lead});
+  try{ await chrome.action.openPopup(); }
+  catch(e){
+    // Si la ventana activa no es la de Vicidial, se intenta en la de Vicidial
+    try{ if(tab && tab.windowId !== undefined) await chrome.action.openPopup({windowId: tab.windowId}); }catch(e2){}
+  }
+}
 
 function hoyISO(){ const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 

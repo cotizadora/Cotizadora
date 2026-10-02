@@ -458,6 +458,12 @@ body.ext .guion[data-contraste="normal"] .gs h4{color:var(--brand)}
 body.ext .guion[data-contraste="normal"] .gs.clave,
 body.ext .guion[data-contraste="normal"] .gs.ojo{border-left-width:4px; border-radius:10px}
 
+/* casilla "Abrir solo al entrar una llamada" */
+.auto-abrir{display:flex;align-items:center;gap:6px;margin:8px 12px 0;font-size:10.5px;font-weight:600;
+  text-transform:none;letter-spacing:0;color:var(--muted);cursor:pointer}
+.auto-abrir input{margin:0;accent-color:var(--brand2);cursor:pointer}
+.auto-abrir[hidden]{display:none}
+
 /* ============ versión web ============ */
 :root{ color-scheme: light }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ color-scheme: dark } }
@@ -599,6 +605,7 @@ body{ padding-block: 14px; padding-inline: 16px; }
       <button id="copiar" type="button">Copiar</button>
     </div>
     <div class="exacto" id="exacto"></div>
+    <label class="auto-abrir" id="lineaAutoAbrir"><input type="checkbox" id="autoAbrir" checked> Abrir solo al entrar una llamada</label>
   </div>
 
   <aside class="guion" id="guion">
@@ -2957,6 +2964,15 @@ if(ESWEB) document.getElementById("cerrarGuion").hidden = true;
 })();
 // Versión a la vista, para saber de un vistazo si es la última
 try{ document.getElementById("verExt").textContent = "v" + chrome.runtime.getManifest().version; }catch(e){}
+// Abrir solo al entrar una llamada (lo hace el service worker); en la web no aplica
+(function(){
+  const c = document.getElementById("autoAbrir"), linea = document.getElementById("lineaAutoAbrir");
+  if(ESWEB){ linea.hidden = true; return; }
+  try{
+    chrome.storage.local.get("autoAbrir", function(r){ c.checked = r.autoAbrir !== false; });
+    c.addEventListener("change", function(){ chrome.storage.local.set({autoAbrir: c.checked}); });
+  }catch(e){ linea.hidden = true; }
+})();
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){

@@ -1581,6 +1581,15 @@ if(ESWEB) document.getElementById("cerrarGuion").hidden = true;
 })();
 // Versión a la vista, para saber de un vistazo si es la última
 try{ document.getElementById("verExt").textContent = "v" + chrome.runtime.getManifest().version; }catch(e){}
+// Abrir solo al entrar una llamada (lo hace el service worker); en la web no aplica
+(function(){
+  const c = document.getElementById("autoAbrir"), linea = document.getElementById("lineaAutoAbrir");
+  if(ESWEB){ linea.hidden = true; return; }
+  try{
+    chrome.storage.local.get("autoAbrir", function(r){ c.checked = r.autoAbrir !== false; });
+    c.addEventListener("change", function(){ chrome.storage.local.set({autoAbrir: c.checked}); });
+  }catch(e){ linea.hidden = true; }
+})();
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){

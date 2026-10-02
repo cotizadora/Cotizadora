@@ -455,3 +455,9 @@ body.ext .guion[data-contraste="normal"] .gs{
 body.ext .guion[data-contraste="normal"] .gs h4{color:var(--brand)}
 body.ext .guion[data-contraste="normal"] .gs.clave,
 body.ext .guion[data-contraste="normal"] .gs.ojo{border-left-width:4px; border-radius:10px}
+
+/* casilla "Abrir solo al entrar una llamada" */
+.auto-abrir{display:flex;align-items:center;gap:6px;margin:8px 12px 0;font-size:10.5px;font-weight:600;
+  text-transform:none;letter-spacing:0;color:var(--muted);cursor:pointer}
+.auto-abrir input{margin:0;accent-color:var(--brand2);cursor:pointer}
+.auto-abrir[hidden]{display:none}
