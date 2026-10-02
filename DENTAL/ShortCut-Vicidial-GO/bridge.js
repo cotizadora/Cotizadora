@@ -417,10 +417,12 @@
 // ===========================================================================
 (function rutDelCliente() {
   'use strict';
-  if (window.__VCA_RUT__) return;
-  window.__VCA_RUT__ = true;
+  // Una copia viva por página: si la anterior quedó desconectada al
+  // actualizar la extensión, ésta la reemplaza (y vuelve a leer el RUT).
+  if (window.__VCA_RUT_VIVO__ && window.__VCA_RUT_VIVO__()) return;
   const host = location.hostname || '';
   const vivo = () => { try { return !!chrome.runtime.id; } catch (e) { return false; } };
+  window.__VCA_RUT_VIVO__ = vivo;
 
   function dvDe(num) {
     let s = 0, m = 2;

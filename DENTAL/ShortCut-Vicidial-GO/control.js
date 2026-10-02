@@ -178,7 +178,7 @@ async function collect() {
     TABS = await scanTabs();
     lastScan = Date.now();
   }
-  const out = { states: [], armed: null, learning: null, settings: {}, ka: null, log: [], engines: [] };
+  const out = { states: [], armed: null, learning: null, settings: {}, ka: null, log: [], engines: [], sinGrabar: [], grabando: false };
   let failed = false;
   const seenStates = new Map();   // firma -> índice en out.states (evita duplicados)
   for (const t of TABS) {
@@ -206,6 +206,8 @@ async function collect() {
       if (n > cur) out.learning = Object.assign({}, r.learning, { __tab: t.id, __host: t.host });
     }
     if (!out.ka && r.ka) out.ka = r.ka;
+    if (r.learning && r.learning.recording) out.grabando = true;
+    if (!r.learning) out.sinGrabar.push(t.id);
     out.engines.push({ tab: t.id, host: t.host, engine: r.engine || null });
     Object.assign(out.settings, r.settings || {});
     (r.log || []).forEach(l => out.log.push('[' + siteName(t.host) + '] ' + l));
@@ -596,6 +598,9 @@ async function refresh() {
 async function refreshInner() {
   const r = await collect();
   engineLog = r.log || engineLog;
+  // Grabación en curso y una pestaña que se conectó después (o no recibió la
+  // orden): se suma a la grabación, para que sus clics también queden.
+  if (r.grabando && r.sinGrabar.length) r.sinGrabar.forEach(id => sendTo(id, { type: 'learnStart' }));
   pintarAvisoMotor(r.engines);
 
   if (!TABS.length) {
@@ -661,6 +666,11 @@ async function refreshInner() {
 // ---- Botones de grabación --------------------------------------------------
 $('#rec').addEventListener('click', async () => {
   $('#name').value = '';
+  // Recién abierto, el panel puede no haber reconocido aún todas las pestañas
+  // (tarda unos segundos): se buscan AHORA, para que la orden llegue también
+  // a GO y no sólo a Vicidial.
+  setStatus('Conectando pestañas…');
+  TABS = await scanTabs(); lastScan = Date.now();
   await broadcast({ type: 'learnStart' });   // graba en TODAS las pestañas
   listSig = ''; refresh();
 });
