@@ -75,18 +75,21 @@ function pintarUF(cent, fecha, fuente){
    guarda en el navegador (localStorage) y no se leen los sitios de las redes. */
 const ESWEB = (typeof chrome === "undefined" || !chrome.storage);
 
-// Pide un JSON con un tope de 8 segundos; null si no responde
-async function traerJSON(url){
+// Pide un JSON con un tope de segundos. Devuelve {json} o {error} con el
+// motivo en palabras, para poder decir por qué no llegó la UF.
+async function traerJSON(url, segundos){
   const ctl = new AbortController();
-  const t = setTimeout(function(){ ctl.abort(); }, 8000);
+  const t = setTimeout(function(){ ctl.abort(); }, (segundos || 8) * 1000);
   try{
     const r = await fetch(url, {cache: "no-store", signal: ctl.signal});
-    return r.ok ? await r.json() : null;
-  }catch(e){ return null; }
+    if(!r.ok) return {error: "error " + r.status};
+    try{ return {json: await r.json()}; }catch(e){ return {error: "respuesta rara (¿bloqueado por la red?)"}; }
+  }catch(e){
+    return {error: ctl.signal.aborted ? "no respondió en " + (segundos || 8) + " s" : "sin conexión"};
+  }
   finally{ clearTimeout(t); }
 }
 
-// Acepta 39485.65 (número o texto) y 39.485,65 (formato chileno)
 function numeroUF(v){
   if(typeof v === "number") return v;
   const t = String(v).trim();
@@ -94,37 +97,54 @@ function numeroUF(v){
   return parseFloat(t);
 }
 
-// La UF del día se trae sola, también en la página web: primero de
-// mindicador.cl y, si no responde, de boostr.cl. Sólo si ninguna responde
-// se usa la última guardada y se ofrece escribirla a mano.
+// La UF del día se trae sola, también en la página web. Se consultan varias
+// fuentes A LA VEZ y se usa la primera que responda con un valor razonable
+// (la UF es una sola, da igual cuál). Sólo si ninguna responde se usa la
+// última guardada y se ofrece escribirla a mano, diciendo qué falló.
+function fechaISO(t){ const iso = String(t || "").slice(0,10).split("-"); return iso.length === 3 ? iso[2]+"-"+iso[1]+"-"+iso[0] : fmt(hoy()); }
+function serieUF(j){ const s = j && j.serie && j.serie[0]; return s && s.valor ? {v: numeroUF(s.valor), f: fechaISO(s.fecha)} : null; }
+const FUENTES_UF = [
+  {nombre: "mindicador", url: "https://mindicador.cl/api/uf", leer: serieUF},
+  {nombre: "boostr", url: "https://api.boostr.cl/economy/uf.json",
+   leer: function(j){ const v = j && j.data && (j.data.value || j.data.valor); return v ? {v: numeroUF(v), f: fmt(hoy())} : null; }},
+  {nombre: "findic", url: "https://findic.cl/api/uf", leer: serieUF}
+];
+let ufPidiendo = 0;
 async function cargarUF(){
-  document.getElementById("ufFecha").textContent = "actualizando…";
-  const m = await traerJSON("https://mindicador.cl/api/uf");
-  const s = m && m.serie && m.serie[0];
-  if(s && s.valor){
-    const cent = Math.round(s.valor*100);
-    const iso = String(s.fecha).slice(0,10).split("-");          // sin desfase de zona horaria
-    const f = iso[2]+"-"+iso[1]+"-"+iso[0];
-    guardar(cent, f);
-    pintarUF(cent, f, "mindicador");
+  const turno = ++ufPidiendo;
+  const fecha = document.getElementById("ufFecha");
+  fecha.textContent = "actualizando…";
+  fecha.title = "";
+  const fallas = [];
+  const hallada = await new Promise(function(listo){
+    let pendientes = FUENTES_UF.length, hecho = false;
+    FUENTES_UF.forEach(function(fu){
+      traerJSON(fu.url, 6).then(function(r){
+        let val = null;
+        try{ val = r.json ? fu.leer(r.json) : null; }catch(e){}
+        if(val && val.v > 20000 && val.v < 100000){
+          if(!hecho){ hecho = true; listo({v: val.v, f: val.f, fuente: fu.nombre}); }
+        }else{
+          fallas.push(fu.nombre + ": " + (r.error || "sin el valor"));
+        }
+        if(--pendientes === 0 && !hecho) listo(null);
+      });
+    });
+  });
+  if(turno !== ufPidiendo) return;   // se pidió otra actualización mientras tanto
+  if(hallada){
+    const cent = Math.round(hallada.v*100);
+    guardar(cent, hallada.f);
+    pintarUF(cent, hallada.f, hallada.fuente);
     document.getElementById("ufManualBox").style.display = "";
     avisarUFVieja();
     return;
   }
-  const b = await traerJSON("https://api.boostr.cl/economy/uf.json");
-  const v = b && b.data && (b.data.value || b.data.valor);
-  if(v){
-    const cent = Math.round(numeroUF(v)*100);
-    const f = fmt(hoy());
-    guardar(cent, f);
-    pintarUF(cent, f, "boostr");
-    document.getElementById("ufManualBox").style.display = "";
-    avisarUFVieja();
-    return;
-  }
+  const motivo = "No se pudo traer la UF. " + fallas.join(" · ");
   const c = leerGuardado();
-  if(c){ pintarUF(c.c, c.f, ESWEB ? "sin conexión · guardada" : "guardado"); }
-  else  { pintarUF(null, "", ""); document.getElementById("ufFecha").textContent = "sin conexión: escríbela aquí abajo"; }
+  if(c){ pintarUF(c.c, c.f, ESWEB ? "sin conexión · guardada" : "guardada (no se pudo actualizar)"); }
+  else  { pintarUF(null, "", ""); fecha.textContent = "no se pudo traer: escríbela abajo"; }
+  fecha.title = motivo;   // pasando el mouse se ve qué falló
   document.getElementById("ufManualBox").style.display = "flex";
   avisarUFVieja();
 }
@@ -1541,6 +1561,8 @@ if(ESWEB) document.getElementById("cerrarGuion").hidden = true;
   const g = document.getElementById("guion"), cab = g.querySelector(".guion-cab");
   try{ new ResizeObserver(function(){ g.style.setProperty("--gb-top", cab.offsetHeight + "px"); }).observe(cab); }catch(e){}
 })();
+// Versión a la vista, para saber de un vistazo si es la última
+try{ document.getElementById("verExt").textContent = "v" + chrome.runtime.getManifest().version; }catch(e){}
 // La pestaña de mapeo necesita leer otros sitios: en la web no aplica
 if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
 almacen.leer("prefs", function(v){
