@@ -9,6 +9,11 @@
    ============================================================ */
 (function(){
   if(window.top !== window) return;       // sólo en la página principal; los marcos se leen desde aquí
+  // Al actualizar la extensión, la copia anterior queda desconectada (ya no
+  // puede avisar). El service worker inyecta esta de nuevo en la pestaña
+  // abierta; si la anterior sigue viva, no se duplica.
+  if(window.__capturaDentalViva && window.__capturaDentalViva()) return;
+  window.__capturaDentalViva = function(){ try{ return !!chrome.runtime.id; }catch(e){ return false; } };
   let ultimo = "";
 
   function leerCampos(doc, campos){

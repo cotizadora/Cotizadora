@@ -1601,6 +1601,8 @@ almacen.leer("prefs", function(v){
 almacen.leer("uf", function(u){
   if(u){ cacheUF = u; if(UF === null) pintarUF(u.c, u.f, "guardada"); }
   restaurarEstado(function(){ cargarUF(); sincronizarVicidial(); });
+  // Que la vigilancia de llamadas esté conectada (para abrirse sola la próxima vez)
+  if(!ESWEB){ try{ chrome.runtime.sendMessage({tipo: "conectarCaptura"}, function(){ void chrome.runtime.lastError; }); }catch(e){} }
 });
 marcarEnvio();
 pintarBloqueCargas();

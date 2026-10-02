@@ -89,6 +89,21 @@ chrome.runtime.onMessage.addListener(function(msg, sender, responder){
 
 // Al instalar o actualizar se lee de inmediato; al abrir el navegador, sólo
 // si lo guardado ya venció.
+/* La vigilancia de Vicidial (vicidial-captura.js) se reconecta sola en la
+   pestaña ya abierta al instalar, actualizar o abrir el navegador, y cada vez
+   que se abre el cotizador. Sin esto, tras actualizar la extensión no se
+   enteraba de las llamadas hasta recargar Vicidial. No recarga nada. */
+async function conectarCaptura(){
+  let tabs = [];
+  try{ tabs = await chrome.tabs.query({url: "https://vicidial.recaall.simtastic.cl/agc/*"}); }catch(e){}
+  for(const t of tabs){
+    try{ await chrome.scripting.executeScript({target: {tabId: t.id}, files: ["vicidial-captura.js"]}); }catch(e){}
+  }
+}
+chrome.runtime.onInstalled.addListener(conectarCaptura);
+chrome.runtime.onStartup.addListener(conectarCaptura);
+chrome.runtime.onMessage.addListener(function(msg){ if(msg && msg.tipo === "conectarCaptura") conectarCaptura(); });
+
 chrome.runtime.onInstalled.addListener(function(d){
   if(d.reason === "install" || d.reason === "update") pedirLectura(true);
 });
