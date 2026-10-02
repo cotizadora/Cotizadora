@@ -143,8 +143,16 @@ async function scanTabs() {
 
   const found = [];
   for (const t of cands) {
-    const { ok, err } = await pingTab(t.id);
+    let { ok, err } = await pingTab(t.id);
     let host = ''; try { host = new URL(t.url || '').hostname; } catch (e) {}
+    // Pestaña de Vicidial/GO que no responde (abierta antes de instalar o
+    // actualizar la extensión): se conecta sola, sin recargarla.
+    if (!ok && SITE_RE.test(t.url || '')) {
+      try { await chrome.scripting.executeScript({ target: { tabId: t.id }, files: ['bridge.js'] }); } catch (e) {}
+      try { await chrome.scripting.executeScript({ target: { tabId: t.id, allFrames: true }, world: 'MAIN', files: ['content.js'] }); } catch (e) {}
+      ({ ok, err } = await pingTab(t.id));
+      if (ok) diag.lines.push('  (conectada sin recargar)');
+    }
     if (ok) {
       found.push({ id: t.id, host: host, url: t.url || '' });
       diag.lines.push('  OK    tab ' + t.id + '  ' + siteName(host) + '  ' + host);

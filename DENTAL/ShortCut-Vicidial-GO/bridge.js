@@ -450,12 +450,15 @@
       if (!vivo()) return;
       const c = campos();
       let num = '', dv = '';
+      // Misma regla que el Cotizador Dental: si no viene el DV aparte, un RUT de
+      // más de 7 caracteres ya trae el DV al final (107038973 = 10.703.897-3).
       const crudo = c.rut || c.vendor_lead_code || '';
       const limpio = String(crudo).toUpperCase().replace(/[^0-9K]/g, '');
-      if (c.rut) { num = limpio.replace(/K/g, ''); dv = String(c.dv || '').toUpperCase().replace(/[^0-9K]/g, ''); }
-      else if (/[-]/.test(crudo) && limpio.length >= 2) { num = limpio.slice(0, -1); dv = limpio.slice(-1); }
-      else num = limpio.replace(/K/g, '');
-      if (num.length < 6 || num.length > 9) return;
+      dv = c.rut ? String(c.dv || '').toUpperCase().replace(/[^0-9K]/g, '') : '';
+      num = limpio;
+      if (!dv && limpio.length > 7) { num = limpio.slice(0, -1); dv = limpio.slice(-1); }
+      num = num.replace(/K/g, '');
+      if (num.length < 6 || num.length > 8) return;
       if (!dv) dv = dvDe(num);
       const nombre = [c.nombres || c.first_name || '', c.apellido_pat || c.last_name || ''].join(' ').replace(/\s+/g, ' ').trim();
       const dato = { num: num, dv: dv, rut: puntos(num) + '-' + dv, nombre: nombre, lead: c.lead_id || '', t: Date.now() };
