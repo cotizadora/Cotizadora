@@ -354,3 +354,104 @@ td.off{color:var(--muted)}
 }
 .guion.guiada .paso.actual .nota{ color:inherit; opacity:.8 }
 @media (prefers-reduced-motion: reduce){ .guion.guiada .paso{ transition:none } }
+
+/* ============ módulos por jerarquía (sólo en la extensión) ============
+   Cada bloque de información es una tarjeta redondeada con su propio tono,
+   de más a menos importante:
+     1. Cliente leído de Vicidial ........ azul (quién es)
+     2. Tipificación de la llamada ....... verde menta
+     3. Plan elegido y cotización ........ blanco sobre gris (lo que se vende)
+     4. Total a cobrar ................... azul marino suave, el más marcado
+     5. Clínicas por comuna .............. turquesa (información de apoyo)
+     6. Guardado / avisos ................ arena (estado)
+   El scroll vive dentro de cada columna, para que el popup nunca pase del
+   máximo de Chrome (800 × 600) ni muestre barras propias. */
+body.ext{
+  --m-fondo:#eef2f7;
+  --m-tarjeta:#fff; --m-borde:#d5dde8;
+  --m-cli:#e7effb; --m-cli-borde:#9db8de; --m-cli-acento:#123a6d;
+  --m-tip:#e6f5ec; --m-tip-borde:#a9d8bd;
+  --m-total:#e4ebf6; --m-total-borde:#8fa7c9;
+  --m-clin:#e3f3f1; --m-clin-borde:#9fd1c9;
+  --m-est:#faf3e3; --m-est-borde:#e5d3a6;
+  --m-sombra:0 1px 2px rgba(12,28,56,.07), 0 2px 6px rgba(12,28,56,.06);
+  overflow:hidden;
+}
+@media (prefers-color-scheme:dark){ body.ext{
+  --m-fondo:#10161e;
+  --m-tarjeta:#18212c; --m-borde:#2a3644;
+  --m-cli:#16243a; --m-cli-borde:#2e4a72; --m-cli-acento:#8ab4ff;
+  --m-tip:#122a1f; --m-tip-borde:#24513a;
+  --m-total:#172338; --m-total-borde:#36507a;
+  --m-clin:#10282a; --m-clin-borde:#24544f;
+  --m-est:#2a2416; --m-est-borde:#5a4a22;
+  --m-sombra:0 1px 3px rgba(0,0,0,.4);
+}}
+body.ext .app{max-height:584px}
+body.ext .izq{
+  max-height:582px; overflow-y:auto; scrollbar-width:thin;
+  background:var(--m-fondo); padding-bottom:10px;
+}
+body.ext .guion{max-height:582px}
+
+/* 1. cliente */
+body.ext .cliente{
+  margin:8px 8px 0; padding:7px 10px 7px 11px; border:1px solid var(--m-cli-borde);
+  border-left:4px solid var(--m-cli-acento); border-radius:10px;
+  background:linear-gradient(135deg,var(--m-cli) 0%,var(--m-tarjeta) 140%);
+  box-shadow:var(--m-sombra);
+}
+body.ext .cliente b{color:var(--m-cli-acento)}
+/* 2. tipificación */
+body.ext .tipif-cli{
+  margin:6px 8px 0; padding:6px 8px; border:1px solid var(--m-tip-borde);
+  border-radius:10px; background:var(--m-tip); box-shadow:var(--m-sombra);
+}
+body.ext .uf-manual{margin:6px 8px 0; border-radius:10px; border:1px solid var(--m-est-borde)}
+/* 3. plan elegido y cotización */
+body.ext .resumen{
+  margin:8px 8px 0; padding:8px 11px; border:1px solid var(--m-borde); border-radius:10px;
+  background:var(--m-tarjeta); box-shadow:var(--m-sombra);
+}
+body.ext .campo{
+  margin:8px 8px 0; padding:9px 10px; border:1px solid var(--m-borde); border-radius:10px;
+  background:var(--m-tarjeta); box-shadow:var(--m-sombra);
+}
+body.ext .campo > label.check{margin:0; border:0; background:none; padding:2px 0}
+body.ext .campo:has(> label.check input:checked){border-color:var(--brand2)}
+body.ext .aviso{margin:8px 8px 0; border-radius:10px}
+body.ext table{
+  width:calc(100% - 16px); margin:8px 8px 0; border-collapse:separate; border-spacing:0;
+  background:var(--m-tarjeta); border:1px solid var(--m-borde); border-radius:10px;
+  overflow:hidden; box-shadow:var(--m-sombra);
+}
+body.ext tr:last-child td{border-bottom:0}
+/* 5. clínicas por comuna */
+body.ext .verif{
+  margin:8px 8px 0; padding:8px; border:1px solid var(--m-clin-borde); border-radius:10px;
+  background:var(--m-clin); box-shadow:var(--m-sombra);
+}
+body.ext .verif .abrir{border:0; padding:2px 2px; color:#0f5c55}
+body.ext .verif .clin{background:var(--m-tarjeta); border-radius:0 8px 8px 0}
+body.ext .verif .comuna{background:var(--m-tarjeta)}
+/* 6. guardado */
+body.ext .guardado{
+  margin:8px 8px 0; border:1px solid var(--m-est-borde); border-radius:10px; background:var(--m-est);
+}
+/* 4. total */
+body.ext .total{
+  margin:8px 8px 0; padding:9px 11px; border:1px solid var(--m-total-borde); border-top-width:1px;
+  border-radius:10px; background:var(--m-total); box-shadow:var(--m-sombra);
+}
+body.ext .exacto{margin:4px 12px 0}
+
+/* script: cada sección es una tarjeta (sólo en contraste Normal; los demás
+   modos de lectura quedan como estaban, que es lo que se pidió para leer) */
+body.ext .guion[data-contraste="normal"] .guion-cuerpo{padding:.2em 9px 1.2em}
+body.ext .guion[data-contraste="normal"] .gs{
+  margin:.7em 0 0; padding:.55em .8em .45em; background:var(--m-tarjeta);
+  border:1px solid var(--m-borde); border-radius:10px; box-shadow:var(--m-sombra);
+}
+body.ext .guion[data-contraste="normal"] .gs h4{color:var(--brand)}
+body.ext .guion[data-contraste="normal"] .gs.clave,
+body.ext .guion[data-contraste="normal"] .gs.ojo{border-left-width:4px; border-radius:10px}
