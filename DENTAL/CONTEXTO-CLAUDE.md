@@ -18,7 +18,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 - **INSTALAR.bat:** descarga todo lo de `DENTAL/` de esa rama a `Documentos\DENTAL` en mi PC. No borra nada mío.
 - **Pull request abierto:** [cotizadora/Cotizadora#1](https://github.com/cotizadora/Cotizadora/pull/1). Al hacer merge, GitHub Pages publica la página web en https://cotizadora.github.io/Cotizadora/DENTAL/cotizador-web.html. Todavía no lo he aprobado.
 
-## 1. Cotizador Dental Bci (extensión) — v3.0.9
+## 1. Cotizador Dental Bci (extensión) — v3.1.0
 
 - **En mi PC:** `Documentos\DENTAL\extension`
 - **Paquete:** `DENTAL/extension-cotizador-dental.zip`
@@ -31,6 +31,7 @@ Qué hace:
 - **Se abre solo al entrar una llamada (v3.0.5):** cuando cae un lead nuevo en Vicidial, el cotizador se despliega aunque esté en otra pestaña (una vez por cliente; Chrome tiene que estar al frente). Se apaga con la casilla "Abrir solo al entrar una llamada" al pie del cotizador. Requiere Chrome 127 o más nuevo (el PC del trabajo tiene Chrome 154). Desde la v3.0.6 la vigilancia de Vicidial se reconecta sola tras actualizar la extensión (antes había que recargar Vicidial para que se abriera solo).
 - **Más rápido (v3.0.7):** el popup aparece de una vez con su ancho final (sin animación al abrir). Al caer una llamada se detecta el lead en ~0,4 s (antes cada 3 s y esperando el nombre), se trae al frente la pestaña de Vicidial y se abre el cotizador; los datos del FORM que llegan después se completan solos en los primeros 10 s sin pisar lo editado a mano.
 - **Barra del script compacta + atajos de tipificación (v3.0.8):** la barra del script es una sola fila de íconos (A↓ A↑ letra, 4 muestras de color para el contraste, ¶ ▲ n/82 ▼ lectura guiada). Debajo, 2 filas × 3 botones con las tipificaciones grabadas en ShortCut-Vicidial-GO, leídas de la pestaña de Vicidial (localStorage `vca_states`) sin volver a grabarlas; las pausas no salen. Un clic las deja en cola como el ▶ de ShortCut (escribe `vca2_armed`); otro clic cancela. Muestra las 6 más usadas desde el cotizador. Colores por nombre: rojo (no le interesa, equivocado, ya tiene), ámbar (lo pensará, agendar, buzón), verde (interesado, venta), azul (otros).
+- **Cuenta regresiva para tipificar (v3.1.0):** el cotizador también trae el reloj (en `vicidial-captura.js`). Aparece SOLO en la página de Vicidial, arriba a la derecha, al abrirse el formulario de tipificación; no hay que abrir ninguna extensión. Si ShortCut-Vicidial-GO está cargado, se ve su reloj y el del cotizador se oculta (comparten límite `vca_tipif_lim` y posición). Ofrece calibrar cuando el formulario dura más que el límite.
 - **📊 Historial de clientes:** planilla tipo Excel con las mismas opciones de la cotizadora de Equifax. Registra cada cliente que cae, permite editar, tipificar y agendar, y hace respaldos automáticos (internos y un archivo diario en `Descargas/DENTAL-respaldos`).
 - **UF del día (v3.0.1):** consulta mindicador.cl, api.boostr.cl y findic.cl al mismo tiempo, con 6 s de tope, y usa la primera que responde. Si ninguna responde, pide escribirla a mano; el motivo aparece al pasar el mouse por "no se pudo traer". La versión se ve chica en la barra de la UF.
 
