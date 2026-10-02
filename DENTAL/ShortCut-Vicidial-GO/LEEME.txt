@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.0.5
+ShortCut-Vicidial-GO 1.0.6
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.0.5).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.0.6).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.

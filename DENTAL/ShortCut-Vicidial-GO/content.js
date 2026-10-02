@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ShortCut-Vicidial-GO
 // @namespace    shortcut-vicidial-go
-// @version      1.0.5
+// @version      1.0.6
 // @description  Pre-selecciona un estado de agente y lo aplica automaticamente al cortar la llamada (replay del clic real). Autoconfigurable + modo debug.
 // @author       Pausa Vocal
 // @match        *://vicidial.recaall.simtastic.cl/*
@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.0.5';
+  const VCA_VERSION = '1.0.6';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -1508,8 +1508,14 @@
       if (!vigente()) return;
       const f = this.formulario();
       const clave = f ? (f.getAttribute('src') || 'form') : '';
-      if (clave && clave !== this.clave) { this.clave = clave; this.iniciar(); }
-      else if (!clave && this.clave) { this.clave = ''; this.cerrado(); }
+      if (clave && clave !== this.clave) {
+        this.clave = clave; this.iniciar();
+        log('Reloj de tipificación: se abrió el formulario → cuenta de ' + this.limite() + ' s (' + String(clave).slice(0, 80) + ')');
+      } else if (!clave && this.clave) {
+        this.clave = '';
+        if (this.activo) log('Reloj de tipificación: el formulario se cerró a los ' + Math.round((Date.now() - this.t0) / 1000) + ' s' + (this.enviado ? '' : ' sin tipificar'));
+        this.cerrado();
+      }
       if (this.activo) this.pintar();
     },
     iniciar() {
@@ -1519,6 +1525,7 @@
     tipificado() {
       if (!this.activo) return;
       this.enviado = true; this.activo = false;
+      log('Reloj de tipificación: tipificado a los ' + Math.round((Date.now() - this.t0) / 1000) + ' s');
       this.mensaje('✓ Tipificado a los ' + Math.round((Date.now() - this.t0) / 1000) + ' s', '#166534', 2500);
     },
     cerrado() {
