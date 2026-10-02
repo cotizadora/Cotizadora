@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ShortCut-Vicidial-GO
 // @namespace    shortcut-vicidial-go
-// @version      1.0.7
+// @version      1.0.8
 // @description  Pre-selecciona un estado de agente y lo aplica automaticamente al cortar la llamada (replay del clic real). Autoconfigurable + modo debug.
 // @author       Pausa Vocal
 // @match        *://vicidial.recaall.simtastic.cl/*
@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.0.7';
+  const VCA_VERSION = '1.0.8';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -339,6 +339,14 @@
     return null;
   }
 
+  // RUT del cliente que está en Vicidial (lo deja aquí el puente de la extensión)
+  function clienteActual() { const c = Store.get('vca_cliente', null); return c && c.num ? c : null; }
+  function rutConFormato(c, fmt) {
+    const f = fmt || { puntos: true, guion: true };
+    const num = f.puntos ? String(c.num).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : String(c.num);
+    return num + (f.guion ? '-' : '') + c.dv;
+  }
+
   // Espera hasta que el paso se pueda resolver Y este clicable, o venza el timeout.
   async function waitFor(desc, timeout) {
     const t0 = Date.now();
@@ -401,9 +409,19 @@
     } else if (kind === 'input') {
       const el = await waitFor(st, s.stepTimeoutMs);
       if (!el) { log(tag + ' campo de texto no encontrado'); return false; }
-      setNativeValue(el, st.value);
+      let valor = st.value;
+      if (st.dyn === 'rut') {
+        const cli = clienteActual();
+        if (!cli || !cli.num) { log(tag + ' no hay RUT del cliente: abre Vicidial con el cliente en pantalla'); return false; }
+        valor = rutConFormato(cli, st.fmt);
+      }
+      try { el.focus(); } catch (e) {}
+      setNativeValue(el, valor);
       fireInputChange(el);
-      log(tag + ' -> texto "' + String(st.value).slice(0, 30) + '"');
+      // Formularios con máscara (Angular, PrimeNG): también teclado y salida del campo
+      try { el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter' })); } catch (e) {}
+      try { el.dispatchEvent(new Event('blur')); el.dispatchEvent(new FocusEvent('focusout', { bubbles: true })); } catch (e) {}
+      log(tag + ' -> texto "' + String(valor).slice(0, 30) + '"' + (st.dyn === 'rut' ? ' (RUT del cliente)' : ''));
 
     } else if (kind === 'check') {
       const el = await waitFor(st, s.stepTimeoutMs);
@@ -1003,7 +1021,20 @@
         pushStep(desc, el.type + ' = ' + desc.checked);
       } else {
         desc.kind = 'input'; desc.value = el.value; desc.text = '';
-        pushStep(desc, 'texto = "' + String(el.value).slice(0, 30) + '"');
+        // ¿Es el RUT del cliente que está en Vicidial (o escribiste "RUT")?
+        // Entonces el paso no guarda ese número: al repetirlo usará el RUT del
+        // cliente de ese momento, con el mismo formato (puntos y guion).
+        const v = String(el.value || '').trim();
+        const cli = clienteActual();
+        const soloRut = v.toUpperCase().replace(/[^0-9K]/g, '');
+        const palabra = /^\{?rut\}?$/i.test(v);
+        if (palabra || (cli && soloRut && soloRut === (cli.num + cli.dv).toUpperCase())) {
+          desc.dyn = 'rut';
+          desc.fmt = palabra ? { puntos: true, guion: true } : { puntos: /\./.test(v), guion: /-/.test(v) };
+          pushStep(desc, 'texto = RUT del cliente (se toma de Vicidial al repetir)');
+        } else {
+          pushStep(desc, 'texto = "' + String(el.value).slice(0, 30) + '"');
+        }
       }
     }
   }, true);

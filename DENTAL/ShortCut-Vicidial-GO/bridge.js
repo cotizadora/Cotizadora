@@ -408,3 +408,69 @@
   if (document.body) build();
   else document.addEventListener('DOMContentLoaded', build);
 })();
+
+// ===========================================================================
+//  RUT DEL CLIENTE: de Vicidial a GO
+//  En Vicidial se lee el cliente en pantalla (también la pestaña FORM, que es
+//  un marco del mismo sitio) y se deja en chrome.storage. En GO se copia a su
+//  localStorage, donde el motor lo usa para los pasos "RUT del cliente".
+// ===========================================================================
+(function rutDelCliente() {
+  'use strict';
+  if (window.__VCA_RUT__) return;
+  window.__VCA_RUT__ = true;
+  const host = location.hostname || '';
+  const vivo = () => { try { return !!chrome.runtime.id; } catch (e) { return false; } };
+
+  function dvDe(num) {
+    let s = 0, m = 2;
+    for (let i = num.length - 1; i >= 0; i--) { s += Number(num[i]) * m; m = m === 7 ? 2 : m + 1; }
+    const r = 11 - (s % 11);
+    return r === 11 ? '0' : r === 10 ? 'K' : String(r);
+  }
+  function puntos(num) { return num.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+
+  if (/vicidial\.recaall\.simtastic\.cl/i.test(host)) {
+    function campos() {
+      const c = {};
+      const leer = (doc) => {
+        if (!doc) return;
+        doc.querySelectorAll('input, select, textarea').forEach((e) => {
+          const k = String(e.name || e.id || '').toLowerCase();
+          const v = String(e.value || '').trim();
+          if (k && v && v !== '0' && !c[k]) c[k] = v;
+        });
+        doc.querySelectorAll('iframe, frame').forEach((f) => { try { leer(f.contentDocument); } catch (e) {} });
+      };
+      leer(document);
+      return c;
+    }
+    let ultimo = '';
+    function publicar() {
+      if (!vivo()) return;
+      const c = campos();
+      let num = '', dv = '';
+      const crudo = c.rut || c.vendor_lead_code || '';
+      const limpio = String(crudo).toUpperCase().replace(/[^0-9K]/g, '');
+      if (c.rut) { num = limpio.replace(/K/g, ''); dv = String(c.dv || '').toUpperCase().replace(/[^0-9K]/g, ''); }
+      else if (/[-]/.test(crudo) && limpio.length >= 2) { num = limpio.slice(0, -1); dv = limpio.slice(-1); }
+      else num = limpio.replace(/K/g, '');
+      if (num.length < 6 || num.length > 9) return;
+      if (!dv) dv = dvDe(num);
+      const nombre = [c.nombres || c.first_name || '', c.apellido_pat || c.last_name || ''].join(' ').replace(/\s+/g, ' ').trim();
+      const dato = { num: num, dv: dv, rut: puntos(num) + '-' + dv, nombre: nombre, lead: c.lead_id || '', t: Date.now() };
+      const firma = dato.rut + '|' + dato.lead;
+      if (firma === ultimo) return;
+      ultimo = firma;
+      try { chrome.storage.local.set({ vcaCliente: dato }); } catch (e) {}
+    }
+    setInterval(publicar, 1500);
+    publicar();
+  } else if (/go\.bciseguros\.cl/i.test(host)) {
+    const copiar = (d) => { try { if (d) localStorage.setItem('vca_cliente', JSON.stringify(d)); } catch (e) {} };
+    try {
+      chrome.storage.local.get('vcaCliente', (r) => copiar(r && r.vcaCliente));
+      chrome.storage.onChanged.addListener((ch) => { if (ch.vcaCliente) copiar(ch.vcaCliente.newValue); });
+    } catch (e) {}
+  }
+})();

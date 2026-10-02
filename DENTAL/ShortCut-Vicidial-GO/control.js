@@ -792,6 +792,17 @@ async function pintarAvisoMotor(engines) {
   } finally { avisoEnCurso = false; }
 }
 
+// RUT del cliente que está en Vicidial (lo usan los pasos "RUT del cliente" de GO)
+function pintarCliRut(c) {
+  const el = $('#cliRut');
+  if (!el) return;
+  el.textContent = c && c.rut ? '🪪 Cliente en Vicidial: ' + c.rut + (c.nombre ? ' · ' + c.nombre : '') : '';
+}
+try {
+  chrome.storage.local.get('vcaCliente', r => pintarCliRut(r && r.vcaCliente));
+  chrome.storage.onChanged.addListener(ch => { if (ch.vcaCliente) pintarCliRut(ch.vcaCliente.newValue); });
+} catch (e) {}
+
 // ---- Init ------------------------------------------------------------------
 function showStaleNotice() {
   const el = $('#list');
