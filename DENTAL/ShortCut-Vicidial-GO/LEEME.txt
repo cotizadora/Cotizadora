@@ -1,0 +1,65 @@
+ShortCut-Vicidial-GO 1.0.3
+==========================
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.0.3).
+Graba una vez y repite con un clic:
+  - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
+    disponible y disposiciones de la llamada.
+  - GO Bci (go.bciseguros.cl): tipificaciones.
+Basado en ShortCut-VocalCRM 4.1.0. Es una extensión aparte: puede convivir
+con ShortCut-VocalCRM y con el Cotizador Dental Bci.
+
+INSTALAR
+1. Ejecuta INSTALAR.bat (el de la carpeta DENTAL): deja la extensión en
+   Documentos\DENTAL\ShortCut-Vicidial-GO
+2. chrome://extensions (o edge://extensions) -> activa "Modo de desarrollador".
+3. "Cargar descomprimida" -> elige la carpeta ShortCut-Vicidial-GO
+   (la que tiene manifest.json).
+4. Ancla el ícono ⚡ a la barra.
+ACTUALIZAR: vuelve a ejecutar INSTALAR.bat y pulsa 🔄 en la tarjeta de la
+extensión en chrome://extensions. Tus atajos no se pierden.
+Si Vicidial ya estaba abierto, NO se recarga (recargar la pantalla del
+agente puede sacarte de la sesión). Desde la 1.0.3, al abrir el panel el
+motor nuevo se conecta solo en la página ya abierta y reemplaza al
+anterior. Si el panel muestra "⏳ Conectando el motor..." por más de unos
+segundos, recién ahí recarga Vicidial (F5) sin llamada en curso.
+Chrome pedirá permiso para "leer y cambiar datos de los sitios": hace falta
+porque el formulario de tipificación de Vicidial viene de otro servidor.
+
+GRABAR UN ATAJO
+1. Ícono ⚡ -> ⚙️ Configuración -> ⏺ Grabar nuevo atajo.
+2. Haz los clics en Vicidial o en GO tal como siempre
+   (ej.: Pausa -> BANO - Baño).
+3. ⏹ Detener, ponle nombre y guarda.
+
+USARLO
+- Pincha el atajo (▶).
+- VICIDIAL:
+    * Disponible: se aplica al tiro.
+    * Con un cliente en línea: queda EN COLA (⏳ y el botón pasa a ■) y se
+      aplica solo en cuanto se pueda:
+        - un atajo de disposición, apenas aparece la pantalla de disposición;
+        - una pausa, cuando terminas la disposición.
+      ■ cancela lo que está en cola.
+    * Reloj de pausas: al entrar en pausa aparece un cronómetro abajo a la
+      derecha con el nombre de la pausa. Colación avisa a los 60 min y Break
+      a los 15 (se cambia en content.js, PAUSE_LIMITS).
+- GO Bci: el ▶ tipifica en el momento; nunca queda nada en cola (para no
+  tipificar al cliente equivocado). Con ✏️ eliges el color: verde
+  (contacto) o rojo (no contacto).
+
+TIPIFICAR EN EL FORMULARIO DE VICIDIAL (Corte Llamadas BCISALUR)
+El formulario viene de OTRO servidor, dentro de un marco. Hasta la 1.0.1
+los menús de ese marco no se grababan; desde la 1.0.2 sí (y desde la 1.0.3
+aunque Vicidial no se haya recargado). Los atajos
+grabados antes NO tienen los menús: bórralos y grábalos de nuevo.
+Graba, con el cliente en línea, exactamente lo que haces:
+  (Colgar al Cliente, si lo usas) -> SCRIPT -> Tipo de llamada ->
+  Tipificación -> Sub-tipificación -> Cortar y Tipificar.
+Mientras grabas, el contador del panel debe subir con cada menú. Al pasar
+el mouse sobre el atajo guardado debe decir 5 pasos (o 6 con "Colgar").
+Si algo falla: ⚙️ Configuración -> 📋 Copiar registro y pégamelo; ahí sale el
+marco del formulario y en qué paso se detuvo.
+
+RESPALDAR / REPARTIR
+⚙️ Configuración -> Exportar guarda tus atajos en un archivo; Importar los
+carga en otro equipo.

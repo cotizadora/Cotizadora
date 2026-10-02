@@ -134,6 +134,7 @@ try {
   Write-Host '    calculadora-edad.html   el cotizador, doble clic'
   Write-Host '    PRODUCTO.md             el analisis del producto'
   Write-Host '    extension\              la extension de Chrome y Edge'
+  Write-Host '    ShortCut-Vicidial-GO\   atajos para Vicidial y GO (recarga la extension con su boton)'
   Write-Host '    insumos\                material de referencia'
   Write-Host ''
   Write-Host '  Tus documentos siguen donde estaban.'
