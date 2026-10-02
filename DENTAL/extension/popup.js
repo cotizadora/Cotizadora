@@ -1459,7 +1459,9 @@ async function sincronizarVicidial(){
   if(nuevaLlamada) reiniciar();
   // Las cargas del FORM se cargan una vez por llamada: si después el
   // ejecutivo las cambia a mano, no se le pisan al reabrir.
-  const yaAplicadas = previo && previo.id === c.lead && (previo.aplicado || previo.cargas);
+  const mismo = previo && previo.id === c.lead;
+  const yaAplicadas = mismo && (previo.aplicado || previo.cargas);
+  const yaComuna = mismo && (previo.comuna || (previo.aplicado && previo.comuna === undefined));
   if(c.cargas.length && !yaAplicadas){
     nCargas = Math.min(MAX_CARGAS, c.cargas.length);
     const cont = document.getElementById("hijos");
@@ -1473,16 +1475,18 @@ async function sincronizarVicidial(){
     calcular();
     guardarEstado();
   }
-  if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now(), aplicado: true});
+  const comCli = nombrePropio(c.comuna || c.ciudad);
+  if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now(),
+    aplicado: !!(yaAplicadas || c.cargas.length), comuna: !!(yaComuna || comCli)});
   cliente = c;
   pintarCliente();
   registrarEnHistorial(c);
   // La comuna del cliente queda lista en el buscador de sucursales
-  const com = nombrePropio(c.comuna || c.ciudad);
+  const com = comCli;
   const campo = document.getElementById("comuna");
   // Al entrar la llamada, el buscador de sucursales queda abierto y con la
   // búsqueda hecha en la comuna del cliente (una vez por llamada)
-  if(com && (!yaAplicadas || !campo.value)){
+  if(com && (!yaComuna || !campo.value)){
     campo.value = com;
     document.getElementById("panelClin").hidden = false;
     document.getElementById("abrirClin").classList.add("open");
@@ -1600,7 +1604,14 @@ almacen.leer("prefs", function(v){
 });
 almacen.leer("uf", function(u){
   if(u){ cacheUF = u; if(UF === null) pintarUF(u.c, u.f, "guardada"); }
-  restaurarEstado(function(){ cargarUF(); sincronizarVicidial(); });
+  restaurarEstado(function(){
+    cargarUF(); sincronizarVicidial();
+    // Ya en su estado inicial: desde aquí abrir/cerrar el script sí se anima
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ document.getElementById("app").classList.remove("sin-anim"); }); });
+    // Si se abrió apenas cayó la llamada, los datos del FORM pueden llegar un
+    // poco después: se vuelve a leer Vicidial unas veces en los primeros segundos.
+    [1500, 3500, 6500, 10000].forEach(function(ms){ setTimeout(sincronizarVicidial, ms); });
+  });
   // Que la vigilancia de llamadas esté conectada (para abrirse sola la próxima vez)
   if(!ESWEB){ try{ chrome.runtime.sendMessage({tipo: "conectarCaptura"}, function(){ void chrome.runtime.lastError; }); }catch(e){} }
 });

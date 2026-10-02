@@ -121,7 +121,7 @@ chrome.runtime.onStartup.addListener(function(){ pedirLectura(false); });
 chrome.runtime.onMessage.addListener(function(msg, sender, responder){
   if(!msg || msg.tipo !== "capturaVicidial") return;
   const c = clienteDesdeCampos(msg.campos || {}, "");
-  abrirAlEntrarLlamada(c.lead, sender && sender.tab);
+  abrirAlEntrarLlamada(c.lead, sender && sender.tab);   // respaldo, por si no llegó el aviso rápido
   HDB.capturar(c, {ejecutivo: msg.usuario || ""})
     .then(function(r){ responder({ok: true, id: r && r.id}); })
     .catch(function(e){ responder({ok: false, error: String(e && e.message || e)}); });
@@ -130,24 +130,31 @@ chrome.runtime.onMessage.addListener(function(msg, sender, responder){
 
 /* ============================================================
    ABRIR EL COTIZADOR SOLO CUANDO ENTRA UNA LLAMADA
-   Cuando cae un lead nuevo en Vicidial se abre el popup, esté el
-   ejecutivo en la pestaña que esté. Una vez por lead: si se cierra,
+   Cuando cae un lead nuevo en Vicidial se trae al frente su pestaña y
+   se abre el popup, esté el ejecutivo en la pestaña que esté. Una vez por lead: si se cierra,
    no vuelve a abrirse hasta el próximo cliente. Se apaga desde la
    casilla "Abrir solo al entrar una llamada" del cotizador.
-   Chrome sólo lo abre si su ventana está al frente: no se le quita
-   el foco a otro programa.
+   Para poder abrirlo, la ventana de Chrome se pone al frente.
    ============================================================ */
+let leadEnCurso = "";
 async function abrirAlEntrarLlamada(lead, tab){
-  if(!lead || !chrome.action || !chrome.action.openPopup) return;
+  if(!lead || lead === leadEnCurso) return;
+  leadEnCurso = lead;   // en memoria: el aviso rápido y el respaldo no compiten
   const g = await chrome.storage.local.get(["autoAbrir", "ultimoLeadAbierto"]);
   if(g.autoAbrir === false || g.ultimoLeadAbierto === lead) return;
   await chrome.storage.local.set({ultimoLeadAbierto: lead});
-  try{ await chrome.action.openPopup(); }
-  catch(e){
-    // Si la ventana activa no es la de Vicidial, se intenta en la de Vicidial
-    try{ if(tab && tab.windowId !== undefined) await chrome.action.openPopup({windowId: tab.windowId}); }catch(e2){}
+  // Primero se trae la pestaña de Vicidial al frente, para leer al cliente
+  if(tab && tab.id !== undefined){
+    try{ await chrome.tabs.update(tab.id, {active: true}); }catch(e){}
+    try{ await chrome.windows.update(tab.windowId, {focused: true}); }catch(e){}
   }
+  if(!chrome.action || !chrome.action.openPopup) return;
+  try{ await chrome.action.openPopup(tab && tab.windowId !== undefined ? {windowId: tab.windowId} : undefined); }
+  catch(e){ try{ await chrome.action.openPopup(); }catch(e2){} }
 }
+chrome.runtime.onMessage.addListener(function(msg, sender){
+  if(msg && msg.tipo === "llamadaNueva") abrirAlEntrarLlamada(String(msg.lead || ""), sender && sender.tab);
+});
 
 function hoyISO(){ const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 

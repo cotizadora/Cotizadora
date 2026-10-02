@@ -53,4 +53,18 @@
   }
   setInterval(mirar, 3000);
   mirar();
+
+  // Aviso inmediato de llamada nueva: apenas cambia el lead en pantalla (sin
+  // esperar nombre ni FORM) se avisa, para traer la pestaña y abrir el cotizador.
+  let leadVisto = "";
+  function vigilarLlamada(){
+    const e = document.querySelector('input[name="lead_id"], #lead_id');
+    const l = e ? String(e.value || "").trim() : "";
+    if(!l || l === "0" || l === leadVisto) return;
+    leadVisto = l;
+    try{ chrome.runtime.sendMessage({tipo: "llamadaNueva", lead: l}, function(){ void chrome.runtime.lastError; }); }catch(e2){}
+    mirar();
+  }
+  setInterval(vigilarLlamada, 400);
+  vigilarLlamada();
 })();

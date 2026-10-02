@@ -40,6 +40,9 @@ body.ext .app{
   body.ext .app{ border-color:rgba(138,180,255,.30); box-shadow:0 4px 16px rgba(0,0,0,.6); }
 }
 .app.arrastrando, .app.arrastrando .guion{transition:none}
+/* Al abrir, el popup aparece ya con su ancho final (sin animarse ni
+   obligar a Chrome a redimensionar la ventana): se ve al instante. */
+.app.sin-anim, .app.sin-anim .guion{transition:none !important}
 .izq{width:360px; flex:0 0 360px; padding-bottom:10px}
 
 /* ---- panel del script: se despliega hacia la derecha ---- */
