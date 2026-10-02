@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ShortCut-Vicidial-GO
 // @namespace    shortcut-vicidial-go
-// @version      1.0.6
+// @version      1.0.7
 // @description  Pre-selecciona un estado de agente y lo aplica automaticamente al cortar la llamada (replay del clic real). Autoconfigurable + modo debug.
 // @author       Pausa Vocal
 // @match        *://vicidial.recaall.simtastic.cl/*
@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.0.6';
+  const VCA_VERSION = '1.0.7';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -1509,7 +1509,7 @@
       const f = this.formulario();
       const clave = f ? (f.getAttribute('src') || 'form') : '';
       if (clave && clave !== this.clave) {
-        this.clave = clave; this.iniciar();
+        this.clave = clave; this.form = f; this.iniciar(); this.ubicar();
         log('Reloj de tipificación: se abrió el formulario → cuenta de ' + this.limite() + ' s (' + String(clave).slice(0, 80) + ')');
       } else if (!clave && this.clave) {
         this.clave = '';
@@ -1542,14 +1542,28 @@
       if (this.activo) this.pintar(); else this.mensaje('Límite: ' + this.limite() + ' s', '#123a6d', 1500);
     },
     ocultar() { if (this.caja) this.caja.style.display = 'none'; },
+    // Donde quedó la última vez (se recuerda siempre). Si nunca se movió, bajo
+    // los menús del formulario, a la izquierda: ahí no lo tapa el cotizador.
+    ubicar() {
+      const b = this.asegurarCaja();
+      const pos = Store.get(TIPIF.POS, null);
+      let left, top;
+      if (pos) { left = pos.left; top = pos.top; }
+      else {
+        const r = this.form && this.form.getBoundingClientRect();
+        left = r ? r.left + 12 : 24;
+        top = r ? r.top + Math.max(60, Math.min(r.height - 100, 225)) : 200;
+      }
+      left = Math.max(0, Math.min(innerWidth - 220, left));
+      top = Math.max(0, Math.min(innerHeight - 100, top));
+      b.style.left = Math.round(left) + 'px'; b.style.top = Math.round(top) + 'px'; b.style.right = 'auto';
+    },
     asegurarCaja() {
       if (this.caja && document.documentElement.contains(this.caja)) return this.caja;
       const b = document.createElement('div');
       b.id = 'vca-reloj-tipif';
-      const pos = Store.get(TIPIF.POS, null);
       b.style.cssText = [
-        'position:fixed', 'z-index:2147483647', 'display:none',
-        pos ? 'left:' + pos.left + 'px;top:' + pos.top + 'px' : 'right:24px;top:72px',
+        'position:fixed', 'z-index:2147483647', 'display:none', 'left:24px', 'top:72px', 'cursor:grab',
         'background:#fff', 'border:1px solid rgba(18,58,109,.25)', 'border-radius:16px',
         'box-shadow:0 10px 30px rgba(12,28,56,.25), 0 2px 6px rgba(12,28,56,.12)',
         'padding:10px 12px', 'font-family:"Segoe UI",system-ui,Arial,sans-serif', 'color:#15202b',
@@ -1561,17 +1575,27 @@
       b.addEventListener('pointerdown', (e) => {
         if (e.target.closest('button,[data-r="num"]')) return;
         const r = b.getBoundingClientRect();
-        arr = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+        arr = { dx: e.clientX - r.left, dy: e.clientY - r.top, x: e.clientX, y: e.clientY, movio: false };
+        b.style.cursor = 'grabbing';
         try { b.setPointerCapture(e.pointerId); } catch (e2) {}
+      });
+      // Doble clic en la manito: vuelve a su lugar bajo los menús del formulario
+      b.addEventListener('dblclick', (e) => {
+        const bajo = document.elementFromPoint(e.clientX, e.clientY);
+        if (!bajo || !bajo.closest('[data-r="asa"]')) return;
+        Store.del(TIPIF.POS); this.ubicar();
       });
       b.addEventListener('pointermove', (e) => {
         if (!arr) return;
+        if (Math.abs(e.clientX - arr.x) + Math.abs(e.clientY - arr.y) > 3) arr.movio = true;
+        if (!arr.movio) return;
         const left = Math.max(0, Math.min(innerWidth - 60, e.clientX - arr.dx));
         const top = Math.max(0, Math.min(innerHeight - 40, e.clientY - arr.dy));
         b.style.left = left + 'px'; b.style.top = top + 'px'; b.style.right = 'auto';
       });
       b.addEventListener('pointerup', () => {
-        if (!arr) return; arr = null;
+        if (!arr) return; const movio = arr.movio; arr = null; b.style.cursor = 'grab';
+        if (!movio) return;   // un clic sin arrastrar no cambia la posición guardada
         const r = b.getBoundingClientRect(); Store.set(TIPIF.POS, { left: Math.round(r.left), top: Math.round(r.top) });
       });
       b.addEventListener('click', (e) => {
@@ -1623,7 +1647,10 @@
                 '<button data-a="mas" title="Subir el límite 1 s" style="' + btn + '">+</button>' +
               '</div>' +
             '</div>' +
-            '<button data-a="cerrar" title="Ocultar" style="all:unset;cursor:pointer;align-self:flex-start;color:#94a3b8;font-size:14px">✕</button>' +
+            '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;align-self:stretch">' +
+              '<button data-a="cerrar" title="Ocultar" style="all:unset;cursor:pointer;color:#94a3b8;font-size:14px">✕</button>' +
+              '<div data-r="asa" title="Arrastra para moverlo · doble clic: volver bajo los menús" style="cursor:grab;color:#94a3b8;font-size:15px;line-height:1">✋</div>' +
+            '</div>' +
           '</div>';
         b.__modo = 'reloj';
       }

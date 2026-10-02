@@ -79,6 +79,8 @@
    − / + ajusta el límite (25 s; se recuerda) y clic en el número
    reinicia. Si el formulario dura más que el límite, se ofrece usar
    ese tiempo real (con 2 s de margen).
+   Aparece bajo los menús del formulario (ahí no lo tapa el cotizador); se
+   arrastra con la manito ✋ y recuerda siempre dónde quedó.
    ShortCut-Vicidial-GO trae el mismo reloj: si está, se usa el suyo
    y éste no se muestra (comparten límite y posición).
    ============================================================ */
@@ -129,9 +131,7 @@
     if(R.caja && document.documentElement.contains(R.caja)) return R.caja;
     const b = document.createElement("div");
     b.id = "dental-reloj-tipif";
-    const pos = leer(POS, null);
-    b.style.cssText = ["position:fixed", "z-index:2147483647", "display:none",
-      pos ? "left:" + pos.left + "px;top:" + pos.top + "px" : "right:24px;top:72px",
+    b.style.cssText = ["position:fixed", "z-index:2147483647", "display:none", "left:24px", "top:72px", "cursor:grab",
       "background:#fff", "border:1px solid rgba(18,58,109,.25)", "border-radius:16px",
       "box-shadow:0 10px 30px rgba(12,28,56,.25), 0 2px 6px rgba(12,28,56,.12)",
       "padding:10px 12px", 'font-family:"Segoe UI",system-ui,Arial,sans-serif', "color:#15202b",
@@ -140,16 +140,27 @@
     let arr = null;
     b.addEventListener("pointerdown", function(e){
       if(e.target.closest("button,[data-r=num]")) return;
-      const r = b.getBoundingClientRect(); arr = {dx: e.clientX - r.left, dy: e.clientY - r.top};
+      const r = b.getBoundingClientRect(); arr = {dx: e.clientX - r.left, dy: e.clientY - r.top, x: e.clientX, y: e.clientY, movio: false};
+      b.style.cursor = "grabbing";
       try{ b.setPointerCapture(e.pointerId); }catch(e2){}
+    });
+    // Doble clic en la manito: vuelve a su lugar bajo los menús del formulario
+    b.addEventListener("dblclick", function(e){
+      const bajo = document.elementFromPoint(e.clientX, e.clientY);
+      if(!bajo || !bajo.closest('[data-r="asa"]')) return;
+      try{ localStorage.removeItem(POS); }catch(e2){}
+      ubicar();
     });
     b.addEventListener("pointermove", function(e){
       if(!arr) return;
+      if(Math.abs(e.clientX - arr.x) + Math.abs(e.clientY - arr.y) > 3) arr.movio = true;
+      if(!arr.movio) return;
       b.style.left = Math.max(0, Math.min(innerWidth - 60, e.clientX - arr.dx)) + "px";
       b.style.top = Math.max(0, Math.min(innerHeight - 40, e.clientY - arr.dy)) + "px"; b.style.right = "auto";
     });
     b.addEventListener("pointerup", function(){
-      if(!arr) return; arr = null;
+      if(!arr) return; const movio = arr.movio; arr = null; b.style.cursor = "grab";
+      if(!movio) return;   // un clic sin arrastrar no cambia la posición guardada
       const r = b.getBoundingClientRect(); guardar(POS, {left: Math.round(r.left), top: Math.round(r.top)});
     });
     b.addEventListener("click", function(e){
@@ -163,6 +174,21 @@
     R.caja = b; return b;
   }
   function ocultar(){ if(R.caja) R.caja.style.display = "none"; }
+  // Donde quedó la última vez (se recuerda siempre). Si nunca se movió, bajo
+  // los menús del formulario, a la izquierda: ahí no lo tapa el cotizador.
+  function ubicar(){
+    const b = caja(), pos = leer(POS, null);
+    let left, top;
+    if(pos){ left = pos.left; top = pos.top; }
+    else{
+      const r = R.form && R.form.getBoundingClientRect();
+      left = r ? r.left + 12 : 24;
+      top = r ? r.top + Math.max(60, Math.min(r.height - 100, 225)) : 200;
+    }
+    left = Math.max(0, Math.min(innerWidth - 220, left));
+    top = Math.max(0, Math.min(innerHeight - 100, top));
+    b.style.left = Math.round(left) + "px"; b.style.top = Math.round(top) + "px"; b.style.right = "auto";
+  }
   function iniciar(){ R.t0 = Date.now(); R.activo = true; R.avisos = {}; R.ofreciendo = 0; pintar(); }
   function pintar(){
     // Si ShortCut ya muestra su reloj, el de aquí se queda guardado (cuenta igual por detrás)
@@ -184,7 +210,9 @@
           '<div style="display:flex;align-items:center;gap:5px"><button data-a="menos" title="Bajar el límite 1 s" style="' + btn + '">−</button>' +
           '<span data-r="lim" style="font-size:11px;font-weight:700;min-width:34px;text-align:center"></span>' +
           '<button data-a="mas" title="Subir el límite 1 s" style="' + btn + '">+</button></div></div>' +
-        '<button data-a="cerrar" title="Ocultar" style="all:unset;cursor:pointer;align-self:flex-start;color:#94a3b8;font-size:14px">✕</button></div>';
+        '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;align-self:stretch">' +
+          '<button data-a="cerrar" title="Ocultar" style="all:unset;cursor:pointer;color:#94a3b8;font-size:14px">✕</button>' +
+          '<div data-r="asa" title="Arrastra para moverlo · doble clic: volver bajo los menús" style="cursor:grab;color:#94a3b8;font-size:15px;line-height:1">✋</div></div></div>';
       b.__modo = "reloj";
     }
     const q = function(r){ return b.querySelector('[data-r="' + r + '"]'); };
@@ -222,7 +250,7 @@
   setInterval(function(){
     if(!vivo()){ ocultar(); return; }          // copia vieja tras actualizar: se apaga
     const f = formulario(), clave = f ? (f.getAttribute("src") || "form") : "";
-    if(clave && clave !== R.clave){ R.clave = clave; iniciar(); }
+    if(clave && clave !== R.clave){ R.clave = clave; R.form = f; iniciar(); ubicar(); }
     else if(!clave && R.clave){ R.clave = ""; cerrado(); }
     if(R.activo) pintar();
   }, 250);

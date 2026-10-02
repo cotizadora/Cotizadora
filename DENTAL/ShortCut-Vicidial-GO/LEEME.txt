@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.0.6
+ShortCut-Vicidial-GO 1.0.7
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.0.6).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.0.7).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -61,13 +61,14 @@ Si algo falla: ⚙️ Configuración -> 📋 Copiar registro y pégamelo; ahí s
 marco del formulario y en qué paso se detuvo.
 
 CUENTA REGRESIVA PARA TIPIFICAR (desde la 1.0.5)
-Cuando se abre el formulario de tipificación (el del script), aparece arriba a
-la derecha un reloj que cuenta hacia atrás. Verde; ámbar desde los 10 s, con
+Cuando se abre el formulario de tipificación (el del script), aparece bajo sus
+menús un reloj que cuenta hacia atrás. Verde; ámbar desde los 10 s, con
 un pitido; rojo y parpadeando desde los 5 s, con dos pitidos; tres al llegar
 a 0. Se apaga solo al pulsar "Cortar y Tipificar".
 - Clic en el número: vuelve a empezar la cuenta.
 - − / +: ajusta el límite de a 1 segundo (viene en 25 s y se recuerda).
-- Se arrastra para dejarlo donde moleste menos.
+- Se arrastra con la manito ✋ y recuerda siempre dónde lo dejaste. Doble clic
+  en la manito: vuelve bajo los menús.
 - Calibración: si el formulario se cierra solo sin que hayas tipificado, el
   reloj mide cuánto duró y te ofrece usar ese tiempo (con 2 s de margen) con
   un clic. Si lo cerraste tú, pulsa "No".
