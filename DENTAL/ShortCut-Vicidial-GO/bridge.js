@@ -95,7 +95,7 @@
             settings: get(K.settings, {}),
             ka: get('vca_ka', null),      // estado del keep-alive de audio
             log: get('vca_log', []).slice(-40),  // registro del motor (para diagnóstico)
-            engine: get('vca_engine', null)     // versión del motor que corre en la página
+            engine: get('vca_motor', null)      // versión del motor que corre en la página
           });
           break;
 

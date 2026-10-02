@@ -33,7 +33,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.0.3
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.0.4
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -51,10 +51,11 @@ Qué hace:
 Problemas que se arreglaron:
 - **Formulario de otro servidor:** el "Formulario de Tipificación" (Corte Llamadas BCISALUR, en la pestaña SCRIPT) viene de otro servidor dentro de un marco. Hasta la 1.0.1 sus 3 menús y "Cortar y Tipificar" no se grababan. Desde la 1.0.2 sí, porque la extensión corre dentro de ese marco y se comunica con la página por mensajes.
 - **Motor viejo pegado (v1.0.3):** al actualizar, Vicidial seguía con el motor anterior hasta recargar. Ahora el motor nuevo se conecta solo al abrir el panel ⚡ y reemplaza al viejo. Si no lo logra, el panel muestra un aviso.
+- **Aviso que parpadeaba (v1.0.4):** si en la página seguía vivo el motor 1.0.2, éste seguía anotando su versión y el aviso "Conectando el motor" aparecía y desaparecía. Ahora el panel pregunta directo qué motor corre y usa claves nuevas que la 1.0.2 no toca.
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar la v1.0.3 con INSTALAR.bat.
+1. Instalar la v1.0.4 con INSTALAR.bat.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

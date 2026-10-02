@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
   "name": "ShortCut-Vicidial-GO",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "Eduardo Pérez",
   "description": "Graba una vez y repite con un clic: cambia tu estado y tus pausas en Vicidial y tipifica en GO Bci Seguros. Sin navegar menús. Basado en ShortCut-VocalCRM de Eduardo Pérez — soporte WhatsApp +56 9 2769 0949.",
   "action": {
-    "default_title": "ShortCut-Vicidial-GO v1.0.3",
+    "default_title": "ShortCut-Vicidial-GO v1.0.4",
     "default_popup": "control.html",
     "default_icon": {
       "16": "icon16.png",

@@ -757,26 +757,39 @@ async function motorEnPagina(tabId) {
     return r && r[0] ? r[0].result : '?';
   } catch (e) { return 'sin acceso'; }
 }
+// Lo que de verdad corre en la página se pregunta directo (no se fía sólo del
+// latido) y se recuerda 30 s por pestaña, para no consultar en cada ciclo.
+const motorVisto = {};   // tabId -> {v, t}
+async function motorActual(tabId) {
+  const c = motorVisto[tabId];
+  if (c && Date.now() - c.t < 30000) return c.v;
+  const v = await motorEnPagina(tabId);
+  motorVisto[tabId] = { v: v, t: Date.now() };
+  return v;
+}
+let avisoEnCurso = false;
 async function pintarAvisoMotor(engines) {
-  const viejas = (engines || []).filter(x => {
-    const e = x.engine;
-    return !e || e.v !== VERSION || (Date.now() - (e.t || 0)) > 90000;
-  });
-  const el = $('#motor');
-  if (!viejas.length) { el.hidden = true; el.innerHTML = ''; return; }
-  // Se intenta conectar el motor nuevo SIN recargar la página: toma el relevo
-  // de la copia anterior. Sólo si eso no basta se pide F5.
-  const detalle = [];
-  for (const x of viejas) {
-    conectarMotor(x.tab);
-    const m = await motorEnPagina(x.tab);
-    detalle.push(siteName(x.host) + ': ' + (m === 'true' ? 'v1.0.0/1.0.1' : m));
-  }
-  const sitios = Array.from(new Set(viejas.map(x => siteName(x.host)))).join(' y ');
-  el.innerHTML = '⏳ Conectando el motor <b>v' + VERSION + '</b> en <b>' + escapeHtml(sitios) + '</b>… ' +
-    'Si este aviso no se va en unos segundos, recarga esa página (<b>F5</b>) sin llamada en curso.' +
-    '<br><span class="hintline">Motor en la página → ' + escapeHtml(detalle.join(' · ')) + '</span>';
-  el.hidden = false;
+  if (avisoEnCurso) return;            // un chequeo a la vez: sin parpadeo
+  avisoEnCurso = true;
+  try {
+    const viejas = [];
+    for (const x of (engines || [])) {
+      const e = x.engine;
+      const fresco = e && e.v === VERSION && (Date.now() - (e.t || 0)) < 90000;
+      if (fresco) continue;
+      const m = await motorActual(x.tab);
+      if (m === VERSION) continue;     // la página ya corre esta versión: todo bien
+      viejas.push({ x: x, m: m });
+    }
+    const el = $('#motor');
+    if (!viejas.length) { el.hidden = true; el.innerHTML = ''; return; }
+    // Se conecta el motor nuevo SIN recargar la página; sólo si no basta se pide F5.
+    viejas.forEach(o => { conectarMotor(o.x.tab); delete motorVisto[o.x.tab]; });
+    const sitios = Array.from(new Set(viejas.map(o => siteName(o.x.host)))).join(' y ');
+    el.innerHTML = '⏳ Conectando v' + VERSION + ' en <b>' + escapeHtml(sitios) + '</b>… si no se va, F5 sin llamada.' +
+      ' <span class="hintline">(motor: ' + escapeHtml(viejas.map(o => o.m === 'true' ? '1.0.0/1.0.1' : o.m).join(', ')) + ')</span>';
+    el.hidden = false;
+  } finally { avisoEnCurso = false; }
 }
 
 // ---- Init ------------------------------------------------------------------

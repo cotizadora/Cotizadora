@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ShortCut-Vicidial-GO
 // @namespace    shortcut-vicidial-go
-// @version      1.0.3
+// @version      1.0.4
 // @description  Pre-selecciona un estado de agente y lo aplica automaticamente al cortar la llamada (replay del clic real). Autoconfigurable + modo debug.
 // @author       Pausa Vocal
 // @match        *://vicidial.recaall.simtastic.cl/*
@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.0.3';
+  const VCA_VERSION = '1.0.4';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -479,7 +479,10 @@
   //    página -> marcos: {t:'run'}   ejecuta este paso
   //    marco -> página : {t:'ack'} lo tomé, {t:'done', ok} terminé
   // ===========================================================================
-  const MSG = '__vca102';
+  // Etiqueta de los mensajes con los marcos. Distinta de la de la 1.0.2/1.0.3
+  // (que no saben apagarse solas), para que una copia vieja que siga viva en
+  // la página no conteste ni ejecute pasos.
+  const MSG = '__vca_m2';
   function aTop(o) { try { o[MSG] = 1; window.top.postMessage(o, '*'); } catch (e) {} }
   function urlMarco() { return location.origin + location.pathname; }
   function rid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
@@ -1546,7 +1549,9 @@
     // Versión del motor que corre en esta página (la pantalla de control avisa
     // si no coincide con la de la extensión instalada).
     if (IS_TOP) {
-      const latido = () => { if (vigente()) Store.set('vca_engine', { v: VCA_VERSION, t: Date.now(), relevo: RELEVO }); };
+      // Clave nueva: la 1.0.2 sigue escribiendo 'vca_engine' si quedó viva en
+      // la página, y el panel veía alternar las dos versiones.
+      const latido = () => { if (vigente()) Store.set('vca_motor', { v: VCA_VERSION, t: Date.now(), relevo: RELEVO }); };
       latido(); setInterval(latido, 5000);
       setTimeout(listarMarcos, 1500);
     }
