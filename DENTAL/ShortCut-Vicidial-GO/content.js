@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ShortCut-Vicidial-GO
 // @namespace    shortcut-vicidial-go
-// @version      1.0.4
+// @version      1.0.5
 // @description  Pre-selecciona un estado de agente y lo aplica automaticamente al cortar la llamada (replay del clic real). Autoconfigurable + modo debug.
 // @author       Pausa Vocal
 // @match        *://vicidial.recaall.simtastic.cl/*
@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.0.4';
+  const VCA_VERSION = '1.0.5';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -561,6 +561,8 @@
     window.addEventListener('message', (e) => {
       const d = e.data;
       if (!vigente() || !d || d[MSG] !== 1 || e.source === window) return;
+      // "Cortar y Tipificar" pulsado en el formulario: se detiene la cuenta regresiva
+      if (d.t === 'step' && d.step && (d.step.kind || 'click') === 'click' && /tipific/i.test(d.step.text || '')) RelojTipif.tipificado();
       if (d.t === 'step' && d.step) pushStep(d.step, d.human || 'paso en formulario');
       else if (d.t === 'log' && d.msg) log(String(d.msg).slice(0, 300));
       else if (d.t === 'hola') log('Marco externo listo: ' + String(d.url || '').slice(0, 120));
@@ -1469,6 +1471,194 @@
       if (over && !this.overFired) { this.overFired = true; this.beep(3); }
     }
   };
+  // ===========================================================================
+  //  CUENTA REGRESIVA PARA TIPIFICAR (Vicidial)
+  //  Hay ~30 s para tipificar desde que se entra al formulario de tipificación
+  //  (el marco del script, ej. "Corte Llamadas BCISALUR"); si se pasa, el
+  //  formulario se cae y se pierde lo escrito. El reloj arranca cuando ese
+  //  formulario se vuelve visible, avisa con sonido a los 10 y 5 s, y se
+  //  apaga al pulsar "Cortar y Tipificar" o al cerrarse el formulario.
+  //  Calibración: − / + en el reloj (se recuerda). Y si el formulario se
+  //  cierra solo sin haber tipificado, se mide cuánto duró de verdad y se
+  //  ofrece usar esa medida (con 2 s de margen) con un clic.
+  //  Clic en el número: reinicia la cuenta.
+  // ===========================================================================
+  const TIPIF = { LIM: 'vca_tipif_lim', POS: 'vca_tipif_pos', DEF: 25 };
+  const RelojTipif = {
+    caja: null, t0: 0, activo: false, enviado: false, clave: '', avisos: {}, ofreciendo: 0,
+    limite() { const v = Number(Store.get(TIPIF.LIM, TIPIF.DEF)); return v >= 5 && v <= 180 ? v : TIPIF.DEF; },
+    // El formulario: un marco visible y grande dentro del panel del script,
+    // o de otro sitio. No cuentan el webphone ni la pestaña FORM de Vicidial.
+    formulario() {
+      for (const f of document.querySelectorAll('iframe')) {
+        const id = (f.id || '') + ' ' + (f.name || '');
+        if (/webphone|vcFormIFrame/i.test(id)) continue;
+        let host = '';
+        try { host = new URL(f.getAttribute('src') || '', location.href).host; } catch (e) {}
+        const enScript = !!(f.closest && f.closest('[id*="script" i]'));
+        if (!enScript && (!host || host === location.host)) continue;
+        try { if (getComputedStyle(f).visibility !== 'visible') continue; } catch (e) { continue; }
+        const r = f.getBoundingClientRect();
+        if (r.width < 200 || r.height < 100) continue;
+        return f;
+      }
+      return null;
+    },
+    tick() {
+      if (!vigente()) return;
+      const f = this.formulario();
+      const clave = f ? (f.getAttribute('src') || 'form') : '';
+      if (clave && clave !== this.clave) { this.clave = clave; this.iniciar(); }
+      else if (!clave && this.clave) { this.clave = ''; this.cerrado(); }
+      if (this.activo) this.pintar();
+    },
+    iniciar() {
+      this.t0 = Date.now(); this.activo = true; this.enviado = false; this.avisos = {}; this.ofreciendo = 0;
+      this.pintar();
+    },
+    tipificado() {
+      if (!this.activo) return;
+      this.enviado = true; this.activo = false;
+      this.mensaje('✓ Tipificado a los ' + Math.round((Date.now() - this.t0) / 1000) + ' s', '#166534', 2500);
+    },
+    cerrado() {
+      if (!this.activo) { if (!this.ofreciendo) this.ocultar(); return; }
+      this.activo = false;
+      const seg = Math.round((Date.now() - this.t0) / 1000);
+      // Se cerró sin tipificar: si el tiempo difiere del límite, ofrecer ajustarlo.
+      const sugerido = seg - 2;
+      if (!this.enviado && seg >= 8 && seg <= 180 && sugerido !== this.limite()) this.ofrecer(seg, sugerido);
+      else this.ocultar();
+    },
+    ajustar(d) {
+      Store.set(TIPIF.LIM, Math.max(5, Math.min(180, this.limite() + d)));
+      if (this.activo) this.pintar(); else this.mensaje('Límite: ' + this.limite() + ' s', '#123a6d', 1500);
+    },
+    ocultar() { if (this.caja) this.caja.style.display = 'none'; },
+    asegurarCaja() {
+      if (this.caja && document.documentElement.contains(this.caja)) return this.caja;
+      const b = document.createElement('div');
+      b.id = 'vca-reloj-tipif';
+      const pos = Store.get(TIPIF.POS, null);
+      b.style.cssText = [
+        'position:fixed', 'z-index:2147483647', 'display:none',
+        pos ? 'left:' + pos.left + 'px;top:' + pos.top + 'px' : 'right:24px;top:72px',
+        'background:#fff', 'border:1px solid rgba(18,58,109,.25)', 'border-radius:16px',
+        'box-shadow:0 10px 30px rgba(12,28,56,.25), 0 2px 6px rgba(12,28,56,.12)',
+        'padding:10px 12px', 'font-family:"Segoe UI",system-ui,Arial,sans-serif', 'color:#15202b',
+        'user-select:none', 'min-width:190px'
+      ].join(';');
+      (document.body || document.documentElement).appendChild(b);
+      // Se arrastra desde cualquier parte que no sea un botón o el número
+      let arr = null;
+      b.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('button,[data-r="num"]')) return;
+        const r = b.getBoundingClientRect();
+        arr = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+        try { b.setPointerCapture(e.pointerId); } catch (e2) {}
+      });
+      b.addEventListener('pointermove', (e) => {
+        if (!arr) return;
+        const left = Math.max(0, Math.min(innerWidth - 60, e.clientX - arr.dx));
+        const top = Math.max(0, Math.min(innerHeight - 40, e.clientY - arr.dy));
+        b.style.left = left + 'px'; b.style.top = top + 'px'; b.style.right = 'auto';
+      });
+      b.addEventListener('pointerup', () => {
+        if (!arr) return; arr = null;
+        const r = b.getBoundingClientRect(); Store.set(TIPIF.POS, { left: Math.round(r.left), top: Math.round(r.top) });
+      });
+      b.addEventListener('click', (e) => {
+        const a = e.target.closest('[data-a]');
+        if (!a) return;
+        const q = a.getAttribute('data-a');
+        if (q === 'menos') this.ajustar(-1);
+        else if (q === 'mas') this.ajustar(1);
+        else if (q === 'reiniciar') this.iniciar();
+        else if (q === 'cerrar') { this.activo = false; this.ofreciendo = 0; this.ocultar(); }
+        else if (q === 'usar') { Store.set(TIPIF.LIM, Number(a.getAttribute('data-v'))); this.ofreciendo = 0; this.mensaje('Límite: ' + this.limite() + ' s', '#123a6d', 1800); }
+      });
+      this.caja = b;
+      return b;
+    },
+    pintar() {
+      const b = this.asegurarCaja();
+      const lim = this.limite();
+      const pasado = (Date.now() - this.t0) / 1000;
+      const resto = lim - pasado;
+      const n = Math.ceil(resto);
+      // Avisos: un pitido a los 10 s, dos a los 5 s, tres al llegar a 0
+      [[10, 1], [5, 2], [0, 3]].forEach(([s, v]) => { if (resto <= s && !this.avisos[s] && lim > s) { this.avisos[s] = 1; PauseReloj.beep(v); } });
+      let color = '#16a34a';
+      if (resto <= 10) color = '#d97706';
+      if (resto <= 5) color = '#dc2626';
+      const parpadea = resto <= 5 && Math.floor(Date.now() / 400) % 2 === 0;
+      const frac = Math.max(0, Math.min(1, resto / lim));
+      const C = 2 * Math.PI * 26;
+      // La estructura se arma una vez; en cada tick sólo cambian números y
+      // colores (si se rehiciera entera, los botones perderían clics).
+      if (b.__modo !== 'reloj') {
+        const btn = 'all:unset;cursor:pointer;width:22px;height:22px;line-height:22px;text-align:center;border-radius:6px;background:#eef2f7;color:#123a6d;font-weight:800;font-size:14px';
+        b.innerHTML =
+          '<div style="display:flex;align-items:center;gap:12px">' +
+            '<div data-r="num" data-a="reiniciar" title="Clic: reiniciar la cuenta" style="position:relative;width:64px;height:64px;cursor:pointer;flex:none">' +
+              '<svg width="64" height="64" viewBox="0 0 64 64" style="transform:rotate(-90deg)">' +
+                '<circle cx="32" cy="32" r="26" fill="none" stroke="#e5eaf1" stroke-width="6"/>' +
+                '<circle data-r="arco" cx="32" cy="32" r="26" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '"/>' +
+              '</svg>' +
+              '<div data-r="cifra" style="position:absolute;inset:8px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:800;font-variant-numeric:tabular-nums"></div>' +
+            '</div>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div data-r="tit" style="font-size:13px;font-weight:800;color:#123a6d"></div>' +
+              '<div data-r="sub" style="font-size:11px;color:#5d6b7a;margin:2px 0 6px"></div>' +
+              '<div style="display:flex;align-items:center;gap:5px">' +
+                '<button data-a="menos" title="Bajar el límite 1 s" style="' + btn + '">−</button>' +
+                '<span data-r="lim" style="font-size:11px;font-weight:700;min-width:34px;text-align:center"></span>' +
+                '<button data-a="mas" title="Subir el límite 1 s" style="' + btn + '">+</button>' +
+              '</div>' +
+            '</div>' +
+            '<button data-a="cerrar" title="Ocultar" style="all:unset;cursor:pointer;align-self:flex-start;color:#94a3b8;font-size:14px">✕</button>' +
+          '</div>';
+        b.__modo = 'reloj';
+      }
+      const q = (r) => b.querySelector('[data-r="' + r + '"]');
+      b.style.display = 'block';
+      b.style.borderColor = resto <= 5 ? color : 'rgba(18,58,109,.25)';
+      const arco = q('arco');
+      arco.setAttribute('stroke', color);
+      arco.setAttribute('stroke-dashoffset', (C * (1 - frac)).toFixed(1));
+      const cifra = q('cifra');
+      cifra.textContent = n > 0 ? n : (n === 0 ? '0' : '+' + (-n));
+      cifra.style.fontSize = (n < 0 ? 18 : 24) + 'px';
+      cifra.style.color = parpadea ? '#fff' : color;
+      cifra.style.background = parpadea ? color : 'transparent';
+      q('tit').textContent = resto > 0 ? 'Tipificar' : '¡Tiempo!';
+      q('sub').textContent = resto > 0 ? 'quedan ' + n + ' s' : 'se pasó el límite';
+      q('lim').textContent = lim + ' s';
+    },
+    mensaje(txt, color, ms) {
+      const b = this.asegurarCaja();
+      b.style.display = 'block'; b.style.borderColor = 'rgba(18,58,109,.25)'; b.__modo = 'mensaje';
+      b.innerHTML = '<div style="font-size:13px;font-weight:700;color:' + color + ';padding:4px 2px">' + txt + '</div>';
+      const marca = Date.now(); this.ultimoMsg = marca;
+      setTimeout(() => { if (this.ultimoMsg === marca && !this.activo && !this.ofreciendo) this.ocultar(); }, ms);
+    },
+    ofrecer(seg, sugerido) {
+      const b = this.asegurarCaja();
+      this.ofreciendo = Date.now();
+      const btn = 'all:unset;cursor:pointer;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700';
+      b.style.display = 'block'; b.style.borderColor = '#d97706'; b.__modo = 'oferta';
+      b.innerHTML =
+        '<div style="font-size:12.5px;line-height:1.35;max-width:230px"><b style="color:#9a6a00">El formulario se cerró a los ' + seg + ' s.</b><br>' +
+        'Si fue el sistema (no tú), conviene un límite de <b>' + sugerido + ' s</b> (2 s de margen).</div>' +
+        '<div style="display:flex;gap:6px;margin-top:8px">' +
+          '<button data-a="usar" data-v="' + sugerido + '" style="' + btn + ';background:#123a6d;color:#fff">Usar ' + sugerido + ' s</button>' +
+          '<button data-a="cerrar" style="' + btn + ';background:#eef2f7;color:#123a6d">No</button>' +
+        '</div>';
+      const marca = this.ofreciendo;
+      setTimeout(() => { if (this.ofreciendo === marca) { this.ofreciendo = 0; if (!this.activo) this.ocultar(); } }, 15000);
+    }
+  };
+
   // TEMPORAL (diagnóstico): recuadro visible en cada frame donde corre el
   // content script, indicando si ve el texto de pausa. Quitar: DEBUG = false.
   const VCA_PAUSA_DEBUG = false;
@@ -1543,6 +1733,8 @@
     // En RELEVO la copia anterior ya dibuja el reloj: no duplicarlo.
     if (!IS_CRM && !RELEVO) setInterval(() => { if (vigente()) pausaTick(); }, 1000);
     if (IS_VICI && IS_TOP) { hookPausaVici(); setInterval(hookPausaVici, 2000); }
+    // Cuenta regresiva para tipificar
+    if (IS_VICI && IS_TOP) setInterval(() => { try { RelojTipif.tick(); } catch (e) {} }, 250);
     // Expuesto para que el service worker lo dispare con chrome.scripting aunque
     // el temporizador de la pestaña este congelado en segundo plano.
     window.__vcaTick = autoWatchTick;

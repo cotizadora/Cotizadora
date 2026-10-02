@@ -35,7 +35,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.0.4
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.0.5
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -48,6 +48,7 @@ Qué hace:
 - **Vicidial:** si estoy en llamada, el atajo queda en cola (⏳) y se aplica apenas se puede. ■ lo cancela.
 - **GO:** se aplica en el momento, sin cola.
 - **Reloj de pausa:** aparece abajo a la derecha con el nombre de la pausa.
+- **Cuenta regresiva para tipificar (v1.0.5):** Vicidial da ~30 s desde que se entra al formulario de tipificación (no desde que se corta). Al abrirse el formulario aparece un reloj (arriba a la derecha, arrastrable): verde, ámbar ≤10 s, rojo ≤5 s, con pitidos. Se apaga al pulsar "Cortar y Tipificar". − / + ajusta el límite (25 s por defecto, se recuerda); clic en el número reinicia. Si el formulario se cierra solo sin tipificar, mide el tiempo real y ofrece usarlo con 2 s de margen.
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -57,7 +58,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar la v1.0.4 con INSTALAR.bat.
+1. Instalar la v1.0.5 con INSTALAR.bat.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.
