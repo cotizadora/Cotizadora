@@ -18,14 +18,14 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 - **INSTALAR.bat:** descarga todo lo de `DENTAL/` de esa rama a `Documentos\DENTAL` en mi PC. No borra nada mío.
 - **Pull request abierto:** [cotizadora/Cotizadora#1](https://github.com/cotizadora/Cotizadora/pull/1). Al hacer merge, GitHub Pages publica la página web en https://cotizadora.github.io/Cotizadora/DENTAL/cotizador-web.html. Todavía no lo he aprobado.
 
-## 1. Cotizador Dental Bci (extensión) — v3.0.8
+## 1. Cotizador Dental Bci (extensión) — v3.0.9
 
 - **En mi PC:** `Documentos\DENTAL\extension`
 - **Paquete:** `DENTAL/extension-cotizador-dental.zip`
 - **Versión web:** `DENTAL/cotizador-web.html`, generada desde los archivos de la extensión.
 
 Qué hace:
-- Popup en dos columnas: cotización a la izquierda y script de venta a la derecha, sin manija de ancho. Desde la v3.0.3 va dentro de un marco azul grisáceo con borde fino, esquinas redondeadas y sombra, para que no se pierda sobre el blanco de Vicidial. Desde la v3.0.4 cada módulo es una tarjeta redondeada con su color según jerarquía: cliente (azul), tipificación (menta), plan y cotización (blanco), clínicas (turquesa), guardado (arena), total (azul marino suave); las secciones del script también son tarjetas en contraste Normal. El scroll va dentro de cada columna: el popup no pasa de 800 × 600.
+- Popup en dos columnas: cotización a la izquierda y script de venta a la derecha, sin manija de ancho. Desde la v3.0.3 va dentro de un marco azul grisáceo con borde fino, esquinas redondeadas y sombra, para que no se pierda sobre el blanco de Vicidial. Desde la v3.0.4 cada módulo es una tarjeta redondeada con su color según jerarquía: cliente (azul), tipificación (menta), plan y cotización (blanco), clínicas (turquesa), guardado (arena), total (azul marino suave); las secciones del script también son tarjetas en contraste Normal. El scroll va dentro de cada columna: el popup no pasa de 800 × 600. Desde la v3.0.9 las cabeceras de las dos columnas son una sola franja azul de igual altura, sin línea divisoria ni barra de desplazamiento arriba, y ambas columnas comparten fondo.
 - Autollenado desde la pantalla de agente de Vicidial: cliente, cargas del FORM, correo, teléfono, comuna, datos de validación y cierre.
 - **Apertura del script (v3.0.2):** "Muy buenos días / buenas tardes (según la hora: antes de las 12:00, días), ¿me comunico con [primer nombre y primer apellido del cliente]? Mi nombre es [ejecutivo], llamo desde Bci." Los nombres de Vicidial vienen sin tilde; se reponen las de los nombres y apellidos comunes (Pérez, González, José…).
 - **Se abre solo al entrar una llamada (v3.0.5):** cuando cae un lead nuevo en Vicidial, el cotizador se despliega aunque esté en otra pestaña (una vez por cliente; Chrome tiene que estar al frente). Se apaga con la casilla "Abrir solo al entrar una llamada" al pie del cotizador. Requiere Chrome 127 o más nuevo (el PC del trabajo tiene Chrome 154). Desde la v3.0.6 la vigilancia de Vicidial se reconecta sola tras actualizar la extensión (antes había que recargar Vicidial para que se abriera solo).
