@@ -530,6 +530,16 @@ body.ext .guion[data-contraste="normal"] .guion-cab{ background:#123a6d }
 /* el borde de la tarjeta envuelve las dos columnas como una sola pieza */
 body.ext .app{ overflow:hidden }
 
+/* La tarjeta del cliente queda fija bajo la cabecera: al desplazar la
+   columna, sus datos siguen a la vista. La sombra del color del fondo tapa
+   el hueco de arriba, para que lo que pasa por detrás no se asome. */
+body.ext .cliente{
+  position:sticky; top:calc(var(--cab-alto) + 8px); z-index:2;
+  background:linear-gradient(135deg,var(--m-cli) 0%,#f7faff 140%);
+  box-shadow:0 -9px 0 1px var(--m-fondo), var(--m-sombra);
+}
+@media (prefers-color-scheme:dark){ body.ext .cliente{ background:var(--m-cli) } }
+
 /* ============ versión web ============ */
 :root{ color-scheme: light }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ color-scheme: dark } }
