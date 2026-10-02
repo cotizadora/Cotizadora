@@ -1,0 +1,3177 @@
+<title>Cotizador Dental Bci</title>
+<style>
+:root{
+  --bg:#fff; --ink:#15202b; --muted:#5d6b7a; --line:#dde3ec; --soft:#f4f6fa;
+  --brand:#123a6d; --brand2:#1f6feb;
+  --ok:#0f7b4f; --okbg:#e6f6ee; --warn:#8a5300; --warnbg:#fdf2dc; --bad:#a11f2c; --badbg:#fdeaec;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#151c25; --ink:#e8edf4; --muted:#9aa8b8; --line:#26313d; --soft:#0e1319;
+  --brand:#8ab4ff; --brand2:#4d90ff;
+  --ok:#5fd3a0; --okbg:#10291f; --warn:#f0c169; --warnbg:#2b2213; --bad:#ff8b96; --badbg:#2d1519;
+}}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:13px/1.35 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+.app{
+  display:flex; align-items:stretch; width:360px; overflow:hidden;
+  transition:width .26s cubic-bezier(.32,.72,0,1);
+}
+.app.abierto{width:780px}
+
+/* ---- marco del popup (sólo en la extensión) ----
+   Sobre la pantalla blanca de Vicidial el popup se perdía. Un fondo azul
+   grisáceo alrededor y la tarjeta con borde fino, esquinas redondeadas y
+   sombra suave lo despegan del fondo. Medidas: 780 + 2·7 + 2 = 796 px de
+   ancho y 580 + 16 de alto, dentro del máximo de Chrome (800 × 600). */
+body.ext{
+  padding:7px;
+  background:linear-gradient(160deg,#e3e9f2 0%,#cbd5e3 100%);
+}
+body.ext .app{
+  background:var(--bg);
+  border:1px solid rgba(18,58,109,.38);
+  border-radius:12px;
+  box-shadow:0 1px 2px rgba(12,28,56,.16), 0 4px 14px rgba(12,28,56,.20),
+             inset 0 1px 0 rgba(255,255,255,.7);
+}
+@media (prefers-color-scheme:dark){
+  body.ext{ background:linear-gradient(160deg,#0b1017 0%,#05080c 100%); }
+  body.ext .app{ border-color:rgba(138,180,255,.30); box-shadow:0 4px 16px rgba(0,0,0,.6); }
+}
+.app.arrastrando, .app.arrastrando .guion{transition:none}
+/* Al abrir, el popup aparece ya con su ancho final (sin animarse ni
+   obligar a Chrome a redimensionar la ventana): se ve al instante. */
+.app.sin-anim, .app.sin-anim .guion{transition:none !important}
+.izq{width:360px; flex:0 0 360px; padding-bottom:10px}
+
+/* ---- panel del script: se despliega hacia la derecha ---- */
+.guion{
+  flex:0 0 auto; width:0; min-width:0; align-self:stretch;
+  background:var(--soft); border-left:0 solid var(--line);
+  max-height:580px; overflow:hidden;
+  opacity:0; transform:translateX(10px);
+  transition:width .26s cubic-bezier(.32,.72,0,1),
+             opacity .18s ease .06s,
+             transform .26s cubic-bezier(.32,.72,0,1),
+             border-left-width .26s step-end;
+}
+.app.abierto .guion{
+  width:420px; opacity:1; transform:none;
+  overflow-y:auto; border-left-width:1px;
+  transition:width .26s cubic-bezier(.32,.72,0,1),
+             opacity .2s ease .08s,
+             transform .26s cubic-bezier(.32,.72,0,1),
+             border-left-width .26s step-start;
+}
+@media (prefers-reduced-motion: reduce){
+  .app, .guion{transition:none}
+}
+
+/* ---- nombre del plan: es el que abre el script ---- */
+.nomplan{
+  background:none; border:0; padding:0; margin:0; font:inherit; color:inherit;
+  text-align:left; cursor:pointer; border-bottom:1px dotted var(--muted);
+}
+.nomplan:hover{color:var(--brand2); border-bottom-color:var(--brand2)}
+tr.hit .nomplan{font-weight:700}
+tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
+.nomplan .flecha{font-size:9px; opacity:.55; margin-left:3px}
+.guion-cab{
+  position:sticky; top:0; z-index:2; display:flex; gap:8px; align-items:flex-start;
+  padding:9px 11px; background:var(--brand); color:#fff;
+}
+.guion-tit{font-size:13px; font-weight:800; line-height:1.2}
+.guion-sub{font-size:10.5px; opacity:.85; margin-top:2px}
+.guion-cab>div{flex:1; min-width:0}
+#cerrarGuion{
+  background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3);
+  border-radius:6px; width:22px; height:22px; font-size:15px; line-height:1; cursor:pointer; flex:0 0 auto;
+}
+#cerrarGuion:hover{background:rgba(255,255,255,.3)}
+
+
+.guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
+.gs{margin:.9em 0 0}
+.gs h4{
+  margin:0 0 .3em; font-size:.74em; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--g-muted); font-weight:800;
+}
+.gs p{margin:0 0 .35em; font-size:1em; line-height:1.5}
+.gs ul{margin:.2em 0 .45em; padding-left:1.25em; font-size:1em; line-height:1.45}
+.gs li{margin-bottom:.15em}
+.gs .dato{font-weight:800; color:var(--g-dato); font-variant-numeric:tabular-nums}
+.gs.clave{border-left:3px solid var(--bad); padding-left:8px; background:var(--badbg); border-radius:0 6px 6px 0; padding-top:6px; padding-bottom:2px}
+.gs.clave h4{color:var(--bad)}
+.gs.ojo{border-left:3px solid var(--warn); padding-left:8px; background:var(--warnbg); border-radius:0 6px 6px 0; padding-top:6px; padding-bottom:2px}
+.gs.ojo h4{color:var(--warn)}
+.gs .nota{font-size:.85em; color:var(--g-muted); font-style:italic}
+.uf{display:flex;position:sticky;top:0;z-index:3;align-items:center;gap:7px;background:#123a6d;color:#fff;padding:7px 10px}
+.uf-t{font-size:10px;letter-spacing:.09em;font-weight:700;opacity:.8}
+.uf-v{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.uf-f{font-size:10.5px;opacity:.8;flex:1}
+.uf-ver{font-size:9px;opacity:.6}
+.uf button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:13px;line-height:1}
+.uf button:hover{background:rgba(255,255,255,.3)}
+.uf-manual{display:none;gap:6px;align-items:center;padding:6px 10px;background:var(--warnbg);font-size:11.5px}
+.uf-manual input{width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:5px;
+  background:var(--bg);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
+
+/* ---- resumen permanente del calculo ---- */
+.resumen{
+  padding:7px 10px 8px; background:var(--soft); border-bottom:1px solid var(--line);
+}
+.res-plan{font-size:12px; font-weight:800; color:var(--brand); line-height:1.2}
+.res-linea{display:flex; align-items:baseline; gap:8px; margin-top:2px}
+.res-compos{font-size:10.5px; color:var(--muted); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.res-uf{font-size:12px; font-weight:700; font-variant-numeric:tabular-nums}
+.res-clp{font-size:13px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums}
+
+/* ---- edad con flechas ---- */
+.edadbox{position:relative; flex:0 0 58px}
+.edadbox input.edad{width:100%; padding-right:15px; flex:none}
+.spin{position:absolute; right:3px; top:3px; bottom:3px; display:flex; flex-direction:column; gap:1px}
+.spin button{
+  flex:1; width:12px; padding:0; border:0; background:none; cursor:pointer;
+  color:var(--muted); font-size:7px; line-height:1; border-radius:2px;
+}
+.spin button:hover{background:var(--line); color:var(--ink)}
+.edadbox input.edad[readonly] + .spin{display:none}
+
+.campo{padding:9px 10px 0}
+label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.fila{display:flex;gap:7px;align-items:center}
+input.fecha{
+  flex:0 0 108px;padding:7px 8px;border:1px solid var(--line);border-radius:7px;
+  background:var(--soft);color:var(--ink);font:inherit;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:.02em;
+}
+input.fecha:focus{outline:2px solid var(--brand2);outline-offset:1px}
+input.fecha.mal{border-color:var(--bad);background:var(--badbg)}
+select.par{flex:0 0 96px;padding:6px 5px;border:1px solid var(--line);border-radius:7px;background:var(--soft);color:var(--ink);font:inherit;font-size:11.5px}
+.chip{flex:1;font-size:11px;font-weight:700;padding:5px 7px;border-radius:6px;background:var(--soft);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.ok{background:var(--okbg);color:var(--ok)}
+.chip.bad{background:var(--badbg);color:var(--bad)}
+.chip.warn{background:var(--warnbg);color:var(--warn)}
+
+.conteo{display:flex;gap:5px}
+.conteo button{
+  flex:1;padding:6px 0;border:1px solid var(--line);border-radius:7px;background:var(--soft);
+  color:var(--ink);font:inherit;font-weight:700;cursor:pointer
+}
+.conteo button:hover{border-color:var(--brand2)}
+.conteo button.on{background:var(--brand2);color:#fff;border-color:var(--brand2)}
+
+.verif{padding:9px 10px 0}
+.abrir{
+  width:100%;display:flex;align-items:center;gap:6px;padding:7px 9px;
+  border:1px dashed var(--line);border-radius:7px;background:transparent;color:var(--muted);
+  font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;text-align:left
+}
+.abrir:hover{border-color:var(--brand2);color:var(--ink)}
+.abrir span{transition:transform .12s}
+.abrir.open{border-style:solid;color:var(--ink)}
+.abrir.open span{transform:rotate(90deg)}
+.abrir.hay{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+#panelVerif{padding:7px 0 0}
+.pista{margin:0 0 7px;font-size:10.5px;color:var(--muted);line-height:1.35}
+#envioPista{margin:5px 0 0}
+#envio button{font-size:11.5px}
+#hijos .fila{margin-bottom:6px}
+.veredicto{font-size:10.5px;line-height:1.3;margin:-2px 0 7px 0;padding-left:2px}
+.veredicto.pide{color:var(--warn)}
+input.edad{flex:0 0 46px;padding:7px 6px;border:1px solid var(--line);border-radius:7px;
+  background:var(--soft);color:var(--ink);font:inherit;font-size:14px;text-align:center;font-variant-numeric:tabular-nums}
+input.edad:focus{outline:2px solid var(--brand2);outline-offset:1px}
+input.edad.mal{border-color:var(--bad);background:var(--badbg)}
+input.edad[readonly]{background:transparent;border-style:dashed;color:var(--muted);cursor:default}
+.sep{font-size:10px;color:var(--muted);flex:0 0 auto}
+#hijos .fila .chip{flex:1 1 90px}
+input.comuna{
+  flex:1; padding:7px 9px; border:1px solid var(--line); border-radius:7px;
+  background:var(--soft); color:var(--ink); font:inherit; font-size:13px;
+}
+input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
+#clinRes{margin-top:7px}
+.conteo-redes{display:flex;gap:5px;margin-bottom:6px}
+.conteo-redes .red{font-size:9.5px;padding:2px 6px}
+.clin{padding:6px 8px; border-left:3px solid var(--line); background:var(--soft);
+  border-radius:0 6px 6px 0; margin-bottom:5px}
+.clin-n{font-size:12px; font-weight:700; line-height:1.25}
+.clin-d{font-size:10.5px; color:var(--muted); line-height:1.3; margin-top:1px}
+.clin-m{display:flex; gap:6px; align-items:center; margin-top:3px}
+.red{font-size:9px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+  padding:1px 5px; border-radius:4px; background:var(--line); color:var(--muted)}
+.red.unosalud{background:var(--okbg); color:var(--ok)}
+.red.edental{background:var(--warnbg); color:var(--warn)}
+.dist{font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums}
+.clin-vacio{font-size:11px; color:var(--muted); line-height:1.4; padding:4px 2px}
+.clin-vacio strong{color:var(--ink)}
+.sugerencias{font-size:11px; color:var(--muted); margin:4px 0 0}
+.sugerencias button{background:none;border:0;padding:0;font:inherit;color:var(--brand2);
+  cursor:pointer;text-decoration:underline}
+ .link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
+  color:var(--brand2);cursor:pointer;text-decoration:underline}
+.mapa.unosalud{background:var(--okbg);color:var(--ok);border-color:currentColor}
+/* ---- casilla de cargas ---- */
+.check{display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;
+  font-size:12.5px;font-weight:700;color:var(--ink);margin:0;padding:7px 9px;border:1px solid var(--line);
+  border-radius:8px;background:var(--soft)}
+.check input{width:16px;height:16px;margin:0;accent-color:var(--brand2);cursor:pointer}
+.check:has(input:checked){border-color:var(--brand2)}
+#bloqueCargas{margin-top:8px}
+#bloqueCargas .pista{margin:7px 0 6px}
+
+/* ---- sucursales por red ---- */
+#sugComunas{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px}
+#sugComunas:empty{display:none}
+.sug-t{font-size:10.5px;color:var(--muted)}
+.sug{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;
+  padding:3px 9px;font:inherit;font-size:11px;cursor:pointer}
+.sug:hover{border-color:var(--brand2);color:var(--brand2)}
+.clin-titulo{margin:8px 0 4px;font-size:11.5px;color:var(--muted)}
+.clin-titulo strong{color:var(--ink)}
+.redblq{margin-top:7px}
+.redcab{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.redn{font-size:11px;font-weight:700;color:var(--ink);flex:1}
+.fuente{font-size:10.5px;color:var(--brand2);text-decoration:none;white-space:nowrap}
+.fuente:hover{text-decoration:underline}
+
+.capturado{font-size:9.5px; color:var(--muted); margin-top:6px; font-style:italic}
+
+.guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;
+  border-radius:7px;background:var(--soft);font-size:10.5px;color:var(--muted)}
+.guardado[hidden]{display:none}
+
+/* ---- cliente leído de Vicidial ---- */
+.cliente{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:6px 10px;
+  background:var(--okbg);border-bottom:1px solid var(--line);font-size:11px;color:var(--ink)}
+.cliente[hidden]{display:none}
+.cliente b{font-size:12.5px}
+.cliente span{color:var(--muted)}
+.tipif-cli{display:flex;gap:6px;padding:6px 10px;background:var(--okbg);border-bottom:1px solid var(--line)}
+.tipif-cli[hidden]{display:none}
+.tipif-cli select{flex:0 0 auto;max-width:170px;border:1px solid var(--line);border-radius:6px;padding:3px 4px;font:inherit;font-size:11.5px;font-weight:700;background:var(--bg);color:var(--ink)}
+.tipif-cli select.bueno{color:var(--ok);border-color:var(--ok)}
+.tipif-cli select.malo{color:var(--bad);border-color:var(--bad)}
+.tipif-cli input{flex:1;min-width:0;border:1px solid var(--line);border-radius:6px;padding:3px 7px;font:inherit;font-size:11.5px;background:var(--bg);color:var(--ink)}
+#verHistorial{margin-left:auto}
+.cli-linea{flex-basis:100%;font-size:10.5px;color:var(--muted);line-height:1.35}
+.cli-linea i{font-style:normal;font-weight:700;color:var(--ink)}
+.guion-cuerpo .cli-dato{display:inline-block;margin-left:4px;padding:0 6px;border-radius:4px;background:var(--okbg);color:var(--ok);font-weight:700;font-style:normal}
+.guion-cuerpo em.cli{font-style:normal;font-weight:700;color:var(--g-dato, inherit)}
+.guardado span{flex:1}
+#limpiar{border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--bad);
+  font:inherit;font-size:10.5px;font-weight:700;padding:4px 8px;cursor:pointer}
+#limpiar:hover{border-color:var(--bad)}
+.veredicto.si{color:var(--ok)} .veredicto.no{color:var(--bad)} .veredicto.n{color:var(--muted)}
+
+.aviso{margin:9px 10px 0;padding:7px 9px;border-radius:7px;font-size:11.5px;border-left:3px solid;display:none}
+.aviso.ok{display:block;background:var(--okbg);border-color:var(--ok)}
+.aviso.bad{display:block;background:var(--badbg);border-color:var(--bad)}
+.aviso.warn{display:block;background:var(--warnbg);border-color:var(--warn)}
+
+table{width:calc(100% - 20px);margin:9px 10px 0;border-collapse:collapse;font-size:12px}
+th,td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.hit td{background:var(--okbg);font-weight:700}
+tr.sel{cursor:pointer}
+tr.sel:hover td{background:var(--soft)}
+tr[data-plan] td:first-child::before{content:"";display:inline-block;width:9px;height:9px;margin-right:6px;
+  border:1.5px solid var(--line);border-radius:50%;vertical-align:baseline}
+tr.hit td:first-child::before{border-color:var(--ok);background:var(--ok);box-shadow:inset 0 0 0 1.5px var(--okbg)}
+tr.veta{cursor:not-allowed}
+tr.veta td{opacity:.5;text-decoration:line-through}
+tr.veta small{font-weight:400;text-decoration:none;display:inline-block}
+td.off{color:var(--muted)}
+
+.total{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding-top:8px;border-top:2px solid var(--line)}
+.total>div{flex:1;display:flex;align-items:baseline;gap:7px}
+.t-uf{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.t-clp{font-size:15px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums}
+#copiar{padding:6px 11px;border:1px solid var(--line);border-radius:7px;background:var(--soft);color:var(--ink);font:inherit;font-size:11.5px;cursor:pointer}
+#copiar:hover{border-color:var(--brand2)}
+.exacto{margin:4px 10px 0;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ============ lectura del script: letra, contraste y modo guiado ============
+   Los colores del script viven en variables propias (--g-*), para que el
+   contraste elegido cambie sólo esta zona y no el resto del cotizador. */
+.guion{
+  --g-bg:var(--soft); --g-ink:var(--ink); --g-muted:var(--muted); --g-dato:var(--brand);
+  --g-cab:#123a6d; --g-cab-ink:#fff;
+  --g-mark:#fff1b8; --g-mark-ink:#15202b; --g-mark-borde:#d99a00;
+  background:var(--g-bg); color:var(--g-ink);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .guion{
+  --g-mark:#4a3d0f; --g-mark-ink:#fff6d6; --g-mark-borde:#f0c169;
+}}
+:root[data-theme="dark"] .guion{ --g-mark:#4a3d0f; --g-mark-ink:#fff6d6; --g-mark-borde:#f0c169; }
+
+.guion[data-contraste="negro"]{
+  --g-bg:#000; --g-ink:#fff; --g-muted:#c4c4c4; --g-dato:#8fdcff;
+  --g-cab:#000; --g-cab-ink:#fff; --g-mark:#ffe600; --g-mark-ink:#000; --g-mark-borde:#ffe600;
+}
+.guion[data-contraste="alto"]{
+  --g-bg:#fff; --g-ink:#000; --g-muted:#262626; --g-dato:#0030c0;
+  --g-cab:#000; --g-cab-ink:#fff; --g-mark:#000; --g-mark-ink:#fff; --g-mark-borde:#000;
+}
+.guion[data-contraste="sepia"]{
+  --g-bg:#f4ead3; --g-ink:#3a2c18; --g-muted:#6d5a3d; --g-dato:#8a3c00;
+  --g-cab:#5b4426; --g-cab-ink:#f4ead3; --g-mark:#e7cf95; --g-mark-ink:#2a1e0d; --g-mark-borde:#9a6a18;
+}
+.guion-cab{ background:var(--g-cab); color:var(--g-cab-ink); }
+.guion[data-contraste="negro"] .guion-cab{ border-bottom:1px solid #fff }
+.guion:not([data-contraste="normal"]) .gs.clave,
+.guion:not([data-contraste="normal"]) .gs.ojo{ background:transparent; border-left-color:var(--g-mark-borde) }
+.guion:not([data-contraste="normal"]) .gs.clave h4,
+.guion:not([data-contraste="normal"]) .gs.ojo h4{ color:var(--g-ink) }
+.guion[data-contraste="alto"] .paso.actual .dato,
+.guion[data-contraste="alto"] .paso.actual strong{ color:#fff }
+
+.guion-barra{
+  position:sticky; top:calc(var(--gb-top, 46px)); z-index:1;
+  display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center;
+  padding:6px 11px; background:var(--g-bg); border-bottom:1px solid var(--line);
+}
+.guion[data-contraste="negro"] .guion-barra{ border-bottom-color:#444 }
+.gb-grupo{ display:flex; align-items:center; gap:3px }
+.gb-grupo button{
+  min-width:26px; padding:3px 7px; border:1px solid var(--line); border-radius:6px;
+  background:transparent; color:var(--g-ink); font:inherit; font-size:11px; font-weight:700; cursor:pointer;
+}
+.gb-grupo button:hover{ border-color:var(--g-mark-borde) }
+.gb-grupo button.on{ background:var(--g-ink); color:var(--g-bg); border-color:var(--g-ink) }
+.gb-grupo button:focus-visible{ outline:2px solid var(--g-mark-borde); outline-offset:1px }
+.gb-val{ font-size:10.5px; color:var(--g-muted); min-width:3.6em; text-align:center; font-variant-numeric:tabular-nums }
+
+/* La frase que toca leer queda marcada; lo ya leído se atenúa. Así el
+   ejecutivo sabe dónde quedó aunque mire a otro lado. */
+.guion.guiada .paso{ cursor:pointer; border-radius:5px; transition:opacity .15s, background-color .15s }
+.guion.guiada p.paso{ padding:.12em .4em; margin-left:-.4em; margin-right:-.4em }
+.guion.guiada li.paso{ padding:.06em .3em; margin-left:-.3em }
+.guion.guiada .paso.leido{ opacity:.45 }
+.guion.guiada .paso.actual{
+  background:var(--g-mark); color:var(--g-mark-ink); opacity:1;
+  box-shadow:-.3em 0 0 var(--g-mark-borde);
+}
+.guion.guiada .paso.actual .nota{ color:inherit; opacity:.8 }
+@media (prefers-reduced-motion: reduce){ .guion.guiada .paso{ transition:none } }
+
+/* ============ módulos por jerarquía (sólo en la extensión) ============
+   Cada bloque de información es una tarjeta redondeada con su propio tono,
+   de más a menos importante:
+     1. Cliente leído de Vicidial ........ azul (quién es)
+     2. Tipificación de la llamada ....... verde menta
+     3. Plan elegido y cotización ........ blanco sobre gris (lo que se vende)
+     4. Total a cobrar ................... azul marino suave, el más marcado
+     5. Clínicas por comuna .............. turquesa (información de apoyo)
+     6. Guardado / avisos ................ arena (estado)
+   El scroll vive dentro de cada columna, para que el popup nunca pase del
+   máximo de Chrome (800 × 600) ni muestre barras propias. */
+body.ext{
+  --m-fondo:#eef2f7;
+  --m-tarjeta:#fff; --m-borde:#d5dde8;
+  --m-cli:#e7effb; --m-cli-borde:#9db8de; --m-cli-acento:#123a6d;
+  --m-tip:#e6f5ec; --m-tip-borde:#a9d8bd;
+  --m-total:#e4ebf6; --m-total-borde:#8fa7c9;
+  --m-clin:#e3f3f1; --m-clin-borde:#9fd1c9;
+  --m-est:#faf3e3; --m-est-borde:#e5d3a6;
+  --m-sombra:0 1px 2px rgba(12,28,56,.07), 0 2px 6px rgba(12,28,56,.06);
+  overflow:hidden;
+}
+@media (prefers-color-scheme:dark){ body.ext{
+  --m-fondo:#10161e;
+  --m-tarjeta:#18212c; --m-borde:#2a3644;
+  --m-cli:#16243a; --m-cli-borde:#2e4a72; --m-cli-acento:#8ab4ff;
+  --m-tip:#122a1f; --m-tip-borde:#24513a;
+  --m-total:#172338; --m-total-borde:#36507a;
+  --m-clin:#10282a; --m-clin-borde:#24544f;
+  --m-est:#2a2416; --m-est-borde:#5a4a22;
+  --m-sombra:0 1px 3px rgba(0,0,0,.4);
+}}
+body.ext .app{max-height:584px}
+body.ext .izq{
+  max-height:582px; overflow-y:auto; scrollbar-width:thin;
+  background:var(--m-fondo); padding-bottom:10px;
+}
+body.ext .guion{max-height:582px}
+
+/* 1. cliente */
+body.ext .cliente{
+  margin:8px 8px 0; padding:7px 10px 7px 11px; border:1px solid var(--m-cli-borde);
+  border-left:4px solid var(--m-cli-acento); border-radius:10px;
+  background:linear-gradient(135deg,var(--m-cli) 0%,var(--m-tarjeta) 140%);
+  box-shadow:var(--m-sombra);
+}
+body.ext .cliente b{color:var(--m-cli-acento)}
+/* 2. tipificación */
+body.ext .tipif-cli{
+  margin:6px 8px 0; padding:6px 8px; border:1px solid var(--m-tip-borde);
+  border-radius:10px; background:var(--m-tip); box-shadow:var(--m-sombra);
+}
+body.ext .uf-manual{margin:6px 8px 0; border-radius:10px; border:1px solid var(--m-est-borde)}
+/* 3. plan elegido y cotización */
+body.ext .resumen{
+  margin:8px 8px 0; padding:8px 11px; border:1px solid var(--m-borde); border-radius:10px;
+  background:var(--m-tarjeta); box-shadow:var(--m-sombra);
+}
+body.ext .campo{
+  margin:8px 8px 0; padding:9px 10px; border:1px solid var(--m-borde); border-radius:10px;
+  background:var(--m-tarjeta); box-shadow:var(--m-sombra);
+}
+body.ext .campo > label.check{margin:0; border:0; background:none; padding:2px 0}
+body.ext .campo:has(> label.check input:checked){border-color:var(--brand2)}
+body.ext .aviso{margin:8px 8px 0; border-radius:10px}
+body.ext table{
+  width:calc(100% - 16px); margin:8px 8px 0; border-collapse:separate; border-spacing:0;
+  background:var(--m-tarjeta); border:1px solid var(--m-borde); border-radius:10px;
+  overflow:hidden; box-shadow:var(--m-sombra);
+}
+body.ext tr:last-child td{border-bottom:0}
+/* 5. clínicas por comuna */
+body.ext .verif{
+  margin:8px 8px 0; padding:8px; border:1px solid var(--m-clin-borde); border-radius:10px;
+  background:var(--m-clin); box-shadow:var(--m-sombra);
+}
+body.ext .verif .abrir{border:0; padding:2px 2px; color:#0f5c55}
+body.ext .verif .clin{background:var(--m-tarjeta); border-radius:0 8px 8px 0}
+body.ext .verif .comuna{background:var(--m-tarjeta)}
+/* 6. guardado */
+body.ext .guardado{
+  margin:8px 8px 0; border:1px solid var(--m-est-borde); border-radius:10px; background:var(--m-est);
+}
+/* 4. total */
+body.ext .total{
+  margin:8px 8px 0; padding:9px 11px; border:1px solid var(--m-total-borde); border-top-width:1px;
+  border-radius:10px; background:var(--m-total); box-shadow:var(--m-sombra);
+}
+body.ext .exacto{margin:4px 12px 0}
+
+/* script: cada sección es una tarjeta (sólo en contraste Normal; los demás
+   modos de lectura quedan como estaban, que es lo que se pidió para leer) */
+body.ext .guion[data-contraste="normal"] .guion-cuerpo{padding:.2em 9px 1.2em}
+body.ext .guion[data-contraste="normal"] .gs{
+  margin:.7em 0 0; padding:.55em .8em .45em; background:var(--m-tarjeta);
+  border:1px solid var(--m-borde); border-radius:10px; box-shadow:var(--m-sombra);
+}
+body.ext .guion[data-contraste="normal"] .gs h4{color:var(--brand)}
+body.ext .guion[data-contraste="normal"] .gs.clave,
+body.ext .guion[data-contraste="normal"] .gs.ojo{border-left-width:4px; border-radius:10px}
+
+/* casilla "Abrir solo al entrar una llamada" */
+.auto-abrir{display:flex;align-items:center;gap:6px;margin:8px 12px 0;font-size:10.5px;font-weight:600;
+  text-transform:none;letter-spacing:0;color:var(--muted);cursor:pointer}
+.auto-abrir input{margin:0;accent-color:var(--brand2);cursor:pointer}
+.auto-abrir[hidden]{display:none}
+
+/* ============ barra del script compacta + atajos de tipificación ============
+   Una sola fila de íconos (como en Word): A↓ A↑ para la letra, cuatro
+   muestras de color para el contraste y ¶ ▲ n ▼ para la lectura guiada.
+   El espacio que queda lo ocupan 2 filas × 3 botones con las tipificaciones
+   grabadas en ShortCut-Vicidial-GO. */
+.guion-barra{ display:block; padding:5px 9px 6px }
+.gb-fila{ display:flex; align-items:center; justify-content:space-between; gap:6px }
+.gb-grupo button.gb-ic{ min-width:24px; height:22px; padding:0 5px; display:inline-flex; align-items:center; justify-content:center; gap:1px; font-size:11px }
+.a-chica{ font-size:10px; font-weight:800 } .a-grande{ font-size:13.5px; font-weight:800; line-height:1 } .a-flecha{ font-size:8.5px; opacity:.7 }
+.gb-mini{ min-width:2.6em; font-size:9.5px }
+.gb-tonos{ gap:5px }
+.gb-grupo button.tono{ min-width:0; width:16px; height:16px; padding:0; border-radius:50%; border:1px solid rgba(0,0,0,.25) }
+.gb-grupo button.tono.on{ box-shadow:0 0 0 2px var(--g-bg), 0 0 0 3.5px var(--brand2); border-color:transparent }
+.gb-grupo button.t-normal, .gb-grupo button.t-normal.on{ background:#f4f6fa }
+.gb-grupo button.t-negro, .gb-grupo button.t-negro.on{ background:#000 }
+.gb-grupo button.t-alto, .gb-grupo button.t-alto.on{ background:linear-gradient(135deg,#fff 50%,#000 50%) }
+.gb-grupo button.t-sepia, .gb-grupo button.t-sepia.on{ background:#f4ead3 }
+
+.atajos{ display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:6px }
+.atajos[hidden]{ display:none }
+.atajo{
+  all:unset; box-sizing:border-box; cursor:pointer; text-align:center;
+  padding:4px 6px; border-radius:9px; font-size:10px; font-weight:800; line-height:1.15;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+  min-height:28px; align-content:center; word-break:break-word;
+  border:1px solid; box-shadow:0 1px 2px rgba(12,28,56,.10);
+  transition:transform .08s, box-shadow .12s;
+}
+.atajo:hover{ box-shadow:0 2px 6px rgba(12,28,56,.20) }
+.atajo:active{ transform:scale(.97) }
+.atajo:focus-visible{ outline:2px solid var(--brand2); outline-offset:1px }
+.atajo.verde{ background:linear-gradient(180deg,#eefaf3,#dcf2e5); border-color:#94d1ad; color:#0f5e3a }
+.atajo.ambar{ background:linear-gradient(180deg,#fff8ea,#fcecc8); border-color:#e8c27a; color:#7a4c00 }
+.atajo.rojo { background:linear-gradient(180deg,#fff1f2,#fbdde1); border-color:#eda5ae; color:#8f1d2b }
+.atajo.azul { background:linear-gradient(180deg,#eff5fd,#dde9fa); border-color:#9dbbe6; color:#123a6d }
+.atajo.armado{ border-width:2px; animation:atajoLatido 1.2s ease-in-out infinite }
+@keyframes atajoLatido{ 50%{ box-shadow:0 0 0 3px rgba(31,111,235,.25) } }
+@media (prefers-reduced-motion: reduce){ .atajo.armado{ animation:none } }
+
+
+/* ============ cabecera unificada (sólo en la extensión) ============
+   Las cabeceras de las dos columnas forman UNA franja: misma altura, mismo
+   azul, sin línea vertical entre ellas y sin la barra de desplazamiento de
+   la columna izquierda asomando arriba (la columna sigue desplazándose con
+   la rueda del mouse). Debajo de la franja, las dos columnas comparten el
+   mismo fondo y sólo las separa una línea suave. */
+body.ext{ --cab-alto:48px }
+body.ext .izq{ scrollbar-width:none; box-shadow:inset -1px 0 0 var(--m-borde) }
+body.ext .izq::-webkit-scrollbar{ display:none }
+body.ext .uf, body.ext .guion-cab{
+  height:var(--cab-alto); box-sizing:border-box; align-items:center;
+  background:#123a6d; box-shadow:inset 0 -1px 0 rgba(255,255,255,.08);
+}
+body.ext .uf{ padding:0 10px 0 13px; gap:8px }
+body.ext .guion-cab{ padding:0 10px 0 14px }
+body.ext .guion-tit{ font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+body.ext .guion-sub{ font-size:10.5px; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+body.ext .app.abierto .guion{ border-left-width:0 }
+body.ext .guion[data-contraste="normal"]{ --g-bg:var(--m-fondo) }
+body.ext .guion[data-contraste="normal"] .guion-cab{ background:#123a6d }
+/* el borde de la tarjeta envuelve las dos columnas como una sola pieza */
+body.ext .app{ overflow:hidden }
+
+/* La tarjeta del cliente queda fija bajo la cabecera: al desplazar la
+   columna, sus datos siguen a la vista. La sombra del color del fondo tapa
+   el hueco de arriba, para que lo que pasa por detrás no se asome. */
+body.ext .cliente{
+  position:sticky; top:calc(var(--cab-alto) + 8px); z-index:2;
+  background:linear-gradient(135deg,var(--m-cli) 0%,#f7faff 140%);
+  box-shadow:0 -9px 0 1px var(--m-fondo), var(--m-sombra);
+}
+@media (prefers-color-scheme:dark){ body.ext .cliente{ background:var(--m-cli) } }
+
+/* ============ versión web ============ */
+:root{ color-scheme: light }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ color-scheme: dark } }
+:root[data-theme="dark"]{ color-scheme: dark }
+body{ padding-block: 14px; padding-inline: 16px; }
+.cab{ max-width: 1400px; margin: 0 auto 10px; }
+.cab h1{ font-size: 17px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
+.cab p{ font-size: 12px; color: var(--muted); margin: 3px 0 0; line-height: 1.4; }
+.marco{ max-width: 420px; margin: 0 auto; border: 1px solid var(--line); border-radius: 14px; overflow: clip; background: var(--bg); }
+.marco:has(.app.abierto){ max-width: 1400px; }
+.app, .app.abierto{ width: 100%; max-width: none; flex-wrap: wrap; overflow: visible; transition: none; }
+.izq{ flex: 1 1 340px; width: auto; min-width: 0; }
+.guion{ flex: 1 1 360px; width: auto; min-width: 0; max-height: none; opacity: 1; transform: none; transition: none; border-left-width: 1px; overflow-y: visible; display: none; }
+.app.abierto .guion{ display: block; width: auto; animation: entra .22s ease both; }
+@keyframes entra{ from{ opacity:0; transform: translateY(6px) } to{ opacity:1; transform:none } }
+@media (prefers-reduced-motion: reduce){ .app.abierto .guion{ animation: none } }
+.tirador{ display: none !important; }
+.pie{ max-width: 1400px; margin: 10px auto 0; font-size: 11px; color: var(--muted); line-height: 1.5 }
+.pie strong{ color: var(--ink) }
+
+/* Computador: la página ocupa la ventana. Cotización a la izquierda y el
+   script a la derecha con todo el ancho que queda; cada columna se
+   desplaza por su cuenta, así el precio no se pierde de vista. */
+@media (min-width: 900px) and (min-height: 480px){
+  body{ height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  .cab, .pie{ flex: none; width: 100%; }
+  .marco{ flex: 0 1 auto; min-height: 0; width: 100%; display: flex; }
+  .marco:has(.app.abierto){ flex: 1 1 auto; }
+  .app, .app.abierto{ flex: 1 1 auto; min-height: 0; flex-wrap: nowrap; align-items: stretch; }
+  .izq{ overflow-y: auto; }
+  .app.abierto .izq{ flex: 0 0 380px; width: 380px; }
+  .app.abierto .guion{ flex: 1 1 auto; overflow-y: auto; border-left: 1px solid var(--line); }
+}
+/* Teléfono y ventanas angostas: una columna, el script debajo */
+@media (max-width: 899px){
+  .guion{ border-left: 0; border-top: 1px solid var(--line); }
+  .guion-cab{ position: static; }
+}
+.uf{ position: static; }
+.uf-manual{ background: var(--soft) !important; border-bottom: 1px solid var(--line); font-weight: 600 }
+.uf-vieja{ display: block; padding: 6px 10px; font-size: 11px; font-weight: 600; background: var(--warnbg); color: var(--warn); border-bottom: 1px solid var(--line); }
+.uf-vieja[hidden]{ display: none }
+
+</style>
+
+<div class="cab">
+  <h1>Cotizador Dental Bci</h1>
+  <p>Edad de las cargas, plan que corresponde y script de venta.</p>
+</div>
+
+<div class="marco">
+<div class="app abierto sin-anim" id="app">
+
+  <div class="izq">
+    <div class="uf">
+      <span class="uf-t">UF</span>
+      <span class="uf-v" id="ufVal">—</span>
+      <span class="uf-f" id="ufFecha"></span>
+      <span class="uf-ver" id="verExt"></span>
+      <button id="verHistorial" type="button" title="Historial de clientes (planilla)">&#128202;</button>
+      <button id="ufReload" type="button" title="Actualizar UF">&#8635;</button>
+    </div>
+    <div class="uf-vieja" id="ufVieja" hidden></div>
+    <div class="cliente" id="cliente" hidden></div>
+    <div class="tipif-cli" id="tipifCli" hidden>
+      <select id="tipifSel" title="Tipificación de esta llamada (queda en el Historial)"></select>
+      <input id="notaCli" type="text" placeholder="nota de la llamada…" title="Queda como observación en el Historial">
+    </div>
+    <div class="uf-manual" id="ufManualBox">
+      <label for="ufManual">Valor UF de hoy:</label>
+      <input id="ufManual" type="text" inputmode="decimal" placeholder="39454,17">
+    </div>
+
+    <div class="resumen" id="resumen">
+      <div class="res-plan" id="resPlan">Plan Urgencias</div>
+      <div class="res-linea">
+        <span class="res-compos" id="resCompos">titular solo</span>
+        <span class="res-uf" id="resUF">—</span>
+        <span class="res-clp" id="resCLP">—</span>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label class="check" for="tieneCargas">
+        <input type="checkbox" id="tieneCargas">
+        <span>Tiene cargas (adicionales del titular)</span>
+      </label>
+      <div id="bloqueCargas" hidden>
+        <div class="conteo" id="conteo">
+          <button type="button" data-n="1">1</button>
+          <button type="button" data-n="2">2</button>
+          <button type="button" data-n="3">3</button>
+        </div>
+        <p class="pista">Edad de cada carga. Escríbela o súbela con las flechas. Si consigues la fecha de nacimiento, escríbela y el cálculo se vuelve exacto.</p>
+        <div id="hijos"></div>
+      </div>
+    </div>
+
+    <div class="aviso" id="aviso"></div>
+
+    <div class="campo">
+      <label>Envío de la póliza</label>
+      <div class="conteo" id="envio">
+        <button type="button" data-envio="linea" class="on">En línea</button>
+        <button type="button" data-envio="link">Link de pago</button>
+      </div>
+      <p class="pista" id="envioPista">Tiene cuenta Bci: se carga la prima a su cuenta corriente.</p>
+    </div>
+
+    <table id="tabla">
+      <thead><tr><th>Plan &middot; clic en el nombre para el script</th><th class="n">UF</th><th class="n">Mensual</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <div class="verif">
+      <button type="button" id="abrirClin" class="abrir">
+        <span>&#9656;</span> Clínica por comuna
+      </button>
+      <div id="panelClin" hidden>
+        <div class="fila">
+          <input type="text" id="comuna" class="comuna" placeholder="escribe la comuna del cliente" autocomplete="off" spellcheck="false">
+        </div>
+        <div id="sugComunas"></div>
+        <div id="clinRes"></div>
+        <p class="capturado" id="lineaMapeo"><button type="button" class="link-carga" id="abrirMapeo">Mapeo completo de comunas</button></p>
+      </div>
+    </div>
+
+    <div class="guardado" id="guardado" hidden>
+      <span id="guardadoTxt">Datos guardados</span>
+      <button type="button" id="limpiar">Nuevo cliente</button>
+    </div>
+
+    <div class="total">
+      <div>
+        <span class="t-uf" id="tUF">—</span>
+        <span class="t-clp" id="tCLP"></span>
+      </div>
+      <button id="copiar" type="button">Copiar</button>
+    </div>
+    <div class="exacto" id="exacto"></div>
+    <label class="auto-abrir" id="lineaAutoAbrir"><input type="checkbox" id="autoAbrir" checked> Al entrar una llamada: ir a Vicidial y abrir el cotizador</label>
+  </div>
+
+  <aside class="guion" id="guion">
+    <div class="guion-cab">
+      <div>
+        <div class="guion-tit" id="guionTit">Script</div>
+        <div class="guion-sub" id="guionSub"></div>
+      </div>
+      <button type="button" id="cerrarGuion" title="Ocultar el script">&times;</button>
+    </div>
+    <div class="guion-barra">
+      <div class="gb-fila">
+        <div class="gb-grupo" title="Tamaño de la letra">
+          <button type="button" id="letraMenos" class="gb-ic" aria-label="Letra más chica" title="Letra más chica"><span class="a-chica">A</span><span class="a-flecha">&#8595;</span></button>
+          <button type="button" id="letraMas" class="gb-ic" aria-label="Letra más grande" title="Letra más grande"><span class="a-grande">A</span><span class="a-flecha">&#8593;</span></button>
+          <span id="letraTam" class="gb-val gb-mini">100%</span>
+        </div>
+        <div class="gb-grupo gb-tonos" id="contraste" title="Contraste">
+          <button type="button" data-c="normal" class="on tono t-normal" title="Normal" aria-label="Normal"></button>
+          <button type="button" data-c="negro" class="tono t-negro" title="Fondo negro" aria-label="Fondo negro"></button>
+          <button type="button" data-c="alto" class="tono t-alto" title="Alto contraste" aria-label="Alto contraste"></button>
+          <button type="button" data-c="sepia" class="tono t-sepia" title="Sepia" aria-label="Sepia"></button>
+        </div>
+        <div class="gb-grupo" title="Lectura guiada: avanza y retrocede con las flechas ↑ ↓">
+          <button type="button" id="guiada" class="on gb-ic" title="Lectura guiada (marca la frase que toca)" aria-label="Lectura guiada">&#182;</button>
+          <button type="button" id="pasoAnt" class="gb-ic" aria-label="Frase anterior">&#9650;</button>
+          <span id="pasoNum" class="gb-val">—</span>
+          <button type="button" id="pasoSig" class="gb-ic" aria-label="Frase siguiente">&#9660;</button>
+        </div>
+      </div>
+      <div class="atajos" id="atajos" hidden></div>
+    </div>
+    <div class="guion-cuerpo" id="guionCuerpo"></div>
+  </aside>
+
+</div>
+</div>
+
+<p class="pie">La UF del día se actualiza sola desde mindicador.cl (respaldo: boostr.cl); si no hay conexión, se puede escribir a mano. El buscador de sucursales no funciona en la página web: los sitios de Uno Salud e i-dental no dejan que otra página los lea.<br>Tarifas del script de septiembre 2026. Conversión con aritmética entera, sin redondeos.</p>
+
+<script>
+/* ============================================================
+   MOTOR DE LECTURA DE LAS REDES
+   Compartido por el popup (buscador) y la pestaña de mapeo.
+   ============================================================ */
+
+/* ---------- guardado ----------
+   chrome.storage en la extensión; localStorage si se abre como
+   archivo suelto o como página web. */
+const almacen = {
+  leer: function(clave, cb){
+    try{ chrome.storage.local.get(clave, function(r){ cb(r ? r[clave] : null); }); }
+    catch(e){
+      try{ cb(JSON.parse(localStorage.getItem(clave) || "null")); }catch(e2){ cb(null); }
+    }
+  },
+  escribir: function(clave, valor){
+    try{ chrome.storage.local.set(Object.fromEntries([[clave, valor]])); }
+    catch(e){ try{ localStorage.setItem(clave, JSON.stringify(valor)); }catch(e2){} }
+  },
+  borrar: function(clave){
+    try{ chrome.storage.local.remove(clave); }
+    catch(e){ try{ localStorage.removeItem(clave); }catch(e2){} }
+  }
+};
+
+/* ============================================================
+   SUCURSALES POR COMUNA, LEÍDAS DE LOS SITIOS DE CADA RED
+   La extensión corre en el Chrome del ejecutivo, así que lee
+   unosalud.cl y e-dentalsys.com directamente (los permisos están
+   en el manifest). Lo leído se guarda un día, para no consultar
+   el sitio en cada llamada.
+   ============================================================ */
+const RED = {
+  unosalud: {
+    nombre: "Uno Salud",
+    sitio: "https://www.unosalud.cl/region-comuna/",
+    indices: ["https://www.unosalud.cl/region-comuna/", "https://www.unosalud.cl/clinicas/"],
+    comuna: function(slug){ return "https://www.unosalud.cl/region-comuna/" + slug + "/"; }
+  },
+  edental: {
+    nombre: "i-dental",
+    sitio: "https://www.e-dentalsys.com/#clinicas",
+    portada: "https://www.e-dentalsys.com/"
+  }
+};
+const DIA = 24 * 60 * 60 * 1000;
+const diag = {};   // lo que vio la última lectura de cada red, para depurar
+
+/* ---------- texto ---------- */
+function norm(t){
+  return String(t || "").toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+}
+function esc(t){
+  return String(t == null ? "" : t).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function urlSegura(u){ return /^https:\/\//i.test(String(u || "")) ? u : ""; }
+function humanizar(slug){
+  return String(slug || "").split("-").filter(Boolean).map(function(w){
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(" ");
+}
+function txt(el){ return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : ""; }
+
+// Texto de un bloque separado en líneas, cortando donde corta el diseño
+const BLOQUE = /^(ADDRESS|ARTICLE|ASIDE|BLOCKQUOTE|BR|DD|DIV|DL|DT|FIGCAPTION|FIGURE|FOOTER|FORM|H[1-6]|HEADER|HR|LI|MAIN|NAV|OL|P|SECTION|TABLE|TBODY|TD|TH|TR|UL)$/;
+function lineas(el){
+  const out = []; let buf = "";
+  function cortar(){ const t = buf.replace(/\s+/g, " ").trim(); if(t) out.push(t); buf = ""; }
+  (function rec(n){
+    n.childNodes.forEach(function(c){
+      if(c.nodeType === 3){ buf += c.textContent; return; }
+      if(c.nodeType !== 1 || /^(SCRIPT|STYLE|NOSCRIPT|SVG|BUTTON|IFRAME|SELECT|TEMPLATE)$/.test(c.tagName)) return;
+      const b = BLOQUE.test(c.tagName);
+      if(b) cortar();
+      rec(c);
+      if(b) cortar();
+    });
+  })(el);
+  cortar();
+  return out;
+}
+
+const RE_FONO = /(\+?56[\s-]?)?(600[\s-]?\d{3}[\s-]?\d{4}|\(?22?\)?[\s-]?\d{3,4}[\s-]?\d{4}|9[\s-]?\d{4}[\s-]?\d{4})/;
+function pareceHorario(l){
+  return /(lunes|martes|miercoles|jueves|viernes|sabado|domingo|\blun\b|\bvie\b|\bsab\b)/.test(norm(l)) &&
+         /\d{1,2}[:.]\d{2}/.test(l);
+}
+function pareceDireccion(l){
+  if(l.length < 6 || l.length > 160 || !/\d/.test(l)) return false;
+  if(pareceHorario(l)) return false;
+  const sinFono = l.replace(RE_FONO, "").trim();
+  if(!/[a-záéíóúñ]{3,}/i.test(sinFono)) return false;          // sólo un teléfono
+  if(/^(tel|fono|telefono|whatsapp|llama)/.test(norm(l))) return false;
+  return /(\bav\b|av\.|avenida|calle|pasaje|camino|paseo|alameda|mall|local|piso|esquina|esq\.|n°|nº|#|\bsur\b|\bnorte\b|oriente|poniente)/i.test(l) ||
+         /[a-záéíóúñ]{3,}[^0-9]{0,40}\d{2,5}/i.test(l);
+}
+
+/* ---------- búsqueda tolerante ---------- */
+function distancia(a, b, max){
+  if(Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = [], fila = [];
+  for(let j = 0; j <= b.length; j++) prev[j] = j;
+  for(let i = 1; i <= a.length; i++){
+    fila = [i]; let mejor = i;
+    for(let j = 1; j <= b.length; j++){
+      const costo = a.charCodeAt(i-1) === b.charCodeAt(j-1) ? 0 : 1;
+      fila[j] = Math.min(prev[j] + 1, fila[j-1] + 1, prev[j-1] + costo);
+      if(fila[j] < mejor) mejor = fila[j];
+    }
+    if(mejor > max) return max + 1;
+    prev = fila;
+  }
+  return prev[b.length];
+}
+function puntaje(consulta, candidato){
+  const q = norm(consulta), c = norm(candidato);
+  if(!q || !c) return null;
+  if(c === q) return 0;
+  if(c.startsWith(q)) return 1;
+  if(c.indexOf(q) !== -1) return 2;
+  const max = q.length <= 4 ? 1 : 2;
+  const d = distancia(q, c, max);
+  return d <= max ? 3 + d : null;
+}
+
+/* ---------- red y caché ---------- */
+async function traer(url){
+  const ctl = new AbortController();
+  const t = setTimeout(function(){ ctl.abort(); }, 12000);
+  try{
+    const r = await fetch(url, {signal: ctl.signal, credentials: "omit"});
+    const html = await r.text();
+    return {ok: r.ok, status: r.status, html: html, url: r.url || url};
+  }catch(e){
+    return {ok: false, status: 0, html: "", url: url,
+            error: e.name === "AbortError" ? "el sitio tardó demasiado" : "no hubo respuesta del sitio"};
+  }finally{ clearTimeout(t); }
+}
+function docDe(html){ return new DOMParser().parseFromString(html, "text/html"); }
+function cacheLeer(clave, maxEdad){
+  return new Promise(function(res){
+    almacen.leer(clave, function(v){ res(v && v.t && (Date.now() - v.t) < maxEdad ? v.d : null); });
+  });
+}
+function cacheEscribir(clave, d){ almacen.escribir(clave, {t: Date.now(), d: d}); }
+function muestraHTML(doc){
+  const b = doc.body ? doc.body.cloneNode(true) : null;
+  if(!b) return "";
+  b.querySelectorAll("script,style,noscript,svg,iframe,link,meta").forEach(function(x){ x.remove(); });
+  return b.innerHTML.replace(/\s+/g, " ").slice(0, 12000);
+}
+
+/* ---------- lectura de datos estructurados (JSON-LD) ---------- */
+function desdeJsonLd(doc){
+  const out = [];
+  doc.querySelectorAll('script[type="application/ld+json"]').forEach(function(s){
+    let j; try{ j = JSON.parse(s.textContent); }catch(e){ return; }
+    const pila = Array.isArray(j) ? j.slice() : [j];
+    while(pila.length){
+      const o = pila.pop();
+      if(!o || typeof o !== "object") continue;
+      ["@graph","location","department","subOrganization"].forEach(function(k){
+        if(Array.isArray(o[k])) pila.push.apply(pila, o[k]);
+      });
+      const tipo = [].concat(o["@type"] || []).join(" ");
+      if(!/Dentist|MedicalClinic|MedicalBusiness|LocalBusiness|Hospital/i.test(tipo)) continue;
+      const ad = o.address;
+      const dir = !ad ? "" : (typeof ad === "string" ? ad :
+                  [ad.streetAddress, ad.addressLocality].filter(Boolean).join(", "));
+      if(dir && o.name){
+        out.push({nombre: String(o.name), direccion: dir, telefono: o.telephone || "", horario: "",
+                  url: urlSegura(o.url), texto: o.name + " " + dir});
+      }
+    }
+  });
+  return out;
+}
+
+/* ---------- tarjetas: la caja que rodea a una clínica ---------- */
+const GENERICO = /^(ver|ver mas|agenda|agendar|reserva|reservar|mas info|mas informacion|como llegar|llamar|whatsapp|ir|detalle|conoce mas|leer mas|ver ficha|ver clinica)$/;
+function fuera(el){ return !!el.closest("header,nav,footer,[role=navigation],.menu,[class*='menu'],[id*='menu']"); }
+
+function tarjetaDe(a, esEnlace){
+  let n = a, previo = null;
+  for(let i = 0; i < 8 && n && n.tagName !== "BODY"; i++){
+    const propios = new Set([].filter.call(n.querySelectorAll ? n.querySelectorAll("a[href]") : [], esEnlace)
+      .map(function(x){ return (x.getAttribute("href") || "").replace(/[#?].*$/, "").replace(/\/+$/, ""); }));
+    if(propios.size > 1) return previo;              // ya abarca otra clínica: me quedo con el anterior
+    if(lineas(n).some(pareceDireccion)) return n;
+    previo = n; n = n.parentElement;
+  }
+  return null;
+}
+
+function datosDeTarjeta(card, a, base){
+  const ls = lineas(card);
+  const h = card.querySelector("h1,h2,h3,h4,h5,h6,strong,b,.title,[class*='titulo'],[class*='title'],[class*='nombre']");
+  let nombre = h ? txt(h) : "";
+  if(GENERICO.test(norm(nombre)) || nombre.length > 90 || pareceDireccion(nombre)) nombre = "";
+  if(!nombre && a){ const t = txt(a); if(t && !GENERICO.test(norm(t)) && t.length < 80 && !pareceDireccion(t)) nombre = t; }
+  if(!nombre){
+    nombre = ls.find(function(l){
+      return !pareceDireccion(l) && !RE_FONO.test(l) && !pareceHorario(l) && !GENERICO.test(norm(l)) && l.length < 70;
+    }) || "";
+  }
+  const direccion = ls.find(pareceDireccion) || "";
+  const fono = ls.join("  ").match(RE_FONO);
+  let url = "";
+  if(a){ try{ url = urlSegura(new URL(a.getAttribute("href"), base).href); }catch(e){} }
+  return {nombre: nombre, direccion: direccion, telefono: fono ? fono[0].trim() : "",
+          horario: ls.filter(pareceHorario).slice(0, 2).join(" · "), url: url, texto: ls.join(" ")};
+}
+
+// Último recurso: un título con una dirección justo debajo
+function desdeEncabezados(doc){
+  const out = [], vistas = {};
+  doc.querySelectorAll("h2,h3,h4,h5").forEach(function(h){
+    if(fuera(h)) return;
+    const nombre = txt(h);
+    if(!nombre || nombre.length > 80 || GENERICO.test(norm(nombre))) return;
+    let ls = [], n = h.nextElementSibling, k = 0;
+    while(n && k < 5 && !/^H[1-5]$/.test(n.tagName)){ ls = ls.concat(lineas(n)); n = n.nextElementSibling; k++; }
+    const dir = ls.find(pareceDireccion);
+    if(!dir || vistas[norm(dir)]) return;
+    vistas[norm(dir)] = 1;
+    const fono = ls.join("  ").match(RE_FONO);
+    out.push({nombre: nombre, direccion: dir, telefono: fono ? fono[0].trim() : "",
+              horario: ls.filter(pareceHorario).slice(0, 2).join(" · "), url: "", texto: nombre + " " + ls.join(" ")});
+  });
+  return out;
+}
+
+/* ---------- Uno Salud ---------- */
+function parsearIndiceUnoSalud(html){
+  const doc = docDe(html), m = {};
+  function agregar(slug, nombre){
+    slug = String(slug || "").toLowerCase();
+    if(!/^(?=.*[a-z])[a-z0-9-]{2,50}$/.test(slug) || m[slug]) return;
+    nombre = String(nombre || "").replace(/\s+/g, " ").trim();
+    if(!nombre || nombre.length > 60 || GENERICO.test(norm(nombre)) || /\d/.test(nombre)) nombre = humanizar(slug);
+    m[slug] = nombre.replace(/^cl[ií]nicas? dentales? en (la comuna de )?/i, "");
+  }
+  doc.querySelectorAll('a[href*="/region-comuna/"]').forEach(function(a){
+    const mm = (a.getAttribute("href") || "").match(/\/region-comuna\/([^\/?#]+)\/?/i);
+    if(mm) agregar(mm[1], txt(a));
+  });
+  doc.querySelectorAll("option").forEach(function(o){
+    const v = (o.getAttribute("value") || "").trim(), t = txt(o);
+    if(/\/region-comuna\//.test(v)){ const mm = v.match(/\/region-comuna\/([^\/?#]+)/); if(mm) agregar(mm[1], t); }
+    else if(t && !/selecciona|todas|elige/i.test(t)) agregar(v, t);
+  });
+  return Object.keys(m).map(function(slug){ return {slug: slug, nombre: m[slug]}; });
+}
+
+function parsearComunaUnoSalud(html, base){
+  const doc = docDe(html);
+  const d = {titulo: txt(doc.querySelector("title")), estrategia: "", muestra: muestraHTML(doc)};
+  const esFicha = function(a){
+    const h = a.getAttribute("href") || "";
+    return /\/clinicas\/[^\/?#]+\/?(?:[?#].*)?$/i.test(h) && !fuera(a);
+  };
+  const vistas = {}, porEnlace = [];
+  [].filter.call(doc.querySelectorAll("a[href]"), esFicha).forEach(function(a){
+    let k = ""; try{ k = new URL(a.getAttribute("href"), base).pathname.replace(/\/+$/, ""); }catch(e){ return; }
+    if(vistas[k]) return;
+    const card = tarjetaDe(a, esFicha);
+    if(!card) return;
+    const x = datosDeTarjeta(card, a, base);
+    if(!x.direccion) return;                         // sin dirección no es una sucursal (menús, migas)
+    if(!x.nombre) x.nombre = humanizar(k.split("/").pop());
+    vistas[k] = 1;
+    porEnlace.push(x);
+  });
+  const ld = desdeJsonLd(doc);
+  let lista = porEnlace.length >= ld.length ? porEnlace : ld;
+  d.estrategia = lista === porEnlace ? "enlaces a fichas" : "datos estructurados";
+  if(!lista.length){ lista = desdeEncabezados(doc); d.estrategia = "títulos"; }
+  d.encontradas = lista.length;
+  d.enlacesFicha = [].filter.call(doc.querySelectorAll("a[href]"), esFicha).length;
+  return {lista: lista, diag: d};
+}
+
+async function indiceUnoSalud(fresco){
+  const c = fresco ? null : await cacheLeer("red_uno_indice", 7 * DIA);
+  if(c && c.length) return c;
+  const m = {};
+  diag.indice = [];
+  for(const u of RED.unosalud.indices){
+    const r = await traer(u);
+    diag.indice.push({url: u, status: r.status, error: r.error || ""});
+    if(r.ok) parsearIndiceUnoSalud(r.html).forEach(function(x){ if(!m[x.slug]) m[x.slug] = x; });
+  }
+  const lista = Object.keys(m).map(function(k){ return m[k]; });
+  if(lista.length) cacheEscribir("red_uno_indice", lista);
+  return lista;
+}
+
+async function clinicasUnoSalud(comuna, fresco){
+  const clave = "red_uno_" + comuna.slug;
+  const c = fresco ? null : await cacheLeer(clave, DIA);
+  if(c) return c;
+  const url = RED.unosalud.comuna(comuna.slug);
+  const r = await traer(url);
+  diag.unosalud = {url: url, status: r.status, error: r.error || ""};
+  if(r.status === 404) return {lista: [], url: url, error: "", sinPagina: true};
+  if(!r.ok) return {lista: [], url: url, error: r.error || ("el sitio respondió " + r.status)};
+  const p = parsearComunaUnoSalud(r.html, r.url);
+  Object.assign(diag.unosalud, p.diag);
+  const res = {lista: p.lista, url: url, error: ""};
+  if(p.lista.length) cacheEscribir(clave, res);       // un cero puede ser un fallo de lectura: no se guarda
+  return res;
+}
+
+
+/* ---------- datos escondidos en los scripts ----------
+   Muchos sitios no traen el listado en el HTML: lo dibujan con
+   JavaScript a partir de un arreglo de datos que va dentro de la
+   página. Se buscan arreglos JSON cuyos objetos tengan cara de
+   sucursal (un nombre y una dirección). */
+const CAMPOS_DIR = /^(direcci[oó]n|direccion|address|addr|calle|domicilio|ubicaci[oó]n|street|streetaddress)$/i;
+const CAMPOS_NOM = /^(nombre|name|title|titulo|t[ií]tulo|cl[ií]nica|clinica|sucursal|sede|label)$/i;
+const CAMPOS_COM = /^(comuna|ciudad|city|locality|addresslocality|commune|municipio)$/i;
+const CAMPOS_FON = /^(tel[eé]fono|telefono|phone|fono|telephone|celular)$/i;
+
+function valorTexto(v){
+  if(v == null) return "";
+  if(typeof v === "string" || typeof v === "number") return String(v).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  if(typeof v === "object" && !Array.isArray(v)){
+    if(v.rendered) return valorTexto(v.rendered);
+    if(v.streetAddress) return [v.streetAddress, v.addressLocality].filter(Boolean).join(", ");
+  }
+  return "";
+}
+function sucursalDeObjeto(o){
+  if(!o || typeof o !== "object" || Array.isArray(o)) return null;
+  let nombre = "", direccion = "", comuna = "", telefono = "";
+  Object.keys(o).forEach(function(k){
+    const v = valorTexto(o[k]);
+    if(!v) return;
+    if(!direccion && CAMPOS_DIR.test(k)) direccion = v;
+    else if(!nombre && CAMPOS_NOM.test(k)) nombre = v;
+    else if(!comuna && CAMPOS_COM.test(k)) comuna = v;
+    else if(!telefono && CAMPOS_FON.test(k)) telefono = v;
+  });
+  if(!nombre || !direccion || direccion.length > 200) return null;
+  if(comuna && direccion.toLowerCase().indexOf(comuna.toLowerCase()) === -1) direccion += ", " + comuna;
+  return {nombre: nombre, direccion: direccion, telefono: telefono, horario: "", url: urlSegura(o.url || o.link || o.permalink || ""),
+          texto: nombre + " " + direccion};
+}
+function buscarEnJson(raiz){
+  const out = [];
+  const pila = [raiz]; let vueltas = 0;
+  while(pila.length && vueltas++ < 20000){
+    const x = pila.pop();
+    if(Array.isArray(x)){
+      const suc = x.map(sucursalDeObjeto).filter(Boolean);
+      if(suc.length >= 2 && suc.length >= x.length / 2){ out.push.apply(out, suc); continue; }
+      x.forEach(function(y){ if(y && typeof y === "object") pila.push(y); });
+    }else if(x && typeof x === "object"){
+      Object.keys(x).forEach(function(k){ if(x[k] && typeof x[k] === "object") pila.push(x[k]); });
+    }
+  }
+  return out;
+}
+// Recorre el texto de un script y prueba cada arreglo [ {...} ] balanceado
+function arreglosJson(src){
+  const out = [];
+  if(src.length > 3000000) return out;
+  let i = 0;
+  while((i = src.indexOf("[", i)) !== -1 && out.length < 40){
+    let j = i + 1; while(j < src.length && /\s/.test(src[j])) j++;
+    if(src[j] !== "{"){ i++; continue; }
+    let nivel = 0, enCadena = false, comilla = "", k = i;
+    for(; k < src.length; k++){
+      const ch = src[k];
+      if(enCadena){ if(ch === "\\"){ k++; continue; } if(ch === comilla) enCadena = false; continue; }
+      if(ch === '"' || ch === "'"){ enCadena = true; comilla = ch; continue; }
+      if(ch === "[" || ch === "{") nivel++;
+      else if(ch === "]" || ch === "}"){ nivel--; if(nivel === 0) break; }
+    }
+    const trozo = src.slice(i, k + 1);
+    if(trozo.length > 40){
+      try{ out.push(JSON.parse(trozo)); i = k + 1; continue; }catch(e){}
+    }
+    i++;
+  }
+  return out;
+}
+function desdeScripts(doc){
+  const out = [];
+  doc.querySelectorAll("script:not([src])").forEach(function(sc){
+    const t = sc.textContent || "";
+    if(!/direcci|address|sucursal|clinica|clínica|sede/i.test(t)) return;
+    if(/json/i.test(sc.type || "")){
+      try{ out.push.apply(out, buscarEnJson(JSON.parse(t))); return; }catch(e){}
+    }
+    arreglosJson(t).forEach(function(a){ out.push.apply(out, buscarEnJson(a)); });
+  });
+  const vistas = {};
+  return out.filter(function(c){ const k = norm(c.direccion); if(vistas[k]) return false; vistas[k] = 1; return true; });
+}
+
+// Lo que sirve para entender cómo está armado un sitio que no se deja leer
+function radiografia(doc, html){
+  const scripts = [].map.call(doc.querySelectorAll("script[src]"), function(x){ return x.getAttribute("src"); }).slice(0, 30);
+  const inline = [].map.call(doc.querySelectorAll("script:not([src])"), function(x){ return (x.textContent || "").length; });
+  const marcas = [];
+  [["__NEXT_DATA__", /__NEXT_DATA__/], ["Nuxt", /__NUXT__/], ["Angular", /ng-version|ng-app/], ["React", /data-reactroot|id="root"/],
+   ["Vue", /id="app"|data-v-/], ["Wix", /wix|static\.parastorage/], ["WordPress", /wp-content|wp-json/],
+   ["Elementor", /elementor/], ["Store locator", /wpsl|storelocator|store_locator|asl_/i], ["Google Maps", /maps\.googleapis|google\.com\/maps/],
+   ["Webflow", /webflow/i], ["Squarespace", /squarespace/i], ["Shopify", /shopify/i]].forEach(function(m){
+    if(m[1].test(html)) marcas.push(m[0]);
+  });
+  const apis = [];
+  doc.querySelectorAll("script:not([src])").forEach(function(sc){
+    const t = sc.textContent || "";
+    (t.match(/["'](https?:\/\/[^"'\s]+|\/[a-z0-9_\-\/.?=&]+)["']/gi) || []).forEach(function(u){
+      u = u.slice(1, -1);
+      if(/api|ajax|json|clinic|sucursal|sede|red|locat|store|map/i.test(u) && apis.indexOf(u) === -1 && apis.length < 30) apis.push(u);
+    });
+  });
+  return {
+    marcas: marcas,
+    scripts: scripts,
+    scriptsEnLinea: inline.length + " (" + inline.reduce(function(a, b){ return a + b; }, 0) + " caracteres)",
+    posiblesApis: apis,
+    iframes: [].map.call(doc.querySelectorAll("iframe[src]"), function(x){ return x.getAttribute("src"); }).slice(0, 10),
+    enlaces: [].map.call(doc.querySelectorAll("a[href]"), function(a){ return txt(a).slice(0, 40) + " -> " + a.getAttribute("href"); }).slice(0, 60),
+    idsSecciones: [].map.call(doc.querySelectorAll("[id]"), function(x){ return x.id; }).slice(0, 60),
+    textoVisible: txt(doc.body).slice(0, 2500)
+  };
+}
+
+/* ---------- i-dental ---------- */
+function parsearEdental(html, base){
+  const doc = docDe(html);
+  const d = {titulo: txt(doc.querySelector("title")), muestra: muestraHTML(doc)};
+  const zona = doc.getElementById("clinicas") ||
+               doc.querySelector('[id*="clinica" i],[class*="clinica" i],[id*="sucursal" i],[class*="sucursal" i],[id*="sede" i],[class*="sede" i]') ||
+               doc.body;
+  d.zona = zona === doc.body ? "toda la página" : (zona.id ? "#" + zona.id : "." + String(zona.className).split(/\s+/)[0]);
+
+  // Tarjetas: bloques chicos con una dirección, que no contengan otras tarjetas
+  const cand = [].filter.call(zona.querySelectorAll("article,li,div,tr,section"), function(el){
+    if(fuera(el)) return false;
+    const largo = (el.textContent || "").length;
+    if(largo < 12 || largo > 700) return false;
+    const ls = lineas(el);
+    return ls.length >= 2 && ls.length <= 14 && ls.some(pareceDireccion);
+  });
+  const minimas = cand.filter(function(el){ return !cand.some(function(o){ return o !== el && el.contains(o); }); });
+
+  // El título de sección que precede a cada tarjeta suele ser la región o la
+  // comuna. Los títulos que están dentro de otra tarjeta no cuentan: son el
+  // nombre de esa clínica, no una sección.
+  const titulos = [].filter.call(doc.querySelectorAll("h1,h2,h3,h4,h5,h6"), function(h){
+    return !minimas.some(function(c){ return c.contains(h); });
+  });
+  function contexto(el){
+    let t = "";
+    titulos.forEach(function(h){
+      if(!el.contains(h) && (h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) t = txt(h);
+    });
+    return t;
+  }
+  const vistas = {}, lista = [];
+  minimas.forEach(function(card){
+    const a = card.querySelector("a[href]");
+    const x = datosDeTarjeta(card, a, base);
+    if(!x.direccion || !x.nombre || vistas[norm(x.direccion)]) return;
+    vistas[norm(x.direccion)] = 1;
+    x.contexto = contexto(card);
+    lista.push(x);
+  });
+  const ld = desdeJsonLd(doc);
+  const js = desdeScripts(doc);
+  // Tarjetas con la línea "comuna - provincia - región" (edental.js)
+  const ub = typeof tarjetasPorUbicacion === "function" && doc.body ? tarjetasPorUbicacion(doc.body) : [];
+  let final = ub, estrategia = "línea de ubicación";
+  if(lista.length > final.length){ final = lista; estrategia = "tarjetas"; }
+  if(ld.length > final.length){ final = ld; estrategia = "datos estructurados"; }
+  if(js.length > final.length){ final = js; estrategia = "datos dentro de los scripts"; }
+  d.encontradas = final.length;
+  d.estrategia = final.length ? estrategia : "ninguna";
+  d.porEstrategia = {ubicacion: ub.length, tarjetas: lista.length, jsonld: ld.length, scripts: js.length};
+  if(!final.length) d.radiografia = radiografia(doc, html);
+  return {lista: final, diag: d, doc: doc};
+}
+
+// El listado de i-dental cambia poco y leerlo abre una pestaña de fondo,
+// así que se guarda una semana. "Volver a leer" fuerza una lectura nueva.
+const EDE_VIGENCIA = 7 * DIA;
+function edentalGuardado(){ return cacheLeer("red_edental", EDE_VIGENCIA); }
+
+// Pide al service worker (background.js) que lea el sitio en una pestaña
+// de fondo. forzar: aunque haya un intento reciente sin resultados.
+function edentalEnPestana(forzar){
+  return new Promise(function(resolver){
+    try{
+      chrome.runtime.sendMessage({tipo: "edentalVivo", forzar: !!forzar}, function(r){
+        if(chrome.runtime.lastError || !r) resolver(null); else resolver(r);
+      });
+    }catch(e){ resolver(null); }
+  });
+}
+function hayPestanas(){
+  try{ return !!(chrome && chrome.runtime && chrome.runtime.id && chrome.runtime.sendMessage); }catch(e){ return false; }
+}
+
+// opciones.esperar: el mapeo espera la lectura en pestaña; el buscador no,
+// sólo la encarga y sigue (el listado aparece solo cuando queda guardado).
+async function clinicasEdental(fresco, opciones){
+  opciones = opciones || {};
+  const c = fresco ? null : await edentalGuardado();
+  if(c) return c;
+  diag.edental = {};
+
+  // 1. La dirección de datos que usa el propio sitio, si ya se conoce
+  const api = await new Promise(function(res){ almacen.leer("ede_api", res); });
+  if(api && typeof clinicasDeJson === "function"){
+    const r = await traer(api);
+    diag.edental.api = {url: api, status: r.status, error: r.error || ""};
+    if(r.ok){
+      let lista = [];
+      try{ lista = clinicasDeJson(JSON.parse(r.html)); }catch(e){ diag.edental.api.error = "no es JSON"; }
+      diag.edental.api.encontradas = lista.length;
+      if(lista.length){
+        const res = {lista: lista, error: ""};
+        cacheEscribir("red_edental", res);
+        return res;
+      }
+    }
+  }
+
+  // 2. El HTML tal cual: rápido, y basta si algún día el sitio lo trae armado
+  const r = await traer(RED.edental.portada);
+  Object.assign(diag.edental, {url: RED.edental.portada, status: r.status, error: r.error || ""});
+  let res = {lista: [], error: r.ok ? "" : (r.error || ("el sitio respondió " + r.status))};
+  if(r.ok){
+    const p = parsearEdental(r.html, r.url);
+    Object.assign(diag.edental, p.diag);
+    res.lista = p.lista;
+  }
+  if(res.lista.length){ cacheEscribir("red_edental", res); return res; }
+
+  // 3. El sitio arma el listado con JavaScript: se lee en una pestaña de fondo
+  if(!hayPestanas()) return res;
+  if(!opciones.esperar){
+    // Si la última lectura aparte no encontró nada hace poco, no se insiste
+    const intento = await new Promise(function(res){ almacen.leer("ede_intento", res); });
+    if(intento && !intento.n && Date.now() - intento.t < 6 * 60 * 60 * 1000){
+      diag.edental.pestana = await new Promise(function(res){ almacen.leer("diag_edental_vivo", res); });
+      return res;
+    }
+    edentalEnPestana(false);
+    return {lista: [], error: "", pendiente: true};
+  }
+  const v = await edentalEnPestana(fresco);
+  if(v){
+    diag.edental.pestana = v.diag;
+    if(v.res.lista.length){ delete diag.edental.radiografia; delete diag.edental.muestra; }
+    res = v.res;
+  }
+  return res;
+}
+
+
+/* ============================================================
+   MAPEO COMPLETO
+   Recorre todas las comunas de Uno Salud y el listado entero de
+   i-dental, y deja cada sucursal asignada a una sola comuna. Con
+   el mapeo guardado, el buscador responde sin consultar los sitios.
+   ============================================================ */
+const MAPEO_VIGENCIA = 30 * DIA;
+
+function contienePalabra(texto, nombre){
+  const n = norm(nombre);
+  return !!n && (" " + norm(texto) + " ").indexOf(" " + n + " ") !== -1;
+}
+// La misma sucursal puede venir de páginas leídas con estrategias distintas
+// (con o sin enlace a su ficha). Lo que no cambia es la calle y el número.
+function claveSucursal(c){
+  const calle = norm(String(c.direccion || "").split(",")[0]);
+  if(calle) return "d:" + calle;
+  if(c.url) return "u:" + c.url.replace(/[#?].*$/, "").replace(/\/+$/, "").toLowerCase();
+  return "n:" + norm(c.nombre);
+}
+function sucursalLimpia(c){
+  return {nombre: c.nombre || "", direccion: c.direccion || "", telefono: c.telefono || "",
+          horario: c.horario || "", url: urlSegura(c.url)};
+}
+
+// A qué comuna pertenece una clínica de i-dental. Se prueba en orden de
+// confianza: lo que va después de la última coma de la dirección, una
+// comuna conocida dentro de la dirección, dentro de la tarjeta, y por
+// último el título de la sección.
+function ubicarClinica(c, conocidas){
+  // La tarjeta dice la comuna ("Providencia - Santiago - REGIÓN ...")
+  if(c.comuna){
+    const exacta = conocidas.find(function(n){ return norm(n) === norm(c.comuna); }) ||
+                   conocidas.find(function(n){ const p = puntaje(c.comuna, n); return p !== null && p <= 3 && Math.abs(norm(n).length - norm(c.comuna).length) <= 2; });
+    return {comuna: exacta || nombreComuna(c.comuna), porSeccion: false};
+  }
+  function mejor(texto){
+    return conocidas.filter(function(n){ return contienePalabra(texto, n); })
+                    .sort(function(a, b){ return b.length - a.length; })[0] || "";
+  }
+  const partes = String(c.direccion || "").split(",").map(function(t){ return t.trim(); }).filter(Boolean);
+  const cola = partes.length > 1 ? partes[partes.length - 1] : "";
+  if(cola && !/\d/.test(cola) && cola.length <= 32){
+    const conocida = conocidas.find(function(n){
+      const p = puntaje(cola, n);
+      return p !== null && p <= 4 && norm(cola).length >= norm(n).length - 2;
+    });
+    return {comuna: conocida || cola.replace(/\.$/, ""), porSeccion: false};
+  }
+  const propia = mejor(c.direccion) || mejor(c.texto);
+  if(propia) return {comuna: propia, porSeccion: false};
+  const seccion = mejor(c.contexto);
+  return {comuna: seccion, porSeccion: !!seccion};
+}
+// "SAN PEDRO DE LA PAZ" -> "San Pedro De La Paz" con las partículas en minúscula
+function nombreComuna(t){
+  t = String(t || "").trim();
+  if(t !== t.toUpperCase()) return t;
+  return t.toLowerCase().replace(/(^|[\s-])(\S)/g, function(m, a, b){ return a + b.toUpperCase(); })
+          .replace(/ (De|Del|La|Las|Los|El|Y)(?= )/g, function(m){ return m.toLowerCase(); });
+}
+function comunaDeClinica(c, conocidas){ return ubicarClinica(c, conocidas).comuna; }
+
+function armarMapeo(paginasUno, ede, indice){
+  const conocidas = indice.map(function(x){ return x.nombre; });
+  const comunas = {};
+  function entrada(nombre, slug){
+    const k = norm(nombre);
+    if(!comunas[k]) comunas[k] = {nombre: nombre, slug: slug || "", uno: [], ede: []};
+    if(slug && !comunas[k].slug) comunas[k].slug = slug;
+    return comunas[k];
+  }
+
+  // Uno Salud. Hay páginas de comuna y páginas de región, y una sucursal sale
+  // en las dos. Una página es de región si sus sucursales nombran dos o más
+  // comunas distintas de la suya.
+  const esRegion = {};
+  paginasUno.forEach(function(pg){
+    const otras = {};
+    (pg.lista || []).forEach(function(c){
+      conocidas.forEach(function(n){
+        if(norm(n) !== norm(pg.nombre) && contienePalabra(c.direccion, n)) otras[norm(n)] = 1;
+      });
+    });
+    esRegion[pg.slug] = Object.keys(otras).length >= 2;
+  });
+
+  const porClave = {};
+  paginasUno.forEach(function(pg){
+    (pg.lista || []).forEach(function(c){
+      const k = claveSucursal(c);
+      (porClave[k] = porClave[k] || {c: c, paginas: []}).paginas.push(pg);
+    });
+  });
+  // Cada sucursal va a una sola comuna: la página de comuna que nombra su
+  // dirección; si ninguna, la página de comuna más chica. Si sólo salió en
+  // páginas de región, la comuna se saca de su dirección.
+  Object.keys(porClave).forEach(function(k){
+    const it = porClave[k];
+    const deComuna = it.paginas.filter(function(p){ return !esRegion[p.slug]; });
+    const pg = deComuna.find(function(p){ return contienePalabra(it.c.direccion, p.nombre); }) ||
+               deComuna.slice().sort(function(a, b){ return a.lista.length - b.lista.length; })[0];
+    if(pg){ entrada(pg.nombre, pg.slug).uno.push(sucursalLimpia(it.c)); return; }
+    const u = ubicarClinica(it.c, conocidas);
+    const conocida = u.comuna && indice.find(function(x){ return norm(x.nombre) === norm(u.comuna); });
+    if(conocida) entrada(conocida.nombre, conocida.slug).uno.push(sucursalLimpia(it.c));
+    else if(u.comuna) entrada(u.comuna, "").uno.push(sucursalLimpia(it.c));
+    else entrada(it.paginas[0].nombre, it.paginas[0].slug).uno.push(sucursalLimpia(it.c));
+  });
+
+  // i-dental
+  const sinComuna = [];
+  (ede.lista || []).forEach(function(c){
+    const u = ubicarClinica(c, conocidas);
+    if(!u.comuna){ sinComuna.push(sucursalLimpia(c)); return; }
+    const conocida = indice.find(function(x){ return norm(x.nombre) === norm(u.comuna); });
+    const s = sucursalLimpia(c);
+    if(u.porSeccion) s.porSeccion = true;
+    entrada(conocida ? conocida.nombre : u.comuna, conocida ? conocida.slug : "").ede.push(s);
+  });
+
+  const lista = Object.keys(comunas).map(function(k){ return comunas[k]; })
+    .filter(function(c){ return c.uno.length || c.ede.length; })
+    .sort(function(a, b){ return a.nombre.localeCompare(b.nombre, "es"); });
+
+  const fallidas = paginasUno.filter(function(p){ return p.error; }).map(function(p){ return p.nombre + ": " + p.error; });
+  return {
+    version: 1,
+    generado: Date.now(),
+    comunas: lista,
+    sinComuna: sinComuna,
+    resumen: {
+      comunas: lista.length,
+      conUno: lista.filter(function(c){ return c.uno.length; }).length,
+      conEde: lista.filter(function(c){ return c.ede.length; }).length,
+      conAmbas: lista.filter(function(c){ return c.uno.length && c.ede.length; }).length,
+      sucursalesUno: lista.reduce(function(a, c){ return a + c.uno.length; }, 0),
+      sucursalesEde: lista.reduce(function(a, c){ return a + c.ede.length; }, 0) + sinComuna.length,
+      paginasLeidas: paginasUno.length,
+      paginasRegion: Object.keys(esRegion).filter(function(k){ return esRegion[k]; }).length,
+      paginasFallidas: fallidas.length,
+      edeError: ede.error || ""
+    },
+    fallidas: fallidas
+  };
+}
+
+function leerMapeo(){
+  return new Promise(function(res){
+    almacen.leer("mapeo", function(m){ res(m && m.comunas && (Date.now() - m.generado) < MAPEO_VIGENCIA ? m : null); });
+  });
+}
+
+function mapeoCSV(m){
+  const filas = [["red", "comuna", "sucursal", "direccion", "telefono", "horario", "fuente"]];
+  m.comunas.forEach(function(c){
+    c.uno.forEach(function(s){ filas.push(["Uno Salud", c.nombre, s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
+    c.ede.forEach(function(s){ filas.push(["i-dental", c.nombre, s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
+  });
+  (m.sinComuna || []).forEach(function(s){ filas.push(["i-dental", "", s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
+  // Punto y coma y BOM: así lo abre bien Excel en español, con tildes
+  return "﻿" + filas.map(function(f){
+    return f.map(function(v){ v = String(v || ""); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(";");
+  }).join("\r\n");
+}
+
+/* =========================================================
+   Cotizador Dental Bci — popup
+   Tarifas: Script Bci Dental Full, septiembre 2026.
+   Valores en centésimas de UF (enteros) para que la
+   conversión a pesos no arrastre errores de coma flotante.
+   El índice del arreglo es la cantidad de cargas (0 a 3).
+   ========================================================= */
+const PLANES = [
+  {id:"basico", nom:"Plan Urgencias",    precios:[26, 33, 39, 46]},
+  {id:"full",   nom:"Plan 3 Full",       precios:[43, 68, 92, 116]},
+  {id:"ninos",  nom:"Plan 4 Full Niños", precios:[null, 81, 113, 144]}
+];
+const MAX_CARGAS = 3;
+const EDAD_NINOS = 14;
+
+/* Aqui NO se calcula la edad del titular: no cambia el plan ni el precio.
+   Lo unico que importa es la carga contra el corte de 14 anos.
+   Las reglas de titular y conyuge estan documentadas en ../PRODUCTO.md. */
+const REGLAS = {
+  hijo: {min:{a:0, d:14, txt:"14 días"}, ing:{a:23,d:0, txt:"23 años y 0 días"}, per:{a:24,d:0, txt:"24 años y 0 días"}}
+};
+
+/* ---------- fechas ---------- */
+function hoy(){ const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function fmt(d){ return String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+d.getFullYear(); }
+// Lee "dd/mm/aaaa" y verifica que la fecha exista de verdad (rechaza 31/02)
+function leerFecha(txt){
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(txt.trim());
+  if(!m) return null;
+  const dd=+m[1], mm=+m[2], aa=+m[3];
+  if(mm<1 || mm>12 || dd<1 || aa<1900) return null;
+  const d = new Date(aa, mm-1, dd);
+  if(d.getFullYear()!==aa || d.getMonth()!==mm-1 || d.getDate()!==dd) return null;
+  if(d > hoy()) return null;
+  return d;
+}
+function hito(nac, h){
+  const b = new Date(nac.getFullYear()+(h.a||0), nac.getMonth(), nac.getDate());
+  b.setDate(b.getDate() + (h.d||0));
+  return b;
+}
+function edad(nac, ref){
+  let y=ref.getFullYear()-nac.getFullYear(), m=ref.getMonth()-nac.getMonth(), d=ref.getDate()-nac.getDate();
+  if(d<0){ m--; d += new Date(ref.getFullYear(), ref.getMonth(), 0).getDate(); }
+  if(m<0){ y--; m+=12; }
+  return {y:y,m:m,d:d};
+}
+function edadTxt(nac, ref){
+  const e = edad(nac, ref);
+  if(e.y>0) return e.y+"a "+e.m+"m";
+  if(e.m>0) return e.m+"m "+e.d+"d";
+  return e.d+" días";
+}
+
+/* ---------- números ---------- */
+function miles(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
+function ufTxt(c){ return miles(Math.floor(c/100))+","+String(c%100).padStart(2,"0"); }
+function pesos(ufCent, planCent){
+  const bruto = ufCent*planCent;                       // unidades de 0,0001 peso
+  return {
+    exacto: "$"+miles(Math.floor(bruto/10000))+","+String(bruto%10000).padStart(4,"0"),
+    redondo: "$"+miles(Math.round(bruto/10000))
+  };
+}
+
+/* ---------- valor UF ---------- */
+let UF = null;
+function pintarUF(cent, fecha, fuente){
+  UF = cent;
+  document.getElementById("ufVal").textContent   = cent===null ? "—" : "$"+ufTxt(cent);
+  document.getElementById("ufFecha").textContent = cent===null ? "" : fecha+" · "+fuente;
+  calcular();
+}
+/* Abierta como página web (no como extensión) no hay chrome.storage: se
+   guarda en el navegador (localStorage) y no se leen los sitios de las redes. */
+const ESWEB = (typeof chrome === "undefined" || !chrome.storage);
+
+// Pide un JSON con un tope de segundos. Devuelve {json} o {error} con el
+// motivo en palabras, para poder decir por qué no llegó la UF.
+async function traerJSON(url, segundos){
+  const ctl = new AbortController();
+  const t = setTimeout(function(){ ctl.abort(); }, (segundos || 8) * 1000);
+  try{
+    const r = await fetch(url, {cache: "no-store", signal: ctl.signal});
+    if(!r.ok) return {error: "error " + r.status};
+    try{ return {json: await r.json()}; }catch(e){ return {error: "respuesta rara (¿bloqueado por la red?)"}; }
+  }catch(e){
+    return {error: ctl.signal.aborted ? "no respondió en " + (segundos || 8) + " s" : "sin conexión"};
+  }
+  finally{ clearTimeout(t); }
+}
+
+function numeroUF(v){
+  if(typeof v === "number") return v;
+  const t = String(v).trim();
+  if(t.indexOf(",") >= 0) return parseFloat(t.replace(/\./g, "").replace(",", "."));
+  return parseFloat(t);
+}
+
+// La UF del día se trae sola, también en la página web. Se consultan varias
+// fuentes A LA VEZ y se usa la primera que responda con un valor razonable
+// (la UF es una sola, da igual cuál). Sólo si ninguna responde se usa la
+// última guardada y se ofrece escribirla a mano, diciendo qué falló.
+function fechaISO(t){ const iso = String(t || "").slice(0,10).split("-"); return iso.length === 3 ? iso[2]+"-"+iso[1]+"-"+iso[0] : fmt(hoy()); }
+function serieUF(j){ const s = j && j.serie && j.serie[0]; return s && s.valor ? {v: numeroUF(s.valor), f: fechaISO(s.fecha)} : null; }
+const FUENTES_UF = [
+  {nombre: "mindicador", url: "https://mindicador.cl/api/uf", leer: serieUF},
+  {nombre: "boostr", url: "https://api.boostr.cl/economy/uf.json",
+   leer: function(j){ const v = j && j.data && (j.data.value || j.data.valor); return v ? {v: numeroUF(v), f: fmt(hoy())} : null; }},
+  {nombre: "findic", url: "https://findic.cl/api/uf", leer: serieUF}
+];
+let ufPidiendo = 0;
+async function cargarUF(){
+  const turno = ++ufPidiendo;
+  const fecha = document.getElementById("ufFecha");
+  fecha.textContent = "actualizando…";
+  fecha.title = "";
+  const fallas = [];
+  const hallada = await new Promise(function(listo){
+    let pendientes = FUENTES_UF.length, hecho = false;
+    FUENTES_UF.forEach(function(fu){
+      traerJSON(fu.url, 6).then(function(r){
+        let val = null;
+        try{ val = r.json ? fu.leer(r.json) : null; }catch(e){}
+        if(val && val.v > 20000 && val.v < 100000){
+          if(!hecho){ hecho = true; listo({v: val.v, f: val.f, fuente: fu.nombre}); }
+        }else{
+          fallas.push(fu.nombre + ": " + (r.error || "sin el valor"));
+        }
+        if(--pendientes === 0 && !hecho) listo(null);
+      });
+    });
+  });
+  if(turno !== ufPidiendo) return;   // se pidió otra actualización mientras tanto
+  if(hallada){
+    const cent = Math.round(hallada.v*100);
+    guardar(cent, hallada.f);
+    pintarUF(cent, hallada.f, hallada.fuente);
+    document.getElementById("ufManualBox").style.display = "";
+    avisarUFVieja();
+    return;
+  }
+  const motivo = "No se pudo traer la UF. " + fallas.join(" · ");
+  const c = leerGuardado();
+  if(c){ pintarUF(c.c, c.f, ESWEB ? "sin conexión · guardada" : "guardada (no se pudo actualizar)"); }
+  else  { pintarUF(null, "", ""); fecha.textContent = "no se pudo traer: escríbela abajo"; }
+  fecha.title = motivo;   // pasando el mouse se ve qué falló
+  document.getElementById("ufManualBox").style.display = "flex";
+  avisarUFVieja();
+}
+function guardar(c, f){ almacen.escribir("uf", {c:c, f:f}); }
+
+function avisarUFVieja(){
+  const el = document.getElementById("ufVieja");
+  if(!el) return;
+  const c = leerGuardado();
+  const vieja = UF !== null && c && c.f && c.f !== fmt(hoy());
+  el.hidden = !vieja;
+  if(vieja) el.textContent = "Ese valor es del " + c.f + ". Actualízalo con la UF de hoy.";
+}
+let cacheUF = null;
+function leerGuardado(){ return cacheUF; }
+
+/* ---------- evaluación ---------- */
+function evaluar(nac, ref, tipo){
+  const r = REGLAS[tipo];
+  const fMin = hito(nac, r.min), fIng = hito(nac, r.ing), fPer = hito(nac, r.per);
+  let estado, motivo = "";
+  if(ref < fMin){
+    estado = "menor";
+    motivo = "no cumple la edad mínima de ingreso ("+r.min.txt+"), la cumple el "+fmt(fMin);
+  }else if(ref > fIng){
+    estado = "fuera";
+    motivo = (ref < fPer)
+      ? "supera la edad máxima de ingreso ("+r.ing.txt+"), alcanzada el "+fmt(fIng)
+      : "superó la edad máxima de permanencia ("+r.per.txt+") el "+fmt(fPer);
+  }else{
+    estado = "ok";
+  }
+  return {estado:estado, motivo:motivo, menor14: ref < hito(nac, {a:EDAD_NINOS, d:0})};
+}
+
+/* ---------- entrada rápida de fecha ---------- */
+function autoFecha(el){
+  const pos = el.selectionStart, largo = el.value.length;
+  let v = el.value.replace(/\D/g,"").slice(0,8);
+  if(v.length > 4)      v = v.slice(0,2)+"/"+v.slice(2,4)+"/"+v.slice(4);
+  else if(v.length > 2) v = v.slice(0,2)+"/"+v.slice(2);
+  el.value = v;
+  if(pos < largo) el.setSelectionRange(pos, pos);       // no saltar al final al editar en medio
+}
+
+/* ---------- guardado ----------
+   El popup se cierra cada vez que el ejecutivo pincha fuera, y en una
+   llamada real se sale a buscar datos a otro sistema. Nada de lo que
+   escriba puede perderse: el estado se guarda en cada tecla y se
+   restaura al abrir. Sólo el botón "Nuevo cliente" lo borra. */
+
+let restaurando = false;
+
+function guardarEstado(){
+  if(restaurando) return;
+  const cargas = [].map.call(document.querySelectorAll("#hijos .fila"), function(f){
+    return { edad: f.querySelector(".edad").value, fecha: f.querySelector(".fecha").value };
+  });
+  const comuna = document.getElementById("comuna").value;
+  const hayAlgo = nCargas > 0 || envio !== "linea" || planElegido !== PLAN_POR_DEFECTO || guionAbierto !== GUION_POR_DEFECTO ||
+                  !document.getElementById("panelClin").hidden || comuna !== "";
+  if(!hayAlgo){ almacen.borrar("estado"); pintarGuardado(null); return; }
+  const estado = {
+    n: nCargas,
+    plan: planElegido,
+    guion: guionAbierto,
+    pasos: pasos,
+    clinAbierto: !document.getElementById("panelClin").hidden,
+    comuna: comuna,
+    envio: envio,
+    cargas: cargas,
+    cuando: Date.now()
+  };
+  almacen.escribir("estado", estado);
+  pintarGuardado(estado);
+}
+
+function pintarGuardado(estado){
+  const barra = document.getElementById("guardado");
+  if(!estado){ barra.hidden = true; return; }
+  barra.hidden = false;
+  const d = new Date(estado.cuando);
+  document.getElementById("guardadoTxt").textContent =
+    "Guardado a las " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0") +
+    ". Se mantiene durante la llamada; tras 45 min sin cambios vuelve a cero.";
+}
+
+/* Lo guardado es de la llamada en curso. Si pasaron 45 minutos sin cambios,
+   es de un cliente anterior: se descarta y se parte en Plan Urgencias, sin
+   cargas y póliza en línea. */
+const VIGENCIA_LLAMADA = 45 * 60 * 1000;
+
+function restaurarEstado(cb){
+  almacen.leer("estado", function(e){
+    if(e && (!e.cuando || Date.now() - e.cuando > VIGENCIA_LLAMADA)){ almacen.borrar("estado"); e = null; }
+    if(!e){ pintarBloqueCargas(); if(cb) cb(); return; }
+    restaurando = true;
+    nCargas = Math.max(0, Math.min(MAX_CARGAS, e.n || 0));
+    planElegido = e.plan || PLAN_POR_DEFECTO;
+    guionAbierto = ESWEB || (e.guion === undefined ? GUION_POR_DEFECTO : !!e.guion);
+    if(e.pasos) pasos = Object.assign({basico: 0, full: 0, ninos: 0}, e.pasos);
+    envio = e.envio || "linea";
+    marcarEnvio();
+
+    // Una fila por carga, con lo que se había escrito
+    const cont = document.getElementById("hijos");
+    cont.innerHTML = "";
+    for(let k = 0; k < nCargas; k++){
+      const caja = filaHijo(true);
+      const c = (e.cargas || [])[k] || {};
+      caja.querySelector(".edad").value  = c.edad  || "";
+      caja.querySelector(".fecha").value = c.fecha || "";
+    }
+    pintarBloqueCargas();
+
+    if(e.clinAbierto){
+      document.getElementById("panelClin").hidden = false;
+      document.getElementById("abrirClin").classList.add("open");
+    }
+    document.getElementById("comuna").value = e.comuna || "";
+    restaurando = false;
+    pintarGuardado(e);
+    calcular();
+    if(e.comuna && norm(e.comuna).length >= 3) buscarComuna(e.comuna);
+    if(cb) cb();
+  });
+}
+
+/* ---------- veredictos ----------
+   Con la fecha de nacimiento el veredicto es exacto.
+   Con la edad en años alcanza para lo que decide el plan, salvo en los
+   bordes (recién nacido, 23 años), donde hay que pedir la fecha. */
+let nCargas = 0;
+
+function veredictoPorFecha(nac, ref){
+  const ev = evaluar(nac, ref, "hijo");
+  const e  = edadTxt(nac, ref);
+  if(ev.estado === "menor")
+    return {clase:"no", chip:"bad", corto:e+" · aún no",
+            texto:"Aún no puede ingresar: la edad mínima es 14 días. Podrá desde el "+fmt(hito(nac, REGLAS.hijo.min))+".",
+            menor14:false, bloquea:true};
+  if(ev.estado === "fuera")
+    return {clase:"no", chip:"bad", corto:e+" · fuera",
+            texto:"No entra en ningún plan: "+ev.motivo+".", menor14:false, bloquea:true};
+  if(ev.menor14)
+    return {clase:"no", chip:"warn", corto:e+" · menor de 14",
+            texto:"Sólo Plan 4 Full Niños. No entra en Urgencias ni en Full.", menor14:true, bloquea:false};
+  return {clase:"si", chip:"ok", corto:e+" · califica",
+          texto:"Entra en Urgencias, en Full y en Full Niños.", menor14:false, bloquea:false};
+}
+
+function veredictoPorEdad(a){
+  if(a < 0 || a > 120) return null;
+  if(a === 0)
+    return {clase:"pide", chip:"warn", corto:"menos de 1 año",
+            texto:"Escribe la fecha de nacimiento: la edad mínima de ingreso son 14 días.",
+            menor14:true, bloquea:false, aprox:true};
+  if(a < 14)
+    return {clase:"no", chip:"warn", corto:a+" años · menor de 14",
+            texto:"Sólo Plan 4 Full Niños. No entra en Urgencias ni en Full.",
+            menor14:true, bloquea:false, aprox:true};
+  if(a < 23)
+    return {clase:"si", chip:"ok", corto:a+" años · califica",
+            texto:"Entra en Urgencias, en Full y en Full Niños.",
+            menor14:false, bloquea:false, aprox:true};
+  if(a === 23)
+    return {clase:"pide", chip:"warn", corto:"23 años · depende",
+            texto:"Escribe la fecha de nacimiento: el tope de ingreso es 23 años y 0 días, así que depende del día exacto.",
+            menor14:false, bloquea:false, aprox:true};
+  return {clase:"no", chip:"bad", corto:a+" años · fuera",
+          texto:"No entra en ningún plan: el tope de permanencia es 24 años y 0 días.",
+          menor14:false, bloquea:true, aprox:true};
+}
+
+/* ---------- filas de cargas ---------- */
+function filaHijo(silencioso){
+  const cont = document.getElementById("hijos");
+  if(cont.querySelectorAll(".fila").length >= MAX_CARGAS) return null;
+  const caja = document.createElement("div");
+  caja.innerHTML =
+    '<div class="fila">'+
+      '<span class="edadbox">'+
+        '<input type="text" class="edad" inputmode="numeric" placeholder="edad" maxlength="3">'+
+        '<span class="spin">'+
+          '<button type="button" class="up" tabindex="-1" title="Subir un año">&#9650;</button>'+
+          '<button type="button" class="down" tabindex="-1" title="Bajar un año">&#9660;</button>'+
+        '</span>'+
+      '</span>'+
+      '<span class="sep">o</span>'+
+      '<input type="text" class="fecha" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">'+
+      '<span class="chip">—</span>'+
+    '</div>'+
+    '<div class="veredicto n"></div>';
+  cont.appendChild(caja);
+  const ed = caja.querySelector(".edad"), fe = caja.querySelector(".fecha");
+
+  // Flechas: suben y bajan de a un año, entre 0 y 99
+  function mover(paso){
+    if(ed.readOnly) return;
+    const actual = ed.value === "" ? (paso > 0 ? -1 : 1) : parseInt(ed.value, 10);
+    const nuevo = Math.max(0, Math.min(99, (isNaN(actual) ? 0 : actual) + paso));
+    ed.value = String(nuevo);
+    calcular(); guardarEstado();
+  }
+  caja.querySelector(".up").addEventListener("click", function(){ mover(1); });
+  caja.querySelector(".down").addEventListener("click", function(){ mover(-1); });
+  // Y con las flechas del teclado, que es aún más rápido
+  ed.addEventListener("keydown", function(e){
+    if(e.key === "ArrowUp"){ e.preventDefault(); mover(1); }
+    else if(e.key === "ArrowDown"){ e.preventDefault(); mover(-1); }
+  });
+  ed.addEventListener("input", function(){
+    this.value = this.value.replace(/\D/g,"").slice(0,3);
+    calcular(); guardarEstado();
+  });
+  fe.addEventListener("input", function(){ autoFecha(this); calcular(); guardarEstado(); });
+  if(!silencioso){ ed.focus(); calcular(); guardarEstado(); }
+  return caja;
+}
+
+/* La casilla "tiene cargas" es la que habilita todo lo de las cargas.
+   Sin marcarla se cotiza al titular solo. Marcada, hay una fila de edad
+   por cada carga: 1 carga, 1 fila. */
+function sincronizarFilas(){
+  const cont = document.getElementById("hijos");
+  while(cont.children.length < nCargas) filaHijo(true);
+  while(cont.children.length > nCargas) cont.removeChild(cont.lastElementChild);
+}
+
+function pintarBloqueCargas(){
+  document.getElementById("tieneCargas").checked = nCargas > 0;
+  document.getElementById("bloqueCargas").hidden = nCargas === 0;
+  marcarCargas();
+  sincronizarFilas();
+}
+
+/* ---------- cálculo ---------- */
+let ultimaCotizacion = "";
+/* Por defecto se cotiza el Plan Urgencias. Sin menores, el cliente puede
+   subir a Full. Con un menor de 14, el Plan 4 queda forzado. */
+const PLAN_POR_DEFECTO = "basico";
+let planElegido = PLAN_POR_DEFECTO;
+/* true cuando el Plan 4 lo impuso un menor, no el ejecutivo. Si el menor
+   desaparece (se corrige la edad, se quita la carga), se vuelve solo al plan
+   por defecto en vez de dejar cotizando el plan más caro sin razón. */
+let planForzado = false;
+
+function calcular(){
+  const ref = hoy();
+  const problemas = [];
+  let menores = 0, evaluados = 0;
+
+  [].forEach.call(document.querySelectorAll("#hijos .fila"), function(f){
+    const ed  = f.querySelector(".edad");
+    const fe  = f.querySelector(".fecha");
+    const chip = f.querySelector(".chip");
+    const ver  = f.parentNode.querySelector(".veredicto");
+
+    const nac = leerFecha(fe.value);
+    fe.classList.toggle("mal", fe.value.length===10 && !nac);
+
+    let v = null;
+    if(nac){
+      // Con fecha, la edad se deriva y se bloquea para que no se pisen
+      v = veredictoPorFecha(nac, ref);
+      ed.value = edad(nac, ref).y;
+      ed.readOnly = true;
+      ed.title = "Calculada desde la fecha. Borra la fecha para escribirla a mano.";
+      ed.classList.remove("mal");
+    }else{
+      ed.readOnly = false;
+      ed.title = "";
+      if(ed.value !== ""){
+        v = veredictoPorEdad(parseInt(ed.value, 10));
+        ed.classList.toggle("mal", v === null);
+      }else{
+        ed.classList.remove("mal");
+      }
+    }
+
+    if(!v){
+      chip.className = "chip";
+      chip.textContent = (fe.value.length===10) ? "fecha inválida" : (fe.value ? "fecha incompleta" : "—");
+      ver.className = "veredicto n"; ver.textContent = "";
+      return;
+    }
+    evaluados++;
+    chip.className = "chip " + v.chip;
+    chip.textContent = v.corto;
+    ver.className = "veredicto " + v.clase;
+    ver.textContent = v.texto + (v.aprox && v.clase!=="pide" ? " (por edad; con la fecha queda exacto)" : "");
+    if(v.menor14) menores++;
+    if(v.bloquea) problemas.push(v.texto);
+  });
+
+
+
+  // Plan. Con cero cargas no se incorpora a nadie, asi que un menor escrito
+  // en el verificador no puede obligar al Plan 4: todavia no entra al grupo.
+  const obliga = menores > 0 && nCargas > 0;
+  if(obliga){
+    planElegido = "ninos";
+    planForzado = true;
+  }else if(planForzado){
+    planElegido = PLAN_POR_DEFECTO;     // se acabó la obligación: no dejar el caro puesto
+    planForzado = false;
+  }
+  if(PLANES.filter(function(p){ return p.id===planElegido; })[0].precios[nCargas] === null && !obliga){
+    planElegido = PLAN_POR_DEFECTO;
+  }
+  const plan = PLANES.filter(function(p){ return p.id===planElegido; })[0];
+  const cent = plan.precios[nCargas];
+
+  // Aviso
+  const av = document.getElementById("aviso");
+  let clase = "aviso", texto = "";
+  if(obliga){
+    clase = "aviso bad";
+    const alt = PLANES[0].precios[nCargas];
+    texto = "Hay "+menores+" menor"+(menores===1?"":"es")+" de 14: no entra"+(menores===1?"":"n")+
+            " en Urgencias ni en Full. Obligatorio Plan 4 Full Niños.";
+    if(UF && alt!==null && cent!==null) texto += " Son "+pesos(UF, cent-alt).redondo+" más al mes que Urgencias.";
+  }else if(evaluados > 0){
+    clase = "aviso ok";
+    texto = (evaluados===1 ? "La carga califica" : "Las "+evaluados+" cargas califican")+
+            ": el cliente puede quedarse en Urgencias o subir a Full.";
+  }
+  if(cent === null){
+    clase = "aviso warn";
+    texto = "El Plan 4 Full Niños no se vende con titular solo. Marca al menos 1 carga.";
+  }
+  if(problemas.length){ clase = "aviso bad"; texto = problemas.join(" "); }
+  av.className = clase; av.textContent = texto;
+
+  // Tabla seleccionable
+  document.getElementById("tbody").innerHTML = PLANES.map(function(p){
+    const c = p.precios[nCargas];
+    const veta = (obliga && p.id!=="ninos");
+    if(c === null) return '<tr><td class="off">'+p.nom+'</td><td class="n off">—</td><td class="n off">no aplica</td></tr>';
+    const v = UF ? pesos(UF, c) : null;
+    const cls = (p.id===planElegido) ? "hit" : (veta ? "veta" : "sel");
+    const flecha = (guionAbierto && p.id===planElegido) ? '<span class="flecha">&#9656;</span>' : '';
+    const nombre = veta
+      ? p.nom + ' <small>(no admite menores)</small>'
+      : '<button type="button" class="nomplan" data-nombre="'+p.id+'">'+p.nom+flecha+'</button>';
+    return '<tr class="'+cls+'" data-plan="'+p.id+'"><td>'+nombre+
+           '</td><td class="n">'+ufTxt(c)+'</td><td class="n">'+(v ? v.redondo : "—")+"</td></tr>";
+  }).join("");
+
+  // Total
+  const v = (UF && cent!==null) ? pesos(UF, cent) : null;
+  const compos = ["titular solo","titular + 1","titular + 2","titular + 3"][nCargas];
+  document.getElementById("tUF").textContent  = cent===null ? "—" : ufTxt(cent)+" UF";
+  document.getElementById("tCLP").textContent = v ? v.redondo : "";
+  document.getElementById("exacto").textContent = v ? ufTxt(cent)+" × $"+ufTxt(UF)+" = "+v.exacto
+                                                    : (UF ? "" : "sin valor UF");
+  // Resumen permanente arriba: siempre a la vista, cambie lo que cambie
+  document.getElementById("resPlan").textContent   = plan.nom;
+  document.getElementById("resCompos").textContent = compos;
+  document.getElementById("resUF").textContent     = cent===null ? "—" : ufTxt(cent)+" UF";
+  document.getElementById("resCLP").textContent    = v ? v.redondo : "—";
+
+  ultimaCotizacion = v
+    ? plan.nom+" · "+compos+" · "+ufTxt(cent)+" UF · "+v.redondo+" mensual (UF de hoy $"+ufTxt(UF)+")"
+    : "";
+
+  if(typeof pintarGuion === "function") pintarGuion();
+  if(typeof registrarCotizacion === "function") registrarCotizacion();
+}
+
+function marcarEnvio(){
+  [].forEach.call(document.querySelectorAll("#envio button"), function(b){
+    b.classList.toggle("on", b.dataset.envio === envio);
+  });
+  document.getElementById("envioPista").textContent = (envio === "linea")
+    ? "Tiene cuenta Bci: se carga la prima a su cuenta corriente."
+    : "Sin cuenta Bci: se le envía el link de pago, con 48 horas de vigencia.";
+}
+
+function marcarCargas(){
+  [].forEach.call(document.querySelectorAll("#conteo button"), function(b){
+    b.classList.toggle("on", +b.dataset.n === nCargas);
+  });
+}
+
+/* ============================================================
+   GUION DE VENTA
+   Tomado del Script Bci Dental Full de septiembre 2026. Cada
+   seccion declara en que planes se lee, y los montos se
+   calculan en vivo con la UF del dia, para no leer cifras
+   congeladas al cliente.
+   ============================================================ */
+const GUION = [
+  /* Texto del Script Bci Dental Full de septiembre 2026, en su orden, con
+     sólo las faltas de tipeo corregidas. Cada <p> y cada <li> es una frase
+     de la lectura guiada. Lo que va en <p class="nota"> es instrucción para
+     el ejecutivo: no se lee al cliente y la lectura guiada lo salta. */
+  {t:"Apertura", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Muy <em>[saludo]</em>, ¿me comunico con <em>[nombre y apellido del cliente]</em>? Mi nombre es <em>[su nombre]</em>, llamo desde Bci.</p>'+
+    '<p>¿Cómo está?</p>'+
+    '<p class="nota">Empatizar.</p>'+
+    '<p>El motivo de mi llamado es para entregarle una información importante, son buenas noticias, no le quitaré mucho tiempo.</p>'+
+    '<p>Primero que todo, queremos agradecer su permanencia como cliente y contarle que Bci pone a su disposición el día de hoy '+
+    'una completa cobertura dental que le cubrirá hasta el 100% en los tratamientos dentales más frecuentes.</p>'+
+    '<p>Y lo mejor es que la atención es exclusiva en la red de clínicas <strong>Uno Salud Dental</strong>, '+
+    'que son más de 80 clínicas a lo largo de todo Chile.</p>'; }},
+
+  {t:"Urgencias dentales", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Tendrá los siguientes tratamientos de <strong>urgencias dentales, sin costo (a costo 0)</strong>, '+
+    'en caso de dolor, inflamación y sangrado, por ejemplo:</p>'+
+    '<ul>'+
+      '<li>Extracciones simples</li>'+
+      '<li>Trepanación, que es la primera parte del tratamiento de conducto (entre otros)</li>'+
+      '<li>Colocación de cemento o tapadura temporal</li>'+
+      '<li>Urgencia protésica: recementación de corona, puentes, incrustaciones y reparación en el sillón de otro tipo de prótesis</li>'+
+    '</ul>'; }},
+
+  {t:"Prevención", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Lo mejor es que además le cubrimos tratamientos de prevención como:</p>'+
+    '<ul>'+
+      '<li>Evaluación y diagnóstico</li>'+
+      '<li>Radiografías pieza a pieza</li>'+
+      '<li>Extracciones simples</li>'+
+      '<li>Una limpieza profunda (profilaxis + remoción de cálculos supragingivales), para remover la placa bacteriana '+
+          'y el sarro acumulados entre los dientes</li>'+
+    '</ul>'+
+    '<p>Los odontólogos, don <em>[nombre]</em>, recomiendan realizar una limpieza al menos 1 vez al año, y usted la tendría '+
+    'sin costo con nosotros dentro de 30 días, al igual que el resto de los tratamientos.</p>'+
+    '<p>Y en el caso de urgencia dental, usted puede comenzar a utilizarlo en <strong>48 horas hábiles</strong>.</p>'; }},
+
+  {t:"Tratamientos con copago · sólo Full y Full + Niños", p:["full","ninos"], html:function(d){ return ''+
+    '<p>Importante indicar, don <em>[nombre]</em>, que para los tratamientos más complejos y que suelen ser los más costosos '+
+    'en forma particular, usted también podrá acceder a ellos dentro de 30 días, a través de copagos claros y fijos antes '+
+    'de su realización. Se los detallo:</p>'+
+    '<ul>'+
+      '<li><strong>5 tapaduras en resina por año</strong> con un costo de $12.000 cada una '+
+          '($45.000 es el valor actual en otras clínicas)</li>'+
+      '<li><strong>2 tratamientos de conducto</strong> en muelas, premolares o dientes anteriores al año, con un costo de '+
+          '$12.000 cada uno ($150.000 a $300.000 aprox. es el valor referencial en otras clínicas)</li>'+
+    '</ul>'+
+    '<p>Contará además con <strong>hasta un 65% de descuento</strong> en precio promedio de mercado para los siguientes '+
+    'tratamientos más frecuentes de odontología general:</p>'+
+    '<ul>'+
+      '<li>Extracciones de las muelas del juicio</li>'+
+      '<li>Planos de relajación para el bruxismo</li>'+
+      '<li>Cambio de tapadura de amalgama a resina (cambio estético)</li>'+
+      '<li>Tapaduras de resina adicionales</li>'+
+      '<li>Tratamientos de conducto adicionales</li>'+
+    '</ul>'; }},
+
+  {t:"Programa de Salud y Bienestar", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Y de manera adicional le quiero contar que con este seguro podrá acceder sin costo al '+
+    '<strong>Programa de Salud y Bienestar de Bci</strong>, el cual cuenta con 13 programas de salud, tales como:</p>'+
+    '<ul>'+
+      '<li>Telemedicina</li><li>Salud mental</li><li>Nutrición</li><li>Kinesiología</li><li>Fonoaudiología</li>'+
+      '<li>Entre otras</li>'+
+    '</ul>'+
+    '<p>Sin costo adicional, de uso ilimitado, con atención multicanal y profesionales de la salud altamente calificados.</p>'+
+    '<p>Para acceder debe descargar la aplicación de <strong>Care Assistance</strong> y seguir las instrucciones que recibirá '+
+    'en el correo de bienvenida.</p>'; }},
+
+  {t:"Muerte accidental", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Bueno, finalmente y complementando las asistencias indicadas, don <em>[nombre]</em>, existe una protección frente a '+
+    'accidentes personales que usted pueda sufrir y terminen en fallecimiento (sólo titular), entregando una indemnización '+
+    'a sus herederos legales de <span class="dato">50 UF</span>' + (d.ap ? ', <span class="dato">' + d.ap + '</span> aprox' : '') + '.</p>'+
+    '<p>Dinero de libre disposición.</p>'+
+    '<p>Es una cobertura full y completa, ¿verdad?</p>'; }},
+
+  {t:"Sin reembolsos", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Lo mejor es que no trabajamos con reembolso, así que puede olvidarse de comprar bonos y los papeleos.</p>'+
+    '<p>Es muy simple: usted agenda la primera hora llamando al <strong>227501096</strong>, en cualquiera de las clínicas '+
+    'de la red Uno Salud, en donde le aplicarán todos los descuentos y valores que le he mencionado automáticamente '+
+    'en su presupuesto.</p>'; }},
+
+  {t:"Requisitos", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Usted, don <em>[nombre]</em>, cumple con los requisitos ya que es mayor de 18 años y menor de 70 años.</p>'+
+    '<p>Y la permanencia máxima es hasta un día antes de cumplir los 71 años.</p>'+
+    (d.cargas > 0
+      ? '<p>Don <em>[nombre]</em>, además usted puede incorporar adicionales (cónyuge e hijos).</p>'+
+        '<p>La edad mínima de ingreso de sus hijos es de <strong>14 días</strong> y la permanencia es hasta los '+
+        '<strong>24 años 0 días</strong>.</p>'+
+        '<p>Y sus adicionales contarían con la cobertura de asistencia dental y los 10 programas.</p>'+
+        '<p class="nota">Así dice el script: "10 programas" aquí y "13 programas" más arriba.</p>'
+      : ''); }},
+
+  {t:"Si no quiere el Full · Plan Urgencia + prevención", p:["full"], clase:"ojo", html:function(d){ return ''+
+    '<p class="nota">Sólo si el cliente se niega a tomar el Plan Full.</p>'+
+    '<p>Como no queremos que se quede sin cobertura y lo tome por sorpresa un dolor en sus dientes, ofrecemos por sólo '+
+    '<span class="dato">' + (d.clpBasico || '—') + '</span> aproximadamente mensuales, es decir, '+
+    '<span class="dato">UF ' + (d.ufBasico || '—') + '</span>, todas las urgencias dentales que ya le mencioné más '+
+    'tratamientos de prevención.</p>'; }},
+
+  {t:"Plan niños", p:["ninos"], clase:"clave", html:function(d){ return ''+
+    '<p>Además, don <em>[nombre]</em>, en caso de tener niños menores de 14 años, le entregamos '+
+    '<strong>11 procedimientos asociados a dientes temporales</strong> adicionales, a costo cero y sin tope, '+
+    'las que podrá utilizar dentro de 30 días.</p>'+
+    '<p class="nota">Hay un menor de 14 en el grupo: no corresponde ofrecer Urgencias ni Full.</p>'; }},
+
+  {t:"El precio", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
+    '<p>Lo más importante, don <em>[nombre]</em>, es que todas las coberturas, asistencias y beneficios mencionados tienen '+
+    'un costo de <span class="dato">UF ' + d.uf + '</span> fijas, que son <span class="dato">' + d.clp + '</span> aprox.</p>'+
+    '<p>Serán cargados automáticamente en su cuenta Bci terminada en los dígitos <em>[XXX]</em>, recién en su próximo '+
+    'estado de cuenta.</p>'+
+    '<p class="nota">' + d.plan + ' · ' + d.compos + ' · calculado con la UF de hoy, $' + d.ufdia + '.</p>'+
+    '<p>Además, don <em>[nombre]</em>, este mes nos encontramos con una promoción especial, donde la compañía durante este '+
+    'mes le otorgará <em>[X]</em> cuota sin costo para usted en el primer año de vigencia.</p>'+
+    '<p>¿Qué fecha de cargo le acomoda?</p>'+
+    '<p>¿Lo incorporo, verdad?</p>' +
+    (d.plan === "Plan Urgencias"
+      ? '<p class="nota">Para ofrecer más cobertura, elige el Plan 3 Full: su script agrega los tratamientos con copago.</p>' : ''); }},
+
+  {t:"Opcional · sólo como argumento", p:["basico","full","ninos"], clase:"ojo", html:function(d){ return ''+
+    '<p class="nota">Opcional. Úsalo sólo como argumento.</p>'+
+    '<p>Le otorgaremos además 3 meses gratuitos del seguro de sala de urgencia, con el que tendrá una cobertura de '+
+    '500 UF en caso de muerte accidental para sus herederos legales ($20.500.000 aprox.) y a su vez 9 UF ($370.000) '+
+    'para cubrir los gastos de atención inicial de una urgencia médica por accidentes de manera ilimitada y hasta 3 veces '+
+    'por enfermedad.</p>'; }},
+
+  {t:"Compañía", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Don <em>[nombre]</em>, estas coberturas son otorgadas por Bci Seguros Vida en conjunto con Bci Corredores de Seguros.</p>'; }},
+
+  {t:"Validación de datos", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Entonces, para cumplir con la normativa y poder realizar el correcto envío de su póliza, le voy a solicitar que me '+
+    'corrobore si los datos que tengo en pantalla están vigentes y correctos.</p>'+
+    '<ul>'+
+      '<li>Fecha de nacimiento</li>'+
+      '<li>Domicilio completo</li>'+
+      '<li>Teléfono de contacto</li>'+
+      '<li>Correo electrónico <span class="nota">(fundamental para enviar la póliza vía email)</span></li>'+
+      '<li>Nombre completo del titular <span class="nota">(en negación, 50/50)</span></li>'+
+      '<li>RUT <span class="nota">(en negación, 50/50)</span></li>'+
+    '</ul>'+
+    (d.cargas > 0
+      ? '<p class="nota">De cada asegurado adicional, obligatorio: nombre completo, RUT, fecha de nacimiento y parentesco.</p>'
+      : ''); }},
+
+  {t:"Grabación", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Antes de continuar le informo que, para su tranquilidad y respaldo, esta conversación está siendo grabada.</p>'; }},
+
+  {t:"Exclusiones del seguro", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Estas son algunas de las principales exclusiones de esta póliza. No se cubrirá en caso de que el origen o '+
+    'consecuencia de los daños sean por:</p>'+
+    '<ul>'+
+      '<li>Guerra, peleas, riñas, actos delictivos</li>'+
+      '<li>Suicidio o intento de suicidio</li>'+
+      '<li>Intoxicación o encontrarse bajo el efecto de cualquier narcótico o droga</li>'+
+      '<li>Conducción en estado de ebriedad</li>'+
+      '<li>Negligencia o imprudencia</li>'+
+      '<li>Prestación de servicios en las fuerzas armadas o funciones policiales</li>'+
+      '<li>Movimientos sísmicos desde el grado 8 inclusive en la escala de Mercalli</li>'+
+      '<li>Viaje o vuelo en vehículo aéreo de itinerario no regular</li>'+
+    '</ul>'+
+    '<p>En relación con el Programa Dental, se excluyen:</p>'+
+    '<ul>'+
+      '<li>Las cirugías de alta complejidad</li>'+
+      '<li>Cirugías para implantes que se realicen fuera de la red Uno Salud</li>'+
+      '<li>Costos de laboratorio y medicación</li>'+
+    '</ul>'; }},
+
+  {t:"Pregunta de contratación · textual", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
+    '<p>Sr.(a) <em>[apellido]</em>, entonces con fecha <em>[DD/MM/AA]</em>, ¿acepta la contratación en forma voluntaria del '+
+    '<strong>Seguro Dental Modular Bci</strong> con las coberturas detalladas anteriormente, con un valor mensual de '+
+    '<span class="dato">UF ' + d.uf + '</span> fijas, <span class="dato">' + d.clp + '</span> aprox., IVA incluido? ¿Acepta?</p>'+
+    '<p class="nota">La respuesta puede ser sí, acepto o de acuerdo. No se acepta ok, ya, correcto, etc.</p>'; }},
+
+  {t:"Medio de pago · póliza en línea", p:["basico","full","ninos"], envio:"linea", clase:"clave", html:function(d){ return ''+
+    '<p>Sr./Sra. <em>[apellido]</em>, usted ¿autoriza el cargo de la prima mensual del seguro, el que será descontado de su '+
+    'cuenta corriente <em>[N.º medio de pago]</em> del banco Bci? ¿Acepta?</p>'+
+    '<p class="nota">Esperar respuesta.</p>'; }},
+
+  {t:"Medio de pago · link de pago", p:["basico","full","ninos"], envio:"link", clase:"clave", html:function(d){ return ''+
+    '<p class="nota">Pago débito: cobro inmediato. Pago crédito: próximo ciclo de facturación.</p>'+
+    '<p>Sr./Sra. <em>[apellido]</em>, en este momento le llegará a su correo electrónico un correo con el asunto '+
+    '<strong>“Multicotizador – Pago de primera cuota”</strong>, donde encontrará el link de pago (en naranjo: '+
+    '<strong>“Pagar aquí”</strong>).</p>'+
+    '<p>¿Autoriza el cargo de la prima mensual del Seguro Dental, el que será descontado en la forma de pago que usted '+
+    'seleccione cuando ingrese al link enviado a su correo? ¿Acepta?</p>'+
+    '<p class="nota">Esperar respuesta.</p>'+
+    '<p>Si no puede realizar el pago en este momento, le comento que este link tiene una vigencia de <strong>48 horas</strong>.</p>'+
+    '<p>Mientras no realice el pago, este seguro no está vigente y no puede hacer uso de las asistencias y las coberturas.</p>'; }},
+
+  {t:"Después del pago", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Lo invitamos a siempre estar al día en el pago de su prima mensual, para así poder utilizar su cobertura cuando la necesite.</p>'+
+    '<p>Haremos llegar a su correo electrónico dentro de unos minutos (cuando registre su medio de pago) su póliza de seguro '+
+    'y todas las comunicaciones relativas a esta.</p>'; }},
+
+  {t:"Cierre normativo", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Las condiciones generales de su póliza están registradas en la CMF bajo el código <strong>POL 3 2013 0085 Alt. A</strong> '+
+    'para muerte accidental y <strong>POL 3 2019 0055</strong> para la cobertura dental.</p>'+
+    '<p>Don/Sra. <em>[nombre y apellido]</em>, le comento que la compañía Bci Seguros Vida y Bci Corredores de Seguros '+
+    'tratarán sus datos para evaluar y mejorar sus servicios por medio de análisis de datos y estudios analíticos, '+
+    'resolver consultas, publicidad y realizar gestiones propias de sus negocios.</p>'+
+    '<p>¿Autoriza el tratamiento de los mismos?</p>'+
+    '<p>Don/Sra., el código de operación asociado a esta venta es <em>[RUT del cliente o ID de venta]</em>.</p>'+
+    '<p>Guárdelo para futuras consultas o modificaciones a la póliza.</p>'+
+    '<p>La grabación de esta conversación constituye prueba de la información proporcionada y la aceptación de este contrato.</p>'+
+    '<p>Le informo que la vigencia de su seguro comenzará a regir a contar de hoy <em>[DD/MM/AAAA]</em> y tendrá vigencia '+
+    'anual y renovable automáticamente por periodos iguales y sucesivos de un año.</p>'+
+    '<p>El asegurado podrá poner término unilateral al seguro en cualquier momento, sin expresión de causa, '+
+    'comunicándolo al asegurador.</p>'+
+    '<p>Le recuerdo que la contratación es de carácter voluntario y usted puede retractarse del seguro dentro del plazo '+
+    'de diez días contado desde que reciba la póliza, sin expresión de causa ni cargo alguno, teniendo el derecho a la '+
+    'devolución de la prima que hubiere pagado.</p>'+
+    '<p>El seguro terminará en caso de no pago de prima, al cumplir la edad de permanencia y/o en caso de fallecimiento.</p>'+
+    '<p>Las demás causales de término anticipado están señaladas en las respectivas POL.</p>'+
+    '<p>Visítenos en el sitio web www.bci.cl/corredora-de-seguros/diversificacion-de-cartera</p>'+
+    '<p>Desde ya le damos la más cordial bienvenida a Bci Corredores de Seguros y a Bci Seguros Vida S.A.</p>'+
+    '<p>Revise su póliza una vez recibida y ante cualquier consulta, solicitud de grabación, entre otros, puede contactarnos '+
+    'al Centro de Respuesta Inmediata al fono <strong>600 6000 292</strong>.</p>'+
+    '<p>En caso de que el asegurado requiera los servicios de asistencia dental, deberá comunicarse al número telefónico '+
+    '<strong>227501096</strong>.</p>'; }},
+
+  {t:"Encuesta EPA", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p>Don/Srta. <em>[nombre]</em>, para finalizar lo derivaré a una pequeña encuesta de 2 preguntas para que califique '+
+    'mi atención en esta llamada, ¿de acuerdo?</p>'+
+    '<p>Que tenga buen día / tarde.</p>'+
+    '<p class="nota">En el sistema: Transfer-Conf → ingroup ENCUESTA_EPA → CLOSER LOCAL, y tipificar. '+
+    'Obligatoria salvo derivación a IVR por pago con tarjeta de crédito.</p>'; }}
+];
+
+// Dos columnas: la cotización y, a su derecha, el script del plan elegido,
+// abierto desde el inicio. En la extensión se puede cerrar con la ×; en la
+// página web queda siempre a la vista.
+const GUION_POR_DEFECTO = true;
+let guionAbierto = GUION_POR_DEFECTO;
+/* Por defecto se lee la opción de póliza en línea, porque el cliente tiene
+   cuenta Bci. Si no la tiene, se le envía el link de pago. */
+let envio = "linea";
+
+function pintarGuion(){
+  const app = document.getElementById("app");
+  const yaAbierto = app.classList.contains("abierto");
+  if(guionAbierto && !yaAbierto) abriendoHasta = Date.now() + 300;
+  app.classList.toggle("abierto", guionAbierto);
+  if(!guionAbierto) return;
+  const caja = document.getElementById("guion");
+  const scroll = caja.scrollTop;
+
+  const plan = PLANES.filter(function(p){ return p.id===planElegido; })[0];
+  const cent = plan.precios[nCargas];
+  const basico = PLANES[0].precios[nCargas];
+  const full   = PLANES[1].precios[nCargas];
+
+  const d = {
+    plan:   plan.nom,
+    compos: ["titular solo","titular + 1 carga","titular + 2 cargas","titular + 3 cargas"][nCargas],
+    cargas: nCargas,
+    uf:     cent===null ? "—" : ufTxt(cent),
+    clp:    (UF && cent!==null)   ? pesos(UF, cent).redondo   : "—",
+    ufdia:  UF ? ufTxt(UF) : "—",
+    ap:     UF ? pesos(UF, 5000).redondo : "",          // 50 UF de muerte accidental
+    ufBasico:  basico!==null ? ufTxt(basico) : null,
+    clpBasico: (UF && basico!==null) ? pesos(UF, basico).redondo : null,
+    clpFull:   (UF && full!==null)   ? pesos(UF, full).redondo   : null
+  };
+
+  document.getElementById("guionTit").textContent = "Script · " + plan.nom;
+  document.getElementById("guionSub").textContent =
+    d.compos + " · " + d.uf + " UF · " + d.clp + " mensual";
+
+  document.getElementById("guionCuerpo").innerHTML = GUION
+    .filter(function(sec){
+      if(sec.p.indexOf(planElegido) === -1) return false;
+      if(sec.envio && sec.envio !== envio) return false;    // sólo la opción de pago que corresponde
+      return true;
+    })
+    .map(function(sec){
+      return '<div class="gs '+(sec.clase||"")+'"><h4>'+sec.t+"</h4>"+personalizar(sec.html(d))+"</div>";
+    }).join("");
+
+  // Se redibuja con cada cambio (una edad, el envío): que no salte de lugar.
+  // Al abrirlo, en cambio, se lleva a la frase donde se quedó.
+  caja.scrollTop = scroll;
+  marcarPasos(!yaAbierto);
+}
+
+/* ============================================================
+   LECTURA GUIADA, LETRA Y CONTRASTE
+   Cada frase del script es un paso. Las flechas ↑ ↓ avanzan y
+   retroceden, la frase actual queda marcada y lo ya leído se
+   atenúa. Se recuerda en qué frase quedó cada plan.
+   La letra, el contraste y el modo guiado son preferencias del
+   ejecutivo: no se borran con "Nuevo cliente".
+   ============================================================ */
+const prefs = {letra: 100, contraste: "normal", guiada: true};
+let pasos = {basico: 0, full: 0, ninos: 0};
+
+function aplicarPrefs(){
+  const g = document.getElementById("guion");
+  g.style.setProperty("--gfs", (13 * prefs.letra / 100).toFixed(1) + "px");
+  g.dataset.contraste = prefs.contraste;
+  g.classList.toggle("guiada", prefs.guiada);
+  document.getElementById("letraTam").textContent = prefs.letra + "%";
+  document.getElementById("letraMenos").disabled = prefs.letra <= 80;
+  document.getElementById("letraMas").disabled = prefs.letra >= 220;
+  [].forEach.call(document.querySelectorAll("#contraste button"), function(b){
+    b.classList.toggle("on", b.dataset.c === prefs.contraste);
+  });
+  document.getElementById("guiada").classList.toggle("on", prefs.guiada);
+  document.getElementById("pasoAnt").disabled = !prefs.guiada;
+  document.getElementById("pasoSig").disabled = !prefs.guiada;
+  // La barra queda pegada bajo la cabecera, cuya altura cambia con la letra
+  const cab = g.querySelector(".guion-cab");
+  if(cab) g.style.setProperty("--gb-top", cab.offsetHeight + "px");
+}
+function guardarPrefs(){ almacen.escribir("prefs", prefs); }
+
+
+
+function frases(){
+  return [].slice.call(document.querySelectorAll("#guionCuerpo .gs p:not(.nota), #guionCuerpo .gs li"));
+}
+function marcarPasos(llevar){
+  const ps = frases();
+  const n = ps.length;
+  const i = n ? Math.max(0, Math.min(n - 1, pasos[planElegido] || 0)) : 0;
+  pasos[planElegido] = i;
+  ps.forEach(function(el, k){
+    el.classList.add("paso");
+    el.dataset.i = k;
+    el.classList.toggle("actual", prefs.guiada && k === i);
+    el.classList.toggle("leido", prefs.guiada && k < i);
+  });
+  document.getElementById("pasoNum").textContent = n ? (i + 1) + " / " + n : "—";
+  if(llevar && prefs.guiada && ps[i]){
+    // Recién abierto, el panel todavía se está desplegando (el texto está
+    // más angosto y alto): se espera a que termine para ubicar la frase.
+    const espera = Math.max(0, abriendoHasta - Date.now());
+    setTimeout(function(){ llevarAlPaso(ps[i]); }, espera);
+  }
+}
+let abriendoHasta = 0;
+// Deja la frase a la vista, justo bajo la cabecera y la barra fijas
+function llevarAlPaso(el){
+  const g = document.getElementById("guion");
+  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(g.scrollHeight <= g.clientHeight + 2){   // la web: se desplaza la página
+    el.scrollIntoView({block: "center", behavior: suave ? "smooth" : "auto"});
+    return;
+  }
+  const tapa = g.querySelector(".guion-cab").offsetHeight + g.querySelector(".guion-barra").offsetHeight;
+  const rg = g.getBoundingClientRect(), re = el.getBoundingClientRect();
+  const libre = g.clientHeight - tapa;
+  const margen = Math.max(10, Math.min((libre - re.height) / 3, 120));
+  const destino = g.scrollTop + (re.top - rg.top) - tapa - margen;
+  g.scrollTo({top: Math.max(0, destino), behavior: suave ? "smooth" : "auto"});
+}
+function moverPaso(delta){
+  pasos[planElegido] = (pasos[planElegido] || 0) + delta;
+  marcarPasos(true);
+  guardarEstado();
+}
+
+/* ---------- búsqueda y resultados ---------- */
+let busquedaId = 0, temporizador = null;
+
+function alEscribirComuna(){
+  clearTimeout(temporizador);
+  const q = document.getElementById("comuna").value;
+  if(norm(q).length < 3){ pintarSugerencias([], false); pintarResultados(null); return; }
+  temporizador = setTimeout(function(){ buscarComuna(q); }, 380);
+}
+
+// Elige la comuna entre los candidatos. Sólo la da por elegida si no hay
+// empate: con "las c" ofrece Las Cabras y Las Condes en vez de adivinar.
+// Abreviaturas de uso común al escribir comunas
+const ABREV = {pto: "puerto", pta: "punta", sta: "santa", sto: "santo", gral: "general", sn: "san",
+               stgo: "santiago", valpo: "valparaiso", conce: "concepcion", vina: "vina del mar"};
+function expandirAbrev(q){
+  return norm(q).split(" ").map(function(w){ return ABREV[w] || w; }).join(" ");
+}
+function elegirComuna(q, candidatos){
+  const q2 = expandirAbrev(q);
+  function pt(n){
+    const a = puntaje(q, n), b = q2 !== norm(q) ? puntaje(q2, n) : null;
+    return a === null ? b : (b === null ? a : Math.min(a, b));
+  }
+  const cand = candidatos
+    .map(function(x){ return {x: x, pt: pt(x.nombre)}; })
+    .filter(function(c){ return c.pt !== null; })
+    .sort(function(a, b){ return a.pt - b.pt || a.x.nombre.localeCompare(b.x.nombre, "es"); });
+  const claro = cand.length && (cand.length === 1 || cand[0].pt < cand[1].pt || cand[0].pt === 0);
+  return {comuna: claro ? cand[0].x : null, sugerencias: cand.slice(0, 5).map(function(c){ return c.x; })};
+}
+
+// Si algo falla, se dice en el panel en vez de quedar en silencio
+let ultimaBusqueda = null;
+async function buscarComuna(q, elegida){
+  ultimaBusqueda = {q: q, elegida: elegida || null};
+  try{ await buscarComunaAdentro(q, elegida); }
+  catch(e){
+    document.getElementById("clinRes").innerHTML =
+      '<p class="clin-vacio">Algo falló al buscar: ' + esc(String(e && e.message || e)) +
+      '. <button type="button" class="link-carga" data-diag="error">copiar diagnóstico</button></p>';
+    diag.error = {mensaje: String(e && e.message || e), pila: String(e && e.stack || "").slice(0, 1500)};
+  }
+}
+// Cuando el listado de i-dental termina de leerse en segundo plano, la
+// búsqueda que está en pantalla se repite sola para mostrarlo.
+try{
+  chrome.storage.onChanged.addListener(function(cambios, zona){
+    if(zona !== "local" || !(cambios.red_edental || cambios.ede_intento) || !ultimaBusqueda) return;
+    if(document.getElementById("panelClin").hidden) return;
+    if(norm(document.getElementById("comuna").value) !== norm(ultimaBusqueda.q) && !ultimaBusqueda.elegida) return;
+    buscarComuna(ultimaBusqueda.q, ultimaBusqueda.elegida);
+  });
+}catch(e){}
+
+async function buscarComunaAdentro(q, elegida){
+  const id = ++busquedaId;
+  pintarResultados({cargando: true, comuna: q});
+
+  // 1. Con mapeo guardado, la respuesta es inmediata y no se consulta nada
+  const m = await leerMapeo();
+  if(id !== busquedaId) return;
+  if(m){
+    const r = elegida ? {comuna: m.comunas.find(function(c){ return norm(c.nombre) === norm(elegida.nombre); }), sugerencias: []}
+                      : elegirComuna(q, m.comunas);
+    mostrarEleccion(r);
+    if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length}); return; }
+    const c = r.comuna;
+    pintarResultados({
+      comuna: c.nombre, mapeo: m,
+      uno: {lista: c.uno, url: c.slug ? RED.unosalud.comuna(c.slug) : RED.unosalud.sitio, error: "", sinPagina: !c.uno.length},
+      ede: {lista: c.ede, error: m.resumen.edeError, total: m.resumen.sucursalesEde}
+    });
+    return;
+  }
+
+  // 2. Sin mapeo: se lee en vivo. Las comunas candidatas son las de Uno Salud
+  //    más las que aparecen en el listado de i-dental. Uno Salud no espera a
+  //    i-dental: si i-dental aún no está guardado (la primera lectura tarda
+  //    unos segundos), se muestra Uno Salud y i-dental llega después.
+  const indice = await indiceUnoSalud();
+  if(id !== busquedaId) return;
+  let ede = await edentalGuardado();
+  const pEde = ede ? null : clinicasEdental();
+  const conocidas = indice.map(function(x){ return x.nombre; });
+  function agrupar(){
+    const porComuna = {};
+    indice.forEach(function(x){ porComuna[norm(x.nombre)] = {nombre: x.nombre, slug: x.slug, ede: []}; });
+    ((ede && ede.lista) || []).forEach(function(c){
+      const u = ubicarClinica(c, conocidas);
+      if(!u.comuna) return;
+      const k = norm(u.comuna);
+      if(!porComuna[k]) porComuna[k] = {nombre: u.comuna, slug: "", ede: []};
+      porComuna[k].ede.push(Object.assign({}, c, u.porSeccion ? {porSeccion: true} : {}));
+    });
+    return porComuna;
+  }
+  function elegir(porComuna){
+    const candidatos = Object.keys(porComuna).map(function(k){ return porComuna[k]; });
+    if(elegida) return {comuna: porComuna[norm(elegida.nombre)] || {nombre: elegida.nombre, slug: elegida.slug, ede: []}, sugerencias: []};
+    if(candidatos.length) return elegirComuna(q, candidatos);
+    return {comuna: {nombre: q.trim(), slug: norm(q).replace(/\s+/g, "-"), ede: []}, sugerencias: []};  // sin nada leído
+  }
+  function edeDe(c){
+    return {lista: c.ede, error: ede.error, total: (ede.lista || []).length, pendiente: !!ede.pendiente};
+  }
+
+  let r = elegir(agrupar());
+  // La comuna puede tener sólo i-dental: sin calce en Uno Salud se espera el listado
+  if(!r.comuna && pEde){
+    pintarResultados({cargando: true, comuna: q, ede: true});
+    ede = await pEde;
+    if(id !== busquedaId) return;
+    r = elegir(agrupar());
+  }
+  mostrarEleccion(r);
+  if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length}); return; }
+
+  const c = r.comuna;
+  const uno = c.slug ? await clinicasUnoSalud(c) : {lista: [], url: RED.unosalud.sitio, error: "", sinPagina: true};
+  if(id !== busquedaId) return;
+  pintarResultados({comuna: c.nombre, uno: uno, ede: ede ? edeDe(c) : {cargando: true, lista: []}});
+  if(ede) return;
+
+  ede = await pEde;
+  if(id !== busquedaId) return;
+  const c2 = agrupar()[norm(c.nombre)] || {ede: []};
+  pintarResultados({comuna: c.nombre, uno: uno, ede: edeDe(c2)});
+}
+
+function mostrarEleccion(r){
+  const elegida = r.comuna;
+  pintarSugerencias(elegida ? r.sugerencias.filter(function(s){ return norm(s.nombre) !== norm(elegida.nombre); }).slice(0, 4)
+                            : r.sugerencias, !!elegida);
+}
+
+function pintarSugerencias(lista, hayElegida){
+  const c = document.getElementById("sugComunas");
+  if(!lista.length){ c.innerHTML = ""; return; }
+  c.innerHTML = '<span class="sug-t">' + (hayElegida ? "¿O era…?" : "¿Cuál comuna?") + '</span>' +
+    lista.map(function(x){
+      return '<button type="button" class="sug" data-slug="' + esc(x.slug) + '" data-nombre="' + esc(x.nombre) + '">' + esc(x.nombre) + '</button>';
+    }).join("");
+}
+
+function tarjetaHTML(c){
+  return '<div class="clin">' +
+    '<div class="clin-n">' + esc(c.nombre) + '</div>' +
+    (c.direccion ? '<div class="clin-d">' + esc(c.direccion) + '</div>' : '') +
+    ((c.telefono || c.horario || c.url) ? '<div class="clin-m">' +
+      (c.telefono ? '<span class="dist">' + esc(c.telefono) + '</span>' : '') +
+      (c.horario ? '<span class="dist">' + esc(c.horario) + '</span>' : '') +
+      (urlSegura(c.url) ? '<a class="fuente" href="' + esc(c.url) + '" target="_blank" rel="noopener">ficha &#8599;</a>' : '') +
+    '</div>' : '') +
+  '</div>';
+}
+
+function bloqueRed(red, comuna, r){
+  const nom = RED[red].nombre;
+  const lista = r.lista || [];
+  let estado;
+  if(r.cargando){
+    return '<div class="redblq"><div class="redcab"><span class="red ' + red + '">' + nom + '</span>' +
+      '<span class="redn">leyendo…</span></div>' +
+      '<p class="clin-vacio">Leyendo el listado de ' + nom + '. La primera vez tarda unos segundos: se abre y se cierra sola una pestaña de fondo. Después queda guardado una semana.</p></div>';
+  }
+  if(r.pendiente){
+    return '<div class="redblq"><div class="redcab"><span class="red ' + red + '">' + nom + '</span>' +
+      '<span class="redn">cargando aparte…</span>' +
+      '<a class="fuente" href="' + esc(RED[red].sitio) + '" target="_blank" rel="noopener">ver en el sitio &#8599;</a></div>' +
+      '<p class="clin-vacio">El listado de ' + nom + ' se está cargando aparte (unos segundos, una sola vez por semana). Aparece aquí solo, sin volver a buscar.</p></div>';
+  }
+  if(r.error) estado = "sin respuesta";
+  else if(lista.length) estado = lista.length + (lista.length === 1 ? " sucursal" : " sucursales");
+  else if(red === "edental" && !r.total) estado = "sin listado";
+  else estado = "ninguna en " + esc(comuna);
+  let h = '<div class="redblq"><div class="redcab">' +
+    '<span class="red ' + red + '">' + nom + '</span>' +
+    '<span class="redn">' + estado + '</span>' +
+    '<a class="fuente" href="' + esc(red === "unosalud" && r.url ? r.url : RED[red].sitio) + '" target="_blank" rel="noopener">ver en el sitio &#8599;</a>' +
+    '</div>';
+  if(r.error){
+    h += '<p class="clin-vacio">' + (ESWEB
+      ? 'Desde la página web no se pueden consultar otros sitios. En la extensión de Chrome sí.'
+      : 'No pude leer el sitio: ' + esc(r.error) + '.') +
+      (ESWEB ? '' : ' <button type="button" class="link-carga" data-diag="' + red + '">copiar diagnóstico</button>') + '</p>';
+  }else if(!lista.length){
+    let motivo;
+    if(red === "unosalud" && r.sinPagina) motivo = "Uno Salud no tiene sucursales en esta comuna.";
+    else if(red === "edental" && !r.total) motivo = "No encontré el listado de clínicas en el sitio de i-dental.";
+    else if(red === "edental") motivo = "i-dental no tiene sucursales en esta comuna.";
+    else motivo = "No encontré sucursales en la página de esta comuna.";
+    h += '<p class="clin-vacio">' + motivo +
+         (red === "unosalud" && r.sinPagina || red === "edental" && r.total ? '' :
+          ' <button type="button" class="link-carga" data-diag="' + red + '">copiar diagnóstico</button>') + '</p>';
+  }else{
+    if(lista.some(function(c){ return c.porSeccion; })){
+      h += '<p class="clin-vacio">El sitio no dice la comuna de alguna de estas clínicas: aparece bajo el título <strong>' +
+           esc(comuna) + '</strong>. Confirma la dirección antes de dársela al cliente.</p>';
+    }
+    h += lista.map(tarjetaHTML).join("");
+  }
+  return h + '</div>';
+}
+
+function pintarResultados(e){
+  const caja = document.getElementById("clinRes");
+  if(!e){ caja.innerHTML = ""; return; }
+  if(e.cargando){
+    caja.innerHTML = '<p class="clin-vacio">Buscando sucursales en ' + esc(e.comuna) + '…' +
+      (e.ede ? ' Leyendo el listado de i-dental: la primera vez tarda unos segundos.' : '') + '</p>';
+    return;
+  }
+  if(e.sinElegir){
+    caja.innerHTML = e.nada
+      ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas con sucursales de Uno Salud o i-dental. Revisa cómo se escribe.</p>'
+      : '';
+    return;
+  }
+  caja.innerHTML = '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong></p>' +
+    bloqueRed("unosalud", e.comuna, e.uno) +
+    bloqueRed("edental", e.comuna, e.ede) +
+    (e.mapeo
+      ? '<p class="capturado">Del mapeo del ' + fmt(new Date(e.mapeo.generado)) + ' (' + e.mapeo.resumen.comunas + ' comunas). ' +
+        '<button type="button" class="link-carga" data-abrir-mapeo="1">ver mapeo completo</button></p>'
+      : '<p class="capturado">Leído en este momento de unosalud.cl y e-dentalsys.com. ' +
+        '<button type="button" class="link-carga" data-abrir-mapeo="1">Haz el mapeo completo</button> para que responda al instante.</p>');
+}
+
+async function copiarDiagnostico(red, btn){
+  const info = {red: red, cuando: new Date().toISOString(), indice: diag.indice || null, lectura: diag[red] || null};
+  if(red === "edental"){
+    info.ultimaPestana = await new Promise(function(res){ almacen.leer("diag_edental_vivo", res); });
+  }
+  const texto = "DIAGNOSTICO BUSCADOR " + red.toUpperCase() + "\n" + JSON.stringify(info, null, 1);
+  try{ await navigator.clipboard.writeText(texto); btn.textContent = "copiado: pégalo en el chat"; }
+  catch(e){ btn.textContent = "no se pudo copiar"; }
+}
+
+
+/* ---------- eventos ---------- */
+function confirmarDosToques(btn, aviso, accion){
+  if(btn.dataset.armado === "1"){
+    btn.dataset.armado = ""; btn.textContent = btn.dataset.original; accion(); return;
+  }
+  btn.dataset.original = btn.textContent;
+  btn.dataset.armado = "1";
+  btn.textContent = aviso;
+  setTimeout(function(){
+    if(btn.dataset.armado === "1"){ btn.dataset.armado = ""; btn.textContent = btn.dataset.original; }
+  }, 3500);
+}
+
+// Nuevo cliente: todo a cero. Titular solo, Plan Urgencias, sin nada escrito.
+function reiniciar(){
+  almacen.borrar("estado");
+  busquedaId++;
+  clearTimeout(temporizador);
+  nCargas = 0;
+  planElegido = PLAN_POR_DEFECTO;
+  planForzado = false;
+  guionAbierto = GUION_POR_DEFECTO;
+  envio = "linea";
+  pasos = {basico: 0, full: 0, ninos: 0};
+  document.getElementById("hijos").innerHTML = "";
+  document.getElementById("comuna").value = "";
+  document.getElementById("sugComunas").innerHTML = "";
+  document.getElementById("clinRes").innerHTML = "";
+  document.getElementById("panelClin").hidden = true;
+  document.getElementById("abrirClin").classList.remove("open");
+  pintarBloqueCargas();
+  marcarEnvio();
+  pintarGuardado(null);
+  calcular();
+}
+
+document.getElementById("ufReload").addEventListener("click", cargarUF);
+document.getElementById("ufManual").addEventListener("input", function(){
+  const v = parseFloat(this.value.replace(/\./g, "").replace(",", "."));
+  if(v > 0){
+    const cent = Math.round(v * 100), f = fmt(hoy());
+    guardar(cent, f);
+    cacheUF = {c: cent, f: f};
+    pintarUF(cent, f, ESWEB ? "escrita a mano" : "manual");
+    avisarUFVieja();
+  }
+});
+document.getElementById("tieneCargas").addEventListener("change", function(){
+  nCargas = this.checked ? Math.max(1, nCargas) : 0;
+  pintarBloqueCargas();
+  calcular(); guardarEstado();
+  if(this.checked){ const ed = document.querySelector("#hijos .edad"); if(ed) ed.focus(); }
+});
+document.getElementById("conteo").addEventListener("click", function(e){
+  const b = e.target.closest("button");
+  if(!b) return;
+  nCargas = +b.dataset.n;
+  pintarBloqueCargas();
+  calcular(); guardarEstado();
+});
+document.getElementById("abrirClin").addEventListener("click", function(){
+  const panel = document.getElementById("panelClin");
+  const abierto = !panel.hidden;
+  panel.hidden = abierto;
+  this.classList.toggle("open", !abierto);
+  if(!abierto){
+    const campo = document.getElementById("comuna");
+    campo.focus();
+    if(norm(campo.value).length >= 3 && !document.getElementById("clinRes").innerHTML) alEscribirComuna();
+  }
+  guardarEstado();
+});
+document.getElementById("comuna").addEventListener("input", function(){ alEscribirComuna(); guardarEstado(); });
+document.getElementById("comuna").addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ e.preventDefault(); clearTimeout(temporizador); if(norm(this.value).length >= 3) buscarComuna(this.value); }
+});
+document.getElementById("sugComunas").addEventListener("click", function(e){
+  const b = e.target.closest("button.sug");
+  if(!b) return;
+  document.getElementById("comuna").value = b.dataset.nombre;
+  guardarEstado();
+  buscarComuna(b.dataset.nombre, {slug: b.dataset.slug, nombre: b.dataset.nombre});
+});
+function abrirMapeo(){
+  try{ chrome.tabs.create({url: chrome.runtime.getURL("mapeo.html")}); }
+  catch(e){ window.open("mapeo.html", "_blank"); }
+}
+document.getElementById("clinRes").addEventListener("click", function(e){
+  const d = e.target.closest("[data-diag]");
+  if(d){ copiarDiagnostico(d.dataset.diag, d); return; }
+  if(e.target.closest("[data-abrir-mapeo]")) abrirMapeo();
+});
+document.getElementById("abrirMapeo").addEventListener("click", abrirMapeo);
+document.getElementById("envio").addEventListener("click", function(e){
+  const b = e.target.closest("button");
+  if(!b) return;
+  envio = b.dataset.envio;
+  marcarEnvio();
+  pintarGuion(); guardarEstado();
+});
+document.getElementById("tbody").addEventListener("click", function(e){
+  const tr = e.target.closest("tr");
+  if(!tr || !tr.dataset.plan || tr.classList.contains("veta")) return;
+  const porNombre = !!e.target.closest(".nomplan");
+  const mismoPlan = (tr.dataset.plan === planElegido);
+  planElegido = tr.dataset.plan;
+  planForzado = false;
+  if(porNombre) guionAbierto = ESWEB ? true : !(guionAbierto && mismoPlan);
+  calcular(); guardarEstado();
+});
+document.getElementById("cerrarGuion").addEventListener("click", function(){
+  guionAbierto = false;
+  pintarGuion(); guardarEstado();
+});
+document.getElementById("letraMenos").addEventListener("click", function(){
+  prefs.letra = Math.max(80, prefs.letra - 10); aplicarPrefs(); guardarPrefs(); marcarPasos(true);
+});
+document.getElementById("letraMas").addEventListener("click", function(){
+  prefs.letra = Math.min(220, prefs.letra + 10); aplicarPrefs(); guardarPrefs(); marcarPasos(true);
+});
+document.getElementById("contraste").addEventListener("click", function(e){
+  const b = e.target.closest("button");
+  if(!b) return;
+  prefs.contraste = b.dataset.c; aplicarPrefs(); guardarPrefs();
+});
+document.getElementById("guiada").addEventListener("click", function(){
+  prefs.guiada = !prefs.guiada; aplicarPrefs(); guardarPrefs(); marcarPasos(prefs.guiada);
+});
+document.getElementById("pasoAnt").addEventListener("click", function(){ moverPaso(-1); });
+document.getElementById("pasoSig").addEventListener("click", function(){ moverPaso(1); });
+document.getElementById("guionCuerpo").addEventListener("click", function(e){
+  const el = e.target.closest(".paso");
+  if(!el || !prefs.guiada) return;
+  pasos[planElegido] = +el.dataset.i;          // pinchar una frase la deja como actual
+  marcarPasos(false); guardarEstado();
+});
+// Flechas ↑ ↓ en cualquier parte, salvo mientras se escribe en un campo
+document.addEventListener("keydown", function(e){
+  if(!guionAbierto || !prefs.guiada || e.altKey || e.ctrlKey || e.metaKey) return;
+  const t = e.target;
+  const escribiendo = t && (t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable ||
+                      (t.tagName === "INPUT" && !/^(checkbox|radio|button|submit)$/i.test(t.type)));
+  if(escribiendo) return;
+  if(e.key === "ArrowDown" || e.key === "PageDown"){ e.preventDefault(); moverPaso(1); }
+  else if(e.key === "ArrowUp" || e.key === "PageUp"){ e.preventDefault(); moverPaso(-1); }
+  else if(e.key === "Home"){ e.preventDefault(); pasos[planElegido] = 0; marcarPasos(true); guardarEstado(); }
+  else if(e.key === "End"){ e.preventDefault(); pasos[planElegido] = 9999; marcarPasos(true); guardarEstado(); }
+});
+
+document.getElementById("limpiar").addEventListener("click", function(){
+  confirmarDosToques(this, "¿Seguro? Toca otra vez", reiniciar);
+});
+document.getElementById("copiar").addEventListener("click", function(){
+  if(!ultimaCotizacion) return;
+  const b = this;
+  navigator.clipboard.writeText(ultimaCotizacion).then(function(){
+    b.textContent = "Copiado";
+    setTimeout(function(){ b.textContent = "Copiar"; }, 1200);
+  }, function(){ b.textContent = "No se pudo"; setTimeout(function(){ b.textContent = "Copiar"; }, 1500); });
+});
+
+/* ============================================================
+   CLIENTE DESDE VICIDIAL
+   Al abrir, se lee el lead que está en pantalla en la pestaña de
+   Vicidial (nombre, RUT, fonos, comuna, sexo y el nombre del
+   ejecutivo). Con eso:
+   - se muestra el cliente arriba de la cotización;
+   - el script dice su nombre donde tenía [nombre] y el del ejecutivo
+     donde tenía [su nombre]; "Don/Sra." se elige según el sexo;
+   - la comuna queda escrita en el buscador de sucursales;
+   - si el lead cambió (otra llamada), la cotización parte de cero.
+   ============================================================ */
+const VICIDIAL = "https://vicidial.recaall.simtastic.cl/agc/*";
+let cliente = null;
+
+// Vicidial guarda los nombres en mayúsculas y sin tildes. Se reponen las de
+// los nombres y apellidos más comunes, para leerlos bien en el script.
+const TILDES = {};
+("Pérez González Rodríguez Martínez Fernández López Gómez Sánchez Díaz Hernández Ramírez Álvarez " +
+ "Jiménez Gutiérrez Vásquez Velásquez Núñez Benítez Domínguez Suárez Méndez Márquez Chávez Ríos Peña " +
+ "Muñoz Ibáñez Valdés Cáceres Sáez Galdámez Céspedes Bermúdez Rubén Raúl Héctor Víctor Óscar Ángel " +
+ "José María Andrés Matías Sebastián Martín Joaquín Agustín Cristián Iván Ramón Germán Julián Nicolás " +
+ "Tomás Mónica Verónica Inés Sofía Lucía Belén Héctor Ángela Darío Efraín Facundo Fabián Damián Adrián " +
+ "Simón Elías Jesús Ruth Débora Bárbara Noemí Zoé Rocío Ximena").split(" ").forEach(function(w){
+  if(w) TILDES[w.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()] = w;
+});
+function nombrePropio(t){
+  t = String(t || "").replace(/\s+/g, " ").trim();
+  if(!t) return "";
+  if(t === t.toUpperCase() || t === t.toLowerCase()){   // si ya viene bien escrito, se respeta
+    t = t.toLowerCase().replace(/(^|[\s-])(\S)/g, function(m, a, b){ return a + b.toUpperCase(); })
+         .replace(/ (De|Del|La|Las|Los|Y) /g, function(m){ return m.toLowerCase(); });
+  }
+  return t.replace(/[A-Za-z]+/g, function(w){ return TILDES[w.toLowerCase()] || w; });
+}
+// "Eduardo Rodrigo Perez Moya" -> "Eduardo Perez" (primer nombre y primer apellido)
+function nombreCorto(full){
+  const w = nombrePropio(full).split(" ").filter(Boolean);
+  if(w.length >= 4) return w[0] + " " + w[2];
+  if(w.length === 3) return w[0] + " " + w[1];
+  return w.join(" ");
+}
+function escCli(t){ return String(t).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+function hoyTexto(anioCorto){
+  const f = hoy(), dd = String(f.getDate()).padStart(2, "0"), mm = String(f.getMonth() + 1).padStart(2, "0");
+  return dd + "/" + mm + "/" + (anioCorto ? String(f.getFullYear()).slice(2) : f.getFullYear());
+}
+function datoCli(t){ return ' <span class="cli-dato">' + escCli(t) + "</span>"; }
+
+function personalizar(h){
+  // Las fechas del cierre son las de hoy, haya o no cliente leído
+  h = h.split("<em>[DD/MM/AA]</em>").join('<em class="cli">' + hoyTexto(true) + "</em>");
+  h = h.split("<em>[DD/MM/AAAA]</em>").join('<em class="cli">' + hoyTexto(false) + "</em>");
+  // Saludo según la hora: buenos días hasta las 12:00, después buenas tardes
+  h = h.split("<em>[saludo]</em>").join(new Date().getHours() < 12 ? "buenos días" : "buenas tardes");
+  if(!cliente) return h;
+  const nom = nombrePropio(cliente.nombre).split(" ")[0] || "";
+  const completo = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
+  const apellido = nombrePropio(cliente.apellidoPat);
+  const mujer = cliente.genero === "F", hombre = cliente.genero === "M";
+  const em = function(t){ return '<em class="cli">' + escCli(t) + "</em>"; };
+  if(cliente.agente) h = h.split("<em>[su nombre]</em>").join(em(nombreCorto(cliente.agente)));
+  // Apertura: primer nombre y primer apellido ("Kevin Salazar")
+  const corto = (nom + " " + apellido).trim();
+  if(corto) h = h.split("<em>[nombre y apellido del cliente]</em>").join(em(corto));
+  if(completo){
+    h = h.split("Don/Sra. <em>[nombre y apellido]</em>").join((mujer ? "Sra." : hombre ? "Don" : "Don/Sra.") + " " + em(completo));
+    h = h.split("<em>[nombre y apellido]</em>").join(em(completo));
+  }
+  if(nom){
+    if(mujer) h = h.split("don <em>[nombre]</em>").join("Sra. <em>[nombre]</em>").split("Don <em>[nombre]</em>").join("Sra. <em>[nombre]</em>");
+    h = h.split("<em>[nombre]</em>").join(em(nom));
+  }
+  if(apellido){
+    const trato = mujer ? "Sra." : hombre ? "Sr." : null;
+    if(trato){
+      h = h.split("Sr./Sra. <em>[apellido]</em>").join(trato + " <em>[apellido]</em>");
+      h = h.split("Sr.(a) <em>[apellido]</em>").join(trato + " <em>[apellido]</em>");
+    }
+    h = h.split("<em>[apellido]</em>").join(em(apellido));
+  }
+  if(mujer || hombre) h = h.split("Don/Sra., ").join((mujer ? "Sra." : "Don") + (nom ? " " + em(nom) : "") + ", ");
+  if(cliente.cta) h = h.split("<em>[XXX]</em>").join(em(cliente.cta));
+  if(cliente.rut) h = h.split("<em>[RUT del cliente o ID de venta]</em>").join(em(cliente.rut));
+
+  // Validación de datos: junto a cada ítem, lo que trae Vicidial
+  const domicilio = [nombrePropio(cliente.direccion), nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean).join(", ");
+  const fonos = [cliente.fono, cliente.fono2].filter(Boolean).join(" · ");
+  if(cliente.fechaNac) h = h.split("<li>Fecha de nacimiento</li>").join("<li>Fecha de nacimiento" + datoCli(cliente.fechaNac) + "</li>");
+  if(domicilio) h = h.split("<li>Domicilio completo</li>").join("<li>Domicilio completo" + datoCli(domicilio) + "</li>");
+  if(fonos) h = h.split("<li>Teléfono de contacto</li>").join("<li>Teléfono de contacto" + datoCli(fonos) + "</li>");
+  if(cliente.email) h = h.split("<li>Correo electrónico <span").join("<li>Correo electrónico" + datoCli(cliente.email.toLowerCase()) + " <span");
+  if(completo) h = h.split("<li>Nombre completo del titular <span").join("<li>Nombre completo del titular" + datoCli(completo) + " <span");
+  if(cliente.rut) h = h.split("<li>RUT <span").join("<li>RUT" + datoCli(cliente.rut) + " <span");
+  return h;
+}
+
+async function leerVicidial(){
+  if(ESWEB) return null;
+  try{
+    const tabs = await chrome.tabs.query({url: VICIDIAL});
+    if(!tabs.length) return null;
+    tabs.sort(function(a, b){ return (b.lastAccessed || 0) - (a.lastAccessed || 0); });
+    // Se leen todos los marcos: la pantalla principal (lead_id, campos
+    // estándar, nombre del ejecutivo) y la pestaña FORM, que es un marco
+    // aparte con los campos de la campaña (RUT, DV, Nombres, Apellido_Pat…).
+    const r = await chrome.scripting.executeScript({
+      target: {tabId: tabs[0].id, allFrames: true},
+      world: "MAIN",
+      func: function(){
+        const campos = {};
+        document.querySelectorAll("input, select, textarea").forEach(function(e){
+          const k = String(e.name || e.id || "").toLowerCase();
+          if(!k || e.type === "password" || e.type === "button" || e.type === "submit") return;
+          const v = String(e.value || "").trim();
+          if(v && !campos[k]) campos[k] = v;
+        });
+        return {campos: campos, agente: typeof LOGfullname === "string" ? LOGfullname : ""};
+      }
+    });
+    // Se juntan los marcos; lo de la pestaña FORM manda sobre lo estándar
+    const f = {}; let agente = "";
+    (r || []).forEach(function(x){
+      if(!x || !x.result) return;
+      Object.keys(x.result.campos).forEach(function(k){ if(!f[k]) f[k] = x.result.campos[k]; });
+      if(x.result.agente) agente = x.result.agente;
+    });
+    const c = clienteDesdeCampos(f, agente);
+    return c.lead || c.nombre || c.apellido ? c : null;
+  }catch(e){ return null; }
+}
+
+function pintarCliente(){
+  const el = document.getElementById("cliente");
+  if(!cliente || !(cliente.nombre || cliente.apellido)){ el.hidden = true; el.innerHTML = ""; return; }
+  const nombre = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
+  const datos = [cliente.rut ? "RUT " + cliente.rut : "", [cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
+                 cliente.email ? cliente.email.toLowerCase() : "", nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean);
+  let h = "<b>" + escCli(nombre) + "</b>" + datos.map(function(d){ return "<span>" + escCli(d) + "</span>"; }).join("");
+  if(cliente.cargas && cliente.cargas.length){
+    h += '<div class="cli-linea"><i>Cargas en Vicidial:</i> ' + cliente.cargas.map(function(c, i){
+      const quien = [nombrePropio(c.nombre), c.parentesco ? "(" + nombrePropio(c.parentesco) + ")" : ""].filter(Boolean).join(" ");
+      return escCli((quien || "Carga " + (i + 1)) + (c.fecha ? " " + c.fecha : " sin fecha"));
+    }).join(" · ") + (cliente.cargas.length > MAX_CARGAS ? " · <b>el seguro admite hasta " + MAX_CARGAS + "</b>" : "") + "</div>";
+  }
+  if(cliente.info && cliente.info.length){
+    h += '<div class="cli-linea">' + cliente.info.map(function(x){ return "<i>" + escCli(x[0]) + ":</i> " + escCli(x[1]); }).join(" · ") + "</div>";
+  }
+  el.innerHTML = h;
+  el.hidden = false;
+}
+
+async function sincronizarVicidial(){
+  const c = await leerVicidial();
+  if(!c) return;
+  const previo = await new Promise(function(res){ almacen.leer("lead", res); });
+  const nuevaLlamada = c.lead && previo && previo.id && previo.id !== c.lead;
+  if(nuevaLlamada) reiniciar();
+  // Las cargas del FORM se cargan una vez por llamada: si después el
+  // ejecutivo las cambia a mano, no se le pisan al reabrir.
+  const mismo = previo && previo.id === c.lead;
+  const yaAplicadas = mismo && (previo.aplicado || previo.cargas);
+  const yaComuna = mismo && (previo.comuna || (previo.aplicado && previo.comuna === undefined));
+  if(c.cargas.length && !yaAplicadas){
+    nCargas = Math.min(MAX_CARGAS, c.cargas.length);
+    const cont = document.getElementById("hijos");
+    cont.innerHTML = "";
+    for(let k = 0; k < nCargas; k++){
+      const caja = filaHijo(true);
+      caja.querySelector(".fecha").value = c.cargas[k].fecha || "";
+      caja.querySelector(".edad").value = "";
+    }
+    pintarBloqueCargas();
+    calcular();
+    guardarEstado();
+  }
+  const comCli = nombrePropio(c.comuna || c.ciudad);
+  if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now(),
+    aplicado: !!(yaAplicadas || c.cargas.length), comuna: !!(yaComuna || comCli)});
+  cliente = c;
+  pintarCliente();
+  registrarEnHistorial(c);
+  // La comuna del cliente queda lista en el buscador de sucursales
+  const com = comCli;
+  const campo = document.getElementById("comuna");
+  // Al entrar la llamada, el buscador de sucursales queda abierto y con la
+  // búsqueda hecha en la comuna del cliente (una vez por llamada)
+  if(com && (!yaComuna || !campo.value)){
+    campo.value = com;
+    document.getElementById("panelClin").hidden = false;
+    document.getElementById("abrirClin").classList.add("open");
+    clearTimeout(temporizador);
+    buscarComuna(com);
+    guardarEstado();
+  }
+  if(guionAbierto) pintarGuion();
+}
+
+/* ============================================================
+   HISTORIAL: el cliente en curso queda registrado (también lo
+   registra solo vicidial-captura.js, aunque no se abra esto), con
+   su tipificación, su nota y lo que se le cotizó.
+   ============================================================ */
+let registroActual = null;
+function hayHistorial(){ return !ESWEB && typeof HDB !== "undefined"; }
+
+function registrarEnHistorial(c){
+  if(!hayHistorial()) return;
+  HDB.capturar(c, {ejecutivo: c.agente || ""}).then(function(r){
+    registroActual = r;
+    pintarTipificacion();
+    registrarCotizacion();
+  }).catch(function(){});
+}
+function pintarTipificacion(){
+  const caja = document.getElementById("tipifCli");
+  if(!registroActual){ caja.hidden = true; return; }
+  const sel = document.getElementById("tipifSel");
+  if(!sel.options.length){
+    sel.innerHTML = HDB.ESTADOS.map(function(e){ return '<option value="' + e[0] + '">' + e[1] + "</option>"; }).join("");
+  }
+  sel.value = registroActual.estado || "sin_tipificar";
+  sel.className = HDB.TONO[sel.value] || "neutro";
+  const nota = document.getElementById("notaCli");
+  if(document.activeElement !== nota) nota.value = registroActual.observacion || "";
+  caja.hidden = false;
+}
+// Lo cotizado se guarda en el registro, sin tocar lo que haya editado a mano
+let cotizacionT = null;
+function registrarCotizacion(){
+  if(!hayHistorial() || !registroActual) return;
+  clearTimeout(cotizacionT);
+  cotizacionT = setTimeout(function(){
+    const edades = [].map.call(document.querySelectorAll("#hijos .fila"), function(f){
+      const fe = f.querySelector(".fecha").value, ed = f.querySelector(".edad").value;
+      return ed ? ed + " años" + (fe ? " (" + fe + ")" : "") : (fe || "?");
+    });
+    const cot = {
+      plan: document.getElementById("resPlan").textContent.trim(),
+      compos: document.getElementById("resCompos").textContent.trim(),
+      uf: document.getElementById("resUF").textContent.trim(),
+      clp: document.getElementById("resCLP").textContent.replace(/\s*mensual\s*/, "").trim(),
+      envio: envio === "link" ? "link de pago" : "en línea",
+      edades: edades.length ? edades.length + ": " + edades.join(", ") : "",
+      cuando: Date.now()
+    };
+    const ant = registroActual.cotizacion || {};
+    if(ant.plan === cot.plan && ant.compos === cot.compos && ant.uf === cot.uf && ant.clp === cot.clp && ant.envio === cot.envio && ant.edades === cot.edades) return;
+    HDB.actualizar(registroActual.id, {cotizacion: cot}, "cotización").then(function(r){ if(r) registroActual = r; }).catch(function(){});
+  }, 700);
+}
+document.getElementById("tipifSel").addEventListener("change", function(){
+  if(!registroActual) return;
+  const v = this.value;
+  this.className = HDB.TONO[v] || "neutro";
+  HDB.actualizar(registroActual.id, {estado: v}, "tipificado").then(function(r){ if(r) registroActual = r; });
+});
+let notaT = null;
+document.getElementById("notaCli").addEventListener("input", function(){
+  if(!registroActual) return;
+  const v = this.value;
+  clearTimeout(notaT);
+  notaT = setTimeout(function(){ HDB.actualizar(registroActual.id, {observacion: v.trim()}, "observación").then(function(r){ if(r) registroActual = r; }); }, 700);
+});
+document.getElementById("verHistorial").addEventListener("click", function(){
+  try{ chrome.tabs.create({url: chrome.runtime.getURL("historial.html")}); }catch(e){}
+});
+// Si se tipifica desde la planilla, se refleja aquí
+if(hayHistorial()) HDB.alCambiar(function(m){
+  if(registroActual && (!m.id || m.id === registroActual.id)){
+    HDB.obtener(registroActual.id).then(function(r){ if(r){ registroActual = r; pintarTipificacion(); } });
+  }
+});
+
+/* ---------- arranque ---------- */
+if(ESWEB) document.getElementById("verHistorial").hidden = true;
+// En la web el script no se cierra: es la segunda columna de la página
+if(ESWEB) document.getElementById("cerrarGuion").hidden = true;
+// La barra del script queda pegada bajo la cabecera, cuyo alto cambia con
+// la letra, el subtítulo y al mostrarse (oculta mide 0): se sigue en vivo.
+(function(){
+  const g = document.getElementById("guion"), cab = g.querySelector(".guion-cab");
+  try{ new ResizeObserver(function(){ g.style.setProperty("--gb-top", cab.offsetHeight + "px"); }).observe(cab); }catch(e){}
+})();
+// Versión a la vista, para saber de un vistazo si es la última
+try{ document.getElementById("verExt").textContent = "v" + chrome.runtime.getManifest().version; }catch(e){}
+// Abrir solo al entrar una llamada (lo hace el service worker); en la web no aplica
+(function(){
+  const c = document.getElementById("autoAbrir"), linea = document.getElementById("lineaAutoAbrir");
+  if(ESWEB){ linea.hidden = true; return; }
+  try{
+    chrome.storage.local.get("autoAbrir", function(r){ c.checked = r.autoAbrir !== false; });
+    c.addEventListener("change", function(){ chrome.storage.local.set({autoAbrir: c.checked}); });
+  }catch(e){ linea.hidden = true; }
+})();
+/* ============================================================
+   ATAJOS DE TIPIFICACIÓN (los de ShortCut-Vicidial-GO)
+   Lo grabado en ShortCut queda en la pestaña de Vicidial (su
+   localStorage). Aquí se leen esos atajos sin volver a grabarlos y
+   se muestran los 6 más usados en 2 filas × 3 botones. Un clic deja
+   el atajo en cola igual que el ▶ de ShortCut (se aplica en cuanto
+   se pueda); otro clic lo cancela. Las pausas no se muestran.
+   Necesita ShortCut-Vicidial-GO 1.0.3 o más nuevo.
+   ============================================================ */
+const ATAJOS_MAX = 6;
+let atajosSig = "";
+let usoAtajos = {};
+try{ chrome.storage.local.get("usoAtajos", function(r){ usoAtajos = r.usoAtajos || {}; }); }catch(e){}
+function textoPasos(s){ return JSON.stringify(s.steps || []); }
+function esPausa(s){
+  return /PauseCodeSelect|VDADpause|VDADready/.test(textoPasos(s)) || /ba[ñn]o|break|colaci|almuerzo|pausa|capacitaci|reuni/i.test(s.label || "");
+}
+function tonoAtajo(s){
+  if(s.color === "green") return "verde";
+  if(s.color === "red") return "rojo";
+  const t = String(s.label || "").toLowerCase();
+  if(/no le|no interes|no inere|equivoc|ya tiene|no desea|no califica|fallec|molest/.test(t)) return "rojo";
+  if(/pensar|pensa|agend|llamar|despu|ocupad|buz|no contesta|volver/.test(t)) return "ambar";
+  if(/interes|venta|acept|contrat|cerrad/.test(t)) return "verde";
+  return "azul";
+}
+async function pestanaVicidial(){
+  const tabs = await chrome.tabs.query({url: VICIDIAL});
+  if(!tabs.length) return null;
+  tabs.sort(function(a, b){ return (b.lastAccessed || 0) - (a.lastAccessed || 0); });
+  return tabs[0];
+}
+async function refrescarAtajos(){
+  if(ESWEB) return;
+  const caja = document.getElementById("atajos");
+  let d = null;
+  try{
+    const tab = await pestanaVicidial();
+    if(tab){
+      const r = await chrome.scripting.executeScript({target: {tabId: tab.id}, func: function(){
+        function g(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+        return {states: g("vca_states") || [], armado: g("vca2_armed")};
+      }});
+      d = r && r[0] && r[0].result;
+    }
+  }catch(e){}
+  const lista = d ? d.states.filter(function(s){ return s && s.id && !esPausa(s); }) : [];
+  lista.forEach(function(s, i){ s.__orden = i; });
+  lista.sort(function(a, b){ return ((usoAtajos[b.id] || 0) - (usoAtajos[a.id] || 0)) || (a.__orden - b.__orden); });
+  const ver = lista.slice(0, ATAJOS_MAX);
+  const armado = d && d.armado ? d.armado.id : "";
+  const sig = JSON.stringify(ver.map(function(s){ return [s.id, s.label, s.color]; })) + "|" + armado;
+  if(sig === atajosSig) return;
+  atajosSig = sig;
+  caja.hidden = !ver.length;
+  caja.innerHTML = "";
+  ver.forEach(function(s){
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "atajo " + tonoAtajo(s) + (s.id === armado ? " armado" : "");
+    b.textContent = (s.id === armado ? "⏳ " : "") + (s.label || "Atajo");
+    b.title = s.id === armado
+      ? (s.label + ": en cola, se aplica en cuanto se pueda. Clic para cancelar.")
+      : (s.label + " · " + (s.steps || []).length + " pasos · clic: tipificar con ShortCut (se aplica en cuanto se pueda)");
+    b.addEventListener("click", function(){ armarAtajo(s.id); });
+    caja.appendChild(b);
+  });
+}
+async function armarAtajo(id){
+  try{
+    const tab = await pestanaVicidial();
+    if(!tab) return;
+    const r = await chrome.scripting.executeScript({target: {tabId: tab.id}, args: [id], func: function(id){
+      function g(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+      const st = (g("vca_states") || []).find(function(x){ return x.id === id; });
+      if(!st) return "";
+      const a = g("vca2_armed");
+      if(a && a.id === id){ localStorage.removeItem("vca2_armed"); localStorage.setItem("vca_armping", JSON.stringify(Date.now())); return "cancelado"; }
+      // Igual que el ▶ de ShortCut: en cola, sin espera mínima ni cooldown
+      localStorage.setItem("vca2_armed", JSON.stringify({id: st.id, label: st.label, steps: st.steps || (st.desc ? [st.desc] : []), __armedAt: 0, immediate: true}));
+      localStorage.setItem("vca_lastfire", "0");
+      localStorage.setItem("vca_armping", JSON.stringify(Date.now()));
+      return "armado";
+    }});
+    if(r && r[0] && r[0].result === "armado"){
+      usoAtajos[id] = (usoAtajos[id] || 0) + 1;
+      try{ chrome.storage.local.set({usoAtajos: usoAtajos}); }catch(e){}
+    }
+  }catch(e){}
+  atajosSig = "";
+  refrescarAtajos();
+}
+if(!ESWEB){ refrescarAtajos(); setInterval(refrescarAtajos, 1500); }
+
+// La pestaña de mapeo necesita leer otros sitios: en la web no aplica
+if(ESWEB) document.getElementById("lineaMapeo").hidden = true;
+almacen.leer("prefs", function(v){
+  if(v) delete v.ancho;   // de cuando el script se ensanchaba con una manija
+  if(v) Object.assign(prefs, v);
+  aplicarPrefs();
+  if(guionAbierto) marcarPasos(false);
+});
+almacen.leer("uf", function(u){
+  if(u){ cacheUF = u; if(UF === null) pintarUF(u.c, u.f, "guardada"); }
+  restaurarEstado(function(){
+    cargarUF(); sincronizarVicidial();
+    // Ya en su estado inicial: desde aquí abrir/cerrar el script sí se anima
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ document.getElementById("app").classList.remove("sin-anim"); }); });
+    // Si se abrió apenas cayó la llamada, los datos del FORM pueden llegar un
+    // poco después: se vuelve a leer Vicidial unas veces en los primeros segundos.
+    [1500, 3500, 6500, 10000].forEach(function(ms){ setTimeout(sincronizarVicidial, ms); });
+  });
+  // Que la vigilancia de llamadas esté conectada (para abrirse sola la próxima vez)
+  if(!ESWEB){ try{ chrome.runtime.sendMessage({tipo: "conectarCaptura"}, function(){ void chrome.runtime.lastError; }); }catch(e){} }
+});
+marcarEnvio();
+pintarBloqueCargas();
+calcular();
+</script>
