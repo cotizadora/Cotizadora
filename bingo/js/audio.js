@@ -39,25 +39,63 @@
     var d = this.noise.getChannelData(0);
     for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
 
-    // Soplador: aire filtrado + zumbido grave del motor.
+    // Motor del soplador: zumbido mecánico grave y aire seco, sin oleaje.
     var air = ctx.createBufferSource();
     air.buffer = this.noise; air.loop = true;
     this.airFilter = ctx.createBiquadFilter();
-    this.airFilter.type = 'bandpass'; this.airFilter.frequency.value = 420; this.airFilter.Q.value = 0.6;
+    this.airFilter.type = 'lowpass'; this.airFilter.frequency.value = 260; this.airFilter.Q.value = 0.5;
     this.airGain = ctx.createGain(); this.airGain.gain.value = 0;
     air.connect(this.airFilter); this.airFilter.connect(this.airGain); this.airGain.connect(this.master);
-    var lfo = ctx.createOscillator(); lfo.frequency.value = 0.55;
-    var lfoGain = ctx.createGain(); lfoGain.gain.value = 90;
-    lfo.connect(lfoGain); lfoGain.connect(this.airFilter.frequency);
 
-    var hum1 = ctx.createOscillator(); hum1.type = 'sawtooth'; hum1.frequency.value = 49;
-    var hum2 = ctx.createOscillator(); hum2.type = 'triangle'; hum2.frequency.value = 98.6;
-    var humFilter = ctx.createBiquadFilter(); humFilter.type = 'lowpass'; humFilter.frequency.value = 180;
+    var hum1 = ctx.createOscillator(); hum1.type = 'sawtooth'; hum1.frequency.value = 98;
+    var hum2 = ctx.createOscillator(); hum2.type = 'triangle'; hum2.frequency.value = 196.5;
+    var humFilter = ctx.createBiquadFilter(); humFilter.type = 'bandpass'; humFilter.frequency.value = 160; humFilter.Q.value = 1.2;
     this.humGain = ctx.createGain(); this.humGain.gain.value = 0;
     hum1.connect(humFilter); hum2.connect(humFilter); humFilter.connect(this.humGain); this.humGain.connect(this.master);
 
-    air.start(); lfo.start(); hum1.start(); hum2.start();
+    this.clicks = this._bank(ctx, 10, 'ball');
+    this.knocks = this._bank(ctx, 6, 'wall');
+    this.lands = this._bank(ctx, 3, 'land');
+
+    air.start(); hum1.start(); hum2.start();
     this.setActivity(this.activity);
+  };
+
+  /* Choques precalculados con síntesis modal: transitorio seco + resonancias
+     cortas, como bolas macizas de resina (billar) chocando entre sí o contra el acrílico. */
+  AudioEngine.prototype._bank = function (ctx, count, kind) {
+    var sr = ctx.sampleRate, out = [];
+    for (var v = 0; v < count; v++) {
+      var dur = kind === 'land' ? 0.16 : 0.07, len = Math.floor(sr * dur);
+      var buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0);
+      var r = function (a, b) { return a + Math.random() * (b - a); };
+      var modes;
+      if (kind === 'ball') modes = [[r(2900, 4300), 1, r(0.006, 0.011)], [0, 0.55, r(0.004, 0.007)], [r(1150, 1650), 0.35, r(0.004, 0.007)], [r(6200, 7600), 0.18, 0.002]];
+      else if (kind === 'wall') modes = [[r(1050, 1500), 1, r(0.012, 0.02)], [r(2300, 2900), 0.45, r(0.006, 0.01)], [r(420, 560), 0.4, 0.02]];
+      else modes = [[r(700, 850), 1, 0.03], [r(1700, 2100), 0.5, 0.012], [r(190, 240), 0.7, 0.05]];
+      if (kind === 'ball') modes[1][0] = modes[0][0] * r(1.47, 1.62);
+      var ph = modes.map(function () { return Math.random() * 6.28; }), peak = 0, i, m;
+      for (i = 0; i < len; i++) {
+        var t = i / sr, x = 0;
+        for (m = 0; m < modes.length; m++) x += modes[m][1] * Math.exp(-t / modes[m][2]) * Math.sin(6.2832 * modes[m][0] * t + ph[m]);
+        x += (Math.random() * 2 - 1) * Math.exp(-t / (kind === 'ball' ? 0.0006 : 0.0012)) * (kind === 'ball' ? 0.9 : 0.6);
+        x *= Math.min(1, t / 0.0002);
+        d[i] = x; if (Math.abs(x) > peak) peak = Math.abs(x);
+      }
+      for (i = 0; i < len; i++) d[i] /= peak;
+      out.push(buf);
+    }
+    return out;
+  };
+
+  AudioEngine.prototype._play = function (bank, gain, pan, when, rate) {
+    var ctx = this.ctx;
+    var src = ctx.createBufferSource();
+    src.buffer = bank[(Math.random() * bank.length) | 0];
+    src.playbackRate.value = rate || (0.94 + Math.random() * 0.12);
+    var g = ctx.createGain(); g.gain.value = gain;
+    src.connect(g); g.connect(this._panner(pan));
+    src.start(when || ctx.currentTime);
   };
 
   AudioEngine.prototype.ready = function () {
@@ -85,10 +123,10 @@
   AudioEngine.prototype.setActivity = function (level) {
     this.activity = level;
     if (!this.ctx) return;
-    var t = this.ctx.currentTime;
-    this.airGain.gain.setTargetAtTime(0.012 + 0.16 * level, t, 0.25);
-    this.airFilter.frequency.setTargetAtTime(380 + 800 * level, t, 0.3);
-    this.humGain.gain.setTargetAtTime(0.018 + 0.05 * level, t, 0.3);
+    var t = this.ctx.currentTime, on = level > 0.12 ? (level - 0.12) / 0.88 : 0;
+    this.airGain.gain.setTargetAtTime(0.09 * on, t, 0.2);
+    this.airFilter.frequency.setTargetAtTime(220 + 260 * on, t, 0.2);
+    this.humGain.gain.setTargetAtTime(0.035 * on, t, 0.25);
   };
 
   AudioEngine.prototype._panner = function (pan) {
@@ -114,78 +152,38 @@
     o.start(start); o.stop(start + decay + 0.02);
   };
 
-  AudioEngine.prototype._noiseBurst = function (out, start, dur, gain, type, freq, q) {
-    var ctx = this.ctx;
-    var s = ctx.createBufferSource();
-    s.buffer = this.noise;
-    var f = ctx.createBiquadFilter();
-    f.type = type; f.frequency.value = freq; if (q) f.Q.value = q;
-    var g = ctx.createGain();
-    g.gain.setValueAtTime(gain, start);
-    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    s.connect(f); f.connect(g); g.connect(out);
-    s.start(start, Math.random() * 1.5); s.stop(start + dur + 0.02);
-  };
-
-  /* Choque de bolas de plástico (kind 'ball') o contra la esfera (kind 'wall'). */
+  /* Choque entre bolas (kind 'ball') o contra la esfera de acrílico (kind 'wall'). */
   AudioEngine.prototype.clack = function (intensity, pan, kind) {
     if (!this.ready()) return;
     var t = this.ctx.currentTime;
-    if (t - this._windowStart > 0.1) { this._windowStart = t; this._clacksThisWindow = 0; }
-    if (this._clacksThisWindow >= 4) return;
+    if (t - this._windowStart > 0.05) { this._windowStart = t; this._clacksThisWindow = 0; }
+    if (this._clacksThisWindow >= 5) return;
     this._clacksThisWindow++;
-    var out = this._panner(pan);
     var v = Math.min(1, intensity);
-    var start = t + Math.random() * 0.012;
-    if (kind === 'wall') {
-      var fw = 1500 + Math.random() * 700;
-      this._tone(out, fw, start, 0.07 + v * 0.05, 0.05 * v + 0.01);
-      this._tone(out, fw * 2.32, start, 0.04, 0.02 * v + 0.004);
-      this._noiseBurst(out, start, 0.012, 0.06 * v, 'highpass', 2500);
-    } else {
-      var f = 2300 + Math.random() * 1500;
-      this._tone(out, f, start, 0.025 + v * 0.025, 0.09 * v + 0.012);
-      this._tone(out, f * 1.53, start, 0.018, 0.05 * v + 0.006);
-      this._noiseBurst(out, start, 0.008, 0.12 * v + 0.02, 'bandpass', 4200, 1.2);
-    }
+    var when = t + Math.random() * 0.008;
+    if (kind === 'wall') this._play(this.knocks, 0.08 + 0.32 * v * v, pan, when);
+    else this._play(this.clicks, 0.06 + 0.5 * v * v, pan, when, 0.9 + v * 0.18 + Math.random() * 0.06);
   };
 
-  /* Ascenso de la bola por el tubo: soplido que sube de tono y roces contra el tubo. */
+  /* La bola sube por el tubo golpeteando las paredes. */
   AudioEngine.prototype.tube = function (duration) {
     if (!this.ready()) return;
-    var ctx = this.ctx, t = ctx.currentTime;
-    var s = ctx.createBufferSource(); s.buffer = this.noise;
-    var f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2.2;
-    f.frequency.setValueAtTime(350, t);
-    f.frequency.exponentialRampToValueAtTime(2400, t + duration);
-    var g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.22, t + duration * 0.35);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + duration + 0.1);
-    s.connect(f); f.connect(g); g.connect(this.master);
-    s.start(t); s.stop(t + duration + 0.15);
-    var out = this._panner(0.2);
-    for (var i = 0; i < 4; i++) {
-      var at = t + duration * (0.15 + i * 0.22) + Math.random() * 0.03;
-      this._tone(out, 1700 + Math.random() * 500, at, 0.05, 0.035);
+    var t = this.ctx.currentTime, at = 0.03, step = 0.05;
+    while (at < duration) {
+      this._play(this.knocks, 0.07 + Math.random() * 0.08, 0.1 + at / duration * 0.4, t + at, 1.25 + Math.random() * 0.2);
+      at += step + Math.random() * 0.04;
+      step *= 1.08;
     }
   };
 
-  /* La bola cae en la bandeja de salida. */
+  /* La bola cae en la bandeja de bronce y rebota hasta quedar quieta. */
   AudioEngine.prototype.thunk = function () {
     if (!this.ready()) return;
-    var ctx = this.ctx, t = ctx.currentTime;
-    var o = ctx.createOscillator(); o.type = 'sine';
-    o.frequency.setValueAtTime(260, t);
-    o.frequency.exponentialRampToValueAtTime(120, t + 0.12);
-    var g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.35, t + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-    o.connect(g); g.connect(this.master);
-    o.start(t); o.stop(t + 0.2);
-    this._noiseBurst(this.master, t, 0.03, 0.18, 'lowpass', 1800);
-    this._tone(this.master, 2900, t + 0.09, 0.03, 0.04);
+    var t = this.ctx.currentTime, gap = 0.11, g = 0.55;
+    for (var i = 0; i < 4; i++) {
+      this._play(i === 0 ? this.lands : this.knocks, g, 0.5, t, i === 0 ? 1 : 1.1);
+      t += gap; gap *= 0.62; g *= 0.45;
+    }
   };
 
   /* Campanilla cálida de dos notas cuando el número queda a la vista. */

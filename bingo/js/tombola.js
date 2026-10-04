@@ -7,7 +7,7 @@
   var CAM = 3.4;           // distancia de la cámara al centro de la esfera (radio = 1)
   var BALL_R = 0.118;      // radio de cada bola
   var WALL = 1 - BALL_R;
-  var GRAVITY = 3.1;
+  var GRAVITY = 22;
   var TUBE_R = 0.135;
   var INTAKE = { x: 0, y: 0.86, z: 0 };
   var TRAY = { x: 1.24, y: 0.36 };
@@ -79,8 +79,6 @@
     var a = rand(0, Math.PI * 2), b = rand(-1, 1), s = Math.sqrt(1 - b * b);
     this.nx = Math.cos(a) * s; this.ny = b; this.nz = Math.sin(a) * s;
     this.wx = rand(-3, 3); this.wy = rand(-3, 3); this.wz = rand(-3, 3);
-    this.ph = [rand(0, 6.28), rand(0, 6.28), rand(0, 6.28)];
-    this.fr = [rand(2.2, 4.5), rand(1.8, 4.2), rand(2.4, 5.1)];
     this.kinematic = false;
   }
 
@@ -91,8 +89,8 @@
     this._airReported = -1;
     this.reducedMotion = !!opts.reducedMotion;
     this.balls = [];
-    this.air = 0.12;            // nivel actual del soplador (0..1)
-    this.airTarget = 0.12;
+    this.air = 0.08;            // nivel actual del soplador (0..1)
+    this.airTarget = 0.08;
     this.time = 0;
     this.tweens = [];
     this.selected = null;       // bola viajando por el tubo / presentándose
@@ -353,86 +351,103 @@
       this.balls.push(b);
     }
     if (!fromTop) for (var s = 0; s < 240; s++) this._step(1 / 120, true);
-    this.air = this.airTarget = 0.12;
+    this.air = this.airTarget = 0.08;
   };
 
   Tombola.prototype.setAir = function (level) { this.airTarget = level; };
 
   /* ---------- Física ---------- */
 
+  /* Bolas macizas tipo billar: gravedad real a escala de la esfera (radio ≈ 20 cm),
+     choques duros y el soplador como ráfagas impulsivas desde la boquilla inferior. */
   Tombola.prototype._step = function (dt, silent) {
-    var balls = this.balls, n = balls.length, i, j, b, o;
-    var A = this.air, t = this.time;
-    var jet = GRAVITY * (0.7 + 4.2 * A);
-    var turb = GRAVITY * (0.15 + 2.1 * A);
-    var swirl = 0.6 + 2.6 * A;
-    var drag = Math.exp(-(0.45 + 0.5 * A) * dt);
+    var balls = this.balls, n = balls.length, i, j, it, b, o;
+    var A = this.air;
+    var drag = Math.exp(-0.08 * dt);
+    var rate = 0.1 + 9 * A;             // ráfagas por segundo para cada bola en la corriente de aire
+    var kick = 1.8 + 9.5 * A;           // velocidad que entrega cada ráfaga
 
     for (i = 0; i < n; i++) {
       b = balls[i];
       if (b.kinematic) continue;
-      var h2 = b.x * b.x + b.z * b.z;
-      var lift = Math.exp(-h2 / 0.3) * clamp(1 - (b.y + 1) / 2.3, 0, 1);
-      var fx = turb * Math.sin(t * b.fr[0] + b.ph[0]) - b.z * swirl;
-      var fy = -GRAVITY + jet * lift * (0.75 + 0.5 * Math.sin(t * b.fr[1] * 1.7 + b.ph[1])) + turb * 0.4 * Math.sin(t * b.fr[1] + b.ph[1]);
-      var fz = turb * Math.sin(t * b.fr[2] + b.ph[2]) + b.x * swirl;
-      b.vx = (b.vx + fx * dt) * drag;
-      b.vy = (b.vy + fy * dt) * drag;
-      b.vz = (b.vz + fz * dt) * drag;
+      b.vy -= GRAVITY * dt;
+      if (b.y < -0.15) {
+        var h2 = b.x * b.x + b.z * b.z;
+        // La corriente es más fuerte junto a la boquilla y se abre hacia arriba.
+        var reach = h2 < 0.55 ? (1 - h2 / 0.55) * (b.y < -0.5 ? 1 : 0.45) : 0;
+        if (reach > 0 && Math.random() < rate * dt * reach) {
+          var s = kick * (0.55 + 0.45 * Math.random());
+          b.vy += s;
+          b.vx += (Math.random() - 0.5) * s * 0.7;
+          b.vz += (Math.random() - 0.5) * s * 0.7;
+          b.wx += (Math.random() - 0.5) * 40; b.wz += (Math.random() - 0.5) * 40;
+        }
+      }
+      b.vx *= drag; b.vy *= drag; b.vz *= drag;
       b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt;
     }
 
-    var D = BALL_R * 2, D2 = D * D, e = 0.82;
-    for (i = 0; i < n; i++) {
-      b = balls[i];
-      for (j = i + 1; j < n; j++) {
-        o = balls[j];
-        var dx = b.x - o.x, dy = b.y - o.y, dz = b.z - o.z;
-        var d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 >= D2 || d2 < 1e-9) continue;
-        var d = Math.sqrt(d2), nx = dx / d, ny = dy / d, nz = dz / d, ov = D - d;
-        var wb = b.kinematic ? 0 : (o.kinematic ? 1 : 0.5), wo = o.kinematic ? 0 : (b.kinematic ? 1 : 0.5);
-        b.x += nx * ov * wb; b.y += ny * ov * wb; b.z += nz * ov * wb;
-        o.x -= nx * ov * wo; o.y -= ny * ov * wo; o.z -= nz * ov * wo;
-        var rvx = b.vx - o.vx, rvy = b.vy - o.vy, rvz = b.vz - o.vz;
-        var vn = rvx * nx + rvy * ny + rvz * nz;
-        if (vn < 0) {
-          var imp = -(1 + e) * vn;
-          b.vx += nx * imp * wb; b.vy += ny * imp * wb; b.vz += nz * imp * wb;
-          o.vx -= nx * imp * wo; o.vy -= ny * imp * wo; o.vz -= nz * imp * wo;
-          // Giro por fricción tangencial.
-          var tx = rvx - vn * nx, ty = rvy - vn * ny, tz = rvz - vn * nz, k = 0.35 / BALL_R;
-          b.wx += (ny * tz - nz * ty) * k * wb; b.wy += (nz * tx - nx * tz) * k * wb; b.wz += (nx * ty - ny * tx) * k * wb;
-          o.wx += (ny * tz - nz * ty) * k * wo; o.wy += (nz * tx - nx * tz) * k * wo; o.wz += (nx * ty - ny * tx) * k * wo;
-          if (!silent && -vn > 0.55) this._impacts.push({ v: -vn, x: b.x, z: b.z, kind: 'ball' });
+    var D = BALL_R * 2, D2 = D * D;
+    for (it = 0; it < 2; it++) {
+      for (i = 0; i < n; i++) {
+        b = balls[i];
+        for (j = i + 1; j < n; j++) {
+          o = balls[j];
+          var dx = b.x - o.x, dy = b.y - o.y, dz = b.z - o.z;
+          var d2 = dx * dx + dy * dy + dz * dz;
+          if (d2 >= D2 || d2 < 1e-9) continue;
+          var d = Math.sqrt(d2), nx = dx / d, ny = dy / d, nz = dz / d, ov = D - d;
+          var wb = b.kinematic ? 0 : (o.kinematic ? 1 : 0.5), wo = o.kinematic ? 0 : (b.kinematic ? 1 : 0.5);
+          b.x += nx * ov * wb; b.y += ny * ov * wb; b.z += nz * ov * wb;
+          o.x -= nx * ov * wo; o.y -= ny * ov * wo; o.z -= nz * ov * wo;
+          var rvx = b.vx - o.vx, rvy = b.vy - o.vy, rvz = b.vz - o.vz;
+          var vn = rvx * nx + rvy * ny + rvz * nz;
+          if (vn < 0) {
+            // Rebote duro en choques rápidos; contacto quieto en la pila (sin temblor).
+            var e = -vn > 0.9 ? 0.88 : 0.05;
+            var imp = -(1 + e) * vn;
+            b.vx += nx * imp * wb; b.vy += ny * imp * wb; b.vz += nz * imp * wb;
+            o.vx -= nx * imp * wo; o.vy -= ny * imp * wo; o.vz -= nz * imp * wo;
+            // Fricción tangencial y giro.
+            var tx = rvx - vn * nx, ty = rvy - vn * ny, tz = rvz - vn * nz, f = 0.1;
+            b.vx -= tx * f * wb; b.vy -= ty * f * wb; b.vz -= tz * f * wb;
+            o.vx += tx * f * wo; o.vy += ty * f * wo; o.vz += tz * f * wo;
+            var k = 0.35 / BALL_R;
+            b.wx += (ny * tz - nz * ty) * k * wb; b.wy += (nz * tx - nx * tz) * k * wb; b.wz += (nx * ty - ny * tx) * k * wb;
+            o.wx += (ny * tz - nz * ty) * k * wo; o.wy += (nz * tx - nx * tz) * k * wo; o.wz += (nx * ty - ny * tx) * k * wo;
+            if (!silent && it === 0 && -vn > 1.0) this._impacts.push(-vn, b.x, 0);
+          }
         }
+      }
+
+      for (i = 0; i < n; i++) {
+        b = balls[i];
+        if (b.kinematic) continue;
+        var dist = Math.sqrt(b.x * b.x + b.y * b.y + b.z * b.z);
+        if (dist <= WALL) continue;
+        var mx = b.x / dist, my = b.y / dist, mz = b.z / dist;
+        b.x = mx * WALL; b.y = my * WALL; b.z = mz * WALL;
+        var wn = b.vx * mx + b.vy * my + b.vz * mz;
+        if (wn > 0) {
+          var ew = wn > 1.2 ? 0.62 : 0;
+          b.vx -= (1 + ew) * wn * mx; b.vy -= (1 + ew) * wn * my; b.vz -= (1 + ew) * wn * mz;
+          if (!silent && it === 0 && wn > 1.4) this._impacts.push(wn, b.x, 1);
+        }
+        // Rodadura sobre la esfera: ω = (−n × v) / r, con resistencia a rodar.
+        var rr = Math.exp(-1.6 * dt);
+        b.vx *= rr; b.vy *= rr; b.vz *= rr;
+        var rx = (-my * b.vz + mz * b.vy) / BALL_R, ry = (-mz * b.vx + mx * b.vz) / BALL_R, rz = (-mx * b.vy + my * b.vx) / BALL_R;
+        b.wx = lerp(b.wx, rx, 0.3); b.wy = lerp(b.wy, ry, 0.3); b.wz = lerp(b.wz, rz, 0.3);
       }
     }
 
+    var wd = Math.exp(-1.5 * dt);
     for (i = 0; i < n; i++) {
       b = balls[i];
-      if (!b.kinematic) {
-        var dist = Math.sqrt(b.x * b.x + b.y * b.y + b.z * b.z);
-        if (dist > WALL) {
-          var mx = b.x / dist, my = b.y / dist, mz = b.z / dist;
-          b.x = mx * WALL; b.y = my * WALL; b.z = mz * WALL;
-          var wn = b.vx * mx + b.vy * my + b.vz * mz;
-          if (wn > 0) {
-            b.vx -= 1.55 * wn * mx; b.vy -= 1.55 * wn * my; b.vz -= 1.55 * wn * mz;
-            b.vx *= 0.985; b.vy *= 0.985; b.vz *= 0.985;
-            if (!silent && wn > 0.8) this._impacts.push({ v: wn * 0.8, x: b.x, z: b.z, kind: 'wall' });
-          }
-          // Rodadura sobre la pared: ω = (−n × v) / r.
-          var rx = (-my * b.vz + mz * b.vy) / BALL_R, ry = (-mz * b.vx + mx * b.vz) / BALL_R, rz = (-mx * b.vy + my * b.vx) / BALL_R;
-          b.wx = lerp(b.wx, rx, 0.25); b.wy = lerp(b.wy, ry, 0.25); b.wz = lerp(b.wz, rz, 0.25);
-        }
-      }
-      // Orientación de la etiqueta.
       var ax = b.wy * b.nz - b.wz * b.ny, ay = b.wz * b.nx - b.wx * b.nz, az = b.wx * b.ny - b.wy * b.nx;
       b.nx += ax * dt; b.ny += ay * dt; b.nz += az * dt;
       var nl = Math.sqrt(b.nx * b.nx + b.ny * b.ny + b.nz * b.nz) || 1;
       b.nx /= nl; b.ny /= nl; b.nz /= nl;
-      var wd = Math.exp(-1.2 * dt);
       b.wx *= wd; b.wy *= wd; b.wz *= wd;
     }
   };
@@ -477,7 +492,7 @@
       this.trayBall = null;
       this._tween(0.45, function (p) { self.dropping.t = p; if (p >= 1) self.dropping = null; });
     }
-    return this._tween(seconds, function (p) { self.airTarget = lerp(from, peak, easeInOut(Math.min(1, p * 1.6))); });
+    return this._tween(seconds, function (p) { self.airTarget = lerp(from, peak, easeOut(Math.min(1, p * 2.5))); });
   };
 
   /* Fases 2–3: la bola elegida se separa, sube a la toma y recorre el tubo hasta la bandeja. */
@@ -519,7 +534,7 @@
       });
     }).then(function (ok) {
       if (!ok) return false;
-      self.airTarget = 0.12;
+      self.airTarget = 0.08;
       self.onSound('land');
       return true;
     });
@@ -584,9 +599,9 @@
     this._lastFrame = now;
     this._adapt(raw);
     this.time += dt;
-    this.air += (this.airTarget - this.air) * (1 - Math.exp(-dt * 3.2));
+    this.air += (this.airTarget - this.air) * (1 - Math.exp(-dt * 5));
     if (Math.abs(this.air - this._airReported) > 0.03) { this._airReported = this.air; this.onSound('air', this.air); }
-    var steps = Math.min(3, Math.ceil(dt / (1 / 110)));
+    var steps = Math.min(4, Math.ceil(dt / (1 / 120)));
     for (var i = 0; i < steps; i++) this._step(dt / steps, false);
     this._emitImpacts();
     this._runTweens();
@@ -608,14 +623,17 @@
   };
 
   Tombola.prototype._emitImpacts = function () {
-    var list = this._impacts;
-    if (!list.length) return;
-    list.sort(function (a, b) { return b.v - a.v; });
-    for (var i = 0; i < Math.min(2, list.length); i++) {
-      var it = list[i];
-      this.onSound(it.kind, clamp(it.v / 4, 0.05, 1) * (0.55 + 0.45 * this.air), clamp(it.x, -1, 1) * 0.6);
+    var list = this._impacts, count = list.length / 3;
+    if (!count) return;
+    // Hasta 4 choques por cuadro, los más fuertes (lista plana v, x, tipo: sin crear objetos).
+    for (var k = 0; k < Math.min(4, count); k++) {
+      var best = -1, bv = 0;
+      for (var i = 0; i < list.length; i += 3) if (list[i] > bv) { bv = list[i]; best = i; }
+      if (best < 0) break;
+      this.onSound(list[best + 2] ? 'wall' : 'ball', clamp(bv / 7, 0.05, 1), clamp(list[best + 1], -1, 1) * 0.6);
+      list[best] = 0;
     }
-    this._impacts = [];
+    list.length = 0;
   };
 
   /* ---------- Dibujo ---------- */
