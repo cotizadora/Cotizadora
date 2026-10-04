@@ -35,6 +35,7 @@
     if (n === 13) return { text: '¿Qué te parece?', say: 'Trece, ¿qué te parece?' };
     if (n === 14) return { text: 'Caga torcido', say: 'Catorce, ¡caga torcido!' };
     if (n === 33) return { text: 'La edad de Cristo', say: 'La edad de Cristo… ¡treinta y tres!' };
+    if (n === 69) return { text: 'El año en que no nos vimos las caras', say: 'El año en que no nos vimos las caras… … ¡sesenta y nueve!' };
     return null;
   }
 
