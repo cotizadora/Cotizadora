@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e231f">
+<meta name="description" content="Tómbola digital para cantar Bingo de 75 números con mezcla, sonido y anuncio por voz.">
+<title>Tómbola Bingo 75</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23d3392f'/%3E%3Ccircle cx='32' cy='32' r='17' fill='%23fbf8f1'/%3E%3Ctext x='32' y='40' font-family='Arial' font-weight='700' font-size='22' text-anchor='middle' fill='%2316130f'%3E75%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-ball" aria-hidden="true">75</span>
+      <div class="brand-text">
+        <span class="brand-name">Tómbola</span>
+        <span class="brand-sub">Bingo 75 · sorteo digital</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="icon-btn" id="btnSound" aria-pressed="true" aria-label="Sonido activado" title="Sonido">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="ico-on" d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/><path class="ico-off" d="M4 9v6h4l5 4V5L8 9H4zm15.6 3 2.2-2.2-1.4-1.4-2.2 2.2-2.2-2.2-1.4 1.4 2.2 2.2-2.2 2.2 1.4 1.4 2.2-2.2 2.2 2.2 1.4-1.4z"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="btnVoice" aria-pressed="true" aria-label="Voz activada" title="Voz">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1a7 7 0 0 0 6-6.9h-2z"/><path class="ico-slash" d="M3.3 2.3 21.7 20.7l-1.4 1.4L1.9 3.7z"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="btnSettings" aria-haspopup="dialog" aria-label="Ajustes de sonido y voz" title="Ajustes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v2H3zm0 10h7v2H3zm14-11h2v2h2v2h-2v2h-2zM12 15h2v-2h2v6h-2v-2h-2zm4 1h5v2h-5zM3 11h5v2H3z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="Tómbola">
+      <div class="status" id="status" role="status" data-state="ready">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text" id="statusText">Lista</span>
+      </div>
+      <canvas id="tombola" role="img" aria-label="Tómbola transparente con 75 bolas"></canvas>
+    </section>
+
+    <section class="panel" aria-label="Sorteo">
+      <div class="current" id="current" data-col="">
+        <div class="current-ball" aria-hidden="true">
+          <span class="current-letter" id="curLetter">·</span>
+          <span class="current-num" id="curNum">—</span>
+        </div>
+        <div class="current-info">
+          <span class="current-kicker" id="curKicker">Último número</span>
+          <span class="current-word" id="curWord">Aún no ha salido ninguno</span>
+          <ol class="recent" id="recent" aria-label="Números anteriores, del más reciente al más antiguo"></ol>
+        </div>
+      </div>
+
+      <div class="counters">
+        <div class="counter">
+          <span class="counter-val" id="cntDrawn">0</span>
+          <span class="counter-lbl">salieron</span>
+        </div>
+        <div class="counter">
+          <span class="counter-val" id="cntLeft">75</span>
+          <span class="counter-lbl">quedan</span>
+        </div>
+        <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+      </div>
+
+      <fieldset class="mode">
+        <legend class="sr-only">Modo de sorteo</legend>
+        <label class="mode-opt"><input type="radio" name="mode" value="manual" checked><span>Manual</span></label>
+        <label class="mode-opt"><input type="radio" name="mode" value="auto"><span>Automático</span></label>
+      </fieldset>
+
+      <div class="controls" id="manualControls">
+        <button type="button" class="btn-primary" id="btnDraw">Sacar número</button>
+        <p class="hint">Atajo: barra espaciadora</p>
+      </div>
+
+      <div class="controls" id="autoControls" hidden>
+        <div class="interval">
+          <label for="interval">Pausa entre números</label>
+          <output id="intervalOut" for="interval">5 s</output>
+          <input type="range" id="interval" min="2" max="30" step="1" value="5">
+        </div>
+        <div class="auto-buttons">
+          <button type="button" class="btn-primary" id="btnAutoStart">Iniciar</button>
+          <button type="button" class="btn-primary" id="btnAutoPause" hidden>Pausar</button>
+          <button type="button" class="btn-secondary" id="btnAutoStop" disabled>Detener</button>
+        </div>
+        <div class="countdown" id="countdown" aria-live="off">
+          <span class="countdown-text" id="countdownText">Detenido</span>
+          <span class="countdown-bar" aria-hidden="true"><span id="countdownBar"></span></span>
+        </div>
+      </div>
+
+      <button type="button" class="btn-ghost" id="btnNew">Nueva partida</button>
+    </section>
+
+    <section class="history" aria-labelledby="historyTitle">
+      <div class="history-head">
+        <h2 id="historyTitle">Historial</h2>
+        <div class="tabs" role="tablist" aria-label="Vista del historial">
+          <button type="button" role="tab" id="tabBoard" aria-selected="true" aria-controls="board">Tablero</button>
+          <button type="button" role="tab" id="tabOrder" aria-selected="false" aria-controls="order" tabindex="-1">Orden de salida</button>
+        </div>
+      </div>
+      <div class="board" id="board" role="tabpanel" aria-labelledby="tabBoard"></div>
+      <div class="order" id="order" role="tabpanel" aria-labelledby="tabOrder" hidden>
+        <p class="order-empty" id="orderEmpty">Los números aparecerán aquí en el orden en que salgan.</p>
+        <ol class="order-list" id="orderList"></ol>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="sr-only" aria-live="assertive" id="announcer"></div>
+
+<dialog class="sheet" id="settings" aria-labelledby="settingsTitle">
+  <form method="dialog" class="sheet-body">
+    <h2 id="settingsTitle">Sonido y voz</h2>
+
+    <div class="setting">
+      <label class="switch"><input type="checkbox" id="optSound" checked><span>Sonido de la tómbola</span></label>
+      <label class="slider"><span>Volumen</span><input type="range" id="optSoundVol" min="0" max="100" value="70"></label>
+    </div>
+
+    <div class="setting">
+      <label class="switch"><input type="checkbox" id="optVoice" checked><span>Anunciar números en voz alta</span></label>
+      <label class="slider"><span>Volumen de voz</span><input type="range" id="optVoiceVol" min="0" max="100" value="100"></label>
+      <label class="slider"><span>Velocidad</span><input type="range" id="optVoiceRate" min="70" max="130" value="95"></label>
+      <label class="select"><span>Voz</span><select id="optVoiceName"></select></label>
+      <p class="note" id="voiceNote"></p>
+      <button type="button" class="btn-secondary small" id="btnTestVoice">Probar voz</button>
+    </div>
+
+    <button type="submit" class="btn-primary small">Listo</button>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="confirmNew" aria-labelledby="confirmTitle">
+  <form method="dialog" class="sheet-body">
+    <h2 id="confirmTitle">¿Empezar una nueva partida?</h2>
+    <p id="confirmText">Se borrarán los números que ya salieron y las 75 bolas volverán a la tómbola.</p>
+    <div class="sheet-actions">
+      <button type="submit" value="cancel" class="btn-secondary small">Cancelar</button>
+      <button type="submit" value="ok" class="btn-primary small">Nueva partida</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="js/game.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/tombola.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
