@@ -2,8 +2,12 @@
    (en el navegador y en la app instalada). Un toque la salta. */
 (function () {
   'use strict';
+  var Bingo = window.Bingo = window.Bingo || {};
   var intro = document.getElementById('intro');
-  if (!intro) return;
+  var resolveDone;
+  // La tómbola espera a que termine la presentación para no competir por la GPU.
+  Bingo.introDone = new Promise(function (r) { resolveDone = r; });
+  if (!intro) { resolveDone(); return; }
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var done = false;
   var timer = 0;
@@ -15,6 +19,7 @@
     done = true;
     clearTimeout(timer);
     intro.classList.add('leave');
+    resolveDone();
     setTimeout(function () {
       intro.remove();
       document.documentElement.classList.remove('intro-on');

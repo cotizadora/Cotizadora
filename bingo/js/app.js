@@ -513,7 +513,7 @@
         countdown.frozen = true;
       }
     } else {
-      tombola.start();
+      if (!document.getElementById('intro')) tombola.start();
       audio.resume();
       if (countdown.frozen) {
         countdown.frozen = false;
@@ -552,5 +552,5 @@
   syncToggles();
   updateControls();
   Bingo.initInstall();
-  tombola.start();
+  (Bingo.introDone || Promise.resolve()).then(function () { tombola.start(); });
 })(window.Bingo);

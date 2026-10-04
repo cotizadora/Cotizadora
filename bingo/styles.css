@@ -534,7 +534,8 @@ input[type="range"] { width: 100%; height: 32px; accent-color: var(--brass); bac
   .icon-btn { width: 38px; height: 38px; }
 }
 
-/* ---------- Presentación inicial ---------- */
+/* ---------- Presentación inicial ----------
+   Solo se animan transform y opacity: el teléfono las resuelve en la GPU sin redibujar. */
 
 .intro-on, .intro-on body { overflow: hidden; }
 .intro {
@@ -547,14 +548,16 @@ input[type="range"] { width: 100%; height: 32px; accent-color: var(--brass); bac
   cursor: pointer;
   text-align: center;
   overflow: hidden;
+  contain: strict;
 }
 .intro p { margin: 0; }
 .intro-stack { position: relative; display: flex; flex-direction: column; align-items: center; }
+.intro-glow, .intro-ball, .intro-by, .intro-for, .intro-name-ink, .intro-name-ink::after,
+.intro-rule, .intro-mask, .intro-ink, .intro-sparks i, .intro-skip { will-change: transform, opacity; }
 
 .intro-glow {
-  position: absolute; left: 50%; top: 50%; width: 120vmax; height: 120vmax;
-  transform: translate(-50%, -50%) scale(0.4);
-  background: radial-gradient(circle, rgba(246, 220, 148, 0.16) 0%, rgba(246, 220, 148, 0) 45%);
+  position: absolute; left: 50%; top: 50%; width: 90vmax; height: 90vmax; margin: -45vmax 0 0 -45vmax;
+  background: radial-gradient(circle, rgba(246, 220, 148, 0.17) 0%, rgba(246, 220, 148, 0) 55%);
   opacity: 0;
 }
 
@@ -578,17 +581,25 @@ input[type="range"] { width: 100%; height: 32px; accent-color: var(--brass); bac
 
 .intro-by, .intro-for {
   font: 600 clamp(13px, 3.4vmin, 17px)/1.2 var(--text);
-  text-transform: uppercase; letter-spacing: 0.42em; color: #c8d3c9;
-  opacity: 0; margin-right: -0.42em;
+  text-transform: uppercase; letter-spacing: 0.42em; margin-right: -0.42em; color: #c8d3c9;
+  opacity: 0;
 }
 .intro-name {
-  margin-top: 6px !important;
+  margin-top: 6px !important; overflow: hidden; padding: 0.04em 0.06em;
   font: 800 clamp(44px, 12.5vmin, 96px)/0.95 var(--display);
   text-transform: uppercase; letter-spacing: 0.035em;
-  background: linear-gradient(100deg, var(--gold-1) 0%, var(--gold-2) 30%, var(--gold-3) 44%, var(--gold-4) 50%, var(--gold-3) 56%, var(--gold-2) 70%, var(--gold-1) 100%);
-  background-size: 260% 100%; background-position: 100% 0;
+}
+.intro-name-ink {
+  position: relative; display: block;
+  background: linear-gradient(100deg, var(--gold-1) 0%, var(--gold-2) 32%, var(--gold-3) 50%, var(--gold-2) 68%, var(--gold-1) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  clip-path: inset(0 100% 0 0);
+  transform: translateY(110%);
+}
+.intro-name-ink::after {
+  content: attr(data-text); position: absolute; inset: 0;
+  background: linear-gradient(100deg, rgba(255, 246, 214, 0) 30%, var(--gold-4) 50%, rgba(255, 246, 214, 0) 70%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  opacity: 0;
 }
 .intro-rule {
   display: block; width: clamp(120px, 42vmin, 280px); height: 1px; margin: clamp(14px, 3vh, 22px) 0;
@@ -596,11 +607,15 @@ input[type="range"] { width: 100%; height: 32px; accent-color: var(--brass); bac
   transform: scaleX(0);
 }
 .intro-dedic {
-  margin-top: 4px !important; padding: 0 0.3em 0.12em;
-  font: 400 clamp(46px, 13vmin, 104px)/1.15 "Great Vibes", "Snell Roundhand", "Segoe Script", cursive;
+  margin-top: 2px !important;
+  font: 400 clamp(46px, 13vmin, 104px)/1.3 "Great Vibes", "Snell Roundhand", "Segoe Script", cursive;
   color: var(--gold-3);
-  text-shadow: 0 0 24px rgba(246, 220, 148, 0.35), 0 4px 14px rgba(0, 0, 0, 0.5);
-  clip-path: inset(-20% 100% -20% 0);
+}
+.intro-mask { display: inline-block; overflow: hidden; vertical-align: top; transform: translateX(-101%); }
+.intro-ink {
+  display: block; padding: 0.06em 0.32em 0.2em;
+  text-shadow: 0 0 22px rgba(246, 220, 148, 0.3), 0 3px 10px rgba(0, 0, 0, 0.45);
+  transform: translateX(101%);
 }
 .intro-skip {
   position: absolute; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0;
@@ -609,8 +624,8 @@ input[type="range"] { width: 100%; height: 32px; accent-color: var(--brass); bac
 }
 
 .intro-sparks i {
-  position: absolute; width: 4px; height: 4px; border-radius: 50%;
-  background: var(--gold-4); box-shadow: 0 0 10px 2px rgba(246, 220, 148, 0.7);
+  position: absolute; width: 5px; height: 5px; border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-4) 0 35%, rgba(246, 220, 148, 0) 70%);
   opacity: 0;
 }
 .intro-sparks i:nth-child(1) { left: 14%; top: 22%; --d: 2.4s; }
@@ -622,57 +637,47 @@ input[type="range"] { width: 100%; height: 32px; accent-color: var(--brass); bac
 .intro-sparks i:nth-child(7) { left: 92%; top: 44%; --d: 3.35s; }
 .intro-sparks i:nth-child(8) { left: 36%; top: 86%; --d: 2.65s; }
 .intro-sparks i:nth-child(9) { left: 64%; top: 84%; --d: 3.1s; }
-.intro-sparks i:nth-child(10) { left: 30%; top: 34%; --d: 3.5s; width: 3px; height: 3px; }
-.intro-sparks i:nth-child(11) { left: 70%; top: 30%; --d: 3.6s; width: 3px; height: 3px; }
-.intro-sparks i:nth-child(12) { left: 58%; top: 58%; --d: 3.45s; width: 3px; height: 3px; }
+.intro-sparks i:nth-child(10) { left: 30%; top: 34%; --d: 3.5s; }
+.intro-sparks i:nth-child(11) { left: 70%; top: 30%; --d: 3.6s; }
+.intro-sparks i:nth-child(12) { left: 58%; top: 58%; --d: 3.45s; }
 
-.intro.play .intro-glow { animation: introGlow 2.6s 0.2s cubic-bezier(.2, .7, .2, 1) forwards; }
+.intro.play .intro-glow { animation: introFade 2.4s 0.2s ease-out forwards; }
 .intro.play .intro-ball { animation: introDrop 1.15s 0.15s cubic-bezier(.3, 1.35, .45, 1) forwards; }
-.intro.play .intro-by { animation: introLetter 0.9s 0.95s cubic-bezier(.2, .8, .2, 1) forwards; }
-.intro.play .intro-name {
-  animation: introWipe 1.0s 1.2s cubic-bezier(.65, 0, .35, 1) forwards, introSheen 1.6s 2.3s ease-in-out forwards;
-}
-.intro.play .intro-rule { animation: introRule 0.9s 1.95s cubic-bezier(.65, 0, .35, 1) forwards; }
-.intro.play .intro-for { animation: introLetter 0.8s 2.2s cubic-bezier(.2, .8, .2, 1) forwards; }
-.intro.play .intro-dedic { animation: introWrite 1.5s 2.45s cubic-bezier(.45, 0, .25, 1) forwards; }
+.intro.play .intro-by { animation: introRise 0.8s 0.95s cubic-bezier(.2, .8, .2, 1) forwards; }
+.intro.play .intro-name-ink { animation: introSlideUp 0.95s 1.15s cubic-bezier(.16, 1, .3, 1) forwards; }
+.intro.play .intro-name-ink::after { animation: introShine 1.4s 2.2s ease-in-out forwards; }
+.intro.play .intro-rule { animation: introRule 0.9s 1.9s cubic-bezier(.65, 0, .35, 1) forwards; }
+.intro.play .intro-for { animation: introRise 0.7s 2.15s cubic-bezier(.2, .8, .2, 1) forwards; }
+.intro.play .intro-mask, .intro.play .intro-ink { animation: introReveal 1.5s 2.4s cubic-bezier(.45, 0, .25, 1) forwards; }
 .intro.play .intro-sparks i { animation: introSpark 1.8s var(--d) ease-in-out forwards; }
 .intro.play .intro-skip { animation: introFade 0.8s 1.6s ease forwards; }
-.intro.leave { animation: introLeave 0.9s cubic-bezier(.6, 0, .4, 1) forwards; pointer-events: none; }
+.intro.leave { animation: introLeave 0.8s cubic-bezier(.6, 0, .4, 1) forwards; pointer-events: none; }
 
-@keyframes introGlow { to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes introFade { to { opacity: 1; } }
+@keyframes introOut { to { opacity: 0; } }
 @keyframes introDrop {
   0% { opacity: 0; transform: translateY(-46vh) rotate(-220deg) scale(0.8); }
   25% { opacity: 1; }
   100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
 }
-@keyframes introLetter {
-  from { opacity: 0; letter-spacing: 0.9em; margin-right: -0.9em; filter: blur(6px); }
-  to { opacity: 1; letter-spacing: 0.42em; margin-right: -0.42em; filter: blur(0); }
-}
-@keyframes introWipe { to { clip-path: inset(0 0 0 0); } }
-@keyframes introSheen { to { background-position: 0 0; } }
+@keyframes introRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes introSlideUp { to { transform: translateY(0); } }
+@keyframes introShine { 0% { opacity: 0; } 45% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes introRule { to { transform: scaleX(1); } }
-@keyframes introWrite { to { clip-path: inset(-20% -5% -20% 0); } }
+@keyframes introReveal { to { transform: translateX(0); } }
 @keyframes introSpark {
-  0% { opacity: 0; transform: scale(0.2) translateY(0); }
-  40% { opacity: 1; transform: scale(1.2) translateY(-8px); }
-  100% { opacity: 0; transform: scale(0.4) translateY(-22px); }
+  0% { opacity: 0; transform: scale(0.3) translateY(0); }
+  40% { opacity: 1; transform: scale(1.5) translateY(-8px); }
+  100% { opacity: 0; transform: scale(0.5) translateY(-22px); }
 }
-@keyframes introFade { to { opacity: 1; } }
-@keyframes introOut { to { opacity: 0; } }
-@keyframes introLeave {
-  0% { opacity: 1; transform: scale(1); filter: blur(0); }
-  100% { opacity: 0; transform: scale(1.06); filter: blur(10px); }
-}
+@keyframes introLeave { to { opacity: 0; transform: scale(1.05); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .intro.play .intro-ball, .intro.play .intro-by, .intro.play .intro-name, .intro.play .intro-rule,
-  .intro.play .intro-for, .intro.play .intro-dedic, .intro.play .intro-skip, .intro.play .intro-glow {
-    animation: introFade 0.6s 0.1s ease forwards !important;
-  }
-  .intro .intro-name, .intro .intro-dedic { clip-path: none; opacity: 0; }
-  .intro .intro-rule { transform: none; opacity: 0; }
-  .intro .intro-glow { transform: translate(-50%, -50%); }
+  .intro .intro-name-ink, .intro .intro-mask, .intro .intro-ink, .intro .intro-rule { transform: none; }
+  .intro .intro-stack { opacity: 0; }
+  .intro.play .intro-stack { animation: introFade 0.6s 0.1s ease forwards !important; }
+  .intro.play .intro-ball, .intro.play .intro-by, .intro.play .intro-for,
+  .intro.play .intro-skip, .intro.play .intro-glow { animation: introFade 0.01s forwards !important; }
   .intro.leave { animation: introOut 0.3s ease forwards !important; }
 }
 

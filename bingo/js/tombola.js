@@ -101,9 +101,11 @@
     this.present = null;        // estado de la presentación en primer plano
     this.path = buildTubePath();
     this.dpr = 1;
+    this.quality = 1;
+    this._slow = 0; this._frames = 0;
+    this._order = [];
     this.W = 0; this.H = 0;
     this._lastFrame = 0;
-    this._lastRender = 0;
     this._running = false;
     this._impacts = [];
     this._loop = this._loop.bind(this);
@@ -117,7 +119,9 @@
   Tombola.prototype.resize = function () {
     var rect = this.canvas.getBoundingClientRect();
     var w = Math.max(200, rect.width), h = Math.max(200, rect.height);
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Resolución limitada por presupuesto de píxeles (y rebajada si el equipo va lento).
+    var budget = 1100000 * this.quality;
+    this.dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(budget / (w * h))));
     this.W = w; this.H = h;
     this.canvas.width = Math.round(w * this.dpr);
     this.canvas.height = Math.round(h * this.dpr);
@@ -279,23 +283,21 @@
     drawCollar(g, P(0, 0.985), S * 0.17, S * 0.05);
     drawCollar(g, P(0, -0.965), S * 0.33, S * 0.07);
 
-    this.frontLayer = front;
-
-    // Paredes del tubo (por delante de la bola que sube).
-    var tube = makeCanvas(cw, ch); g = tube.getContext('2d');
+    // Paredes del tubo (por delante de la bola que sube), en la misma capa.
     this._worldPath(g, this.path.pts, 0, 0);
     g.lineJoin = 'round';
-    g.strokeStyle = 'rgba(225,245,238,0.30)'; g.lineWidth = tubeW; g.stroke();
-    g.globalCompositeOperation = 'destination-out';
-    this._worldPath(g, this.path.pts, 0, 0);
-    g.strokeStyle = 'rgba(0,0,0,0.88)'; g.lineWidth = tubeW - Math.max(2.5, S * 0.016); g.stroke();
-    g.globalCompositeOperation = 'source-over';
+    var walls = makeCanvas(cw, ch), wg = walls.getContext('2d');
+    wg.lineJoin = 'round';
+    this._worldPath(wg, this.path.pts, 0, 0);
+    wg.strokeStyle = 'rgba(225,245,238,0.30)'; wg.lineWidth = tubeW; wg.stroke();
+    wg.globalCompositeOperation = 'destination-out';
+    this._worldPath(wg, this.path.pts, 0, 0);
+    wg.strokeStyle = 'rgba(0,0,0,0.88)'; wg.lineWidth = tubeW - Math.max(2.5, S * 0.016); wg.stroke();
+    g.drawImage(walls, 0, 0);
     this._worldPath(g, this.path.pts, tubeW * 0.22, tubeW * 0.22);
     g.strokeStyle = 'rgba(255,255,255,0.13)'; g.lineWidth = tubeW * 0.14; g.stroke();
-    this.tubeLayer = tube;
 
     // Labio delantero de la bandeja.
-    var lip = makeCanvas(cw, ch); g = lip.getContext('2d');
     g.save();
     var lipG = g.createLinearGradient(0, tp.y, 0, tp.y + tr * 1.2);
     lipG.addColorStop(0, '#f0d189'); lipG.addColorStop(0.5, '#b88a2e'); lipG.addColorStop(1, '#5e4310');
@@ -306,7 +308,7 @@
     g.ellipse(tp.x, tp.y + tr * 0.9, tr * 0.85, tr * 0.28, 0, Math.PI, 0, true);
     g.closePath(); g.fill();
     g.restore();
-    this.lipLayer = lip;
+    this.frontLayer = front;
   };
 
   function roundRect(g, x, y, w, h, r) {
@@ -334,6 +336,7 @@
     this.selected = null; this.present = null; this.dropping = null;
     this.trayBall = lastNumber ? { num: lastNumber, alpha: 1 } : null;
     this.balls = [];
+    this._order.length = 0;
     for (var i = 0; i < numbers.length; i++) {
       var b = new Ball(numbers[i]), tries = 0, ok;
       do {
@@ -504,6 +507,7 @@
       if (!ok) return false;
       var idx = self.balls.indexOf(ball);
       if (idx !== -1) self.balls.splice(idx, 1);
+      self._order.length = 0;
       self.selected = { num: num, x: INTAKE.x, y: INTAKE.y, spin: 0 };
       self.airTarget = 0.3;
       self.onSound('tube', travel);
@@ -575,21 +579,32 @@
   Tombola.prototype._loop = function (now) {
     this._raf = 0;
     if (!this._running) return;
-    var busy = this.tweens.length > 0 || this.air > 0.16;
-    // En reposo se dibuja a ~30 fps para ahorrar batería.
-    if (!busy && this._lastRender && now - this._lastRender < 31) { this._raf = requestAnimationFrame(this._loop); return; }
-    var dt = this._lastFrame ? Math.min(0.05, (now - this._lastFrame) / 1000) : 1 / 60;
+    var raw = this._lastFrame ? now - this._lastFrame : 16.7;
+    var dt = Math.min(0.05, raw / 1000);
     this._lastFrame = now;
-    this._lastRender = now;
+    this._adapt(raw);
     this.time += dt;
     this.air += (this.airTarget - this.air) * (1 - Math.exp(-dt * 3.2));
     if (Math.abs(this.air - this._airReported) > 0.03) { this._airReported = this.air; this.onSound('air', this.air); }
-    var steps = Math.ceil(dt / (1 / 110));
+    var steps = Math.min(3, Math.ceil(dt / (1 / 110)));
     for (var i = 0; i < steps; i++) this._step(dt / steps, false);
     this._emitImpacts();
     this._runTweens();
     this._render();
     this._raf = requestAnimationFrame(this._loop);
+  };
+
+  /* Si el equipo no sostiene la animación, baja la resolución del lienzo (hasta 2 veces). */
+  Tombola.prototype._adapt = function (frameMs) {
+    if (frameMs > 200) return;
+    this._frames++;
+    if (frameMs > 24) this._slow++;
+    if (this._frames < 40) return;
+    if (this._slow > 24 && this.quality > 0.3) {
+      this.quality *= 0.62;
+      this.resize();
+    }
+    this._frames = 0; this._slow = 0;
   };
 
   Tombola.prototype._emitImpacts = function () {
@@ -643,13 +658,21 @@
     ctx.fillStyle = glow;
     ctx.beginPath(); ctx.arc(cx, cy, Rs, 0, Math.PI * 2); ctx.fill();
 
-    var balls = this.balls.slice().sort(function (a, b) { return a.z - b.z; });
-    for (var i = 0; i < balls.length; i++) {
-      var b = balls[i], p = this.project(b.x, b.y, b.z);
-      this._drawBall(b, p.x, p.y, BALL_R * p.k * this.S, b.nx, b.ny, b.nz, clamp(-b.z * 0.3, 0, 0.32));
+    // Orden por profundidad: inserción sobre la lista del cuadro anterior (casi ordenada, sin basura).
+    var order = this._order, i, j, b;
+    if (order.length !== this.balls.length) { order.length = 0; for (i = 0; i < this.balls.length; i++) order.push(this.balls[i]); }
+    for (i = 1; i < order.length; i++) {
+      b = order[i]; j = i - 1;
+      while (j >= 0 && order[j].z > b.z) { order[j + 1] = order[j]; j--; }
+      order[j + 1] = b;
+    }
+    var S = this.S;
+    for (i = 0; i < order.length; i++) {
+      b = order[i];
+      var k = CAM / (CAM - b.z);
+      this._drawBall(b, cx + b.x * k * S, cy - b.y * k * S, BALL_R * k * S, b.nx, b.ny, b.nz, b.z < 0 ? Math.min(0.32, -b.z * 0.3) : 0);
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(this.frontLayer, 0, 0);
 
     var rS = BALL_R * this.S;
     if (this.dropping) {
@@ -668,8 +691,7 @@
       this._drawBall({ num: this.selected.num, color: Bingo.columnFor(this.selected.num) }, sp.x, sp.y, rS, Math.cos(sa), Math.sin(sa), -0.6, 0);
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(this.tubeLayer, 0, 0);
-    ctx.drawImage(this.lipLayer, 0, 0);
+    ctx.drawImage(this.frontLayer, 0, 0);
     if (this.present) this._renderPresent();
   };
 
