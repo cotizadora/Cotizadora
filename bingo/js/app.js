@@ -28,7 +28,7 @@
   var saved = load();
   var settings = Object.assign({
     sound: true, soundVol: 0.7,
-    voice: true, voiceVol: 1, voiceRate: 0.95, voiceURI: '',
+    voice: true, voiceVol: 1, voiceRate: 0.95, voiceURI: '', phrases: true,
     interval: 5
   }, saved.settings || {});
 
@@ -50,6 +50,9 @@
   var busy = false;               // hay una extracción en curso
   var session = 0;                // invalida extracciones al reiniciar
   var countdown = { remaining: 0, deadline: 0, timer: 0, total: 0 };
+  // Los choques solo suenan mientras la tómbola trabaja; en reposo hay silencio.
+  var clatterUntil = 0;
+  function clatter(seconds) { clatterUntil = Math.max(clatterUntil, performance.now() + seconds * 1000); }
 
   var tombola = new Bingo.Tombola($('tombola'), {
     reducedMotion: reduced,
@@ -57,7 +60,7 @@
       if (kind === 'air') audio.setActivity(a);
       else if (kind === 'tube') audio.tube(a);
       else if (kind === 'land') audio.thunk();
-      else audio.clack(a, b, kind);
+      else if (performance.now() < clatterUntil) audio.clack(a, b, kind);
     }
   });
 
@@ -116,6 +119,7 @@
       $('curNum').textContent = '—';
       $('curKicker').textContent = 'Último número';
       $('curWord').textContent = 'Aún no ha salido ninguno';
+      $('curPhrase').hidden = true;
       return;
     }
     cur.setAttribute('data-col', Bingo.columnFor(n));
@@ -123,6 +127,9 @@
     $('curNum').textContent = n;
     $('curKicker').textContent = kicker;
     $('curWord').textContent = Bingo.capitalize(Bingo.numberToWords(n));
+    var call = settings.phrases ? Bingo.callFor(n) : null;
+    $('curPhrase').hidden = !call;
+    $('curPhrase').textContent = call ? '«' + call.text + '»' : '';
     cur.classList.remove('pop');
     void cur.offsetWidth;
     cur.classList.add('pop');
@@ -212,6 +219,7 @@
     persist();
     setStatus('mixing');
     updateControls();
+    clatter(30);
     var alive = function (ok) { return ok !== false && token === session; };
 
     tombola.mix(reduced ? 0.7 : 1.5).then(function (ok) {
@@ -219,6 +227,7 @@
       setStatus('extracting');
       return tombola.extract(n);
     }).then(function (ok) {
+      clatterUntil = 0;
       if (!alive(ok)) return false;
       return tombola.presentBall(n);
     }).then(function (ok) {
@@ -229,7 +238,9 @@
       $('announcer').textContent = Bingo.letterFor(n) + ' ' + n;
       setStatus('announcing');
       var spoken = tombola.wait(0.35).then(function (w) {
-        return w === false || token !== session ? false : voice.say(Bingo.numberToWords(n));
+        if (w === false || token !== session) return false;
+        var call = settings.phrases ? Bingo.callFor(n) : null;
+        return voice.say(call ? call.say : Bingo.numberToWords(n));
       });
       return Promise.all([spoken, tombola.wait(1.4)]).then(function (r) { return r[1]; });
     }).then(function (ok) {
@@ -336,6 +347,7 @@
     game.reset();
     persist();
     tombola.load(game.available.slice(), null, true);
+    clatter(2.5);
     showCurrent(null);
     $('announcer').textContent = 'Nueva partida';
     renderHistory(0);
@@ -418,6 +430,11 @@
     settings.soundVol = this.value / 100; audio.setVolume(settings.soundVol); persist();
   });
   $('optVoice').addEventListener('change', function () { setVoice(this.checked); });
+  $('optPhrases').checked = settings.phrases;
+  $('optPhrases').addEventListener('change', function () {
+    settings.phrases = this.checked; persist();
+    if (game.last()) showCurrent(game.last(), $('curKicker').textContent);
+  });
   $('optVoiceVol').addEventListener('input', function () { settings.voiceVol = this.value / 100; voice.volume = settings.voiceVol; persist(); });
   $('optVoiceRate').addEventListener('input', function () { settings.voiceRate = this.value / 100; voice.rate = settings.voiceRate; persist(); });
   $('optVoiceName').addEventListener('change', function () { settings.voiceURI = this.value; voice.voiceURI = this.value; persist(); });

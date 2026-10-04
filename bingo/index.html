@@ -100,6 +100,7 @@
         <div class="current-info">
           <span class="current-kicker" id="curKicker">Último número</span>
           <span class="current-word" id="curWord">Aún no ha salido ninguno</span>
+          <span class="current-phrase" id="curPhrase" hidden></span>
           <ol class="recent" id="recent" aria-label="Números anteriores, del más reciente al más antiguo"></ol>
         </div>
       </div>
@@ -187,6 +188,7 @@
 
     <div class="setting">
       <label class="switch"><input type="checkbox" id="optVoice" checked><span>Anunciar números en voz alta</span></label>
+      <label class="switch"><input type="checkbox" id="optPhrases" checked><span>Frases del bingo chileno (“Solito, el ocho”, “Par de patos”)</span></label>
       <label class="slider"><span>Volumen de voz</span><input type="range" id="optVoiceVol" min="0" max="100" value="100"></label>
       <label class="slider"><span>Velocidad</span><input type="range" id="optVoiceRate" min="70" max="130" value="95"></label>
       <label class="select"><span>Voz</span><select id="optVoiceName"></select></label>
@@ -203,10 +205,11 @@
 
     <div class="setting credits">
       <h3>Créditos</h3>
-      <p><strong>Tómbola Bingo 75</strong> · versión 1.2</p>
+      <p><strong>Tómbola Bingo 75</strong> · versión 1.3</p>
       <p class="credits-dedic">Hecho por <strong>Eduardo Pérez</strong> para <span>Sofía Valentina</span>.</p>
       <p>Programada con Claude Code.</p>
       <p>Sonidos generados en el navegador con Web Audio, sin grabaciones de terceros. La voz usa el lector de voz de tu dispositivo.</p>
+      <p>Frases del bingo chileno tomadas de fuentes chilenas: Club Manquehue y The Clinic (“Solito, el…”), Típico Chileno y el diccionario de chilenismos de Apocatastasis (“Par de patos”).</p>
       <p>Tipografías Barlow y Barlow Condensed, de Jeremy Tribby, y Great Vibes, de Robert Leuschke (licencia SIL Open Font), incluidas en la app.</p>
       <p><a href="https://github.com/cotizadora/Cotizadora/tree/main/bingo" target="_blank" rel="noopener">Código fuente</a></p>
     </div>

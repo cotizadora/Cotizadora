@@ -17,6 +17,22 @@
     return u === 0 ? TENS[t] : TENS[t] + ' y ' + UNITS[u];
   }
 
+  /* Frases del bingo chileno. Solo se incluyen las que aparecen documentadas en fuentes
+     chilenas; los demás números se cantan sin frase.
+     - "Solito" para los números de una cifra: Club Manquehue, "¡Solito el 1! Vuelve el bingo
+       a nuestra tradicional fiesta" (clubmanquehue.cl, 2024); The Clinic, "Fiebre de bingo por
+       la noche" (theclinic.cl, 2025): "¡Solito, solito el 6!".
+     - 22, "Par de patos": Típico Chileno, "Los bingos solidarios" (tipicochileno.cl);
+       Diccionario de chilenismos de Apocatastasis ("Par de patos: veintidós"). */
+  function callFor(n) {
+    if (n >= 1 && n <= 9) {
+      var s = 'Solito, el ' + UNITS[n];
+      return { text: s, say: s };
+    }
+    if (n === 22) return { text: 'Par de patos', say: 'Veintidós. ¡Par de patos!' };
+    return null;
+  }
+
   function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
   function letterFor(n) { return LETTERS[Math.floor((n - 1) / 15)]; }
@@ -73,6 +89,7 @@
   Bingo.TOTAL = TOTAL;
   Bingo.LETTERS = LETTERS;
   Bingo.numberToWords = numberToWords;
+  Bingo.callFor = callFor;
   Bingo.capitalize = capitalize;
   Bingo.letterFor = letterFor;
   Bingo.columnFor = columnFor;

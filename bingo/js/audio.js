@@ -156,13 +156,13 @@
   AudioEngine.prototype.clack = function (intensity, pan, kind) {
     if (!this.ready()) return;
     var t = this.ctx.currentTime;
-    if (t - this._windowStart > 0.05) { this._windowStart = t; this._clacksThisWindow = 0; }
-    if (this._clacksThisWindow >= 5) return;
+    if (t - this._windowStart > 0.07) { this._windowStart = t; this._clacksThisWindow = 0; }
+    if (this._clacksThisWindow >= 3) return;
     this._clacksThisWindow++;
     var v = Math.min(1, intensity);
     var when = t + Math.random() * 0.008;
-    if (kind === 'wall') this._play(this.knocks, 0.08 + 0.32 * v * v, pan, when);
-    else this._play(this.clicks, 0.06 + 0.5 * v * v, pan, when, 0.9 + v * 0.18 + Math.random() * 0.06);
+    if (kind === 'wall') this._play(this.knocks, 0.05 + 0.22 * v * v, pan, when);
+    else this._play(this.clicks, 0.04 + 0.34 * v * v, pan, when, 0.9 + v * 0.18 + Math.random() * 0.06);
   };
 
   /* La bola sube por el tubo golpeteando las paredes. */
