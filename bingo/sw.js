@@ -1,5 +1,5 @@
 /* Service worker: deja la tómbola disponible sin conexión una vez instalada. */
-var CACHE = 'tombola-v5';
+var CACHE = 'tombola-v6';
 var SHELL = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'js/intro.js', 'js/game.js', 'js/audio.js', 'js/voice.js', 'js/tombola.js', 'js/install.js', 'js/app.js',

@@ -4,20 +4,70 @@
   "short_name": "Tómbola",
   "description": "Tómbola digital para cantar Bingo de 75 números con mezcla, sonido y anuncio por voz.",
   "lang": "es",
-  "start_url": "./",
+  "start_url": "./?app=1",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0e231f",
   "theme_color": "#0e231f",
-  "categories": ["games", "entertainment"],
+  "categories": [
+    "games",
+    "entertainment"
+  ],
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "related_applications": [
-    { "platform": "webapp", "url": "https://cotizadora.github.io/Cotizadora/bingo/manifest.webmanifest" }
+    {
+      "platform": "webapp",
+      "url": "https://cotizadora.github.io/Cotizadora/bingo/manifest.webmanifest"
+    }
+  ],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "screenshots/tombola-1.jpg",
+      "sizes": "1080x2340",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Tómbola lista para sacar un número"
+    },
+    {
+      "src": "screenshots/tombola-2.jpg",
+      "sizes": "1080x2340",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Número presentado en primer plano"
+    },
+    {
+      "src": "screenshots/tombola-wide.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Tómbola y tablero en pantalla grande"
+    }
   ]
 }
