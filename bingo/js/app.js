@@ -436,6 +436,22 @@
   $('btnAutoPause').addEventListener('click', autoPause);
   $('btnAutoStop').addEventListener('click', autoStop);
   $('btnNew').addEventListener('click', requestNewGame);
+  $('btnNewTop').addEventListener('click', requestNewGame);
+
+  /* En pantallas compactas el historial es un panel que se despliega desde abajo. */
+  function setHistoryOpen(open) {
+    document.body.classList.toggle('history-open', open);
+    $('btnHistory').setAttribute('aria-expanded', open ? 'true' : 'false');
+    $('historyBackdrop').hidden = !open;
+    if (open) $('btnHistoryClose').focus();
+    else if (document.activeElement && $('history').contains(document.activeElement)) $('btnHistory').focus();
+  }
+  $('btnHistory').addEventListener('click', function () { setHistoryOpen(true); });
+  $('btnHistoryClose').addEventListener('click', function () { setHistoryOpen(false); });
+  $('historyBackdrop').addEventListener('click', function () { setHistoryOpen(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.body.classList.contains('history-open')) setHistoryOpen(false);
+  });
 
   Array.prototype.forEach.call(document.querySelectorAll('input[name="mode"]'), function (r) {
     r.addEventListener('change', function () { if (this.checked) setMode(this.value); });
@@ -535,5 +551,6 @@
   setStatus(game.isOver() ? 'over' : 'ready');
   syncToggles();
   updateControls();
+  Bingo.initInstall();
   tombola.start();
 })(window.Bingo);

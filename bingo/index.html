@@ -7,6 +7,12 @@
 <meta name="description" content="Tómbola digital para cantar Bingo de 75 números con mezcla, sonido y anuncio por voz.">
 <title>Tómbola Bingo 75</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23d3392f'/%3E%3Ccircle cx='32' cy='32' r='17' fill='%23fbf8f1'/%3E%3Ctext x='32' y='40' font-family='Arial' font-weight='700' font-size='22' text-anchor='middle' fill='%2316130f'%3E75%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tómbola">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,13 +29,16 @@
       </div>
     </div>
     <div class="topbar-actions">
+      <button type="button" class="icon-btn only-compact" id="btnNewTop" aria-label="Nueva partida" title="Nueva partida">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>
+      </button>
       <button type="button" class="icon-btn" id="btnSound" aria-pressed="true" aria-label="Sonido activado" title="Sonido">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path class="ico-on" d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/><path class="ico-off" d="M4 9v6h4l5 4V5L8 9H4zm15.6 3 2.2-2.2-1.4-1.4-2.2 2.2-2.2-2.2-1.4 1.4 2.2 2.2-2.2 2.2 1.4 1.4 2.2-2.2 2.2 2.2 1.4-1.4z"/></svg>
       </button>
       <button type="button" class="icon-btn" id="btnVoice" aria-pressed="true" aria-label="Voz activada" title="Voz">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1a7 7 0 0 0 6-6.9h-2z"/><path class="ico-slash" d="M3.3 2.3 21.7 20.7l-1.4 1.4L1.9 3.7z"/></svg>
       </button>
-      <button type="button" class="icon-btn" id="btnSettings" aria-haspopup="dialog" aria-label="Ajustes de sonido y voz" title="Ajustes">
+      <button type="button" class="icon-btn" id="btnSettings" aria-haspopup="dialog" aria-label="Ajustes" title="Ajustes">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v2H3zm0 10h7v2H3zm14-11h2v2h2v2h-2v2h-2zM12 15h2v-2h2v6h-2v-2h-2zm4 1h5v2h-5zM3 11h5v2H3z"/></svg>
       </button>
     </div>
@@ -42,6 +51,14 @@
         <span class="status-text" id="statusText">Lista</span>
       </div>
       <canvas id="tombola" role="img" aria-label="Tómbola transparente con 75 bolas"></canvas>
+      <div class="install" id="installBanner" role="region" aria-label="Instalar aplicación" hidden>
+        <img src="icons/icon-192.png" alt="" width="40" height="40">
+        <p class="install-text" id="installText"></p>
+        <button type="button" class="btn-install" id="btnInstall" hidden>Instalar</button>
+        <button type="button" class="install-close" id="btnInstallClose" aria-label="Cerrar aviso de instalación">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
+        </button>
+      </div>
     </section>
 
     <section class="panel" aria-label="Sorteo">
@@ -69,11 +86,17 @@
         <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
       </div>
 
-      <fieldset class="mode">
-        <legend class="sr-only">Modo de sorteo</legend>
-        <label class="mode-opt"><input type="radio" name="mode" value="manual" checked><span>Manual</span></label>
-        <label class="mode-opt"><input type="radio" name="mode" value="auto"><span>Automático</span></label>
-      </fieldset>
+      <div class="mode-row">
+        <fieldset class="mode">
+          <legend class="sr-only">Modo de sorteo</legend>
+          <label class="mode-opt"><input type="radio" name="mode" value="manual" checked><span>Manual</span></label>
+          <label class="mode-opt"><input type="radio" name="mode" value="auto"><span>Automático</span></label>
+        </fieldset>
+        <button type="button" class="history-btn only-compact" id="btnHistory" aria-expanded="false" aria-controls="history">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>
+          <span>Tablero</span>
+        </button>
+      </div>
 
       <div class="controls" id="manualControls">
         <button type="button" class="btn-primary" id="btnDraw">Sacar número</button>
@@ -100,13 +123,17 @@
       <button type="button" class="btn-ghost" id="btnNew">Nueva partida</button>
     </section>
 
-    <section class="history" aria-labelledby="historyTitle">
+    <div class="history-backdrop" id="historyBackdrop" hidden></div>
+    <section class="history" id="history" aria-labelledby="historyTitle">
       <div class="history-head">
         <h2 id="historyTitle">Historial</h2>
         <div class="tabs" role="tablist" aria-label="Vista del historial">
           <button type="button" role="tab" id="tabBoard" aria-selected="true" aria-controls="board">Tablero</button>
           <button type="button" role="tab" id="tabOrder" aria-selected="false" aria-controls="order" tabindex="-1">Orden de salida</button>
         </div>
+        <button type="button" class="history-close only-compact" id="btnHistoryClose" aria-label="Cerrar historial">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
+        </button>
       </div>
       <div class="board" id="board" role="tabpanel" aria-labelledby="tabBoard"></div>
       <div class="order" id="order" role="tabpanel" aria-labelledby="tabOrder" hidden>
@@ -121,7 +148,7 @@
 
 <dialog class="sheet" id="settings" aria-labelledby="settingsTitle">
   <form method="dialog" class="sheet-body">
-    <h2 id="settingsTitle">Sonido y voz</h2>
+    <h2 id="settingsTitle">Ajustes</h2>
 
     <div class="setting">
       <label class="switch"><input type="checkbox" id="optSound" checked><span>Sonido de la tómbola</span></label>
@@ -135,6 +162,21 @@
       <label class="select"><span>Voz</span><select id="optVoiceName"></select></label>
       <p class="note" id="voiceNote"></p>
       <button type="button" class="btn-secondary small" id="btnTestVoice">Probar voz</button>
+    </div>
+
+    <div class="setting">
+      <h3>Aplicación</h3>
+      <p class="note" id="installNote"></p>
+      <button type="button" class="btn-secondary small" id="btnInstallSettings" hidden>Instalar en este dispositivo</button>
+    </div>
+
+    <div class="setting credits">
+      <h3>Créditos</h3>
+      <p><strong>Tómbola Bingo 75</strong> · versión 1.1</p>
+      <p>Creada por <a href="https://github.com/cotizadora" target="_blank" rel="noopener">cotizadora</a>. Programada con Claude Code.</p>
+      <p>Sonidos generados en el navegador con Web Audio, sin grabaciones de terceros. La voz usa el lector de voz de tu dispositivo.</p>
+      <p>Tipografías Barlow y Barlow Condensed, de Jeremy Tribby (licencia SIL Open Font).</p>
+      <p><a href="https://github.com/cotizadora/Cotizadora/tree/main/bingo" target="_blank" rel="noopener">Código fuente</a></p>
     </div>
 
     <button type="submit" class="btn-primary small">Listo</button>
@@ -156,6 +198,7 @@
 <script src="js/audio.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/tombola.js"></script>
+<script src="js/install.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

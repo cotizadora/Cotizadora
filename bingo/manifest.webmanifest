@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "Tómbola Bingo 75",
+  "short_name": "Tómbola",
+  "description": "Tómbola digital para cantar Bingo de 75 números con mezcla, sonido y anuncio por voz.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e231f",
+  "theme_color": "#0e231f",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "related_applications": [
+    { "platform": "webapp", "url": "https://cotizadora.github.io/Cotizadora/bingo/manifest.webmanifest" }
+  ]
+}

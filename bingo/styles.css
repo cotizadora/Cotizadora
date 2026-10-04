@@ -343,55 +343,182 @@ input[type="range"] { width: 100%; height: 32px; accent-color: var(--brass); bac
 
 /* ---------- Responsive ---------- */
 
-@media (max-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "panel" "history"; gap: 12px; padding: 12px; }
-  .stage { height: min(calc(100vw - 24px), 56vh, 600px); min-height: 300px; }
-  .panel { position: static; }
+.only-compact { display: none !important; }
+.mode-row { display: flex; gap: 8px; }
+.mode-row .mode { flex: 1; min-width: 0; }
+.history-backdrop { display: none; }
+
+/* Teléfonos y tablets: todo en una sola pantalla, sin desplazamiento.
+   La tómbola ocupa el espacio libre; el historial se despliega desde abajo. */
+@media (max-width: 900px), (orientation: landscape) and (max-height: 540px) {
+  .only-compact { display: grid !important; }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  .app { height: 100%; min-height: 0; overflow: hidden; }
+
+  .topbar { padding-top: 6px; padding-bottom: 6px; flex: none; }
+  .brand-ball { width: 32px; height: 32px; font-size: 12px; }
+  .brand-name { font-size: 22px; }
+  .brand-sub { font-size: 11.5px; }
+  .topbar-actions { gap: 4px; }
+  .icon-btn { width: 40px; height: 40px; border-radius: 10px; }
+  .icon-btn svg { width: 20px; height: 20px; }
+
+  .install { left: 8px; right: 8px; bottom: 8px; padding: 6px 6px 6px 10px; gap: 8px; }
+  .install img { width: 30px; height: 30px; border-radius: 8px; }
+  .install-text { font-size: 13px; line-height: 1.3; }
+  .btn-install { min-height: 38px; font-size: 16px; padding: 0 14px; }
+  .install-close { width: 34px; height: 34px; }
+
+  .layout {
+    flex: 1; min-height: 0; align-items: stretch;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .stage { flex: 1 1 auto; height: auto; min-height: 150px; }
+  .status { top: 8px; left: 8px; padding: 5px 10px 5px 8px; font-size: 13px; }
+
+  .panel { flex: none; position: static; gap: 8px; }
+  .current { gap: 12px; padding: 8px 10px; }
+  .current-ball { width: 66px; height: 66px; box-shadow: inset -5px -6px 0 rgba(0, 0, 0, 0.16); }
+  .current-letter { font-size: 11px; }
+  .current-num { font-size: 30px; }
+  .current-kicker { font-size: 11px; }
+  .current-word { font-size: 19px; }
+  .recent { margin-top: 2px; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
+  .chip { width: 24px; height: 24px; font-size: 12px; flex: none; }
+
+  .counters { padding: 6px 12px 8px; gap: 0 10px; }
+  .counter-val { font-size: 24px; }
+  .counter-lbl { font-size: 12px; }
+  .progress { height: 4px; margin-top: 5px; }
+
+  .mode { padding: 3px; }
+  .mode-opt span { height: 40px; font-size: 15px; letter-spacing: 0.04em; }
+  .history-btn {
+    flex: none; display: flex !important; align-items: center; gap: 6px;
+    padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: transparent;
+    font: 700 15px/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-felt);
+  }
+  .history-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+  .controls { gap: 6px; }
+  .btn-primary { min-height: 58px; font-size: 24px; }
+  .hint, #btnNew { display: none; }
+  .interval { grid-template-columns: auto 1fr auto; padding: 4px 12px; gap: 10px; }
+  .interval label { font-size: 14px; }
+  .interval input { grid-column: auto; grid-row: 1; grid-column: 2; height: 28px; }
+  .interval output { font-size: 18px; }
+  .auto-buttons { gap: 8px; }
+  .auto-buttons .btn-secondary { min-height: 58px; }
+  .countdown { gap: 4px; }
+  .countdown-text { font-size: 12.5px; }
+
+  /* Historial como panel inferior. */
+  .history {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    max-height: 82%; overflow-y: auto; overscroll-behavior: contain;
+    border-radius: 18px 18px 0 0;
+    padding: 14px 14px calc(16px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(105%); visibility: hidden;
+    transition: transform 0.28s ease, visibility 0s linear 0.28s;
+  }
+  body.history-open .history { transform: none; visibility: visible; transition: transform 0.28s ease; }
+  .history-backdrop { display: block; position: fixed; inset: 0; z-index: 29; background: rgba(4, 12, 10, 0.6); }
+  .history-head { flex-wrap: nowrap; }
+  .history h2 { font-size: 19px; }
+  .tabs button { padding: 0 10px; height: 36px; font-size: 13.5px; }
+  .history-close {
+    width: 38px; height: 38px; flex: none; place-items: center;
+    border: 0; border-radius: 10px; background: var(--cream-2); color: var(--paper-ink);
+  }
+  .history-close svg { width: 20px; height: 20px; fill: currentColor; }
+  .board-row { grid-template-columns: 26px repeat(15, minmax(0, 1fr)); gap: 3px; }
+  .cell { min-height: 0; font-size: 13px; }
+}
+
+@media (max-width: 900px) and (min-width: 600px) and (orientation: portrait) {
+  .current-ball { width: 96px; height: 96px; }
+  .current-num { font-size: 44px; }
+  .current-word { font-size: 24px; }
 }
 
 @media (max-width: 520px) {
-  .brand-name { font-size: 22px; }
-  .icon-btn { width: 42px; height: 42px; }
-  .current { gap: 12px; padding: 12px; }
-  .current-ball { width: 108px; height: 108px; }
-  .current-num { font-size: 46px; }
-  .current-word { font-size: 21px; }
-  .chip { width: 30px; height: 30px; font-size: 14px; }
-  .counter-val { font-size: 32px; }
-  .history { padding: 12px; }
-  .board-row { grid-template-columns: 22px repeat(15, minmax(0, 1fr)); gap: 2px; }
-  .board-letter { font-size: 14px; border-radius: 4px; }
-  .cell { min-height: 0; font-size: 12.5px; border-style: solid; border-color: #ddd3bd; }
+  .brand-sub { display: none; }
+  .history { padding-left: 10px; padding-right: 10px; }
+  .history h2 { display: none; }
+  .board-row { grid-template-columns: 20px repeat(15, minmax(0, 1fr)); gap: 2px; }
+  .board-letter { font-size: 13px; border-radius: 4px; }
+  .cell { font-size: 11.5px; border-style: solid; border-color: #ddd3bd; }
   .slider, .select { grid-template-columns: 1fr; gap: 2px; }
 }
 
-@media (max-width: 360px) {
-  .brand-sub { display: none; }
-  .cell { font-size: 11px; }
+@media (max-height: 640px) and (orientation: portrait) {
+  .current-ball { width: 56px; height: 56px; }
+  .current-num { font-size: 26px; }
+  .current-word { font-size: 17px; }
+  .counters { padding: 4px 12px 6px; }
+  .counter-val { font-size: 20px; }
+  .mode-opt span { height: 36px; }
+  .btn-primary, .auto-buttons .btn-secondary { min-height: 52px; font-size: 21px; }
 }
 
 /* Teléfono en horizontal: tómbola a la izquierda, controles a la derecha. */
 @media (orientation: landscape) and (max-height: 540px) {
-  .topbar { padding-top: 6px; padding-bottom: 6px; }
-  .brand-ball { width: 30px; height: 30px; font-size: 12px; }
-  .brand-name { font-size: 20px; }
-  .icon-btn { width: 40px; height: 40px; }
-  .layout {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    grid-template-areas: "stage panel" "stage history";
-    gap: 10px; padding: 10px max(10px, env(safe-area-inset-right)) 10px max(10px, env(safe-area-inset-left));
-  }
-  .stage { position: sticky; top: 10px; height: calc(100dvh - 76px); min-height: 240px; grid-row: 1 / span 2; }
-  .panel { position: static; gap: 10px; }
-  .current { padding: 10px; }
-  .current-ball { width: 92px; height: 92px; }
-  .current-num { font-size: 40px; }
-  .btn-primary { min-height: 56px; font-size: 22px; }
-  .auto-buttons .btn-secondary { min-height: 56px; }
-  .board-row { grid-template-columns: 20px repeat(15, minmax(0, 1fr)); gap: 2px; }
-  .cell { font-size: 11px; min-height: 0; }
+  .brand-sub { display: none; }
+  .layout { flex-direction: row; padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  .stage { flex: 1.25 1 0; min-width: 0; }
+  .panel { flex: 1 1 0; min-width: 0; overflow-y: auto; justify-content: safe center; }
+  .current-ball { width: 56px; height: 56px; }
+  .current-num { font-size: 26px; }
+  .current-word { font-size: 17px; }
+  .counters { padding: 4px 12px 6px; }
+  .counter-val { font-size: 20px; }
+  .mode-opt span { height: 36px; }
+  .btn-primary, .auto-buttons .btn-secondary { min-height: 48px; font-size: 20px; }
+  .panel { gap: 6px; }
+  .recent, .current-kicker { display: none; }
+  .current { padding: 6px 10px; }
+  .interval { padding: 2px 12px; }
+  .history { left: auto; width: min(560px, 100%); max-height: 100%; border-radius: 18px 0 0 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- Instalación y créditos ---------- */
+
+.install {
+  position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 2;
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 8px 8px 12px;
+  background: rgba(19, 46, 40, 0.94); border: 1px solid var(--brass-deep); border-radius: var(--radius);
+}
+.install img { flex: none; border-radius: 10px; }
+.install-text { flex: 1; min-width: 0; margin: 0; font-size: 14.5px; line-height: 1.35; }
+.btn-install {
+  flex: none; min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px;
+  background: var(--brass); color: var(--paper-ink);
+  font: 800 18px/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase;
+  box-shadow: inset 0 -3px 0 var(--brass-deep);
+}
+.install-close {
+  flex: none; width: 40px; height: 40px; border-radius: 10px; border: 0;
+  display: grid; place-items: center; background: transparent; color: var(--on-felt-muted);
+}
+.install-close svg { width: 20px; height: 20px; fill: currentColor; }
+.install-close:hover { color: var(--on-felt); }
+
+.sheet h3 { margin: 0; font: 800 18px/1.1 var(--display); text-transform: uppercase; letter-spacing: 0.08em; }
+.credits { gap: 6px; border-bottom: 0; padding-bottom: 0; font-size: 14.5px; }
+.credits p { color: var(--paper-muted); }
+.credits strong { color: var(--paper-ink); }
+.credits a { color: var(--red-deep); font-weight: 600; }
+.sheet { max-height: calc(100dvh - 32px); }
+
+@media (max-width: 380px) {
+  .brand { gap: 8px; }
+  .brand-ball { width: 28px; height: 28px; font-size: 11px; }
+  .brand-name { font-size: 18px; letter-spacing: 0.04em; }
+  .icon-btn { width: 38px; height: 38px; }
 }
