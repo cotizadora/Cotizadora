@@ -30,6 +30,11 @@
       return { text: s, say: s };
     }
     if (n === 22) return { text: 'Par de patos', say: 'Veintidós. ¡Par de patos!' };
+    // Frases indicadas por Sofía Valentina y Eduardo.
+    if (n === 11) return { text: '…mmm, entonces', say: 'Once… mmm… ¡entonces!' };
+    if (n === 13) return { text: '¿Qué te parece?', say: 'Trece, ¿qué te parece?' };
+    if (n === 14) return { text: 'Caga torcido', say: 'Catorce, ¡caga torcido!' };
+    if (n === 33) return { text: 'La edad de Cristo', say: 'La edad de Cristo… ¡treinta y tres!' };
     return null;
   }
 
