@@ -13,12 +13,24 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tómbola">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/great-vibes-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/barlow-condensed-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div class="intro" id="intro" aria-label="Hecho por Eduardo Pérez para Sofía Valentina">
+  <div class="intro-glow" aria-hidden="true"></div>
+  <div class="intro-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="intro-stack">
+    <div class="intro-ball" aria-hidden="true"><span>75</span></div>
+    <p class="intro-by">Hecho por</p>
+    <p class="intro-name">Eduardo Pérez</p>
+    <span class="intro-rule" aria-hidden="true"></span>
+    <p class="intro-for">para</p>
+    <p class="intro-dedic">Sofía Valentina</p>
+  </div>
+  <p class="intro-skip" aria-hidden="true">Toca para continuar</p>
+</div>
 <div class="app">
   <header class="topbar">
     <div class="brand">
@@ -172,10 +184,11 @@
 
     <div class="setting credits">
       <h3>Créditos</h3>
-      <p><strong>Tómbola Bingo 75</strong> · versión 1.1</p>
-      <p>Creada por <a href="https://github.com/cotizadora" target="_blank" rel="noopener">cotizadora</a>. Programada con Claude Code.</p>
+      <p><strong>Tómbola Bingo 75</strong> · versión 1.2</p>
+      <p class="credits-dedic">Hecho por <strong>Eduardo Pérez</strong> para <span>Sofía Valentina</span>.</p>
+      <p>Programada con Claude Code.</p>
       <p>Sonidos generados en el navegador con Web Audio, sin grabaciones de terceros. La voz usa el lector de voz de tu dispositivo.</p>
-      <p>Tipografías Barlow y Barlow Condensed, de Jeremy Tribby (licencia SIL Open Font).</p>
+      <p>Tipografías Barlow y Barlow Condensed, de Jeremy Tribby, y Great Vibes, de Robert Leuschke (licencia SIL Open Font), incluidas en la app.</p>
       <p><a href="https://github.com/cotizadora/Cotizadora/tree/main/bingo" target="_blank" rel="noopener">Código fuente</a></p>
     </div>
 
@@ -194,6 +207,7 @@
   </form>
 </dialog>
 
+<script src="js/intro.js"></script>
 <script src="js/game.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/voice.js"></script>

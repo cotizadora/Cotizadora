@@ -1,9 +1,14 @@
 /* Service worker: deja la tómbola disponible sin conexión una vez instalada. */
-var CACHE = 'tombola-v2';
+var CACHE = 'tombola-v4';
 var SHELL = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
-  'js/game.js', 'js/audio.js', 'js/voice.js', 'js/tombola.js', 'js/install.js', 'js/app.js',
-  'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-192.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'
+  'js/intro.js', 'js/game.js', 'js/audio.js', 'js/voice.js', 'js/tombola.js', 'js/install.js', 'js/app.js',
+  'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-192.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png',
+  'fonts/great-vibes-latin-400-normal.woff2',
+  'fonts/barlow-condensed-latin-500-normal.woff2', 'fonts/barlow-condensed-latin-600-normal.woff2',
+  'fonts/barlow-condensed-latin-700-normal.woff2', 'fonts/barlow-condensed-latin-800-normal.woff2',
+  'fonts/barlow-latin-400-normal.woff2', 'fonts/barlow-latin-500-normal.woff2',
+  'fonts/barlow-latin-600-normal.woff2', 'fonts/barlow-latin-700-normal.woff2'
 ];
 
 self.addEventListener('install', function (e) {
@@ -21,16 +26,6 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET') return;
   var url = new URL(req.url);
 
-  // Tipografías: se guardan la primera vez que se descargan.
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    e.respondWith(caches.open(CACHE).then(function (c) {
-      return c.match(req).then(function (hit) {
-        var net = fetch(req).then(function (res) { if (res.ok || res.type === 'opaque') c.put(req, res.clone()); return res; });
-        return hit || net;
-      });
-    }));
-    return;
-  }
   if (url.origin !== self.location.origin) return;
 
   // Archivos propios: red primero (para recibir actualizaciones), caché si no hay conexión.

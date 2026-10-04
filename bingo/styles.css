@@ -1,3 +1,14 @@
+/* Tipografías incluidas en la app (funcionan sin conexión). Licencia SIL OFL: ver fonts/. */
+@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/barlow-condensed-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 800; font-display: swap; src: url("fonts/barlow-condensed-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/barlow-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/barlow-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/barlow-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Great Vibes"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/great-vibes-latin-400-normal.woff2") format("woff2"); }
+
 :root {
   --felt: #0e231f;
   --felt-2: #132e28;
@@ -521,4 +532,155 @@ input[type="range"] { width: 100%; height: 32px; accent-color: var(--brass); bac
   .brand-ball { width: 28px; height: 28px; font-size: 11px; }
   .brand-name { font-size: 18px; letter-spacing: 0.04em; }
   .icon-btn { width: 38px; height: 38px; }
+}
+
+/* ---------- Presentación inicial ---------- */
+
+.intro-on, .intro-on body { overflow: hidden; }
+.intro {
+  --gold-1: #8a6420; --gold-2: #d4a94c; --gold-3: #f6dc94; --gold-4: #fff6d6;
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-items: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at 50% 42%, #1d4239 0%, #10291f 46%, #06120f 100%);
+  color: var(--on-felt);
+  cursor: pointer;
+  text-align: center;
+  overflow: hidden;
+}
+.intro p { margin: 0; }
+.intro-stack { position: relative; display: flex; flex-direction: column; align-items: center; }
+
+.intro-glow {
+  position: absolute; left: 50%; top: 50%; width: 120vmax; height: 120vmax;
+  transform: translate(-50%, -50%) scale(0.4);
+  background: radial-gradient(circle, rgba(246, 220, 148, 0.16) 0%, rgba(246, 220, 148, 0) 45%);
+  opacity: 0;
+}
+
+.intro-ball {
+  position: relative;
+  width: clamp(76px, 20vmin, 120px); aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center; margin-bottom: clamp(18px, 4vh, 30px);
+  background: radial-gradient(circle at 35% 30%, #ff9b8b 0%, #d3392f 42%, #7c1611 100%);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), inset -8px -10px 18px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+}
+.intro-ball::before {
+  content: ""; position: absolute; inset: 22%; border-radius: 50%;
+  background: #fbf8f1; box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.12);
+}
+.intro-ball::after {
+  content: ""; position: absolute; left: 16%; top: 12%; width: 30%; height: 24%; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%);
+}
+.intro-ball span { position: relative; font: 800 clamp(24px, 6.4vmin, 38px)/1 var(--display); color: #16130f; }
+
+.intro-by, .intro-for {
+  font: 600 clamp(13px, 3.4vmin, 17px)/1.2 var(--text);
+  text-transform: uppercase; letter-spacing: 0.42em; color: #c8d3c9;
+  opacity: 0; margin-right: -0.42em;
+}
+.intro-name {
+  margin-top: 6px !important;
+  font: 800 clamp(44px, 12.5vmin, 96px)/0.95 var(--display);
+  text-transform: uppercase; letter-spacing: 0.035em;
+  background: linear-gradient(100deg, var(--gold-1) 0%, var(--gold-2) 30%, var(--gold-3) 44%, var(--gold-4) 50%, var(--gold-3) 56%, var(--gold-2) 70%, var(--gold-1) 100%);
+  background-size: 260% 100%; background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  clip-path: inset(0 100% 0 0);
+}
+.intro-rule {
+  display: block; width: clamp(120px, 42vmin, 280px); height: 1px; margin: clamp(14px, 3vh, 22px) 0;
+  background: linear-gradient(90deg, rgba(212, 169, 76, 0), var(--gold-2) 30%, var(--gold-3) 50%, var(--gold-2) 70%, rgba(212, 169, 76, 0));
+  transform: scaleX(0);
+}
+.intro-dedic {
+  margin-top: 4px !important; padding: 0 0.3em 0.12em;
+  font: 400 clamp(46px, 13vmin, 104px)/1.15 "Great Vibes", "Snell Roundhand", "Segoe Script", cursive;
+  color: var(--gold-3);
+  text-shadow: 0 0 24px rgba(246, 220, 148, 0.35), 0 4px 14px rgba(0, 0, 0, 0.5);
+  clip-path: inset(-20% 100% -20% 0);
+}
+.intro-skip {
+  position: absolute; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0;
+  font-size: 12.5px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(239, 231, 214, 0.45);
+  opacity: 0;
+}
+
+.intro-sparks i {
+  position: absolute; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--gold-4); box-shadow: 0 0 10px 2px rgba(246, 220, 148, 0.7);
+  opacity: 0;
+}
+.intro-sparks i:nth-child(1) { left: 14%; top: 22%; --d: 2.4s; }
+.intro-sparks i:nth-child(2) { left: 82%; top: 18%; --d: 2.7s; }
+.intro-sparks i:nth-child(3) { left: 24%; top: 72%; --d: 3.0s; }
+.intro-sparks i:nth-child(4) { left: 76%; top: 68%; --d: 2.55s; }
+.intro-sparks i:nth-child(5) { left: 50%; top: 10%; --d: 3.2s; }
+.intro-sparks i:nth-child(6) { left: 8%; top: 48%; --d: 2.85s; }
+.intro-sparks i:nth-child(7) { left: 92%; top: 44%; --d: 3.35s; }
+.intro-sparks i:nth-child(8) { left: 36%; top: 86%; --d: 2.65s; }
+.intro-sparks i:nth-child(9) { left: 64%; top: 84%; --d: 3.1s; }
+.intro-sparks i:nth-child(10) { left: 30%; top: 34%; --d: 3.5s; width: 3px; height: 3px; }
+.intro-sparks i:nth-child(11) { left: 70%; top: 30%; --d: 3.6s; width: 3px; height: 3px; }
+.intro-sparks i:nth-child(12) { left: 58%; top: 58%; --d: 3.45s; width: 3px; height: 3px; }
+
+.intro.play .intro-glow { animation: introGlow 2.6s 0.2s cubic-bezier(.2, .7, .2, 1) forwards; }
+.intro.play .intro-ball { animation: introDrop 1.15s 0.15s cubic-bezier(.3, 1.35, .45, 1) forwards; }
+.intro.play .intro-by { animation: introLetter 0.9s 0.95s cubic-bezier(.2, .8, .2, 1) forwards; }
+.intro.play .intro-name {
+  animation: introWipe 1.0s 1.2s cubic-bezier(.65, 0, .35, 1) forwards, introSheen 1.6s 2.3s ease-in-out forwards;
+}
+.intro.play .intro-rule { animation: introRule 0.9s 1.95s cubic-bezier(.65, 0, .35, 1) forwards; }
+.intro.play .intro-for { animation: introLetter 0.8s 2.2s cubic-bezier(.2, .8, .2, 1) forwards; }
+.intro.play .intro-dedic { animation: introWrite 1.5s 2.45s cubic-bezier(.45, 0, .25, 1) forwards; }
+.intro.play .intro-sparks i { animation: introSpark 1.8s var(--d) ease-in-out forwards; }
+.intro.play .intro-skip { animation: introFade 0.8s 1.6s ease forwards; }
+.intro.leave { animation: introLeave 0.9s cubic-bezier(.6, 0, .4, 1) forwards; pointer-events: none; }
+
+@keyframes introGlow { to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes introDrop {
+  0% { opacity: 0; transform: translateY(-46vh) rotate(-220deg) scale(0.8); }
+  25% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+@keyframes introLetter {
+  from { opacity: 0; letter-spacing: 0.9em; margin-right: -0.9em; filter: blur(6px); }
+  to { opacity: 1; letter-spacing: 0.42em; margin-right: -0.42em; filter: blur(0); }
+}
+@keyframes introWipe { to { clip-path: inset(0 0 0 0); } }
+@keyframes introSheen { to { background-position: 0 0; } }
+@keyframes introRule { to { transform: scaleX(1); } }
+@keyframes introWrite { to { clip-path: inset(-20% -5% -20% 0); } }
+@keyframes introSpark {
+  0% { opacity: 0; transform: scale(0.2) translateY(0); }
+  40% { opacity: 1; transform: scale(1.2) translateY(-8px); }
+  100% { opacity: 0; transform: scale(0.4) translateY(-22px); }
+}
+@keyframes introFade { to { opacity: 1; } }
+@keyframes introOut { to { opacity: 0; } }
+@keyframes introLeave {
+  0% { opacity: 1; transform: scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: scale(1.06); filter: blur(10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro.play .intro-ball, .intro.play .intro-by, .intro.play .intro-name, .intro.play .intro-rule,
+  .intro.play .intro-for, .intro.play .intro-dedic, .intro.play .intro-skip, .intro.play .intro-glow {
+    animation: introFade 0.6s 0.1s ease forwards !important;
+  }
+  .intro .intro-name, .intro .intro-dedic { clip-path: none; opacity: 0; }
+  .intro .intro-rule { transform: none; opacity: 0; }
+  .intro .intro-glow { transform: translate(-50%, -50%); }
+  .intro.leave { animation: introOut 0.3s ease forwards !important; }
+}
+
+.credits-dedic span { font-family: "Great Vibes", cursive; font-size: 1.45em; color: var(--paper-ink); line-height: 1; }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .intro-skip { display: none; }
+  .intro-ball { width: 64px; margin-bottom: 12px; }
+  .intro-ball span { font-size: 22px; }
+  .intro-rule { margin: 10px 0; }
 }
