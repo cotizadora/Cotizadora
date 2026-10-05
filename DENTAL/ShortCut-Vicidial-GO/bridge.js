@@ -43,8 +43,17 @@
     return h || '';
   })(location.hostname);
   let respaldo = null, repuestos = 0;
+  // Lo que hay de verdad en la página (sin caer en el respaldo)
+  function crudo(k) { try { const v = localStorage.getItem(k); return v == null ? null : JSON.parse(v); } catch (e) { return null; } }
   function respaldar() {
-    respaldo = { states: get('vca_states', null), learning: get('vca2_learning', null), t: Date.now() };
+    const st = crudo('vca_states');
+    respaldo = {
+      // si la web borró los atajos, se conserva el respaldo anterior
+      states: st != null ? st : (respaldo ? respaldo.states : null),
+      // la grabación se toma tal cual: si se descartó o guardó, queda vacía
+      learning: crudo('vca2_learning'),
+      t: Date.now()
+    };
     try { chrome.storage.local.set({ [SK]: respaldo }); } catch (e) {}
   }
   // El motor avisa cada paso grabado: el respaldo queda siempre al día
