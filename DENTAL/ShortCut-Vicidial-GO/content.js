@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ShortCut-Vicidial-GO
 // @namespace    shortcut-vicidial-go
-// @version      1.1.0
+// @version      1.1.1
 // @description  Pre-selecciona un estado de agente y lo aplica automaticamente al cortar la llamada (replay del clic real). Autoconfigurable + modo debug.
 // @author       Pausa Vocal
 // @match        *://vicidial.recaall.simtastic.cl/*
@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.1.0';
+  const VCA_VERSION = '1.1.1';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -772,6 +772,7 @@
     if (d.type === 'applynow') { Store.set(K.lastfire, 0); handleCallEnd('popup'); }
     else if (d.type === 'callend') { handleCallEnd(d.tag || 'popup'); }
     else if (d.type === 'refresh' && window.__vcaPanel) { window.__vcaPanel.rebuild(); window.__vcaPanel.refresh(); }
+    else if (d.type === 'learnReset') { memLearn = null; }   // grabación guardada o cancelada
   });
 
   // ===========================================================================
@@ -963,10 +964,34 @@
   // escrito por ESTE content script. No depende de que el popup/ventana siga
   // abierto: la ventana de control solo lee/muestra este estado.
   //   vca_learning = { recording:boolean, steps:[descriptor...], ts }
+  // La grabación vive en el localStorage de la página. Algunas webs (GO) lo
+  // pueden borrar: se guarda también en memoria y, si desaparece en plena
+  // grabación, se repone desde ahí sin perder los pasos.
+  let memLearn = null;
+  function leerLearning() {
+    const l = Store.get(K.learning, null);
+    // Si lo que hay es una copia más vieja de esta misma grabación (repuesta
+    // desde un respaldo atrasado), manda la de memoria, que tiene todos los pasos.
+    if (l && memLearn && l.ts === memLearn.ts && (l.steps || []).length < (memLearn.steps || []).length && l.recording === memLearn.recording) {
+      Store.set(K.learning, memLearn);
+      return memLearn;
+    }
+    if (l) { memLearn = l; return l; }
+    if (memLearn && memLearn.recording) {
+      Store.set(K.learning, memLearn);
+      log('La página borró la grabación en curso: repuesta (' + (memLearn.steps || []).length + ' pasos).');
+      return memLearn;
+    }
+    return null;
+  }
+  // La memoria se mantiene al día aunque no haya clics, para que un borrado de
+  // la página justo antes de un clic no lo pierda.
+  if (!EXT) setInterval(() => { try { if (vigente()) leerLearning(); } catch (e) {} }, 250);
+  document.addEventListener('vca:learn-estado', (ev) => { try { memLearn = ev.detail ? JSON.parse(ev.detail) : null; } catch (e) {} });
   function grabando() {
     if (!vigente()) return false;
     if (EXT) return true;   // el marco no sabe si se graba: manda y la página decide
-    const learn = Store.get(K.learning, null);
+    const learn = leerLearning();
     return !!(learn && learn.recording);
   }
   function pushStep(step, human) {
@@ -977,11 +1002,14 @@
       aTop({ t: 'step', step: step, human: human + ' [formulario ' + location.hostname + ']' });
       return;
     }
-    const learn = Store.get(K.learning, null);
+    const learn = leerLearning();
     if (!learn || !learn.recording) return;
     learn.steps = learn.steps || [];
     learn.steps.push(step);
     Store.set(K.learning, learn);
+    memLearn = learn;
+    // Aviso al puente de la extensión, que guarda un respaldo fuera de la página
+    try { document.dispatchEvent(new CustomEvent('vca:learn', { detail: JSON.stringify(learn) })); } catch (e) {}
     log('  grabado paso ' + learn.steps.length + ': ' + human);
   }
 
@@ -1019,6 +1047,10 @@
       if (/^(checkbox|radio)$/i.test(el.type || '')) {
         desc.kind = 'check'; desc.checked = !!el.checked;
         pushStep(desc, el.type + ' = ' + desc.checked);
+      } else if (/^password$/i.test(el.type || '')) {
+        // Las contraseñas NUNCA se guardan en el atajo (quedarían a la vista
+        // en el computador). Para ese paso, que la complete Chrome.
+        log('  contraseña: no se graba (deja que Chrome la complete con su gestor de contraseñas)');
       } else {
         desc.kind = 'input'; desc.value = el.value; desc.text = '';
         // ¿Es el RUT del cliente que está en Vicidial (o escribiste "RUT")?

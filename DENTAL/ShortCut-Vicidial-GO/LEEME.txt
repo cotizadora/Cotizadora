@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.1.0
+ShortCut-Vicidial-GO 1.1.1
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.1.0).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.1.1).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -67,6 +67,16 @@ Al grabar un atajo en GO, pega o escribe ESE RUT en el campo (por ejemplo
 "Rut cliente" de Nueva Oportunidad): el paso queda como "RUT del cliente" y,
 al repetirlo, usa el RUT del cliente de ese momento, con el mismo formato.
 También sirve escribir la palabra RUT en el campo mientras grabas.
+
+GRABAR EN GO (desde la 1.1.1)
+- Se puede grabar con sólo GO abierto (no necesita Vicidial).
+- GO borra sus datos al iniciar sesión: la grabación y los atajos quedan
+  respaldados en la extensión y se reponen solos. Mientras grabas, el panel
+  dice cuántos clics lleva cada página, ej. "Capturando en: GO Bci (5)".
+- Las CONTRASEÑAS nunca se graban. En el paso de ingreso, deja que Chrome
+  la complete con su gestor de contraseñas.
+- Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
+  "Ingresar"): graba el ingreso y el resto como atajos separados.
 
 CUENTA REGRESIVA PARA TIPIFICAR (desde la 1.0.5)
 Cuando se abre el formulario de tipificación (el del script), aparece bajo sus

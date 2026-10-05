@@ -207,6 +207,9 @@ async function collect() {
     }
     if (!out.ka && r.ka) out.ka = r.ka;
     if (r.learning && r.learning.recording) out.grabando = true;
+    out.porSitio = out.porSitio || {};
+    out.porSitio[siteName(t.host)] = r.learning ? (r.learning.steps || []).length : null;
+    if (r.repuestos) out.repuestos = (out.repuestos || 0) + r.repuestos;
     if (!r.learning) out.sinGrabar.push(t.id);
     out.engines.push({ tab: t.id, host: t.host, engine: r.engine || null });
     Object.assign(out.settings, r.settings || {});
@@ -556,6 +559,8 @@ function showRecBox(mode) {
 // Nombra el/los sitio(s) conocidos que NO están conectados, para que se vea
 // antes de grabar (los clics en una pestaña sin conectar no se capturan).
 function missingSiteHtml() {
+  // Basta con que haya una página conectada: grabar en GO no necesita Vicidial ni al revés
+  if (TABS.length) return '';
   const falta = [];
   if (!TABS.some(t => /vicidial/i.test(t.host || ''))) falta.push('Vicidial');
   if (!TABS.some(t => /bciseguros/i.test(t.host || ''))) falta.push('GO Bci');
@@ -617,8 +622,11 @@ async function refreshInner() {
     $('#reccount').textContent = (learn.steps || []).length;
     // Mostrar SIEMPRE dónde se está capturando: si falta un sitio, los clics
     // que hagas allí no se grabarán y hay que saberlo ANTES de perder el tiempo.
-    $('#reccap').innerHTML = 'Capturando en: <b>' +
-      escapeHtml(siteNamesJoined() || '—') + '</b>' + missingSiteHtml();
+    // Cuántos clics lleva cada página: si GO no suma, se ve en el momento
+    const ps = r.porSitio || {};
+    const detalle = Object.keys(ps).map(k => escapeHtml(k) + ' ' + (ps[k] == null ? '(no graba)' : '(' + ps[k] + ')')).join(' + ');
+    $('#reccap').innerHTML = 'Capturando en: <b>' + (detalle || escapeHtml(siteNamesJoined() || '—')) + '</b>' + missingSiteHtml() +
+      (r.repuestos ? '<br>♻ La página borró la grabación ' + r.repuestos + ' vez/veces y se repuso.' : '');
     setStatus('Grabando…');
   } else if (learn && !learn.recording) {
     showRecBox('naming');

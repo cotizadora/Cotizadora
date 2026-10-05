@@ -21,10 +21,63 @@
   };
 
   function get(k, d) {
-    try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }
-    catch (e) { return d; }
+    try {
+      const v = localStorage.getItem(k);
+      if (v != null) return JSON.parse(v);
+    } catch (e) { return d; }
+    // La web borró su localStorage: lo respaldado en la extensión sirve igual
+    if (respaldo && k === 'vca_states' && Array.isArray(respaldo.states)) return respaldo.states;
+    if (respaldo && k === 'vca2_learning' && respaldo.learning) return respaldo.learning;
+    return d;
   }
-  function set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function set(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+    if (k === 'vca_states' || k === 'vca2_learning') respaldar();
+  }
+  // RESPALDO en la extensión (chrome.storage), por sitio: los atajos y la
+  // grabación en curso. Si la web borra su localStorage (GO puede hacerlo),
+  // se reponen desde aquí: no se pierden ni los atajos ni los clics grabados.
+  const SK = 'vcaSitio:' + (function (h) {
+    if (/vicidial\.recaall\.simtastic\.cl/i.test(h || '')) return 'vicidial';
+    if (/go\.bciseguros\.cl/i.test(h || '')) return 'go.bciseguros.cl';
+    return h || '';
+  })(location.hostname);
+  let respaldo = null, repuestos = 0;
+  function respaldar() {
+    respaldo = { states: get('vca_states', null), learning: get('vca2_learning', null), t: Date.now() };
+    try { chrome.storage.local.set({ [SK]: respaldo }); } catch (e) {}
+  }
+  // El motor avisa cada paso grabado: el respaldo queda siempre al día
+  document.addEventListener('vca:learn', (ev) => {
+    try {
+      const l = JSON.parse(ev.detail);
+      respaldo = Object.assign({}, respaldo || {}, { learning: l, t: Date.now() });
+      if (respaldo.states == null) respaldo.states = get('vca_states', null);
+      chrome.storage.local.set({ [SK]: respaldo });
+    } catch (e) {}
+  });
+  function reponer() {
+    if (!respaldo) return;
+    let cambio = false;
+    if (localStorage.getItem('vca_states') == null && Array.isArray(respaldo.states) && respaldo.states.length) {
+      localStorage.setItem('vca_states', JSON.stringify(respaldo.states)); cambio = true;
+    }
+    // La grabación se repone tanto en curso como detenida y pendiente de nombre
+    if (localStorage.getItem('vca2_learning') == null && respaldo.learning) {
+      localStorage.setItem('vca2_learning', JSON.stringify(respaldo.learning)); cambio = true;
+    }
+    if (cambio) { repuestos++; notifyPage(); }
+  }
+  // Cada medio segundo: reponer lo borrado o, si la página sumó pasos, respaldarlos
+  setInterval(() => {
+    try {
+      if (!chrome.runtime.id) return;
+      reponer();
+      const l = localStorage.getItem('vca2_learning'), st = localStorage.getItem('vca_states');
+      const firma = (l || '') + '|' + (st || '');
+      if (firma !== reponer.firma) { reponer.firma = firma; if (l != null || st != null) respaldar(); }
+    } catch (e) {}
+  }, 500);
   function del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 
   function stepsOf(x) {
@@ -59,6 +112,9 @@
 
   (async function seedDefaults() {
     try {
+      // Primero el respaldo de la extensión (por si la web borró sus datos)
+      const g = await new Promise(r => { try { chrome.storage.local.get(SK, x => r(x && x[SK])); } catch (e) { r(null); } });
+      if (g) { respaldo = g; reponer(); }
       if (localStorage.getItem(K.states) != null) return; // ya hay config del usuario
       const url = chrome.runtime.getURL('default-config.json');
       const cfg = await fetch(url).then(r => r.json()).catch(() => null);
@@ -95,6 +151,7 @@
             settings: get(K.settings, {}),
             ka: get('vca_ka', null),      // estado del keep-alive de audio
             log: get('vca_log', []).slice(-40),  // registro del motor (para diagnóstico)
+            repuestos: repuestos,               // veces que se repuso lo que borró la web
             engine: get('vca_motor', null)      // versión del motor que corre en la página
           });
           break;
@@ -140,16 +197,19 @@
         // --- Grabacion de secuencia (grabar primero, nombrar al final) --------
         case 'learnStart':               // empieza a grabar YA, sin pedir nombre
           set(K.learning, { recording: true, steps: [], ts: Date.now() });
+          try { document.dispatchEvent(new CustomEvent('vca:learn-estado', { detail: localStorage.getItem(K.learning) })); } catch (e) {}
           notifyPage();
           reply({ ok: true });
           break;
         case 'learnStop': {              // deja de capturar; queda pendiente de nombrar
           const l = get(K.learning, null);
           if (l) { l.recording = false; set(K.learning, l); }
+          try { document.dispatchEvent(new CustomEvent('vca:learn-estado', { detail: l ? JSON.stringify(l) : '' })); } catch (e) {}
           reply({ ok: true, steps: l ? (l.steps || []).length : 0 });
           break;
         }
         case 'learnSave': {              // nombra y guarda la secuencia grabada
+          try { document.dispatchEvent(new CustomEvent('vca:cmd', { detail: { type: 'learnReset' } })); } catch (e) {}
           const learn = get(K.learning, null);
           let ok = false;
           if (learn && learn.steps && learn.steps.length) {
@@ -160,12 +220,15 @@
             ok = true;
           }
           del(K.learning);
+          respaldar();
           notifyPage();
           reply({ ok: ok });
           break;
         }
         case 'learnCancel':
+          try { document.dispatchEvent(new CustomEvent('vca:cmd', { detail: { type: 'learnReset' } })); } catch (e) {}
           del(K.learning);
+          respaldar();
           notifyPage();
           reply({ ok: true });
           break;
