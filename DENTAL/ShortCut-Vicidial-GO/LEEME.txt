@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.1.4
+ShortCut-Vicidial-GO 1.1.5
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.1.4).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.1.5).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,15 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+REPETIR EN GO (desde la 1.1.5)
+- El ▶ se ejecuta en la pestaña de GO que estás mirando (antes, con dos
+  pestañas de GO abiertas, se ejecutaba en la otra y parecía no hacer nada).
+- GO cambia sus nombres internos cada vez que abre un menú; ahora el atajo
+  los ignora y encuentra igual los botones (también el ☰).
+- Mientras corre, el panel dice "⏳ Ejecutando … en GO". Si un paso no
+  aparece en 15 s, el atajo se detiene (no queda en cola) y el panel avisa
+  en rojo qué paso faltó. Empieza en la misma pantalla donde grabaste.
 
 CUENTA REGRESIVA PARA TIPIFICAR (desde la 1.0.5)
 Cuando se abre el formulario de tipificación (el del script), aparece bajo sus

@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.1.4';
+  const VCA_VERSION = '1.1.5';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -183,17 +183,34 @@
   // ===========================================================================
   //  LOCATOR: capturar un elemento -> descriptor; y resolver descriptor -> elemento
   // ===========================================================================
+  // Clases e ids que la web cambia sola. Angular/PrimeNG (GO) numeran sus
+  // clases por cada vez que se abre un menú (ng-tns-c124-3, luego -35…) y
+  // marcan el estado (ng-touched, ng-dirty, p-inputwrapper-filled): si se
+  // graban, el paso deja de calzar la próxima vez.
+  const CLASE_VOLATIL = /^(ng-|p-inputwrapper|p-focus|p-filled|p-highlight|p-disabled|p-overlay|p-dropdown-open|p-multiselect-open|p-ripple|cdk-)|active|show|open|hover|selected|focus|highlight/i;
+  const ID_VOLATIL = /^(pr_id_|ng-|mat-|cdk-|ui-id-)/i;
+
   const Locator = {
     norm(t) { return (t || '').replace(/\s+/g, ' ').trim(); },
+
+    // Quita de una ruta grabada las clases volátiles (atajos grabados antes).
+    limpiarRuta(path) {
+      return String(path || '').replace(/\.((?:\\.|[\w-])+)/g, (m, c) => CLASE_VOLATIL.test(c.replace(/\\/g, '')) ? '' : m);
+    },
+    // Entre varios candidatos, el primero que se ve en pantalla.
+    visible(list) {
+      const arr = Array.from(list || []);
+      return arr.find(e => { try { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (x) { return false; } }) || arr[0] || null;
+    },
 
     cssPath(el) {
       const parts = [];
       let cur = el;
       while (cur && cur.nodeType === 1 && parts.length < 6) {
         let part = cur.tagName.toLowerCase();
-        if (cur.id) { parts.unshift(part + '#' + CSS.escape(cur.id)); break; }
+        if (cur.id && !ID_VOLATIL.test(cur.id)) { parts.unshift(part + '#' + CSS.escape(cur.id)); break; }
         const cls = Array.from(cur.classList)
-          .filter(c => !/(active|show|open|hover|selected|focus|highlight)/i.test(c))
+          .filter(c => !CLASE_VOLATIL.test(c))
           .slice(0, 3);
         if (cls.length) part += '.' + cls.map(c => CSS.escape(c)).join('.');
         const parent = cur.parentElement;
@@ -212,10 +229,18 @@
       for (const a of el.attributes || []) {
         if (/^(data-|onclick|href|value|title|aria-label)/i.test(a.name)) data[a.name] = a.value;
       }
+      // Botones sólo con ícono (☰ de GO): el ícono los identifica.
+      let icono = '';
+      try {
+        const i = el.matches('i,span,svg') && /\b(pi|fa|fas|far|material-icons)\b/.test(el.getAttribute('class') || '') ? el
+          : el.querySelector('i[class*="pi-"],i[class*="fa-"],span[class*="pi-"],.material-icons');
+        if (i) icono = ((i.getAttribute('class') || '').match(/\b(?:pi|fa)-[\w-]+/) || [''])[0] || this.norm(i.textContent).slice(0, 30);
+      } catch (e) {}
       return {
         text: this.norm(el.textContent).slice(0, 60),
         tag: el.tagName.toLowerCase(),
-        id: el.id || '',
+        icono: icono,
+        id: (el.id && !ID_VOLATIL.test(el.id)) ? el.id : '',
         classes: Array.from(el.classList),
         path: this.cssPath(el),
         attrs: data
@@ -226,7 +251,7 @@
     resolve(doc, d) {
       if (!d) return null;
       // 1) por id
-      if (d.id) { const e = doc.getElementById(d.id); if (e) return e; }
+      if (d.id && !ID_VOLATIL.test(d.id)) { const e = doc.getElementById(d.id); if (e) return e; }
       // 1b) por su onclick exacto. Los botones de Vicidial son imágenes sin
       //     texto (<a onclick="dialedcall_send_hangup(...)"><img></a>): la
       //     acción que ejecutan es lo que mejor los identifica.
@@ -238,14 +263,33 @@
           if (e) return e;
         } catch (e) {}
       }
-      // 2) por path CSS + verificacion de texto
-      try {
-        const e = doc.querySelector(d.path);
-        if (e && (!d.text || this.norm(e.textContent).slice(0, 60) === d.text)) return e;
+      // 2) por path CSS + verificacion de texto (también la ruta sin las
+      //    clases que la web renumera)
+      const limpia = this.limpiarRuta(d.path);
+      const rutas = limpia && limpia !== d.path ? [d.path, limpia] : [d.path];
+      const conTexto = (e) => !d.text || this.norm(e.textContent).slice(0, 60) === d.text;
+      for (const r of rutas) try {
+        const e = this.visible(Array.from(doc.querySelectorAll(r)).filter(conTexto));
+        if (e) return e;
+      } catch (e) {}
+      // 2b) botón sólo con ícono (ej. ☰): mismo ícono, mismo tipo de control
+      if (!d.text && d.icono) try {
+        const cand = /^(?:pi|fa)-/.test(d.icono)
+          ? Array.from(doc.querySelectorAll('.' + CSS.escape(d.icono)))
+          : Array.from(doc.querySelectorAll('.material-icons')).filter(i => this.norm(i.textContent) === d.icono);
+        const e = this.visible(cand.map(i => (d.tag && i.closest(d.tag)) || i));
+        if (e) return e;
+      } catch (e) {}
+      // 2c) por su título o aria-label
+      const et = d.attrs && (d.attrs['aria-label'] || d.attrs.title);
+      if (et) try {
+        const e = this.visible(Array.from(doc.querySelectorAll((d.tag || '*') + '[aria-label],' + (d.tag || '*') + '[title]'))
+          .filter(x => (x.getAttribute('aria-label') || x.getAttribute('title')) === et));
+        if (e) return e;
       } catch (e) {}
       // 3) por tag + primera clase + texto exacto. Sólo con texto: sin él
       //    calzaría con CUALQUIER enlace-imagen de la pantalla.
-      const firstCls = (d.classes || []).find(c => !/(active|show|open|selected)/i.test(c));
+      const firstCls = (d.classes || []).find(c => !CLASE_VOLATIL.test(c));
       if (d.text) try {
         const sel = d.tag + (firstCls ? '.' + CSS.escape(firstCls) : '');
         const cand = Array.from(doc.querySelectorAll(sel));
@@ -262,7 +306,7 @@
       // 5) ultimo recurso: el path aunque el texto haya cambiado. Necesario para
       //    controles cuyo texto refleja el estado actual (ej. el toggle "En espera"
       //    que luego dice otra cosa) o menus que varian su etiqueta.
-      try { const e = doc.querySelector(d.path); if (e) return e; } catch (e) {}
+      for (const r of rutas) try { const e = this.visible(doc.querySelectorAll(r)); if (e) return e; } catch (e) {}
       return null;
     },
 
@@ -441,6 +485,16 @@
     return true;
   }
 
+  // Último paso que no se pudo hacer (para avisar en el panel).
+  let pasoFallido = null;
+  function describirPaso(st) {
+    const k = st.kind || 'click';
+    if (k === 'select') return 'menú "' + (st.optText || st.value || '') + '"';
+    if (k === 'input') return st.dyn === 'rut' ? 'escribir el RUT del cliente' : 'escribir en un campo';
+    if (k === 'check') return 'casilla';
+    return st.text ? '"' + String(st.text).slice(0, 40) + '"' : (st.icono ? 'botón con ícono (' + st.icono + ')' : 'botón ' + (st.tag || ''));
+  }
+
   // Un intento de la secuencia, desde el paso `desde`. Devuelve el índice del
   // paso que falló, o -1 si se completó.
   async function runStepsOnce(steps, s, desde) {
@@ -448,7 +502,7 @@
       const st = steps[i];
       const tag = '  paso ' + (i + 1) + '/' + steps.length;
       const ok = st.xf ? await pasoEnMarco(st, s, tag) : await ejecutarPaso(st, s, tag);
-      if (!ok) return i;
+      if (!ok) { pasoFallido = { n: i + 1, de: steps.length, que: describirPaso(st) }; return i; }
       await sleep(s.stepGapMs);
     }
     return -1;
@@ -468,13 +522,21 @@
   // (el menu de pausa no siempre esta disponible al instante).
   async function runSteps(steps) {
     const s = settings();
-    const deadline = Date.now() + s.totalTimeoutMs;
+    // GO: tope más corto, para avisar pronto si algo no aparece
+    const deadline = Date.now() + (IS_CRM ? Math.min(s.totalTimeoutMs, 15000) : s.totalTimeoutMs);
     let attempt = 0, desde = 0;
     while (Date.now() < deadline) {
       attempt++;
       if (attempt > 1) log('Replay reintento ' + attempt + (desde ? ' (desde el paso ' + (desde + 1) + ')' : '') + '...');
       const fallo = await runStepsOnce(steps, s, desde);
       if (fallo < 0) { log('Replay COMPLETADO (intento ' + attempt + ').'); return true; }
+      if (IS_CRM) {
+        // GO: sin Escape (cerraría la ventana "Nueva Oportunidad" ya abierta)
+        // y sin volver al ☰ (lo cerraría): se sigue esperando el paso que faltó.
+        await sleep(s.retryGapMs);
+        desde = fallo;
+        continue;
+      }
       // cerrar cualquier menu abierto antes de reintentar
       try {
         (document.activeElement || document.body).dispatchEvent(
@@ -628,16 +690,27 @@
     const steps = stepsOf(armed);
     if (!steps.length) return;
     if (viciDebeEsperar(armed, steps)) return;   // Vicidial: aún en llamada o en disposición
+    // GO: lo ejecuta la página principal de la pestaña que recibió el ▶, aunque
+    // el primer botón todavía no aparezca (se espera y, si no, se avisa).
+    if (IS_CRM && !IS_TOP) return;
     // Si el primer control no vive en este frame, que lo intenten los demas.
-    if (!primeroAqui(steps)) { Store.set(K.needrep, now + '|' + Math.random()); return; }
+    if (!IS_CRM && !primeroAqui(steps)) { Store.set(K.needrep, now + '|' + Math.random()); return; }
 
     Store.set(K.lastfire, now);
     replaying = true;
-    log('Fin de llamada (' + sourceTag + ') -> aplicando "' +
-        (armed.label || armed.name || armed.text) + '" (' + steps.length + ' paso/s)');
+    pasoFallido = null;
+    Store.del('vca_fallo');
+    const nombre = armed.label || armed.name || armed.text;
+    log((IS_CRM ? 'Ejecutando' : 'Fin de llamada (' + sourceTag + ') -> aplicando') + ' "' +
+        nombre + '" (' + steps.length + ' paso/s)');
     runSteps(steps).then((ok) => {
       replaying = false;
       if (ok) { setArmed(null); }
+      else if (IS_CRM) {
+        // GO: nada queda "en cola" para siempre; el panel dice qué paso falló.
+        Store.set('vca_fallo', { label: nombre, paso: pasoFallido, t: Date.now() });
+        setArmed(null);
+      }
       else { Store.set(K.needrep, Date.now() + '|' + Math.random()); } // que prueben otros frames
     });
   }

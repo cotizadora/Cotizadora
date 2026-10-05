@@ -199,6 +199,7 @@ async function collect() {
       out.states.push(Object.assign({}, s, { __tab: t.id, __host: t.host }));
     });
     if (r.armed && !out.armed) out.armed = Object.assign({}, r.armed, { __tab: t.id, __host: t.host });
+    if (r.fallo && (!out.fallo || r.fallo.t > out.fallo.t)) out.fallo = r.fallo;
     // De todas las pestañas "grabando", nos quedamos con la que tiene más pasos.
     if (r.learning) {
       const n = (r.learning.steps || []).length;
@@ -296,10 +297,24 @@ function optimistic(sendPromise) {
     refresh();            // reconciliar con el estado real
   });
 }
+let lastFallo = null;
 function paintArmInfo(armed) {
-  $('#arminfo').textContent = armed
-    ? '⏳ “' + labelOf(armed) + '” en cola: se ejecuta en cuanto se pueda.'
-    : '';
+  const f = lastFallo;
+  const el = $('#arminfo');
+  el.classList.remove('fallo');
+  if (armed) {
+    el.textContent = /bciseguros/i.test(armed.__host || '')
+      ? '⏳ Ejecutando “' + labelOf(armed) + '” en GO…'
+      : '⏳ “' + labelOf(armed) + '” en cola: se ejecuta en cuanto se pueda.';
+  } else if (f && Date.now() - f.t < 3 * 60 * 1000) {
+    const p = f.paso;
+    el.classList.add('fallo');
+    el.textContent = '⚠️ “' + (f.label || 'atajo') + '” no se completó' +
+      (p ? ': en el paso ' + p.n + ' de ' + p.de + ' no apareció ' + p.que + '.' : '.') +
+      ' Revisa que GO esté en la pantalla donde empezaste a grabar.';
+  } else {
+    el.textContent = '';
+  }
 }
 function renderNow() {
   lastStates = sortStates(lastStates);
@@ -371,12 +386,26 @@ function renderList(states, armed) {
 
 // Ejecuta / cancela un atajo (lo mismo que el botón ▶/■). Se usa también al hacer
 // clic en CUALQUIER zona del botón (no solo en el ▶). Calcula solo si está en cola.
+// Pestaña donde ejecutar un atajo: la que se está mirando de ese sitio (con
+// dos pestañas de GO abiertas, la orden iba a la primera y no a la visible).
+async function tabParaSitio(host, porDefecto) {
+  const sk = siteKey(host);
+  const mias = new Set(TABS.filter(t => siteKey(t.host) === sk).map(t => t.id));
+  if (!mias.size) return porDefecto;
+  const todas = (await queryTabs({})).filter(t => mias.has(t.id));
+  if (!todas.length) return porDefecto;
+  todas.sort((a, b) => (b.active - a.active) || ((b.lastAccessed || 0) - (a.lastAccessed || 0)));
+  return todas[0].id;
+}
+
 function activateShortcut(st) {
   const on = lastArmed && lastArmed.id === st.id;
   // INSTANTÁNEO: marcar/desmarcar en cola y repintar YA; el envío va después.
   lastArmed = on ? null : { id: st.id, label: st.label, __tab: st.__tab, __host: st.__host };
+  lastFallo = null;
   renderNow();
-  optimistic(sendTo(st.__tab, on ? { type: 'disarm' } : { type: 'arm', id: st.id }));
+  if (on) { optimistic(sendToSite(st.__host, { type: 'disarm' })); return; }
+  optimistic(tabParaSitio(st.__host, st.__tab).then(id => sendTo(id, { type: 'arm', id: st.id })));
 }
 
 // ---------------------------------------------------------------------------
@@ -663,6 +692,7 @@ async function refreshInner() {
   if (pendingOps === 0 && !(dragCtx && dragCtx.moved)) {
     lastStates = sortStates(r.states);
     lastArmed = r.armed;
+    lastFallo = r.fallo || null;
     if (editingId == null) {
       const sig = sigOf(lastStates, lastArmed);
       if (sig !== listSig) { renderList(lastStates, lastArmed); listSig = sig; }

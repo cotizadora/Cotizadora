@@ -168,7 +168,8 @@
             ka: get('vca_ka', null),      // estado del keep-alive de audio
             log: get('vca_log', []).slice(-40),  // registro del motor (para diagnóstico)
             repuestos: repuestos,               // veces que se repuso lo que borró la web
-            engine: get('vca_motor', null)      // versión del motor que corre en la página
+            engine: get('vca_motor', null),     // versión del motor que corre en la página
+            fallo: get('vca_fallo', null)       // GO: último atajo que no se pudo completar
           });
           break;
         }
@@ -177,6 +178,7 @@
         case 'arm': {
           // Un clic en ▶ = "ejecútalo ya, o en cuanto el control esté disponible".
           const st = get(K.states, []).find(x => x.id === msg.id);
+          del('vca_fallo');
           if (st) {
             set(K.armed, {
               id: st.id, label: st.label, steps: stepsOf(st),

@@ -1,7 +1,7 @@
 # Contexto para retomar con Claude
 
 Pega este archivo al empezar una sesión nueva para que Claude sepa dónde quedamos.
-Última actualización: 02-10-2026.
+Última actualización: 05-10-2026.
 
 ## Quién soy y cómo trabajo
 
@@ -37,7 +37,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.1.4
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.1.5
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -52,6 +52,7 @@ Qué hace:
 - **Reloj de pausa:** aparece abajo a la derecha con el nombre de la pausa.
 - **Cuenta regresiva para tipificar (v1.0.5):** Vicidial da ~30 s desde que se entra al formulario de tipificación (no desde que se corta). Al abrirse el formulario aparece un reloj (arriba a la derecha, arrastrable): verde, ámbar ≤10 s, rojo ≤5 s, con pitidos. Se apaga al pulsar "Cortar y Tipificar". − / + ajusta el límite (25 s por defecto, se recuerda); clic en el número reinicia. Si el formulario se cierra solo sin tipificar, mide el tiempo real y ofrece usarlo con 2 s de margen.
 - **RUT del cliente en GO (v1.0.8, etapa 1):** el puente en Vicidial lee el RUT del cliente en pantalla (campos `rut`+`dv` del FORM o `vendor_lead_code`; si no hay DV aparte y tiene más de 7 caracteres, el último es el DV — misma regla que el cotizador, ej. 107038973 = 10.703.897-3; con 7 o menos se calcula) y lo deja en `chrome.storage.local.vcaCliente`; en GO se copia a `localStorage.vca_cliente`. Al grabar, si se escribe en un campo ese RUT (o la palabra RUT), el paso queda `dyn:'rut'` con su formato, y al repetir usa el RUT del cliente del momento. El panel muestra "🪪 Cliente en Vicidial: …". Desde la v1.0.9 el panel conecta solo (sin recargar) las pestañas de Vicidial/GO que no responden, para que la grabación llegue a todas. Desde la v1.1.0, al apretar Grabar el panel busca las pestañas en ese momento (antes, recién abierto, a veces no había reconocido GO y la orden sólo llegaba a Vicidial: "No se capturó ningún clic"), y una pestaña que se conecte durante la grabación se suma sola. Desde la v1.1.1: GO borra su localStorage (al iniciar sesión en go.bciseguros.cl/login): la grabación en curso y los atajos se respaldan en chrome.storage (`vcaSitio:<sitio>`) y el motor guarda la grabación en memoria; se reponen solos. El panel muestra clics por página mientras graba. Las contraseñas nunca se graban (que las complete Chrome). Grabar en GO no depende de Vicidial. Pendiente etapa 2: que un atajo siga después de un cambio de página (ej. tras "Ingresar"). Objetivo: grabar en go.bciseguros.cl/dashboard/go el camino ☰ → Nueva Oportunidad → Rut cliente (campo `#rut-cliente`, Angular 11 + PrimeNG) → CREAR. Pendiente: grabar el ingreso con usuario y la configuración de perfil (etapa 2) y luego llevarlo al cotizador.
+- **Repetir en GO (v1.1.5):** el ▶ va a la pestaña de GO que se está mirando (con dos pestañas abiertas iba a la otra: "no hace nada"). GO (Angular/PrimeNG) renumera clases como `ng-tns-c124-3` al reabrir menús y las rutas grabadas dejaban de calzar: ahora se ignoran las clases `ng-*` y de estado, también en atajos ya grabados, y los botones sólo con ícono se buscan por su ícono. En GO no se reintenta con Escape ni volviendo al ☰; si un paso no aparece en 15 s, el atajo se detiene y el panel avisa en rojo qué paso faltó (`vca_fallo`).
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -61,7 +62,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar la v1.1.4 con INSTALAR.bat.
+1. Instalar la v1.1.5 con INSTALAR.bat. Probar el atajo de GO con ▶ desde la misma pantalla donde se grabó.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.
