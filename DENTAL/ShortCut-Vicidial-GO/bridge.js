@@ -71,7 +71,10 @@
     if (localStorage.getItem('vca_states') == null && Array.isArray(respaldo.states) && respaldo.states.length) {
       localStorage.setItem('vca_states', JSON.stringify(respaldo.states)); cambio = true;
     }
-    // La grabación se repone tanto en curso como detenida y pendiente de nombre
+    // La grabación se repone en curso o detenida con pasos (pendiente de nombre).
+    // Una grabación detenida SIN pasos no sirve: no se repone (se descarta).
+    const rl = respaldo.learning;
+    if (rl && !rl.recording && !(rl.steps || []).length) { respaldo.learning = null; try { chrome.storage.local.set({ [SK]: respaldo }); } catch (e) {} }
     if (localStorage.getItem('vca2_learning') == null && respaldo.learning) {
       localStorage.setItem('vca2_learning', JSON.stringify(respaldo.learning)); cambio = true;
     }
@@ -152,7 +155,11 @@
           reply({ ok: true });
           break;
 
-        case 'getData':
+        case 'getData': {
+          // Grabación detenida sin ningún paso: se descarta sola (no deja el
+          // cuadro "No se capturó ningún clic" pegado ni bloquea Grabar).
+          const lv = get(K.learning, null);
+          if (lv && !lv.recording && !(lv.steps || []).length) { del(K.learning); respaldar(); }
           reply({
             states: get(K.states, []),
             armed: get(K.armed, null),
@@ -164,6 +171,7 @@
             engine: get('vca_motor', null)      // versión del motor que corre en la página
           });
           break;
+        }
 
         // --- Armar / desarmar (un solo clic en el ▶ del atajo) -----------------
         case 'arm': {

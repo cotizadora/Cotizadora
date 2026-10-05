@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ShortCut-Vicidial-GO
 // @namespace    shortcut-vicidial-go
-// @version      1.1.3
+// @version      1.1.4
 // @description  Pre-selecciona un estado de agente y lo aplica automaticamente al cortar la llamada (replay del clic real). Autoconfigurable + modo debug.
 // @author       Pausa Vocal
 // @match        *://vicidial.recaall.simtastic.cl/*
@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.1.3';
+  const VCA_VERSION = '1.1.4';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
