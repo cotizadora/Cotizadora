@@ -21,6 +21,10 @@
   };
 
   function get(k, d) {
+    if (k === K.learning) return sanear(getCrudo(k, d));
+    return getCrudo(k, d);
+  }
+  function getCrudo(k, d) {
     try {
       const v = localStorage.getItem(k);
       if (v != null) return JSON.parse(v);
@@ -29,6 +33,42 @@
     if (respaldo && k === 'vca_states' && Array.isArray(respaldo.states)) return respaldo.states;
     if (respaldo && k === 'vca2_learning' && respaldo.learning) return respaldo.learning;
     return d;
+  }
+
+  // MARCAS DE FIN DE GRABACIÓN. Una grabación se identifica por su `ts` (hora
+  // de inicio). Al detenerla, guardarla o descartarla se anota aquí, en la
+  // página (la ven al instante todas las pestañas de ese sitio) y en la
+  // extensión (por si la web borra sus datos). Así, una copia vieja que quedó
+  // en otra pestaña (Chrome duerme las pestañas de atrás), en la memoria del
+  // motor o en el respaldo NUNCA puede revivir la grabación: antes reaparecía
+  // "Grabando…" una y otra vez.
+  const MK = 'vca_learn_marcas';
+  let marcas = { stop: 0, fin: 0 };
+  function leerMarcas(extra) {
+    let l = null;
+    try { l = JSON.parse(localStorage.getItem(MK) || 'null'); } catch (e) {}
+    const n = { stop: Math.max(marcas.stop, (l && l.stop) || 0, (extra && extra.stop) || 0),
+                fin: Math.max(marcas.fin, (l && l.fin) || 0, (extra && extra.fin) || 0) };
+    marcas = n;
+    if (!l || l.stop !== n.stop || l.fin !== n.fin) { try { localStorage.setItem(MK, JSON.stringify(n)); } catch (e) {} }
+    return n;
+  }
+  function marcar(tipo, ts) {
+    const m = leerMarcas();
+    ts = ts || Date.now();
+    if (ts > m[tipo]) m[tipo] = ts;
+    if (m.fin > m.stop) m.stop = m.fin;
+    try { localStorage.setItem(MK, JSON.stringify(m)); } catch (e) {}
+    try { chrome.storage.local.set({ [SK + ':marcas']: m }); } catch (e) {}
+  }
+  // La grabación tal como vale hoy: null si ya terminó; detenida si se detuvo.
+  function sanear(l) {
+    if (!l) return l;
+    const m = leerMarcas();
+    const ts = l.ts || 0;
+    if (m.fin && ts <= m.fin) return null;
+    if (l.recording && m.stop && ts <= m.stop) return Object.assign({}, l, { recording: false });
+    return l;
   }
   function set(k, v) {
     try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
@@ -51,7 +91,7 @@
       // si la web borró los atajos, se conserva el respaldo anterior
       states: st != null ? st : (respaldo ? respaldo.states : null),
       // la grabación se toma tal cual: si se descartó o guardó, queda vacía
-      learning: crudo('vca2_learning'),
+      learning: sanear(crudo('vca2_learning')),
       t: Date.now()
     };
     try { chrome.storage.local.set({ [SK]: respaldo }); } catch (e) {}
@@ -59,12 +99,18 @@
   // El motor avisa cada paso grabado: el respaldo queda siempre al día
   document.addEventListener('vca:learn', (ev) => {
     try {
-      const l = JSON.parse(ev.detail);
+      const l = sanear(JSON.parse(ev.detail));
+      if (!l) return;
       respaldo = Object.assign({}, respaldo || {}, { learning: l, t: Date.now() });
       if (respaldo.states == null) respaldo.states = get('vca_states', null);
       chrome.storage.local.set({ [SK]: respaldo });
     } catch (e) {}
   });
+  try {
+    chrome.storage.onChanged.addListener((ch, area) => {
+      if (area === 'local' && ch[SK + ':marcas'] && ch[SK + ':marcas'].newValue) leerMarcas(ch[SK + ':marcas'].newValue);
+    });
+  } catch (e) {}
   function reponer() {
     if (!respaldo) return;
     let cambio = false;
@@ -73,7 +119,8 @@
     }
     // La grabación se repone en curso o detenida con pasos (pendiente de nombre).
     // Una grabación detenida SIN pasos no sirve: no se repone (se descarta).
-    const rl = respaldo.learning;
+    const rl0 = respaldo.learning, rl = sanear(rl0);
+    if (rl !== rl0) { respaldo.learning = rl; try { chrome.storage.local.set({ [SK]: respaldo }); } catch (e) {} }
     if (rl && !rl.recording && !(rl.steps || []).length) { respaldo.learning = null; try { chrome.storage.local.set({ [SK]: respaldo }); } catch (e) {} }
     if (localStorage.getItem('vca2_learning') == null && respaldo.learning) {
       localStorage.setItem('vca2_learning', JSON.stringify(respaldo.learning)); cambio = true;
@@ -84,6 +131,10 @@
   setInterval(() => {
     try {
       if (!chrome.runtime.id) return;
+      // Una grabación ya terminada que alguien repuso en la página: fuera.
+      const lc = crudo(K.learning), ls = sanear(lc);
+      if (lc && !ls) del(K.learning);
+      else if (lc && ls !== lc) localStorage.setItem(K.learning, JSON.stringify(ls));
       reponer();
       const l = localStorage.getItem('vca2_learning'), st = localStorage.getItem('vca_states');
       const firma = (l || '') + '|' + (st || '');
@@ -125,7 +176,9 @@
   (async function seedDefaults() {
     try {
       // Primero el respaldo de la extensión (por si la web borró sus datos)
-      const g = await new Promise(r => { try { chrome.storage.local.get(SK, x => r(x && x[SK])); } catch (e) { r(null); } });
+      const todo = await new Promise(r => { try { chrome.storage.local.get([SK, SK + ':marcas'], x => r(x || {})); } catch (e) { r({}); } });
+      leerMarcas(todo[SK + ':marcas']);
+      const g = todo[SK];
       if (g) { respaldo = g; reponer(); }
       if (localStorage.getItem(K.states) != null) return; // ya hay config del usuario
       const url = chrome.runtime.getURL('default-config.json');
@@ -215,14 +268,14 @@
 
         // --- Grabacion de secuencia (grabar primero, nombrar al final) --------
         case 'learnStart':               // empieza a grabar YA, sin pedir nombre
-          set(K.learning, { recording: true, steps: [], ts: Date.now() });
+          set(K.learning, { recording: true, steps: [], ts: Math.max(Date.now(), leerMarcas().fin + 1) });
           try { document.dispatchEvent(new CustomEvent('vca:learn-estado', { detail: localStorage.getItem(K.learning) })); } catch (e) {}
           notifyPage();
           reply({ ok: true });
           break;
         case 'learnStop': {              // deja de capturar; queda pendiente de nombrar
           const l = get(K.learning, null);
-          if (l) { l.recording = false; set(K.learning, l); }
+          if (l) { marcar('stop', l.ts); l.recording = false; set(K.learning, l); }
           try { document.dispatchEvent(new CustomEvent('vca:learn-estado', { detail: l ? JSON.stringify(l) : '' })); } catch (e) {}
           reply({ ok: true, steps: l ? (l.steps || []).length : 0 });
           break;
@@ -230,6 +283,7 @@
         case 'learnSave': {              // nombra y guarda la secuencia grabada
           try { document.dispatchEvent(new CustomEvent('vca:cmd', { detail: { type: 'learnReset' } })); } catch (e) {}
           const learn = get(K.learning, null);
+          marcar('fin', learn && learn.ts);
           let ok = false;
           if (learn && learn.steps && learn.steps.length) {
             const states = get(K.states, []);
@@ -244,13 +298,16 @@
           reply({ ok: ok });
           break;
         }
-        case 'learnCancel':
+        case 'learnCancel': {
           try { document.dispatchEvent(new CustomEvent('vca:cmd', { detail: { type: 'learnReset' } })); } catch (e) {}
+          const lx = getCrudo(K.learning, null);
+          marcar('fin', Math.max((lx && lx.ts) || 0, Date.now()));
           del(K.learning);
           respaldar();
           notifyPage();
           reply({ ok: true });
           break;
+        }
 
         // --- Editar alias / borrar --------------------------------------------
         case 'rename': {

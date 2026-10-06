@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.1.5
+ShortCut-Vicidial-GO 1.1.6
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.1.5).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.1.6).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,14 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+GRABACIÓN QUE NO SE DETENÍA (arreglado en la 1.1.6)
+- Con varias pestañas de GO, una pestaña de atrás podía reponer la grabación
+  ya detenida o guardada, y el panel volvía a mostrar "Grabando…" sin parar,
+  aun después de reiniciar. Ahora, al detener, guardar o descartar, esa
+  grabación queda cerrada para siempre y ninguna copia vieja la revive.
+- Si al instalar la 1.1.6 el panel aún muestra "Grabando…" de antes, pulsa
+  ■ Detener y luego "Descartar" una vez.
 
 REPETIR EN GO (desde la 1.1.5)
 - El ▶ se ejecuta en la pestaña de GO que estás mirando (antes, con dos

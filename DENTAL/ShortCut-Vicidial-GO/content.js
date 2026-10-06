@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.1.5';
+  const VCA_VERSION = '1.1.6';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -1041,8 +1041,20 @@
   // pueden borrar: se guarda también en memoria y, si desaparece en plena
   // grabación, se repone desde ahí sin perder los pasos.
   let memLearn = null;
+  // Marcas que deja el puente al detener / guardar / descartar una grabación
+  // (por su `ts`): una copia vieja en memoria nunca la revive.
+  function sanearLearn(l) {
+    if (!l) return l;
+    const m = Store.get('vca_learn_marcas', null) || {};
+    const ts = l.ts || 0;
+    if (m.fin && ts <= m.fin) return null;
+    if (l.recording && m.stop && ts <= m.stop) return Object.assign({}, l, { recording: false });
+    return l;
+  }
   function leerLearning() {
-    const l = Store.get(K.learning, null);
+    memLearn = sanearLearn(memLearn);
+    const l0 = Store.get(K.learning, null), l = sanearLearn(l0);
+    if (l0 && !l) { Store.del(K.learning); return null; }   // ya terminada: fuera
     // Si lo que hay es una copia más vieja de esta misma grabación (repuesta
     // desde un respaldo atrasado), manda la de memoria, que tiene todos los pasos.
     if (l && memLearn && l.ts === memLearn.ts && (l.steps || []).length < (memLearn.steps || []).length && l.recording === memLearn.recording) {
@@ -1050,7 +1062,9 @@
       return memLearn;
     }
     if (l) { memLearn = l; return l; }
-    if (memLearn && memLearn.recording) {
+    // Sólo la página principal repone desde su memoria (un marco interno de
+    // GO no se entera de que se detuvo la grabación).
+    if (IS_TOP && memLearn && memLearn.recording) {
       Store.set(K.learning, memLearn);
       log('La página borró la grabación en curso: repuesta (' + (memLearn.steps || []).length + ' pasos).');
       return memLearn;
