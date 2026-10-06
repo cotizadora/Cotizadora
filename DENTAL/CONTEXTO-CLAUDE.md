@@ -37,7 +37,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.1.6
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.1.7
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -54,6 +54,7 @@ Qué hace:
 - **RUT del cliente en GO (v1.0.8, etapa 1):** el puente en Vicidial lee el RUT del cliente en pantalla (campos `rut`+`dv` del FORM o `vendor_lead_code`; si no hay DV aparte y tiene más de 7 caracteres, el último es el DV — misma regla que el cotizador, ej. 107038973 = 10.703.897-3; con 7 o menos se calcula) y lo deja en `chrome.storage.local.vcaCliente`; en GO se copia a `localStorage.vca_cliente`. Al grabar, si se escribe en un campo ese RUT (o la palabra RUT), el paso queda `dyn:'rut'` con su formato, y al repetir usa el RUT del cliente del momento. El panel muestra "🪪 Cliente en Vicidial: …". Desde la v1.0.9 el panel conecta solo (sin recargar) las pestañas de Vicidial/GO que no responden, para que la grabación llegue a todas. Desde la v1.1.0, al apretar Grabar el panel busca las pestañas en ese momento (antes, recién abierto, a veces no había reconocido GO y la orden sólo llegaba a Vicidial: "No se capturó ningún clic"), y una pestaña que se conecte durante la grabación se suma sola. Desde la v1.1.1: GO borra su localStorage (al iniciar sesión en go.bciseguros.cl/login): la grabación en curso y los atajos se respaldan en chrome.storage (`vcaSitio:<sitio>`) y el motor guarda la grabación en memoria; se reponen solos. El panel muestra clics por página mientras graba. Las contraseñas nunca se graban (que las complete Chrome). Grabar en GO no depende de Vicidial. Pendiente etapa 2: que un atajo siga después de un cambio de página (ej. tras "Ingresar"). Objetivo: grabar en go.bciseguros.cl/dashboard/go el camino ☰ → Nueva Oportunidad → Rut cliente (campo `#rut-cliente`, Angular 11 + PrimeNG) → CREAR. Pendiente: grabar el ingreso con usuario y la configuración de perfil (etapa 2) y luego llevarlo al cotizador.
 - **Repetir en GO (v1.1.5):** el ▶ va a la pestaña de GO que se está mirando (con dos pestañas abiertas iba a la otra: "no hace nada"). GO (Angular/PrimeNG) renumera clases como `ng-tns-c124-3` al reabrir menús y las rutas grabadas dejaban de calzar: ahora se ignoran las clases `ng-*` y de estado, también en atajos ya grabados, y los botones sólo con ícono se buscan por su ícono. En GO no se reintenta con Escape ni volviendo al ☰; si un paso no aparece en 15 s, el atajo se detiene y el panel avisa en rojo qué paso faltó (`vca_fallo`).
 - **Grabación que no se detenía (v1.1.6):** con varias pestañas de GO, una pestaña dormida (o el respaldo) reponía la grabación ya detenida/guardada y el panel mostraba "Grabando…" sin parar, aun tras reiniciar. Ahora el puente anota en `vca_learn_marcas` (página) y `vcaSitio:<sitio>:marcas` (chrome.storage) el `ts` de la grabación detenida (`stop`) y terminada (`fin`); ninguna copia con `ts` ≤ `fin` se repone, y con `ts` ≤ `stop` queda detenida. Sólo la página principal repone desde la memoria del motor.
+- **Sólo clics de la persona (v1.1.7):** en el PC del trabajo algo hace clics automáticos en Vicidial (posible extensión "MIC ACTIVO"): al grabar aparecía "VICIDIAL (90)" sin tocarlo. Ahora el grabador sólo acepta clics con `isTrusted`, y cambios de menú si son `isTrusted` o vienen ≤1,5 s después de un clic/tecla real (librerías de menús). En las pruebas con Playwright hay que hacer clic en el `<select>` antes de `selectOption`.
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -63,7 +64,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar la v1.1.6 con INSTALAR.bat (si el panel sigue en "Grabando…" de antes: ■ Detener y "Descartar" una vez). Probar el atajo de GO con ▶ desde la misma pantalla donde se grabó.
+1. Instalar la v1.1.7 con INSTALAR.bat (si el panel sigue en "Grabando…" de antes: ■ Detener y "Descartar" una vez). Probar el atajo de GO con ▶ desde la misma pantalla donde se grabó.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

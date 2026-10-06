@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.1.6';
+  const VCA_VERSION = '1.1.7';
 
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -1104,8 +1104,20 @@
   // se graban por clic: un <select> nativo despliega su lista a nivel del sistema
   // operativo y un clic sintetico sobre una <option> no selecciona nada. Esos se
   // graban con el evento 'change' (abajo).
+  // Sólo se graba lo que hace la PERSONA (isTrusted). Los clics y cambios que
+  // dispara un programa (otra extensión, un script de la página o nuestra
+  // propia repetición) no cuentan: antes se sumaban solos, ej. "VICIDIAL (90)"
+  // sin haber tocado Vicidial.
+  // Un menú puede avisar su cambio "por programa" justo después de que la
+  // persona lo tocó (librerías de menús): esos sí valen, si hubo un clic o una
+  // tecla de verdad en el último segundo y medio.
+  let ultimoGesto = 0;
+  ['pointerdown', 'mousedown', 'keydown', 'touchstart'].forEach(t =>
+    document.addEventListener(t, (ev) => { if (ev.isTrusted) ultimoGesto = Date.now(); }, true));
+  function deLaPersona(ev) { return ev.isTrusted || Date.now() - ultimoGesto < 1500; }
+
   document.addEventListener('click', function (ev) {
-    if (!grabando()) return;
+    if (!ev.isTrusted || !grabando()) return;
     const t = ev.target;
     if (t && /^(select|option|input|textarea)$/i.test(t.tagName || '')) return;
     const act = (t.closest && t.closest('a,button,li,[role="button"],[onclick]')) || t;
@@ -1116,7 +1128,7 @@
 
   // Menus desplegables nativos (<select>), campos de texto y casillas.
   document.addEventListener('change', function (ev) {
-    if (!grabando()) return;
+    if (!deLaPersona(ev) || !grabando()) return;
     const el = ev.target;
     if (!el || !el.tagName) return;
     const tag = el.tagName.toLowerCase();
