@@ -106,3 +106,36 @@ Plan para titular de 18 a 69 años. Sujeto a condiciones de la póliza.
 | Titular de 18 a 69 años (ingreso hasta 69 años y 364 días) | Folleto (requisitos de asegurabilidad) |
 
 No se usan cifras en pesos: el script dice ~$10.600, pero ese monto cambia con la UF del día.
+
+---
+
+## PROMPT CON ZONA LIBRE (para la app "Afiche Urgencia Dental")
+
+Genera el afiche dejando un espacio vacío abajo a la izquierda. Ahí la app pone la tarjeta de cada ejecutiva (nombre, celular y QR) sin tapar nada. Adjunta el logo de Uno Salud Dental antes de pegarlo. En la app: **Imagen de fondo → Usar otra imagen**, y la ubicación **"Zona libre abajo a la izquierda"** queda elegida sola.
+
+```
+Crea una pieza publicitaria CUADRADA 1:1 (1024 × 1024 px) para Instagram y Facebook, para vender un seguro dental de urgencia para UNA sola persona en Chile. Estilo campaña profesional de agencia, fotografía REALISTA (nada de ilustración, 3D ni estilo "IA"), luz natural y limpia.
+
+COMPOSICIÓN (respeta estas proporciones)
+- Mitad derecha: mujer chilena de unos 35 años, pelo castaño, suéter celeste grisáceo, sonriendo aliviada con una mano suave en la mejilla, en una clínica dental moderna y luminosa desenfocada detrás (sillón dental azul, plantas). Que no ocupe la mitad izquierda.
+- Mitad izquierda, fondo blanco limpio con textos en azul (#0250B4) y celeste (#04A5D5):
+  1. Titular grande en 3 líneas: "¿Dolor de muela?" / "Te atendemos a" / "costo $0" (esta última en celeste).
+  2. Bajada: "Plan Urgencia Dental · para ti"
+  3. Tres beneficios con íconos lineales azules (diente, reloj, escudo con check):
+     "Urgencias a costo $0: dolor intenso, inflamación o sangrado"
+     "Úsalo desde las 48 horas hábiles"
+     "Más de 80 clínicas Uno Salud Dental en todo Chile"
+  4. Círculo celeste con texto blanco: "Solo" / "UF 0,26" / "al mes"
+  Todo esto debe terminar ANTES del 72 % de la altura de la imagen.
+- ZONA LIBRE OBLIGATORIA: abajo a la izquierda, desde el 4 % hasta el 52 % del ancho y desde el 75 % hasta el 95 % del alto, deja un espacio COMPLETAMENTE VACÍO, solo fondo blanco liso: sin texto, sin botón, sin íconos, sin sombras ni la foto. Ahí se pondrá después una tarjeta con datos de contacto.
+- NO pongas botón de "Contrátalo hoy" ni ningún teléfono, nombre o código QR.
+- Logo: usa el logo de Uno Salud Dental que te adjunto, TAL CUAL, arriba a la derecha.
+- Línea legal muy pequeña al pie izquierdo (debajo de la zona libre, al 97 % del alto): "Plan para titular de 18 a 69 años. Sujeto a condiciones de la póliza."
+
+REGLAS
+- Textos EXACTOS en español de Chile con tildes; no agregues otros textos, marcas ni logos de bancos.
+- Tipografía sans serif redondeada y gruesa en el titular, muy legible en celular.
+- Nada de manos o dientes deformes ni letras inventadas en el fondo.
+```
+
+Si la zona no sale bien vacía, pídele: *"Deja totalmente vacío (fondo blanco liso) el rectángulo de abajo a la izquierda, del 4 % al 52 % del ancho y del 75 % al 95 % del alto. No cambies nada más."* Si queda un poco corrida, en la app se ajusta con **Mover ↔ / ↕** y **Tamaño**.
