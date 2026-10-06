@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Afiche Urgencia Dental</title>
+<meta name="description" content="Arma tu afiche del Plan Urgencia Dental con tu nombre, tu celular y un QR a tu WhatsApp. Listo para Instagram, Facebook y TikTok.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cotizadora.github.io/Cotizadora/afiche/">
+<meta property="og:site_name" content="Afiche Urgencia Dental">
+<meta property="og:title" content="Arma tu afiche · Plan Urgencia Dental">
+<meta property="og:description" content="Pon tu nombre y tu celular: el afiche sale con un QR a tu WhatsApp, listo para Instagram, Facebook y TikTok.">
+<meta property="og:image" content="https://cotizadora.github.io/Cotizadora/afiche/og.jpg">
+<meta property="og:image:secure_url" content="https://cotizadora.github.io/Cotizadora/afiche/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Afiche del Plan Urgencia Dental con tarjeta y QR de la ejecutiva">
+<meta property="og:locale" content="es_CL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cotizadora.github.io/Cotizadora/afiche/og.jpg">
+<meta name="theme-color" content="#0250B4">
+<link rel="canonical" href="https://cotizadora.github.io/Cotizadora/afiche/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Afiche Dental">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+/* Layout: herramienta de dos paneles — controles a la izquierda, afiche en vivo a la derecha; en celular se apilan.
+   Colores tomados del afiche Uno Salud Dental: azul del titular y del botón, celeste del "$0". */
+:root {
+  --bg: #F2F6FB;
+  --panel: #FFFFFF;
+  --fg: #0B2459;
+  --muted: #5A6B8C;
+  --line: #D8E2F0;
+  --accent: #0250B4;
+  --accent-fg: #FFFFFF;
+  --sky: #04A5D5;
+  --field: #FAFCFF;
+  --danger: #B3402A;
+  --font: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1424; --panel: #131E33; --fg: #E3EAF7; --muted: #9AA9C4; --line: #263552;
+    --accent: #4F8EF0; --accent-fg: #071226; --sky: #3CC3EA; --field: #18243C; --danger: #F08A72;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1424; --panel: #131E33; --fg: #E3EAF7; --muted: #9AA9C4; --line: #263552;
+  --accent: #4F8EF0; --accent-fg: #071226; --sky: #3CC3EA; --field: #18243C; --danger: #F08A72;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.45; padding-inline: 16px; padding-block: 20px 32px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
+header h1 { font-size: 1.65rem; font-weight: 900; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+header h1 span { color: var(--sky); }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 64ch; }
+.grid { display: grid; grid-template-columns: minmax(0, 370px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 18px; min-width: 0; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; min-width: 0; }
+legend { font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); padding: 0; margin-bottom: 6px; }
+label { display: grid; gap: 4px; font-weight: 700; font-size: 0.9rem; }
+label small { font-weight: 600; color: var(--muted); }
+input[type="text"], input[type="tel"], textarea, select {
+  font: inherit; font-weight: 600; color: var(--fg); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; width: 100%;
+}
+textarea { resize: vertical; min-height: 60px; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg label { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; background: var(--field); }
+.seg input { accent-color: var(--accent); margin: 0; }
+.seg label:has(input:checked) { border-color: var(--accent); }
+.check { display: flex; gap: 8px; align-items: flex-start; font-weight: 700; }
+.check input { accent-color: var(--accent); margin-top: 3px; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.btn { font: inherit; font-weight: 800; border-radius: 999px; padding: 10px 16px; cursor: pointer; border: 1px solid var(--line); background: var(--field); color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); width: 100%; font-size: 1.02rem; padding: 12px 16px; }
+.btn.small { padding: 6px 12px; font-size: 0.85rem; }
+.base-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.hint { font-size: 0.82rem; color: var(--muted); margin: 0; font-weight: 600; }
+.hint.err { color: var(--danger); }
+.tag { display: inline-block; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sky); }
+.stage { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; justify-items: center; min-width: 0; position: sticky; top: env(safe-area-inset-top, 0px); }
+@media (max-width: 860px) { .stage { position: static; } }
+.stage canvas { max-width: 100%; max-height: 80vh; width: auto; height: auto; border-radius: 10px; box-shadow: 0 8px 28px rgba(5, 30, 80, 0.18); }
+.drop { outline: 2px dashed var(--accent); outline-offset: 6px; }
+.meta { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; margin: 0; }
+#estado { min-height: 1.2em; }
+.instalar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; }
+.instalar img { width: 44px; height: 44px; border-radius: 11px; flex: none; }
+.instalar .txt { flex: 1 1 220px; min-width: 0; }
+.instalar strong { display: block; font-weight: 900; }
+.instalar p { margin: 2px 0 0; color: var(--muted); font-weight: 600; font-size: 0.86rem; }
+.instalar .acciones { display: flex; gap: 8px; align-items: center; }
+.instalar .btn.primary { width: auto; }
+.compartir { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -0.15em; }
+@media (prefers-reduced-motion: no-preference) { .btn { transition: filter 0.15s; } .btn:hover { filter: brightness(1.07); } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Afiche Urgencia Dental <span>· tu versión</span></h1>
+    <p>Escribe tu nombre y tu celular: el afiche lleva tu teléfono en el botón azul y una tarjeta con un QR que abre tu WhatsApp. Descárgalo y publícalo en Instagram, Facebook o TikTok.</p>
+  </header>
+
+  <div class="instalar" id="instalar" hidden>
+    <img src="apple-touch-icon.png" alt="" id="instIcono">
+    <div class="txt">
+      <strong>Instala la app en tu celular</strong>
+      <p id="instTexto">Queda con su ícono en la pantalla de inicio y se abre sin buscar el enlace.</p>
+    </div>
+    <div class="acciones">
+      <button type="button" class="btn primary" id="instBoton" hidden>Instalar</button>
+      <button type="button" class="btn small" id="instYa" hidden>Ya la instalé</button>
+      <button type="button" class="btn small" id="instCerrar" aria-label="No mostrar más">✕</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <form class="panel" id="form" autocomplete="on">
+      <fieldset>
+        <legend>1 · Tus datos</legend>
+        <p class="hint"><span class="tag">Ejemplo</span> Reemplaza estos datos por los tuyos.</p>
+        <label>Nombre y apellido
+          <input type="text" id="nombre" maxlength="40" value="Camila Rojas">
+        </label>
+        <label>Línea sobre tu nombre
+          <input type="text" id="cargo" maxlength="36" value="Tu ejecutiva Seguro Dental">
+        </label>
+        <label>Celular
+          <input type="tel" id="telefono" inputmode="tel" maxlength="20" value="+56 9 1234 5678">
+        </label>
+        <p class="hint" id="telInfo"></p>
+        <div>
+          <p class="hint" style="margin-bottom:6px">Al escanear el QR se abre:</p>
+          <div class="seg" role="radiogroup" aria-label="El QR abre">
+            <label><input type="radio" name="qr" id="qrWa" value="wa" checked> WhatsApp</label>
+            <label><input type="radio" name="qr" id="qrTel" value="tel"> Llamada</label>
+          </div>
+        </div>
+        <label id="msgBox">Mensaje que te llega por WhatsApp
+          <textarea id="mensaje" maxlength="200">Hola, vi el afiche del Plan Urgencia Dental y quiero más información.</textarea>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>2 · Formato</legend>
+        <select id="formato" aria-label="Formato">
+          <option value="1:1">Instagram y Facebook · cuadrado 1:1</option>
+          <option value="4:5">Instagram y Facebook · vertical 4:5</option>
+          <option value="9:16">TikTok, Reels e Historias · 9:16</option>
+        </select>
+        <p class="hint" id="formatoInfo"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>3 · Diseño</legend>
+        <label class="check" id="botonBox"><input type="checkbox" id="boton" checked> <span>Poner mi celular en el botón azul (en vez de "Contrátalo hoy")</span></label>
+        <div class="row">
+          <label>Tarjeta
+            <select id="estilo">
+              <option value="blanca">Blanca</option>
+              <option value="azul">Azul</option>
+              <option value="celeste">Celeste</option>
+            </select>
+          </label>
+          <label id="posBox">Ubicación
+            <select id="posicion">
+              <option value="sueter">Abajo a la derecha</option>
+              <option value="zona">Zona libre abajo a la izquierda</option>
+            </select>
+          </label>
+        </div>
+        <label>Tamaño de la tarjeta <small id="tamTxt">100 %</small>
+          <input type="range" id="tamano" min="80" max="125" step="5" value="100">
+        </label>
+        <div class="row">
+          <label>Mover ↔
+            <input type="range" id="movX" min="-25" max="25" step="1" value="0">
+          </label>
+          <label>Mover ↕
+            <input type="range" id="movY" min="-25" max="25" step="1" value="0">
+          </label>
+        </div>
+        <button type="button" class="btn small" id="centrar">Volver a la posición inicial</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>4 · Imagen de fondo</legend>
+        <div class="base-row">
+          <button type="button" class="btn small" id="cargar">Usar otra imagen</button>
+          <button type="button" class="btn small" id="original" hidden>Volver al afiche Uno Salud</button>
+        </div>
+        <input type="file" id="archivo" accept="image/png,image/jpeg,image/webp" hidden>
+        <p class="hint" id="baseInfo">Afiche Uno Salud Dental incluido. Si generas uno nuevo en ChatGPT, cárgalo aquí o arrástralo sobre la vista previa.</p>
+      </fieldset>
+
+      <div style="display:grid; gap:8px">
+        <button type="submit" class="btn primary" id="descargar">Descargar afiche (PNG)</button>
+        <p class="hint" id="estado" role="status"></p>
+      </div>
+    </form>
+
+    <section class="stage" id="stage" aria-label="Vista previa del afiche">
+      <canvas id="lienzo" width="1254" height="1254" aria-label="Afiche personalizado"></canvas>
+      <p class="meta" id="medidas"></p>
+      <p class="hint">Antes de publicar, escanea el QR con tu celular y comprueba que abre tu número.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const cv = $('lienzo'), ctx = cv.getContext('2d');
+  const FONT = '"Nunito", "Segoe UI", system-ui, sans-serif';
+  const AZUL = '#0250B4', AZUL_OSC = '#07389E', CELESTE = '#04A5D5', FONDO = '#FAFCFE';
+
+  // Afiche Uno Salud Dental (1254 × 1254) incluido en la página.
+  const BASE_INCLUIDA = 'base-urgencia.jpg';
+
+  // Medidas del afiche incluido, en px de la imagen original (1254 de lado):
+  //  botón "Contrátalo hoy": x 75–471, y 1078–1158 (80 de alto, borde 40)
+  //  suéter libre abajo a la derecha: x 690–1230, y 975–1235
+  const ORIG = 1254;
+  const BOTON = { x: 75, y: 1078, w: 397, h: 81 };
+  // Ubicaciones de la tarjeta, en fracciones del lado del cuadrado.
+  const POS = {
+    sueter: { x: 0.553, y: 0.783, w: 0.425, h: 0.196 },
+    // Zona que el prompt nuevo deja vacía (abajo a la izquierda).
+    zona:   { x: 0.045, y: 0.765, w: 0.47,  h: 0.19 }
+  };
+
+  let base = null, esIncluida = true;
+  const campos = ['nombre', 'cargo', 'telefono', 'mensaje', 'formato', 'estilo', 'posicion', 'tamano', 'movX', 'movY'];
+
+  function leer() {
+    return {
+      nombre: $('nombre').value.trim(), cargo: $('cargo').value.trim(), telefono: $('telefono').value,
+      mensaje: $('mensaje').value.trim(), qr: $('qrTel').checked ? 'tel' : 'wa', formato: $('formato').value,
+      boton: $('boton').checked, estilo: $('estilo').value, posicion: $('posicion').value,
+      tamano: +$('tamano').value / 100, movX: +$('movX').value / 100, movY: +$('movY').value / 100
+    };
+  }
+
+  // ---------- celular chileno ----------
+  function normalizarFono(t) {
+    let d = String(t || '').replace(/\D/g, '');
+    if (d.startsWith('00')) d = d.slice(2);
+    if (d.length === 8) d = '9' + d;
+    if (d.length === 9 && d[0] === '9') d = '56' + d;
+    return /^569\d{8}$/.test(d) ? d : null;
+  }
+  function fonoBonito(n) { return '+56 9 ' + n.slice(3, 7) + ' ' + n.slice(7); }
+  function contenidoQR(s, n) {
+    if (s.qr === 'tel') return 'tel:+' + n;
+    return 'https://wa.me/' + n + (s.mensaje ? '?text=' + encodeURIComponent(s.mensaje) : '');
+  }
+
+  // ---------- utilidades de dibujo ----------
+  function rr(x, y, w, h, r) {
+    r = Math.min(r, h / 2, w / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function fuente(peso, px) { ctx.font = peso + ' ' + Math.round(px) + 'px ' + FONT; }
+  function ajustar(txt, peso, px, max, min) {
+    let p = px; fuente(peso, p);
+    while (ctx.measureText(txt).width > max && p > (min || 10)) { p -= 0.5; fuente(peso, p); }
+    return p;
+  }
+  function iconoFono(cx, cy, r, color) {
+    // auricular simple
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(-Math.PI / 4);
+    ctx.fillStyle = color;
+    rr(-r * 0.28, -r, r * 0.56, r * 2, r * 0.28); ctx.fill();
+    ctx.fillStyle = color;
+    rr(-r * 0.62, -r, r * 0.9, r * 0.46, r * 0.2); ctx.fill();
+    rr(-r * 0.62, r * 0.54, r * 0.9, r * 0.46, r * 0.2); ctx.fill();
+    ctx.restore();
+  }
+  function iconoChat(cx, cy, r, color) {
+    ctx.save(); ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx - r * 0.75, cy + r * 0.45); ctx.lineTo(cx - r * 1.05, cy + r * 1.05); ctx.lineTo(cx - r * 0.2, cy + r * 0.85); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function dibujarQR(texto, x, y, lado, color) {
+    if (typeof window.qrcode !== 'function') return false;
+    const q = window.qrcode(0, 'M'); q.addData(texto); q.make();
+    const n = q.getModuleCount(), celda = lado / n;
+    ctx.fillStyle = color;
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+      if (q.isDark(r, c)) ctx.fillRect(Math.floor(x + c * celda), Math.floor(y + r * celda), Math.ceil(celda), Math.ceil(celda));
+    }
+    return true;
+  }
+
+  // ---------- geometría por formato ----------
+  // Devuelve el lienzo y dónde va la imagen cuadrada dentro de él.
+  function geometria(s) {
+    const lado = base ? Math.min(base.naturalWidth, base.naturalHeight) : ORIG;
+    if (s.formato === '4:5') return { W: 1080, H: 1350, img: { x: 0, y: 0, l: 1080 }, franja: { x: 0, y: 1080, w: 1080, h: 270 } };
+    if (s.formato === '9:16') return { W: 1080, H: 1920, img: { x: 0, y: 420, l: 1080 }, franja: { x: 0, y: 0, w: 1080, h: 420 }, abajo: { x: 0, y: 1500, w: 1080, h: 420 } };
+    const L = Math.max(1080, Math.min(lado, 1600));
+    return { W: L, H: L, img: { x: 0, y: 0, l: L }, franja: null };
+  }
+
+  function rectTarjeta(s, g) {
+    if (g.franja) {
+      // 4:5 la tarjeta va en la franja de abajo; 9:16, en la de arriba,
+      // bajo la barra de TikTok (~150 px) y lejos de sus botones de abajo.
+      const f = g.franja, m = 44;
+      const h = Math.round(222 * s.tamano), w = Math.round(Math.min(f.w - 2 * m, 980 * s.tamano));
+      const yBase = s.formato === '9:16' ? 168 : f.y + (f.h - h) / 2;
+      const x = (g.W - w) / 2 + s.movX * g.W * 0.4;
+      const y = yBase + s.movY * (s.formato === '9:16' ? 300 : 120);
+      return clamp({ x, y, w, h }, g);
+    }
+    const p = POS[s.posicion] || POS.sueter, L = g.img.l;
+    const w = p.w * L * s.tamano, h = p.h * L * s.tamano;
+    // crece hacia arriba y hacia el centro desde su esquina de abajo
+    let x = s.posicion === 'zona' ? p.x * L : (p.x + p.w) * L - w;
+    let y = (p.y + p.h) * L - h;
+    x += s.movX * L * 0.6; y += s.movY * L * 0.6;
+    return clamp({ x: x + g.img.x, y: y + g.img.y, w, h }, g);
+  }
+  function clamp(r, g) {
+    const m = 10;
+    r.x = Math.max(m, Math.min(g.W - r.w - m, r.x));
+    r.y = Math.max(m, Math.min(g.H - r.h - m, r.y));
+    return r;
+  }
+
+  // ---------- partes del afiche ----------
+  function franjas(g) {
+    const pintar = (f) => {
+      const gr = ctx.createLinearGradient(f.x, f.y, f.x + f.w, f.y + f.h);
+      gr.addColorStop(0, AZUL_OSC); gr.addColorStop(1, CELESTE);
+      ctx.fillStyle = gr; ctx.fillRect(f.x, f.y, f.w, f.h);
+    };
+    if (g.franja) pintar(g.franja);
+    if (g.abajo) {
+      pintar(g.abajo);
+      ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
+      fuente(800, 40); ctx.fillText('Plan Urgencia Dental', g.W / 2, g.abajo.y + 110);
+      fuente(700, 30); ctx.fillText('Solo UF 0,26 al mes', g.W / 2, g.abajo.y + 156);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  // Botón azul con el celular, encima de "Contrátalo hoy" (sólo en el afiche incluido).
+  function botonFono(s, g, numero) {
+    if (!esIncluida || !s.boton || !numero) return;
+    const k = g.img.l / ORIG;
+    const x = g.img.x + BOTON.x * k, y = g.img.y + BOTON.y * k, w = BOTON.w * k, h = BOTON.h * k;
+    // tapa el botón original (con un borde de fondo para que no asome)
+    ctx.fillStyle = FONDO; rr(x - 6 * k, y - 5 * k, w + 12 * k, h + 10 * k, (h + 10 * k) / 2); ctx.fill();
+    const gr = ctx.createLinearGradient(0, y, 0, y + h);
+    gr.addColorStop(0, '#0154B8'); gr.addColorStop(1, '#0048AE');
+    ctx.fillStyle = gr; rr(x, y, w, h, h / 2); ctx.fill();
+    const txt = fonoBonito(numero);
+    const icR = h * 0.2, pad = h * 0.42;
+    const tamTxt = ajustar(txt, 900, h * 0.46, w - pad * 2 - icR * 2.8, 14);
+    const anchoTxt = ctx.measureText(txt).width, total = icR * 2.8 + anchoTxt;
+    const x0 = x + (w - total) / 2;
+    if (s.qr === 'tel') iconoFono(x0 + icR, y + h / 2, icR * 1.05, '#FFFFFF'); else iconoChat(x0 + icR, y + h / 2 - icR * 0.1, icR, '#FFFFFF');
+    ctx.fillStyle = '#FFFFFF'; fuente(900, tamTxt); ctx.textBaseline = 'middle';
+    ctx.fillText(txt, x0 + icR * 2.8, y + h / 2 + 1 * k);
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  function tarjeta(s, g, numero) {
+    const r = rectTarjeta(s, g);
+    const u = r.h / 240;
+    const colores = {
+      blanca:  { fondo: '#FFFFFF', prin: '#0B2C8A', sec: CELESTE, ter: '#4A5D86' },
+      azul:    { fondo: AZUL,      prin: '#FFFFFF', sec: '#8FDDF5', ter: '#D5E4FF' },
+      celeste: { fondo: CELESTE,   prin: '#FFFFFF', sec: '#08307E', ter: '#EAF8FE' }
+    }[s.estilo] || {};
+    ctx.save();
+    ctx.shadowColor = 'rgba(4, 25, 70, 0.30)'; ctx.shadowBlur = 34 * u; ctx.shadowOffsetY = 10 * u;
+    rr(r.x, r.y, r.w, r.h, 30 * u); ctx.fillStyle = colores.fondo; ctx.fill();
+    ctx.restore();
+
+    // QR (siempre oscuro sobre blanco, para que lo lea cualquier celular)
+    const qPad = 20 * u, lado = r.h - 2 * qPad;
+    const qx = r.x + r.w - lado - qPad, qy = r.y + qPad;
+    rr(qx - 8 * u, qy - 8 * u, lado + 16 * u, lado + 16 * u, 14 * u); ctx.fillStyle = '#FFFFFF'; ctx.fill();
+    let ok = false;
+    if (numero) ok = dibujarQR(contenidoQR(s, numero), qx, qy, lado, '#06246B');
+    if (!ok) {
+      ctx.fillStyle = '#EDF2FA'; ctx.fillRect(qx, qy, lado, lado);
+      ctx.fillStyle = '#5A6B8C'; fuente(800, 22 * u); ctx.textAlign = 'center';
+      ctx.fillText(numero ? 'Cargando…' : 'Falta tu', qx + lado / 2, qy + lado / 2 - 2 * u);
+      if (!numero) ctx.fillText('celular', qx + lado / 2, qy + lado / 2 + 26 * u);
+      ctx.textAlign = 'left';
+    }
+
+    // textos
+    const tx = r.x + 30 * u, maxW = qx - tx - 22 * u;
+    const cargo = (s.cargo || 'Tu ejecutiva Seguro Dental');
+    const nom = s.nombre || 'Tu nombre';
+    const fono = numero ? fonoBonito(numero) : 'Tu celular';
+    const llamado = s.qr === 'tel' ? 'Escanea y llámame' : 'Escanea y escríbeme por WhatsApp';
+    ctx.textBaseline = 'alphabetic';
+    ajustar(cargo.toUpperCase(), 900, 20 * u, maxW, 9); ctx.fillStyle = colores.sec; ctx.fillText(cargo.toUpperCase(), tx, r.y + 50 * u);
+    // nombre: hasta dos líneas si es largo
+    let tamNom = ajustar(nom, 900, 46 * u, maxW, 26 * u);
+    let lineas = [nom];
+    if (ctx.measureText(nom).width > maxW) {
+      const pal = nom.split(' '); const mitad = Math.ceil(pal.length / 2);
+      lineas = [pal.slice(0, mitad).join(' '), pal.slice(mitad).join(' ')];
+      tamNom = Math.min(ajustar(lineas[0], 900, 38 * u, maxW, 14), ajustar(lineas[1], 900, 38 * u, maxW, 14));
+    }
+    ctx.fillStyle = colores.prin; fuente(900, tamNom);
+    let yN = r.y + 100 * u;
+    if (lineas.length > 1) { ctx.fillText(lineas[0], tx, r.y + 88 * u); ctx.fillText(lineas[1], tx, r.y + 124 * u); yN = r.y + 124 * u; }
+    else ctx.fillText(nom, tx, yN);
+    ajustar(fono, 800, 34 * u, maxW, 12); ctx.fillStyle = colores.prin; ctx.fillText(fono, tx, yN + 52 * u);
+    ajustar(llamado, 700, 21 * u, maxW, 9); ctx.fillStyle = colores.ter;
+    ctx.fillText(llamado, tx, Math.min(r.y + r.h - 24 * u, yN + 92 * u));
+  }
+
+  // ---------- dibujo completo ----------
+  function dibujar() {
+    const s = leer();
+    const g = geometria(s);
+    if (cv.width !== g.W) cv.width = g.W;
+    if (cv.height !== g.H) cv.height = g.H;
+    ctx.clearRect(0, 0, g.W, g.H);
+    franjas(g);
+    if (base) {
+      // recorte cuadrado centrado de la imagen de fondo
+      const lw = base.naturalWidth, lh = base.naturalHeight, lado = Math.min(lw, lh);
+      ctx.drawImage(base, (lw - lado) / 2, (lh - lado) / 2, lado, lado, g.img.x, g.img.y, g.img.l, g.img.l);
+    }
+    const numero = normalizarFono(s.telefono);
+    botonFono(s, g, numero);
+    tarjeta(s, g, numero);
+
+    $('telInfo').textContent = numero
+      ? 'El QR abrirá ' + (s.qr === 'tel' ? 'una llamada a ' : 'WhatsApp con ') + fonoBonito(numero) + '.'
+      : 'Escribe un celular chileno de 9 dígitos, por ejemplo 9 1234 5678.';
+    $('telInfo').className = numero ? 'hint' : 'hint err';
+    $('msgBox').hidden = s.qr === 'tel';
+    $('botonBox').hidden = !esIncluida;
+    $('posBox').hidden = s.formato !== '1:1';
+    $('tamTxt').textContent = Math.round(s.tamano * 100) + ' %';
+    $('original').hidden = esIncluida;
+    $('formatoInfo').textContent = s.formato === '1:1' ? 'La tarjeta va sobre el afiche.'
+      : s.formato === '4:5' ? 'El afiche arriba y tu tarjeta en una franja azul abajo: no tapa nada.'
+      : 'Tu tarjeta arriba, bajo la barra de TikTok; abajo queda libre para sus botones.';
+    $('medidas').textContent = g.W + ' × ' + g.H + ' px';
+    guardarDatos();
+  }
+
+  // ---------- recordar datos en este navegador ----------
+  const LS = 'afiche-urgencia-v2';
+  function guardarDatos() {
+    try {
+      const d = {}; campos.forEach(k => d[k] = $(k).value);
+      d.qr = $('qrTel').checked ? 'tel' : 'wa'; d.boton = $('boton').checked;
+      localStorage.setItem(LS, JSON.stringify(d));
+    } catch (e) {}
+  }
+  function cargarDatos() {
+    try {
+      const d = JSON.parse(localStorage.getItem(LS) || 'null'); if (!d) return;
+      campos.forEach(k => { if (d[k] != null) $(k).value = d[k]; });
+      (d.qr === 'tel' ? $('qrTel') : $('qrWa')).checked = true;
+      if (typeof d.boton === 'boolean') $('boton').checked = d.boton;
+    } catch (e) {}
+  }
+
+  // ---------- imagen de fondo ----------
+  function abrirImagen(src) {
+    return new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+  }
+  async function usarIncluida() {
+    const i = await abrirImagen(BASE_INCLUIDA);
+    base = i; esIncluida = true;
+    $('baseInfo').textContent = 'Afiche Uno Salud Dental incluido. Si generas uno nuevo en ChatGPT, cárgalo aquí o arrástralo sobre la vista previa.';
+    dibujar();
+  }
+  async function usarArchivo(f) {
+    const i = await abrirImagen(URL.createObjectURL(f));
+    if (!i) { $('baseInfo').textContent = 'No se pudo abrir esa imagen. Prueba con PNG, JPG o WEBP.'; return; }
+    base = i; esIncluida = false;
+    $('posicion').value = 'zona';
+    $('baseInfo').textContent = 'Usando tu imagen (' + i.naturalWidth + ' × ' + i.naturalHeight + ' px). Mueve la tarjeta para que no tape textos.' + (i.naturalWidth !== i.naturalHeight ? ' Se usa el centro cuadrado.' : '');
+    dibujar();
+  }
+  $('cargar').addEventListener('click', () => $('archivo').click());
+  $('archivo').addEventListener('change', (e) => { const f = e.target.files[0]; if (f) usarArchivo(f); e.target.value = ''; });
+  $('original').addEventListener('click', () => { $('posicion').value = 'sueter'; usarIncluida(); });
+  const stage = $('stage');
+  stage.addEventListener('dragover', (e) => { e.preventDefault(); stage.classList.add('drop'); });
+  stage.addEventListener('dragleave', () => stage.classList.remove('drop'));
+  stage.addEventListener('drop', (e) => {
+    e.preventDefault(); stage.classList.remove('drop');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f && /^image\//.test(f.type)) usarArchivo(f);
+  });
+  $('centrar').addEventListener('click', () => { $('movX').value = 0; $('movY').value = 0; $('tamano').value = 100; dibujar(); });
+
+  // ---------- descargar ----------
+  let descargas = null;
+  function nombreArchivo() {
+    const n = ($('nombre').value || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return 'afiche-urgencia-dental-' + $('formato').value.replace(':', 'x') + '-' + (n || 'personalizado') + '.png';
+  }
+  $('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!normalizarFono($('telefono').value)) {
+      $('estado').textContent = 'Falta un celular válido: el QR no funcionaría.'; $('estado').className = 'hint err'; $('telefono').focus(); return;
+    }
+    dibujar();
+    $('estado').className = 'hint'; $('estado').textContent = 'Preparando la imagen…';
+    cv.toBlob(async (blob) => {
+      if (!blob) { $('estado').textContent = 'No se pudo crear la imagen.'; return; }
+      const nombre = nombreArchivo();
+      if (descargas) {
+        try { await descargas.save({ filename: nombre, data: blob }); $('estado').textContent = 'Listo: ' + nombre; return; }
+        catch (err) { if (err && err.code === 'declined') { $('estado').textContent = 'Descarga cancelada.'; return; } }
+      }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = nombre;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      $('estado').textContent = 'Si no se descargó: clic derecho sobre el afiche → "Guardar imagen como…" (en el celular, mantén presionado el afiche).';
+    }, 'image/png');
+  });
+
+  // ---------- arranque ----------
+  cargarDatos();
+  $('form').addEventListener('input', dibujar);
+  $('form').addEventListener('change', dibujar);
+  usarIncluida();
+  if (document.fonts && document.fonts.load) {
+    Promise.all(['600', '700', '800', '900'].map(p => document.fonts.load(p + ' 40px Nunito'))).then(dibujar, () => {});
+  }
+  if (typeof window.qrcode !== 'function') {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+    sc.onload = dibujar; document.head.appendChild(sc);
+  }
+  // ---------- instalar como app ----------
+  (function instalacion() {
+    if (!document.querySelector('link[rel="manifest"]')) return;     // versión sin app (vista previa)
+    const caja = $('instalar'), boton = $('instBoton'), ya = $('instYa'), texto = $('instTexto');
+    const KI = 'afiche-urgencia-instalada';
+    const marcar = () => { try { localStorage.setItem(KI, '1'); } catch (e) {} };
+    const marcada = () => { try { return localStorage.getItem(KI) === '1'; } catch (e) { return false; } };
+    const abiertaComoApp = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+    // Abierta desde el ícono: ya está instalada, no se ofrece nada.
+    if (abiertaComoApp) { marcar(); return; }
+    if (marcada()) return;
+    $('instCerrar').addEventListener('click', () => { marcar(); caja.hidden = true; });
+    ya.addEventListener('click', () => { marcar(); caja.hidden = true; });
+    // Android y computador (Chrome/Edge): Chrome sólo avisa si la app NO está instalada.
+    let aviso = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); aviso = e;
+      boton.hidden = false; ya.hidden = true;
+      texto.textContent = 'Queda con su ícono en la pantalla de inicio y se abre sin buscar el enlace.';
+      caja.hidden = false;
+    });
+    boton.addEventListener('click', async () => {
+      if (!aviso) return;
+      aviso.prompt();
+      try { const r = await aviso.userChoice; if (r && r.outcome === 'accepted') { marcar(); caja.hidden = true; } } catch (e) {}
+      aviso = null; boton.hidden = true;
+    });
+    window.addEventListener('appinstalled', () => { marcar(); caja.hidden = true; });
+    // iPhone/iPad: no hay botón de instalar; se explica cómo hacerlo en Safari.
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (ios) {
+      const safari = /safari/i.test(navigator.userAgent) && !/crios|fxios|edgios|gsa\//i.test(navigator.userAgent);
+      texto.innerHTML = safari
+        ? 'Toca <svg class="compartir" viewBox="0 0 24 24" aria-label="Compartir"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M7.5 7.5 12 3l4.5 4.5M6 11H5v10h14V11h-1"/></svg> <b>Compartir</b> abajo y luego <b>"Agregar a inicio"</b>.'
+        : 'Abre este enlace en <b>Safari</b>, toca <b>Compartir</b> y luego <b>"Agregar a inicio"</b>.';
+      ya.hidden = false; caja.hidden = false;
+    }
+  })();
+
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('downloads').then((d) => { descargas = d; }, () => {});
+  }
+})();
+</script>
+
+</body>
+</html>
