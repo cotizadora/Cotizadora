@@ -71,6 +71,14 @@ Problemas que se arreglaron:
 
 Cuando funcione bien, decidir si se deja en la versión principal (con el merge del pull request #1).
 
+## 3. Afiche Urgencia Dental (redes sociales)
+
+- **Enlace para las compañeras:** https://cotizadora.github.io/Cotizadora/afiche/ (GitHub Pages, desde la carpeta `afiche/` de `main`; con mi permiso se publica sólo esa carpeta en main).
+- App instalable (Android: botón Instalar; iPhone: Safari → Compartir → Agregar a inicio; no se ofrece si ya está instalada), funciona sin señal, miniatura para WhatsApp (`og.jpg`).
+- Base: afiche Uno Salud Dental hecho en ChatGPT (`afiche/base-urgencia.jpg`). Encima: celular en el botón azul (tapa "Contrátalo hoy") y tarjeta con nombre, celular y QR a WhatsApp o llamada. Formatos 1:1, 4:5 y 9:16.
+- Prompts para ChatGPT: `DENTAL/redes/PROMPT-URGENCIA-1-PERSONA.md` (incluye uno con zona libre para la tarjeta). Sin logo ni nombre de Bci; sí logo Uno Salud Dental.
+- Al cambiar la app: editar en la rama, copiar `afiche/` a main y subir la versión del caché en `afiche/sw.js`.
+
 ## Notas para Claude
 
 - Esta sesión corre en la nube y no puede tocar archivos de mi PC. Los cambios se suben a la rama y yo ejecuto INSTALAR.bat.
