@@ -4,7 +4,7 @@
   "short_name": "Afiche Dental",
   "description": "Arma tu afiche del Plan Urgencia Dental con tu nombre, tu celular y un QR a tu WhatsApp.",
   "lang": "es-CL",
-  "start_url": "index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
