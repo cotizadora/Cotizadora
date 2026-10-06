@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Afiche Urgencia Dental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+/* Layout: herramienta de dos paneles — controles a la izquierda, afiche en vivo a la derecha; en celular se apilan. */
+:root {
+  --bg: #F3F7F7;
+  --panel: #FFFFFF;
+  --fg: #12302F;
+  --muted: #5B7271;
+  --line: #D6E3E2;
+  --accent: #0E8C88;
+  --accent-fg: #FFFFFF;
+  --warm: #F07F5B;
+  --field: #FBFDFD;
+  --danger: #B3402A;
+  --font: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1A1A; --panel: #162424; --fg: #E4EFEE; --muted: #9DB3B1; --line: #2A3D3C;
+    --accent: #3BB5AF; --accent-fg: #082322; --warm: #F49A7C; --field: #1B2C2B; --danger: #F08A72;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1A1A; --panel: #162424; --fg: #E4EFEE; --muted: #9DB3B1; --line: #2A3D3C;
+  --accent: #3BB5AF; --accent-fg: #082322; --warm: #F49A7C; --field: #1B2C2B; --danger: #F08A72;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.45; padding-inline: 16px; padding-block: 20px 32px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
+header h1 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 62ch; }
+.grid { display: grid; grid-template-columns: minmax(0, 370px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 18px; min-width: 0; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; min-width: 0; }
+legend { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); padding: 0; margin-bottom: 6px; }
+label { display: grid; gap: 4px; font-weight: 600; font-size: 0.9rem; }
+label small { font-weight: 400; color: var(--muted); }
+input[type="text"], input[type="tel"], textarea, select {
+  font: inherit; color: var(--fg); background: var(--field); border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; width: 100%;
+}
+textarea { resize: vertical; min-height: 64px; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg label { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; background: var(--field); }
+.seg input { accent-color: var(--accent); margin: 0; }
+.seg label:has(input:checked) { border-color: var(--accent); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.btn { font: inherit; font-weight: 800; border-radius: 10px; padding: 11px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--field); color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); width: 100%; font-size: 1rem; }
+.btn.link { border: 0; background: none; color: var(--accent); padding: 4px 0; font-weight: 600; text-decoration: underline; }
+.base-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.hint { font-size: 0.82rem; color: var(--muted); margin: 0; }
+.hint.err { color: var(--danger); font-weight: 600; }
+.tag { display: inline-block; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warm); }
+.stage { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; justify-items: center; min-width: 0; }
+.stage canvas { max-width: 100%; max-height: 78vh; width: auto; height: auto; border-radius: 8px; box-shadow: 0 6px 24px rgba(10, 40, 40, 0.18); }
+.drop { outline: 2px dashed var(--accent); outline-offset: 6px; }
+.meta { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; }
+#estado { min-height: 1.2em; }
+@media (prefers-reduced-motion: no-preference) { .btn { transition: filter 0.15s; } .btn:hover { filter: brightness(1.06); } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Afiche Urgencia Dental</h1>
+    <p>Escribe tu nombre y tu teléfono: el afiche lleva tu tarjeta y un QR que abre WhatsApp con tu número. Descárgalo y publícalo en Instagram, Facebook o TikTok.</p>
+  </header>
+
+  <div class="grid">
+    <form class="panel" id="form" autocomplete="on">
+      <fieldset>
+        <legend>1 · Afiche base</legend>
+        <div class="base-row">
+          <button type="button" class="btn" id="cargar">Cargar imagen del afiche</button>
+          <button type="button" class="btn link" id="quitar" hidden>Volver al diseño incluido</button>
+        </div>
+        <input type="file" id="archivo" accept="image/png,image/jpeg,image/webp" hidden>
+        <p class="hint" id="baseInfo">Usando el diseño incluido. Si tienes el afiche hecho en ChatGPT, cárgalo aquí (o arrástralo sobre la vista previa). Queda guardado en este navegador.</p>
+        <label id="formatoBox">Formato
+          <select id="formato">
+            <option value="1080x1350">Instagram y Facebook · vertical 4:5</option>
+            <option value="1080x1920">TikTok, Reels e Historias · 9:16</option>
+            <option value="1080x1080">Facebook · cuadrado 1:1</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>2 · Tus datos</legend>
+        <p class="hint"><span class="tag">Ejemplo</span> Reemplaza estos datos por los tuyos.</p>
+        <label>Nombre y apellido
+          <input type="text" id="nombre" maxlength="40" value="Camila Rojas">
+        </label>
+        <label>Cargo <small>(línea pequeña sobre tu nombre)</small>
+          <input type="text" id="cargo" maxlength="40" value="Tu ejecutiva Seguro Dental">
+        </label>
+        <label>Teléfono celular
+          <input type="tel" id="telefono" inputmode="tel" maxlength="20" value="+56 9 1234 5678">
+        </label>
+        <p class="hint" id="telInfo"></p>
+        <div>
+          <p class="hint" style="margin-bottom:6px">El QR abre:</p>
+          <div class="seg" role="radiogroup" aria-label="El QR abre">
+            <label><input type="radio" name="qr" id="qrWa" value="wa" checked> WhatsApp</label>
+            <label><input type="radio" name="qr" id="qrTel" value="tel"> Llamada</label>
+          </div>
+        </div>
+        <label id="msgBox">Mensaje que te llega por WhatsApp
+          <textarea id="mensaje" maxlength="200">Hola, vi el afiche del Plan Urgencia Dental y quiero más información.</textarea>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>3 · Tarjeta en el afiche</legend>
+        <div class="row">
+          <label>Ubicación
+            <select id="posicion">
+              <option value="abajo">Abajo</option>
+              <option value="arriba">Arriba</option>
+            </select>
+          </label>
+          <label>Estilo
+            <select id="estilo">
+              <option value="claro">Blanca</option>
+              <option value="oscuro">Verde oscuro</option>
+            </select>
+          </label>
+        </div>
+        <label>Tamaño <small id="tamTxt">100 %</small>
+          <input type="range" id="tamano" min="75" max="135" step="5" value="100">
+        </label>
+        <label>Subir o bajar <small>(para no tapar textos del afiche)</small>
+          <input type="range" id="ajuste" min="-30" max="30" step="1" value="0">
+        </label>
+      </fieldset>
+
+      <div style="display:grid; gap:8px">
+        <button type="submit" class="btn primary" id="descargar">Descargar afiche (PNG)</button>
+        <p class="hint" id="estado" role="status"></p>
+      </div>
+    </form>
+
+    <section class="stage" id="stage" aria-label="Vista previa del afiche">
+      <canvas id="lienzo" width="1080" height="1350" aria-label="Afiche personalizado"></canvas>
+      <p class="meta" id="medidas"></p>
+      <p class="hint">Antes de publicar, escanea el QR con tu celular para comprobar que abre tu número.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const cv = $('lienzo'), ctx = cv.getContext('2d');
+  const FONT = '"Figtree", "Segoe UI", system-ui, sans-serif';
+
+  // ---------- estado ----------
+  let base = null;            // HTMLImageElement del afiche cargado
+  const campos = ['nombre', 'cargo', 'telefono', 'mensaje', 'posicion', 'estilo', 'tamano', 'ajuste', 'formato'];
+
+  function leer() {
+    return {
+      nombre: $('nombre').value.trim(),
+      cargo: $('cargo').value.trim(),
+      telefono: $('telefono').value,
+      mensaje: $('mensaje').value.trim(),
+      qr: $('qrTel').checked ? 'tel' : 'wa',
+      posicion: $('posicion').value,
+      estilo: $('estilo').value,
+      tamano: +$('tamano').value / 100,
+      ajuste: +$('ajuste').value / 100,
+      formato: $('formato').value
+    };
+  }
+
+  // ---------- teléfono chileno ----------
+  // Acepta "912345678", "+56 9 1234 5678", "56912345678"… y deja 569XXXXXXXX.
+  function normalizarFono(t) {
+    let d = String(t || '').replace(/\D/g, '');
+    if (d.startsWith('00')) d = d.slice(2);
+    if (d.length === 8) d = '9' + d;
+    if (d.length === 9 && d[0] === '9') d = '56' + d;
+    return /^569\d{8}$/.test(d) ? d : null;
+  }
+  function fonoBonito(n) { return '+56 9 ' + n.slice(3, 7) + ' ' + n.slice(7); }
+
+  function contenidoQR(s, n) {
+    if (s.qr === 'tel') return 'tel:+' + n;
+    const txt = s.mensaje ? '?text=' + encodeURIComponent(s.mensaje) : '';
+    return 'https://wa.me/' + n + txt;
+  }
+
+  // ---------- dibujo ----------
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function fuente(peso, px) { ctx.font = peso + ' ' + Math.round(px) + 'px ' + FONT; }
+  // Achica la letra hasta que el texto quepa en `max` px de ancho.
+  function ajustarTexto(txt, peso, px, max, min) {
+    let p = px; fuente(peso, p);
+    while (ctx.measureText(txt).width > max && p > (min || 10)) { p -= 1; fuente(peso, p); }
+    return p;
+  }
+  function envolver(txt, max) {
+    const pal = txt.split(' '), lineas = []; let l = '';
+    for (const w of pal) {
+      const prueba = l ? l + ' ' + w : w;
+      if (ctx.measureText(prueba).width > max && l) { lineas.push(l); l = w; } else l = prueba;
+    }
+    if (l) lineas.push(l);
+    return lineas;
+  }
+
+  function diente(cx, cy, s, color) {
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(s / 100, s / 100);
+    ctx.beginPath();
+    ctx.moveTo(-38, -40);
+    ctx.bezierCurveTo(-58, -40, -62, -10, -52, 12);
+    ctx.bezierCurveTo(-44, 30, -40, 52, -32, 62);
+    ctx.bezierCurveTo(-22, 74, -14, 52, -8, 30);
+    ctx.bezierCurveTo(-4, 20, 4, 20, 8, 30);
+    ctx.bezierCurveTo(14, 52, 22, 74, 32, 62);
+    ctx.bezierCurveTo(40, 52, 44, 30, 52, 12);
+    ctx.bezierCurveTo(62, -10, 58, -40, 38, -40);
+    ctx.bezierCurveTo(24, -40, 14, -32, 0, -32);
+    ctx.bezierCurveTo(-14, -32, -24, -40, -38, -40);
+    ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+    ctx.restore();
+  }
+  function check(cx, cy, r, fondo, linea) {
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = fondo; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx - r * 0.42, cy + r * 0.02); ctx.lineTo(cx - r * 0.1, cy + r * 0.34); ctx.lineTo(cx + r * 0.46, cy - r * 0.3);
+    ctx.strokeStyle = linea; ctx.lineWidth = r * 0.22; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+  }
+
+  // Diseño incluido: los mismos textos del prompt de ChatGPT, sin fotografía.
+  function disenoIncluido(W, H, s) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#D8F1EE'); g.addColorStop(0.55, '#F4FBFA'); g.addColorStop(1, '#FFFFFF');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const u0 = W / 1080, m = 72 * u0;
+    const alto = H / W;                     // 1 = cuadrado, 1.25 = 4:5, 1.78 = 9:16
+    const reserva = tarjetaAlto(W, H, s) + 40 * u0;
+    const extra = alto > 1.6 ? 200 * u0 : 0;
+    // El contenido mide ~900 px (en 1080 de ancho); si no cabe (cuadrado), se achica entero.
+    const k = Math.min(1, (H - 2 * m - reserva - extra) / (900 * u0));
+    const u = u0 * k;
+    let y = m + (s.posicion === 'arriba' ? reserva : 0) + extra;
+
+    // círculo con diente
+    const rc = 150 * u;
+    const cxD = W - m - rc * 0.9, cyD = y + rc * 0.75;
+    ctx.beginPath(); ctx.arc(cxD, cyD, rc, 0, Math.PI * 2); ctx.fillStyle = '#9FDDD6'; ctx.fill();
+    ctx.beginPath(); ctx.arc(cxD, cyD, rc * 0.78, 0, Math.PI * 2); ctx.fillStyle = '#0E8C88'; ctx.fill();
+    diente(cxD, cyD + 4 * u, rc * 1.15, '#FFFFFF');
+
+    // etiqueta
+    fuente(800, 26 * u); const et = 'PLAN URGENCIA DENTAL';
+    const etW = ctx.measureText(et).width + 36 * u;
+    rr(m, y, etW, 50 * u, 25 * u); ctx.fillStyle = '#0E8C88'; ctx.fill();
+    ctx.fillStyle = '#FFFFFF'; ctx.textBaseline = 'middle'; ctx.fillText(et, m + 18 * u, y + 26 * u);
+    y += 50 * u + 34 * u;
+
+    // titular
+    ctx.textBaseline = 'alphabetic';
+    const maxT = cxD - rc - 24 * u - m;
+    ajustarTexto('¿Dolor de muela?', 800, 80 * u, maxT, 20); ctx.fillStyle = '#0B3B3C';
+    ctx.fillText('¿Dolor de muela?', m, y + 70 * u);
+    y += 92 * u;
+    fuente(800, 64 * u);
+    const l1 = 'Te atendemos', l2 = 'a costo ';
+    ctx.fillText(l1, m, y + 60 * u); y += 74 * u;
+    ctx.fillText(l2, m, y + 60 * u);
+    const wl2 = ctx.measureText(l2).width;
+    fuente(800, 96 * u); ctx.fillStyle = '#E8603C'; ctx.fillText('$0', m + wl2, y + 66 * u);
+    y += 112 * u;
+
+    fuente(600, 34 * u); ctx.fillStyle = '#2F5F5E';
+    ctx.fillText('Plan Urgencia Dental · para ti', m, y); y += 56 * u;
+
+    // beneficios
+    const ben = [
+      'Urgencias a costo $0: dolor intenso, inflamación o sangrado',
+      'Úsalo desde las 48 horas hábiles',
+      'Más de 80 clínicas Uno Salud Dental en todo Chile'
+    ];
+    const anchoB = W - 2 * m - 70 * u;
+    const lista = alto < 1.1 ? ben.slice(0, 2).concat([ben[2]]) : ben;
+    fuente(600, 32 * u);
+    for (const b of lista) {
+      const lineas = envolver(b, anchoB);
+      check(m + 22 * u, y + 2 * u, 22 * u, '#0E8C88', '#FFFFFF');
+      ctx.fillStyle = '#12302F';
+      lineas.forEach((l, i) => ctx.fillText(l, m + 64 * u, y + 13 * u + i * 40 * u));
+      y += Math.max(1, lineas.length) * 40 * u + 20 * u;
+    }
+    y += 14 * u;
+
+    // precio
+    const pw = 470 * u, ph = 150 * u;
+    rr(m, y, pw, ph, 28 * u); ctx.fillStyle = '#F7B733'; ctx.fill();
+    ctx.fillStyle = '#0B3B3C'; fuente(600, 30 * u); ctx.fillText('Solo', m + 30 * u, y + 46 * u);
+    fuente(800, 74 * u); ctx.fillText('UF 0,26', m + 28 * u, y + 118 * u);
+    const wUF = ctx.measureText('UF 0,26').width;
+    fuente(600, 30 * u); ctx.fillText('al mes', m + 28 * u + wUF + 12 * u, y + 118 * u);
+    fuente(600, 26 * u); ctx.fillStyle = '#2F5F5E';
+    const notas = envolver('Incluye examen y limpieza dental anual a costo $0 · Sin deducible', W - 2 * m - pw - 30 * u);
+    notas.forEach((l, i) => ctx.fillText(l, m + pw + 30 * u, y + 50 * u + i * 34 * u));
+    y += ph + 26 * u;
+
+    // legal (sobre la tarjeta si va abajo)
+    fuente(400, 21 * u); ctx.fillStyle = '#5B7271';
+    const yLegal = s.posicion === 'abajo' ? Math.min(y + 20 * u, posTarjeta(W, H, s).y - 18 * u) : H - m * 0.7;
+    ctx.fillText('Plan para titular de 18 a 69 años. Sujeto a condiciones de la póliza.', m, yLegal, W - 2 * m);
+  }
+
+  function tarjetaAlto(W, H, s) { return Math.round(W * 0.205 * s.tamano); }
+  function posTarjeta(W, H, s) {
+    const h = tarjetaAlto(W, H, s), m = Math.round(W * 0.045);
+    // En 9:16 TikTok tapa los ~400 px de abajo (de 1920) con sus botones y textos.
+    const libreAbajo = H / W > 1.6 ? H * 0.21 : m;
+    const libreArriba = H / W > 1.6 ? H * 0.13 : m;
+    let y = s.posicion === 'arriba' ? libreArriba : H - h - libreAbajo;
+    y += s.ajuste * H * 0.5;
+    y = Math.max(m * 0.5, Math.min(H - h - m * 0.5, y));
+    return { x: m, y: Math.round(y), w: W - 2 * m, h: h };
+  }
+
+  function dibujarQR(texto, x, y, lado, color) {
+    if (typeof window.qrcode !== 'function') return false;
+    const q = window.qrcode(0, 'M'); q.addData(texto); q.make();
+    const n = q.getModuleCount(), celda = lado / n;
+    ctx.fillStyle = color;
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+      if (q.isDark(r, c)) ctx.fillRect(Math.floor(x + c * celda), Math.floor(y + r * celda), Math.ceil(celda), Math.ceil(celda));
+    }
+    return true;
+  }
+
+  function tarjeta(W, H, s, numero) {
+    const p = posTarjeta(W, H, s), u = p.h / 220;
+    const oscuro = s.estilo === 'oscuro';
+    ctx.save();
+    ctx.shadowColor = 'rgba(8, 40, 40, 0.28)'; ctx.shadowBlur = 30 * u; ctx.shadowOffsetY = 8 * u;
+    rr(p.x, p.y, p.w, p.h, 30 * u); ctx.fillStyle = oscuro ? '#0B3B3C' : '#FFFFFF'; ctx.fill();
+    ctx.restore();
+    // franja de acento
+    rr(p.x, p.y, 16 * u, p.h, 8 * u); ctx.save(); ctx.clip();
+    ctx.fillStyle = '#F07F5B'; ctx.fillRect(p.x, p.y, 16 * u, p.h); ctx.restore();
+
+    // QR sobre blanco (siempre, para que lo lea cualquier celular)
+    const qPad = 18 * u, lado = p.h - 2 * qPad;
+    const qx = p.x + p.w - lado - qPad, qy = p.y + qPad;
+    rr(qx - 10 * u, qy - 10 * u, lado + 20 * u, lado + 20 * u, 14 * u); ctx.fillStyle = '#FFFFFF'; ctx.fill();
+    let okQR = false;
+    if (numero) okQR = dibujarQR(contenidoQR(s, numero), qx, qy, lado, '#0B3B3C');
+    if (!okQR) {
+      ctx.fillStyle = '#E7EFEE'; ctx.fillRect(qx, qy, lado, lado);
+      ctx.fillStyle = '#5B7271'; fuente(600, 22 * u); ctx.textAlign = 'center';
+      ctx.fillText(numero ? 'QR…' : 'Falta tu', qx + lado / 2, qy + lado / 2 - 4 * u);
+      if (!numero) ctx.fillText('teléfono', qx + lado / 2, qy + lado / 2 + 26 * u);
+      ctx.textAlign = 'left';
+    }
+
+    // textos
+    const tx = p.x + 48 * u, maxW = qx - tx - 28 * u;
+    const cPrin = oscuro ? '#FFFFFF' : '#0B3B3C', cSec = oscuro ? '#A8DCD7' : '#0E8C88', cTer = oscuro ? '#D3E7E5' : '#5B7271';
+    ctx.textBaseline = 'alphabetic';
+    ajustarTexto((s.cargo || 'Tu ejecutiva Seguro Dental').toUpperCase(), 800, 22 * u, maxW, 12);
+    ctx.fillStyle = cSec; ctx.fillText((s.cargo || 'Tu ejecutiva Seguro Dental').toUpperCase(), tx, p.y + 52 * u);
+    const nom = s.nombre || 'Tu nombre';
+    ajustarTexto(nom, 800, 54 * u, maxW, 18); ctx.fillStyle = cPrin; ctx.fillText(nom, tx, p.y + 112 * u);
+    const fono = numero ? fonoBonito(numero) : 'Escribe tu teléfono';
+    ajustarTexto(fono, 600, 40 * u, maxW, 14); ctx.fillStyle = cPrin; ctx.fillText(fono, tx, p.y + 160 * u);
+    const llamado = s.qr === 'tel' ? 'Escanea el código y llámame' : 'Escanea y escríbeme por WhatsApp';
+    ajustarTexto(llamado, 600, 24 * u, maxW, 11); ctx.fillStyle = cTer; ctx.fillText(llamado, tx, p.y + 196 * u);
+  }
+
+  function medidas(s) {
+    if (base) return { W: base.naturalWidth, H: base.naturalHeight };
+    const [w, h] = s.formato.split('x').map(Number); return { W: w, H: h };
+  }
+
+  function dibujar() {
+    const s = leer();
+    const { W, H } = medidas(s);
+    if (cv.width !== W) cv.width = W;
+    if (cv.height !== H) cv.height = H;
+    ctx.clearRect(0, 0, W, H);
+    if (base) ctx.drawImage(base, 0, 0, W, H); else disenoIncluido(W, H, s);
+    const numero = normalizarFono(s.telefono);
+    tarjeta(W, H, s, numero);
+
+    $('telInfo').textContent = numero ? 'El QR abrirá ' + (s.qr === 'tel' ? 'una llamada a ' : 'WhatsApp con ') + fonoBonito(numero) + '.' : 'Escribe un celular chileno de 9 dígitos, por ejemplo 9 1234 5678.';
+    $('telInfo').className = numero ? 'hint' : 'hint err';
+    $('msgBox').hidden = s.qr === 'tel';
+    $('tamTxt').textContent = Math.round(s.tamano * 100) + ' %';
+    $('formatoBox').hidden = !!base;
+    $('quitar').hidden = !base;
+    $('medidas').textContent = W + ' × ' + H + ' px' + (base ? ' · tu afiche' : ' · diseño incluido');
+    guardarDatos();
+  }
+
+  // ---------- recordar datos en este navegador ----------
+  const LS = 'afiche-urgencia-datos';
+  function guardarDatos() {
+    try {
+      const d = {}; campos.forEach(k => d[k] = $(k).value); d.qr = $('qrTel').checked ? 'tel' : 'wa';
+      localStorage.setItem(LS, JSON.stringify(d));
+    } catch (e) {}
+  }
+  function cargarDatos() {
+    try {
+      const d = JSON.parse(localStorage.getItem(LS) || 'null'); if (!d) return;
+      campos.forEach(k => { if (d[k] != null) $(k).value = d[k]; });
+      (d.qr === 'tel' ? $('qrTel') : $('qrWa')).checked = true;
+    } catch (e) {}
+  }
+
+  // ---------- afiche base (guardado en IndexedDB de este navegador) ----------
+  function bd() {
+    return new Promise((res, rej) => {
+      try {
+        const r = indexedDB.open('afiche-urgencia', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('img');
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+      } catch (e) { rej(e); }
+    });
+  }
+  async function bdPut(blob) {
+    try { const db = await bd(); db.transaction('img', 'readwrite').objectStore('img').put(blob, 'base'); } catch (e) {}
+  }
+  async function bdGet() {
+    try {
+      const db = await bd();
+      return await new Promise((res) => { const q = db.transaction('img').objectStore('img').get('base'); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); });
+    } catch (e) { return null; }
+  }
+  async function bdDel() { try { const db = await bd(); db.transaction('img', 'readwrite').objectStore('img').delete('base'); } catch (e) {} }
+
+  function usarBlob(blob, guardar) {
+    return new Promise((res) => {
+      const img = new Image();
+      img.onload = () => {
+        base = img;
+        $('baseInfo').textContent = 'Usando tu afiche (' + img.naturalWidth + ' × ' + img.naturalHeight + ' px). Ajusta la tarjeta para que no tape el precio ni el titular.';
+        if (guardar) bdPut(blob);
+        dibujar(); res(true);
+      };
+      img.onerror = () => { $('baseInfo').textContent = 'No se pudo abrir esa imagen. Prueba con un PNG o JPG.'; res(false); };
+      img.src = URL.createObjectURL(blob);
+    });
+  }
+  $('cargar').addEventListener('click', () => $('archivo').click());
+  $('archivo').addEventListener('change', (e) => { const f = e.target.files[0]; if (f) usarBlob(f, true); e.target.value = ''; });
+  $('quitar').addEventListener('click', () => {
+    base = null; bdDel();
+    $('baseInfo').textContent = 'Usando el diseño incluido. Si tienes el afiche hecho en ChatGPT, cárgalo aquí (o arrástralo sobre la vista previa).';
+    dibujar();
+  });
+  const stage = $('stage');
+  stage.addEventListener('dragover', (e) => { e.preventDefault(); stage.classList.add('drop'); });
+  stage.addEventListener('dragleave', () => stage.classList.remove('drop'));
+  stage.addEventListener('drop', (e) => {
+    e.preventDefault(); stage.classList.remove('drop');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f && /^image\//.test(f.type)) usarBlob(f, true);
+  });
+
+  // ---------- descargar ----------
+  let descargas = null;
+  function nombreArchivo() {
+    const n = ($('nombre').value || 'afiche').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return 'afiche-urgencia-dental-' + (n || 'personalizado') + '.png';
+  }
+  $('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!normalizarFono($('telefono').value)) { $('estado').textContent = 'Falta un teléfono válido: el QR no funcionaría.'; $('estado').className = 'hint err'; $('telefono').focus(); return; }
+    dibujar();
+    $('estado').className = 'hint'; $('estado').textContent = 'Preparando la imagen…';
+    cv.toBlob(async (blob) => {
+      if (!blob) { $('estado').textContent = 'No se pudo crear la imagen.'; return; }
+      const nombre = nombreArchivo();
+      if (descargas) {
+        try { await descargas.save({ filename: nombre, data: blob }); $('estado').textContent = 'Listo: ' + nombre; return; }
+        catch (err) {
+          if (err && err.code === 'declined') { $('estado').textContent = 'Descarga cancelada.'; return; }
+        }
+      }
+      // Archivo abierto directo en el navegador: descarga normal.
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = nombre;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      $('estado').textContent = 'Si no se descargó: clic derecho en el afiche → "Guardar imagen como…" (en celular, mantén presionado el afiche).';
+    }, 'image/png');
+  });
+
+  // ---------- arranque ----------
+  cargarDatos();
+  $('form').addEventListener('input', dibujar);
+  $('form').addEventListener('change', dibujar);
+  dibujar();
+  if (document.fonts && document.fonts.load) {
+    Promise.all([document.fonts.load('800 40px Figtree'), document.fonts.load('600 40px Figtree'), document.fonts.load('400 40px Figtree')]).then(dibujar, () => {});
+  }
+  // Si la biblioteca del QR tarda o falla en su primer sitio, se prueba otro.
+  if (typeof window.qrcode !== 'function') {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+    sc.onload = dibujar; document.head.appendChild(sc);
+  }
+  bdGet().then((b) => { if (b) usarBlob(b, false); });
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('downloads').then((d) => { descargas = d; }, () => {});
+  }
+})();
+</script>
+
+</body>
+</html>
