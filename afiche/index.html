@@ -141,7 +141,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <input type="text" id="nombre" maxlength="40" value="Camila Rojas">
         </label>
         <label>Línea sobre tu nombre
-          <input type="text" id="cargo" maxlength="36" value="Tu ejecutiva Seguro Dental">
+          <input type="text" id="cargo" maxlength="36" value="Tu ejecutiva">
         </label>
         <label>Celular
           <input type="tel" id="telefono" inputmode="tel" maxlength="20" value="+56 9 1234 5678">
@@ -243,7 +243,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   const BOTON = { x: 75, y: 1078, w: 397, h: 81 };
   // Ubicaciones de la tarjeta, en fracciones del lado del cuadrado.
   const POS = {
-    sueter: { x: 0.553, y: 0.783, w: 0.425, h: 0.196 },
+    sueter: { x: 0.49, y: 0.77, w: 0.495, h: 0.215 },
     // Zona que el prompt nuevo deja vacía (abajo a la izquierda).
     zona:   { x: 0.045, y: 0.765, w: 0.47,  h: 0.19 }
   };
@@ -330,8 +330,8 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
       // 4:5 la tarjeta va en la franja de abajo; 9:16, en la de arriba,
       // bajo la barra de TikTok (~150 px) y lejos de sus botones de abajo.
       const f = g.franja, m = 44;
-      const h = Math.round(222 * s.tamano), w = Math.round(Math.min(f.w - 2 * m, 980 * s.tamano));
-      const yBase = s.formato === '9:16' ? 168 : f.y + (f.h - h) / 2;
+      const h = Math.round((s.formato === '9:16' ? 252 : 222) * s.tamano), w = Math.round(Math.min(f.w - 2 * m, 980 * s.tamano));
+      const yBase = s.formato === '9:16' ? 150 : f.y + (f.h - h) / 2;
       const x = (g.W - w) / 2 + s.movX * g.W * 0.4;
       const y = yBase + s.movY * (s.formato === '9:16' ? 300 : 120);
       return clamp({ x, y, w, h }, g);
@@ -389,56 +389,97 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
     ctx.textBaseline = 'alphabetic';
   }
 
+  // Parte un texto en líneas que quepan en `max` px (con la fuente ya puesta).
+  function lineasDe(txt, max) {
+    const pal = String(txt).split(/\s+/), out = []; let l = '';
+    for (const w of pal) { const t = l ? l + ' ' + w : w; if (ctx.measureText(t).width > max && l) { out.push(l); l = w; } else l = t; }
+    if (l) out.push(l);
+    return out;
+  }
+  // Ajusta el tamaño para que el texto quepa en `maxLineas` líneas, sin bajar de `min`.
+  function bloque(txt, peso, tam, min, max, maxLineas) {
+    let t = tam, ls;
+    for (;;) { fuente(peso, t); ls = lineasDe(txt, max); if ((ls.length <= maxLineas && ls.every(l => ctx.measureText(l).width <= max)) || t <= min) break; t -= 1; }
+    return { peso, t, ls, alto: ls.length * t * 1.12 };
+  }
+
   function tarjeta(s, g, numero) {
     const r = rectTarjeta(s, g);
-    const u = r.h / 240;
+    let u = r.h / 240;
     const colores = {
-      blanca:  { fondo: '#FFFFFF', prin: '#0B2C8A', sec: CELESTE, ter: '#4A5D86' },
-      azul:    { fondo: AZUL,      prin: '#FFFFFF', sec: '#8FDDF5', ter: '#D5E4FF' },
-      celeste: { fondo: CELESTE,   prin: '#FFFFFF', sec: '#08307E', ter: '#EAF8FE' }
+      blanca:  { fondo: '#FFFFFF', prin: '#0B2C8A', sec: '#0388B5', ter: '#33466F' },
+      azul:    { fondo: AZUL,      prin: '#FFFFFF', sec: '#A5E6FA', ter: '#E3EDFF' },
+      celeste: { fondo: CELESTE,   prin: '#FFFFFF', sec: '#06296E', ter: '#FFFFFF' }
     }[s.estilo] || {};
+    // Letra mínima legible en un celular (el afiche se ve a ~400 px de ancho).
+    const minimo = g.W * 0.022;
+    const cargo = s.cargo || 'Tu ejecutiva';
+    const nom = s.nombre || 'Tu nombre';
+    const fono = numero ? fonoBonito(numero) : 'Tu celular';
+    const llamado = s.qr === 'tel' ? 'Escanea y llámame' : 'Escanea y escríbeme por WhatsApp';
+
+    // Medir el bloque de texto; si no cabe, la tarjeta crece hacia arriba.
+    const pad = 22 * u;
+    // El QR no crece con la tarjeta: así el texto conserva su ancho.
+    const ladoQR = Math.min(r.h - 2 * pad, r.w * 0.36);
+    let medir = () => {
+      const lado = ladoQR, qx = r.x + r.w - lado - pad;
+      const maxW = qx - (r.x + 28 * u) - 20 * u;
+      const b = [
+        bloque(cargo.toUpperCase(), 900, Math.max(minimo * 0.95, 23 * u), minimo * 0.8, maxW, 2),
+        bloque(nom, 900, Math.max(minimo * 1.7, 52 * u), minimo * 1.15, maxW, 2),
+        bloque(fono, 800, Math.max(minimo * 1.3, 38 * u), minimo, maxW, 1),
+        bloque(llamado, 800, Math.max(minimo, 25 * u), minimo * 0.9, maxW, 2)
+      ];
+      const sep = [8 * u, 10 * u, 8 * u];
+      const alto = b.reduce((a, x) => a + x.alto, 0) + sep.reduce((a, x) => a + x, 0);
+      return { lado, qx, maxW, b, sep, alto };
+    };
+    let L = medir();
+    const falta = L.alto - (r.h - 2 * pad);
+    if (falta > 0) { r.y -= falta; r.h += falta; r.y = Math.max(10, r.y); L = medir(); }
+
     ctx.save();
     ctx.shadowColor = 'rgba(4, 25, 70, 0.30)'; ctx.shadowBlur = 34 * u; ctx.shadowOffsetY = 10 * u;
     rr(r.x, r.y, r.w, r.h, 30 * u); ctx.fillStyle = colores.fondo; ctx.fill();
     ctx.restore();
 
     // QR (siempre oscuro sobre blanco, para que lo lea cualquier celular)
-    const qPad = 20 * u, lado = r.h - 2 * qPad;
-    const qx = r.x + r.w - lado - qPad, qy = r.y + qPad;
+    const lado = L.lado, qx = L.qx, qy = r.y + (r.h - lado) / 2;
     rr(qx - 8 * u, qy - 8 * u, lado + 16 * u, lado + 16 * u, 14 * u); ctx.fillStyle = '#FFFFFF'; ctx.fill();
     let ok = false;
     if (numero) ok = dibujarQR(contenidoQR(s, numero), qx, qy, lado, '#06246B');
     if (!ok) {
       ctx.fillStyle = '#EDF2FA'; ctx.fillRect(qx, qy, lado, lado);
-      ctx.fillStyle = '#5A6B8C'; fuente(800, 22 * u); ctx.textAlign = 'center';
+      ctx.fillStyle = '#5A6B8C'; fuente(800, Math.max(minimo, 22 * u)); ctx.textAlign = 'center';
       ctx.fillText(numero ? 'Cargando…' : 'Falta tu', qx + lado / 2, qy + lado / 2 - 2 * u);
-      if (!numero) ctx.fillText('celular', qx + lado / 2, qy + lado / 2 + 26 * u);
+      if (!numero) ctx.fillText('celular', qx + lado / 2, qy + lado / 2 + 30 * u);
       ctx.textAlign = 'left';
     }
 
-    // textos
-    const tx = r.x + 30 * u, maxW = qx - tx - 22 * u;
-    const cargo = (s.cargo || 'Tu ejecutiva Seguro Dental');
-    const nom = s.nombre || 'Tu nombre';
-    const fono = numero ? fonoBonito(numero) : 'Tu celular';
-    const llamado = s.qr === 'tel' ? 'Escanea y llámame' : 'Escanea y escríbeme por WhatsApp';
+    // textos, centrados en el alto de la tarjeta
+    const tx = r.x + 28 * u;
+    let y = r.y + (r.h - L.alto) / 2;
+    const color = [colores.sec, colores.prin, colores.prin, colores.ter];
     ctx.textBaseline = 'alphabetic';
-    ajustar(cargo.toUpperCase(), 900, 20 * u, maxW, 9); ctx.fillStyle = colores.sec; ctx.fillText(cargo.toUpperCase(), tx, r.y + 50 * u);
-    // nombre: hasta dos líneas si es largo
-    let tamNom = ajustar(nom, 900, 46 * u, maxW, 26 * u);
-    let lineas = [nom];
-    if (ctx.measureText(nom).width > maxW) {
-      const pal = nom.split(' '); const mitad = Math.ceil(pal.length / 2);
-      lineas = [pal.slice(0, mitad).join(' '), pal.slice(mitad).join(' ')];
-      tamNom = Math.min(ajustar(lineas[0], 900, 38 * u, maxW, 14), ajustar(lineas[1], 900, 38 * u, maxW, 14));
-    }
-    ctx.fillStyle = colores.prin; fuente(900, tamNom);
-    let yN = r.y + 100 * u;
-    if (lineas.length > 1) { ctx.fillText(lineas[0], tx, r.y + 88 * u); ctx.fillText(lineas[1], tx, r.y + 124 * u); yN = r.y + 124 * u; }
-    else ctx.fillText(nom, tx, yN);
-    ajustar(fono, 800, 34 * u, maxW, 12); ctx.fillStyle = colores.prin; ctx.fillText(fono, tx, yN + 52 * u);
-    ajustar(llamado, 700, 21 * u, maxW, 9); ctx.fillStyle = colores.ter;
-    ctx.fillText(llamado, tx, Math.min(r.y + r.h - 24 * u, yN + 92 * u));
+    L.b.forEach((b, i) => {
+      fuente(b.peso, b.t); ctx.fillStyle = color[i];
+      b.ls.forEach((l) => { y += b.t * 1.12; ctx.fillText(l, tx, y - b.t * 0.22); });
+      if (i < L.sep.length) y += L.sep[i];
+    });
+  }
+
+  // Línea legal del afiche incluido: venía en letra muy chica (da desconfianza).
+  // Se tapa y se vuelve a escribir legible, en dos líneas.
+  function legalGrande(g, conBoton) {
+    if (!esIncluida) return;
+    const k = g.img.l / ORIG, ox = g.img.x, oy = g.img.y;
+    ctx.fillStyle = FONDO; ctx.fillRect(ox + 60 * k, oy + 1168 * k, 500 * k, 32 * k);
+    const t = Math.max(25 * k, g.W * 0.02);
+    ctx.fillStyle = '#2E4472'; fuente(600, t); ctx.textBaseline = 'alphabetic';
+    const y0 = oy + (conBoton ? 1197 : 1190) * k;
+    ctx.fillText('Plan para titular de 18 a 69 años.', ox + 78 * k, y0);
+    ctx.fillText('Sujeto a condiciones de la póliza.', ox + 78 * k, y0 + t * 1.2);
   }
 
   // ---------- dibujo completo ----------
@@ -456,6 +497,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
     }
     const numero = normalizarFono(s.telefono);
     botonFono(s, g, numero);
+    legalGrande(g, true);
     tarjeta(s, g, numero);
 
     $('telInfo').textContent = numero
