@@ -1,6 +1,6 @@
 // Afiche Urgencia Dental — deja la app lista para abrirse aunque la señal sea mala.
 const CACHE = 'afiche-urgencia-v1';
-const BASE = ['./', 'index.html', 'manifest.webmanifest', 'base-urgencia.jpg',
+const BASE = ['index.html', 'manifest.webmanifest', 'base-urgencia.jpg',
   'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon-32.png'];
 
 self.addEventListener('install', (e) => {
