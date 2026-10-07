@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.2.3
+ShortCut-Vicidial-GO 1.2.4
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.3).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.4).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -85,9 +85,14 @@ LA CLAVE DE GO (desde la 1.2.3)
 - Al repetir, el atajo la escribe y aprieta «Ingresar» solo: el flujo entra a
   GO y sigue hasta el final sin que toques nada.
 - Si cambias tu clave de GO, vuelve a grabar el flujo.
-- Si el flujo se grabó sin clave, el atajo muestra "👆 Haz clic aquí para
-  entrar a GO…": un clic en ese aviso basta para que Chrome entregue la clave
-  que tiene guardada; el atajo aprieta «Ingresar» y sigue solo.
+- Si el flujo se grabó sin clave, el atajo muestra "👆 Haz un clic en
+  cualquier parte de esta página…": un clic basta para que Chrome entregue la
+  clave que tiene guardada; el atajo aprieta «Ingresar» y sigue solo (también
+  sigue si la escribes y aprietas «Ingresar» tú). El aviso nunca tapa botones.
+- Desde la 1.2.4, después de entrar el atajo espera (hasta 30 s) a que GO
+  termine de cargar "Oportunidades" antes de seguir. Antes, si el login
+  tardaba, se rendía y quedaba quieto en esa pantalla. Si un atajo se detiene,
+  ahora lo dice en rojo arriba de la misma página.
 
 DESDE EL COTIZADOR DENTAL (desde la 1.2.2 y el cotizador 3.1.3)
 - En la tarjeta del cliente del cotizador aparece 🚀 con el nombre del flujo

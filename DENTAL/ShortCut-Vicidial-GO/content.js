@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.2.3';
+  const VCA_VERSION = '1.2.4';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -595,15 +595,16 @@
       d.id = 'vca-aviso-login';
       d.setAttribute('style', 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;max-width:min(92vw,520px);' +
         'background:#0B2C8A;color:#fff;font:600 15px/1.4 system-ui,Segoe UI,sans-serif;padding:14px 18px;border-radius:14px;' +
-        'box-shadow:0 12px 30px rgba(0,20,60,.35);text-align:center;cursor:pointer;opacity:.97');
-      d.textContent = '👆 Haz clic aquí para entrar a GO con tu clave guardada. ' +
-        '(Si no la tienes guardada, escríbela.) El atajo «' + (nombre || '') + '» sigue solo después.';
-      // Un clic aquí es "tocar la página": Chrome entrega la clave guardada y el
-      // atajo aprieta «Ingresar». Se enfoca el campo de la clave por si hay que escribirla.
-      d.addEventListener('click', () => {
-        try { const pw = Array.from(document.querySelectorAll('input[type="password"]')).find(visibleEl); if (pw) pw.focus(); } catch (e) {}
+        'box-shadow:0 12px 30px rgba(0,20,60,.35);text-align:center;pointer-events:none;opacity:.97');
+      d.textContent = '👆 Haz un clic en cualquier parte de esta página para entrar a GO con tu clave guardada ' +
+        '(o escríbela). El atajo «' + (nombre || '') + '» aprieta «Ingresar» y sigue solo.';
+      // Cualquier clic en la página es "tocarla": Chrome entrega la clave guardada
+      // y el atajo aprieta «Ingresar». El aviso no recibe clics: nunca tapa un botón.
+      document.addEventListener('pointerdown', function cambio(ev) {
+        if (!ev.isTrusted) return;
+        document.removeEventListener('pointerdown', cambio, true);
         d.textContent = '⏳ Entrando a GO… el atajo «' + (nombre || '') + '» sigue solo.';
-      });
+      }, true);
       (document.body || document.documentElement).appendChild(d);
       setTimeout(() => { try { d.remove(); } catch (e) {} }, 180000);
     } catch (e) {}
@@ -660,7 +661,13 @@
           return i;
         }
         log(tag + ': sesión iniciada, sigo');
-        await sleep(1500);
+        // GO tarda en armar su panel después de entrar: se espera (hasta 30 s)
+        // a que aparezca el próximo botón, y el plazo del atajo parte de nuevo.
+        const prox = steps[esIngresar ? i + 1 : i];
+        const t1 = Date.now();
+        await sleep(1200);
+        while (prox && !prox.xf && (!prox.sitio || prox.sitio === MI_SITIO) && Date.now() - t1 < 30000 && !resolverEnTodos(prox, isClickable)) await sleep(400);
+        if (corrida) corrida.hasta = Date.now() + 30000;
         if (!esIngresar) i--;      // el paso de esta vuelta es del panel: se hace ahora
         continue;
       }
@@ -686,11 +693,12 @@
   // (el menu de pausa no siempre esta disponible al instante).
   async function runSteps(steps, inicio, label) {
     const s = settings();
-    corrida = { label: label || '', steps: steps };
-    // GO: tope más corto, para avisar pronto si algo no aparece
-    const deadline = Date.now() + (IS_CRM ? Math.min(s.totalTimeoutMs, 15000) : s.totalTimeoutMs);
+    // GO / multicotizador: 30 s por tramo (las páginas de Bci tardan en cargar);
+    // el plazo se renueva cuando hubo que esperar el inicio de sesión.
+    corrida = { label: label || '', steps: steps, hasta: Date.now() + (IS_CRM ? 30000 : s.totalTimeoutMs) };
+    const yo = corrida;
     let attempt = 0, desde = inicio || 0;
-    while (Date.now() < deadline) {
+    while (Date.now() < yo.hasta) {
       attempt++;
       if (attempt > 1) log('Replay reintento ' + attempt + (desde ? ' (desde el paso ' + (desde + 1) + ')' : '') + '...');
       const fallo = await runStepsOnce(steps, s, desde);
@@ -712,8 +720,25 @@
       desde = primeroDisponible(steps) ? 0 : fallo;
     }
     log('Replay AGOTADO tras ' + attempt + ' intento(s): no se pudo aplicar el estado.');
+    if (IS_CRM) avisoEnPagina('⚠️ El atajo «' + (yo.label || '') + '» se detuvo' +
+      (pasoFallido ? ' en el paso ' + pasoFallido.n + ' de ' + pasoFallido.de + ': no apareció ' + pasoFallido.que : '') +
+      '. Sigue tú desde aquí o vuelve a apretar el botón.', '#8f1d2b');
     pendiente('clear'); corrida = null;
     return false;
+  }
+  // Aviso corto arriba de la página (no bloquea clics; se va solo).
+  function avisoEnPagina(texto, fondo) {
+    try {
+      const v = document.getElementById('vca-aviso-pagina'); if (v) v.remove();
+      const d = document.createElement('div');
+      d.id = 'vca-aviso-pagina';
+      d.setAttribute('style', 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;max-width:min(92vw,560px);' +
+        'background:' + (fondo || '#0B2C8A') + ';color:#fff;font:600 14px/1.4 system-ui,Segoe UI,sans-serif;padding:12px 16px;border-radius:14px;' +
+        'box-shadow:0 12px 30px rgba(0,20,60,.35);text-align:center;pointer-events:none');
+      d.textContent = texto;
+      (document.body || document.documentElement).appendChild(d);
+      setTimeout(() => { try { d.remove(); } catch (e) {} }, 25000);
+    } catch (e) {}
   }
 
   // ===========================================================================

@@ -38,7 +38,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.3
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.4
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -60,6 +60,7 @@ Qué hace:
 - **Flujo completo con un ▶ (v1.2.1):** cada paso guarda `ruta` y `url`. ▶ en un atajo de Bci trae la pestaña al frente o, si no hay, la abre en la URL del primer paso (el panel deja `vcaPendiente` con `sitio:'panel'` y `vence` 3 min). `inicioSegunPantalla`: si la página ya está en una pantalla posterior (sesión abierta), se salta el login. Si el paso es un clic con una clave visible vacía (Chrome no entrega la clave guardada sin gesto), muestra el aviso "Ingresa tu clave…" (sin bloquear clics), espera hasta 3 min a que cambie la pantalla y sigue; si "Ingresar" recarga, sigue la página nueva. El panel lista los atajos de Bci desde el respaldo aunque GO esté cerrado.
 - **Pedidos del cotizador (v1.2.2):** el puente deja `localStorage.vca_ext_id = chrome.runtime.id`; `background.js` atiende `onMessageExternal` sólo `listarFlujos` (atajos de Bci desde `vcaSitio:*`) y `ejecutarFlujo {id, forzarLogin}` (arma en la pestaña de GO y la trae al frente; si no hay pestaña o se fuerza el login, deja `vcaPendiente` y navega/abre la URL del primer paso).
 - **Clave de GO (v1.2.3, a pedido de Eduardo):** el campo de contraseña SÍ se graba, oculto (`secreto:true`, valor `v1:` + base64 de XOR con una llave fija; no es cifrado fuerte, sólo evita leerla de un vistazo); el registro dice "clave (oculta)" y Exportar la deja vacía. Al repetir se escribe y se aprieta Ingresar: el flujo entra solo. Si un flujo no tiene clave grabada y Chrome la autocompletó (Chrome no la entrega sin un gesto), sale el aviso clicable "👆 Haz clic aquí para entrar…": tras el clic, si la clave aparece, el atajo aprieta Ingresar (botón grabado o uno con "Ingresar/Entrar") y sigue.
+- **v1.2.4:** el plazo de un atajo en Bci es de 30 s por tramo y se renueva tras esperar el login (antes 15 s desde el inicio: si la persona tardaba en entrar, el atajo se rendía y quedaba quieto en "Oportunidades"); tras entrar espera hasta 30 s a que aparezca el próximo botón. El aviso de login ya no recibe clics (cualquier clic en la página basta para que Chrome entregue la clave). Si un atajo se detiene, aviso rojo arriba de la página con el paso.
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -69,7 +70,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar ShortCut v1.2.3 y Cotizador v3.1.3 con INSTALAR.bat, grabar de nuevo el flujo completo ESCRIBIENDO la clave en el login, y usarlo desde el botón 🚀 del cotizador.
+1. Instalar ShortCut v1.2.4 y Cotizador v3.1.3 con INSTALAR.bat, grabar de nuevo el flujo completo ESCRIBIENDO la clave en el login, y usarlo desde el botón 🚀 del cotizador.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.
