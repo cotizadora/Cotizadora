@@ -537,3 +537,16 @@ body.ext .cliente{
   box-shadow:0 -9px 0 1px var(--m-fondo), var(--m-sombra);
 }
 @media (prefers-color-scheme:dark){ body.ext .cliente{ background:var(--m-cli) } }
+
+/* Cotizar en GO (flujo de ShortCut) dentro de la tarjeta del cliente */
+.cli-go{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:5px;padding-top:6px;border-top:1px dashed var(--m-cli-borde,#9db8de)}
+.btn-go{font:inherit;font-size:12px;font-weight:800;color:#fff;border:0;border-radius:999px;padding:5px 12px;cursor:pointer;
+  background:linear-gradient(135deg,#0250B4,#0790CF);box-shadow:0 2px 6px rgba(2,60,160,.30);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-go:hover{filter:brightness(1.08)}
+.btn-go:active{transform:scale(.97)}
+.btn-go:focus-visible{outline:2px solid var(--brand2,#0790CF);outline-offset:2px}
+.btn-go[disabled]{background:#9fb0c8;box-shadow:none;cursor:not-allowed}
+.cli-go select{font:inherit;font-size:11px;max-width:160px;padding:2px 4px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;color:inherit}
+.go-login{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--muted);cursor:pointer;text-transform:none;letter-spacing:0}
+.go-login input{margin:0}
+.cliente .go-estado{flex-basis:100%;font-size:10.5px;color:var(--m-cli-acento,#123a6d);font-weight:700}

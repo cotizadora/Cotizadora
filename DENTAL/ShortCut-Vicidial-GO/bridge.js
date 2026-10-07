@@ -9,6 +9,9 @@
   // (chrome.runtime deja de responder): en ese caso esta copia la reemplaza.
   if (window.__VCA_BRIDGE_VIVO__ && window.__VCA_BRIDGE_VIVO__()) return;
   window.__VCA_BRIDGE_VIVO__ = function () { try { return !!chrome.runtime.id; } catch (e) { return false; } };
+  // El Cotizador Dental (otra extensión) busca aquí a ShortCut para pedirle
+  // que ejecute un flujo de GO.
+  try { localStorage.setItem('vca_ext_id', chrome.runtime.id); } catch (e) {}
 
   const K = {
     states:   'vca_states',    // [{id,label,steps}]

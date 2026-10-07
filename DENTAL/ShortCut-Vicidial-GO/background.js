@@ -194,3 +194,75 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   })();
   return true;
 });
+
+// ---------------------------------------------------------------------------
+//  PEDIDOS DEL COTIZADOR DENTAL (otra extensión)
+//  El cotizador encuentra a ShortCut por la marca `vca_ext_id` que el puente
+//  deja en la página de Vicidial, y le pide:
+//    {type:'listarFlujos'}                 → los atajos de GO / multicotizador
+//    {type:'ejecutarFlujo', id, forzarLogin} → ejecutarlo (abre GO si está cerrado;
+//                                            con forzarLogin, parte siempre en el login)
+//  Sólo atiende estos dos pedidos; nada más se puede hacer desde fuera.
+// ---------------------------------------------------------------------------
+function sitioClave(host) {
+  host = String(host || '').toLowerCase();
+  if (/vicidial\.recaall\.simtastic\.cl/.test(host)) return 'vicidial';
+  return host;
+}
+async function flujosGuardados() {
+  const todo = await chrome.storage.local.get(null);
+  const out = [];
+  Object.keys(todo).forEach((k) => {
+    const m = /^vcaSitio:(.+)$/.exec(k);
+    if (!m || !/bciseguros/.test(m[1])) return;
+    ((todo[k] && todo[k].states) || []).forEach((s) => {
+      if (!s || !s.id || !(s.steps || []).length) return;
+      const sitios = [];
+      s.steps.forEach((p) => { if (p.sitio && sitios[sitios.length - 1] !== p.sitio) sitios.push(p.sitio); });
+      out.push({ id: s.id, label: s.label || 'Atajo', sitio: m[1], pasos: s.steps.length, sitios: sitios,
+                 creado: s.steps[0] && s.steps[0].t || 0, steps: s.steps });
+    });
+  });
+  return out;
+}
+async function enfocar(tab) {
+  try { await chrome.tabs.update(tab.id, { active: true }); } catch (e) {}
+  try { if (tab.windowId != null) await chrome.windows.update(tab.windowId, { focused: true }); } catch (e) {}
+}
+async function ejecutarFlujo(id, forzarLogin) {
+  const f = (await flujosGuardados()).find((x) => x.id === id);
+  if (!f) return { ok: false, motivo: 'no-existe' };
+  const url = (f.steps[0] && f.steps[0].url) || ('https://' + f.sitio + '/');
+  let tabs = [];
+  try { tabs = (await chrome.tabs.query({ url: '*://' + f.sitio + '/*' })); } catch (e) {}
+  tabs.sort((a, b) => (b.active - a.active) || ((b.lastAccessed || 0) - (a.lastAccessed || 0)));
+  const tab = tabs[0];
+  if (tab && !forzarLogin) {
+    // GO ya está abierto: se ejecuta ahí (se salta el login si la sesión sigue).
+    let r = null;
+    try { r = await chrome.tabs.sendMessage(tab.id, { type: 'arm', id: id }, { frameId: 0 }); } catch (e) {}
+    if (r && r.ok) { await enfocar(tab); return { ok: true, como: 'pestaña abierta' }; }
+  }
+  // GO cerrado, sin conexión, o "partir siempre en el login": se abre en la
+  // dirección del primer paso y la página que carga sigue el atajo.
+  await area.set({ [PEND]: { data: { label: f.label, steps: f.steps, desde: 0, sitio: 'panel', t: Date.now(), vence: Date.now() + 3 * 60 * 1000 }, tab: null, sitio: 'panel', t: Date.now() } });
+  if (tab) { try { await chrome.tabs.update(tab.id, { url: url, active: true }); } catch (e) {} await enfocar(tab); return { ok: true, como: 'login en la pestaña de GO' }; }
+  const nueva = await chrome.tabs.create({ url: url, active: true });
+  await enfocar(nueva);
+  return { ok: true, como: 'GO abierto' };
+}
+chrome.runtime.onMessageExternal.addListener((msg, sender, reply) => {
+  if (!msg || (msg.type !== 'listarFlujos' && msg.type !== 'ejecutarFlujo')) return;
+  (async () => {
+    try {
+      if (msg.type === 'listarFlujos') {
+        const fl = await flujosGuardados();
+        reply({ ok: true, version: chrome.runtime.getManifest().version,
+                flujos: fl.map((f) => ({ id: f.id, label: f.label, sitio: f.sitio, pasos: f.pasos, sitios: f.sitios, creado: f.creado })) });
+      } else {
+        reply(await ejecutarFlujo(String(msg.id || ''), !!msg.forzarLogin));
+      }
+    } catch (e) { reply({ ok: false, motivo: String(e && e.message || e) }); }
+  })();
+  return true;
+});

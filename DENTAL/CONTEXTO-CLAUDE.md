@@ -18,7 +18,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 - **INSTALAR.bat:** descarga todo lo de `DENTAL/` de esa rama a `Documentos\DENTAL` en mi PC. No borra nada mío.
 - **Pull request abierto:** [cotizadora/Cotizadora#1](https://github.com/cotizadora/Cotizadora/pull/1). Al hacer merge, GitHub Pages publica la página web en https://cotizadora.github.io/Cotizadora/DENTAL/cotizador-web.html. Todavía no lo he aprobado.
 
-## 1. Cotizador Dental Bci (extensión) — v3.1.2
+## 1. Cotizador Dental Bci (extensión) — v3.1.3
 
 - **En mi PC:** `Documentos\DENTAL\extension`
 - **Paquete:** `DENTAL/extension-cotizador-dental.zip`
@@ -26,6 +26,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 
 Qué hace:
 - Popup en dos columnas: cotización a la izquierda y script de venta a la derecha, sin manija de ancho. Desde la v3.0.3 va dentro de un marco azul grisáceo con borde fino, esquinas redondeadas y sombra, para que no se pierda sobre el blanco de Vicidial. Desde la v3.0.4 cada módulo es una tarjeta redondeada con su color según jerarquía: cliente (azul), tipificación (menta), plan y cotización (blanco), clínicas (turquesa), guardado (arena), total (azul marino suave); las secciones del script también son tarjetas en contraste Normal. El scroll va dentro de cada columna: el popup no pasa de 800 × 600. Desde la v3.0.9 las cabeceras de las dos columnas son una sola franja azul de igual altura, sin línea divisoria ni barra de desplazamiento arriba, y ambas columnas comparten fondo. Desde la v3.1.1 la tarjeta del cliente queda fija bajo la cabecera al desplazar la columna izquierda.
+- **🚀 Cotizar en GO (v3.1.3):** en la tarjeta del cliente, un botón con el nombre del flujo de ShortCut (por defecto el más nuevo que pasa por el multicotizador; si hay varios, se elige en una lista). Al apretarlo copia el RUT sin puntos y con guion (ej. 12199895-5) y le pide a ShortCut que ejecute el flujo. Casilla "Abrir siempre el login de GO" (marcada por defecto, se recuerda): parte siempre en el login (navega la pestaña de GO o la abre); desmarcada, usa GO abierto y se salta el login si la sesión sigue. Necesita ShortCut 1.2.2 (el cotizador lo encuentra por `localStorage.vca_ext_id` en Vicidial y le habla con `chrome.runtime.sendMessage(id, …)`: `listarFlujos` / `ejecutarFlujo`). No aparece en la versión web.
 - Autollenado desde la pantalla de agente de Vicidial: cliente, cargas del FORM, correo, teléfono, comuna, datos de validación y cierre.
 - **Apertura del script (v3.0.2):** "Muy buenos días / buenas tardes (según la hora: antes de las 12:00, días), ¿me comunico con [primer nombre y primer apellido del cliente]? Mi nombre es [ejecutivo], llamo desde Bci." Los nombres de Vicidial vienen sin tilde; se reponen las de los nombres y apellidos comunes (Pérez, González, José…).
 - **Se abre solo al entrar una llamada (v3.0.5):** cuando cae un lead nuevo en Vicidial, el cotizador se despliega aunque esté en otra pestaña (una vez por cliente; Chrome tiene que estar al frente). Se apaga con la casilla "Abrir solo al entrar una llamada" al pie del cotizador. Requiere Chrome 127 o más nuevo (el PC del trabajo tiene Chrome 154). Desde la v3.0.6 la vigilancia de Vicidial se reconecta sola tras actualizar la extensión (antes había que recargar Vicidial para que se abriera solo).
@@ -37,7 +38,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.1
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.2
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -57,6 +58,7 @@ Qué hace:
 - **Sólo clics de la persona (v1.1.7):** en el PC del trabajo algo hace clics automáticos en Vicidial (posible extensión "MIC ACTIVO"): al grabar aparecía "VICIDIAL (90)" sin tocarlo. Ahora el grabador sólo acepta clics con `isTrusted`, y cambios de menú si son `isTrusted` o vienen ≤1,5 s después de un clic/tecla real (librerías de menús). En las pruebas con Playwright hay que hacer clic en el `<select>` antes de `selectOption`.
 - **Atajos que cruzan páginas (v1.2.0):** un atajo sigue tras un cambio de página, en otra pestaña o en otro sitio: GO (login → panel → ☰ → Nueva Oportunidad → RUT → "Continuar cotización") → multicotizadorvida.bciseguros.cl ("Siguiente" × n hasta el medio de pago). Cómo: cada paso grabado lleva `sitio` y `t`; antes de cada clic el motor anota "voy en el paso N" (`vca:pendiente` → bridge → background, `chrome.storage.session.vcaPendiente`, 60 s de vigencia); la página que carga pregunta (`pendienteTomar`) y continúa si el paso que sigue es de su sitio (misma pestaña, o pestaña de otro sitio). Grabación compartida: el panel anota `vcaGrab {ts,on}` y toda página de Vicidial/Bci que se abra se suma; al guardar se juntan los pasos de todas las páginas (también de los respaldos `vcaSitio:*`) ordenados por `t`, sin los de Vicidial si hay pasos de Bci. Entre pasos espera 40 % de lo grabado (400 ms–2,5 s) y no repite el mismo botón antes de 2,5 s. El buscador prefiere controles visibles (varios "Siguiente" ocultos). RUT: un campo con "rut" en id/nombre/placeholder y valor con forma de RUT queda `dyn:'rut'`; el puente repone `vca_cliente` en las páginas de Bci cada 2 s (GO lo borra al iniciar sesión). Sitios: Vicidial y `*.bciseguros.cl`.
 - **Flujo completo con un ▶ (v1.2.1):** cada paso guarda `ruta` y `url`. ▶ en un atajo de Bci trae la pestaña al frente o, si no hay, la abre en la URL del primer paso (el panel deja `vcaPendiente` con `sitio:'panel'` y `vence` 3 min). `inicioSegunPantalla`: si la página ya está en una pantalla posterior (sesión abierta), se salta el login. Si el paso es un clic con una clave visible vacía (Chrome no entrega la clave guardada sin gesto), muestra el aviso "Ingresa tu clave…" (sin bloquear clics), espera hasta 3 min a que cambie la pantalla y sigue; si "Ingresar" recarga, sigue la página nueva. El panel lista los atajos de Bci desde el respaldo aunque GO esté cerrado.
+- **Pedidos del cotizador (v1.2.2):** el puente deja `localStorage.vca_ext_id = chrome.runtime.id`; `background.js` atiende `onMessageExternal` sólo `listarFlujos` (atajos de Bci desde `vcaSitio:*`) y `ejecutarFlujo {id, forzarLogin}` (arma en la pestaña de GO y la trae al frente; si no hay pestaña o se fuerza el login, deja `vcaPendiente` y navega/abre la URL del primer paso).
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -66,7 +68,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar la v1.2.1 con INSTALAR.bat, grabar de una vez el flujo completo (login GO → menús → RUT → multicotizador → "Siguiente" hasta el medio de pago) y probarlo con ▶ con GO cerrado y con GO abierto.
+1. Instalar ShortCut v1.2.2 y Cotizador v3.1.3 con INSTALAR.bat, grabar de una vez el flujo completo en ShortCut y usarlo desde el botón 🚀 de la tarjeta del cliente del cotizador.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

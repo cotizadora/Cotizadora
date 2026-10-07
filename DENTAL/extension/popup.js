@@ -1447,8 +1447,106 @@ function pintarCliente(){
   if(cliente.info && cliente.info.length){
     h += '<div class="cli-linea">' + cliente.info.map(function(x){ return "<i>" + escCli(x[0]) + ":</i> " + escCli(x[1]); }).join(" · ") + "</div>";
   }
+  if(!ESWEB) h += htmlBotonGo();
   el.innerHTML = h;
   el.hidden = false;
+}
+
+/* ============================================================
+   COTIZAR EN GO: el flujo grabado en ShortCut-Vicidial-GO
+   (login de GO → menús → RUT → multicotizador → "Siguiente"…).
+   Un clic copia el RUT del cliente (sin puntos, con guion) y le pide
+   a ShortCut que ejecute el flujo: GO se abre solo si está cerrado.
+   ShortCut deja su identificación en la página de Vicidial
+   (vca_ext_id); necesita ShortCut 1.2.2 o más nuevo.
+   ============================================================ */
+var flujosGo = [], idShortcut = "", estadoGo = "";    // var: pintarCliente puede correr antes
+var prefGo = {forzarLogin: true, flujo: ""};
+try{ chrome.storage.local.get("prefGo", function(r){ if(r && r.prefGo) Object.assign(prefGo, r.prefGo); if(cliente) pintarCliente(); }); }catch(e){}
+function guardarPrefGo(){ try{ chrome.storage.local.set({prefGo: prefGo}); }catch(e){} }
+function rutSinPuntos(r){
+  const s = String(r || "").toUpperCase().replace(/[^0-9K]/g, "");
+  return s.length > 1 ? s.slice(0, -1) + "-" + s.slice(-1) : "";
+}
+function flujoElegido(){
+  if(!flujosGo.length) return null;
+  const pref = flujosGo.find(function(f){ return f.id === prefGo.flujo; });
+  if(pref) return pref;
+  // Por defecto: el más nuevo que pase por el multicotizador
+  const multi = flujosGo.filter(function(f){ return (f.sitios || []).some(function(s){ return /multicotizador/.test(s); }); });
+  return (multi.length ? multi : flujosGo).slice().sort(function(a, b){ return (b.creado || 0) - (a.creado || 0); })[0];
+}
+function htmlBotonGo(){
+  const f = flujoElegido();
+  const titulo = !idShortcut ? "Instala o actualiza ShortCut-Vicidial-GO (1.2.2 o más nuevo) y abre Vicidial"
+    : !f ? "Graba en ShortCut el flujo de GO (login → menús → RUT → multicotizador) y guárdalo"
+    : "Copia el RUT del cliente y ejecuta «" + f.label + "» (" + f.pasos + " pasos)";
+  let h = '<div class="cli-go">' +
+    '<button type="button" class="btn-go" data-go="ejecutar"' + (f ? "" : " disabled") + ' title="' + escCli(titulo) + '">' +
+      '🚀 ' + escCli(f ? f.label : "Cotizar en GO") + '</button>';
+  if(flujosGo.length > 1){
+    h += '<select data-go="flujo" title="Flujo de ShortCut que ejecuta el botón">' + flujosGo.map(function(x){
+      return '<option value="' + escCli(x.id) + '"' + (f && x.id === f.id ? " selected" : "") + ">" + escCli(x.label) + "</option>";
+    }).join("") + "</select>";
+  }
+  h += '<label class="go-login" title="Abre siempre la página de inicio de sesión de GO, aunque ya esté abierto en otra pantalla">' +
+       '<input type="checkbox" data-go="login"' + (prefGo.forzarLogin ? " checked" : "") + '> Abrir siempre el login de GO</label>';
+  const nota = estadoGo || (!idShortcut ? "ShortCut no está conectado" : !f ? "Graba el flujo de GO en ShortCut" : "");
+  if(nota) h += '<span class="go-estado">' + escCli(nota) + '</span>';
+  return h + "</div>";
+}
+async function idDeShortcut(){
+  try{
+    const tab = await pestanaVicidial();
+    if(!tab) return "";
+    const r = await chrome.scripting.executeScript({target: {tabId: tab.id}, func: function(){ return localStorage.getItem("vca_ext_id"); }});
+    return (r && r[0] && r[0].result) || "";
+  }catch(e){ return ""; }
+}
+function pedirShortcut(msg){
+  return new Promise(function(res){
+    try{ chrome.runtime.sendMessage(idShortcut, msg, function(r){ void chrome.runtime.lastError; res(r || null); }); }
+    catch(e){ res(null); }
+  });
+}
+async function refrescarFlujosGo(){
+  if(ESWEB) return;
+  const antes = JSON.stringify([idShortcut, flujosGo.map(function(f){ return [f.id, f.label]; })]);
+  if(!idShortcut) idShortcut = await idDeShortcut();
+  let lista = [];
+  if(idShortcut){
+    const r = await pedirShortcut({type: "listarFlujos"});
+    if(r && r.ok) lista = r.flujos || [];
+    else if(!r) idShortcut = "";   // ShortCut se recargó o no está: se vuelve a buscar
+  }
+  flujosGo = lista;
+  if(JSON.stringify([idShortcut, flujosGo.map(function(f){ return [f.id, f.label]; })]) !== antes && cliente) pintarCliente();
+}
+if(!ESWEB){
+  const cajaCli = document.getElementById("cliente");
+  cajaCli.addEventListener("click", async function(e){
+    const b = e.target.closest('[data-go="ejecutar"]');
+    if(!b || b.disabled) return;
+    const f = flujoElegido();
+    if(!f) return;
+    // 1) RUT al portapapeles, sin puntos y con guion (ej. 12199895-5)
+    const rut = rutSinPuntos(cliente && cliente.rut);
+    let copiado = false;
+    if(rut){ try{ await navigator.clipboard.writeText(rut); copiado = true; }catch(err){} }
+    const pre = copiado ? "RUT " + rut + " copiado · " : (rut ? "" : "Sin RUT del cliente · ");
+    estadoGo = pre + "abriendo GO…"; pintarCliente();
+    // 2) ShortCut ejecuta el flujo (abre GO si está cerrado)
+    const r = await pedirShortcut({type: "ejecutarFlujo", id: f.id, forzarLogin: !!prefGo.forzarLogin});
+    estadoGo = r && r.ok ? pre + "flujo en marcha en GO" : "ShortCut no respondió: abre su panel una vez y reintenta";
+    pintarCliente();
+    setTimeout(function(){ estadoGo = ""; if(cliente) pintarCliente(); }, 15000);
+  });
+  cajaCli.addEventListener("change", function(e){
+    const t = e.target;
+    if(t.matches('[data-go="login"]')){ prefGo.forzarLogin = t.checked; guardarPrefGo(); }
+    else if(t.matches('[data-go="flujo"]')){ prefGo.flujo = t.value; guardarPrefGo(); pintarCliente(); }
+  });
+  refrescarFlujosGo(); setInterval(refrescarFlujosGo, 4000);
 }
 
 async function sincronizarVicidial(){
