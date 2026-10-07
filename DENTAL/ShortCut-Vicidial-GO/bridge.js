@@ -337,9 +337,14 @@
           if (pasos.length) {
             const states = get(K.states, []);
             const label = (msg.label && msg.label.trim()) || ('Atajo ' + (states.length + 1));
-            states.push({ id: genId(), label: label, steps: pasos });
+            // Mismo nombre que uno existente: lo REEMPLAZA (conserva su id, color
+            // y lugar; el cotizador lo sigue reconociendo como el mismo atajo).
+            const norma = (t) => String(t || '').trim().toLowerCase();
+            const previo = states.find(x => norma(x.label) === norma(label));
+            if (previo) { previo.steps = pasos; previo.label = label; }
+            else states.push({ id: genId(), label: label, steps: pasos });
             set(K.states, states);
-            ok = true;
+            ok = previo ? 'reemplazado' : true;
           }
           del(K.learning);
           respaldar();

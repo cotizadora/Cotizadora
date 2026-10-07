@@ -830,7 +830,8 @@ $('#save').addEventListener('click', async () => {
   const r = await sendTo(destino, { type: 'learnSave', label: label, steps: pasos, ts: ts });
   await grabOff(true);
   await broadcast({ type: 'learnCancel' });  // limpia grabaciones vacías en las demás
-  setStatus(r && r.ok ? 'Atajo guardado.' : 'No se guardó (0 clics grabados).');
+  setStatus(r && r.ok === 'reemplazado' ? 'Atajo «' + label + '» actualizado (reemplaza al anterior).'
+    : r && r.ok ? 'Atajo guardado.' : 'No se guardó (0 clics grabados).');
   $('#name').value = '';
   listSig = ''; refresh();
 });
