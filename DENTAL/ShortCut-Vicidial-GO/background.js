@@ -160,6 +160,9 @@ chrome.alarms.onAlarm.addListener((a) => { if (a.name === 'vca-pump') pumpTick()
 const PEND = 'vcaPendiente';
 const area = chrome.storage.session || chrome.storage.local;
 const VIGENCIA_MS = 60 * 1000;
+// Vigente hasta: 60 s desde el último aviso, o más si la página lo pidió
+// (ej. 3 minutos mientras espera que la persona inicie sesión).
+const vigente = (p) => p && p.data && Date.now() < Math.max(p.t + VIGENCIA_MS, p.data.vence || 0);
 
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   if (!msg || (msg.type !== 'pendiente' && msg.type !== 'pendienteTomar')) return;
@@ -169,7 +172,7 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
       if (msg.type === 'pendiente') {
         const p = (await area.get(PEND))[PEND];
         // Otra pestaña ya tomó el atajo y va más adelante: un aviso atrasado no la pisa.
-        const deOtra = p && p.tab !== tab && Date.now() - p.t < VIGENCIA_MS;
+        const deOtra = p && p.tab !== tab && vigente(p);
         if (msg.op === 'clear') { if (!deOtra) await area.remove(PEND); }
         else if (msg.data && !(deOtra && p.data && p.data.label === msg.data.label && p.data.desde >= msg.data.desde)) {
           await area.set({ [PEND]: { data: msg.data, tab: tab, sitio: msg.data.sitio, t: Date.now() } });
@@ -179,12 +182,13 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
       }
       // pendienteTomar
       const p = (await area.get(PEND))[PEND];
-      if (!p || !p.data || Date.now() - p.t > VIGENCIA_MS) { reply({}); return; }
+      if (!vigente(p)) { reply({}); return; }
       const sig = p.data.steps && p.data.steps[p.data.desde];
       if (!sig || (sig.sitio && sig.sitio !== msg.sitio)) { reply({}); return; }
       if (tab !== p.tab && msg.sitio === p.sitio) { reply({}); return; }   // otra pestaña del mismo sitio: no
       // Entregado: desde ahora lo lleva esta pestaña.
-      await area.set({ [PEND]: { data: p.data, tab: tab, sitio: msg.sitio, t: Date.now(), tomado: true } });
+      // (sin la vigencia larga: ya la tomó una página que avanza por su cuenta)
+      await area.set({ [PEND]: { data: Object.assign({}, p.data, { vence: 0 }), tab: tab, sitio: msg.sitio, t: Date.now(), tomado: true } });
       reply({ data: p.data });
     } catch (e) { reply({}); }
   })();

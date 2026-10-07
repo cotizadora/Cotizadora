@@ -225,6 +225,22 @@ async function collect() {
     (r.log || []).forEach(l => out.log.push('[' + siteName(t.host) + '] ' + l));
   }
   if (failed) lastScan = 0;   // alguna pestaña no respondió -> re-escanear ya
+  // Atajos de páginas de Bci que no están abiertas (GO cerrado): se muestran
+  // igual, desde el respaldo de la extensión; ▶ abre la página sola.
+  try {
+    const todo = await new Promise(r => { try { chrome.storage.local.get(null, x => r(x || {})); } catch (e) { r({}); } });
+    const abiertos = new Set(TABS.map(t => siteKey(t.host)));
+    Object.keys(todo).forEach(k => {
+      const m = /^vcaSitio:(.+)$/.exec(k);
+      if (!m || abiertos.has(m[1]) || !/bciseguros/.test(m[1])) return;
+      ((todo[k] && todo[k].states) || []).forEach(s => {
+        const sig = m[1] + '|' + (s.label || s.name || '') + '|' + JSON.stringify(s.steps || []);
+        if (seenStates.has(sig)) return;
+        seenStates.set(sig, out.states.length);
+        out.states.push(Object.assign({}, s, { __tab: null, __host: m[1], __cerrado: true }));
+      });
+    });
+  } catch (e) {}
   return out;
 }
 
@@ -413,7 +429,37 @@ function activateShortcut(st) {
   lastFallo = null;
   renderNow();
   if (on) { optimistic(sendToSite(st.__host, { type: 'disarm' })); return; }
-  optimistic(tabParaSitio(st.__host, st.__tab).then(id => sendTo(id, { type: 'arm', id: st.id })));
+  optimistic(ejecutarAtajo(st));
+}
+
+// ▶ en un atajo de GO / multicotizador: la página se trae al frente; si no
+// está abierta, se abre sola y el atajo empieza ahí (se salta el login si la
+// sesión sigue abierta, o espera a que entres).
+async function ejecutarAtajo(st) {
+  const bci = /bciseguros/.test(siteKey(st.__host));
+  // Antes de abrir otra pestaña, se vuelve a mirar: quizás GO ya se abrió.
+  if (st.__cerrado || !TABS.some(t => siteKey(t.host) === siteKey(st.__host))) { TABS = await scanTabs(); lastScan = Date.now(); }
+  const id = await tabParaSitio(st.__host, st.__cerrado ? null : st.__tab);
+  if (id != null) {
+    const r = await sendTo(id, { type: 'arm', id: st.id });
+    if (bci) {
+      try {
+        const t = await chrome.tabs.update(id, { active: true });
+        if (t && t.windowId != null) await chrome.windows.update(t.windowId, { focused: true });
+      } catch (e) {}
+    }
+    return r;
+  }
+  if (!bci) return null;
+  const pasos = st.steps || [];
+  const url = (pasos[0] && pasos[0].url) || ('https://' + siteKey(st.__host) + '/');
+  try {
+    const area = chrome.storage.session || chrome.storage.local;
+    await area.set({ vcaPendiente: { data: { label: st.label, steps: pasos, desde: 0, sitio: 'panel', t: Date.now(), vence: Date.now() + 3 * 60 * 1000 }, tab: null, sitio: 'panel', t: Date.now() } });
+    await chrome.tabs.create({ url: url, active: true });
+  } catch (e) { setStatus('No se pudo abrir ' + siteName(st.__host) + '.'); }
+  lastArmed = null;
+  return { ok: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -645,7 +691,7 @@ async function refreshInner() {
   if (r.grabando && r.sinGrabar.length) r.sinGrabar.forEach(id => sendTo(id, { type: 'learnStart', ts: r.learning && r.learning.ts }));
   pintarAvisoMotor(r.engines);
 
-  if (!TABS.length) {
+  if (!TABS.length && !(r.states || []).length) {
     if (editingId == null) { $('#list').innerHTML = connectionWarningHtml(); listSig = ''; }
     setStatus('Sin conexión.');
     return;

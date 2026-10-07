@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.2.0
+ShortCut-Vicidial-GO 1.2.1
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.0).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.1).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,19 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+EL FLUJO COMPLETO CON UN SOLO ▶ (desde la 1.2.1)
+- Graba UNA vez todo: login de GO → menús → RUT → multicotizador → todos los
+  "Siguiente". No hace falta copiar el RUT: se pone el del cliente de Vicidial.
+- Al apretar ▶:
+  · Si GO está cerrado, se abre solo.
+  · Si GO está abierto, se trae al frente.
+  · Si la sesión de GO sigue abierta, se salta el login.
+  · Si GO pide la clave, pone tu usuario y muestra arriba "Ingresa tu clave y
+    aprieta «Ingresar»". Tú entras (Chrome completa la clave) y el atajo sigue
+    solo hasta el final. Chrome no deja que una extensión use la clave
+    guardada sin que tú toques la página, por eso este único paso es tuyo.
+- El atajo aparece en el panel aunque GO esté cerrado.
 
 UN ATAJO QUE PASA POR VARIAS PÁGINAS (desde la 1.2.0)
 - Un solo atajo puede seguir aunque la página cambie: después de "Ingresar"

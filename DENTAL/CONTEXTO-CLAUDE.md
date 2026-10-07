@@ -37,7 +37,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.0
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.1
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -56,6 +56,7 @@ Qué hace:
 - **Grabación que no se detenía (v1.1.6):** con varias pestañas de GO, una pestaña dormida (o el respaldo) reponía la grabación ya detenida/guardada y el panel mostraba "Grabando…" sin parar, aun tras reiniciar. Ahora el puente anota en `vca_learn_marcas` (página) y `vcaSitio:<sitio>:marcas` (chrome.storage) el `ts` de la grabación detenida (`stop`) y terminada (`fin`); ninguna copia con `ts` ≤ `fin` se repone, y con `ts` ≤ `stop` queda detenida. Sólo la página principal repone desde la memoria del motor.
 - **Sólo clics de la persona (v1.1.7):** en el PC del trabajo algo hace clics automáticos en Vicidial (posible extensión "MIC ACTIVO"): al grabar aparecía "VICIDIAL (90)" sin tocarlo. Ahora el grabador sólo acepta clics con `isTrusted`, y cambios de menú si son `isTrusted` o vienen ≤1,5 s después de un clic/tecla real (librerías de menús). En las pruebas con Playwright hay que hacer clic en el `<select>` antes de `selectOption`.
 - **Atajos que cruzan páginas (v1.2.0):** un atajo sigue tras un cambio de página, en otra pestaña o en otro sitio: GO (login → panel → ☰ → Nueva Oportunidad → RUT → "Continuar cotización") → multicotizadorvida.bciseguros.cl ("Siguiente" × n hasta el medio de pago). Cómo: cada paso grabado lleva `sitio` y `t`; antes de cada clic el motor anota "voy en el paso N" (`vca:pendiente` → bridge → background, `chrome.storage.session.vcaPendiente`, 60 s de vigencia); la página que carga pregunta (`pendienteTomar`) y continúa si el paso que sigue es de su sitio (misma pestaña, o pestaña de otro sitio). Grabación compartida: el panel anota `vcaGrab {ts,on}` y toda página de Vicidial/Bci que se abra se suma; al guardar se juntan los pasos de todas las páginas (también de los respaldos `vcaSitio:*`) ordenados por `t`, sin los de Vicidial si hay pasos de Bci. Entre pasos espera 40 % de lo grabado (400 ms–2,5 s) y no repite el mismo botón antes de 2,5 s. El buscador prefiere controles visibles (varios "Siguiente" ocultos). RUT: un campo con "rut" en id/nombre/placeholder y valor con forma de RUT queda `dyn:'rut'`; el puente repone `vca_cliente` en las páginas de Bci cada 2 s (GO lo borra al iniciar sesión). Sitios: Vicidial y `*.bciseguros.cl`.
+- **Flujo completo con un ▶ (v1.2.1):** cada paso guarda `ruta` y `url`. ▶ en un atajo de Bci trae la pestaña al frente o, si no hay, la abre en la URL del primer paso (el panel deja `vcaPendiente` con `sitio:'panel'` y `vence` 3 min). `inicioSegunPantalla`: si la página ya está en una pantalla posterior (sesión abierta), se salta el login. Si el paso es un clic con una clave visible vacía (Chrome no entrega la clave guardada sin gesto), muestra el aviso "Ingresa tu clave…" (sin bloquear clics), espera hasta 3 min a que cambie la pantalla y sigue; si "Ingresar" recarga, sigue la página nueva. El panel lista los atajos de Bci desde el respaldo aunque GO esté cerrado.
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -65,7 +66,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar la v1.2.0 con INSTALAR.bat y probar el atajo GO → multicotizador en una cotización real (grabarlo de nuevo de una sola vez).
+1. Instalar la v1.2.1 con INSTALAR.bat, grabar de una vez el flujo completo (login GO → menús → RUT → multicotizador → "Siguiente" hasta el medio de pago) y probarlo con ▶ con GO cerrado y con GO abierto.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.2.0';
+  const VCA_VERSION = '1.2.1';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -543,6 +543,45 @@
     return Math.max(s.stepGapMs, Math.min(2500, Math.round((b.t - a.t) * 0.4)));
   }
 
+  // ¿En qué paso conviene empezar según la pantalla en que está la página?
+  // Si GO ya tiene la sesión abierta, los pasos del login se saltan; si la
+  // página quedó en una pantalla más adelante, se parte desde ésa.
+  function inicioSegunPantalla(steps, desde) {
+    const st = steps[desde];
+    if (!IS_CRM || !st || !st.ruta || st.ruta === location.pathname) return desde;
+    for (let j = desde; j < steps.length; j++) {
+      if (steps[j].sitio && steps[j].sitio !== MI_SITIO) break;
+      if (steps[j].ruta === location.pathname) {
+        log('Esta página ya está en ' + location.pathname + ': empiezo en el paso ' + (j + 1) + ' (me salto ' + (j - desde) + ')');
+        return j;
+      }
+    }
+    // Sesión ya abierta: saltar los pasos del inicio de sesión
+    let j = desde;
+    while (j < steps.length && /login|ingres|sesion/i.test(steps[j].ruta || '') && (!steps[j].sitio || steps[j].sitio === MI_SITIO)) j++;
+    if (j > desde && !hayClaveVisible()) { log('La sesión ya está abierta: me salto ' + (j - desde) + ' paso(s) del login'); return j; }
+    return desde;
+  }
+  function visibleEl(e) { try { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (x) { return false; } }
+  function hayClaveVisible() { return Array.from(document.querySelectorAll('input[type="password"]')).some(visibleEl); }
+  // Chrome no entrega a ninguna extensión la clave que guardó hasta que la
+  // persona toca la página. Si hay que iniciar sesión, el atajo espera: la
+  // persona entra y, al cargar la página siguiente, el atajo sigue solo.
+  function claveVacia() { return Array.from(document.querySelectorAll('input[type="password"]')).some(e => visibleEl(e) && !e.value); }
+  function avisoLogin(nombre) {
+    try {
+      if (document.getElementById('vca-aviso-login')) return;
+      const d = document.createElement('div');
+      d.id = 'vca-aviso-login';
+      d.setAttribute('style', 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;max-width:min(92vw,520px);' +
+        'background:#0B2C8A;color:#fff;font:600 15px/1.4 system-ui,Segoe UI,sans-serif;padding:14px 18px;border-radius:14px;' +
+        'box-shadow:0 12px 30px rgba(0,20,60,.35);text-align:center;pointer-events:none;opacity:.96');
+      d.textContent = '🔐 Ingresa tu clave y aprieta «Ingresar». El atajo «' + (nombre || '') + '» sigue solo después.';
+      (document.body || document.documentElement).appendChild(d);
+      setTimeout(() => { try { d.remove(); } catch (e) {} }, 180000);
+    } catch (e) {}
+  }
+
   async function runStepsOnce(steps, s, desde) {
     for (let i = desde || 0; i < steps.length; i++) {
       const st = steps[i];
@@ -552,7 +591,38 @@
         log('  paso ' + (i + 1) + '/' + steps.length + ': sigue en ' + st.sitio + ' (esperando que se abra)');
         return OTRA_PAGINA;
       }
+      // La página saltó a otra pantalla por su cuenta (ej. GO ya tenía la sesión
+      // abierta y pasó del login al panel): se sigue desde el paso de esa pantalla.
+      const LOGIN = /login|ingres|sesion/i;
+      if (IS_CRM && LOGIN.test(st.ruta || '') && !LOGIN.test(location.pathname)) {
+        const j = inicioSegunPantalla(steps, i);
+        if (j > i) { i = j - 1; continue; }
+      }
       const tag = '  paso ' + (i + 1) + '/' + steps.length;
+      // Botón de entrar con la clave vacía: espera a que la persona inicie sesión.
+      if (IS_CRM && (st.kind || 'click') === 'click' && claveVacia()) {
+        if (corrida) {
+          corrida.anotado = null;
+          pendiente('set', { label: corrida.label, steps: steps, desde: i + 1, sitio: MI_SITIO, t: Date.now(), vence: Date.now() + 3 * 60 * 1000 });
+        }
+        avisoLogin(corrida && corrida.label);
+        log(tag + ': esperando que inicies sesión (Chrome completa la clave); después sigue solo');
+        // Si "Ingresar" recarga la página, la página nueva sigue (queda anotado).
+        // Si GO cambia de pantalla sin recargar, se sigue aquí mismo.
+        const t0 = Date.now(), ruta0 = location.pathname;
+        while (Date.now() - t0 < 3 * 60 * 1000) {
+          await sleep(500);
+          if (location.pathname !== ruta0 || !hayClaveVisible()) break;
+        }
+        try { const a = document.getElementById('vca-aviso-login'); if (a) a.remove(); } catch (e) {}
+        if (location.pathname === ruta0 && hayClaveVisible()) {
+          pasoFallido = { n: i + 1, de: steps.length, que: 'el inicio de sesión (no se ingresó en 3 minutos)' };
+          return i;
+        }
+        log(tag + ': sesión iniciada, sigo');
+        await sleep(1200);
+        continue;
+      }
       if ((st.kind || 'click') === 'click') anotarAvance(steps, i + 1);
       const ok = st.xf ? await pasoEnMarco(st, s, tag) : await ejecutarPaso(st, s, tag);
       if (!ok) { pasoFallido = { n: i + 1, de: steps.length, que: describirPaso(st) }; return i; }
@@ -759,7 +829,7 @@
     const nombre = armed.label || armed.name || armed.text;
     log((IS_CRM ? 'Ejecutando' : 'Fin de llamada (' + sourceTag + ') -> aplicando') + ' "' +
         nombre + '" (' + steps.length + ' paso/s)');
-    runSteps(steps, 0, nombre).then((ok) => {
+    runSteps(steps, inicioSegunPantalla(steps, 0), nombre).then((ok) => {
       replaying = false;
       if (ok) { setArmed(null); }
       else if (IS_CRM) {
@@ -776,7 +846,7 @@
     if (replaying || !vigente() || !p || !Array.isArray(p.steps)) return;
     replaying = true; pasoFallido = null; Store.del('vca_fallo');
     log('Continuando "' + (p.label || 'atajo') + '" desde el paso ' + (p.desde + 1) + '/' + p.steps.length + ' (viene de otra página)');
-    runSteps(p.steps, p.desde, p.label).then((ok) => {
+    runSteps(p.steps, inicioSegunPantalla(p.steps, p.desde), p.label).then((ok) => {
       replaying = false;
       if (!ok) Store.set('vca_fallo', { label: p.label, paso: pasoFallido, t: Date.now() });
     });
@@ -1162,6 +1232,8 @@
     learn.steps = learn.steps || [];
     step.sitio = MI_SITIO;            // en qué página va este paso
     step.t = Date.now();              // cuándo (para ordenar y respetar las esperas)
+    step.ruta = location.pathname;    // en qué pantalla (ej. /login o /dashboard/go)
+    step.url = location.origin + location.pathname;   // para abrir la página si no está
     learn.steps.push(step);
     Store.set(K.learning, learn);
     memLearn = learn;
