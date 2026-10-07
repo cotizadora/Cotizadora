@@ -35,82 +35,123 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
-/* Layout: herramienta de dos paneles — controles a la izquierda, afiche en vivo a la derecha; en celular se apilan.
-   Colores tomados del afiche Uno Salud Dental: azul del titular y del botón, celeste del "$0". */
+/* Layout: herramienta de dos paneles sobre un fondo azul profundo; los paneles son de cristal esmerilado
+   y el afiche blanco resalta encima. En celular se apilan. Colores del afiche Uno Salud Dental. */
 :root {
-  --bg: #F2F6FB;
-  --panel: #FFFFFF;
+  --bg-1: #061A4A;            /* azul noche */
+  --bg-2: #0A43A8;            /* azul del botón */
+  --bg-3: #0B9BD0;            /* celeste del "$0" */
+  --on-bg: #FFFFFF;
+  --on-bg-muted: rgba(235, 244, 255, 0.82);
+  --glass: rgba(255, 255, 255, 0.86);
+  --glass-soft: rgba(255, 255, 255, 0.14);
+  --glass-line: rgba(255, 255, 255, 0.60);
+  --glass-shadow: 0 24px 60px rgba(2, 14, 48, 0.38);
   --fg: #0B2459;
-  --muted: #5A6B8C;
-  --line: #D8E2F0;
+  --muted: #4E5F82;
+  --line: rgba(11, 36, 89, 0.14);
   --accent: #0250B4;
   --accent-fg: #FFFFFF;
   --sky: #04A5D5;
-  --field: #FAFCFF;
+  --sky-on-bg: #8FE1FF;
+  --field: rgba(255, 255, 255, 0.92);
   --danger: #B3402A;
   --font: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0C1424; --panel: #131E33; --fg: #E3EAF7; --muted: #9AA9C4; --line: #263552;
-    --accent: #4F8EF0; --accent-fg: #071226; --sky: #3CC3EA; --field: #18243C; --danger: #F08A72;
+    --bg-1: #030B22; --bg-2: #08296B; --bg-3: #0A6E9A;
+    --glass: rgba(10, 20, 44, 0.66); --glass-soft: rgba(255, 255, 255, 0.07); --glass-line: rgba(255, 255, 255, 0.14);
+    --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    --fg: #E6EDFA; --muted: #A3B2CF; --line: rgba(255, 255, 255, 0.12);
+    --accent: #5B9BFF; --accent-fg: #06132C; --sky: #4CCBF0; --field: rgba(255, 255, 255, 0.07); --danger: #F59A84;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0C1424; --panel: #131E33; --fg: #E3EAF7; --muted: #9AA9C4; --line: #263552;
-  --accent: #4F8EF0; --accent-fg: #071226; --sky: #3CC3EA; --field: #18243C; --danger: #F08A72;
+  --bg-1: #030B22; --bg-2: #08296B; --bg-3: #0A6E9A;
+  --glass: rgba(10, 20, 44, 0.66); --glass-soft: rgba(255, 255, 255, 0.07); --glass-line: rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --fg: #E6EDFA; --muted: #A3B2CF; --line: rgba(255, 255, 255, 0.12);
+  --accent: #5B9BFF; --accent-fg: #06132C; --sky: #4CCBF0; --field: rgba(255, 255, 255, 0.07); --danger: #F59A84;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.45; padding-inline: 16px; padding-block: 20px 32px; }
+html { background: var(--bg-1); }
+body { background: var(--bg-1); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.45; padding-inline: 16px; padding-block: 24px 28px; min-height: 100vh; position: relative; isolation: isolate; }
+/* Fondo: degradado azul con luces suaves; capa fija para que no se mueva al desplazar (también en iPhone). */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60vmax 60vmax at 88% -10%, color-mix(in srgb, var(--bg-3) 85%, transparent), transparent 60%),
+    radial-gradient(50vmax 50vmax at -10% 105%, color-mix(in srgb, var(--bg-3) 55%, transparent), transparent 60%),
+    radial-gradient(40vmax 40vmax at 30% 20%, rgba(255, 255, 255, 0.10), transparent 60%),
+    linear-gradient(150deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 120%);
+}
 .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
-header h1 { font-size: 1.65rem; font-weight: 900; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
-header h1 span { color: var(--sky); }
-header p { margin: 4px 0 0; color: var(--muted); max-width: 64ch; }
+header { color: var(--on-bg); }
+header h1 { font-size: 1.75rem; font-weight: 900; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+header h1 span { color: var(--sky-on-bg); }
+header p { margin: 6px 0 0; color: var(--on-bg-muted); max-width: 64ch; font-weight: 600; }
 .grid { display: grid; grid-template-columns: minmax(0, 370px) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 18px; min-width: 0; }
+/* Cristal esmerilado */
+.vidrio {
+  background: var(--glass); border: 1px solid var(--glass-line); border-radius: 20px; box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%);
+}
+.panel { padding: 20px; display: grid; gap: 18px; min-width: 0; }
 fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; min-width: 0; }
-legend { font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); padding: 0; margin-bottom: 6px; }
+fieldset + fieldset { border-top: 1px solid var(--line); padding-top: 16px; }
+legend { font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); padding: 0; margin-bottom: 6px; float: left; width: 100%; }
+legend + * { clear: both; }
 label { display: grid; gap: 4px; font-weight: 700; font-size: 0.9rem; }
 label small { font-weight: 600; color: var(--muted); }
 input[type="text"], input[type="tel"], textarea, select {
-  font: inherit; font-weight: 600; color: var(--fg); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; width: 100%;
+  font: inherit; font-weight: 600; color: var(--fg); background: var(--field); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; width: 100%;
 }
 textarea { resize: vertical; min-height: 60px; }
-input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .seg label { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; background: var(--field); }
 .seg input { accent-color: var(--accent); margin: 0; }
-.seg label:has(input:checked) { border-color: var(--accent); }
+.seg label:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 .check { display: flex; gap: 8px; align-items: flex-start; font-weight: 700; }
 .check input { accent-color: var(--accent); margin-top: 3px; }
 input[type="range"] { width: 100%; accent-color: var(--accent); }
 .btn { font: inherit; font-weight: 800; border-radius: 999px; padding: 10px 16px; cursor: pointer; border: 1px solid var(--line); background: var(--field); color: var(--fg); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); width: 100%; font-size: 1.02rem; padding: 12px 16px; }
+.btn.primary { background: linear-gradient(135deg, #0250B4, #0790CF); border-color: transparent; color: #FFFFFF; width: 100%; font-size: 1.04rem; padding: 13px 16px; box-shadow: 0 10px 24px rgba(2, 60, 160, 0.35); }
 .btn.small { padding: 6px 12px; font-size: 0.85rem; }
 .base-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .hint { font-size: 0.82rem; color: var(--muted); margin: 0; font-weight: 600; }
 .hint.err { color: var(--danger); }
 .tag { display: inline-block; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sky); }
-.stage { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; justify-items: center; min-width: 0; position: sticky; top: env(safe-area-inset-top, 0px); }
+/* Escenario del afiche: cristal más transparente, para que el afiche blanco destaque sobre el azul */
+.stage { background: var(--glass-soft); padding: 18px; display: grid; gap: 12px; justify-items: center; min-width: 0; position: sticky; top: env(safe-area-inset-top, 0px); }
 @media (max-width: 860px) { .stage { position: static; } }
-.stage canvas { max-width: 100%; max-height: 80vh; width: auto; height: auto; border-radius: 10px; box-shadow: 0 8px 28px rgba(5, 30, 80, 0.18); }
-.drop { outline: 2px dashed var(--accent); outline-offset: 6px; }
-.meta { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; margin: 0; }
+.stage canvas { max-width: 100%; max-height: 78vh; width: auto; height: auto; border-radius: 14px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55), 0 30px 70px rgba(0, 8, 36, 0.55); }
+.stage .meta, .stage .hint { color: var(--on-bg-muted); }
+.drop { outline: 2px dashed var(--sky-on-bg); outline-offset: 6px; }
+.meta { font-size: 0.82rem; font-variant-numeric: tabular-nums; text-align: center; margin: 0; font-weight: 700; }
+.stage .hint { text-align: center; }
 #estado { min-height: 1.2em; }
-.instalar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; }
-.instalar img { width: 44px; height: 44px; border-radius: 11px; flex: none; }
+.instalar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; }
+.instalar img { width: 44px; height: 44px; border-radius: 11px; flex: none; box-shadow: 0 4px 12px rgba(2, 30, 90, 0.3); }
 .instalar .txt { flex: 1 1 220px; min-width: 0; }
 .instalar strong { display: block; font-weight: 900; }
 .instalar p { margin: 2px 0 0; color: var(--muted); font-weight: 600; font-size: 0.86rem; }
 .instalar .acciones { display: flex; gap: 8px; align-items: center; }
 .instalar .btn.primary { width: auto; }
 .compartir { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -0.15em; }
-@media (prefers-reduced-motion: no-preference) { .btn { transition: filter 0.15s; } .btn:hover { filter: brightness(1.07); } }
+/* Firma */
+.firma { justify-self: center; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 14px; padding: 12px 20px; border-radius: 999px; color: var(--on-bg); background: var(--glass-soft); border: 1px solid rgba(255, 255, 255, 0.28); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); font-size: 0.88rem; text-align: center; }
+.firma strong { font-weight: 900; }
+.firma .sep { opacity: 0.5; }
+.firma a { color: var(--sky-on-bg); font-weight: 800; text-decoration: none; white-space: nowrap; }
+.firma a:hover { text-decoration: underline; }
+@media (prefers-reduced-motion: no-preference) { .btn { transition: filter 0.15s, transform 0.15s; } .btn:hover { filter: brightness(1.07); } .btn.primary:active { transform: translateY(1px); } }
 </style>
 
 <div class="wrap">
@@ -119,7 +160,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
     <p>Escribe tu nombre y tu celular: el afiche lleva tu teléfono en el botón azul y una tarjeta con un QR que abre tu WhatsApp. Descárgalo y publícalo en Instagram, Facebook o TikTok.</p>
   </header>
 
-  <div class="instalar" id="instalar" hidden>
+  <div class="instalar vidrio" id="instalar" hidden>
     <img src="apple-touch-icon.png" alt="" id="instIcono">
     <div class="txt">
       <strong>Instala la app en tu celular</strong>
@@ -133,7 +174,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   </div>
 
   <div class="grid">
-    <form class="panel" id="form" autocomplete="on">
+    <form class="panel vidrio" id="form" autocomplete="on">
       <fieldset>
         <legend>1 · Tus datos</legend>
         <p class="hint"><span class="tag">Ejemplo</span> Reemplaza estos datos por los tuyos.</p>
@@ -217,12 +258,18 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
       </div>
     </form>
 
-    <section class="stage" id="stage" aria-label="Vista previa del afiche">
+    <section class="stage vidrio" id="stage" aria-label="Vista previa del afiche">
       <canvas id="lienzo" width="1254" height="1254" aria-label="Afiche personalizado"></canvas>
       <p class="meta" id="medidas"></p>
       <p class="hint">Antes de publicar, escanea el QR con tu celular y comprueba que abre tu número.</p>
     </section>
   </div>
+
+  <footer class="firma">
+    <span>Desarrollado por <strong>Eduardo Pérez</strong></span>
+    <span class="sep" aria-hidden="true">·</span>
+    <span>Soporte o sugerencias: <a href="https://wa.me/56927690949" target="_blank" rel="noopener">+56 9 2769 0949</a></span>
+  </footer>
 </div>
 
 <script>
