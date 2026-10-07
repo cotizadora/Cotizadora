@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.2.2
+ShortCut-Vicidial-GO 1.2.3
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.2).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.3).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -78,6 +78,17 @@ GRABAR EN GO (desde la 1.1.1)
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
 
+LA CLAVE DE GO (desde la 1.2.3)
+- Si al grabar escribes tu clave en el login de GO, se graba OCULTA (no se ve
+  en el atajo, ni en el registro, ni en "📋 Copiar registro") y sólo en este
+  computador. No sale en la configuración que se exporta para compartir.
+- Al repetir, el atajo la escribe y aprieta «Ingresar» solo: el flujo entra a
+  GO y sigue hasta el final sin que toques nada.
+- Si cambias tu clave de GO, vuelve a grabar el flujo.
+- Si el flujo se grabó sin clave, el atajo muestra "👆 Haz clic aquí para
+  entrar a GO…": un clic en ese aviso basta para que Chrome entregue la clave
+  que tiene guardada; el atajo aprieta «Ingresar» y sigue solo.
+
 DESDE EL COTIZADOR DENTAL (desde la 1.2.2 y el cotizador 3.1.3)
 - En la tarjeta del cliente del cotizador aparece 🚀 con el nombre del flujo
   de GO grabado aquí. Al apretarlo copia el RUT del cliente (sin puntos, con
@@ -115,7 +126,6 @@ UN ATAJO QUE PASA POR VARIAS PÁGINAS (desde la 1.2.0)
 - El RUT: si escribes o pegas un RUT en el campo "Rut cliente", al repetir se
   pone el RUT del cliente que está en Vicidial. Ya no se pierde cuando GO borra
   sus datos al iniciar sesión.
-- La contraseña nunca se graba: deja que Chrome la complete antes de apretar ▶.
 
 SÓLO SE GRABA LO QUE HACES TÚ (desde la 1.1.7)
 - Antes, mientras grababas, se sumaban clics solos en Vicidial (ej. "VICIDIAL

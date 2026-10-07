@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.2.2';
+  const VCA_VERSION = '1.2.3';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -401,6 +401,19 @@
     return null;
   }
 
+  // Clave grabada: se guarda oculta (no en texto plano) para que no se lea
+  // de un vistazo en el atajo ni en los respaldos.
+  const LLAVE = 'ShortCut-Vicidial-GO·Eduardo';
+  function xorTexto(t) {
+    let o = '';
+    for (let k = 0; k < t.length; k++) o += String.fromCharCode(t.charCodeAt(k) ^ LLAVE.charCodeAt(k % LLAVE.length));
+    return o;
+  }
+  function ocultarClave(t) { try { return 'v1:' + btoa(unescape(encodeURIComponent(xorTexto(String(t))))); } catch (e) { return ''; } }
+  function revelarClave(t) {
+    try { return String(t || '').startsWith('v1:') ? xorTexto(decodeURIComponent(escape(atob(String(t).slice(3))))) : ''; } catch (e) { return ''; }
+  }
+
   // RUT del cliente que está en Vicidial (lo deja aquí el puente de la extensión)
   function clienteActual() { const c = Store.get('vca_cliente', null); return c && c.num ? c : null; }
   function rutConFormato(c, fmt) {
@@ -483,13 +496,14 @@
         if (!cli || !cli.num) { log(tag + ' no hay RUT del cliente: abre Vicidial con el cliente en pantalla'); return false; }
         valor = rutConFormato(cli, st.fmt);
       }
+      if (st.secreto) valor = revelarClave(valor);
       try { el.focus(); } catch (e) {}
       setNativeValue(el, valor);
       fireInputChange(el);
       // Formularios con máscara (Angular, PrimeNG): también teclado y salida del campo
       try { el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter' })); } catch (e) {}
       try { el.dispatchEvent(new Event('blur')); el.dispatchEvent(new FocusEvent('focusout', { bubbles: true })); } catch (e) {}
-      log(tag + ' -> texto "' + String(valor).slice(0, 30) + '"' + (st.dyn === 'rut' ? ' (RUT del cliente)' : ''));
+      log(tag + ' -> ' + (st.secreto ? 'clave (oculta)' : 'texto "' + String(valor).slice(0, 30) + '"') + (st.dyn === 'rut' ? ' (RUT del cliente)' : ''));
 
     } else if (kind === 'check') {
       const el = await waitFor(st, s.stepTimeoutMs);
@@ -568,6 +582,12 @@
   // persona toca la página. Si hay que iniciar sesión, el atajo espera: la
   // persona entra y, al cargar la página siguiente, el atajo sigue solo.
   function claveVacia() { return Array.from(document.querySelectorAll('input[type="password"]')).some(e => visibleEl(e) && !e.value); }
+  // Botón para entrar en una pantalla de inicio de sesión.
+  function botonIngresar() {
+    const cand = Array.from(document.querySelectorAll('button, input[type="submit"], a[role="button"]')).filter(visibleEl);
+    return cand.find(e => /ingresar|entrar|iniciar\s*sesi|acceder|log\s*in/i.test(Locator.norm(e.textContent || e.value || ''))) ||
+           cand.find(e => (e.type || '').toLowerCase() === 'submit') || null;
+  }
   function avisoLogin(nombre) {
     try {
       if (document.getElementById('vca-aviso-login')) return;
@@ -575,8 +595,15 @@
       d.id = 'vca-aviso-login';
       d.setAttribute('style', 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;max-width:min(92vw,520px);' +
         'background:#0B2C8A;color:#fff;font:600 15px/1.4 system-ui,Segoe UI,sans-serif;padding:14px 18px;border-radius:14px;' +
-        'box-shadow:0 12px 30px rgba(0,20,60,.35);text-align:center;pointer-events:none;opacity:.96');
-      d.textContent = '🔐 Ingresa tu clave y aprieta «Ingresar». El atajo «' + (nombre || '') + '» sigue solo después.';
+        'box-shadow:0 12px 30px rgba(0,20,60,.35);text-align:center;cursor:pointer;opacity:.97');
+      d.textContent = '👆 Haz clic aquí para entrar a GO con tu clave guardada. ' +
+        '(Si no la tienes guardada, escríbela.) El atajo «' + (nombre || '') + '» sigue solo después.';
+      // Un clic aquí es "tocar la página": Chrome entrega la clave guardada y el
+      // atajo aprieta «Ingresar». Se enfoca el campo de la clave por si hay que escribirla.
+      d.addEventListener('click', () => {
+        try { const pw = Array.from(document.querySelectorAll('input[type="password"]')).find(visibleEl); if (pw) pw.focus(); } catch (e) {}
+        d.textContent = '⏳ Entrando a GO… el atajo «' + (nombre || '') + '» sigue solo.';
+      });
       (document.body || document.documentElement).appendChild(d);
       setTimeout(() => { try { d.remove(); } catch (e) {} }, 180000);
     } catch (e) {}
@@ -601,18 +628,31 @@
       const tag = '  paso ' + (i + 1) + '/' + steps.length;
       // Botón de entrar con la clave vacía: espera a que la persona inicie sesión.
       if (IS_CRM && (st.kind || 'click') === 'click' && claveVacia()) {
+        // ¿Este paso ES el botón "Ingresar" de esta pantalla? (si se entró con
+        // Enter al grabar, el paso siguiente ya es del panel y no se consume)
+        const esIngresar = st.ruta === location.pathname;
+        const sigue = esIngresar ? i + 1 : i;
         if (corrida) {
           corrida.anotado = null;
-          pendiente('set', { label: corrida.label, steps: steps, desde: i + 1, sitio: MI_SITIO, t: Date.now(), vence: Date.now() + 3 * 60 * 1000 });
+          pendiente('set', { label: corrida.label, steps: steps, desde: sigue, sitio: MI_SITIO, t: Date.now(), vence: Date.now() + 3 * 60 * 1000 });
         }
         avisoLogin(corrida && corrida.label);
-        log(tag + ': esperando que inicies sesión (Chrome completa la clave); después sigue solo');
-        // Si "Ingresar" recarga la página, la página nueva sigue (queda anotado).
-        // Si GO cambia de pantalla sin recargar, se sigue aquí mismo.
+        log(tag + ': esperando un clic en la página para que Chrome entregue la clave; después entra y sigue solo');
+        // Chrome entrega la clave guardada en cuanto la persona toca la página
+        // (un clic en el aviso basta). Entonces se aprieta "Ingresar" aquí.
+        // Si "Ingresar" recarga la página, la página nueva sigue (queda anotado);
+        // si GO cambia de pantalla sin recargar, se sigue aquí mismo.
         const t0 = Date.now(), ruta0 = location.pathname;
+        let apretado = 0;
         while (Date.now() - t0 < 3 * 60 * 1000) {
-          await sleep(500);
+          await sleep(300);
           if (location.pathname !== ruta0 || !hayClaveVisible()) break;
+          if (!claveVacia() && Date.now() - apretado > 6000) {
+            apretado = Date.now();
+            document.querySelectorAll('input[type="password"]').forEach((e) => { if (visibleEl(e)) fireInputChange(e); });
+            const btn = (esIngresar && resolverEnTodos(st, isClickable)) || botonIngresar();
+            if (btn) { await sleep(250); log(tag + ': la clave ya está: aprieto «' + Locator.norm(btn.textContent || btn.value || 'Ingresar') + '»'); Locator.fireClick(btn); }
+          }
         }
         try { const a = document.getElementById('vca-aviso-login'); if (a) a.remove(); } catch (e) {}
         if (location.pathname === ruta0 && hayClaveVisible()) {
@@ -620,7 +660,8 @@
           return i;
         }
         log(tag + ': sesión iniciada, sigo');
-        await sleep(1200);
+        await sleep(1500);
+        if (!esIngresar) i--;      // el paso de esta vuelta es del panel: se hace ahora
         continue;
       }
       if ((st.kind || 'click') === 'click') anotarAvance(steps, i + 1);
@@ -1289,9 +1330,12 @@
         desc.kind = 'check'; desc.checked = !!el.checked;
         pushStep(desc, el.type + ' = ' + desc.checked);
       } else if (/^password$/i.test(el.type || '')) {
-        // Las contraseñas NUNCA se guardan en el atajo (quedarían a la vista
-        // en el computador). Para ese paso, que la complete Chrome.
-        log('  contraseña: no se graba (deja que Chrome la complete con su gestor de contraseñas)');
+        // La clave se graba OCULTA (no queda a la vista en el atajo, el
+        // registro ni lo que se exporta) y sólo en este computador, para que
+        // el flujo entre solo a GO.
+        if (!el.value) return;
+        desc.kind = 'input'; desc.text = ''; desc.secreto = true; desc.value = ocultarClave(el.value);
+        pushStep(desc, 'clave (guardada oculta)');
       } else {
         desc.kind = 'input'; desc.value = el.value; desc.text = '';
         // ¿Es el RUT del cliente que está en Vicidial (o escribiste "RUT")?

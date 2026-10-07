@@ -839,7 +839,9 @@ $('#save').addEventListener('click', async () => {
 $('#export').addEventListener('click', async () => {
   const r = await collect();
   if (!TABS.length) { setStatus('Sin pestañas conectadas.'); return; }
-  const states = (r.states || []).map(s => ({ id: s.id, label: s.label, steps: s.steps, color: s.color || '', site: siteKey(s.__host) }));
+  // La clave grabada (oculta) NUNCA sale en lo que se exporta para compartir.
+  const sinClave = (steps) => (steps || []).map(p => p && p.secreto ? Object.assign({}, p, { value: '' }) : p);
+  const states = (r.states || []).map(s => ({ id: s.id, label: s.label, steps: sinClave(s.steps), color: s.color || '', site: siteKey(s.__host) }));
   const cfg = { version: 3, exportedAt: new Date().toISOString(), states: states, settings: r.settings || {} };
   const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
