@@ -171,7 +171,7 @@
 
   // GO Bci: sin cola. El ▶ aplica la tipificación en el momento y no deja
   // nada pendiente. Vicidial sí conserva la cola (espera a que corte la llamada).
-  const IS_CRM = /go\.bciseguros\.cl/i.test(location.hostname || '');
+  const IS_CRM = /(^|\.)bciseguros\.cl$/i.test(location.hostname || '');
 
   (async function seedDefaults() {
     try {
@@ -201,6 +201,48 @@
   // ---------------------------------------------------------------------------
   //  API para el popup
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  //  GRABACIÓN QUE CRUZA PÁGINAS. El panel anota en la extensión que se está
+  //  grabando ({ts, on}). Una página que se abre después (otra pestaña, el
+  //  multicotizador, la página siguiente a "Ingresar") se suma sola.
+  // ---------------------------------------------------------------------------
+  function sumarseAGrabacion(g) {
+    try {
+      if (!g || !g.ts || Date.now() - g.ts > 45 * 60 * 1000) return;
+      const l = crudo(K.learning);
+      if (g.on) {
+        if (leerMarcas().fin >= g.ts) return;                  // ya se guardó o descartó
+        if (l && l.ts === g.ts) return;                        // ya está grabando
+        set(K.learning, { recording: true, steps: [], ts: g.ts });
+        try { document.dispatchEvent(new CustomEvent('vca:learn-estado', { detail: localStorage.getItem(K.learning) })); } catch (e) {}
+        notifyPage();
+      } else if (l && l.recording && l.ts === g.ts) {          // se detuvo desde el panel
+        marcar('stop', l.ts); l.recording = false; set(K.learning, l);
+        try { document.dispatchEvent(new CustomEvent('vca:learn-estado', { detail: JSON.stringify(l) })); } catch (e) {}
+      }
+    } catch (e) {}
+  }
+  try {
+    chrome.storage.local.get('vcaGrab', (r) => sumarseAGrabacion(r && r.vcaGrab));
+    chrome.storage.onChanged.addListener((ch, area) => { if (area === 'local' && ch.vcaGrab) sumarseAGrabacion(ch.vcaGrab.newValue); });
+  } catch (e) {}
+
+  // El motor avisa "voy en el paso N" antes de cada clic: queda en la extensión.
+  document.addEventListener('vca:pendiente', (ev) => {
+    try { const d = JSON.parse(ev.detail); chrome.runtime.sendMessage({ type: 'pendiente', op: d.op, data: d.data }); } catch (e) {}
+  });
+  // Al cargar la página: ¿quedó un atajo a medias que sigue aquí?
+  function preguntarPendiente() {
+    try {
+      chrome.runtime.sendMessage({ type: 'pendienteTomar', sitio: siteKey(location.hostname) }, (r) => {
+        if (chrome.runtime.lastError || !r || !r.data) return;
+        try { document.dispatchEvent(new CustomEvent('vca:cmd', { detail: { type: 'continuar', data: r.data } })); } catch (e) {}
+      });
+    } catch (e) {}
+  }
+  if (document.readyState === 'complete') setTimeout(preguntarPendiente, 300);
+  else window.addEventListener('load', () => setTimeout(preguntarPendiente, 300), { once: true });
+
   chrome.runtime.onMessage.addListener((msg, sender, reply) => {
     try {
       switch (msg && msg.type) {
@@ -268,7 +310,9 @@
 
         // --- Grabacion de secuencia (grabar primero, nombrar al final) --------
         case 'learnStart':               // empieza a grabar YA, sin pedir nombre
-          set(K.learning, { recording: true, steps: [], ts: Math.max(Date.now(), leerMarcas().fin + 1) });
+          // Todas las páginas graban con la MISMA marca de inicio (la da el panel),
+          // para juntar después los pasos de GO, del multicotizador, etc.
+          set(K.learning, { recording: true, steps: [], ts: Math.max(msg.ts || Date.now(), leerMarcas().fin + 1) });
           try { document.dispatchEvent(new CustomEvent('vca:learn-estado', { detail: localStorage.getItem(K.learning) })); } catch (e) {}
           notifyPage();
           reply({ ok: true });
@@ -283,12 +327,14 @@
         case 'learnSave': {              // nombra y guarda la secuencia grabada
           try { document.dispatchEvent(new CustomEvent('vca:cmd', { detail: { type: 'learnReset' } })); } catch (e) {}
           const learn = get(K.learning, null);
-          marcar('fin', learn && learn.ts);
+          marcar('fin', Math.max((learn && learn.ts) || 0, msg.ts || 0));
+          // El panel manda los pasos de TODAS las páginas ya juntos y en orden.
+          const pasos = Array.isArray(msg.steps) && msg.steps.length ? msg.steps : (learn && learn.steps) || [];
           let ok = false;
-          if (learn && learn.steps && learn.steps.length) {
+          if (pasos.length) {
             const states = get(K.states, []);
             const label = (msg.label && msg.label.trim()) || ('Atajo ' + (states.length + 1));
-            states.push({ id: genId(), label: label, steps: learn.steps });
+            states.push({ id: genId(), label: label, steps: pasos });
             set(K.states, states);
             ok = true;
           }
@@ -610,11 +656,17 @@
     }
     setInterval(publicar, 1500);
     publicar();
-  } else if (/go\.bciseguros\.cl/i.test(host)) {
-    const copiar = (d) => { try { if (d) localStorage.setItem('vca_cliente', JSON.stringify(d)); } catch (e) {} };
+  } else if (/(^|\.)bciseguros\.cl$/i.test(host)) {
+    // GO borra sus datos al iniciar sesión: el RUT del cliente se repone cada 2 s.
+    let ultimo = null;
+    const copiar = (d) => {
+      if (d) ultimo = d;
+      try { if (ultimo && localStorage.getItem('vca_cliente') !== JSON.stringify(ultimo)) localStorage.setItem('vca_cliente', JSON.stringify(ultimo)); } catch (e) {}
+    };
     try {
       chrome.storage.local.get('vcaCliente', (r) => copiar(r && r.vcaCliente));
       chrome.storage.onChanged.addListener((ch) => { if (ch.vcaCliente) copiar(ch.vcaCliente.newValue); });
+      setInterval(() => { if (vivo()) copiar(null); }, 2000);
     } catch (e) {}
   }
 })();

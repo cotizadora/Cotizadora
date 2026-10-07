@@ -38,9 +38,10 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.1.7';
+  const VCA_VERSION = '1.2.0';
 
-  const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
+  // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
+  const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
   const IS_TOP = (function () { try { return window.self === window.top; } catch (e) { return false; } })();
 
   // MARCO EXTERNO: un marco de OTRO sitio dentro de Vicidial/GO (ej. el
@@ -76,7 +77,15 @@
   // queda nada pendiente. Si quedara algo armado y luego cae OTRO cliente (o se
   // recarga la página), se tipificaría al cliente equivocado. La cola solo tiene
   // sentido en Vicidial, donde el cambio de estado espera a que corte la llamada.
-  const IS_CRM = !EXT && /go\.bciseguros\.cl/i.test(location.hostname || '');
+  const IS_CRM = !EXT && /(^|\.)bciseguros\.cl$/i.test(location.hostname || '');
+  // Sitio de esta página (mismo nombre que usa el panel): cada paso grabado lo lleva,
+  // para que un atajo pueda seguir en otra página (GO → multicotizador).
+  function sitioDe(h) {
+    h = String(h || '').toLowerCase();
+    if (/vicidial\.recaall\.simtastic\.cl/.test(h)) return 'vicidial';
+    return h;
+  }
+  const MI_SITIO = sitioDe(location.hostname);
 
   // ---------------------------------------------------------------------------
   // Vicidial: estado de la llamada leído de las variables de la pantalla del
@@ -263,13 +272,22 @@
           if (e) return e;
         } catch (e) {}
       }
+      // 2–4: se prefiere SIEMPRE un control que se vea. Uno oculto (ej. el
+      // "Siguiente" de otra pantalla del asistente) sólo se usa si no hay otro.
+      let oculto = null;
+      const elegir = (lista) => {
+        const arr = Array.from(lista || []);
+        const vis = arr.find(e => { try { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (x) { return false; } });
+        if (!vis && arr[0] && !oculto) oculto = arr[0];
+        return vis || null;
+      };
       // 2) por path CSS + verificacion de texto (también la ruta sin las
       //    clases que la web renumera)
       const limpia = this.limpiarRuta(d.path);
       const rutas = limpia && limpia !== d.path ? [d.path, limpia] : [d.path];
       const conTexto = (e) => !d.text || this.norm(e.textContent).slice(0, 60) === d.text;
       for (const r of rutas) try {
-        const e = this.visible(Array.from(doc.querySelectorAll(r)).filter(conTexto));
+        const e = elegir(Array.from(doc.querySelectorAll(r)).filter(conTexto));
         if (e) return e;
       } catch (e) {}
       // 2b) botón sólo con ícono (ej. ☰): mismo ícono, mismo tipo de control
@@ -277,13 +295,13 @@
         const cand = /^(?:pi|fa)-/.test(d.icono)
           ? Array.from(doc.querySelectorAll('.' + CSS.escape(d.icono)))
           : Array.from(doc.querySelectorAll('.material-icons')).filter(i => this.norm(i.textContent) === d.icono);
-        const e = this.visible(cand.map(i => (d.tag && i.closest(d.tag)) || i));
+        const e = elegir(cand.map(i => (d.tag && i.closest(d.tag)) || i));
         if (e) return e;
       } catch (e) {}
       // 2c) por su título o aria-label
       const et = d.attrs && (d.attrs['aria-label'] || d.attrs.title);
       if (et) try {
-        const e = this.visible(Array.from(doc.querySelectorAll((d.tag || '*') + '[aria-label],' + (d.tag || '*') + '[title]'))
+        const e = elegir(Array.from(doc.querySelectorAll((d.tag || '*') + '[aria-label],' + (d.tag || '*') + '[title]'))
           .filter(x => (x.getAttribute('aria-label') || x.getAttribute('title')) === et));
         if (e) return e;
       } catch (e) {}
@@ -292,17 +310,17 @@
       const firstCls = (d.classes || []).find(c => !CLASE_VOLATIL.test(c));
       if (d.text) try {
         const sel = d.tag + (firstCls ? '.' + CSS.escape(firstCls) : '');
-        const cand = Array.from(doc.querySelectorAll(sel));
-        const hit = cand.find(e => this.norm(e.textContent).slice(0, 60) === d.text);
+        const hit = elegir(Array.from(doc.querySelectorAll(sel)).filter(e => this.norm(e.textContent).slice(0, 60) === d.text));
         if (hit) return hit;
       } catch (e) {}
       // 4) cualquier control con ese texto exacto y pocos hijos
       if (d.text) {
         const all = Array.from(doc.querySelectorAll('a,button,li,span,div,td'));
-        const hit = all.find(e =>
-          this.norm(e.textContent).slice(0, 60) === d.text && e.children.length <= 2);
+        const hit = elegir(all.filter(e =>
+          this.norm(e.textContent).slice(0, 60) === d.text && e.children.length <= 2));
         if (hit) return hit;
       }
+      if (oculto) return oculto;
       // 5) ultimo recurso: el path aunque el texto haya cambiado. Necesario para
       //    controles cuyo texto refleja el estado actual (ej. el toggle "En espera"
       //    que luego dice otra cosa) o menus que varian su etiqueta.
@@ -392,15 +410,21 @@
   }
 
   // Espera hasta que el paso se pueda resolver Y este clicable, o venza el timeout.
-  async function waitFor(desc, timeout) {
+  async function waitFor(desc, timeout, extra) {
     const t0 = Date.now();
+    const ok = extra ? (e) => isClickable(e) && extra(e) : isClickable;
     while (Date.now() - t0 < timeout) {
-      const el = resolverEnTodos(desc, isClickable);
+      const el = resolverEnTodos(desc, ok);
       if (el) return el;
       await sleep(150);
     }
     return resolverEnTodos(desc); // ultimo intento aunque no parezca clicable
   }
+  // Último botón apretado: si el paso siguiente es otro "Siguiente" y la
+  // pantalla todavía no cambia, se espera (hasta 2,5 s) en vez de apretar dos
+  // veces el mismo botón y saltarse una pantalla.
+  let ultimoClic = { el: null, t: 0 };
+  const noRecienApretado = (e) => !(e === ultimoClic.el && e.isConnected && Date.now() - ultimoClic.t < 2500);
 
   // --- Controles de formulario (<select>, texto, casillas) -------------------
   // Asignar .value directamente no basta si la web usa React/Vue: hay que usar
@@ -474,11 +498,12 @@
       log(tag + ' -> casilla ' + st.checked);
 
     } else {
-      const el = await waitFor(st, s.stepTimeoutMs);
+      const el = await waitFor(st, s.stepTimeoutMs, noRecienApretado);
       if (!el || !isClickable(el)) {
         log(tag + ' no listo (' + st.tag + ' "' + st.text + '")');
         return false;
       }
+      ultimoClic = { el: el, t: Date.now() };
       Locator.fireClick(el);
       log(tag + ' -> ' + st.tag + ' "' + st.text + '"');
     }
@@ -497,13 +522,41 @@
 
   // Un intento de la secuencia, desde el paso `desde`. Devuelve el índice del
   // paso que falló, o -1 si se completó.
+  // ---- Atajos que cruzan páginas -------------------------------------------
+  // Antes de cada clic se anota "voy en el paso N" fuera de la página (en la
+  // extensión). Si el clic abre otra página (o pestaña, o sitio), ésa lo lee al
+  // cargar y sigue desde ahí. -3 = el resto sigue en otra página.
+  const OTRA_PAGINA = -3;
+  let corrida = null;   // {label, steps} de la ejecución en curso
+  function pendiente(op, data) {
+    try { document.dispatchEvent(new CustomEvent('vca:pendiente', { detail: JSON.stringify({ op: op, data: data || null }) })); } catch (e) {}
+  }
+  function anotarAvance(steps, desde) {
+    if (!corrida || desde >= steps.length || corrida.anotado === desde) return;
+    corrida.anotado = desde;      // una vez por paso: no pisar a la página que ya siguió
+    pendiente('set', { label: corrida.label, steps: steps, desde: desde, sitio: MI_SITIO, t: Date.now() });
+  }
+  // Espera entre pasos: la que usaste al grabar (un poco menos), para que una
+  // página alcance a cambiar antes del siguiente "Siguiente".
+  function esperaEntre(a, b, s) {
+    if (!IS_CRM || !a || !b || !a.t || !b.t) return s.stepGapMs;
+    return Math.max(s.stepGapMs, Math.min(2500, Math.round((b.t - a.t) * 0.4)));
+  }
+
   async function runStepsOnce(steps, s, desde) {
     for (let i = desde || 0; i < steps.length; i++) {
       const st = steps[i];
+      // Paso de otra página: se deja anotado y lo hace esa página al abrirse.
+      if (st.sitio && !st.xf && st.sitio !== MI_SITIO) {
+        anotarAvance(steps, i);
+        log('  paso ' + (i + 1) + '/' + steps.length + ': sigue en ' + st.sitio + ' (esperando que se abra)');
+        return OTRA_PAGINA;
+      }
       const tag = '  paso ' + (i + 1) + '/' + steps.length;
+      if ((st.kind || 'click') === 'click') anotarAvance(steps, i + 1);
       const ok = st.xf ? await pasoEnMarco(st, s, tag) : await ejecutarPaso(st, s, tag);
       if (!ok) { pasoFallido = { n: i + 1, de: steps.length, que: describirPaso(st) }; return i; }
-      await sleep(s.stepGapMs);
+      await sleep(esperaEntre(st, steps[i + 1], s));
     }
     return -1;
   }
@@ -520,16 +573,18 @@
 
   // Ejecuta la secuencia reintentando hasta lograrlo o vencer el tiempo total
   // (el menu de pausa no siempre esta disponible al instante).
-  async function runSteps(steps) {
+  async function runSteps(steps, inicio, label) {
     const s = settings();
+    corrida = { label: label || '', steps: steps };
     // GO: tope más corto, para avisar pronto si algo no aparece
     const deadline = Date.now() + (IS_CRM ? Math.min(s.totalTimeoutMs, 15000) : s.totalTimeoutMs);
-    let attempt = 0, desde = 0;
+    let attempt = 0, desde = inicio || 0;
     while (Date.now() < deadline) {
       attempt++;
       if (attempt > 1) log('Replay reintento ' + attempt + (desde ? ' (desde el paso ' + (desde + 1) + ')' : '') + '...');
       const fallo = await runStepsOnce(steps, s, desde);
-      if (fallo < 0) { log('Replay COMPLETADO (intento ' + attempt + ').'); return true; }
+      if (fallo === OTRA_PAGINA) { corrida = null; return true; }   // sigue en la otra página
+      if (fallo < 0) { pendiente('clear'); corrida = null; log('Replay COMPLETADO (intento ' + attempt + ').'); return true; }
       if (IS_CRM) {
         // GO: sin Escape (cerraría la ventana "Nueva Oportunidad" ya abierta)
         // y sin volver al ☰ (lo cerraría): se sigue esperando el paso que faltó.
@@ -546,6 +601,7 @@
       desde = primeroDisponible(steps) ? 0 : fallo;
     }
     log('Replay AGOTADO tras ' + attempt + ' intento(s): no se pudo aplicar el estado.');
+    pendiente('clear'); corrida = null;
     return false;
   }
 
@@ -703,7 +759,7 @@
     const nombre = armed.label || armed.name || armed.text;
     log((IS_CRM ? 'Ejecutando' : 'Fin de llamada (' + sourceTag + ') -> aplicando') + ' "' +
         nombre + '" (' + steps.length + ' paso/s)');
-    runSteps(steps).then((ok) => {
+    runSteps(steps, 0, nombre).then((ok) => {
       replaying = false;
       if (ok) { setArmed(null); }
       else if (IS_CRM) {
@@ -712,6 +768,17 @@
         setArmed(null);
       }
       else { Store.set(K.needrep, Date.now() + '|' + Math.random()); } // que prueben otros frames
+    });
+  }
+
+  // Un atajo que empezó en otra página (o antes de un cambio de página) sigue aquí.
+  function continuarAtajo(p) {
+    if (replaying || !vigente() || !p || !Array.isArray(p.steps)) return;
+    replaying = true; pasoFallido = null; Store.del('vca_fallo');
+    log('Continuando "' + (p.label || 'atajo') + '" desde el paso ' + (p.desde + 1) + '/' + p.steps.length + ' (viene de otra página)');
+    runSteps(p.steps, p.desde, p.label).then((ok) => {
+      replaying = false;
+      if (!ok) Store.set('vca_fallo', { label: p.label, paso: pasoFallido, t: Date.now() });
     });
   }
 
@@ -846,6 +913,7 @@
     else if (d.type === 'callend') { handleCallEnd(d.tag || 'popup'); }
     else if (d.type === 'refresh' && window.__vcaPanel) { window.__vcaPanel.rebuild(); window.__vcaPanel.refresh(); }
     else if (d.type === 'learnReset') { memLearn = null; }   // grabación guardada o cancelada
+    else if (d.type === 'continuar' && d.data && IS_TOP && !EXT) continuarAtajo(d.data);
   });
 
   // ===========================================================================
@@ -1092,6 +1160,8 @@
     const learn = leerLearning();
     if (!learn || !learn.recording) return;
     learn.steps = learn.steps || [];
+    step.sitio = MI_SITIO;            // en qué página va este paso
+    step.t = Date.now();              // cuándo (para ordenar y respetar las esperas)
     learn.steps.push(step);
     Store.set(K.learning, learn);
     memLearn = learn;
@@ -1159,7 +1229,11 @@
         const cli = clienteActual();
         const soloRut = v.toUpperCase().replace(/[^0-9K]/g, '');
         const palabra = /^\{?rut\}?$/i.test(v);
-        if (palabra || (cli && soloRut && soloRut === (cli.num + cli.dv).toUpperCase())) {
+        // Un campo de RUT (por su id, nombre o texto de ayuda) con algo que parece RUT:
+        // vale aunque GO haya borrado el dato del cliente o el RUT venga pegado.
+        const pista = [el.id, el.name, el.getAttribute('formcontrolname'), el.placeholder, el.getAttribute('aria-label')].join(' ');
+        const campoRut = /rut/i.test(pista) && /^\d{1,2}\.?\d{3}\.?\d{3}-?[\dkK]$/.test(v);
+        if (palabra || campoRut || (cli && soloRut && soloRut === (cli.num + cli.dv).toUpperCase())) {
           desc.dyn = 'rut';
           desc.fmt = palabra ? { puntos: true, guion: true } : { puntos: /\./.test(v), guion: /-/.test(v) };
           pushStep(desc, 'texto = RUT del cliente (se toma de Vicidial al repetir)');

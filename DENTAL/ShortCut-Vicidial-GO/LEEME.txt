@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.1.7
+ShortCut-Vicidial-GO 1.2.0
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.1.7).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.0).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,25 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+UN ATAJO QUE PASA POR VARIAS PÁGINAS (desde la 1.2.0)
+- Un solo atajo puede seguir aunque la página cambie: después de "Ingresar"
+  en GO, al abrirse el multicotizador (multicotizadorvida.bciseguros.cl) en
+  otra pestaña, y en cada "Siguiente" que carga otra página.
+- Para grabarlo: ⏺ Grabar, haz TODO el recorrido (GO, luego el
+  multicotizador con sus "Siguiente"), ■ Detener, ponle nombre y Guardar.
+  El panel muestra los clics de cada página, ej. "GO Bci (4) +
+  Multicotizador (3)", y el atajo queda como "GO Bci → Multicotizador".
+- Para repetirlo: deja GO a la vista y aprieta ▶. GO hace su parte y, cuando
+  se abre el multicotizador, éste sigue solo hasta el último "Siguiente".
+- Entre un "Siguiente" y otro espera lo mismo que esperaste tú al grabar (un
+  poco menos), y nunca aprieta dos veces el mismo botón antes de que cambie la
+  pantalla.
+- Mientras grabas un atajo de GO, los clics que hagas en Vicidial no entran.
+- El RUT: si escribes o pegas un RUT en el campo "Rut cliente", al repetir se
+  pone el RUT del cliente que está en Vicidial. Ya no se pierde cuando GO borra
+  sus datos al iniciar sesión.
+- La contraseña nunca se graba: deja que Chrome la complete antes de apretar ▶.
 
 SÓLO SE GRABA LO QUE HACES TÚ (desde la 1.1.7)
 - Antes, mientras grababas, se sumaban clics solos en Vicidial (ej. "VICIDIAL

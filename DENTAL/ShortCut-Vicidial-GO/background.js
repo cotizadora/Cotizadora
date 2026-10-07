@@ -113,6 +113,9 @@ async function reloadOurSiteTabs() {
   }
   let vici = [];
   try { vici = await chrome.tabs.query({ url: '*://vicidial.recaall.simtastic.cl/*' }); } catch (e) {}
+  // Otras páginas de Bci (multicotizador…): una cotización a medias no se
+  // recarga; se le conecta la extensión nueva igual que a Vicidial.
+  try { vici = vici.concat((await chrome.tabs.query({ url: '*://*.bciseguros.cl/*' })).filter(t => !/\/\/go\.bciseguros\.cl\//i.test(t.url || ''))); } catch (e) {}
   for (const t of vici) {
     try { await chrome.scripting.executeScript({ target: { tabId: t.id, allFrames: true }, world: 'MAIN', files: ['content.js'] }); } catch (e) {}
     try { await chrome.scripting.executeScript({ target: { tabId: t.id }, files: ['bridge.js'] }); } catch (e) {}
@@ -145,3 +148,45 @@ async function pumpTick() {
   }
 }
 chrome.alarms.onAlarm.addListener((a) => { if (a.name === 'vca-pump') pumpTick(); });
+
+// ---------------------------------------------------------------------------
+//  ATAJOS QUE CRUZAN PÁGINAS
+//  Antes de cada clic, la página anota aquí "voy en el paso N" (con todos los
+//  pasos). Si ese clic abre otra página —en la misma pestaña o en una nueva,
+//  del mismo sitio o de otro (GO → multicotizador)—, la página nueva pregunta
+//  al cargar y, si el paso que sigue es suyo, continúa desde ahí.
+//  Se entrega UNA sola vez: a la misma pestaña, o a una página de otro sitio.
+// ---------------------------------------------------------------------------
+const PEND = 'vcaPendiente';
+const area = chrome.storage.session || chrome.storage.local;
+const VIGENCIA_MS = 60 * 1000;
+
+chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+  if (!msg || (msg.type !== 'pendiente' && msg.type !== 'pendienteTomar')) return;
+  const tab = sender && sender.tab ? sender.tab.id : null;
+  (async () => {
+    try {
+      if (msg.type === 'pendiente') {
+        const p = (await area.get(PEND))[PEND];
+        // Otra pestaña ya tomó el atajo y va más adelante: un aviso atrasado no la pisa.
+        const deOtra = p && p.tab !== tab && Date.now() - p.t < VIGENCIA_MS;
+        if (msg.op === 'clear') { if (!deOtra) await area.remove(PEND); }
+        else if (msg.data && !(deOtra && p.data && p.data.label === msg.data.label && p.data.desde >= msg.data.desde)) {
+          await area.set({ [PEND]: { data: msg.data, tab: tab, sitio: msg.data.sitio, t: Date.now() } });
+        }
+        reply({ ok: true });
+        return;
+      }
+      // pendienteTomar
+      const p = (await area.get(PEND))[PEND];
+      if (!p || !p.data || Date.now() - p.t > VIGENCIA_MS) { reply({}); return; }
+      const sig = p.data.steps && p.data.steps[p.data.desde];
+      if (!sig || (sig.sitio && sig.sitio !== msg.sitio)) { reply({}); return; }
+      if (tab !== p.tab && msg.sitio === p.sitio) { reply({}); return; }   // otra pestaña del mismo sitio: no
+      // Entregado: desde ahora lo lleva esta pestaña.
+      await area.set({ [PEND]: { data: p.data, tab: tab, sitio: msg.sitio, t: Date.now(), tomado: true } });
+      reply({ data: p.data });
+    } catch (e) { reply({}); }
+  })();
+  return true;
+});

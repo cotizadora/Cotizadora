@@ -24,8 +24,16 @@ function escapeHtml(s) {
 function labelOf(st) { return (st && st.label) ? st.label : '(sin nombre)'; }
 function siteName(host) {
   if (/vicidial/i.test(host)) return 'VICIDIAL';
-  if (/bciseguros/i.test(host)) return 'GO Bci';
+  if (/(^|\.)go\.bciseguros\.cl/i.test(host)) return 'GO Bci';
+  if (/multicotizador/i.test(host)) return 'Multicotizador';
+  if (/bciseguros/i.test(host)) return 'Bci Seguros';
   return host || '?';
+}
+// Páginas por las que pasa un atajo, en orden (ej. "GO Bci → Multicotizador").
+function rutaDeSitios(st) {
+  const out = [];
+  (st.steps || []).forEach(p => { const n = p.sitio ? siteName(p.sitio) : ''; if (n && out[out.length - 1] !== n) out.push(n); });
+  return out.length > 1 ? out.join(' → ') : siteName(st.__host);
 }
 // Nombres de sitio SIN repetir: si hay dos pestañas de Vicidial, muestra
 // "Vicidial" una sola vez (no "Vicidial + Vicidial").
@@ -132,7 +140,7 @@ async function sendToSite(host, msg) {
   return last;
 }
 
-const SITE_RE = /vicidial\.recaall\.simtastic\.cl|go\.bciseguros\.cl/i;
+const SITE_RE = /vicidial\.recaall\.simtastic\.cl|\/\/([a-z0-9-]+\.)*bciseguros\.cl\//i;
 
 async function scanTabs() {
   diag = { lines: [], verdict: '', lastErr: '' };
@@ -255,7 +263,7 @@ function siteKey(host) {
 function groupRank(host) {
   const s = siteName(host || '');
   if (/vicidial/i.test(s)) return 0;   // Vocal
-  if (/go bci/i.test(s)) return 1;        // CRM
+  if (/go bci|multicotizador|bci seguros/i.test(s)) return 1;        // CRM
   return 2;                            // Otros
 }
 // Dentro del CRM, agrupa por color: verdes (positivas) juntas, luego rojas,
@@ -351,8 +359,8 @@ function renderList(states, armed) {
     lbl.className = 'lbl';
     // Una sola línea: nombre + sitio. Los pasos van en el tooltip para ahorrar alto.
     lbl.innerHTML = (on ? '⏳ ' : '') + escapeHtml(labelOf(st)) +
-      ' <span class="mini">· ' + escapeHtml(siteName(st.__host)) + '</span>';
-    row.title = labelOf(st) + ' · ' + siteName(st.__host) + ' · ' + nPasos + ' pasos';
+      ' <span class="mini">· ' + escapeHtml(rutaDeSitios(st)) + '</span>';
+    row.title = labelOf(st) + ' · ' + rutaDeSitios(st) + ' · ' + nPasos + ' pasos';
 
     const edit = document.createElement('button');
     edit.textContent = '✏️';
@@ -634,7 +642,7 @@ async function refreshInner() {
   engineLog = r.log || engineLog;
   // Grabación en curso y una pestaña que se conectó después (o no recibió la
   // orden): se suma a la grabación, para que sus clics también queden.
-  if (r.grabando && r.sinGrabar.length) r.sinGrabar.forEach(id => sendTo(id, { type: 'learnStart' }));
+  if (r.grabando && r.sinGrabar.length) r.sinGrabar.forEach(id => sendTo(id, { type: 'learnStart', ts: r.learning && r.learning.ts }));
   pintarAvisoMotor(r.engines);
 
   if (!TABS.length) {
@@ -701,6 +709,40 @@ async function refreshInner() {
   paintArmInfo(lastArmed);
 }
 
+// ---- Grabación compartida entre páginas ----------------------------------
+function grab(v) { return new Promise(r => { try { chrome.storage.local.set({ vcaGrab: v }, () => r()); } catch (e) { r(); } }); }
+function leerTodo() { return new Promise(r => { try { chrome.storage.local.get(null, x => r(x || {})); } catch (e) { r({}); } }); }
+async function grabOff(borrar) {
+  const g = (await leerTodo()).vcaGrab;
+  if (borrar) { try { await chrome.storage.local.remove('vcaGrab'); } catch (e) {} return; }
+  if (g) await grab({ ts: g.ts, on: false });
+}
+// Pasos de la grabación actual en todas las páginas, ordenados por la hora del clic.
+async function pasosGrabados() {
+  const r = await collect();
+  const todo = await leerTodo();
+  const ts = (todo.vcaGrab && todo.vcaGrab.ts) || (r.learning && r.learning.ts) || 0;
+  const listas = [];
+  for (const t of TABS) {
+    const l = await sendTo(t.id, { type: 'getData' });
+    if (l && l.learning && (!ts || l.learning.ts === ts)) listas.push(l.learning.steps || []);
+  }
+  Object.keys(todo).forEach(k => {
+    const l = /^vcaSitio:/.test(k) && todo[k] && todo[k].learning;
+    if (l && (!ts || l.ts === ts)) listas.push(l.steps || []);
+  });
+  const vistos = new Set(), pasos = [];
+  listas.forEach(lst => lst.forEach(p => {
+    const firma = (p.t || '') + '|' + (p.sitio || '') + '|' + (p.path || '') + '|' + (p.value || '') + '|' + (p.optText || '');
+    if (!vistos.has(firma)) { vistos.add(firma); pasos.push(p); }
+  }));
+  pasos.sort((a, b) => (a.t || 0) - (b.t || 0));
+  // Un atajo de GO / multicotizador no lleva clics de Vicidial (se cuelan al
+  // copiar el RUT o mirar la llamada mientras se graba).
+  const bci = pasos.some(p => /bciseguros/.test(p.sitio || ''));
+  return { pasos: bci ? pasos.filter(p => p.sitio !== 'vicidial') : pasos, ts: ts };
+}
+
 // ---- Botones de grabación --------------------------------------------------
 $('#rec').addEventListener('click', async () => {
   $('#name').value = '';
@@ -709,12 +751,16 @@ $('#rec').addEventListener('click', async () => {
   // a GO y no sólo a Vicidial.
   setStatus('Conectando pestañas…');
   TABS = await scanTabs(); lastScan = Date.now();
-  await broadcast({ type: 'learnStart' });   // graba en TODAS las pestañas
+  // Una sola grabación para todas las páginas, también las que se abran después
+  // (otra pestaña, el multicotizador, la página que sigue a "Ingresar").
+  const ts = Date.now();
+  await grab({ ts: ts, on: true });
+  await broadcast({ type: 'learnStart', ts: ts });   // graba en TODAS las pestañas
   listSig = ''; refresh();
 });
-$('#stop').addEventListener('click', async () => { await broadcast({ type: 'learnStop' }); refresh(); });
-$('#cancel1').addEventListener('click', async () => { await broadcast({ type: 'learnCancel' }); listSig = ''; refresh(); });
-$('#cancel2').addEventListener('click', async () => { await broadcast({ type: 'learnCancel' }); listSig = ''; refresh(); });
+$('#stop').addEventListener('click', async () => { await grabOff(); await broadcast({ type: 'learnStop' }); refresh(); });
+$('#cancel1').addEventListener('click', async () => { await grabOff(); await broadcast({ type: 'learnCancel' }); listSig = ''; refresh(); });
+$('#cancel2').addEventListener('click', async () => { await grabOff(); await broadcast({ type: 'learnCancel' }); listSig = ''; refresh(); });
 $('#save').addEventListener('click', async () => {
   if (learningTab == null) { setStatus('No hay nada grabado.'); return; }
   const label = $('#name').value.trim();
@@ -728,7 +774,15 @@ $('#save').addEventListener('click', async () => {
     setStatus('Escríbele un nombre para guardar.');
     return;
   }
-  const r = await sendTo(learningTab, { type: 'learnSave', label: label });
+  // Junta los pasos de todas las páginas (también de las que ya se cerraron)
+  // y lo guarda en la página donde empieza el atajo.
+  const { pasos, ts } = await pasosGrabados();
+  let destino = learningTab;
+  const inicio = pasos[0] && pasos[0].sitio;
+  const t0 = inicio && TABS.find(t => siteKey(t.host) === inicio);
+  if (t0) destino = t0.id;
+  const r = await sendTo(destino, { type: 'learnSave', label: label, steps: pasos, ts: ts });
+  await grabOff(true);
   await broadcast({ type: 'learnCancel' });  // limpia grabaciones vacías en las demás
   setStatus(r && r.ok ? 'Atajo guardado.' : 'No se guardó (0 clics grabados).');
   $('#name').value = '';
