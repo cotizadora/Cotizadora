@@ -32,12 +32,25 @@ function fechaVici(v){
   if(m && m[1] !== "0000") return m[3] + "/" + m[2] + "/" + m[1];
   return "";
 }
+// Dígito verificador (módulo 11)
+function dvRut(num){
+  let s = 0, m = 2;
+  for(let i = num.length - 1; i >= 0; i--){ s += Number(num[i]) * m; m = m === 7 ? 2 : m + 1; }
+  const r = 11 - (s % 11);
+  return r === 11 ? "0" : r === 10 ? "K" : String(r);
+}
 // Formato chileno: 19758650 + 8 -> 19.758.650-8
 function rutConPuntos(num, dv){
   num = String(num || "").replace(/[^0-9kK]/g, "");
   dv = String(dv || "").trim();
   if(!num) return "";
-  if(!dv && num.length > 7){ dv = num.slice(-1); num = num.slice(0, -1); }
+  // Sin DV aparte: 9 caracteres traen el DV al final; con 8 sólo si el último
+  // dígito cuadra con el módulo 11 (12780633 es 12.780.633-0, no 1.278.063-3).
+  if(!dv && (num.length > 8 || /k$/i.test(num) || (num.length === 8 && dvRut(num.slice(0, -1)) === num.slice(-1).toUpperCase()))){
+    dv = num.slice(-1); num = num.slice(0, -1);
+  }
+  num = num.replace(/k/gi, "");
+  if(!dv && num.length >= 6 && num.length <= 8) dv = dvRut(num);
   return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + (dv ? "-" + dv.toUpperCase() : "");
 }
 // Campos crudos de la pantalla de Vicidial ({nombre_en_minúsculas: valor}) ->
@@ -50,7 +63,8 @@ function clienteDesdeCampos(f, agente){
     lead: val("lead_id"),
     nombre: val("nombres", "nombre", "first_name"),
     apellido: ap || val("apellidos", "last_name"),
-    rut: val("rut") ? rutConPuntos(val("rut"), val("dv")) : rutConPuntos(val("vendor_lead_code")),
+    // El DV "0" es válido (12780633-0): se lee aparte, sin el filtro de los "0".
+    rut: val("rut") ? rutConPuntos(val("rut"), String(f.dv == null ? "" : f.dv).trim()) : rutConPuntos(val("vendor_lead_code")),
     fono: val("fono1", "phone_number"),
     fono2: val("fono2", "alt_phone"),
     comuna: val("comuna", "province"),

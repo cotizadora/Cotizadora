@@ -839,6 +839,10 @@ $('#rec').addEventListener('click', async () => {
 $('#stop').addEventListener('click', async () => { await grabOff(); await broadcast({ type: 'learnStop' }); refresh(); });
 $('#cancel1').addEventListener('click', async () => { await grabOff(); await broadcast({ type: 'learnCancel' }); listSig = ''; refresh(); });
 $('#cancel2').addEventListener('click', async () => { await grabOff(); await broadcast({ type: 'learnCancel' }); listSig = ''; refresh(); });
+// Nombres fijos de los botones 1 y 2 del Cotizador Dental: un clic los pone.
+document.querySelectorAll('.chip-nombre').forEach(b => b.addEventListener('click', () => {
+  $('#name').value = b.getAttribute('data-nombre'); $('#name').focus();
+}));
 $('#save').addEventListener('click', async () => {
   if (learningTab == null) { setStatus('No hay nada grabado.'); return; }
   const label = $('#name').value.trim();

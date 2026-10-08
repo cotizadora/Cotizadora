@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.2.7
+ShortCut-Vicidial-GO 1.2.9
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.7).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.9).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,18 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+RUT CON DÍGITO VERIFICADOR 0 (arreglado en la 1.2.9)
+- Si en Vicidial el DV del cliente era 0 (ej. RUT 12780633, DV 0), se
+  descartaba como si estuviera vacío y se tomaba el último dígito del RUT como
+  DV: a GO llegaba 1278063-3 ("Rut inválido") y el atajo se detenía.
+  Ahora el DV 0 se respeta: 12780633-0. Sin DV aparte, un RUT de 8 dígitos
+  sólo se separa si el último cuadra con el módulo 11.
+
+NOMBRES RÁPIDOS PARA LOS 2 BOTONES DEL COTIZADOR (desde la 1.2.8)
+- Al guardar una grabación, los botones "1 · LOGUEO GO" y
+  "2 · EVALUAR MEDIO DE PAGO" ponen ese nombre. El Cotizador Dental (3.1.5+)
+  muestra esos dos botones juntos en la tarjeta del cliente.
 
 ▶ QUE "NO HACÍA NADA" (arreglado en la 1.2.7)
 - Si en la pestaña de GO quedaba corriendo un intento anterior (esperando un

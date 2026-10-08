@@ -95,6 +95,9 @@
   #arminfo:empty { margin: 0; }
   #vivo { margin: 3px 0 0; font: 10.5px/1.35 ui-monospace, Consolas, monospace; color: #3d4f6e; white-space: pre-wrap; word-break: break-word; background: rgba(11,44,138,.06); border-radius: 6px; padding: 4px 6px; }
   #vivo:empty { display: none; }
+  .chips-nombre { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .chip-nombre { font: inherit; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; border: 1px solid #9dbbe6; background: #eff5fd; color: #123a6d; cursor: pointer; }
+  .chip-nombre:hover { background: #dde9fa; }
   #arminfo.fallo { color: #a33; background: #fdecea; border-radius: 6px; padding: 5px 7px; }
   #bg:empty { display: none; margin: 0; }
   .warn { background: #fff7e0; border: 1px solid #f0d38a; border-radius: 8px; padding: 9px; font-size: 12px; }
@@ -156,6 +159,10 @@
           <b><span id="namesite">—</span></b>. Escríbele un nombre para guardarlo:</div>
         <div id="namewarn" class="warn" style="display:none"></div>
         <input id="name" class="txt" style="margin-top:6px" placeholder="Ej: Correo, No contacto…" autocomplete="off">
+        <div class="chips-nombre" title="Nombres que usan los botones 1 y 2 del Cotizador Dental">
+          <button type="button" class="chip-nombre" data-nombre="LOGUEO GO">1 · LOGUEO GO</button>
+          <button type="button" class="chip-nombre" data-nombre="EVALUAR MEDIO DE PAGO">2 · EVALUAR MEDIO DE PAGO</button>
+        </div>
         <div class="row">
           <button id="save" class="btn primary">💾 Guardar atajo</button>
           <button id="cancel2" class="btn">✖ Descartar</button>

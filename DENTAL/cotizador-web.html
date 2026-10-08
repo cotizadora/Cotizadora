@@ -559,6 +559,16 @@ body.ext .cliente{
 .btn-copiar:hover{background:#fff}
 .btn-copiar.copiado{background:#dcf2e5;border-color:#94d1ad;color:#0f5e3a;font-weight:800}
 @media (prefers-color-scheme:dark){ .btn-copiar{background:rgba(255,255,255,.08);color:inherit} }
+/* Dos botones fijos de GO (1 · Logueo, 2 · Evaluar medio de pago) */
+.go-botones{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.btn-go b{display:inline-grid;place-items:center;width:16px;height:16px;margin-right:3px;border-radius:50%;background:rgba(255,255,255,.28);font-size:10.5px}
+.btn-go.dos{background:linear-gradient(135deg,#0d7a52,#18a873);box-shadow:0 2px 6px rgba(13,122,82,.30)}
+.btn-go.dos[disabled]{background:#9fb8ad;box-shadow:none}
+.btn-go-edit{font:inherit;font-size:11px;line-height:1;padding:4px 6px;border-radius:999px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;cursor:pointer}
+.btn-go-edit.on{background:var(--m-cli-borde,#9db8de)}
+.go-edit-fila{flex-basis:100%;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:4px 6px;font-size:11px}
+.go-edit-fila input,.go-edit-fila select{font:inherit;font-size:11px;min-width:0;padding:2px 5px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;color:inherit}
+.go-edit-fila .go-edit-nota{grid-column:2 / -1;color:var(--muted);font-size:10px}
 
 /* ============ versión web ============ */
 :root{ color-scheme: light }
@@ -2915,6 +2925,9 @@ async function leerVicidial(){
 
 function pintarCliente(){
   const el = document.getElementById("cliente");
+  // Escribiendo el nombre de un botón o eligiendo su atajo: no se repinta (se perdería lo escrito)
+  const foco = document.activeElement;
+  if(foco && el.contains(foco) && /^(INPUT|SELECT)$/.test(foco.tagName)) return;
   if(!cliente || !(cliente.nombre || cliente.apellido)){ el.hidden = true; el.innerHTML = ""; return; }
   const nombre = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
   const datos = [[cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
@@ -2948,37 +2961,71 @@ function pintarCliente(){
    (vca_ext_id); necesita ShortCut 1.2.2 o más nuevo.
    ============================================================ */
 var flujosGo = [], idShortcut = "", estadoGo = "";    // var: pintarCliente puede correr antes
-var prefGo = {forzarLogin: true, flujo: ""};
-try{ chrome.storage.local.get("prefGo", function(r){ if(r && r.prefGo) Object.assign(prefGo, r.prefGo); if(cliente) pintarCliente(); }); }catch(e){}
-function guardarPrefGo(){ try{ chrome.storage.local.set({prefGo: prefGo}); }catch(e){} }
+// Dos botones fijos, con el mismo nombre que los atajos de ShortCut:
+//   1 · LOGUEO GO              → abre siempre el login de GO y entra
+//   2 · EVALUAR MEDIO DE PAGO  → menús → RUT → multicotizador → "Siguiente"…
+// Cada uno busca en ShortCut el atajo con su nombre; desde ✏️ se puede
+// cambiar el nombre del botón y el atajo que ejecuta.
+var BOTONES_GO = [
+  {nombre: "Logueo GO", clave: "LOGUEO GO", patron: /logue|login|ingres/i, forzarLogin: true},
+  {nombre: "Evaluar medio de pago", clave: "EVALUAR MEDIO DE PAGO", patron: /medio\s*de\s*pago|evaluar|multicot|cotiz/i, forzarLogin: false}
+];
+var prefGo = {botones: [{nombre: "", flujo: ""}, {nombre: "", flujo: ""}], editando: false};
+try{ chrome.storage.local.get("prefGo", function(r){
+  const v = r && r.prefGo;
+  if(v && Array.isArray(v.botones)) prefGo.botones = [0, 1].map(function(k){ return Object.assign({nombre: "", flujo: ""}, v.botones[k] || {}); });
+  if(cliente) pintarCliente();
+}); }catch(e){}
+function guardarPrefGo(){ try{ chrome.storage.local.set({prefGo: {botones: prefGo.botones}}); }catch(e){} }
 function rutSinPuntos(r){
   const s = String(r || "").toUpperCase().replace(/[^0-9K]/g, "");
   return s.length > 1 ? s.slice(0, -1) + "-" + s.slice(-1) : "";
 }
-function flujoElegido(){
+function normaNombre(t){ return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/gi, " ").trim().toUpperCase(); }
+function nombreBoton(i){ return (prefGo.botones[i] && prefGo.botones[i].nombre) || BOTONES_GO[i].nombre; }
+// Atajo de ShortCut que ejecuta el botón i: el elegido en ✏️, o el que se llama
+// igual que el botón, o el que se le parece; el 2 cae al más nuevo que pase por
+// el multicotizador. Nunca el mismo atajo en los dos botones.
+function flujoDeBoton(i, sinCruce){
   if(!flujosGo.length) return null;
-  const pref = flujosGo.find(function(f){ return f.id === prefGo.flujo; });
+  const elegido = prefGo.botones[i] && prefGo.botones[i].flujo;
+  const pref = elegido && flujosGo.find(function(f){ return f.id === elegido; });
   if(pref) return pref;
-  // Por defecto: el más nuevo que pase por el multicotizador
-  const multi = flujosGo.filter(function(f){ return (f.sitios || []).some(function(s){ return /multicotizador/.test(s); }); });
-  return (multi.length ? multi : flujosGo).slice().sort(function(a, b){ return (b.creado || 0) - (a.creado || 0); })[0];
+  const nuevos = flujosGo.slice().sort(function(a, b){ return (b.creado || 0) - (a.creado || 0); });
+  const otro = sinCruce ? null : flujoDeBoton(1 - i, true);
+  const libre = function(f){ return !otro || f.id !== otro.id; };
+  const claves = [normaNombre(nombreBoton(i)), normaNombre(BOTONES_GO[i].clave)];
+  return nuevos.find(function(f){ return libre(f) && claves.indexOf(normaNombre(f.label)) >= 0; }) ||
+         nuevos.find(function(f){ return libre(f) && BOTONES_GO[i].patron.test(f.label || ""); }) ||
+         (i === 1 ? nuevos.find(function(f){ return libre(f) && (f.sitios || []).some(function(s){ return /multicotizador/.test(s); }); }) : null) ||
+         null;
 }
 function htmlBotonGo(){
-  const f = flujoElegido();
-  const titulo = !idShortcut ? "Instala o actualiza ShortCut-Vicidial-GO (1.2.2 o más nuevo) y abre Vicidial"
-    : !f ? "Graba en ShortCut el flujo de GO (login → menús → RUT → multicotizador) y guárdalo"
-    : "Copia el RUT del cliente y ejecuta «" + f.label + "» (" + f.pasos + " pasos)";
-  let h = '<div class="cli-go">' +
-    '<button type="button" class="btn-go" data-go="ejecutar"' + (f ? "" : " disabled") + ' title="' + escCli(titulo) + '">' +
-      '🚀 ' + escCli(f ? f.label : "Cotizar en GO") + '</button>';
-  if(flujosGo.length > 1){
-    h += '<select data-go="flujo" title="Flujo de ShortCut que ejecuta el botón">' + flujosGo.map(function(x){
-      return '<option value="' + escCli(x.id) + '"' + (f && x.id === f.id ? " selected" : "") + ">" + escCli(x.label) + "</option>";
-    }).join("") + "</select>";
+  let h = '<div class="cli-go"><div class="go-botones">';
+  [0, 1].forEach(function(i){
+    const f = flujoDeBoton(i);
+    const titulo = !idShortcut ? "Instala o actualiza ShortCut-Vicidial-GO y abre Vicidial"
+      : !f ? "Graba en ShortCut un atajo llamado «" + BOTONES_GO[i].clave + "» (o elígelo con ✏️)"
+      : (i === 0 ? "Abre el login de GO y ejecuta «" : "Copia el RUT del cliente y ejecuta «") + f.label + "» (" + f.pasos + " pasos)";
+    h += '<button type="button" class="btn-go' + (i ? " dos" : "") + '" data-go="ejecutar" data-i="' + i + '"' + (f ? "" : " disabled") +
+         ' title="' + escCli(titulo) + '"><b>' + (i + 1) + '</b> ' + escCli(nombreBoton(i)) + '</button>';
+  });
+  h += '<button type="button" class="btn-go-edit' + (prefGo.editando ? " on" : "") + '" data-go="editar" title="Cambiar el nombre de los botones y el atajo que ejecuta cada uno">✏️</button></div>';
+  if(prefGo.editando){
+    [0, 1].forEach(function(i){
+      const f = flujoDeBoton(i);
+      h += '<div class="go-edit-fila"><b>' + (i + 1) + '</b>' +
+        '<input type="text" maxlength="30" data-go="nombre" data-i="' + i + '" value="' + escCli(nombreBoton(i)) + '" aria-label="Nombre del botón ' + (i + 1) + '">' +
+        '<select data-go="flujo" data-i="' + i + '" aria-label="Atajo de ShortCut del botón ' + (i + 1) + '">' +
+          '<option value="">' + (flujosGo.length ? "— el que se llame «" + escCli(BOTONES_GO[i].clave) + "» —" : "— sin atajos en ShortCut —") + '</option>' +
+          flujosGo.map(function(x){
+            return '<option value="' + escCli(x.id) + '"' + (prefGo.botones[i].flujo === x.id ? " selected" : "") + ">" + escCli(x.label) + " (" + x.pasos + ")</option>";
+          }).join("") + "</select>" +
+        '<span class="go-edit-nota">' + (f ? "ejecuta «" + escCli(f.label) + "»" : "sin atajo") + "</span></div>";
+    });
   }
-  h += '<label class="go-login" title="Abre siempre la página de inicio de sesión de GO, aunque ya esté abierto en otra pantalla">' +
-       '<input type="checkbox" data-go="login"' + (prefGo.forzarLogin ? " checked" : "") + '> Abrir siempre el login de GO</label>';
-  const nota = estadoGo || (!idShortcut ? "ShortCut no está conectado" : !f ? "Graba el flujo de GO en ShortCut" : "");
+  const falta = [0, 1].filter(function(i){ return !flujoDeBoton(i); }).map(function(i){ return "«" + BOTONES_GO[i].clave + "»"; });
+  const nota = estadoGo || (!idShortcut ? "ShortCut no está conectado (abre Vicidial)" : falta.length ? "Graba en ShortCut " + falta.join(" y ") : "");
   if(nota) h += '<span class="go-estado">' + escCli(nota) + '</span>';
   return h + "</div>";
 }
@@ -3027,9 +3074,11 @@ document.getElementById("cliente").addEventListener("click", async function(e){
 if(!ESWEB){
   const cajaCli = document.getElementById("cliente");
   cajaCli.addEventListener("click", async function(e){
+    if(e.target.closest('[data-go="editar"]')){ prefGo.editando = !prefGo.editando; pintarCliente(); return; }
     const b = e.target.closest('[data-go="ejecutar"]');
     if(!b || b.disabled) return;
-    const f = flujoElegido();
+    const i = Number(b.getAttribute("data-i")) || 0;
+    const f = flujoDeBoton(i);
     if(!f) return;
     // 1) RUT al portapapeles, sin puntos y con guion (ej. 12199895-5)
     const rut = rutSinPuntos(cliente && cliente.rut);
@@ -3038,15 +3087,16 @@ if(!ESWEB){
     const pre = copiado ? "RUT " + rut + " copiado · " : (rut ? "" : "Sin RUT del cliente · ");
     estadoGo = pre + "abriendo GO…"; pintarCliente();
     // 2) ShortCut ejecuta el flujo (abre GO si está cerrado)
-    const r = await pedirShortcut({type: "ejecutarFlujo", id: f.id, forzarLogin: !!prefGo.forzarLogin});
+    // El 1 (logueo) parte siempre en el login de GO; el 2 usa GO como esté.
+    const r = await pedirShortcut({type: "ejecutarFlujo", id: f.id, forzarLogin: !!BOTONES_GO[i].forzarLogin});
     estadoGo = r && r.ok ? pre + "flujo en marcha en GO" : "ShortCut no respondió: abre su panel una vez y reintenta";
     pintarCliente();
     setTimeout(function(){ estadoGo = ""; if(cliente) pintarCliente(); }, 15000);
   });
   cajaCli.addEventListener("change", function(e){
-    const t = e.target;
-    if(t.matches('[data-go="login"]')){ prefGo.forzarLogin = t.checked; guardarPrefGo(); }
-    else if(t.matches('[data-go="flujo"]')){ prefGo.flujo = t.value; guardarPrefGo(); pintarCliente(); }
+    const t = e.target, i = Number(t.getAttribute("data-i")) || 0;
+    if(t.matches('[data-go="nombre"]')){ prefGo.botones[i].nombre = t.value.trim(); guardarPrefGo(); pintarCliente(); }
+    else if(t.matches('[data-go="flujo"]')){ prefGo.botones[i].flujo = t.value; guardarPrefGo(); pintarCliente(); }
   });
   refrescarFlujosGo(); setInterval(refrescarFlujosGo, 4000);
 }

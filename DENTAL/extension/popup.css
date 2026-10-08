@@ -557,3 +557,13 @@ body.ext .cliente{
 .btn-copiar:hover{background:#fff}
 .btn-copiar.copiado{background:#dcf2e5;border-color:#94d1ad;color:#0f5e3a;font-weight:800}
 @media (prefers-color-scheme:dark){ .btn-copiar{background:rgba(255,255,255,.08);color:inherit} }
+/* Dos botones fijos de GO (1 · Logueo, 2 · Evaluar medio de pago) */
+.go-botones{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.btn-go b{display:inline-grid;place-items:center;width:16px;height:16px;margin-right:3px;border-radius:50%;background:rgba(255,255,255,.28);font-size:10.5px}
+.btn-go.dos{background:linear-gradient(135deg,#0d7a52,#18a873);box-shadow:0 2px 6px rgba(13,122,82,.30)}
+.btn-go.dos[disabled]{background:#9fb8ad;box-shadow:none}
+.btn-go-edit{font:inherit;font-size:11px;line-height:1;padding:4px 6px;border-radius:999px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;cursor:pointer}
+.btn-go-edit.on{background:var(--m-cli-borde,#9db8de)}
+.go-edit-fila{flex-basis:100%;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:4px 6px;font-size:11px}
+.go-edit-fila input,.go-edit-fila select{font:inherit;font-size:11px;min-width:0;padding:2px 5px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;color:inherit}
+.go-edit-fila .go-edit-nota{grid-column:2 / -1;color:var(--muted);font-size:10px}

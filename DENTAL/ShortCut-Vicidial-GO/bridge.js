@@ -649,7 +649,8 @@
         doc.querySelectorAll('input, select, textarea').forEach((e) => {
           const k = String(e.name || e.id || '').toLowerCase();
           const v = String(e.value || '').trim();
-          if (k && v && v !== '0' && !c[k]) c[k] = v;
+          // Un "0" vacío se ignora, salvo en el DV: el dígito verificador 0 es válido.
+          if (k && v && (v !== '0' || /^dv\d*$/.test(k)) && !c[k]) c[k] = v;
         });
         doc.querySelectorAll('iframe, frame').forEach((f) => { try { leer(f.contentDocument); } catch (e) {} });
       };
@@ -661,13 +662,18 @@
       if (!vivo()) return;
       const c = campos();
       let num = '', dv = '';
-      // Misma regla que el Cotizador Dental: si no viene el DV aparte, un RUT de
-      // más de 7 caracteres ya trae el DV al final (107038973 = 10.703.897-3).
+      // Misma regla que el Cotizador Dental: si viene el DV aparte (aunque sea
+      // 0) se usa tal cual. Si no, 9 caracteres ya traen el DV al final
+      // (107038973 = 10.703.897-3); con 8 sólo se separa si ese último dígito
+      // cuadra con el módulo 11, si no los 8 son el número (12780633-0).
       const crudo = c.rut || c.vendor_lead_code || '';
       const limpio = String(crudo).toUpperCase().replace(/[^0-9K]/g, '');
       dv = c.rut ? String(c.dv || '').toUpperCase().replace(/[^0-9K]/g, '') : '';
       num = limpio;
-      if (!dv && limpio.length > 7) { num = limpio.slice(0, -1); dv = limpio.slice(-1); }
+      if (!dv && (limpio.length > 8 || /K$/.test(limpio) ||
+          (limpio.length === 8 && dvDe(limpio.slice(0, -1)) === limpio.slice(-1)))) {
+        num = limpio.slice(0, -1); dv = limpio.slice(-1);
+      }
       num = num.replace(/K/g, '');
       if (num.length < 6 || num.length > 8) return;
       if (!dv) dv = dvDe(num);
