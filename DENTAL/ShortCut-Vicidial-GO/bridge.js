@@ -75,8 +75,12 @@
   }
   function set(k, v) {
     try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+    // Hora del último cambio de la lista de atajos: decide qué lista vale si el
+    // panel la cambió en el respaldo mientras esta página estaba cerrada.
+    if (k === 'vca_states') { try { localStorage.setItem('vca_states_t', String(Date.now())); } catch (e) {} }
     if (k === 'vca_states' || k === 'vca2_learning') respaldar();
   }
+  let sembrado = false;   // hasta leer el respaldo no se escribe encima de él
   // RESPALDO en la extensión (chrome.storage), por sitio: los atajos y la
   // grabación en curso. Si la web borra su localStorage (GO puede hacerlo),
   // se reponen desde aquí: no se pierden ni los atajos ni los clics grabados.
@@ -89,10 +93,12 @@
   // Lo que hay de verdad en la página (sin caer en el respaldo)
   function crudo(k) { try { const v = localStorage.getItem(k); return v == null ? null : JSON.parse(v); } catch (e) { return null; } }
   function respaldar() {
+    if (!sembrado) return;
     const st = crudo('vca_states');
     respaldo = {
       // si la web borró los atajos, se conserva el respaldo anterior
       states: st != null ? st : (respaldo ? respaldo.states : null),
+      statesT: st != null ? (Number(crudo('vca_states_t')) || 0) : (respaldo ? respaldo.statesT || 0 : 0),
       // la grabación se toma tal cual: si se descartó o guardó, queda vacía
       learning: sanear(crudo('vca2_learning')),
       t: Date.now()
@@ -182,7 +188,17 @@
       const todo = await new Promise(r => { try { chrome.storage.local.get([SK, SK + ':marcas'], x => r(x || {})); } catch (e) { r({}); } });
       leerMarcas(todo[SK + ':marcas']);
       const g = todo[SK];
-      if (g) { respaldo = g; reponer(); }
+      if (g) {
+        respaldo = g;
+        // El panel borró o cambió atajos mientras esta página estaba cerrada:
+        // su lista (más nueva) reemplaza a la que quedó en la página.
+        const tLocal = Number(crudo('vca_states_t')) || 0;
+        if (Array.isArray(g.states) && (g.statesT || 0) > tLocal) {
+          try { localStorage.setItem(K.states, JSON.stringify(g.states)); localStorage.setItem('vca_states_t', String(g.statesT)); } catch (e) {}
+        }
+        reponer();
+      }
+      sembrado = true;
       if (localStorage.getItem(K.states) != null) return; // ya hay config del usuario
       const url = chrome.runtime.getURL('default-config.json');
       const cfg = await fetch(url).then(r => r.json()).catch(() => null);
@@ -198,7 +214,7 @@
         set(K.settings, Object.assign(get(K.settings, {}), cfg.settings));
       }
       notifyPage();
-    } catch (e) {}
+    } catch (e) { sembrado = true; }
   })();
 
   // ---------------------------------------------------------------------------

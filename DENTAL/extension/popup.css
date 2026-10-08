@@ -550,3 +550,10 @@ body.ext .cliente{
 .go-login{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--muted);cursor:pointer;text-transform:none;letter-spacing:0}
 .go-login input{margin:0}
 .cliente .go-estado{flex-basis:100%;font-size:10.5px;color:var(--m-cli-acento,#123a6d);font-weight:700}
+/* RUT sin puntos con botón para copiarlo */
+.cliente .cli-rut{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
+.cliente .cli-rut-num{color:var(--m-cli-acento,#123a6d);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em;user-select:all}
+.btn-copiar{font:inherit;font-size:11px;line-height:1;padding:3px 6px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:rgba(255,255,255,.7);cursor:pointer}
+.btn-copiar:hover{background:#fff}
+.btn-copiar.copiado{background:#dcf2e5;border-color:#94d1ad;color:#0f5e3a;font-weight:800}
+@media (prefers-color-scheme:dark){ .btn-copiar{background:rgba(255,255,255,.08);color:inherit} }

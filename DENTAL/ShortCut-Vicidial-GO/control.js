@@ -134,10 +134,34 @@ async function broadcast(msg) {
 async function sendToSite(host, msg) {
   const sk = siteKey(host);
   const targets = TABS.filter(t => siteKey(t.host) === sk);
+  // Sitio sin pestaña abierta (ej. GO cerrado): sus atajos se ven desde el
+  // respaldo de la extensión, así que borrar / renombrar / color / orden se
+  // aplica AHÍ (antes la orden se iba a Vicidial y no pasaba nada).
+  if (!targets.length && sk !== 'vicidial') return cambiarRespaldo(sk, msg);
   const list = targets.length ? targets : TABS;   // respaldo: si no casa, a todas
   let last = null;
   for (const t of list) last = await sendTo(t.id, msg);
   return last;
+}
+async function cambiarRespaldo(sk, msg) {
+  const clave = 'vcaSitio:' + sk;
+  const r = await new Promise(res => { try { chrome.storage.local.get(clave, x => res((x && x[clave]) || null)); } catch (e) { res(null); } });
+  if (!r) return { ok: false };
+  let states = Array.isArray(r.states) ? r.states.slice() : [];
+  if (msg.type === 'deleteState') states = states.filter(s => s.id !== msg.id);
+  else if (msg.type === 'rename') states = states.map(s => s.id === msg.id ? Object.assign({}, s, { label: msg.label }) : s);
+  else if (msg.type === 'setColor') states = states.map(s => s.id === msg.id ? Object.assign({}, s, { color: msg.color || '' }) : s);
+  else if (msg.type === 'reorderStates') {
+    const orden = Array.isArray(msg.order) ? msg.order : [];
+    const enOrden = new Set(orden), porId = {};
+    states.forEach(s => { if (enOrden.has(s.id)) porId[s.id] = s; });
+    const huecos = []; states.forEach((s, i) => { if (enOrden.has(s.id)) huecos.push(i); });
+    huecos.forEach((h, k) => { if (porId[orden[k]]) states[h] = porId[orden[k]]; });
+  } else return { ok: false };
+  // statesT: la página de GO, al abrirse, toma esta lista (más nueva) en vez de la suya.
+  const ahora = Date.now();
+  await new Promise(res => { try { chrome.storage.local.set({ [clave]: Object.assign({}, r, { states: states, statesT: ahora, t: ahora }) }, () => res()); } catch (e) { res(); } });
+  return { ok: true };
 }
 
 const SITE_RE = /vicidial\.recaall\.simtastic\.cl|\/\/([a-z0-9-]+\.)*bciseguros\.cl\//i;

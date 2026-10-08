@@ -1435,9 +1435,14 @@ function pintarCliente(){
   const el = document.getElementById("cliente");
   if(!cliente || !(cliente.nombre || cliente.apellido)){ el.hidden = true; el.innerHTML = ""; return; }
   const nombre = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
-  const datos = [cliente.rut ? "RUT " + cliente.rut : "", [cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
+  const datos = [[cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
                  cliente.email ? cliente.email.toLowerCase() : "", nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean);
-  let h = "<b>" + escCli(nombre) + "</b>" + datos.map(function(d){ return "<span>" + escCli(d) + "</span>"; }).join("");
+  // RUT sin puntos y con guion (como lo piden GO y el multicotizador), con botón para copiarlo
+  const rut = rutSinPuntos(cliente.rut);
+  let h = "<b>" + escCli(nombre) + "</b>" +
+    (rut ? '<span class="cli-rut">RUT <span class="cli-rut-num">' + escCli(rut) + '</span>' +
+           '<button type="button" class="btn-copiar" data-copiar="' + escCli(rut) + '" title="Copiar el RUT ' + escCli(rut) + '">📋</button></span>' : "") +
+    datos.map(function(d){ return "<span>" + escCli(d) + "</span>"; }).join("");
   if(cliente.cargas && cliente.cargas.length){
     h += '<div class="cli-linea"><i>Cargas en Vicidial:</i> ' + cliente.cargas.map(function(c, i){
       const quien = [nombrePropio(c.nombre), c.parentesco ? "(" + nombrePropio(c.parentesco) + ")" : ""].filter(Boolean).join(" ");
@@ -1522,6 +1527,21 @@ async function refrescarFlujosGo(){
   flujosGo = lista;
   if(JSON.stringify([idShortcut, flujosGo.map(function(f){ return [f.id, f.label]; })]) !== antes && cliente) pintarCliente();
 }
+// 📋 junto al RUT: lo copia sin puntos y con guion (también en la versión web)
+document.getElementById("cliente").addEventListener("click", async function(e){
+  const b = e.target.closest("[data-copiar]");
+  if(!b) return;
+  const txt = b.getAttribute("data-copiar");
+  let ok = false;
+  try{ await navigator.clipboard.writeText(txt); ok = true; }
+  catch(err){
+    // Respaldo: seleccionar el número para copiarlo con Ctrl+C
+    try{ const n = b.parentNode.querySelector(".cli-rut-num"); const r = document.createRange(); r.selectNodeContents(n); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }catch(x){}
+  }
+  b.textContent = ok ? "✓" : "Ctrl+C";
+  b.classList.add("copiado");
+  setTimeout(function(){ b.textContent = "📋"; b.classList.remove("copiado"); }, 1500);
+});
 if(!ESWEB){
   const cajaCli = document.getElementById("cliente");
   cajaCli.addEventListener("click", async function(e){
