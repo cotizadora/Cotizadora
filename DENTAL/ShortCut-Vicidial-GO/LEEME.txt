@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.2.9
+ShortCut-Vicidial-GO 1.3.0
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.9).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.3.0).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,21 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+PARTIR LIMPIO Y CERRAR VENTANAS QUE TRABAN (desde la 1.3.0)
+- Botones 1 y 2 del Cotizador Dental (3.1.7+): antes de empezar se cierran
+  TODAS las pestañas de GO y del multicotizador (Vicidial nunca) y se abre una
+  sola, nueva. Si GO pide la clave, el botón 2 entra con el login grabado en
+  «LOGUEO GO» y sigue; si la sesión sigue abierta, se lo salta.
+- Al cerrar o recargar GO ya no aparece "¿Quieres salir del sitio?".
+- Mientras corre un atajo en GO / multicotizador:
+  · los avisos del sitio (alert / confirm) se aceptan solos;
+  · una ventana de la página que tapa el botón que sigue, o que no deja seguir
+    y no es parte del atajo (avisos, noticias…), se cierra con su ✕ o con
+    «Cerrar» / «Entendido» / «Aceptar». Queda en el registro con 🧹.
+  · las ventanas emergentes de Bci quedan permitidas en Chrome, y si igual se
+    bloquea una, la abre la extensión.
+- El botón del cotizador le pasa el RUT del cliente: el atajo escribe ese.
 
 RUT CON DÍGITO VERIFICADOR 0 (arreglado en la 1.2.9)
 - Si en Vicidial el DV del cliente era 0 (ej. RUT 12780633, DV 0), se

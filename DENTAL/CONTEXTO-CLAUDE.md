@@ -18,7 +18,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 - **INSTALAR.bat:** descarga todo lo de `DENTAL/` de esa rama a `Documentos\DENTAL` en mi PC. No borra nada mío.
 - **Pull request abierto:** [cotizadora/Cotizadora#1](https://github.com/cotizadora/Cotizadora/pull/1). Al hacer merge, GitHub Pages publica la página web en https://cotizadora.github.io/Cotizadora/DENTAL/cotizador-web.html. Todavía no lo he aprobado.
 
-## 1. Cotizador Dental Bci (extensión) — v3.1.6
+## 1. Cotizador Dental Bci (extensión) — v3.1.7
 
 - **En mi PC:** `Documentos\DENTAL\extension`
 - **Paquete:** `DENTAL/extension-cotizador-dental.zip`
@@ -27,6 +27,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 Qué hace:
 - Popup en dos columnas: cotización a la izquierda y script de venta a la derecha, sin manija de ancho. Desde la v3.0.3 va dentro de un marco azul grisáceo con borde fino, esquinas redondeadas y sombra, para que no se pierda sobre el blanco de Vicidial. Desde la v3.0.4 cada módulo es una tarjeta redondeada con su color según jerarquía: cliente (azul), tipificación (menta), plan y cotización (blanco), clínicas (turquesa), guardado (arena), total (azul marino suave); las secciones del script también son tarjetas en contraste Normal. El scroll va dentro de cada columna: el popup no pasa de 800 × 600. Desde la v3.0.9 las cabeceras de las dos columnas son una sola franja azul de igual altura, sin línea divisoria ni barra de desplazamiento arriba, y ambas columnas comparten fondo. Desde la v3.1.1 la tarjeta del cliente queda fija bajo la cabecera al desplazar la columna izquierda.
 - **Dos botones fijos (v3.1.5):** en la tarjeta del cliente, "1 · Logueo GO" (fuerza el login) y "2 · Evaluar medio de pago" (usa GO abierto), visibles a la vez. Cada uno usa el atajo de ShortCut con su nombre (LOGUEO GO / EVALUAR MEDIO DE PAGO), si no uno parecido; con ✏️ se cambia el nombre del botón y el atajo (se guarda en `chrome.storage.local.prefGo`). Nunca usan el mismo atajo los dos. Reemplaza al 🚀 único de la v3.1.3.
+- **Partir limpio (v3.1.7):** los botones 1 y 2 mandan `ejecutarFlujo {id, forzarLogin, limpiar:true, rut}`: ShortCut cierra todas las pestañas de *.bciseguros.cl y abre una nueva. Casilla en ✏️ "Cerrar todas las pestañas de GO…" (marcada por defecto, `prefGo.limpiar`). El RUT se copia con respaldo `execCommand('copy')` si el portapapeles falla.
 - **DV 0 (v3.1.6):** el DV "0" de Vicidial se descartaba como vacío (`val()` ignora los "0") y 12780633 + DV 0 salía 1.278.063-3. Ahora el DV se lee aparte; sin DV, 9 caracteres traen el DV al final y con 8 sólo si el último cuadra con el módulo 11 (`dvRut` en historial-db.js).
 - **RUT en la tarjeta (v3.1.4):** se muestra sin puntos y con guion (12199895-5) con un botón 📋 que lo copia (también en la versión web).
 - **🚀 Cotizar en GO (v3.1.3):** en la tarjeta del cliente, un botón con el nombre del flujo de ShortCut (por defecto el más nuevo que pasa por el multicotizador; si hay varios, se elige en una lista). Al apretarlo copia el RUT sin puntos y con guion (ej. 12199895-5) y le pide a ShortCut que ejecute el flujo. Casilla "Abrir siempre el login de GO" (marcada por defecto, se recuerda): parte siempre en el login (navega la pestaña de GO o la abre); desmarcada, usa GO abierto y se salta el login si la sesión sigue. Necesita ShortCut 1.2.2 (el cotizador lo encuentra por `localStorage.vca_ext_id` en Vicidial y le habla con `chrome.runtime.sendMessage(id, …)`: `listarFlujos` / `ejecutarFlujo`). No aparece en la versión web.
@@ -41,7 +42,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.9
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.3.0
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -69,6 +70,7 @@ Qué hace:
 - **v1.2.7:** un ▶ nuevo cancela una ejecución anterior que seguía esperando en esa página (turno; antes se ignoraba y el panel quedaba "⏳ Ejecutando" sin hacer nada). Indicador "▶ nombre · paso N de M" abajo a la izquierda de GO, aviso "✅ listo" al terminar, y en el panel las últimas 4 líneas del registro de GO bajo "Ejecutando…".
 - **v1.2.8:** al guardar, botones de nombre rápido "1 · LOGUEO GO" / "2 · EVALUAR MEDIO DE PAGO" (los nombres que buscan los dos botones del cotizador).
 - **v1.2.9:** el puente ya no descarta el DV "0" de Vicidial (antes 12780633 + DV 0 llegaba a GO como 1278063-3 → "Rut inválido" y el atajo se detenía esperando "Crear"). Sin DV aparte: 9 caracteres traen el DV; con 8 sólo si el último cuadra con el módulo 11.
+- **v1.3.0 (ventanas que traban):** `ejecutarFlujo` con `limpiar` crea una pestaña nueva, ejecuta `soltarSalida` (MAIN: `__vcaSalidaLibre`, sin aviso "¿Salir del sitio?") y cierra todas las pestañas de Bci; si el atajo no trae login y otro atajo del mismo sitio tiene la clave grabada, antepone esos pasos de login (`pasosDeLogin`). `rut` del cotizador → `vcaCliente` si cuadra el módulo 11. En content.js (sólo Bci, MAIN): durante una ejecución `alert/confirm/prompt` se aceptan solos y los `beforeunload` no corren (envoltura de `addEventListener` y `onbeforeunload`); `window.open` bloqueado → `vca:abrir` → background abre la pestaña; permiso `contentSettings` permite ventanas emergentes de `*.bciseguros.cl`. En `waitFor`: si una ventana (`[role=dialog]`, `.p-dialog`, `.modal.show`, `.swal2-popup`…, o su fondo `.p-dialog-mask`…) tapa el botón que sigue, o hay una abierta que no contiene ninguno de los próximos 4 pasos tras 2,5 s, se cierra con ✕ / «Cerrar» / «Entendido» / «Aceptar» (o Escape y clic en el fondo); tope 6 por ejecución; los "Cargando…" (blockui/spinner) no se tocan. Registro con 🧹. Probado: sin el arreglo `chrome.tabs.remove` muestra "¿Salir del sitio?".
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -78,7 +80,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar ShortCut v1.2.9 y Cotizador v3.1.6 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
+1. Instalar ShortCut v1.3.0 y Cotizador v3.1.7 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

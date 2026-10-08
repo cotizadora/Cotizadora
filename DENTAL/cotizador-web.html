@@ -569,6 +569,8 @@ body.ext .cliente{
 .go-edit-fila{flex-basis:100%;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:4px 6px;font-size:11px}
 .go-edit-fila input,.go-edit-fila select{font:inherit;font-size:11px;min-width:0;padding:2px 5px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;color:inherit}
 .go-edit-fila .go-edit-nota{grid-column:2 / -1;color:var(--muted);font-size:10px}
+.go-edit-limpiar{flex-basis:100%;display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer}
+.go-edit-limpiar input{margin:0}
 
 /* ============ versión web ============ */
 :root{ color-scheme: light }
@@ -2970,13 +2972,26 @@ var BOTONES_GO = [
   {nombre: "Logueo GO", clave: "LOGUEO GO", patron: /logue|login|ingres/i, forzarLogin: true},
   {nombre: "Evaluar medio de pago", clave: "EVALUAR MEDIO DE PAGO", patron: /medio\s*de\s*pago|evaluar|multicot|cotiz/i, forzarLogin: false}
 ];
-var prefGo = {botones: [{nombre: "", flujo: ""}, {nombre: "", flujo: ""}], editando: false};
+// limpiar: antes de cada botón se cierran todas las pestañas de GO y del
+// multicotizador y se abre una nueva (parte limpio, sin ventanas a medias).
+var prefGo = {botones: [{nombre: "", flujo: ""}, {nombre: "", flujo: ""}], limpiar: true, editando: false};
 try{ chrome.storage.local.get("prefGo", function(r){
   const v = r && r.prefGo;
   if(v && Array.isArray(v.botones)) prefGo.botones = [0, 1].map(function(k){ return Object.assign({nombre: "", flujo: ""}, v.botones[k] || {}); });
+  if(v && v.limpiar === false) prefGo.limpiar = false;
   if(cliente) pintarCliente();
 }); }catch(e){}
-function guardarPrefGo(){ try{ chrome.storage.local.set({prefGo: {botones: prefGo.botones}}); }catch(e){} }
+function guardarPrefGo(){ try{ chrome.storage.local.set({prefGo: {botones: prefGo.botones, limpiar: prefGo.limpiar}}); }catch(e){} }
+// Copia al portapapeles; si Chrome no deja (popup sin foco), con un campo oculto.
+async function copiarAlPortapapeles(txt){
+  try{ await navigator.clipboard.writeText(txt); return true; }catch(err){}
+  try{
+    const t = document.createElement("textarea");
+    t.value = txt; t.setAttribute("readonly", ""); t.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0";
+    document.body.appendChild(t); t.select();
+    const ok = document.execCommand("copy"); t.remove(); return !!ok;
+  }catch(err){ return false; }
+}
 function rutSinPuntos(r){
   const s = String(r || "").toUpperCase().replace(/[^0-9K]/g, "");
   return s.length > 1 ? s.slice(0, -1) + "-" + s.slice(-1) : "";
@@ -3006,7 +3021,7 @@ function htmlBotonGo(){
     const f = flujoDeBoton(i);
     const titulo = !idShortcut ? "Instala o actualiza ShortCut-Vicidial-GO y abre Vicidial"
       : !f ? "Graba en ShortCut un atajo llamado «" + BOTONES_GO[i].clave + "» (o elígelo con ✏️)"
-      : (i === 0 ? "Abre el login de GO y ejecuta «" : "Copia el RUT del cliente y ejecuta «") + f.label + "» (" + f.pasos + " pasos)";
+      : (prefGo.limpiar ? "Cierra las pestañas de GO, " : "") + (i === 0 ? "abre el login de GO y ejecuta «" : "copia el RUT del cliente y ejecuta «") + f.label + "» (" + f.pasos + " pasos)";
     h += '<button type="button" class="btn-go' + (i ? " dos" : "") + '" data-go="ejecutar" data-i="' + i + '"' + (f ? "" : " disabled") +
          ' title="' + escCli(titulo) + '"><b>' + (i + 1) + '</b> ' + escCli(nombreBoton(i)) + '</button>';
   });
@@ -3023,6 +3038,8 @@ function htmlBotonGo(){
           }).join("") + "</select>" +
         '<span class="go-edit-nota">' + (f ? "ejecuta «" + escCli(f.label) + "»" : "sin atajo") + "</span></div>";
     });
+    h += '<label class="go-edit-limpiar"><input type="checkbox" data-go="limpiar"' + (prefGo.limpiar ? " checked" : "") + '> ' +
+         "Cerrar todas las pestañas de GO y del multicotizador antes de empezar (parte limpio)</label>";
   }
   const falta = [0, 1].filter(function(i){ return !flujoDeBoton(i); }).map(function(i){ return "«" + BOTONES_GO[i].clave + "»"; });
   const nota = estadoGo || (!idShortcut ? "ShortCut no está conectado (abre Vicidial)" : falta.length ? "Graba en ShortCut " + falta.join(" y ") : "");
@@ -3083,13 +3100,16 @@ if(!ESWEB){
     // 1) RUT al portapapeles, sin puntos y con guion (ej. 12199895-5)
     const rut = rutSinPuntos(cliente && cliente.rut);
     let copiado = false;
-    if(rut){ try{ await navigator.clipboard.writeText(rut); copiado = true; }catch(err){} }
+    if(rut) copiado = await copiarAlPortapapeles(rut);
     const pre = copiado ? "RUT " + rut + " copiado · " : (rut ? "" : "Sin RUT del cliente · ");
-    estadoGo = pre + "abriendo GO…"; pintarCliente();
-    // 2) ShortCut ejecuta el flujo (abre GO si está cerrado)
-    // El 1 (logueo) parte siempre en el login de GO; el 2 usa GO como esté.
-    const r = await pedirShortcut({type: "ejecutarFlujo", id: f.id, forzarLogin: !!BOTONES_GO[i].forzarLogin});
-    estadoGo = r && r.ok ? pre + "flujo en marcha en GO" : "ShortCut no respondió: abre su panel una vez y reintenta";
+    estadoGo = pre + (prefGo.limpiar ? "cerrando GO y abriéndolo limpio…" : "abriendo GO…"); pintarCliente();
+    // 2) ShortCut ejecuta el flujo con ESTE RUT. Con "partir limpio" cierra
+    // todas las pestañas de GO / multicotizador y abre una nueva; si no, el 1
+    // (logueo) parte en el login de GO y el 2 usa GO como esté.
+    const r = await pedirShortcut({type: "ejecutarFlujo", id: f.id, forzarLogin: !!BOTONES_GO[i].forzarLogin,
+                                   limpiar: !!prefGo.limpiar, rut: rut});
+    estadoGo = r && r.ok ? pre + (r.cerradas ? r.cerradas + " pestaña(s) de GO cerradas · " : "") + "flujo en marcha en GO"
+                         : "ShortCut no respondió: abre su panel una vez y reintenta";
     pintarCliente();
     setTimeout(function(){ estadoGo = ""; if(cliente) pintarCliente(); }, 15000);
   });
@@ -3097,6 +3117,7 @@ if(!ESWEB){
     const t = e.target, i = Number(t.getAttribute("data-i")) || 0;
     if(t.matches('[data-go="nombre"]')){ prefGo.botones[i].nombre = t.value.trim(); guardarPrefGo(); pintarCliente(); }
     else if(t.matches('[data-go="flujo"]')){ prefGo.botones[i].flujo = t.value; guardarPrefGo(); pintarCliente(); }
+    else if(t.matches('[data-go="limpiar"]')){ prefGo.limpiar = t.checked; guardarPrefGo(); pintarCliente(); }
   });
   refrescarFlujosGo(); setInterval(refrescarFlujosGo, 4000);
 }

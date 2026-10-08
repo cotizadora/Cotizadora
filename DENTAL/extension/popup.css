@@ -567,3 +567,5 @@ body.ext .cliente{
 .go-edit-fila{flex-basis:100%;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:4px 6px;font-size:11px}
 .go-edit-fila input,.go-edit-fila select{font:inherit;font-size:11px;min-width:0;padding:2px 5px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;color:inherit}
 .go-edit-fila .go-edit-nota{grid-column:2 / -1;color:var(--muted);font-size:10px}
+.go-edit-limpiar{flex-basis:100%;display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer}
+.go-edit-limpiar input{margin:0}

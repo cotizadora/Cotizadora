@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.2.9';
+  const VCA_VERSION = '1.3.0';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -426,9 +426,19 @@
   async function waitFor(desc, timeout, extra) {
     const t0 = Date.now();
     const ok = extra ? (e) => isClickable(e) && extra(e) : isClickable;
+    let revisado = 0;
     while (Date.now() - t0 < timeout) {
       const el = resolverEnTodos(desc, ok);
-      if (el) return el;
+      // GO / multicotizador: una ventana (aviso, noticia…) que tapa el botón o
+      // que no deja seguir se cierra, y se vuelve a buscar.
+      if (el) {
+        if (IS_CRM && corrida && despejarSobre(el, corrida.paso)) { await sleep(700); continue; }
+        return el;
+      }
+      if (IS_CRM && corrida && Date.now() - t0 > 2500 && Date.now() - revisado > 1500) {
+        revisado = Date.now();
+        if (despejarAbiertas(corrida.paso)) { await sleep(700); continue; }
+      }
       await sleep(150);
     }
     return resolverEnTodos(desc); // ultimo intento aunque no parezca clicable
@@ -546,6 +556,169 @@
   const CANCELADA = -4;        // un ▶ más nuevo reemplazó a esta ejecución
   let turno = 0;               // sube con cada ejecución nueva; la anterior se detiene
   let corrida = null;   // {label, steps} de la ejecución en curso
+
+  // ---- Ventanas que traban el atajo (GO / multicotizador) --------------------
+  // Mientras corre un atajo:
+  //  - los avisos del navegador (alert / confirm / "¿Salir del sitio?") se
+  //    aceptan solos: dejan la página congelada hasta que alguien los cierra;
+  //  - si una ventana de la página (aviso, noticia, "sesión activa"…) tapa el
+  //    botón que sigue o aparece una que el atajo no conoce, se cierra con su ✕
+  //    (o «Cerrar», «Entendido», «Aceptar»…).
+  //  - si una ventana nueva del sitio (window.open) queda bloqueada por Chrome,
+  //    la abre la extensión.
+  // Fuera de un atajo la página se comporta como siempre.
+  if (IS_CRM) {
+    window.__vcaEnMarcha = () => !!corrida;
+    window.__vcaAvisoNativo = (t) => log('🧹 ' + t);
+    if (!window.__vcaAntiBloqueo) {
+      window.__vcaAntiBloqueo = true;
+      const W = window;
+      const enMarcha = () => { try { return !!(W.__vcaEnMarcha && W.__vcaEnMarcha()); } catch (e) { return false; } };
+      const anotar = (t) => { try { W.__vcaAvisoNativo && W.__vcaAvisoNativo(t); } catch (e) {} };
+      const libre = () => enMarcha() || !!W.__vcaSalidaLibre;
+      const oA = W.alert, oC = W.confirm, oP = W.prompt, oO = W.open;
+      W.alert = function (m) { if (enMarcha()) { anotar('aviso del sitio aceptado solo: "' + String(m == null ? '' : m).slice(0, 90) + '"'); return; } return oA.apply(this, arguments); };
+      W.confirm = function (m) { if (enMarcha()) { anotar('pregunta del sitio aceptada sola: "' + String(m == null ? '' : m).slice(0, 90) + '"'); return true; } return oC.apply(this, arguments); };
+      W.prompt = function (m, def) { if (enMarcha()) { anotar('pregunta del sitio respondida sola: "' + String(m == null ? '' : m).slice(0, 90) + '"'); return def == null ? '' : String(def); } return oP.apply(this, arguments); };
+      W.open = function (url) {
+        const v = oO.apply(this, arguments);
+        if (!v && enMarcha() && url) {
+          let abs = ''; try { abs = new URL(String(url), location.href).href; } catch (e) {}
+          if (/^https?:/i.test(abs)) {
+            anotar('Chrome bloqueó la ventana nueva: la abro yo (' + abs.slice(0, 80) + ')');
+            try { document.dispatchEvent(new CustomEvent('vca:abrir', { detail: abs })); } catch (e) {}
+          }
+        }
+        return v;
+      };
+      // "¿Quieres salir del sitio?": los avisos de salida no corren mientras el
+      // atajo avanza o cuando la extensión cierra / recarga la pestaña.
+      const envueltos = new WeakMap();
+      const envolver = (fn) => {
+        if (!fn || (typeof fn !== 'function' && typeof fn !== 'object')) return fn;
+        let w = envueltos.get(fn);
+        if (!w) {
+          w = function (ev) { if (libre()) return; return typeof fn === 'function' ? fn.apply(this, arguments) : fn.handleEvent(ev); };
+          envueltos.set(fn, w);
+        }
+        return w;
+      };
+      const oAdd = EventTarget.prototype.addEventListener, oRem = EventTarget.prototype.removeEventListener;
+      EventTarget.prototype.addEventListener = function (tipo, fn, op) {
+        return oAdd.call(this, tipo, (this === W && tipo === 'beforeunload') ? envolver(fn) : fn, op);
+      };
+      EventTarget.prototype.removeEventListener = function (tipo, fn, op) {
+        return oRem.call(this, tipo, (this === W && tipo === 'beforeunload' && fn && envueltos.get(fn)) || fn, op);
+      };
+      try {
+        let dueno = W, d = null;
+        while (dueno && !(d = Object.getOwnPropertyDescriptor(dueno, 'onbeforeunload'))) dueno = Object.getPrototypeOf(dueno);
+        if (d && d.set && d.get) {
+          let actual = null;
+          Object.defineProperty(W, 'onbeforeunload', {
+            configurable: true, enumerable: true,
+            get() { return actual; },
+            set(fn) {
+              actual = fn;
+              d.set.call(W, typeof fn === 'function' ? function (ev) { if (libre()) return; return fn.apply(this, arguments); } : fn);
+            }
+          });
+        }
+      } catch (e) {}
+    }
+  }
+  // Ventanas de la página: diálogos, avisos y su fondo oscuro.
+  const SEL_VENTANA = '[role="dialog"], [role="alertdialog"], .p-dialog, .p-confirm-dialog, .modal.show, .modal.in, .swal2-popup, .mat-dialog-container, .cdk-overlay-pane .mat-mdc-dialog-container';
+  const SEL_FONDO = '.p-dialog-mask, .p-component-overlay, .modal-backdrop, .cdk-overlay-backdrop, .swal2-container, .modal.show, .modal.in';
+  const CERRAR_TXT = /^(x|×|✕|cerrar|cerrar ventana|entendido|aceptar|ok|okay|de acuerdo|continuar|omitir|saltar|ahora no|mas tarde|más tarde|no,? gracias|listo|volver|seguir)$/i;
+  const cerradas = new WeakMap();   // ventana -> momento en que se intentó cerrar
+  let cierres = 0;                  // por ejecución (tope, para no entrar en un ciclo)
+  function ventanaVisible(v) {
+    try {
+      if (!v || !v.isConnected) return false;
+      // "Cargando…" (bloqueo mientras la página trabaja): no se toca, se espera.
+      if (/blockui|spinner|loader|loading|progress|cargando/i.test(v.getAttribute('class') || '') || !Locator.norm(v.textContent || '')) return false;
+      const r = v.getBoundingClientRect();
+      if (r.width < 40 || r.height < 30) return false;
+      const cs = (v.ownerDocument.defaultView || window).getComputedStyle(v);
+      return cs.visibility === 'visible' && cs.display !== 'none' && Number(cs.opacity) > 0.05;
+    } catch (e) { return false; }
+  }
+  function tituloVentana(v) {
+    try {
+      const t = v.querySelector('.p-dialog-title, .modal-title, .swal2-title, h1, h2, h3, h4, h5, [class*="title"], [class*="titulo"]');
+      return Locator.norm((t && t.textContent) || v.textContent || '').slice(0, 60);
+    } catch (e) { return ''; }
+  }
+  // ¿La ventana es parte del atajo? (contiene uno de los próximos pasos)
+  function ventanaDelAtajo(v, desde) {
+    const pasos = (corrida && corrida.steps) || [];
+    const doc = v.ownerDocument || document;
+    for (let j = Math.max(0, desde || 0); j < Math.min(pasos.length, (desde || 0) + 4); j++) {
+      const p = pasos[j];
+      if (!p || p.xf || (p.sitio && p.sitio !== MI_SITIO)) continue;
+      try { const e = Locator.resolve(doc, p); if (e && v.contains(e)) return true; } catch (e) {}
+      if (p.text) {
+        const btns = v.querySelectorAll('button, a, [role="button"], input[type="submit"], input[type="button"], label, h5, span');
+        const txt = String(p.text).toLowerCase();
+        for (const b of btns) if (Locator.norm(b.textContent || b.value || '').toLowerCase() === txt && !CERRAR_TXT.test(p.text)) return true;
+      }
+    }
+    return false;
+  }
+  function cerrarVentana(v, por) {
+    const antes = cerradas.get(v);
+    if ((antes && Date.now() - antes < 2500) || cierres >= 6) return false;
+    cerradas.set(v, Date.now()); cierres++;
+    const caja = v.matches(SEL_FONDO) ? (v.querySelector(SEL_VENTANA) || v) : v;
+    const vis = (e) => { try { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (x) { return false; } };
+    const cand = Array.from(caja.querySelectorAll('button, a, [role="button"], .p-dialog-header-icon, .swal2-close, .close, .btn-close, [class*="close"], [class*="cerrar"]')).filter(vis);
+    const etiqueta = (e) => Locator.norm(e.getAttribute('aria-label') || e.getAttribute('title') || '');
+    const boton = cand.find(e => /cerrar|close/i.test(etiqueta(e)) || e.querySelector('.pi-times, .fa-times, .fa-xmark, .icon-close') || /^(x|×|✕)$/i.test(Locator.norm(e.textContent || ''))) ||
+                  cand.find(e => /p-dialog-header-close|swal2-close|btn-close|(^|\s)close(\s|$)/i.test(e.getAttribute('class') || '')) ||
+                  cand.find(e => CERRAR_TXT.test(Locator.norm(e.textContent || e.value || '')));
+    const nombre = tituloVentana(caja);
+    if (boton) {
+      log('🧹 cerré una ventana que ' + por + ': «' + nombre + '» (' + (Locator.norm(boton.textContent || '') || etiqueta(boton) || '✕') + ')');
+      Locator.fireClick(boton);
+    } else {
+      log('🧹 ventana que ' + por + ' sin botón para cerrar: «' + nombre + '» → Escape');
+      const esc = { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true, cancelable: true };
+      try { (caja.querySelector('input, button') || caja).dispatchEvent(new KeyboardEvent('keydown', esc)); } catch (e) {}
+      try { document.dispatchEvent(new KeyboardEvent('keydown', esc)); } catch (e) {}
+      const fondo = v.closest(SEL_FONDO) || (v.matches(SEL_FONDO) ? v : null);
+      if (fondo) try { fondo.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); } catch (e) {}
+    }
+    return true;
+  }
+  // El botón que sigue existe pero algo lo tapa: ¿es una ventana? → se cierra.
+  function despejarSobre(el, desde) {
+    try {
+      const r = el.getBoundingClientRect();
+      const x = r.left + r.width / 2, y = r.top + r.height / 2;
+      if (r.width <= 0 || x < 0 || y < 0 || x > innerWidth || y > innerHeight) return false;
+      const hit = (el.ownerDocument || document).elementFromPoint(x, y);
+      if (!hit || hit === el || el.contains(hit) || hit.contains(el)) return false;
+      const v = hit.closest(SEL_VENTANA) || hit.closest(SEL_FONDO);
+      if (!v || v.contains(el) || !ventanaVisible(v) || ventanaDelAtajo(v, desde)) return false;
+      return cerrarVentana(v, 'tapaba el botón');
+    } catch (e) { return false; }
+  }
+  // El botón que sigue no aparece y hay una ventana abierta que no es del atajo.
+  function despejarAbiertas(desde) {
+    let hecho = false;
+    for (const d of docsParaBuscar()) {
+      let vs = [];
+      try { vs = Array.from(d.querySelectorAll(SEL_VENTANA)); } catch (e) {}
+      for (const v of vs) {
+        if (!ventanaVisible(v) || v.closest('#vca-progreso, #vca-aviso-pagina, #vca-aviso-login')) continue;
+        if (vs.some(o => o !== v && o.contains(v))) continue;          // sólo la de afuera
+        if (ventanaDelAtajo(v, desde)) continue;
+        if (cerrarVentana(v, 'no dejaba seguir')) hecho = true;
+      }
+    }
+    return hecho;
+  }
   function pendiente(op, data) {
     try { document.dispatchEvent(new CustomEvent('vca:pendiente', { detail: JSON.stringify({ op: op, data: data || null }) })); } catch (e) {}
   }
@@ -618,6 +791,7 @@
     for (let i = desde || 0; i < steps.length; i++) {
       if (s.turno && s.turno !== turno) return CANCELADA;
       const st = steps[i];
+      if (corrida) corrida.paso = i;
       if (IS_CRM && IS_TOP) progresoEnPagina(corrida && corrida.label, i + 1, steps.length, describirPaso(st));
       // Paso de otra página: se deja anotado y lo hace esa página al abrirse.
       if (st.sitio && !st.xf && st.sitio !== MI_SITIO) {
@@ -703,7 +877,8 @@
     s.turno = ++turno;          // si llega un ▶ más nuevo, ésta se detiene
     // GO / multicotizador: 30 s por tramo (las páginas de Bci tardan en cargar);
     // el plazo se renueva cuando hubo que esperar el inicio de sesión.
-    corrida = { label: label || '', steps: steps, hasta: Date.now() + (IS_CRM ? 30000 : s.totalTimeoutMs) };
+    corrida = { label: label || '', steps: steps, paso: inicio || 0, hasta: Date.now() + (IS_CRM ? 30000 : s.totalTimeoutMs) };
+    cierres = 0;
     const yo = corrida;
     let attempt = 0, desde = inicio || 0;
     while (Date.now() < yo.hasta) {

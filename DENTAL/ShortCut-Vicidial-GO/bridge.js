@@ -250,6 +250,10 @@
   document.addEventListener('vca:pendiente', (ev) => {
     try { const d = JSON.parse(ev.detail); chrome.runtime.sendMessage({ type: 'pendiente', op: d.op, data: d.data }); } catch (e) {}
   });
+  // Ventana nueva que Chrome bloqueó durante un atajo: la abre la extensión.
+  document.addEventListener('vca:abrir', (ev) => {
+    try { chrome.runtime.sendMessage({ type: 'abrirUrl', url: String(ev.detail || '') }); } catch (e) {}
+  });
   // Al cargar la página: ¿quedó un atajo a medias que sigue aquí?
   function preguntarPendiente() {
     try {

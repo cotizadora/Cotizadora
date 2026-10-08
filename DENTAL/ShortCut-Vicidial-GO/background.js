@@ -105,10 +105,33 @@ async function closeStaleControlWindows() {
 //  - Vicidial: NUNCA se recarga, porque recargar la pantalla del agente puede
 //    sacarlo de la sesión o cortar la llamada. En su lugar se le inyectan los
 //    scripts en la página ya abierta.
+// Antes de cerrar o recargar una pestaña de Bci: que no salte el aviso
+// "¿Quieres salir del sitio?" (dejaría todo detenido esperando un clic).
+async function soltarSalida(tabId) {
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId: tabId, allFrames: true }, world: 'MAIN',
+      func: () => { try { window.__vcaSalidaLibre = true; window.onbeforeunload = null; } catch (e) {} }
+    });
+  } catch (e) {}
+}
+// Ventanas emergentes de Bci (GO abre el multicotizador en otra ventana):
+// permitidas, para que Chrome no las bloquee cuando las abre un atajo.
+function permitirVentanasBci() {
+  try {
+    if (!chrome.contentSettings || !chrome.contentSettings.popups) return;
+    ['https://*.bciseguros.cl/*', 'http://*.bciseguros.cl/*'].forEach((pat) => {
+      try { chrome.contentSettings.popups.set({ primaryPattern: pat, setting: 'allow' }, () => void chrome.runtime.lastError); } catch (e) {}
+    });
+  } catch (e) {}
+}
+permitirVentanasBci();
+
 async function reloadOurSiteTabs() {
   let go = [];
   try { go = await chrome.tabs.query({ url: '*://go.bciseguros.cl/*' }); } catch (e) {}
   for (const t of go) {
+    await soltarSalida(t.id);
     try { await chrome.tabs.reload(t.id, { bypassCache: false }); } catch (e) {}
   }
   let vici = [];
@@ -131,7 +154,7 @@ chrome.runtime.onInstalled.addListener((details) => {
     reloadOurSiteTabs();
   }
 });
-chrome.runtime.onStartup.addListener(ensurePump);
+chrome.runtime.onStartup.addListener(() => { ensurePump(); permitirVentanasBci(); });
 ensurePump();
 
 async function pumpTick() {
@@ -163,6 +186,14 @@ const VIGENCIA_MS = 60 * 1000;
 // Vigente hasta: 60 s desde el último aviso, o más si la página lo pidió
 // (ej. 3 minutos mientras espera que la persona inicie sesión).
 const vigente = (p) => p && p.data && Date.now() < Math.max(p.t + VIGENCIA_MS, p.data.vence || 0);
+
+// Una página de Bci quiso abrir una ventana nueva durante un atajo y Chrome
+// la bloqueó: la abre la extensión (al lado de la pestaña que la pidió).
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (!msg || msg.type !== 'abrirUrl' || !sender || !sender.tab) return;
+  if (!/^https?:\/\//i.test(String(msg.url || '')) || !/(^|\.)bciseguros\.cl$/i.test(new URL(sender.tab.url || 'about:blank').hostname || '')) return;
+  try { chrome.tabs.create({ url: msg.url, active: true, openerTabId: sender.tab.id, index: sender.tab.index + 1, windowId: sender.tab.windowId }); } catch (e) {}
+});
 
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   if (!msg || (msg.type !== 'pendiente' && msg.type !== 'pendienteTomar')) return;
@@ -229,10 +260,66 @@ async function enfocar(tab) {
   try { await chrome.tabs.update(tab.id, { active: true }); } catch (e) {}
   try { if (tab.windowId != null) await chrome.windows.update(tab.windowId, { focused: true }); } catch (e) {}
 }
-async function ejecutarFlujo(id, forzarLogin) {
-  const f = (await flujosGuardados()).find((x) => x.id === id);
+// RUT que muestra el cotizador (ej. 12780633-0): es el que escribe el atajo.
+function dvDe(num) {
+  let s = 0, m = 2;
+  for (let i = num.length - 1; i >= 0; i--) { s += Number(num[i]) * m; m = m === 7 ? 2 : m + 1; }
+  const r = 11 - (s % 11);
+  return r === 11 ? '0' : r === 10 ? 'K' : String(r);
+}
+async function clienteDelCotizador(rut) {
+  const m = /^(\d{6,8})-?([\dK])$/.exec(String(rut).toUpperCase().replace(/[^0-9K-]/g, ''));
+  if (!m || dvDe(m[1]) !== m[2]) return;
+  const previo = (await chrome.storage.local.get('vcaCliente')).vcaCliente || {};
+  const dato = Object.assign({}, previo.num === m[1] ? previo : {}, {
+    num: m[1], dv: m[2], rut: m[1].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + m[2], t: Date.now() });
+  await chrome.storage.local.set({ vcaCliente: dato });
+}
+// Todas las pestañas de Bci (GO, multicotizador…). Nunca Vicidial.
+async function pestanasBci() {
+  try { return (await chrome.tabs.query({ url: '*://*.bciseguros.cl/*' })).filter((t) => !/vicidial/i.test(t.url || '')); } catch (e) { return []; }
+}
+// Pasos del inicio de sesión de GO (los primeros pasos en la pantalla de
+// login de un atajo que tiene la clave grabada, ej. «LOGUEO GO»).
+const RUTA_LOGIN = /login|ingres|sesion/i;
+function pasosDeLogin(lista) {
+  for (const x of lista) {
+    if (!x.steps.some((p) => p.secreto)) continue;
+    const out = [];
+    for (const p of x.steps) { if (!RUTA_LOGIN.test(p.ruta || '')) break; out.push(p); }
+    if (out.some((p) => p.secreto)) return out;
+  }
+  return [];
+}
+async function ejecutarFlujo(id, forzarLogin, limpiar) {
+  const lista = await flujosGuardados();
+  const f = lista.find((x) => x.id === id);
   if (!f) return { ok: false, motivo: 'no-existe' };
-  const url = (f.steps[0] && f.steps[0].url) || ('https://' + f.sitio + '/');
+  // Un atajo sin el login (ej. «EVALUAR MEDIO DE PAGO») en una pestaña nueva:
+  // si GO pide la clave, entra con los pasos del login de otro atajo. Si la
+  // sesión sigue abierta, la página se los salta sola.
+  let steps = f.steps;
+  if (limpiar && !RUTA_LOGIN.test((steps[0] && steps[0].ruta) || '')) {
+    const login = pasosDeLogin(lista.filter((x) => x.id !== id && x.sitio === f.sitio));
+    if (login.length) steps = login.concat(steps);
+  }
+  const url = (steps[0] && steps[0].url) || ('https://' + f.sitio + '/');
+  if (limpiar) {
+    // Partir limpio: se cierran TODAS las pestañas de GO y del multicotizador
+    // (con sus avisos y ventanas a medias) y se abre una sola, nueva.
+    const viejas = await pestanasBci();
+    const ref = viejas.slice().sort((a, b) => (b.active - a.active) || ((b.lastAccessed || 0) - (a.lastAccessed || 0)))[0];
+    let win = null;
+    try { win = ref ? await chrome.windows.get(ref.windowId) : await chrome.windows.getLastFocused({ windowTypes: ['normal'] }); } catch (e) {}
+    const nueva = await chrome.tabs.create(Object.assign({ url: 'about:blank', active: true },
+      win && win.type === 'normal' ? { windowId: win.id } : {}, ref && win && win.id === ref.windowId ? { index: ref.index } : {}));
+    for (const t of viejas) await soltarSalida(t.id);
+    try { if (viejas.length) await chrome.tabs.remove(viejas.map((t) => t.id)); } catch (e) {}
+    await area.set({ [PEND]: { data: { label: f.label, steps: steps, desde: 0, sitio: 'panel', t: Date.now(), vence: Date.now() + 3 * 60 * 1000 }, tab: null, sitio: 'panel', t: Date.now() } });
+    try { await chrome.tabs.update(nueva.id, { url: url }); } catch (e) {}
+    await enfocar(nueva);
+    return { ok: true, como: 'GO abierto limpio', cerradas: viejas.length };
+  }
   let tabs = [];
   try { tabs = (await chrome.tabs.query({ url: '*://' + f.sitio + '/*' })); } catch (e) {}
   tabs.sort((a, b) => (b.active - a.active) || ((b.lastAccessed || 0) - (a.lastAccessed || 0)));
@@ -260,7 +347,8 @@ chrome.runtime.onMessageExternal.addListener((msg, sender, reply) => {
         reply({ ok: true, version: chrome.runtime.getManifest().version,
                 flujos: fl.map((f) => ({ id: f.id, label: f.label, sitio: f.sitio, pasos: f.pasos, sitios: f.sitios, creado: f.creado })) });
       } else {
-        reply(await ejecutarFlujo(String(msg.id || ''), !!msg.forzarLogin));
+        if (msg.rut) await clienteDelCotizador(String(msg.rut));
+        reply(await ejecutarFlujo(String(msg.id || ''), !!msg.forzarLogin, !!msg.limpiar));
       }
     } catch (e) { reply({ ok: false, motivo: String(e && e.message || e) }); }
   })();
