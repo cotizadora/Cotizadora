@@ -18,6 +18,10 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 - **INSTALAR.bat:** descarga todo lo de `DENTAL/` de esa rama a `Documentos\DENTAL` en mi PC. No borra nada mío.
 - **Pull request abierto:** [cotizadora/Cotizadora#1](https://github.com/cotizadora/Cotizadora/pull/1). Al hacer merge, GitHub Pages publica la página web en https://cotizadora.github.io/Cotizadora/DENTAL/cotizador-web.html. Todavía no lo he aprobado.
 
+## 0. Para compartir con las compañeras
+
+- `DENTAL/COMPARTIR/Extensiones-Dental-Bci.zip`: carpeta `DENTAL/` con `extension/`, `ShortCut-Vicidial-GO/`, `INSTALAR.bat` y `COMO-INSTALAR.txt` (misma estructura que deja INSTALAR.bat, así después se actualizan con INSTALAR.bat + 🔄). Sin atajos ni claves: cada una graba los suyos. **Rehacer el zip cada vez que cambie la versión de una de las dos extensiones.**
+
 ## 1. Cotizador Dental Bci (extensión) — v3.1.8
 
 - **En mi PC:** `Documentos\DENTAL\extension`

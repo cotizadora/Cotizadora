@@ -1,0 +1,46 @@
+EXTENSIONES DENTAL BCI — Cotizador Dental v3.1.8 + ShortCut-Vicidial-GO v1.3.1
+=============================================================================
+Desarrollado por Eduardo Pérez · Soporte o sugerencias: +56 9 2769 0949
+
+QUÉ TRAE
+- Cotizador Dental Bci (carpeta "extension"): cotiza el seguro dental, trae
+  los datos del cliente desde Vicidial, el script de venta, el reloj para
+  tipificar y los botones 1 · Logueo GO y 2 · Evaluar medio de pago.
+- ShortCut-Vicidial-GO (carpeta "ShortCut-Vicidial-GO"): graba una vez tus
+  clics (pausas, tipificaciones, el camino en GO y el multicotizador) y los
+  repite con un botón. Trae el reloj de pausas.
+
+INSTALAR (una sola vez, 3 minutos)
+1. Descomprime este zip en tu carpeta Documentos. Queda:
+     Documentos\DENTAL\extension
+     Documentos\DENTAL\ShortCut-Vicidial-GO
+   No muevas ni borres esa carpeta después: Chrome usa las extensiones
+   desde ahí.
+2. En Chrome escribe en la barra:  chrome://extensions
+3. Arriba a la derecha activa "Modo de desarrollador".
+4. Aprieta "Cargar descomprimida" y elige la carpeta
+     Documentos\DENTAL\extension
+5. Otra vez "Cargar descomprimida" y elige
+     Documentos\DENTAL\ShortCut-Vicidial-GO
+6. Fíjalas en la barra: ícono de pieza de rompecabezas 🧩 → 📌 en las dos.
+7. Entra a Vicidial como siempre (no hace falta recargarlo).
+
+DESPUÉS DE INSTALAR: GRABA TUS ATAJOS
+Los atajos son de cada una (no vienen en el zip). En ShortCut (⚡):
+- "LOGUEO GO": aprieta Grabar, entra a GO escribiendo TU usuario y TU clave,
+  aprieta Detener y el botón rápido "1 · LOGUEO GO", y Guardar.
+  Tu clave queda oculta y sólo en tu computador.
+- "EVALUAR MEDIO DE PAGO": con un cliente en Vicidial, Grabar → ☰ → Nueva
+  Oportunidad → RUT → Continuar cotización → Siguiente… hasta el medio de
+  pago → Detener → "2 · EVALUAR MEDIO DE PAGO" → Guardar.
+- Pausas y tipificaciones de Vicidial: Grabar, haz los clics, Detener, ponle
+  nombre y Guardar.
+Con eso, en el cotizador funcionan los botones 1 y 2.
+
+NO compartas tu atajo LOGUEO GO ni tu configuración exportada: lleva tu
+usuario de GO.
+
+ACTUALIZAR
+- Doble clic en Documentos\DENTAL\INSTALAR.bat (baja la última versión).
+- En chrome://extensions aprieta 🔄 en las dos extensiones.
+Tus atajos y tus datos no se pierden al actualizar.
