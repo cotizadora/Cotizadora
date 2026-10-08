@@ -126,6 +126,15 @@
   .hintline { font-size: 10px; line-height: 1.35; color: #6b7787; margin-top: 4px; }
 
   details { margin-top: 7px; border-top: 1px solid #e4e9f1; padding-top: 5px; }
+  /* Mi usuario y clave de GO (para los atajos compartidos) */
+  #credBox summary b { color: #0d3b66; }
+  #credBox .cred-campos { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 4px 6px; align-items: center; margin-top: 5px; font-size: 11px; }
+  #credBox input { font: inherit; font-size: 12px; padding: 4px 6px; border: 1px solid #b9c6d8; border-radius: 6px; min-width: 0; width: 100%; }
+  #credBox .cred-fila { display: flex; gap: 6px; margin-top: 6px; }
+  #credBox .cred-estado { font-size: 10.5px; margin-top: 4px; color: #6b7787; }
+  #credBox .cred-estado.ok { color: #12753f; font-weight: 600; }
+  #credBox.falta { border-top: 2px solid #f0a020; }
+  #credBox.falta summary b { color: #a35b00; }
   summary { cursor: pointer; font-size: 11px; font-weight: 600; color: #33465c; }
   /* Firma del desarrollador + soporte por WhatsApp */
   #devfoot { margin-top: 8px; border-top: 1px solid #e4e9f1; padding-top: 6px;
@@ -175,6 +184,23 @@
     <div id="arminfo"></div>
     <pre id="vivo"></pre>
 
+    <!-- ===== MI USUARIO Y CLAVE DE GO (atajos compartidos) ===== -->
+    <details id="credBox">
+      <summary><b>🔑 Mi usuario y clave de GO</b> <span id="credResumen"></span></summary>
+      <div class="hintline">Los atajos los escriben solos al entrar a GO. Quedan guardados ocultos y sólo en este computador.</div>
+      <form id="credForm" autocomplete="off">
+        <div class="cred-campos">
+          <label for="credUsuario">Usuario</label><input id="credUsuario" type="text" autocomplete="off" spellcheck="false">
+          <label for="credClave">Clave</label><input id="credClave" type="password" autocomplete="new-password" placeholder="">
+        </div>
+        <div class="cred-fila">
+          <button id="credGuardar" class="btn primary" type="submit">💾 Guardar</button>
+          <button id="credBorrar" class="btn" type="button">🗑 Borrar</button>
+        </div>
+      </form>
+      <div id="credEstado" class="cred-estado"></div>
+    </details>
+
     <!-- ===== ADMINISTRACIÓN ===== -->
     <details id="cfg">
       <summary>⚙️ Configuración</summary>
@@ -191,7 +217,6 @@
         <button id="compartir" class="btn" title="Guarda tus atajos SIN tu usuario ni tu clave, para que las compañeras los tengan instalados">📦 Atajos para compañeras</button>
       </div>
       <div class="row">
-        <button id="olvidarCred" class="btn" title="Borra el usuario y la clave de GO que escribiste en un atajo compartido (la próxima vez los vuelve a pedir)">🔑 Olvidar mi usuario y clave</button>
         <button id="copylog" class="btn" title="Copia el registro del motor para enviarlo por WhatsApp si algo falla">📋 Copiar registro</button>
       </div>
       <input type="file" id="file" accept="application/json,.json" style="display:none">

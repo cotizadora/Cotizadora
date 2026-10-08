@@ -29,15 +29,15 @@ YA VIENEN CON LOS ATAJOS DE EDUARDO
 No hay que grabar nada: los atajos (LOGUEO GO, EVALUAR MEDIO DE PAGO, pausas
 y tipificaciones) ya vienen instalados, SIN el usuario ni la clave de nadie.
 
-LA PRIMERA VEZ: TU USUARIO Y TU CLAVE
-- En el cotizador aprieta "1 · Logueo GO". Se abre GO y aparece el aviso
-  "🔑 Escribe TU usuario y TU clave de GO (sólo esta vez)".
-- Escríbelos. El atajo aprieta «Ingresar» y sigue solo.
-- Quedan guardados OCULTOS y sólo en tu computador. Desde ahí el 1 y el 2
-  entran solos con TUS datos.
-- Si cambias tu clave: en ShortCut (⚡) → ⚙️ Configuración →
-  "🔑 Olvidar mi usuario y clave". La próxima vez te los pide de nuevo.
-  (Si la clave guardada no funciona, el atajo te la pide otra vez solo.)
+LA PRIMERA VEZ: TU USUARIO Y TU CLAVE DE GO
+1. Abre ShortCut (⚡ en la barra de Chrome).
+2. En el recuadro "🔑 Mi usuario y clave de GO" escribe TU usuario y TU
+   clave y aprieta 💾 Guardar. Debe decir "✓ Guardados".
+3. Listo: los botones 1 y 2 del cotizador entran solos a GO con TUS datos.
+- Quedan guardados OCULTOS y sólo en tu computador.
+- Si cambias tu clave: vuelve al recuadro, escribe la nueva y Guardar.
+- Si te olvidas de este paso, la primera vez GO te los pide en pantalla y
+  también quedan guardados.
 
 También puedes grabar atajos tuyos: se suman a los compartidos.
 

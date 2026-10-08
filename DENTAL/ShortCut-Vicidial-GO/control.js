@@ -922,11 +922,60 @@ $('#compartir').addEventListener('click', async () => {
   setStatus('📦 ' + states.length + ' atajos guardados en Descargas (default-config.json), sin tu usuario ni clave' +
             (nCred ? ' (' + nCred + ' campos en blanco)' : '') + '. Mándaselo a Claude para el paquete.');
 });
-$('#olvidarCred').addEventListener('click', async () => {
-  if (!(await confirmBox('¿Borrar el usuario y la clave de GO guardados en este computador? La próxima vez el atajo los pide de nuevo.'))) return;
-  await chrome.storage.local.remove(['vcaCred', 'vcaCredIntento']);
-  setStatus('Usuario y clave olvidados.');
+// ---- 🔑 Mi usuario y clave de GO -------------------------------------------
+// Los atajos compartidos traen el login en blanco: aquí cada persona deja los
+// suyos. Se guardan ocultos (mismo formato que la clave grabada) y sólo en
+// este computador; el motor los escribe al llegar al login de GO.
+const SITIO_GO = 'go.bciseguros.cl';
+const LLAVE_CRED = 'ShortCut-Vicidial-GO·Eduardo';
+function xorCred(t) { let o = ''; for (let k = 0; k < t.length; k++) o += String.fromCharCode(t.charCodeAt(k) ^ LLAVE_CRED.charCodeAt(k % LLAVE_CRED.length)); return o; }
+const ocultarCred = (t) => 'v1:' + btoa(unescape(encodeURIComponent(xorCred(String(t)))));
+const revelarCred = (t) => { try { return String(t || '').startsWith('v1:') ? xorCred(decodeURIComponent(escape(atob(String(t).slice(3))))) : ''; } catch (e) { return ''; } };
+async function pintarCred() {
+  const r = await chrome.storage.local.get(['vcaCred', 'vcaSitio:' + SITIO_GO]);
+  const c = (r.vcaCred || {})[SITIO_GO] || {};
+  const usuario = revelarCred(c.usuario), hayClave = !!revelarCred(c.clave);
+  // ¿Hay atajos de GO que esperan el usuario y la clave de quien los usa?
+  const piden = (((r['vcaSitio:' + SITIO_GO] || {}).states) || []).some(s => (s.steps || []).some(p => p.credencial && !p.value));
+  const listo = !!(usuario && hayClave);
+  const caja = $('#credBox');
+  caja.classList.toggle('falta', piden && !listo);
+  if (piden && !listo && !caja.dataset.abierto) { caja.open = true; caja.dataset.abierto = '1'; }
+  $('#credResumen').textContent = listo ? '✓' : (piden ? '· falta' : '');
+  if (document.activeElement !== $('#credUsuario')) $('#credUsuario').value = usuario;
+  $('#credClave').placeholder = hayClave ? '•••••••• (guardada)' : '';
+  const est = $('#credEstado');
+  est.className = 'cred-estado' + (listo ? ' ok' : '');
+  est.textContent = listo ? '✓ Guardados. Los botones del cotizador entran solos a GO con tus datos.'
+    : piden ? 'Escribe tu usuario y tu clave de GO y aprieta Guardar.' : 'Sólo hace falta si usas atajos compartidos.';
+}
+$('#credForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const usuario = $('#credUsuario').value.trim(), clave = $('#credClave').value;
+  const r = await chrome.storage.local.get(['vcaCred', 'vcaCredIntento']);
+  const todo = r.vcaCred || {};
+  const previo = todo[SITIO_GO] || {};
+  if (!usuario) { $('#credEstado').textContent = 'Falta el usuario.'; return; }
+  if (!clave && !previo.clave) { $('#credEstado').textContent = 'Falta la clave.'; return; }
+  todo[SITIO_GO] = Object.assign({}, previo, { usuario: ocultarCred(usuario) }, clave ? { clave: ocultarCred(clave) } : {});
+  const intento = r.vcaCredIntento || {}; delete intento[SITIO_GO];   // datos nuevos: se vuelven a probar
+  await chrome.storage.local.set({ vcaCred: todo, vcaCredIntento: intento });
+  $('#credClave').value = '';
+  setStatus('🔑 Usuario y clave de GO guardados en este computador.');
+  pintarCred();
 });
+$('#credBorrar').addEventListener('click', async () => {
+  if (!(await confirmBox('¿Borrar tu usuario y tu clave de GO de este computador?'))) return;
+  const r = await chrome.storage.local.get('vcaCred');
+  const todo = r.vcaCred || {}; delete todo[SITIO_GO];
+  await chrome.storage.local.set({ vcaCred: todo });
+  await chrome.storage.local.remove('vcaCredIntento');
+  $('#credUsuario').value = ''; $('#credClave').value = '';
+  setStatus('Usuario y clave borrados.');
+  pintarCred();
+});
+chrome.storage.onChanged.addListener((ch, area) => { if (area === 'local' && (ch.vcaCred || ch['vcaSitio:' + SITIO_GO])) pintarCred(); });
+pintarCred();
 $('#export').addEventListener('click', async () => {
   const r = await collect();
   if (!TABS.length) { setStatus('Sin pestañas conectadas.'); return; }
