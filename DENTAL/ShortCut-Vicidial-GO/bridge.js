@@ -250,6 +250,52 @@
   document.addEventListener('vca:pendiente', (ev) => {
     try { const d = JSON.parse(ev.detail); chrome.runtime.sendMessage({ type: 'pendiente', op: d.op, data: d.data }); } catch (e) {}
   });
+  // ---------------------------------------------------------------------------
+  //  CLAVES DE CADA PERSONA (atajos compartidos)
+  //  Los atajos que vienen de otra persona traen el usuario y la clave en
+  //  blanco. La primera vez la persona los escribe y quedan aquí, ocultos y
+  //  sólo en este computador (chrome.storage.local `vcaCred`), por sitio.
+  //  Nunca salen en lo que se exporta.
+  //    vca:cred-pedir   {n, sitio, campo} → vca:cred-resp {n, valor, intento}
+  //    vca:cred-guardar {sitio, campo, valor}
+  //    vca:cred-intento {sitio}  (se usaron las guardadas: si se vuelve al
+  //                                login, no funcionaron)
+  //    vca:cred-ok      {sitio}  (se entró: las guardadas sirven)
+  // ---------------------------------------------------------------------------
+  const leerJSON = (ev) => { try { return JSON.parse(ev.detail); } catch (e) { return {}; } };
+  document.addEventListener('vca:cred-pedir', (ev) => {
+    const d = leerJSON(ev);
+    try {
+      chrome.storage.local.get(['vcaCred', 'vcaCredIntento'], (r) => {
+        const sitio = (r.vcaCred || {})[d.sitio] || {};
+        const it = (r.vcaCredIntento || {})[d.sitio] || 0;
+        try { document.dispatchEvent(new CustomEvent('vca:cred-resp', { detail: JSON.stringify({ n: d.n, valor: sitio[d.campo] || '', intento: it }) })); } catch (e) {}
+      });
+    } catch (e) {}
+  });
+  document.addEventListener('vca:cred-guardar', (ev) => {
+    const d = leerJSON(ev);
+    if (!d.sitio || !d.campo) return;
+    try {
+      chrome.storage.local.get('vcaCred', (r) => {
+        const todo = r.vcaCred || {};
+        todo[d.sitio] = Object.assign({}, todo[d.sitio], { [d.campo]: String(d.valor || '') });
+        chrome.storage.local.set({ vcaCred: todo });
+      });
+    } catch (e) {}
+  });
+  const marcarIntento = (sitio, t) => {
+    try {
+      chrome.storage.local.get('vcaCredIntento', (r) => {
+        const x = r.vcaCredIntento || {};
+        if (t) x[sitio] = t; else if (x[sitio]) delete x[sitio]; else return;
+        chrome.storage.local.set({ vcaCredIntento: x });
+      });
+    } catch (e) {}
+  };
+  document.addEventListener('vca:cred-intento', (ev) => { const d = leerJSON(ev); if (d.sitio) marcarIntento(d.sitio, Date.now()); });
+  document.addEventListener('vca:cred-ok', (ev) => { const d = leerJSON(ev); if (d.sitio) marcarIntento(d.sitio, 0); });
+
   // Ventana nueva que Chrome bloqueó durante un atajo: la abre la extensión.
   document.addEventListener('vca:abrir', (ev) => {
     try { chrome.runtime.sendMessage({ type: 'abrirUrl', url: String(ev.detail || '') }); } catch (e) {}

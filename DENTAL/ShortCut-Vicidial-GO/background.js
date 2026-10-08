@@ -145,16 +145,53 @@ async function reloadOurSiteTabs() {
   }
 }
 
-chrome.runtime.onInstalled.addListener((details) => {
+// ---------------------------------------------------------------------------
+//  ATAJOS COMPARTIDOS (default-config.json del paquete)
+//  Vienen sin usuario ni clave (pasos con `credencial`): cada persona usa los
+//  suyos. Cada vez que el paquete trae una publicación más nueva, sus atajos
+//  se instalan o se ponen al día (por id o por nombre) en el respaldo de cada
+//  sitio; los atajos propios de la persona se conservan. Al abrir Vicidial o
+//  GO la página toma esa lista (más nueva). En el computador de quien los
+//  publicó (`autor`) no se hace nada: ahí están los originales.
+// ---------------------------------------------------------------------------
+const normaNombre = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+async function aplicarCompartidos() {
+  try {
+    const cfg = await fetch(chrome.runtime.getURL('default-config.json')).then((r) => r.json()).catch(() => null);
+    if (!cfg || !cfg.publicado || !Array.isArray(cfg.states) || !cfg.states.length) return;
+    const yo = await chrome.storage.local.get(['vcaInstalacion', 'vcaCompartidoT']);
+    if (cfg.autor && cfg.autor === yo.vcaInstalacion) return;
+    if ((yo.vcaCompartidoT || 0) >= cfg.publicado) return;
+    const porSitio = {};
+    cfg.states.forEach((s) => { if (s && s.id && (s.steps || []).length) (porSitio[sitioClave(s.site || '')] = porSitio[sitioClave(s.site || '')] || []).push(s); });
+    const ahora = Date.now();
+    for (const sitio of Object.keys(porSitio)) {
+      if (!sitio) continue;
+      const k = 'vcaSitio:' + sitio;
+      const b = (await chrome.storage.local.get(k))[k] || {};
+      const lista = Array.isArray(b.states) ? b.states.slice() : [];
+      porSitio[sitio].forEach((s) => {
+        const nuevo = { id: s.id, label: s.label, steps: s.steps, color: s.color || '', compartido: cfg.publicado };
+        const i = lista.findIndex((x) => x && (x.id === s.id || normaNombre(x.label) === normaNombre(s.label)));
+        if (i >= 0) lista[i] = Object.assign({}, lista[i], nuevo); else lista.push(nuevo);
+      });
+      await chrome.storage.local.set({ [k]: Object.assign({}, b, { states: lista, statesT: ahora, t: ahora }) });
+    }
+    await chrome.storage.local.set({ vcaCompartidoT: cfg.publicado });
+  } catch (e) {}
+}
+
+chrome.runtime.onInstalled.addListener(async (details) => {
   ensurePump();
   closeStaleControlWindows();
+  await aplicarCompartidos();
   // 'install' (primera vez) y 'update' (nueva versión) dejan el script viejo
   // colgado; en ambos casos recargamos las pestañas de los sitios.
   if (!details || details.reason === 'install' || details.reason === 'update') {
     reloadOurSiteTabs();
   }
 });
-chrome.runtime.onStartup.addListener(() => { ensurePump(); permitirVentanasBci(); });
+chrome.runtime.onStartup.addListener(() => { ensurePump(); permitirVentanasBci(); aplicarCompartidos(); });
 ensurePump();
 
 async function pumpTick() {

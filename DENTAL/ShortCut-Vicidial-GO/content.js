@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.3.1';
+  const VCA_VERSION = '1.4.0';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -541,7 +541,7 @@
   function describirPaso(st) {
     const k = st.kind || 'click';
     if (k === 'select') return 'menú "' + (st.optText || st.value || '') + '"';
-    if (k === 'input') return st.dyn === 'rut' ? 'escribir el RUT del cliente' : 'escribir en un campo';
+    if (k === 'input') return st.credencial ? 'tu ' + (st.secreto ? 'clave' : 'usuario') : st.dyn === 'rut' ? 'escribir el RUT del cliente' : 'escribir en un campo';
     if (k === 'check') return 'casilla';
     return st.text ? '"' + String(st.text).slice(0, 40) + '"' : (st.icono ? 'botón con ícono (' + st.icono + ')' : 'botón ' + (st.tag || ''));
   }
@@ -787,7 +787,107 @@
     } catch (e) {}
   }
 
+  // ---- Usuario y clave de CADA persona (atajos compartidos) ----------------
+  // Un atajo que viene de otra persona trae el usuario y la clave en blanco
+  // (paso con `credencial`). Se usan los de quien lo ejecuta: guardados en su
+  // computador por la extensión; la primera vez los escribe ella y quedan.
+  let credN = 0, credOkEnviado = false;
+  function credEvento(tipo, d) {
+    try { document.dispatchEvent(new CustomEvent(tipo, { detail: JSON.stringify(Object.assign({ sitio: MI_SITIO }, d || {})) })); } catch (e) {}
+  }
+  function pedirCred(campo) {
+    return new Promise((res) => {
+      const n = ++credN; let listo = false;
+      const fn = (ev) => {
+        let d = {}; try { d = JSON.parse(ev.detail); } catch (e) {}
+        if (d.n !== n) return;
+        listo = true; document.removeEventListener('vca:cred-resp', fn); res(d);
+      };
+      document.addEventListener('vca:cred-resp', fn);
+      credEvento('vca:cred-pedir', { n: n, campo: campo });
+      setTimeout(() => { if (!listo) { document.removeEventListener('vca:cred-resp', fn); res({}); } }, 2000);
+    });
+  }
+  function avisoCred(texto) {
+    try {
+      let d = document.getElementById('vca-aviso-login');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = 'vca-aviso-login';
+        d.setAttribute('style', 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;max-width:min(92vw,540px);' +
+          'background:#0B2C8A;color:#fff;font:600 15px/1.4 system-ui,Segoe UI,sans-serif;padding:14px 18px;border-radius:14px;' +
+          'box-shadow:0 12px 30px rgba(0,20,60,.35);text-align:center;pointer-events:none;opacity:.97');
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.textContent = texto;
+    } catch (e) {}
+  }
+  // Primer paso después del login (para seguir ahí si la persona aprieta «Ingresar»).
+  function finDelLogin(steps, i) {
+    let j = i;
+    while (j < steps.length && /login|ingres|sesion/i.test(steps[j].ruta || '') && (!steps[j].sitio || steps[j].sitio === MI_SITIO)) j++;
+    return j;
+  }
+  async function pasoCredencial(st, steps, i, s, tag) {
+    const que = st.secreto ? 'clave' : 'usuario';
+    const el = await waitFor(st, s.stepTimeoutMs);
+    if (!el) { log(tag + ' campo de ' + que + ' no encontrado'); return false; }
+    const r = await pedirCred(st.credencial);
+    const guardada = r.valor ? revelarClave(r.valor) : '';
+    // Las guardadas ya se usaron ANTES de esta ejecución y se volvió al login: no sirvieron.
+    const fallo = !!(r.intento && corrida && r.intento < corrida.inicio && Date.now() - r.intento < 5 * 60 * 1000);
+    if (guardada && !fallo) {
+      if (s.turno && s.turno !== turno) return CANCELADA;
+      try { el.focus(); } catch (e) {}
+      setNativeValue(el, guardada); fireInputChange(el);
+      try { el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter' })); } catch (e) {}
+      try { el.dispatchEvent(new Event('blur')); el.dispatchEvent(new FocusEvent('focusout', { bubbles: true })); } catch (e) {}
+      credEvento('vca:cred-intento');
+      log(tag + ' -> tu ' + que + ' guardado' + (st.secreto ? ' (oculta)' : ''));
+      return true;
+    }
+    // La persona lo escribe (primera vez en este computador, o lo guardado no sirvió).
+    if (corrida) {
+      corrida.anotado = null;
+      pendiente('set', { label: corrida.label, steps: steps, desde: finDelLogin(steps, i), sitio: MI_SITIO, t: Date.now(), vence: Date.now() + 3 * 60 * 1000 });
+    }
+    avisoCred(fallo
+      ? '🔑 Tu usuario o clave guardados no funcionaron. Escríbelos de nuevo: quedan guardados sólo en este computador y el atajo «' + ((corrida && corrida.label) || '') + '» sigue solo.'
+      : '🔑 Escribe TU usuario y TU clave de GO (sólo esta vez). Quedan guardados sólo en este computador y el atajo «' + ((corrida && corrida.label) || '') + '» sigue solo.');
+    log(tag + ': esperando que escribas tu ' + que + ' (queda guardado en este computador)');
+    const guardar = () => { const v = el.value; if (v) credEvento('vca:cred-guardar', { campo: st.credencial, valor: ocultarClave(v) }); };
+    if (!el.__vcaCred) {        // también si la persona aprieta «Ingresar» o Enter ella misma
+      el.__vcaCred = true;
+      el.addEventListener('change', guardar);
+      window.addEventListener('pagehide', guardar);
+    }
+    let ultimo = el.value, tCambio = Date.now();
+    const t0 = Date.now(), ruta0 = location.pathname;
+    while (Date.now() - t0 < 3 * 60 * 1000) {
+      await sleep(300);
+      if (s.turno && s.turno !== turno) return CANCELADA;
+      if (!el.isConnected || location.pathname !== ruta0) break;     // ya entró por su cuenta
+      const v = el.value;
+      if (v !== ultimo) { ultimo = v; tCambio = Date.now(); }
+      // Listo: escrito y pasó a otro campo, o dejó de escribir 2,5 s.
+      if (v && Date.now() - tCambio > (document.activeElement === el ? 2500 : 400)) break;
+    }
+    guardar();
+    if (el.isConnected && location.pathname === ruta0 && !el.value) {
+      pasoFallido = { n: i + 1, de: steps.length, que: 'tu ' + que + ' (no se escribió en 3 minutos)' };
+      return false;
+    }
+    if (st.secreto || !steps.slice(i + 1).some(p => p.credencial && !p.value)) {
+      try { const a = document.getElementById('vca-aviso-login'); if (a) a.remove(); } catch (e) {}
+    }
+    log(tag + ': tu ' + que + ' quedó guardado en este computador');
+    if (corrida) corrida.hasta = Math.max(corrida.hasta, Date.now() + 30000);   // la espera no gasta el plazo del atajo
+    return true;
+  }
+
   async function runStepsOnce(steps, s, desde) {
+    // Se entró a GO (pantalla que no es el login): lo guardado sirve.
+    if (IS_CRM && !credOkEnviado && !/login|ingres|sesion/i.test(location.pathname)) { credOkEnviado = true; credEvento('vca:cred-ok'); }
     for (let i = desde || 0; i < steps.length; i++) {
       if (s.turno && s.turno !== turno) return CANCELADA;
       const st = steps[i];
@@ -807,6 +907,19 @@
         if (j > i) { i = j - 1; continue; }
       }
       const tag = '  paso ' + (i + 1) + '/' + steps.length;
+      // Usuario / clave de un atajo compartido: los de quien lo ejecuta.
+      if (IS_CRM && st.kind === 'input' && st.credencial && !st.value) {
+        const r = await pasoCredencial(st, steps, i, s, tag);
+        if (r === CANCELADA) return CANCELADA;
+        if (!r) { if (!pasoFallido || pasoFallido.n !== i + 1) pasoFallido = { n: i + 1, de: steps.length, que: describirPaso(st) }; return i; }
+        if (location.pathname !== (st.ruta || location.pathname) && LOGIN.test(st.ruta || '')) {
+          // La persona apretó «Ingresar» ella misma: se sigue en la pantalla nueva.
+          const j = inicioSegunPantalla(steps, i + 1);
+          i = j - 1; continue;
+        }
+        await sleep(esperaEntre(st, steps[i + 1], s));
+        continue;
+      }
       // Botón de entrar con la clave vacía: espera a que la persona inicie sesión.
       if (IS_CRM && (st.kind || 'click') === 'click' && claveVacia()) {
         // ¿Este paso ES el botón "Ingresar" de esta pantalla? (si se entró con
@@ -877,7 +990,7 @@
     s.turno = ++turno;          // si llega un ▶ más nuevo, ésta se detiene
     // GO / multicotizador: 30 s por tramo (las páginas de Bci tardan en cargar);
     // el plazo se renueva cuando hubo que esperar el inicio de sesión.
-    corrida = { label: label || '', steps: steps, paso: inicio || 0, hasta: Date.now() + (IS_CRM ? 30000 : s.totalTimeoutMs) };
+    corrida = { label: label || '', steps: steps, paso: inicio || 0, inicio: Date.now(), hasta: Date.now() + (IS_CRM ? 30000 : s.totalTimeoutMs) };
     cierres = 0;
     const yo = corrida;
     let attempt = 0, desde = inicio || 0;

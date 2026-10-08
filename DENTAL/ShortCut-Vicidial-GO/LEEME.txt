@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.3.1
+ShortCut-Vicidial-GO 1.4.0
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.3.1).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.4.0).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,17 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+ATAJOS COMPARTIDOS, CADA UNA CON SU CLAVE (desde la 1.4.0)
+- ⚙️ → "📦 Atajos para compañeras": guarda en Descargas default-config.json
+  con TODOS tus atajos (Vicidial y GO), SIN tu usuario ni tu clave.
+  Ese archivo va dentro del paquete para las compañeras.
+- En el computador de cada compañera los atajos se instalan solos (y se
+  ponen al día con cada versión nueva del paquete); los suyos se conservan.
+- La primera vez que un atajo llega al login de GO pide SU usuario y SU
+  clave; quedan ocultos y sólo en su computador. Si no funcionan, los pide de
+  nuevo. "🔑 Olvidar mi usuario y clave" los borra.
+- En tu computador no cambia nada: tus atajos siguen con tus datos.
 
 RELOJ DE PAUSAS QUE NO APARECÍA (arreglado en la 1.3.1)
 - Tras actualizar la extensión (sin recargar Vicidial) el reloj de pausas

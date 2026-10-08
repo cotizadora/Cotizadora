@@ -873,12 +873,64 @@ $('#save').addEventListener('click', async () => {
 });
 
 // ---- Global ----------------------------------------------------------------
+// Lo que se exporta para compartir NUNCA lleva el usuario ni la clave: los
+// campos del inicio de sesión quedan en blanco y marcados (`credencial`), y en
+// el computador de quien lo use se escriben con SUS datos (la primera vez los
+// escribe ella y quedan guardados sólo ahí).
+const RUTA_LOGIN = /login|ingres|sesion/i;
+function sinCredenciales(steps) {
+  let nU = 0, nC = 0;
+  return (steps || []).map((p) => {
+    if (!p || (p.kind !== 'input' && !p.secreto) || p.dyn) return p;
+    if (!p.secreto && !RUTA_LOGIN.test(p.ruta || '')) return p;
+    const campo = p.secreto ? 'clave' + (nC++ ? nC : '') : 'usuario' + (nU++ ? nU : '');
+    return Object.assign({}, p, { value: '', credencial: campo });
+  });
+}
+async function idInstalacion() {
+  const r = await chrome.storage.local.get('vcaInstalacion');
+  if (r.vcaInstalacion) return r.vcaInstalacion;
+  const id = 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  await chrome.storage.local.set({ vcaInstalacion: id });
+  return id;
+}
+function descargarJSON(obj, nombre) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+// 📦 Todos tus atajos (Vicidial y GO, aunque GO esté cerrado), sin credenciales.
+$('#compartir').addEventListener('click', async () => {
+  const todo = await chrome.storage.local.get(null);
+  const states = [];
+  Object.keys(todo).forEach((k) => {
+    const m = /^vcaSitio:([^:]+)$/.exec(k);
+    if (!m) return;
+    ((todo[k] && todo[k].states) || []).forEach((s) => {
+      if (!s || !s.id || !(s.steps || []).length) return;
+      states.push({ id: s.id, label: s.label, steps: sinCredenciales(s.steps), color: s.color || '', site: m[1] });
+    });
+  });
+  if (!states.length) { setStatus('No hay atajos para compartir (abre Vicidial o GO una vez).'); return; }
+  const cfg = { version: 3, _comment: 'Atajos compartidos de ShortCut-Vicidial-GO, sin usuario ni clave.',
+                publicado: Date.now(), autor: await idInstalacion(), exportedAt: new Date().toISOString(), states: states, settings: {} };
+  descargarJSON(cfg, 'default-config.json');
+  const nCred = states.reduce((n, s) => n + s.steps.filter(p => p.credencial).length, 0);
+  setStatus('📦 ' + states.length + ' atajos guardados en Descargas (default-config.json), sin tu usuario ni clave' +
+            (nCred ? ' (' + nCred + ' campos en blanco)' : '') + '. Mándaselo a Claude para el paquete.');
+});
+$('#olvidarCred').addEventListener('click', async () => {
+  if (!(await confirmBox('¿Borrar el usuario y la clave de GO guardados en este computador? La próxima vez el atajo los pide de nuevo.'))) return;
+  await chrome.storage.local.remove(['vcaCred', 'vcaCredIntento']);
+  setStatus('Usuario y clave olvidados.');
+});
 $('#export').addEventListener('click', async () => {
   const r = await collect();
   if (!TABS.length) { setStatus('Sin pestañas conectadas.'); return; }
-  // La clave grabada (oculta) NUNCA sale en lo que se exporta para compartir.
-  const sinClave = (steps) => (steps || []).map(p => p && p.secreto ? Object.assign({}, p, { value: '' }) : p);
-  const states = (r.states || []).map(s => ({ id: s.id, label: s.label, steps: sinClave(s.steps), color: s.color || '', site: siteKey(s.__host) }));
+  const states = (r.states || []).map(s => ({ id: s.id, label: s.label, steps: sinCredenciales(s.steps), color: s.color || '', site: siteKey(s.__host) }));
   const cfg = { version: 3, exportedAt: new Date().toISOString(), states: states, settings: r.settings || {} };
   const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);

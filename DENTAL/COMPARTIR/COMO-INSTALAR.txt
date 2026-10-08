@@ -1,4 +1,4 @@
-EXTENSIONES DENTAL BCI — Cotizador Dental v3.1.8 + ShortCut-Vicidial-GO v1.3.1
+EXTENSIONES DENTAL BCI — Cotizador Dental v3.1.8 + ShortCut-Vicidial-GO v1.4.0
 =============================================================================
 Desarrollado por Eduardo Pérez · Soporte o sugerencias: +56 9 2769 0949
 
@@ -25,22 +25,24 @@ INSTALAR (una sola vez, 3 minutos)
 6. Fíjalas en la barra: ícono de pieza de rompecabezas 🧩 → 📌 en las dos.
 7. Entra a Vicidial como siempre (no hace falta recargarlo).
 
-DESPUÉS DE INSTALAR: GRABA TUS ATAJOS
-Los atajos son de cada una (no vienen en el zip). En ShortCut (⚡):
-- "LOGUEO GO": aprieta Grabar, entra a GO escribiendo TU usuario y TU clave,
-  aprieta Detener y el botón rápido "1 · LOGUEO GO", y Guardar.
-  Tu clave queda oculta y sólo en tu computador.
-- "EVALUAR MEDIO DE PAGO": con un cliente en Vicidial, Grabar → ☰ → Nueva
-  Oportunidad → RUT → Continuar cotización → Siguiente… hasta el medio de
-  pago → Detener → "2 · EVALUAR MEDIO DE PAGO" → Guardar.
-- Pausas y tipificaciones de Vicidial: Grabar, haz los clics, Detener, ponle
-  nombre y Guardar.
-Con eso, en el cotizador funcionan los botones 1 y 2.
+YA VIENEN CON LOS ATAJOS DE EDUARDO
+No hay que grabar nada: los atajos (LOGUEO GO, EVALUAR MEDIO DE PAGO, pausas
+y tipificaciones) ya vienen instalados, SIN el usuario ni la clave de nadie.
 
-NO compartas tu atajo LOGUEO GO ni tu configuración exportada: lleva tu
-usuario de GO.
+LA PRIMERA VEZ: TU USUARIO Y TU CLAVE
+- En el cotizador aprieta "1 · Logueo GO". Se abre GO y aparece el aviso
+  "🔑 Escribe TU usuario y TU clave de GO (sólo esta vez)".
+- Escríbelos. El atajo aprieta «Ingresar» y sigue solo.
+- Quedan guardados OCULTOS y sólo en tu computador. Desde ahí el 1 y el 2
+  entran solos con TUS datos.
+- Si cambias tu clave: en ShortCut (⚡) → ⚙️ Configuración →
+  "🔑 Olvidar mi usuario y clave". La próxima vez te los pide de nuevo.
+  (Si la clave guardada no funciona, el atajo te la pide otra vez solo.)
+
+También puedes grabar atajos tuyos: se suman a los compartidos.
 
 ACTUALIZAR
 - Doble clic en Documentos\DENTAL\INSTALAR.bat (baja la última versión).
 - En chrome://extensions aprieta 🔄 en las dos extensiones.
-Tus atajos y tus datos no se pierden al actualizar.
+Tus atajos, tu usuario y tu clave no se pierden al actualizar. Si Eduardo
+publica atajos nuevos o corregidos, llegan solos con la actualización.
