@@ -42,7 +42,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.3.0
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.3.1
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -71,6 +71,7 @@ Qué hace:
 - **v1.2.8:** al guardar, botones de nombre rápido "1 · LOGUEO GO" / "2 · EVALUAR MEDIO DE PAGO" (los nombres que buscan los dos botones del cotizador).
 - **v1.2.9:** el puente ya no descarta el DV "0" de Vicidial (antes 12780633 + DV 0 llegaba a GO como 1278063-3 → "Rut inválido" y el atajo se detenía esperando "Crear"). Sin DV aparte: 9 caracteres traen el DV; con 8 sólo si el último cuadra con el módulo 11.
 - **v1.3.0 (ventanas que traban):** `ejecutarFlujo` con `limpiar` crea una pestaña nueva, ejecuta `soltarSalida` (MAIN: `__vcaSalidaLibre`, sin aviso "¿Salir del sitio?") y cierra todas las pestañas de Bci; si el atajo no trae login y otro atajo del mismo sitio tiene la clave grabada, antepone esos pasos de login (`pasosDeLogin`). `rut` del cotizador → `vcaCliente` si cuadra el módulo 11. En content.js (sólo Bci, MAIN): durante una ejecución `alert/confirm/prompt` se aceptan solos y los `beforeunload` no corren (envoltura de `addEventListener` y `onbeforeunload`); `window.open` bloqueado → `vca:abrir` → background abre la pestaña; permiso `contentSettings` permite ventanas emergentes de `*.bciseguros.cl`. En `waitFor`: si una ventana (`[role=dialog]`, `.p-dialog`, `.modal.show`, `.swal2-popup`…, o su fondo `.p-dialog-mask`…) tapa el botón que sigue, o hay una abierta que no contiene ninguno de los próximos 4 pasos tras 2,5 s, se cierra con ✕ / «Cerrar» / «Entendido» / «Aceptar» (o Escape y clic en el fondo); tope 6 por ejecución; los "Cargando…" (blockui/spinner) no se tocan. Registro con 🧹. Probado: sin el arreglo `chrome.tabs.remove` muestra "¿Salir del sitio?".
+- **v1.3.1:** el reloj de pausas no arrancaba en RELEVO (`if (!IS_CRM && !RELEVO)`), y la copia anterior se apaga por `vigente()`: tras cada actualización sin recargar Vicidial el reloj quedaba congelado o no aparecía. Ahora arranca siempre, quita las cajas viejas (`#vca-pausa-reloj`, `#vca-reloj-tipif`) y guarda el inicio de la pausa en `vca_pausa_ini` para seguir contando tras un relevo.
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -80,7 +81,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar ShortCut v1.3.0 y Cotizador v3.1.7 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
+1. Instalar ShortCut v1.3.1 y Cotizador v3.1.7 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.3.0
+ShortCut-Vicidial-GO 1.3.1
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.3.0).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.3.1).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,12 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+RELOJ DE PAUSAS QUE NO APARECÍA (arreglado en la 1.3.1)
+- Tras actualizar la extensión (sin recargar Vicidial) el reloj de pausas
+  quedaba congelado o no aparecía: el motor nuevo no lo encendía y el viejo ya
+  se había apagado. Ahora lo dibuja siempre el motor vigente, y si la pausa ya
+  venía corriendo sigue contando desde su inicio.
 
 PARTIR LIMPIO Y CERRAR VENTANAS QUE TRABAN (desde la 1.3.0)
 - Botones 1 y 2 del Cotizador Dental (3.1.7+): antes de empezar se cierran

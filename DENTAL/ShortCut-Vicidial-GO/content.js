@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.3.0';
+  const VCA_VERSION = '1.3.1';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -2001,7 +2001,9 @@
   const PauseReloj = {
     box: null, _cur: null, lastKey: null, hiddenKey: null, warnFired: false, overFired: false,
     ensureBox() {
-      if (this.box) return this.box;
+      if (this.box && this.box.isConnected) return this.box;
+      // La caja que dejó una versión anterior del motor (ya apagada) se quita.
+      document.querySelectorAll('#vca-pausa-reloj').forEach((v) => { try { v.remove(); } catch (e) {} });
       const b = document.createElement('div');
       b.id = 'vca-pausa-reloj';
       b.style.cssText = [
@@ -2152,6 +2154,7 @@
     },
     asegurarCaja() {
       if (this.caja && document.documentElement.contains(this.caja)) return this.caja;
+      document.querySelectorAll('#vca-reloj-tipif').forEach((v) => { try { v.remove(); } catch (e) {} });
       const b = document.createElement('div');
       b.id = 'vca-reloj-tipif';
       b.style.cssText = [
@@ -2308,9 +2311,15 @@
       pausaDebugMarker(p);
       if (p) {
         if (!PauseReloj._cur || PauseReloj._cur.id !== p.label) {
-          PauseReloj._cur = { id: p.label, label: p.label, emoji: p.emoji, limitMin: p.limitMin, startedAt: Date.now() };
+          // Si la pausa ya venía corriendo (la contaba la versión anterior del
+          // motor), se sigue desde su inicio en vez de partir de 00:00.
+          const ini = Store.get('vca_pausa_ini', null);
+          const desde = ini && ini.label === p.label && Date.now() - ini.t < 12 * 3600 * 1000 && Date.now() - (ini.visto || 0) < 15000 ? ini.t : Date.now();
+          PauseReloj._cur = { id: p.label, label: p.label, emoji: p.emoji, limitMin: p.limitMin, startedAt: desde };
         }
+        Store.set('vca_pausa_ini', { label: p.label, t: PauseReloj._cur.startedAt, visto: Date.now() });
       } else {
+        if (PauseReloj._cur) Store.del('vca_pausa_ini');
         PauseReloj._cur = null;
       }
       // El reloj se dibuja en ESTE frame (el del panel del agente, que es el
@@ -2356,8 +2365,10 @@
     setInterval(autoWatchTick, 700);
     // Reloj de pausas: solo en Vicidial (no en el GO Bci). Corre en cada
     // frame; solo actúa el que contiene el botón de estado del agente.
-    // En RELEVO la copia anterior ya dibuja el reloj: no duplicarlo.
-    if (!IS_CRM && !RELEVO) setInterval(() => { if (vigente()) pausaTick(); }, 1000);
+    // También en RELEVO: la copia anterior se apaga sola al ver que ya no es
+    // la vigente (antes, tras actualizar sin recargar Vicidial, nadie lo
+    // dibujaba y el reloj desaparecía). Su caja vieja se quita.
+    if (!IS_CRM) setInterval(() => { if (vigente()) pausaTick(); }, 1000);
     if (IS_VICI && IS_TOP) { hookPausaVici(); setInterval(hookPausaVici, 2000); }
     // Cuenta regresiva para tipificar
     if (IS_VICI && IS_TOP) setInterval(() => { try { RelojTipif.tick(); } catch (e) {} }, 250);
