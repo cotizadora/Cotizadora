@@ -21,6 +21,14 @@
 <meta name="twitter:title" content="Carritos Kimbo — Menú">
 <meta name="twitter:description" content="El sabor del barrio · Pide por WhatsApp 🌭">
 <meta name="twitter:image" content="https://cotizadora.github.io/Cotizadora/kimbo/preview.jpg">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#120d08">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carritos Kimbo">
+<meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 <title>Editor Flyer Kimbo</title>
@@ -2630,5 +2638,6 @@ var qrcode = function() {
 })();
 </script>
 
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>
 </html>
