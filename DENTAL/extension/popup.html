@@ -29,7 +29,13 @@
     </div>
 
     <div class="resumen" id="resumen">
-      <div class="res-plan" id="resPlan">Plan Urgencias</div>
+      <div class="res-cab">
+        <div class="res-plan" id="resPlan">Plan Urgencias</div>
+        <label class="check check-mini" for="tieneCargas" title="Tiene cargas (adicionales del titular)">
+          <input type="checkbox" id="tieneCargas">
+          <span>Tiene cargas</span>
+        </label>
+      </div>
       <div class="res-linea">
         <span class="res-compos" id="resCompos">titular solo</span>
         <span class="res-uf" id="resUF">—</span>
@@ -37,13 +43,10 @@
       </div>
     </div>
 
-    <div class="campo">
-      <label class="check" for="tieneCargas">
-        <input type="checkbox" id="tieneCargas">
-        <span>Tiene cargas (adicionales del titular)</span>
-      </label>
+    <div class="campo campo-cargas" id="campoCargas" hidden>
       <div id="bloqueCargas" hidden>
         <div class="conteo" id="conteo">
+          <span class="conteo-tit">Cargas</span>
           <button type="button" data-n="1">1</button>
           <button type="button" data-n="2">2</button>
           <button type="button" data-n="3">3</button>

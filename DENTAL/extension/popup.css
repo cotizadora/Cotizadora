@@ -123,6 +123,15 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
   padding:7px 10px 8px; background:var(--soft); border-bottom:1px solid var(--line);
 }
 .res-plan{font-size:12px; font-weight:800; color:var(--brand); line-height:1.2}
+/* "Tiene cargas" va en la misma fila que el plan (no ocupa una tarjeta sola) */
+.res-cab{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.res-cab .res-plan{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.check.check-mini{flex:none; gap:5px; padding:2px 8px; font-size:11px; border-radius:999px; background:transparent}
+.check.check-mini input{width:14px; height:14px}
+.check.check-mini:has(input:checked){background:var(--soft)}
+#campoCargas[hidden]{display:none}
+#campoCargas #bloqueCargas{margin-top:0}
+.conteo-tit{align-self:center; font-size:11px; font-weight:800; color:var(--muted); padding-right:2px}
 .res-linea{display:flex; align-items:baseline; gap:8px; margin-top:2px}
 .res-compos{font-size:10.5px; color:var(--muted); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .res-uf{font-size:12px; font-weight:700; font-variant-numeric:tabular-nums}
@@ -558,7 +567,12 @@ body.ext .cliente{
 .btn-copiar.copiado{background:#dcf2e5;border-color:#94d1ad;color:#0f5e3a;font-weight:800}
 @media (prefers-color-scheme:dark){ .btn-copiar{background:rgba(255,255,255,.08);color:inherit} }
 /* Dos botones fijos de GO (1 · Logueo, 2 · Evaluar medio de pago) */
-.go-botones{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+/* 1, 2 y ✏️ en una sola fila: el 2 se acorta (con …) si no cabe */
+.go-botones{flex-basis:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:4px}
+.go-botones .btn-go{min-width:0;padding:5px 8px 5px 5px;font-size:11px;text-align:left;letter-spacing:-.01em}
+.go-botones .btn-go b{width:15px;height:15px;margin-right:3px;font-size:10px}
+.go-botones .btn-go-edit{padding:3px 5px}
+.go-botones .btn-go.dos{justify-self:start;max-width:100%}
 .btn-go b{display:inline-grid;place-items:center;width:16px;height:16px;margin-right:3px;border-radius:50%;background:rgba(255,255,255,.28);font-size:10.5px}
 .btn-go.dos{background:linear-gradient(135deg,#0d7a52,#18a873);box-shadow:0 2px 6px rgba(13,122,82,.30)}
 .btn-go.dos[disabled]{background:#9fb8ad;box-shadow:none}

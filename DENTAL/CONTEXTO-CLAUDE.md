@@ -18,7 +18,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 - **INSTALAR.bat:** descarga todo lo de `DENTAL/` de esa rama a `Documentos\DENTAL` en mi PC. No borra nada mío.
 - **Pull request abierto:** [cotizadora/Cotizadora#1](https://github.com/cotizadora/Cotizadora/pull/1). Al hacer merge, GitHub Pages publica la página web en https://cotizadora.github.io/Cotizadora/DENTAL/cotizador-web.html. Todavía no lo he aprobado.
 
-## 1. Cotizador Dental Bci (extensión) — v3.1.7
+## 1. Cotizador Dental Bci (extensión) — v3.1.8
 
 - **En mi PC:** `Documentos\DENTAL\extension`
 - **Paquete:** `DENTAL/extension-cotizador-dental.zip`
@@ -27,6 +27,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 Qué hace:
 - Popup en dos columnas: cotización a la izquierda y script de venta a la derecha, sin manija de ancho. Desde la v3.0.3 va dentro de un marco azul grisáceo con borde fino, esquinas redondeadas y sombra, para que no se pierda sobre el blanco de Vicidial. Desde la v3.0.4 cada módulo es una tarjeta redondeada con su color según jerarquía: cliente (azul), tipificación (menta), plan y cotización (blanco), clínicas (turquesa), guardado (arena), total (azul marino suave); las secciones del script también son tarjetas en contraste Normal. El scroll va dentro de cada columna: el popup no pasa de 800 × 600. Desde la v3.0.9 las cabeceras de las dos columnas son una sola franja azul de igual altura, sin línea divisoria ni barra de desplazamiento arriba, y ambas columnas comparten fondo. Desde la v3.1.1 la tarjeta del cliente queda fija bajo la cabecera al desplazar la columna izquierda.
 - **Dos botones fijos (v3.1.5):** en la tarjeta del cliente, "1 · Logueo GO" (fuerza el login) y "2 · Evaluar medio de pago" (usa GO abierto), visibles a la vez. Cada uno usa el atajo de ShortCut con su nombre (LOGUEO GO / EVALUAR MEDIO DE PAGO), si no uno parecido; con ✏️ se cambia el nombre del botón y el atajo (se guarda en `chrome.storage.local.prefGo`). Nunca usan el mismo atajo los dos. Reemplaza al 🚀 único de la v3.1.3.
+- **Menos filas (v3.1.8):** los botones 1, 2 y ✏️ van en una sola fila (grid `auto 1fr auto`; el 2 se acorta con … sólo si no cabe). La casilla «Tiene cargas» va en la tarjeta del plan, a la derecha del nombre (`.res-cab`, `.check-mini`); la tarjeta de cargas (`#campoCargas`, con "Cargas 1 2 3", edades) sólo aparece con la casilla marcada.
 - **Partir limpio (v3.1.7):** los botones 1 y 2 mandan `ejecutarFlujo {id, forzarLogin, limpiar:true, rut}`: ShortCut cierra todas las pestañas de *.bciseguros.cl y abre una nueva. Casilla en ✏️ "Cerrar todas las pestañas de GO…" (marcada por defecto, `prefGo.limpiar`). El RUT se copia con respaldo `execCommand('copy')` si el portapapeles falla.
 - **DV 0 (v3.1.6):** el DV "0" de Vicidial se descartaba como vacío (`val()` ignora los "0") y 12780633 + DV 0 salía 1.278.063-3. Ahora el DV se lee aparte; sin DV, 9 caracteres traen el DV al final y con 8 sólo si el último cuadra con el módulo 11 (`dvRut` en historial-db.js).
 - **RUT en la tarjeta (v3.1.4):** se muestra sin puntos y con guion (12199895-5) con un botón 📋 que lo copia (también en la versión web).
@@ -81,7 +82,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar ShortCut v1.3.1 y Cotizador v3.1.7 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
+1. Instalar ShortCut v1.3.1 y Cotizador v3.1.8 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

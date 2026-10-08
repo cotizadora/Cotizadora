@@ -377,6 +377,7 @@ function sincronizarFilas(){
 function pintarBloqueCargas(){
   document.getElementById("tieneCargas").checked = nCargas > 0;
   document.getElementById("bloqueCargas").hidden = nCargas === 0;
+  document.getElementById("campoCargas").hidden = nCargas === 0;   // sin cargas, ni la tarjeta
   marcarCargas();
   sincronizarFilas();
 }
