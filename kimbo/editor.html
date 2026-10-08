@@ -87,6 +87,10 @@ label.lab{font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(
 }
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* vista limpia para el cliente (#ver): oculta edición, deja el flyer */
+body.ver .panel,body.ver .hint,body.ver #btnReset,body.ver .brand span{display:none !important;}
+body.ver .stage{align-items:center;}
+
 @media (min-width:920px){
   .wrap{flex-direction:row;}
   .panel{width:380px;flex:0 0 380px;border-top:none;border-right:1px solid var(--ui-line);overflow-y:auto;max-height:calc(100vh - 58px);order:-1;}
@@ -2712,6 +2716,7 @@ var qrcode = function() {
     setTimeout(function(){URL.revokeObjectURL(u);},5000); toast("¡Flyer descargado!");
   }
 
+  if(location.hash==="#ver" || /(?:^|[?&])ver(?:=|&|$)/.test(location.search)){ document.body.classList.add("ver"); }
   load(); buildPanel(); applyAll(); fit();
   window.addEventListener("resize",fit);
   $("#btnPng").addEventListener("click",exportPNG);
