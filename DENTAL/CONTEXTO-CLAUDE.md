@@ -39,7 +39,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.6
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.2.7
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -64,6 +64,7 @@ Qué hace:
 - **v1.2.4:** el plazo de un atajo en Bci es de 30 s por tramo y se renueva tras esperar el login (antes 15 s desde el inicio: si la persona tardaba en entrar, el atajo se rendía y quedaba quieto en "Oportunidades"); tras entrar espera hasta 30 s a que aparezca el próximo botón. El aviso de login ya no recibe clics (cualquier clic en la página basta para que Chrome entregue la clave). Si un atajo se detiene, aviso rojo arriba de la página con el paso.
 - **v1.2.5:** guardar con el nombre de un atajo existente lo reemplaza (mismo id, color y lugar).
 - **v1.2.6:** borrar / renombrar / color / orden de atajos de un sitio sin pestaña abierta (GO cerrado) se aplica al respaldo `vcaSitio:<sitio>` con `statesT`; al abrir la página, si el respaldo es más nuevo que `vca_states_t` de la página, la lista del respaldo reemplaza a la de la página (antes la orden iba a Vicidial y no pasaba nada).
+- **v1.2.7:** un ▶ nuevo cancela una ejecución anterior que seguía esperando en esa página (turno; antes se ignoraba y el panel quedaba "⏳ Ejecutando" sin hacer nada). Indicador "▶ nombre · paso N de M" abajo a la izquierda de GO, aviso "✅ listo" al terminar, y en el panel las últimas 4 líneas del registro de GO bajo "Ejecutando…".
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -73,7 +74,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar ShortCut v1.2.6 y Cotizador v3.1.4 con INSTALAR.bat, grabar de nuevo el flujo completo ESCRIBIENDO la clave en el login, y usarlo desde el botón 🚀 del cotizador.
+1. Instalar ShortCut v1.2.7 y Cotizador v3.1.4 con INSTALAR.bat, grabar de nuevo el flujo completo ESCRIBIENDO la clave en el login, y usarlo desde el botón 🚀 del cotizador.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

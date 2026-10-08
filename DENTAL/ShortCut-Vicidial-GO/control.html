@@ -93,6 +93,8 @@
   /* min-height:0 => no reserva espacio cuando está vacío */
   #arminfo { margin-top: 4px; font-size: 11px; color: #555; min-height: 0; }
   #arminfo:empty { margin: 0; }
+  #vivo { margin: 3px 0 0; font: 10.5px/1.35 ui-monospace, Consolas, monospace; color: #3d4f6e; white-space: pre-wrap; word-break: break-word; background: rgba(11,44,138,.06); border-radius: 6px; padding: 4px 6px; }
+  #vivo:empty { display: none; }
   #arminfo.fallo { color: #a33; background: #fdecea; border-radius: 6px; padding: 5px 7px; }
   #bg:empty { display: none; margin: 0; }
   .warn { background: #fff7e0; border: 1px solid #f0d38a; border-radius: 8px; padding: 9px; font-size: 12px; }
@@ -164,6 +166,7 @@
     <!-- ===== USO DIARIO: solo los atajos ===== -->
     <div id="list"></div>
     <div id="arminfo"></div>
+    <pre id="vivo"></pre>
 
     <!-- ===== ADMINISTRACIÓN ===== -->
     <details id="cfg">

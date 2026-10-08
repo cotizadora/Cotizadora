@@ -363,6 +363,14 @@ function paintArmInfo(armed) {
   } else {
     el.textContent = '';
   }
+  // Lo último que hizo el motor en GO / multicotizador (para ver si avanza y
+  // dónde se detuvo; basta una captura de pantalla para diagnosticar).
+  const vivo = $('#vivo');
+  if (vivo) {
+    const bci = (engineLog || []).filter(l => /^\[(GO Bci|Multicotizador|Bci Seguros)\]/.test(l));
+    const mostrar = (armed && /bciseguros/i.test(armed.__host || '')) || (f && Date.now() - f.t < 3 * 60 * 1000);
+    vivo.textContent = mostrar ? bci.slice(-4).map(l => l.replace(/\s+/g, ' ').replace(/ \d{1,2}:\d{2}:\d{2}( [AP]M)?/, '')).join('\n') : '';
+  }
 }
 function renderNow() {
   lastStates = sortStates(lastStates);

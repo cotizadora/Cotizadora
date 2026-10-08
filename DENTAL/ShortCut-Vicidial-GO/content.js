@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.2.6';
+  const VCA_VERSION = '1.2.7';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -496,6 +496,7 @@
         if (!cli || !cli.num) { log(tag + ' no hay RUT del cliente: abre Vicidial con el cliente en pantalla'); return false; }
         valor = rutConFormato(cli, st.fmt);
       }
+      if (s.turno && s.turno !== turno) return false;   // la reemplazó un ▶ nuevo
       if (st.secreto) valor = revelarClave(valor);
       try { el.focus(); } catch (e) {}
       setNativeValue(el, valor);
@@ -517,6 +518,7 @@
         log(tag + ' no listo (' + st.tag + ' "' + st.text + '")');
         return false;
       }
+      if (s.turno && s.turno !== turno) return false;   // la reemplazó un ▶ nuevo: no apretar
       ultimoClic = { el: el, t: Date.now() };
       Locator.fireClick(el);
       log(tag + ' -> ' + st.tag + ' "' + st.text + '"');
@@ -541,6 +543,8 @@
   // extensión). Si el clic abre otra página (o pestaña, o sitio), ésa lo lee al
   // cargar y sigue desde ahí. -3 = el resto sigue en otra página.
   const OTRA_PAGINA = -3;
+  const CANCELADA = -4;        // un ▶ más nuevo reemplazó a esta ejecución
+  let turno = 0;               // sube con cada ejecución nueva; la anterior se detiene
   let corrida = null;   // {label, steps} de la ejecución en curso
   function pendiente(op, data) {
     try { document.dispatchEvent(new CustomEvent('vca:pendiente', { detail: JSON.stringify({ op: op, data: data || null }) })); } catch (e) {}
@@ -612,7 +616,9 @@
 
   async function runStepsOnce(steps, s, desde) {
     for (let i = desde || 0; i < steps.length; i++) {
+      if (s.turno && s.turno !== turno) return CANCELADA;
       const st = steps[i];
+      if (IS_CRM && IS_TOP) progresoEnPagina(corrida && corrida.label, i + 1, steps.length, describirPaso(st));
       // Paso de otra página: se deja anotado y lo hace esa página al abrirse.
       if (st.sitio && !st.xf && st.sitio !== MI_SITIO) {
         anotarAvance(steps, i);
@@ -647,6 +653,7 @@
         let apretado = 0;
         while (Date.now() - t0 < 3 * 60 * 1000) {
           await sleep(300);
+          if (s.turno && s.turno !== turno) return CANCELADA;
           if (location.pathname !== ruta0 || !hayClaveVisible()) break;
           if (!claveVacia() && Date.now() - apretado > 6000) {
             apretado = Date.now();
@@ -693,6 +700,7 @@
   // (el menu de pausa no siempre esta disponible al instante).
   async function runSteps(steps, inicio, label) {
     const s = settings();
+    s.turno = ++turno;          // si llega un ▶ más nuevo, ésta se detiene
     // GO / multicotizador: 30 s por tramo (las páginas de Bci tardan en cargar);
     // el plazo se renueva cuando hubo que esperar el inicio de sesión.
     corrida = { label: label || '', steps: steps, hasta: Date.now() + (IS_CRM ? 30000 : s.totalTimeoutMs) };
@@ -702,8 +710,13 @@
       attempt++;
       if (attempt > 1) log('Replay reintento ' + attempt + (desde ? ' (desde el paso ' + (desde + 1) + ')' : '') + '...');
       const fallo = await runStepsOnce(steps, s, desde);
-      if (fallo === OTRA_PAGINA) { corrida = null; return true; }   // sigue en la otra página
-      if (fallo < 0) { pendiente('clear'); corrida = null; log('Replay COMPLETADO (intento ' + attempt + ').'); return true; }
+      if (fallo === CANCELADA || s.turno !== turno) { log('Ejecución anterior detenida (la reemplazó un ▶ nuevo).'); return CANCELADA; }
+      if (fallo === OTRA_PAGINA) { corrida = null; progresoEnPagina(null); return true; }   // sigue en la otra página
+      if (fallo < 0) {
+        pendiente('clear'); corrida = null; log('Replay COMPLETADO (intento ' + attempt + ').');
+        if (IS_CRM) { progresoEnPagina(null); avisoEnPagina('✅ «' + (yo.label || '') + '» listo.', '#0f6e45'); }
+        return true;
+      }
       if (IS_CRM) {
         // GO: sin Escape (cerraría la ventana "Nueva Oportunidad" ya abierta)
         // y sin volver al ☰ (lo cerraría): se sigue esperando el paso que faltó.
@@ -720,11 +733,29 @@
       desde = primeroDisponible(steps) ? 0 : fallo;
     }
     log('Replay AGOTADO tras ' + attempt + ' intento(s): no se pudo aplicar el estado.');
+    progresoEnPagina(null);
     if (IS_CRM) avisoEnPagina('⚠️ El atajo «' + (yo.label || '') + '» se detuvo' +
       (pasoFallido ? ' en el paso ' + pasoFallido.n + ' de ' + pasoFallido.de + ': no apareció ' + pasoFallido.que : '') +
       '. Sigue tú desde aquí o vuelve a apretar el botón.', '#8f1d2b');
     pendiente('clear'); corrida = null;
     return false;
+  }
+  // Indicador abajo a la izquierda mientras corre un atajo en GO / multicotizador:
+  // "▶ nombre · paso 3 de 9: ☰". Si no aparece al apretar ▶, el atajo no arrancó.
+  function progresoEnPagina(nombre, n, de, que) {
+    try {
+      let d = document.getElementById('vca-progreso');
+      if (nombre == null) { if (d) d.remove(); return; }
+      if (!d) {
+        d = document.createElement('div');
+        d.id = 'vca-progreso';
+        d.setAttribute('style', 'position:fixed;left:14px;bottom:14px;z-index:2147483647;max-width:min(80vw,420px);' +
+          'background:rgba(11,44,138,.94);color:#fff;font:600 13px/1.35 system-ui,Segoe UI,sans-serif;padding:8px 12px;' +
+          'border-radius:10px;box-shadow:0 8px 22px rgba(0,20,60,.3);pointer-events:none');
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.textContent = '▶ ' + (nombre || 'Atajo') + ' · paso ' + n + ' de ' + de + ': ' + que;
+    } catch (e) {}
   }
   // Aviso corto arriba de la página (no bloquea clics; se va solo).
   function avisoEnPagina(texto, fondo) {
@@ -877,7 +908,14 @@
     const last = Store.get(K.lastfire, 0);
     if (now - last < s.cooldownMs) return;              // cooldown global
     if (armed.__armedAt && now - armed.__armedAt < s.minArmedMs) return; // recien armado
-    if (replaying) return;
+    if (replaying) {
+      // GO: el ▶ nuevo manda. Una ejecución anterior que quedó esperando (por
+      // ejemplo, una que siguió sola después del login) se cancela y parte ésta.
+      // Antes el ▶ se ignoraba en silencio y el atajo quedaba "⏳ Ejecutando".
+      if (!IS_CRM) return;
+      log('Se cancela la ejecución anterior: parte la nueva');
+      turno++;
+    }
 
     const steps = stepsOf(armed);
     if (!steps.length) return;
@@ -896,6 +934,7 @@
     log((IS_CRM ? 'Ejecutando' : 'Fin de llamada (' + sourceTag + ') -> aplicando') + ' "' +
         nombre + '" (' + steps.length + ' paso/s)');
     runSteps(steps, inicioSegunPantalla(steps, 0), nombre).then((ok) => {
+      if (ok === CANCELADA) return;       // la reemplazó un ▶ más nuevo
       replaying = false;
       if (ok) { setArmed(null); }
       else if (IS_CRM) {
@@ -913,6 +952,7 @@
     replaying = true; pasoFallido = null; Store.del('vca_fallo');
     log('Continuando "' + (p.label || 'atajo') + '" desde el paso ' + (p.desde + 1) + '/' + p.steps.length + ' (viene de otra página)');
     runSteps(p.steps, inicioSegunPantalla(p.steps, p.desde), p.label).then((ok) => {
+      if (ok === CANCELADA) return;       // la reemplazó un ▶ más nuevo
       replaying = false;
       if (!ok) Store.set('vca_fallo', { label: p.label, paso: pasoFallido, t: Date.now() });
     });

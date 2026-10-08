@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.2.6
+ShortCut-Vicidial-GO 1.2.7
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.6).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.2.7).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -77,6 +77,13 @@ GRABAR EN GO (desde la 1.1.1)
   la complete con su gestor de contraseñas.
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
+
+▶ QUE "NO HACÍA NADA" (arreglado en la 1.2.7)
+- Si en la pestaña de GO quedaba corriendo un intento anterior (esperando un
+  botón), el ▶ nuevo se ignoraba y el panel quedaba en "⏳ Ejecutando".
+  Ahora el ▶ nuevo cancela al anterior y parte de inmediato.
+- Mientras corre, abajo a la izquierda de GO se ve "▶ nombre · paso 3 de 9";
+  al terminar, "✅ listo". En el panel se ven las últimas líneas de lo que hizo.
 
 BORRAR Y EDITAR ATAJOS DE GO CON GO CERRADO (arreglado en la 1.2.6)
 - Antes, si GO no estaba abierto, ✕ y ✏️ no hacían nada con los atajos de GO.
