@@ -172,7 +172,11 @@ async function aplicarCompartidos() {
       const lista = Array.isArray(b.states) ? b.states.slice() : [];
       porSitio[sitio].forEach((s) => {
         const nuevo = { id: s.id, label: s.label, steps: s.steps, color: s.color || '', compartido: cfg.publicado };
-        const i = lista.findIndex((x) => x && (x.id === s.id || normaNombre(x.label) === normaNombre(s.label)));
+        // Mismo id y SIN la marca `compartido` = es el original (el computador de
+        // quien lo publicó): nunca se reemplaza por la copia sin usuario ni clave.
+        const porId = lista.findIndex((x) => x && x.id === s.id);
+        if (porId >= 0 && !lista[porId].compartido) return;
+        const i = porId >= 0 ? porId : lista.findIndex((x) => x && normaNombre(x.label) === normaNombre(s.label));
         if (i >= 0) lista[i] = Object.assign({}, lista[i], nuevo); else lista.push(nuevo);
       });
       await chrome.storage.local.set({ [k]: Object.assign({}, b, { states: lista, statesT: ahora, t: ahora }) });

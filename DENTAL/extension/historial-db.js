@@ -75,7 +75,7 @@ function clienteDesdeCampos(f, agente){
     apellidoPat: val("apellido_pat") || val("last_name").split(" ")[0] || "",
     direccion: val("direccion", "address1"),
     fechaNac: fechaVici(val("fecha_nac", "date_of_birth")),
-    cta: val("cta_cte"),
+    cta: val("cta_cte", "ctacte", "cta_corriente", "cuenta_corriente", "__ctatexto"),
     ciclo: val("ciclo_vida"),
     propension: val("propension"),
     seguros: val("seguros_actuales"),

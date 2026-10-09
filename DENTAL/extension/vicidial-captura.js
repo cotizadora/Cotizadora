@@ -24,6 +24,11 @@
       const v = String(e.value || "").trim();
       if(v && !campos[k]) campos[k] = v;
     });
+    // Cta_Cte mostrado como texto (sin casilla)
+    try{
+      const m = ((doc.body && doc.body.innerText) || "").match(/(?:^|[^a-z_])cta[\s_.-]*cte\.?\s*:?\s*(\d[\d .-]{0,24})/i);
+      if(m && m[1].replace(/\D/g, "") && !campos.__ctatexto) campos.__ctatexto = m[1].replace(/\D/g, "");
+    }catch(e){}
     // Marcos del mismo sitio (la pestaña FORM es uno)
     doc.querySelectorAll("iframe, frame").forEach(function(f){
       try{ leerCampos(f.contentDocument, campos); }catch(e){}

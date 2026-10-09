@@ -1349,6 +1349,11 @@ function hoyTexto(anioCorto){
 }
 function datoCli(t){ return ' <span class="cli-dato">' + escCli(t) + "</span>"; }
 
+// Dígitos de la cuenta (Cta_Cte). Si viene el número completo, los últimos 3.
+function digitosCta(v){
+  const d = String(v || "").replace(/\D/g, "");
+  return d.length > 4 ? d.slice(-3) : d;
+}
 function personalizar(h){
   // Las fechas del cierre son las de hoy, haya o no cliente leído
   h = h.split("<em>[DD/MM/AA]</em>").join('<em class="cli">' + hoyTexto(true) + "</em>");
@@ -1382,7 +1387,12 @@ function personalizar(h){
     h = h.split("<em>[apellido]</em>").join(em(apellido));
   }
   if(mujer || hombre) h = h.split("Don/Sra., ").join((mujer ? "Sra." : "Don") + (nom ? " " + em(nom) : "") + ", ");
-  if(cliente.cta) h = h.split("<em>[XXX]</em>").join(em(cliente.cta));
+  // Cta_Cte de Vicidial: los dígitos que se le dicen al cliente
+  const cta = digitosCta(cliente.cta);
+  if(cta){
+    h = h.split("<em>[XXX]</em>").join(em(cta));
+    h = h.split("<em>[N.º medio de pago]</em>").join(em("terminada en " + cta));
+  }
   if(cliente.rut) h = h.split("<em>[RUT del cliente o ID de venta]</em>").join(em(cliente.rut));
 
   // Validación de datos: junto a cada ítem, lo que trae Vicidial
@@ -1417,6 +1427,12 @@ async function leerVicidial(){
           const v = String(e.value || "").trim();
           if(v && !campos[k]) campos[k] = v;
         });
+        // Cta_Cte a veces se muestra como texto (campo de sólo lectura), sin casilla:
+        // se busca también en lo que se ve ("Cta_Cte   573").
+        try{
+          const m = ((document.body && document.body.innerText) || "").match(/(?:^|[^a-z_])cta[\s_.-]*cte\.?\s*:?\s*(\d[\d .-]{0,24})/i);
+          if(m && m[1].replace(/\D/g, "")) campos.__ctatexto = m[1].replace(/\D/g, "");
+        }catch(e){}
         return {campos: campos, agente: typeof LOGfullname === "string" ? LOGfullname : ""};
       }
     });
@@ -1439,7 +1455,8 @@ function pintarCliente(){
   if(foco && el.contains(foco) && /^(INPUT|SELECT)$/.test(foco.tagName)) return;
   if(!cliente || !(cliente.nombre || cliente.apellido)){ el.hidden = true; el.innerHTML = ""; return; }
   const nombre = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
-  const datos = [[cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
+  const datos = [digitosCta(cliente.cta) ? "Cta. Cte. " + digitosCta(cliente.cta) : "",
+                 [cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
                  cliente.email ? cliente.email.toLowerCase() : "", nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean);
   // RUT sin puntos y con guion (como lo piden GO y el multicotizador), con botón para copiarlo
   const rut = rutSinPuntos(cliente.rut);
