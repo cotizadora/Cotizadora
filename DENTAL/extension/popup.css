@@ -1,0 +1,585 @@
+:root{
+  --bg:#fff; --ink:#15202b; --muted:#5d6b7a; --line:#dde3ec; --soft:#f4f6fa;
+  --brand:#123a6d; --brand2:#1f6feb;
+  --ok:#0f7b4f; --okbg:#e6f6ee; --warn:#8a5300; --warnbg:#fdf2dc; --bad:#a11f2c; --badbg:#fdeaec;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#151c25; --ink:#e8edf4; --muted:#9aa8b8; --line:#26313d; --soft:#0e1319;
+  --brand:#8ab4ff; --brand2:#4d90ff;
+  --ok:#5fd3a0; --okbg:#10291f; --warn:#f0c169; --warnbg:#2b2213; --bad:#ff8b96; --badbg:#2d1519;
+}}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:13px/1.35 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+.app{
+  display:flex; align-items:stretch; width:360px; overflow:hidden;
+  transition:width .26s cubic-bezier(.32,.72,0,1);
+}
+.app.abierto{width:780px}
+
+/* ---- marco del popup (sólo en la extensión) ----
+   Sobre la pantalla blanca de Vicidial el popup se perdía. Un fondo azul
+   grisáceo alrededor y la tarjeta con borde fino, esquinas redondeadas y
+   sombra suave lo despegan del fondo. Medidas: 780 + 2·7 + 2 = 796 px de
+   ancho y 580 + 16 de alto, dentro del máximo de Chrome (800 × 600). */
+body.ext{
+  padding:7px;
+  background:linear-gradient(160deg,#e3e9f2 0%,#cbd5e3 100%);
+}
+body.ext .app{
+  background:var(--bg);
+  border:1px solid rgba(18,58,109,.38);
+  border-radius:12px;
+  box-shadow:0 1px 2px rgba(12,28,56,.16), 0 4px 14px rgba(12,28,56,.20),
+             inset 0 1px 0 rgba(255,255,255,.7);
+}
+@media (prefers-color-scheme:dark){
+  body.ext{ background:linear-gradient(160deg,#0b1017 0%,#05080c 100%); }
+  body.ext .app{ border-color:rgba(138,180,255,.30); box-shadow:0 4px 16px rgba(0,0,0,.6); }
+}
+.app.arrastrando, .app.arrastrando .guion{transition:none}
+/* Al abrir, el popup aparece ya con su ancho final (sin animarse ni
+   obligar a Chrome a redimensionar la ventana): se ve al instante. */
+.app.sin-anim, .app.sin-anim .guion{transition:none !important}
+.izq{width:360px; flex:0 0 360px; padding-bottom:10px}
+
+/* ---- panel del script: se despliega hacia la derecha ---- */
+.guion{
+  flex:0 0 auto; width:0; min-width:0; align-self:stretch;
+  background:var(--soft); border-left:0 solid var(--line);
+  max-height:580px; overflow:hidden;
+  opacity:0; transform:translateX(10px);
+  transition:width .26s cubic-bezier(.32,.72,0,1),
+             opacity .18s ease .06s,
+             transform .26s cubic-bezier(.32,.72,0,1),
+             border-left-width .26s step-end;
+}
+.app.abierto .guion{
+  width:420px; opacity:1; transform:none;
+  overflow-y:auto; border-left-width:1px;
+  transition:width .26s cubic-bezier(.32,.72,0,1),
+             opacity .2s ease .08s,
+             transform .26s cubic-bezier(.32,.72,0,1),
+             border-left-width .26s step-start;
+}
+@media (prefers-reduced-motion: reduce){
+  .app, .guion{transition:none}
+}
+
+/* ---- nombre del plan: es el que abre el script ---- */
+.nomplan{
+  background:none; border:0; padding:0; margin:0; font:inherit; color:inherit;
+  text-align:left; cursor:pointer; border-bottom:1px dotted var(--muted);
+}
+.nomplan:hover{color:var(--brand2); border-bottom-color:var(--brand2)}
+tr.hit .nomplan{font-weight:700}
+tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
+.nomplan .flecha{font-size:9px; opacity:.55; margin-left:3px}
+.guion-cab{
+  position:sticky; top:0; z-index:2; display:flex; gap:8px; align-items:flex-start;
+  padding:9px 11px; background:var(--brand); color:#fff;
+}
+.guion-tit{font-size:13px; font-weight:800; line-height:1.2}
+.guion-sub{font-size:10.5px; opacity:.85; margin-top:2px}
+.guion-cab>div{flex:1; min-width:0}
+#cerrarGuion{
+  background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3);
+  border-radius:6px; width:22px; height:22px; font-size:15px; line-height:1; cursor:pointer; flex:0 0 auto;
+}
+#cerrarGuion:hover{background:rgba(255,255,255,.3)}
+
+
+.guion-cuerpo{padding:.3em 11px 1.2em; font-size:var(--gfs, 13px)}
+.gs{margin:.9em 0 0}
+.gs h4{
+  margin:0 0 .3em; font-size:.74em; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--g-muted); font-weight:800;
+}
+.gs p{margin:0 0 .35em; font-size:1em; line-height:1.5}
+.gs ul{margin:.2em 0 .45em; padding-left:1.25em; font-size:1em; line-height:1.45}
+.gs li{margin-bottom:.15em}
+.gs .dato{font-weight:800; color:var(--g-dato); font-variant-numeric:tabular-nums}
+.gs.clave{border-left:3px solid var(--bad); padding-left:8px; background:var(--badbg); border-radius:0 6px 6px 0; padding-top:6px; padding-bottom:2px}
+.gs.clave h4{color:var(--bad)}
+.gs.ojo{border-left:3px solid var(--warn); padding-left:8px; background:var(--warnbg); border-radius:0 6px 6px 0; padding-top:6px; padding-bottom:2px}
+.gs.ojo h4{color:var(--warn)}
+.gs .nota{font-size:.85em; color:var(--g-muted); font-style:italic}
+.uf{display:flex;position:sticky;top:0;z-index:3;align-items:center;gap:7px;background:#123a6d;color:#fff;padding:7px 10px}
+.uf-t{font-size:10px;letter-spacing:.09em;font-weight:700;opacity:.8}
+.uf-v{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.uf-f{font-size:10.5px;opacity:.8;flex:1}
+.uf-ver{font-size:9px;opacity:.6}
+.uf button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:13px;line-height:1}
+.uf button:hover{background:rgba(255,255,255,.3)}
+.uf-manual{display:none;gap:6px;align-items:center;padding:6px 10px;background:var(--warnbg);font-size:11.5px}
+.uf-manual input{width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:5px;
+  background:var(--bg);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
+
+/* ---- resumen permanente del calculo ---- */
+.resumen{
+  padding:7px 10px 8px; background:var(--soft); border-bottom:1px solid var(--line);
+}
+.res-plan{font-size:12px; font-weight:800; color:var(--brand); line-height:1.2}
+/* "Tiene cargas" va en la misma fila que el plan (no ocupa una tarjeta sola) */
+.res-cab{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.res-cab .res-plan{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.check.check-mini{flex:none; gap:5px; padding:2px 8px; font-size:11px; border-radius:999px; background:transparent}
+.check.check-mini input{width:14px; height:14px}
+.check.check-mini:has(input:checked){background:var(--soft)}
+#campoCargas[hidden]{display:none}
+#campoCargas #bloqueCargas{margin-top:0}
+.conteo-tit{align-self:center; font-size:11px; font-weight:800; color:var(--muted); padding-right:2px}
+.res-linea{display:flex; align-items:baseline; gap:8px; margin-top:2px}
+.res-compos{font-size:10.5px; color:var(--muted); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.res-uf{font-size:12px; font-weight:700; font-variant-numeric:tabular-nums}
+.res-clp{font-size:13px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums}
+
+/* ---- edad con flechas ---- */
+.edadbox{position:relative; flex:0 0 58px}
+.edadbox input.edad{width:100%; padding-right:15px; flex:none}
+.spin{position:absolute; right:3px; top:3px; bottom:3px; display:flex; flex-direction:column; gap:1px}
+.spin button{
+  flex:1; width:12px; padding:0; border:0; background:none; cursor:pointer;
+  color:var(--muted); font-size:7px; line-height:1; border-radius:2px;
+}
+.spin button:hover{background:var(--line); color:var(--ink)}
+.edadbox input.edad[readonly] + .spin{display:none}
+
+.campo{padding:9px 10px 0}
+label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.fila{display:flex;gap:7px;align-items:center}
+input.fecha{
+  flex:0 0 108px;padding:7px 8px;border:1px solid var(--line);border-radius:7px;
+  background:var(--soft);color:var(--ink);font:inherit;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:.02em;
+}
+input.fecha:focus{outline:2px solid var(--brand2);outline-offset:1px}
+input.fecha.mal{border-color:var(--bad);background:var(--badbg)}
+select.par{flex:0 0 96px;padding:6px 5px;border:1px solid var(--line);border-radius:7px;background:var(--soft);color:var(--ink);font:inherit;font-size:11.5px}
+.chip{flex:1;font-size:11px;font-weight:700;padding:5px 7px;border-radius:6px;background:var(--soft);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.ok{background:var(--okbg);color:var(--ok)}
+.chip.bad{background:var(--badbg);color:var(--bad)}
+.chip.warn{background:var(--warnbg);color:var(--warn)}
+
+.conteo{display:flex;gap:5px}
+.conteo button{
+  flex:1;padding:6px 0;border:1px solid var(--line);border-radius:7px;background:var(--soft);
+  color:var(--ink);font:inherit;font-weight:700;cursor:pointer
+}
+.conteo button:hover{border-color:var(--brand2)}
+.conteo button.on{background:var(--brand2);color:#fff;border-color:var(--brand2)}
+
+.verif{padding:9px 10px 0}
+.abrir{
+  width:100%;display:flex;align-items:center;gap:6px;padding:7px 9px;
+  border:1px dashed var(--line);border-radius:7px;background:transparent;color:var(--muted);
+  font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;text-align:left
+}
+.abrir:hover{border-color:var(--brand2);color:var(--ink)}
+.abrir span{transition:transform .12s}
+.abrir.open{border-style:solid;color:var(--ink)}
+.abrir.open span{transform:rotate(90deg)}
+.abrir.hay{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+#panelVerif{padding:7px 0 0}
+.pista{margin:0 0 7px;font-size:10.5px;color:var(--muted);line-height:1.35}
+#envioPista{margin:5px 0 0}
+#envio button{font-size:11.5px}
+#hijos .fila{margin-bottom:6px}
+.veredicto{font-size:10.5px;line-height:1.3;margin:-2px 0 7px 0;padding-left:2px}
+.veredicto.pide{color:var(--warn)}
+input.edad{flex:0 0 46px;padding:7px 6px;border:1px solid var(--line);border-radius:7px;
+  background:var(--soft);color:var(--ink);font:inherit;font-size:14px;text-align:center;font-variant-numeric:tabular-nums}
+input.edad:focus{outline:2px solid var(--brand2);outline-offset:1px}
+input.edad.mal{border-color:var(--bad);background:var(--badbg)}
+input.edad[readonly]{background:transparent;border-style:dashed;color:var(--muted);cursor:default}
+.sep{font-size:10px;color:var(--muted);flex:0 0 auto}
+#hijos .fila .chip{flex:1 1 90px}
+input.comuna{
+  flex:1; padding:7px 9px; border:1px solid var(--line); border-radius:7px;
+  background:var(--soft); color:var(--ink); font:inherit; font-size:13px;
+}
+input.comuna:focus{outline:2px solid var(--brand2); outline-offset:1px}
+#clinRes{margin-top:7px}
+.conteo-redes{display:flex;gap:5px;margin-bottom:6px}
+.conteo-redes .red{font-size:9.5px;padding:2px 6px}
+.clin{padding:6px 8px; border-left:3px solid var(--line); background:var(--soft);
+  border-radius:0 6px 6px 0; margin-bottom:5px}
+.clin-n{font-size:12px; font-weight:700; line-height:1.25}
+.clin-d{font-size:10.5px; color:var(--muted); line-height:1.3; margin-top:1px}
+.clin-m{display:flex; gap:6px; align-items:center; margin-top:3px}
+.red{font-size:9px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+  padding:1px 5px; border-radius:4px; background:var(--line); color:var(--muted)}
+.red.unosalud{background:var(--okbg); color:var(--ok)}
+.red.edental{background:var(--warnbg); color:var(--warn)}
+.dist{font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums}
+.clin-vacio{font-size:11px; color:var(--muted); line-height:1.4; padding:4px 2px}
+.clin-vacio strong{color:var(--ink)}
+.sugerencias{font-size:11px; color:var(--muted); margin:4px 0 0}
+.sugerencias button{background:none;border:0;padding:0;font:inherit;color:var(--brand2);
+  cursor:pointer;text-decoration:underline}
+ .link-carga{background:none;border:0;padding:0;font:inherit;font-size:11px;
+  color:var(--brand2);cursor:pointer;text-decoration:underline}
+.mapa.unosalud{background:var(--okbg);color:var(--ok);border-color:currentColor}
+/* ---- casilla de cargas ---- */
+.check{display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;
+  font-size:12.5px;font-weight:700;color:var(--ink);margin:0;padding:7px 9px;border:1px solid var(--line);
+  border-radius:8px;background:var(--soft)}
+.check input{width:16px;height:16px;margin:0;accent-color:var(--brand2);cursor:pointer}
+.check:has(input:checked){border-color:var(--brand2)}
+#bloqueCargas{margin-top:8px}
+#bloqueCargas .pista{margin:7px 0 6px}
+
+/* ---- sucursales por red ---- */
+#sugComunas{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px}
+#sugComunas:empty{display:none}
+.sug-t{font-size:10.5px;color:var(--muted)}
+.sug{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;
+  padding:3px 9px;font:inherit;font-size:11px;cursor:pointer}
+.sug:hover{border-color:var(--brand2);color:var(--brand2)}
+.clin-titulo{margin:8px 0 4px;font-size:11.5px;color:var(--muted)}
+.clin-titulo strong{color:var(--ink)}
+.redblq{margin-top:7px}
+.redcab{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.redn{font-size:11px;font-weight:700;color:var(--ink);flex:1}
+.fuente{font-size:10.5px;color:var(--brand2);text-decoration:none;white-space:nowrap}
+.fuente:hover{text-decoration:underline}
+
+.capturado{font-size:9.5px; color:var(--muted); margin-top:6px; font-style:italic}
+
+.guardado{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding:6px 9px;
+  border-radius:7px;background:var(--soft);font-size:10.5px;color:var(--muted)}
+.guardado[hidden]{display:none}
+
+/* ---- cliente leído de Vicidial ---- */
+.cliente{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:6px 10px;
+  background:var(--okbg);border-bottom:1px solid var(--line);font-size:11px;color:var(--ink)}
+.cliente[hidden]{display:none}
+.cliente b{font-size:12.5px}
+.cliente span{color:var(--muted)}
+.tipif-cli{display:flex;gap:6px;padding:6px 10px;background:var(--okbg);border-bottom:1px solid var(--line)}
+.tipif-cli[hidden]{display:none}
+.tipif-cli select{flex:0 0 auto;max-width:170px;border:1px solid var(--line);border-radius:6px;padding:3px 4px;font:inherit;font-size:11.5px;font-weight:700;background:var(--bg);color:var(--ink)}
+.tipif-cli select.bueno{color:var(--ok);border-color:var(--ok)}
+.tipif-cli select.malo{color:var(--bad);border-color:var(--bad)}
+.tipif-cli input{flex:1;min-width:0;border:1px solid var(--line);border-radius:6px;padding:3px 7px;font:inherit;font-size:11.5px;background:var(--bg);color:var(--ink)}
+#verHistorial{margin-left:auto}
+.cli-linea{flex-basis:100%;font-size:10.5px;color:var(--muted);line-height:1.35}
+.cli-linea i{font-style:normal;font-weight:700;color:var(--ink)}
+.guion-cuerpo .cli-dato{display:inline-block;margin-left:4px;padding:0 6px;border-radius:4px;background:var(--okbg);color:var(--ok);font-weight:700;font-style:normal}
+.guion-cuerpo em.cli{font-style:normal;font-weight:700;color:var(--g-dato, inherit)}
+.guardado span{flex:1}
+#limpiar{border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--bad);
+  font:inherit;font-size:10.5px;font-weight:700;padding:4px 8px;cursor:pointer}
+#limpiar:hover{border-color:var(--bad)}
+.veredicto.si{color:var(--ok)} .veredicto.no{color:var(--bad)} .veredicto.n{color:var(--muted)}
+
+.aviso{margin:9px 10px 0;padding:7px 9px;border-radius:7px;font-size:11.5px;border-left:3px solid;display:none}
+.aviso.ok{display:block;background:var(--okbg);border-color:var(--ok)}
+.aviso.bad{display:block;background:var(--badbg);border-color:var(--bad)}
+.aviso.warn{display:block;background:var(--warnbg);border-color:var(--warn)}
+
+table{width:calc(100% - 20px);margin:9px 10px 0;border-collapse:collapse;font-size:12px}
+th,td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.hit td{background:var(--okbg);font-weight:700}
+tr.sel{cursor:pointer}
+tr.sel:hover td{background:var(--soft)}
+tr[data-plan] td:first-child::before{content:"";display:inline-block;width:9px;height:9px;margin-right:6px;
+  border:1.5px solid var(--line);border-radius:50%;vertical-align:baseline}
+tr.hit td:first-child::before{border-color:var(--ok);background:var(--ok);box-shadow:inset 0 0 0 1.5px var(--okbg)}
+tr.veta{cursor:not-allowed}
+tr.veta td{opacity:.5;text-decoration:line-through}
+tr.veta small{font-weight:400;text-decoration:none;display:inline-block}
+td.off{color:var(--muted)}
+
+.total{display:flex;align-items:center;gap:8px;margin:9px 10px 0;padding-top:8px;border-top:2px solid var(--line)}
+.total>div{flex:1;display:flex;align-items:baseline;gap:7px}
+.t-uf{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.t-clp{font-size:15px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums}
+#copiar{padding:6px 11px;border:1px solid var(--line);border-radius:7px;background:var(--soft);color:var(--ink);font:inherit;font-size:11.5px;cursor:pointer}
+#copiar:hover{border-color:var(--brand2)}
+.exacto{margin:4px 10px 0;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ============ lectura del script: letra, contraste y modo guiado ============
+   Los colores del script viven en variables propias (--g-*), para que el
+   contraste elegido cambie sólo esta zona y no el resto del cotizador. */
+.guion{
+  --g-bg:var(--soft); --g-ink:var(--ink); --g-muted:var(--muted); --g-dato:var(--brand);
+  --g-cab:#123a6d; --g-cab-ink:#fff;
+  --g-mark:#fff1b8; --g-mark-ink:#15202b; --g-mark-borde:#d99a00;
+  background:var(--g-bg); color:var(--g-ink);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .guion{
+  --g-mark:#4a3d0f; --g-mark-ink:#fff6d6; --g-mark-borde:#f0c169;
+}}
+:root[data-theme="dark"] .guion{ --g-mark:#4a3d0f; --g-mark-ink:#fff6d6; --g-mark-borde:#f0c169; }
+
+.guion[data-contraste="negro"]{
+  --g-bg:#000; --g-ink:#fff; --g-muted:#c4c4c4; --g-dato:#8fdcff;
+  --g-cab:#000; --g-cab-ink:#fff; --g-mark:#ffe600; --g-mark-ink:#000; --g-mark-borde:#ffe600;
+}
+.guion[data-contraste="alto"]{
+  --g-bg:#fff; --g-ink:#000; --g-muted:#262626; --g-dato:#0030c0;
+  --g-cab:#000; --g-cab-ink:#fff; --g-mark:#000; --g-mark-ink:#fff; --g-mark-borde:#000;
+}
+.guion[data-contraste="sepia"]{
+  --g-bg:#f4ead3; --g-ink:#3a2c18; --g-muted:#6d5a3d; --g-dato:#8a3c00;
+  --g-cab:#5b4426; --g-cab-ink:#f4ead3; --g-mark:#e7cf95; --g-mark-ink:#2a1e0d; --g-mark-borde:#9a6a18;
+}
+.guion-cab{ background:var(--g-cab); color:var(--g-cab-ink); }
+.guion[data-contraste="negro"] .guion-cab{ border-bottom:1px solid #fff }
+.guion:not([data-contraste="normal"]) .gs.clave,
+.guion:not([data-contraste="normal"]) .gs.ojo{ background:transparent; border-left-color:var(--g-mark-borde) }
+.guion:not([data-contraste="normal"]) .gs.clave h4,
+.guion:not([data-contraste="normal"]) .gs.ojo h4{ color:var(--g-ink) }
+.guion[data-contraste="alto"] .paso.actual .dato,
+.guion[data-contraste="alto"] .paso.actual strong{ color:#fff }
+
+.guion-barra{
+  position:sticky; top:calc(var(--gb-top, 46px)); z-index:1;
+  display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center;
+  padding:6px 11px; background:var(--g-bg); border-bottom:1px solid var(--line);
+}
+.guion[data-contraste="negro"] .guion-barra{ border-bottom-color:#444 }
+.gb-grupo{ display:flex; align-items:center; gap:3px }
+.gb-grupo button{
+  min-width:26px; padding:3px 7px; border:1px solid var(--line); border-radius:6px;
+  background:transparent; color:var(--g-ink); font:inherit; font-size:11px; font-weight:700; cursor:pointer;
+}
+.gb-grupo button:hover{ border-color:var(--g-mark-borde) }
+.gb-grupo button.on{ background:var(--g-ink); color:var(--g-bg); border-color:var(--g-ink) }
+.gb-grupo button:focus-visible{ outline:2px solid var(--g-mark-borde); outline-offset:1px }
+.gb-val{ font-size:10.5px; color:var(--g-muted); min-width:3.6em; text-align:center; font-variant-numeric:tabular-nums }
+
+/* La frase que toca leer queda marcada; lo ya leído se atenúa. Así el
+   ejecutivo sabe dónde quedó aunque mire a otro lado. */
+.guion.guiada .paso{ cursor:pointer; border-radius:5px; transition:opacity .15s, background-color .15s }
+.guion.guiada p.paso{ padding:.12em .4em; margin-left:-.4em; margin-right:-.4em }
+.guion.guiada li.paso{ padding:.06em .3em; margin-left:-.3em }
+.guion.guiada .paso.leido{ opacity:.45 }
+.guion.guiada .paso.actual{
+  background:var(--g-mark); color:var(--g-mark-ink); opacity:1;
+  box-shadow:-.3em 0 0 var(--g-mark-borde);
+}
+.guion.guiada .paso.actual .nota{ color:inherit; opacity:.8 }
+@media (prefers-reduced-motion: reduce){ .guion.guiada .paso{ transition:none } }
+
+/* ============ módulos por jerarquía (sólo en la extensión) ============
+   Cada bloque de información es una tarjeta redondeada con su propio tono,
+   de más a menos importante:
+     1. Cliente leído de Vicidial ........ azul (quién es)
+     2. Tipificación de la llamada ....... verde menta
+     3. Plan elegido y cotización ........ blanco sobre gris (lo que se vende)
+     4. Total a cobrar ................... azul marino suave, el más marcado
+     5. Clínicas por comuna .............. turquesa (información de apoyo)
+     6. Guardado / avisos ................ arena (estado)
+   El scroll vive dentro de cada columna, para que el popup nunca pase del
+   máximo de Chrome (800 × 600) ni muestre barras propias. */
+body.ext{
+  --m-fondo:#eef2f7;
+  --m-tarjeta:#fff; --m-borde:#d5dde8;
+  --m-cli:#e7effb; --m-cli-borde:#9db8de; --m-cli-acento:#123a6d;
+  --m-tip:#e6f5ec; --m-tip-borde:#a9d8bd;
+  --m-total:#e4ebf6; --m-total-borde:#8fa7c9;
+  --m-clin:#e3f3f1; --m-clin-borde:#9fd1c9;
+  --m-est:#faf3e3; --m-est-borde:#e5d3a6;
+  --m-sombra:0 1px 2px rgba(12,28,56,.07), 0 2px 6px rgba(12,28,56,.06);
+  overflow:hidden;
+}
+@media (prefers-color-scheme:dark){ body.ext{
+  --m-fondo:#10161e;
+  --m-tarjeta:#18212c; --m-borde:#2a3644;
+  --m-cli:#16243a; --m-cli-borde:#2e4a72; --m-cli-acento:#8ab4ff;
+  --m-tip:#122a1f; --m-tip-borde:#24513a;
+  --m-total:#172338; --m-total-borde:#36507a;
+  --m-clin:#10282a; --m-clin-borde:#24544f;
+  --m-est:#2a2416; --m-est-borde:#5a4a22;
+  --m-sombra:0 1px 3px rgba(0,0,0,.4);
+}}
+body.ext .app{max-height:584px}
+body.ext .izq{
+  max-height:582px; overflow-y:auto; scrollbar-width:thin;
+  background:var(--m-fondo); padding-bottom:10px;
+}
+body.ext .guion{max-height:582px}
+
+/* 1. cliente */
+body.ext .cliente{
+  margin:8px 8px 0; padding:7px 10px 7px 11px; border:1px solid var(--m-cli-borde);
+  border-left:4px solid var(--m-cli-acento); border-radius:10px;
+  background:linear-gradient(135deg,var(--m-cli) 0%,var(--m-tarjeta) 140%);
+  box-shadow:var(--m-sombra);
+}
+body.ext .cliente b{color:var(--m-cli-acento)}
+/* 2. tipificación */
+body.ext .tipif-cli{
+  margin:6px 8px 0; padding:6px 8px; border:1px solid var(--m-tip-borde);
+  border-radius:10px; background:var(--m-tip); box-shadow:var(--m-sombra);
+}
+body.ext .uf-manual{margin:6px 8px 0; border-radius:10px; border:1px solid var(--m-est-borde)}
+/* 3. plan elegido y cotización */
+body.ext .resumen{
+  margin:8px 8px 0; padding:8px 11px; border:1px solid var(--m-borde); border-radius:10px;
+  background:var(--m-tarjeta); box-shadow:var(--m-sombra);
+}
+body.ext .campo{
+  margin:8px 8px 0; padding:9px 10px; border:1px solid var(--m-borde); border-radius:10px;
+  background:var(--m-tarjeta); box-shadow:var(--m-sombra);
+}
+body.ext .campo > label.check{margin:0; border:0; background:none; padding:2px 0}
+body.ext .campo:has(> label.check input:checked){border-color:var(--brand2)}
+body.ext .aviso{margin:8px 8px 0; border-radius:10px}
+body.ext table{
+  width:calc(100% - 16px); margin:8px 8px 0; border-collapse:separate; border-spacing:0;
+  background:var(--m-tarjeta); border:1px solid var(--m-borde); border-radius:10px;
+  overflow:hidden; box-shadow:var(--m-sombra);
+}
+body.ext tr:last-child td{border-bottom:0}
+/* 5. clínicas por comuna */
+body.ext .verif{
+  margin:8px 8px 0; padding:8px; border:1px solid var(--m-clin-borde); border-radius:10px;
+  background:var(--m-clin); box-shadow:var(--m-sombra);
+}
+body.ext .verif .abrir{border:0; padding:2px 2px; color:#0f5c55}
+body.ext .verif .clin{background:var(--m-tarjeta); border-radius:0 8px 8px 0}
+body.ext .verif .comuna{background:var(--m-tarjeta)}
+/* 6. guardado */
+body.ext .guardado{
+  margin:8px 8px 0; border:1px solid var(--m-est-borde); border-radius:10px; background:var(--m-est);
+}
+/* 4. total */
+body.ext .total{
+  margin:8px 8px 0; padding:9px 11px; border:1px solid var(--m-total-borde); border-top-width:1px;
+  border-radius:10px; background:var(--m-total); box-shadow:var(--m-sombra);
+}
+body.ext .exacto{margin:4px 12px 0}
+
+/* script: cada sección es una tarjeta (sólo en contraste Normal; los demás
+   modos de lectura quedan como estaban, que es lo que se pidió para leer) */
+body.ext .guion[data-contraste="normal"] .guion-cuerpo{padding:.2em 9px 1.2em}
+body.ext .guion[data-contraste="normal"] .gs{
+  margin:.7em 0 0; padding:.55em .8em .45em; background:var(--m-tarjeta);
+  border:1px solid var(--m-borde); border-radius:10px; box-shadow:var(--m-sombra);
+}
+body.ext .guion[data-contraste="normal"] .gs h4{color:var(--brand)}
+body.ext .guion[data-contraste="normal"] .gs.clave,
+body.ext .guion[data-contraste="normal"] .gs.ojo{border-left-width:4px; border-radius:10px}
+
+/* casilla "Abrir solo al entrar una llamada" */
+.auto-abrir{display:flex;align-items:center;gap:6px;margin:8px 12px 0;font-size:10.5px;font-weight:600;
+  text-transform:none;letter-spacing:0;color:var(--muted);cursor:pointer}
+.auto-abrir input{margin:0;accent-color:var(--brand2);cursor:pointer}
+.auto-abrir[hidden]{display:none}
+
+/* ============ barra del script compacta + atajos de tipificación ============
+   Una sola fila de íconos (como en Word): A↓ A↑ para la letra, cuatro
+   muestras de color para el contraste y ¶ ▲ n ▼ para la lectura guiada.
+   El espacio que queda lo ocupan 2 filas × 3 botones con las tipificaciones
+   grabadas en ShortCut-Vicidial-GO. */
+.guion-barra{ display:block; padding:5px 9px 6px }
+.gb-fila{ display:flex; align-items:center; justify-content:space-between; gap:6px }
+.gb-grupo button.gb-ic{ min-width:24px; height:22px; padding:0 5px; display:inline-flex; align-items:center; justify-content:center; gap:1px; font-size:11px }
+.a-chica{ font-size:10px; font-weight:800 } .a-grande{ font-size:13.5px; font-weight:800; line-height:1 } .a-flecha{ font-size:8.5px; opacity:.7 }
+.gb-mini{ min-width:2.6em; font-size:9.5px }
+.gb-tonos{ gap:5px }
+.gb-grupo button.tono{ min-width:0; width:16px; height:16px; padding:0; border-radius:50%; border:1px solid rgba(0,0,0,.25) }
+.gb-grupo button.tono.on{ box-shadow:0 0 0 2px var(--g-bg), 0 0 0 3.5px var(--brand2); border-color:transparent }
+.gb-grupo button.t-normal, .gb-grupo button.t-normal.on{ background:#f4f6fa }
+.gb-grupo button.t-negro, .gb-grupo button.t-negro.on{ background:#000 }
+.gb-grupo button.t-alto, .gb-grupo button.t-alto.on{ background:linear-gradient(135deg,#fff 50%,#000 50%) }
+.gb-grupo button.t-sepia, .gb-grupo button.t-sepia.on{ background:#f4ead3 }
+
+.atajos{ display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:6px }
+.atajos[hidden]{ display:none }
+.atajo{
+  all:unset; box-sizing:border-box; cursor:pointer; text-align:center;
+  padding:4px 6px; border-radius:9px; font-size:10px; font-weight:800; line-height:1.15;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+  min-height:28px; align-content:center; word-break:break-word;
+  border:1px solid; box-shadow:0 1px 2px rgba(12,28,56,.10);
+  transition:transform .08s, box-shadow .12s;
+}
+.atajo:hover{ box-shadow:0 2px 6px rgba(12,28,56,.20) }
+.atajo:active{ transform:scale(.97) }
+.atajo:focus-visible{ outline:2px solid var(--brand2); outline-offset:1px }
+.atajo.verde{ background:linear-gradient(180deg,#eefaf3,#dcf2e5); border-color:#94d1ad; color:#0f5e3a }
+.atajo.ambar{ background:linear-gradient(180deg,#fff8ea,#fcecc8); border-color:#e8c27a; color:#7a4c00 }
+.atajo.rojo { background:linear-gradient(180deg,#fff1f2,#fbdde1); border-color:#eda5ae; color:#8f1d2b }
+.atajo.azul { background:linear-gradient(180deg,#eff5fd,#dde9fa); border-color:#9dbbe6; color:#123a6d }
+.atajo.armado{ border-width:2px; animation:atajoLatido 1.2s ease-in-out infinite }
+@keyframes atajoLatido{ 50%{ box-shadow:0 0 0 3px rgba(31,111,235,.25) } }
+@media (prefers-reduced-motion: reduce){ .atajo.armado{ animation:none } }
+
+
+/* ============ cabecera unificada (sólo en la extensión) ============
+   Las cabeceras de las dos columnas forman UNA franja: misma altura, mismo
+   azul, sin línea vertical entre ellas y sin la barra de desplazamiento de
+   la columna izquierda asomando arriba (la columna sigue desplazándose con
+   la rueda del mouse). Debajo de la franja, las dos columnas comparten el
+   mismo fondo y sólo las separa una línea suave. */
+body.ext{ --cab-alto:48px }
+body.ext .izq{ scrollbar-width:none; box-shadow:inset -1px 0 0 var(--m-borde) }
+body.ext .izq::-webkit-scrollbar{ display:none }
+body.ext .uf, body.ext .guion-cab{
+  height:var(--cab-alto); box-sizing:border-box; align-items:center;
+  background:#123a6d; box-shadow:inset 0 -1px 0 rgba(255,255,255,.08);
+}
+body.ext .uf{ padding:0 10px 0 13px; gap:8px }
+body.ext .guion-cab{ padding:0 10px 0 14px }
+body.ext .guion-tit{ font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+body.ext .guion-sub{ font-size:10.5px; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+body.ext .app.abierto .guion{ border-left-width:0 }
+body.ext .guion[data-contraste="normal"]{ --g-bg:var(--m-fondo) }
+body.ext .guion[data-contraste="normal"] .guion-cab{ background:#123a6d }
+/* el borde de la tarjeta envuelve las dos columnas como una sola pieza */
+body.ext .app{ overflow:hidden }
+
+/* La tarjeta del cliente queda fija bajo la cabecera: al desplazar la
+   columna, sus datos siguen a la vista. La sombra del color del fondo tapa
+   el hueco de arriba, para que lo que pasa por detrás no se asome. */
+body.ext .cliente{
+  position:sticky; top:calc(var(--cab-alto) + 8px); z-index:2;
+  background:linear-gradient(135deg,var(--m-cli) 0%,#f7faff 140%);
+  box-shadow:0 -9px 0 1px var(--m-fondo), var(--m-sombra);
+}
+@media (prefers-color-scheme:dark){ body.ext .cliente{ background:var(--m-cli) } }
+
+/* Cotizar en GO (flujo de ShortCut) dentro de la tarjeta del cliente */
+.cli-go{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:5px;padding-top:6px;border-top:1px dashed var(--m-cli-borde,#9db8de)}
+.btn-go{font:inherit;font-size:12px;font-weight:800;color:#fff;border:0;border-radius:999px;padding:5px 12px;cursor:pointer;
+  background:linear-gradient(135deg,#0250B4,#0790CF);box-shadow:0 2px 6px rgba(2,60,160,.30);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-go:hover{filter:brightness(1.08)}
+.btn-go:active{transform:scale(.97)}
+.btn-go:focus-visible{outline:2px solid var(--brand2,#0790CF);outline-offset:2px}
+.btn-go[disabled]{background:#9fb0c8;box-shadow:none;cursor:not-allowed}
+.cli-go select{font:inherit;font-size:11px;max-width:160px;padding:2px 4px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;color:inherit}
+.go-login{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--muted);cursor:pointer;text-transform:none;letter-spacing:0}
+.go-login input{margin:0}
+.cliente .go-estado{flex-basis:100%;font-size:10.5px;color:var(--m-cli-acento,#123a6d);font-weight:700}
+/* RUT sin puntos con botón para copiarlo */
+.cliente .cli-rut{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
+.cliente .cli-rut-num{color:var(--m-cli-acento,#123a6d);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em;user-select:all}
+.btn-copiar{font:inherit;font-size:11px;line-height:1;padding:3px 6px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:rgba(255,255,255,.7);cursor:pointer}
+.btn-copiar:hover{background:#fff}
+.btn-copiar.copiado{background:#dcf2e5;border-color:#94d1ad;color:#0f5e3a;font-weight:800}
+@media (prefers-color-scheme:dark){ .btn-copiar{background:rgba(255,255,255,.08);color:inherit} }
+/* Dos botones fijos de GO (1 · Logueo, 2 · Evaluar medio de pago) */
+/* 1, 2 y ✏️ en una sola fila: el 2 se acorta (con …) si no cabe */
+.go-botones{flex-basis:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:4px}
+.go-botones .btn-go{min-width:0;padding:5px 8px 5px 5px;font-size:11px;text-align:left;letter-spacing:-.01em}
+.go-botones .btn-go b{width:15px;height:15px;margin-right:3px;font-size:10px}
+.go-botones .btn-go-edit{padding:3px 5px}
+.go-botones .btn-go.dos{justify-self:start;max-width:100%}
+.btn-go b{display:inline-grid;place-items:center;width:16px;height:16px;margin-right:3px;border-radius:50%;background:rgba(255,255,255,.28);font-size:10.5px}
+.btn-go.dos{background:linear-gradient(135deg,#0d7a52,#18a873);box-shadow:0 2px 6px rgba(13,122,82,.30)}
+.btn-go.dos[disabled]{background:#9fb8ad;box-shadow:none}
+.btn-go-edit{font:inherit;font-size:11px;line-height:1;padding:4px 6px;border-radius:999px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;cursor:pointer}
+.btn-go-edit.on{background:var(--m-cli-borde,#9db8de)}
+.go-edit-fila{flex-basis:100%;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:4px 6px;font-size:11px}
+.go-edit-fila input,.go-edit-fila select{font:inherit;font-size:11px;min-width:0;padding:2px 5px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:transparent;color:inherit}
+.go-edit-fila .go-edit-nota{grid-column:2 / -1;color:var(--muted);font-size:10px}
+.go-edit-limpiar{flex-basis:100%;display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer}
+.go-edit-limpiar input{margin:0}

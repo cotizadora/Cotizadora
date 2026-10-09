@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<title>Historial de clientes · Seguro Dental</title>
+<link rel="icon" href="icons/icon48.png">
+<link rel="stylesheet" href="historial.css">
+</head>
+<body class="f-grande">
+
+<header class="barra">
+  <div class="titulo">📊 Historial de clientes <span class="sub">Seguro Dental Modular Bci</span></div>
+  <span class="cuenta" id="cuenta"></span>
+  <div class="barra-der">
+    <div class="grupo" role="group" aria-label="Tamaño de letra">
+      <button type="button" data-f="normal" title="Letra normal">A</button>
+      <button type="button" data-f="grande" class="on" title="Letra grande">A+</button>
+      <button type="button" data-f="xl" title="Letra muy grande">A++</button>
+    </div>
+    <button type="button" id="tema" title="Cambiar entre tema claro y oscuro">🌙 Tema oscuro</button>
+  </div>
+</header>
+
+<div class="herramientas">
+  <button type="button" id="bExportar" title="Toda la base en un archivo de respaldo (.json)">📤 Exportar base</button>
+  <button type="button" id="bImportar" title="Agregar registros desde un respaldo (.json) o una planilla (.csv). No borra nada.">📥 Importar</button>
+  <button type="button" id="bRespaldos" title="Respaldos automáticos, puntos de restauración y archivo diario">🗄 Respaldos</button>
+  <button type="button" id="bExcel" title="La vista actual a Excel (.xls)">📗 A Excel</button>
+  <button type="button" id="bCsv" title="La vista actual a CSV">📄 CSV</button>
+  <button type="button" id="bDuplicados" title="Una fila por cliente (mismo RUT): conserva la más reciente y oculta las otras (reversible)">🧹 Eliminar duplicados</button>
+  <span class="sep"></span>
+  <div class="buscar"><input type="search" id="buscar" placeholder="🔎 Buscar nombre, RUT, fono, correo, comuna…" autocomplete="off"></div>
+  <select id="fEstado" title="Filtrar por tipificación"><option value="">Todas las tipificaciones</option></select>
+  <select id="fAgenda" title="Filtrar por agenda">
+    <option value="">Toda la agenda</option>
+    <option value="hoy">Agendados para hoy</option>
+    <option value="vencidos">Agenda vencida</option>
+    <option value="con">Con agenda</option>
+  </select>
+  <label class="chk"><input type="checkbox" id="fFav"> ★ Favoritos</label>
+  <label class="chk"><input type="checkbox" id="fElim"> Eliminados</label>
+  <input type="file" id="archivo" accept=".json,.csv,application/json,text/csv" hidden>
+</div>
+
+<div class="formula">
+  <span class="caja-nombre" id="celdaRef">—</span>
+  <span class="fx">ƒx</span>
+  <span class="formula-val" id="celdaVal"></span>
+</div>
+
+<div class="masiva" id="masiva" hidden>
+  <span id="masivaCuenta"></span>
+  <select id="masivaEstado"><option value="">Cambiar tipificación…</option></select>
+  <button type="button" id="masivaExcel">📗 Exportar selección</button>
+  <button type="button" id="masivaEliminar" class="peligro">🗑 Eliminar</button>
+  <button type="button" id="masivaRestaurar">♻ Restaurar</button>
+  <button type="button" id="masivaQuitar" title="Quitar selección (Esc)">✕</button>
+</div>
+
+<main class="cuerpo">
+  <div class="tabla-caja" id="tablaCaja"><table id="tabla"></table></div>
+  <div class="vacio" id="vacio" hidden>
+    Aún no hay clientes en el historial. Cada lead que cae en Vicidial se registra solo,
+    con la extensión instalada y la pantalla de agente abierta.
+  </div>
+</main>
+
+<div class="menu-fila" id="menuFila"></div>
+<div class="toast" id="toast"></div>
+
+<!-- Ventanas -->
+<div class="modal" id="mEditar"><div class="caja ancha">
+  <div class="cab"><h3 id="mEditarTit">✎ Editar datos</h3><button class="x" data-cerrar>✕</button></div>
+  <div class="cont" id="mEditarCuerpo"></div>
+  <div class="pie"><button data-cerrar>Cancelar</button><button class="prim" id="mEditarGuardar">💾 Guardar cambios</button></div>
+</div></div>
+
+<div class="modal" id="mHist"><div class="caja ancha">
+  <div class="cab"><h3 id="mHistTit">🕘 Historial</h3><button class="x" data-cerrar>✕</button></div>
+  <div class="cont" id="mHistCuerpo"></div>
+</div></div>
+
+<div class="modal" id="mAgenda"><div class="caja">
+  <div class="cab"><h3 id="mAgendaTit">📅 Agendar</h3><button class="x" data-cerrar>✕</button></div>
+  <div class="cont">
+    <div class="filas2">
+      <label>Fecha <input type="date" id="agFecha"></label>
+      <label>Hora <input type="time" id="agHora" value="10:00"></label>
+    </div>
+    <p class="nota">Al agendar, la tipificación pasa a <b>Agendado</b>. Al quitar la agenda vuelve a la que tenía.</p>
+  </div>
+  <div class="pie"><button id="agQuitar" class="peligro">Quitar agenda</button><button data-cerrar>Cancelar</button><button class="prim" id="agGuardar">📅 Agendar</button></div>
+</div></div>
+
+<div class="modal" id="mObs"><div class="caja">
+  <div class="cab"><h3 id="mObsTit">📝 Observación</h3><button class="x" data-cerrar>✕</button></div>
+  <div class="cont"><textarea id="obsTexto" rows="8"></textarea></div>
+  <div class="pie"><button data-cerrar>Cancelar</button><button class="prim" id="obsGuardar">💾 Guardar</button></div>
+</div></div>
+
+<div class="modal" id="mConfirmar"><div class="caja">
+  <div class="cab"><h3 id="mConfTit">Confirmar</h3><button class="x" data-cerrar>✕</button></div>
+  <div class="cont"><p id="mConfTexto"></p></div>
+  <div class="pie"><button data-cerrar>Cancelar</button><button class="prim" id="mConfOk">Aceptar</button></div>
+</div></div>
+
+<div class="modal" id="mRespaldos"><div class="caja ancha">
+  <div class="cab"><h3>🗄 Respaldos</h3><button class="x" data-cerrar>✕</button></div>
+  <div class="cont">
+    <div class="cfg">
+      <label class="chk"><input type="checkbox" id="rAuto"> Respaldo automático activado</label>
+      <label>Punto de restauración cada <input type="number" id="rCada" min="1" step="1"> horas</label>
+      <label>Conservar los últimos <input type="number" id="rMax" min="1" step="1"> puntos</label>
+      <label class="chk"><input type="checkbox" id="rArchivo"> Archivo diario en Descargas/DENTAL-respaldos</label>
+      <button id="rGuardarCfg">Guardar configuración</button>
+    </div>
+    <p class="nota" id="rUltimo"></p>
+    <p class="nota">Los respaldos se hacen solos aunque no tengas nada abierto (el navegador tiene que estar
+      abierto). Cada uno guarda la base completa. El archivo diario queda en tu carpeta de Descargas y
+      sobrevive aunque se borre o reinstale la extensión: para recuperarlo usa <b>📥 Importar</b>.</p>
+    <div class="acciones"><button class="prim" id="rCrear">＋ Crear punto ahora</button><button id="rArchivoAhora">⬇ Guardar archivo ahora</button></div>
+    <div id="rLista" class="lista-resp"></div>
+  </div>
+</div></div>
+
+<script src="historial-db.js"></script>
+<script src="historial.js"></script>
+</body>
+</html>

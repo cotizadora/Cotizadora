@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>ShortCut-Vicidial-GO</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  /* height:auto => el popup anclado se ajusta al contenido real (no se estira) */
+  html, body { height: auto; }
+  body { margin: 0; width: 300px; font: 13px/1.4 system-ui, "Segoe UI", Arial, sans-serif; background: #fff; color: #111; }
+  body.aswindow { width: auto; min-height: 100vh; }   /* como ventana sí llena */
+  header { background: #0d3b66; color: #fff; padding: 6px 10px; }
+  header b { font-size: 12px; }
+  header small { display: block; font-weight: 400; opacity: .8; font-size: 10px; margin-top: 1px; }
+  #body { padding: 7px 10px; }
+  h4 { margin: 7px 0 3px; font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: #6b7787; }
+
+  /* Lista ADAPTABLE: crece/encoge con la cantidad de atajos. SIN scroll:
+     todos los atajos siempre visibles, nunca hay que desplazarse. */
+  #list { overflow: visible; }
+
+  /* Filas de atajo con efecto CRISTAL (glassmorphism). El fondo indica el sitio
+     (Vicidial = celeste) o, en el CRM, contacto (verde) / no contacto (rojo),
+     para elegir de un vistazo. */
+  .sc { position: relative; display: flex; align-items: center; gap: 3px; margin: 2px 0; padding: 2px 5px 2px 8px;
+        border: 1px solid rgba(203,214,228,.85); border-radius: 8px;
+        background: linear-gradient(135deg, rgba(246,248,252,.75), rgba(228,235,245,.45));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 1px 2px rgba(20,40,80,.06);
+        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        cursor: grab; touch-action: none;
+        transition: box-shadow .2s ease, transform .18s cubic-bezier(.2,.8,.2,1), border-color .2s ease; }
+  /* Arrastrando: la fila se eleva y sigue al cursor (sin transición para no ir
+     con retraso); las demás se apartan con la animación de .sc. */
+  .sc.dragging { transition: none; cursor: grabbing; z-index: 5; opacity: .97;
+        box-shadow: 0 8px 22px rgba(20,40,80,.30); border-color: rgba(120,140,170,.9); }
+  body.dragging-active { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+  body.dragging-active .sc:hover { animation: none; }   /* sin neón mientras se arrastra */
+
+  /* Fondos de color (cristal translúcido) */
+  /* Vicidial: AZUL claro y definido (no cian), para no parecerse al verde. */
+  .sc.site-vocal { border-color: rgba(59,130,246,.65);
+        background: linear-gradient(135deg, rgba(191,219,254,.88), rgba(96,165,250,.46)); }
+  /* CRM contacto: VERDE "pasto" (más cálido), claramente distinto del azul. */
+  .sc.color-green { border-color: rgba(60,170,60,.68);
+        background: linear-gradient(135deg, rgba(200,244,170,.90), rgba(120,200,70,.48)); }
+  .sc.color-red { border-color: rgba(231,90,76,.6);
+        background: linear-gradient(135deg, rgba(254,205,205,.84), rgba(240,120,110,.34)); }
+
+  /* NEÓN al pasar el mouse: brillo animado del color de la fila + leve realce. */
+  @keyframes neonpulse {
+    0%,100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 0 6px 1px var(--neon), 0 0 12px 2px var(--neon2); }
+    50%     { box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 0 13px 3px var(--neon), 0 0 24px 6px var(--neon2); }
+  }
+  .sc:hover { transform: translateY(-1px); animation: neonpulse 1.1s ease-in-out infinite;
+        --neon: rgba(120,140,170,.7); --neon2: rgba(120,140,170,.32); }
+  .sc.site-vocal:hover { --neon: rgba(59,130,246,.92); --neon2: rgba(59,130,246,.45); border-color: rgba(59,130,246,.98); }
+  .sc.color-green:hover { --neon: rgba(101,199,70,.95); --neon2: rgba(101,199,70,.45); border-color: rgba(101,199,70,.98); }
+  .sc.color-red:hover   { --neon: rgba(248,113,113,.92); --neon2: rgba(248,113,113,.45); border-color: rgba(248,113,113,.98); }
+
+  .sc.on { background: linear-gradient(135deg, rgba(18,161,80,.95), rgba(14,138,68,.95)); border-color: #0e8a44; color: #fff; }
+  /* Una sola línea: si no cabe, se recorta con “…” (el nombre completo va en el tooltip) */
+  .sc .lbl { flex: 1; min-width: 0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc .lbl input { width: 100%; font: inherit; padding: 1px 3px; border: 1px solid #9ab; border-radius: 4px; }
+  .sc .mini { font-size: 10px; opacity: .65; }
+  .sc button { border: none; background: transparent; cursor: pointer; font-size: 11px; padding: 0 2px; color: inherit; opacity: .85; line-height: 1.1; }
+  .sc button:hover { opacity: 1; }
+  .sc .play { font-size: 13px; padding: 0 3px; }
+  /* Eliminar = X roja bien visible. Sobre un atajo en cola (fila verde) la
+     pintamos blanca para que igual se vea. */
+  .sc .del { color: #c0392b; font-weight: 700; font-size: 13px; opacity: 1; }
+  .sc.on .del { color: #fff; }
+  /* Selector de color (solo CRM), visible SOLO al editar. Cambia el FONDO de la
+     fila; no ocupa espacio en el uso diario. */
+  .colorpick { display: inline-flex; gap: 3px; margin-left: 4px; flex: none; }
+  .cchip { font-size: 10px; line-height: 1; padding: 2px 6px; border-radius: 6px;
+           border: 1px solid rgba(20,40,80,.18); cursor: pointer; color: #2a3442; }
+  .cchip.cc-green { background: rgba(74,190,130,.40); }
+  .cchip.cc-red   { background: rgba(240,120,110,.42); }
+  .cchip.cc-none  { background: #eef1f6; }
+  .cchip.on { outline: 2px solid #0d3b66; outline-offset: 0; font-weight: 700; }
+
+  .btn { display: block; width: 100%; padding: 6px; border: 1px solid #cfd6e4; border-radius: 7px;
+         background: #fff; cursor: pointer; font-size: 12px; margin-top: 5px; }
+  .btn:hover { background: #f0f3f9; }
+  .btn.primary { background: #0d3b66; color: #fff; border-color: #0d3b66; }
+  .btn.primary:hover { background: #12508c; }
+  .btn.rec { background: #c0392b; color: #fff; border-color: #a93226; }
+  .row { display: flex; gap: 5px; }
+  .row .btn { margin-top: 5px; }
+  input.txt { width: 100%; padding: 6px; border: 1px solid #cfd6e4; border-radius: 7px; font-size: 12px; }
+
+  /* min-height:0 => no reserva espacio cuando está vacío */
+  #arminfo { margin-top: 4px; font-size: 11px; color: #555; min-height: 0; }
+  #arminfo:empty { margin: 0; }
+  #vivo { margin: 3px 0 0; font: 10.5px/1.35 ui-monospace, Consolas, monospace; color: #3d4f6e; white-space: pre-wrap; word-break: break-word; background: rgba(11,44,138,.06); border-radius: 6px; padding: 4px 6px; }
+  #vivo:empty { display: none; }
+  .chips-nombre { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .chip-nombre { font: inherit; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; border: 1px solid #9dbbe6; background: #eff5fd; color: #123a6d; cursor: pointer; }
+  .chip-nombre:hover { background: #dde9fa; }
+  #arminfo.fallo { color: #a33; background: #fdecea; border-radius: 6px; padding: 5px 7px; }
+  #bg:empty { display: none; margin: 0; }
+  .warn { background: #fff7e0; border: 1px solid #f0d38a; border-radius: 8px; padding: 9px; font-size: 12px; }
+  .warn b { color: #8a5a00; }
+
+  #recbox { display: none; margin: 4px 0 6px; padding: 8px; border-radius: 7px; border: 2px solid transparent; }
+  /* Grabando: fondo y MARCO rojo que PARPADEA, como una grabadora encendida. */
+  #recbox.recording { display: block; background: #fdecea; border-color: #c0392b; animation: recpulse 1s ease-in-out infinite; }
+  /* Nombrando: fondo azul; el marco "late" para llamar la atención a poner nombre. */
+  #recbox.naming { display: block; background: #e8f5ff; border-color: #0d3b66; animation: namepulse 1.2s ease-in-out infinite; }
+  @keyframes recpulse {
+    0%, 100% { border-color: #e6a89f; box-shadow: 0 0 0 0 rgba(192,57,43,0); }
+    50%      { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,.28); }
+  }
+  @keyframes namepulse {
+    0%, 100% { border-color: #9ecbe8; box-shadow: 0 0 0 0 rgba(13,59,102,0); }
+    50%      { border-color: #0d3b66; box-shadow: 0 0 0 3px rgba(13,59,102,.22); }
+  }
+  @keyframes blinkdot { 0%, 100% { opacity: 1; } 50% { opacity: .1; } }
+  .recdot { color: #c0392b; font-size: 14px; animation: blinkdot 1s steps(1, end) infinite; }
+  #rectitle { font-weight: 700; color: #a93226; font-size: 13px; letter-spacing: .3px; }
+  #reccount { font-size: 20px; font-weight: 700; }
+  /* Nombre obligatorio: input marcado y botón guardar en verde para invitar a guardar. */
+  #recbox.naming #name { border: 2px solid #0d3b66; }
+  #recbox.naming #save { background: #12a150; border-color: #0e8a44; }
+  .hintline { font-size: 10px; line-height: 1.35; color: #6b7787; margin-top: 4px; }
+
+  details { margin-top: 7px; border-top: 1px solid #e4e9f1; padding-top: 5px; }
+  /* Mi usuario y clave de GO (para los atajos compartidos) */
+  #credBox summary b { color: #0d3b66; }
+  #credBox .cred-campos { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 4px 6px; align-items: center; margin-top: 5px; font-size: 11px; }
+  #credBox input { font: inherit; font-size: 12px; padding: 4px 6px; border: 1px solid #b9c6d8; border-radius: 6px; min-width: 0; width: 100%; }
+  #credBox .cred-fila { display: flex; gap: 6px; margin-top: 6px; }
+  #credBox .cred-estado { font-size: 10.5px; margin-top: 4px; color: #6b7787; }
+  #credBox .cred-estado.ok { color: #12753f; font-weight: 600; }
+  #credBox.falta { border-top: 2px solid #f0a020; }
+  #credBox.falta summary b { color: #a35b00; }
+  summary { cursor: pointer; font-size: 11px; font-weight: 600; color: #33465c; }
+  /* Firma del desarrollador + soporte por WhatsApp */
+  #devfoot { margin-top: 8px; border-top: 1px solid #e4e9f1; padding-top: 6px;
+             text-align: center; font-size: 10px; color: #6b7787; line-height: 1.6; }
+  #devfoot a { display: inline-block; margin-top: 2px; color: #128c4b; font-weight: 600; text-decoration: none; }
+  #devfoot a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <header>
+    <b>⚡ ShortCut-Vicidial-GO <span id="ver"></span></b>
+    <small>Toca ▶ y se ejecuta (o en cuanto se pueda)</small>
+  </header>
+  <div id="body">
+    <div id="motor" class="warn" style="margin-bottom:6px" hidden></div>
+
+    <!-- Grabación: caja ÚNICA, arriba de todo. Mientras grabas, el marco parpadea
+         (tipo grabadora). Al detener, pide un nombre OBLIGATORIO para guardar.
+         Antes había otra caja igual dentro de Configuración: se eliminó para no
+         duplicar el botón de detener. -->
+    <div id="recbox">
+      <div id="rec-recording">
+        <div id="rectitle"><span class="recdot">●</span> GRABANDO… <span id="reccount">0</span> clic(s)</div>
+        <div id="reccap" class="hintline"></div>
+        <div class="hintline">Haz los clics reales de la secuencia. Al terminar, pulsa Detener.</div>
+        <button id="stop" class="btn rec">■ Detener grabación</button>
+        <button id="cancel1" class="btn">✖ Cancelar</button>
+      </div>
+      <div id="rec-naming" style="display:none">
+        <div id="nameok"><b>Grabados <span id="namecount">0</span> clic(s)</b> en
+          <b><span id="namesite">—</span></b>. Escríbele un nombre para guardarlo:</div>
+        <div id="namewarn" class="warn" style="display:none"></div>
+        <input id="name" class="txt" style="margin-top:6px" placeholder="Ej: Correo, No contacto…" autocomplete="off">
+        <div class="chips-nombre" title="Nombres que usan los botones 1 y 2 del Cotizador Dental">
+          <button type="button" class="chip-nombre" data-nombre="LOGUEO GO">1 · LOGUEO GO</button>
+          <button type="button" class="chip-nombre" data-nombre="EVALUAR MEDIO DE PAGO">2 · EVALUAR MEDIO DE PAGO</button>
+        </div>
+        <div class="row">
+          <button id="save" class="btn primary">💾 Guardar atajo</button>
+          <button id="cancel2" class="btn">✖ Descartar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== USO DIARIO: solo los atajos ===== -->
+    <div id="list"></div>
+    <div id="arminfo"></div>
+    <pre id="vivo"></pre>
+
+    <!-- ===== MI USUARIO Y CLAVE DE GO (atajos compartidos) ===== -->
+    <details id="credBox">
+      <summary><b>🔑 Mi usuario y clave de GO</b> <span id="credResumen"></span></summary>
+      <div class="hintline">Los atajos los escriben solos al entrar a GO. Quedan guardados ocultos y sólo en este computador.</div>
+      <form id="credForm" autocomplete="off">
+        <div class="cred-campos">
+          <label for="credUsuario">Usuario</label><input id="credUsuario" type="text" autocomplete="off" spellcheck="false">
+          <label for="credClave">Clave</label><input id="credClave" type="password" autocomplete="new-password" placeholder="">
+        </div>
+        <div class="cred-fila">
+          <button id="credGuardar" class="btn primary" type="submit">💾 Guardar</button>
+          <button id="credBorrar" class="btn" type="button">🗑 Borrar</button>
+        </div>
+      </form>
+      <div id="credEstado" class="cred-estado"></div>
+    </details>
+
+    <!-- ===== ADMINISTRACIÓN ===== -->
+    <details id="cfg">
+      <summary>⚙️ Configuración</summary>
+
+      <h4>Agregar atajo</h4>
+      <button id="rec" class="btn rec">⏺ Grabar nuevo atajo</button>
+
+      <h4>Respaldo / distribución</h4>
+      <div class="row">
+        <button id="export" class="btn">⬇ Exportar</button>
+        <button id="import" class="btn">⬆ Importar</button>
+      </div>
+      <div class="row">
+        <button id="compartir" class="btn" title="Guarda tus atajos SIN tu usuario ni tu clave, para que las compañeras los tengan instalados">📦 Atajos para compañeras</button>
+      </div>
+      <div class="row">
+        <button id="copylog" class="btn" title="Copia el registro del motor para enviarlo por WhatsApp si algo falla">📋 Copiar registro</button>
+      </div>
+      <input type="file" id="file" accept="application/json,.json" style="display:none">
+    </details>
+
+    <div id="cliRut" class="hintline" title="Se usa en los pasos RUT del cliente de GO"></div>
+    <div id="status" class="hintline"></div>
+
+    <!-- Firma del desarrollador + soporte -->
+    <div id="devfoot">
+      Desarrollado por <b>Eduardo Pérez</b><br>
+      <a href="https://wa.me/56927690949?text=Hola%20Eduardo%2C%20necesito%20ayuda%20con%20la%20extensi%C3%B3n%20ShortCut-Vicidial-GO" target="_blank" rel="noopener">📱 ¿Necesitas ayuda? Escríbeme por WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- Cuadro de confirmación PROPIO (dentro de la ventana; el confirm() nativo
+       se corta en ventanas pequeñas). -->
+  <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
+       z-index:99999;align-items:center;justify-content:center;padding:14px">
+    <div style="background:#fff;color:#111;border:1px solid #cfd6e4;border-radius:10px;
+         padding:14px;max-width:280px;width:100%">
+      <div id="modal-msg" style="font-size:13px;margin-bottom:12px"></div>
+      <div class="row" style="margin-top:0">
+        <button id="modal-yes" class="btn primary">Sí</button>
+        <button id="modal-no" class="btn">No</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="control.js"></script>
+</body>
+</html>

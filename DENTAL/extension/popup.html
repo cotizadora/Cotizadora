@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<title>Cotizador Dental Bci</title>
+<link rel="icon" href="icons/icon48.png">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body class="ext">
+<div class="app abierto sin-anim" id="app">
+
+  <div class="izq">
+    <div class="uf">
+      <span class="uf-t">UF</span>
+      <span class="uf-v" id="ufVal">—</span>
+      <span class="uf-f" id="ufFecha"></span>
+      <span class="uf-ver" id="verExt"></span>
+      <button id="verHistorial" type="button" title="Historial de clientes (planilla)">&#128202;</button>
+      <button id="ufReload" type="button" title="Actualizar UF">&#8635;</button>
+    </div>
+    <div class="cliente" id="cliente" hidden></div>
+    <div class="tipif-cli" id="tipifCli" hidden>
+      <select id="tipifSel" title="Tipificación de esta llamada (queda en el Historial)"></select>
+      <input id="notaCli" type="text" placeholder="nota de la llamada…" title="Queda como observación en el Historial">
+    </div>
+    <div class="uf-manual" id="ufManualBox">
+      <label for="ufManual">Valor UF:</label>
+      <input id="ufManual" type="text" inputmode="decimal" placeholder="39454,17">
+    </div>
+
+    <div class="resumen" id="resumen">
+      <div class="res-cab">
+        <div class="res-plan" id="resPlan">Plan Urgencias</div>
+        <label class="check check-mini" for="tieneCargas" title="Tiene cargas (adicionales del titular)">
+          <input type="checkbox" id="tieneCargas">
+          <span>Tiene cargas</span>
+        </label>
+      </div>
+      <div class="res-linea">
+        <span class="res-compos" id="resCompos">titular solo</span>
+        <span class="res-uf" id="resUF">—</span>
+        <span class="res-clp" id="resCLP">—</span>
+      </div>
+    </div>
+
+    <div class="campo campo-cargas" id="campoCargas" hidden>
+      <div id="bloqueCargas" hidden>
+        <div class="conteo" id="conteo">
+          <span class="conteo-tit">Cargas</span>
+          <button type="button" data-n="1">1</button>
+          <button type="button" data-n="2">2</button>
+          <button type="button" data-n="3">3</button>
+        </div>
+        <p class="pista">Edad de cada carga. Escríbela o súbela con las flechas. Si consigues la fecha de nacimiento, escríbela y el cálculo se vuelve exacto.</p>
+        <div id="hijos"></div>
+      </div>
+    </div>
+
+    <div class="aviso" id="aviso"></div>
+
+    <div class="campo">
+      <label>Envío de la póliza</label>
+      <div class="conteo" id="envio">
+        <button type="button" data-envio="linea" class="on">En línea</button>
+        <button type="button" data-envio="link">Link de pago</button>
+      </div>
+      <p class="pista" id="envioPista">Tiene cuenta Bci: se carga la prima a su cuenta corriente.</p>
+    </div>
+
+    <table id="tabla">
+      <thead><tr><th>Plan &middot; clic en el nombre para el script</th><th class="n">UF</th><th class="n">Mensual</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <div class="verif">
+      <button type="button" id="abrirClin" class="abrir">
+        <span>&#9656;</span> Clínica por comuna
+      </button>
+      <div id="panelClin" hidden>
+        <div class="fila">
+          <input type="text" id="comuna" class="comuna" placeholder="escribe la comuna del cliente" autocomplete="off" spellcheck="false">
+        </div>
+        <div id="sugComunas"></div>
+        <div id="clinRes"></div>
+        <p class="capturado" id="lineaMapeo"><button type="button" class="link-carga" id="abrirMapeo">Mapeo completo de comunas</button></p>
+      </div>
+    </div>
+
+    <div class="guardado" id="guardado" hidden>
+      <span id="guardadoTxt">Datos guardados</span>
+      <button type="button" id="limpiar">Nuevo cliente</button>
+    </div>
+
+    <div class="total">
+      <div>
+        <span class="t-uf" id="tUF">—</span>
+        <span class="t-clp" id="tCLP"></span>
+      </div>
+      <button id="copiar" type="button">Copiar</button>
+    </div>
+    <div class="exacto" id="exacto"></div>
+    <label class="auto-abrir" id="lineaAutoAbrir"><input type="checkbox" id="autoAbrir" checked> Al entrar una llamada: ir a Vicidial y abrir el cotizador</label>
+  </div>
+
+  <aside class="guion" id="guion">
+    <div class="guion-cab">
+      <div>
+        <div class="guion-tit" id="guionTit">Script</div>
+        <div class="guion-sub" id="guionSub"></div>
+      </div>
+      <button type="button" id="cerrarGuion" title="Ocultar el script">&times;</button>
+    </div>
+    <div class="guion-barra">
+      <div class="gb-fila">
+        <div class="gb-grupo" title="Tamaño de la letra">
+          <button type="button" id="letraMenos" class="gb-ic" aria-label="Letra más chica" title="Letra más chica"><span class="a-chica">A</span><span class="a-flecha">&#8595;</span></button>
+          <button type="button" id="letraMas" class="gb-ic" aria-label="Letra más grande" title="Letra más grande"><span class="a-grande">A</span><span class="a-flecha">&#8593;</span></button>
+          <span id="letraTam" class="gb-val gb-mini">100%</span>
+        </div>
+        <div class="gb-grupo gb-tonos" id="contraste" title="Contraste">
+          <button type="button" data-c="normal" class="on tono t-normal" title="Normal" aria-label="Normal"></button>
+          <button type="button" data-c="negro" class="tono t-negro" title="Fondo negro" aria-label="Fondo negro"></button>
+          <button type="button" data-c="alto" class="tono t-alto" title="Alto contraste" aria-label="Alto contraste"></button>
+          <button type="button" data-c="sepia" class="tono t-sepia" title="Sepia" aria-label="Sepia"></button>
+        </div>
+        <div class="gb-grupo" title="Lectura guiada: avanza y retrocede con las flechas ↑ ↓">
+          <button type="button" id="guiada" class="on gb-ic" title="Lectura guiada (marca la frase que toca)" aria-label="Lectura guiada">&#182;</button>
+          <button type="button" id="pasoAnt" class="gb-ic" aria-label="Frase anterior">&#9650;</button>
+          <span id="pasoNum" class="gb-val">—</span>
+          <button type="button" id="pasoSig" class="gb-ic" aria-label="Frase siguiente">&#9660;</button>
+        </div>
+      </div>
+      <div class="atajos" id="atajos" hidden></div>
+    </div>
+    <div class="guion-cuerpo" id="guionCuerpo"></div>
+  </aside>
+
+</div>
+<script src="edental.js"></script>
+<script src="historial-db.js"></script>
+<script src="redes.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
