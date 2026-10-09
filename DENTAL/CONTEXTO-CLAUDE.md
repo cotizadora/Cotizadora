@@ -23,7 +23,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 - `DENTAL/COMPARTIR/Extensiones-Dental-Bci.zip`: carpeta `DENTAL/` con `extension/`, `ShortCut-Vicidial-GO/`, `INSTALAR.bat` y `COMO-INSTALAR.txt` (misma estructura que deja INSTALAR.bat, así después se actualizan con INSTALAR.bat + 🔄). Lleva los atajos de Eduardo (en `ShortCut-Vicidial-GO/default-config.json`) sin usuario ni clave; cada una escribe los suyos en el recuadro 🔑 del panel.
 - **Eduardo NO quiere actualizar sus extensiones** (las suyas funcionan "a full"): no pedirle que ejecute INSTALAR.bat (actualizaría su carpeta `Documentos\DENTAL`). Para publicar sus atajos: él aprieta **⬇ Exportar** en su versión actual (deja la clave en blanco, pero el usuario va) y manda `auto-atajos-config.json`; aquí se corre `python3 DENTAL/COMPARTIR/preparar.py <archivo>`, que quita usuario/clave (`credencial`), las consultas de las URL, escribe `default-config.json` (`publicado`, `autor:'eduardo'`) y rehace el zip. **Rehacer el zip cada vez que cambie la versión de una de las dos extensiones.**
 
-## 1. Cotizador Dental Bci (extensión) — v3.1.9
+## 1. Cotizador Dental Bci (extensión) — v3.2.0
 
 - **En mi PC:** `Documentos\DENTAL\extension`
 - **Paquete:** `DENTAL/extension-cotizador-dental.zip`
@@ -32,6 +32,7 @@ Pega este archivo al empezar una sesión nueva para que Claude sepa dónde queda
 Qué hace:
 - Popup en dos columnas: cotización a la izquierda y script de venta a la derecha, sin manija de ancho. Desde la v3.0.3 va dentro de un marco azul grisáceo con borde fino, esquinas redondeadas y sombra, para que no se pierda sobre el blanco de Vicidial. Desde la v3.0.4 cada módulo es una tarjeta redondeada con su color según jerarquía: cliente (azul), tipificación (menta), plan y cotización (blanco), clínicas (turquesa), guardado (arena), total (azul marino suave); las secciones del script también son tarjetas en contraste Normal. El scroll va dentro de cada columna: el popup no pasa de 800 × 600. Desde la v3.0.9 las cabeceras de las dos columnas son una sola franja azul de igual altura, sin línea divisoria ni barra de desplazamiento arriba, y ambas columnas comparten fondo. Desde la v3.1.1 la tarjeta del cliente queda fija bajo la cabecera al desplazar la columna izquierda.
 - **Dos botones fijos (v3.1.5):** en la tarjeta del cliente, "1 · Logueo GO" (fuerza el login) y "2 · Evaluar medio de pago" (usa GO abierto), visibles a la vez. Cada uno usa el atajo de ShortCut con su nombre (LOGUEO GO / EVALUAR MEDIO DE PAGO), si no uno parecido; con ✏️ se cambia el nombre del botón y el atajo (se guarda en `chrome.storage.local.prefGo`). Nunca usan el mismo atajo los dos. Reemplaza al 🚀 único de la v3.1.3.
+- **UF después del número (v3.2.0):** en el script se lee "0,26 UF" (antes "UF 0,26"), como pidió Eduardo.
 - **Cta_Cte en el script (v3.1.9):** el script mostraba [XXX] en el PC real. Ahora Cta_Cte se lee de la casilla (`cta_cte`, `ctacte`…) o, si Vicidial lo muestra sólo como texto, del texto de la pantalla ("Cta_Cte   573" → `__ctatexto`, en popup.js y vicidial-captura.js). `digitosCta()` (si viene el número completo, los últimos 3) reemplaza `[XXX]` ("terminada en los dígitos …") y `[N.º medio de pago]` ("cuenta corriente terminada en …"), y la tarjeta del cliente muestra "Cta. Cte. 573".
 - **Menos filas (v3.1.8):** los botones 1, 2 y ✏️ van en una sola fila (grid `auto 1fr auto`; el 2 se acorta con … sólo si no cabe). La casilla «Tiene cargas» va en la tarjeta del plan, a la derecha del nombre (`.res-cab`, `.check-mini`); la tarjeta de cargas (`#campoCargas`, con "Cargas 1 2 3", edades) sólo aparece con la casilla marcada.
 - **Partir limpio (v3.1.7):** los botones 1 y 2 mandan `ejecutarFlujo {id, forzarLogin, limpiar:true, rut}`: ShortCut cierra todas las pestañas de *.bciseguros.cl y abre una nueva. Casilla en ✏️ "Cerrar todas las pestañas de GO…" (marcada por defecto, `prefGo.limpiar`). El RUT se copia con respaldo `execCommand('copy')` si el portapapeles falla.
@@ -89,7 +90,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar ShortCut v1.4.0 y Cotizador v3.1.9 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
+1. Instalar ShortCut v1.4.0 y Cotizador v3.2.0 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.

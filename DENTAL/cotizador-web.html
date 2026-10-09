@@ -2146,7 +2146,7 @@ const GUION = [
     '<p class="nota">Sólo si el cliente se niega a tomar el Plan Full.</p>'+
     '<p>Como no queremos que se quede sin cobertura y lo tome por sorpresa un dolor en sus dientes, ofrecemos por sólo '+
     '<span class="dato">' + (d.clpBasico || '—') + '</span> aproximadamente mensuales, es decir, '+
-    '<span class="dato">UF ' + (d.ufBasico || '—') + '</span>, todas las urgencias dentales que ya le mencioné más '+
+    '<span class="dato">' + (d.ufBasico || '—') + ' UF</span>, todas las urgencias dentales que ya le mencioné más '+
     'tratamientos de prevención.</p>'; }},
 
   {t:"Plan niños", p:["ninos"], clase:"clave", html:function(d){ return ''+
@@ -2157,7 +2157,7 @@ const GUION = [
 
   {t:"El precio", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
     '<p>Lo más importante, don <em>[nombre]</em>, es que todas las coberturas, asistencias y beneficios mencionados tienen '+
-    'un costo de <span class="dato">UF ' + d.uf + '</span> fijas, que son <span class="dato">' + d.clp + '</span> aprox.</p>'+
+    'un costo de <span class="dato">' + d.uf + ' UF</span> fijas, que son <span class="dato">' + d.clp + '</span> aprox.</p>'+
     '<p>Serán cargados automáticamente en su cuenta Bci terminada en los dígitos <em>[XXX]</em>, recién en su próximo '+
     'estado de cuenta.</p>'+
     '<p class="nota">' + d.plan + ' · ' + d.compos + ' · calculado con la UF de hoy, $' + d.ufdia + '.</p>'+
@@ -2219,7 +2219,7 @@ const GUION = [
   {t:"Pregunta de contratación · textual", p:["basico","full","ninos"], clase:"clave", html:function(d){ return ''+
     '<p>Sr.(a) <em>[apellido]</em>, entonces con fecha <em>[DD/MM/AA]</em>, ¿acepta la contratación en forma voluntaria del '+
     '<strong>Seguro Dental Modular Bci</strong> con las coberturas detalladas anteriormente, con un valor mensual de '+
-    '<span class="dato">UF ' + d.uf + '</span> fijas, <span class="dato">' + d.clp + '</span> aprox., IVA incluido? ¿Acepta?</p>'+
+    '<span class="dato">' + d.uf + ' UF</span> fijas, <span class="dato">' + d.clp + '</span> aprox., IVA incluido? ¿Acepta?</p>'+
     '<p class="nota">La respuesta puede ser sí, acepto o de acuerdo. No se acepta ok, ya, correcto, etc.</p>'; }},
 
   {t:"Medio de pago · póliza en línea", p:["basico","full","ninos"], envio:"linea", clase:"clave", html:function(d){ return ''+
