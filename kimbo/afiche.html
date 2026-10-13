@@ -2779,7 +2779,7 @@ var qrcode = function() {
     var pr=prog(t,3.15,3.6); if(pr>0){ var sx=Math.max(eOutBack(pr,1.2),0.001); g.save(); g.translate(540,272); g.scale(sx,1); g.translate(-540,-272); put(SP.rib); g.restore(); }
     var pc=prog(t,3.45,3.8); if(pc>0){ g.globalAlpha=pc; put(SP.cinta); g.globalAlpha=1; }
     var pt=prog(t,4.4,4.95); if(pt>0){ var tkx=(1-eOutBack(pt,1.1))*-1150; g.drawImage(SP.tkt.c,SP.tkt.x+tkx,SP.tkt.y,SP.tkt.w,SP.tkt.h); }
-    var cy=(1-eOutBack(prog(t,.25,1.15),1.0))*1100;
+    var cy=(1-eOutBack(prog(t,.2,1.3),1.0))*1800;
     var ye=(1-eOutBack(prog(t,1.2,1.75),1.8))*520, ym=(1-eOutBack(prog(t,1.45,2.0),1.8))*560;
     var aE=prog(t,1.2,1.3), aM=prog(t,1.45,1.55);
     function pj(sp,dy,a){ if(a<=0) return; g.globalAlpha=a; g.drawImage(sp.c,sp.x,sp.y+dy,sp.w,sp.h); g.globalAlpha=1; }
