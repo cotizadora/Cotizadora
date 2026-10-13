@@ -5,7 +5,7 @@
    FORM de la campaña, que es un marco aparte) y, cuando cae un
    lead nuevo o se completan sus datos, se los pasa al service
    worker para que queden en el Historial. Sólo lee: no escribe
-   nada en Vicidial.
+   nada en Vicidial (salvo apagar el autocompletar, más abajo).
    ============================================================ */
 (function(){
   if(window.top !== window) return;       // sólo en la página principal; los marcos se leen desde aquí
@@ -72,6 +72,35 @@
   }
   setInterval(vigilarLlamada, 400);
   vigilarLlamada();
+})();
+
+/* ============================================================
+   SIN "GUARDAR DOCUMENTO DE IDENTIDAD"
+   Chrome ve el RUT del cliente en los campos de Vicidial y, con cada
+   llamada, ofrece guardarlo en Google Wallet. Aquí se le dice a Chrome
+   que esos formularios no se autocompletan ni se guardan
+   (autocomplete="off"). No cambia ningún dato ni lo que Vicidial envía.
+   Se repite cada pocos segundos porque Vicidial recarga sus marcos
+   (la pestaña FORM) con cada lead.
+   ============================================================ */
+(function(){
+  if(window.top !== window) return;
+  if(window.__sinAutocompletarVivo && window.__sinAutocompletarVivo()) return;
+  window.__sinAutocompletarVivo = function(){ try{ return !!chrome.runtime.id; }catch(e){ return false; } };
+  function apagar(doc){
+    if(!doc) return;
+    doc.querySelectorAll('form:not([autocomplete="off"])').forEach(function(f){ f.setAttribute("autocomplete", "off"); });
+    doc.querySelectorAll('input:not([autocomplete="off"]), textarea:not([autocomplete="off"])').forEach(function(e){
+      if(e.type === "password" || e.type === "hidden" || e.type === "button" || e.type === "submit") return;
+      e.setAttribute("autocomplete", "off");
+    });
+    doc.querySelectorAll("iframe, frame").forEach(function(f){
+      try{ apagar(f.contentDocument); }catch(e){}
+    });
+  }
+  function ciclo(){ try{ apagar(document); }catch(e){} }
+  setInterval(ciclo, 2000);
+  ciclo();
 })();
 
 /* ============================================================
