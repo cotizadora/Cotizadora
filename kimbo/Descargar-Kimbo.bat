@@ -34,7 +34,6 @@ echo ==========================================================
 echo   LISTO. Proyecto en:   %DEST%
 echo.
 echo   Abre el menu:         editor.html
-echo   Version con mas aire: editor-largo.html
 echo ==========================================================
 echo.
 echo Abriendo la carpeta...
