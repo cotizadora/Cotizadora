@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Montador Mala Difusión</title>
+<meta name="description" content="Montador de portadas, publicaciones, historias y videos de Mala Difusión para Facebook, YouTube, Instagram y otras redes.">
+<meta name="theme-color" content="#0e0c0b">
+<meta property="og:title" content="Montador Mala Difusión">
+<meta property="og:description" content="Composiciones del grupo para Facebook, YouTube e Instagram, con exportación PNG y MP4.">
+<meta property="og:image" content="https://cotizadora.github.io/Cotizadora/mala-difusion/og.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="loader" class="loader">
+  <img src="img/logo_horizontal.png" alt="Mala Difusión" class="loader-logo">
+  <div class="loader-bar"><i id="loaderFill"></i></div>
+  <p id="loaderText">Cargando imágenes…</p>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="img/logo_horizontal.png" alt="Mala Difusión">
+    <span>Montador</span>
+  </div>
+  <nav class="views" role="tablist">
+    <button data-view="editor" class="on">Editor</button>
+    <button data-view="compare">Comparar</button>
+    <button data-view="present">Presentar</button>
+  </nav>
+  <div class="top-actions">
+    <button id="btnUndo" class="ghost icon" title="Deshacer (Ctrl+Z)" aria-label="Deshacer">↶</button>
+    <button id="btnRedo" class="ghost icon" title="Rehacer (Ctrl+Y)" aria-label="Rehacer">↷</button>
+    <button id="btnQuickPng" class="primary">PNG</button>
+    <button id="btnQuickMp4" class="primary alt">MP4</button>
+  </div>
+</header>
+
+<main class="app" id="app">
+  <!-- Columna izquierda: diseños y formatos -->
+  <aside class="side left" id="sideLeft">
+    <section>
+      <h3>Diseños</h3>
+      <div id="designList" class="design-list"></div>
+    </section>
+    <section>
+      <h3>Formatos</h3>
+      <div id="formatList" class="format-list"></div>
+    </section>
+  </aside>
+
+  <!-- Centro: escenario -->
+  <section class="stage-wrap" id="stageWrap">
+    <div class="stage-info">
+      <div class="fmt-title"><b id="infoFmt">—</b><span id="infoDims">—</span></div>
+      <div class="stage-toggles">
+        <label class="chk"><input type="checkbox" id="tglSafe" checked> Zonas seguras</label>
+        <label class="chk"><input type="checkbox" id="tglGuides" checked> Guías</label>
+        <span id="infoQuality" class="badge">—</span>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <canvas id="view" tabindex="0" aria-label="Vista previa de la composición"></canvas>
+      <div id="viewEmpty" class="view-empty" hidden></div>
+    </div>
+    <div class="transport">
+      <button id="btnPlay" class="ghost icon" aria-label="Reproducir">▶</button>
+      <button id="btnRestart" class="ghost icon" aria-label="Reiniciar">⟲</button>
+      <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Línea de tiempo">
+      <span id="timeLbl" class="time">0,0 / 8,0 s</span>
+      <select id="quickAnim" aria-label="Animación"></select>
+    </div>
+    <!-- Vista comparar -->
+    <div class="compare" id="compareView" hidden>
+      <div class="compare-bar">
+        <div class="seg" id="cmpMode">
+          <button data-m="designs" class="on">Diseños en este formato</button>
+          <button data-m="formats">Formatos de este diseño</button>
+          <button data-m="ab">A / B</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="cmpAnimate"> Animar</label>
+        <button id="btnSheet" class="ghost">Lámina comparativa PNG</button>
+      </div>
+      <div id="cmpGrid" class="cmp-grid"></div>
+    </div>
+  </section>
+
+  <!-- Columna derecha: paneles -->
+  <aside class="side right" id="sideRight">
+    <div class="tabs" role="tablist">
+      <button data-tab="elementos" class="on">Elementos</button>
+      <button data-tab="estilo">Estilo</button>
+      <button data-tab="animacion">Animación</button>
+      <button data-tab="exportar">Exportar</button>
+    </div>
+    <div class="tab-body" data-body="elementos">
+      <section>
+        <h3>Integrantes</h3>
+        <div id="memberList" class="member-list"></div>
+      </section>
+      <section>
+        <h3>Distribución del grupo <small>(este diseño, todos los formatos)</small></h3>
+        <div id="layoutCtrls"></div>
+        <div class="row-btns">
+          <button id="btnRelayout" class="ghost">Redistribuir este formato</button>
+          <button id="btnResetComp" class="ghost danger">Restaurar composición</button>
+        </div>
+      </section>
+      <section>
+        <h3>Elemento seleccionado</h3>
+        <div id="inspector" class="inspector"><p class="hint">Toca o haz clic sobre un personaje o el logo en la vista previa.</p></div>
+      </section>
+    </div>
+    <div class="tab-body" data-body="estilo" hidden>
+      <section><h3>Fondo</h3><div id="bgCtrls"></div></section>
+      <section><h3>Luz y profundidad</h3><div id="lightCtrls"></div></section>
+      <section><h3>Personajes</h3><div id="charCtrls"></div></section>
+      <div class="row-btns"><button id="btnResetStyle" class="ghost danger">Restaurar estilo del diseño</button></div>
+    </div>
+    <div class="tab-body" data-body="animacion" hidden>
+      <section><h3>Tipo de animación</h3><div id="animGrid" class="anim-grid"></div></section>
+      <section><h3>Ajustes</h3><div id="animCtrls"></div></section>
+    </div>
+    <div class="tab-body" data-body="exportar" hidden>
+      <section>
+        <h3>PNG</h3>
+        <div id="pngCtrls"></div>
+        <div id="pngInfo" class="export-info"></div>
+        <div class="col-btns">
+          <button id="btnPng" class="primary">Exportar PNG</button>
+          <button id="btnZipFormats" class="ghost">PNG de todos los formatos (ZIP)</button>
+          <button id="btnZipDesigns" class="ghost">PNG de todos los diseños (ZIP)</button>
+        </div>
+      </section>
+      <section>
+        <h3>Video MP4</h3>
+        <div id="mp4Ctrls"></div>
+        <div id="mp4Info" class="export-info"></div>
+        <div class="col-btns"><button id="btnMp4" class="primary alt">Exportar MP4</button></div>
+        <p class="hint" id="codecSupport"></p>
+      </section>
+    </div>
+  </aside>
+</main>
+
+<!-- Barra móvil -->
+<nav class="mobile-bar" id="mobileBar">
+  <button data-panel="sideLeft">Diseños</button>
+  <button data-panel="elementos">Elementos</button>
+  <button data-panel="estilo">Estilo</button>
+  <button data-panel="animacion">Animar</button>
+  <button data-panel="exportar">Exportar</button>
+</nav>
+
+<!-- Presentación -->
+<div class="present" id="present" hidden>
+  <canvas id="presentCanvas"></canvas>
+  <div class="present-ui">
+    <button id="presPrev" class="ghost icon" aria-label="Anterior">‹</button>
+    <span id="presLbl"></span>
+    <button id="presNext" class="ghost icon" aria-label="Siguiente">›</button>
+    <label class="chk"><input type="checkbox" id="presAuto" checked> Automático</label>
+    <button id="presClose" class="ghost">Salir (Esc)</button>
+  </div>
+</div>
+
+<!-- Progreso / resultados -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-card">
+    <h3 id="modalTitle">Exportando…</h3>
+    <p id="modalText"></p>
+    <div class="progress"><i id="modalBar"></i></div>
+    <div id="modalResult"></div>
+    <div class="row-btns end">
+      <button id="modalCancel" class="ghost">Cancelar</button>
+      <button id="modalClose" class="primary" hidden>Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="fileInput" accept="image/png,image/webp,image/jpeg" hidden>
+
+<script src="vendor/mp4-muxer.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
