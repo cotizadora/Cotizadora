@@ -729,7 +729,9 @@ const GUION = [
 
   {t:"Después del pago", p:["basico","full","ninos"], html:function(d){ return ''+
     '<p>Lo invitamos a siempre estar al día en el pago de su prima mensual, para así poder utilizar su cobertura cuando la necesite.</p>'+
-    '<p>Haremos llegar a su correo electrónico dentro de unos minutos (cuando registre su medio de pago) su póliza de seguro '+
+    // "(cuando registre su medio de pago)" sólo con link de pago: en línea se
+    // descuenta de su misma cuenta Bci y no registra nada.
+    '<p>Haremos llegar a su correo electrónico dentro de unos minutos' + (envio === "link" ? ' (cuando registre su medio de pago)' : '') + ' su póliza de seguro '+
     'y todas las comunicaciones relativas a esta.</p>'; }},
 
   {t:"Cierre normativo", p:["basico","full","ninos"], html:function(d){ return ''+
