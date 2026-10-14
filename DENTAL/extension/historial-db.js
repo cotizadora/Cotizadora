@@ -70,7 +70,11 @@ function clienteDesdeCampos(f, agente){
     comuna: val("comuna", "province"),
     ciudad: val("ciudad", "city"),
     region: val("region", "state"),
-    email: val("email"),
+    // El primer correo VÁLIDO de la pantalla (el escrito a mano en Vicidial
+    // gana a uno vacío o de relleno del FORM); si no hay, lo que diga "email".
+    email: (String(f.__emails || "").split("|").filter(Boolean)[0]) || (/@/.test(val("email")) ? val("email") : ""),
+    // Código de verificación de la operación, si Vicidial lo trae
+    codigo: val("__codigo"),
     genero: (val("sexo", "gender").charAt(0) || "").toUpperCase(),
     apellidoPat: val("apellido_pat") || val("last_name").split(" ")[0] || "",
     direccion: val("direccion", "address1"),

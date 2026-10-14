@@ -23,11 +23,22 @@
       if(!k || e.type === "password" || e.type === "button" || e.type === "submit") return;
       const v = String(e.value || "").trim();
       if(v && !campos[k]) campos[k] = v;
+      // Correos válidos (el escrito a mano primero) y código de verificación:
+      // misma regla que la lectura del cotizador (lecturaVicidial en popup.js)
+      if(/mail|correo/.test(k) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){
+        const l = (campos.__emails ? campos.__emails.split("|") : []);
+        if(l.indexOf(v.toLowerCase()) < 0){ l.push(v.toLowerCase()); campos.__emails = l.join("|"); }
+      }
+      if(!campos.__codigo && /valid|verif|cod(igo)?[\s_.-]*(de[\s_.-]*)?(op|oper|venta|val|verif)|id[\s_.-]*venta|folio|n[\s_.ºo-]*operaci/i.test(k) &&
+         !/phone_code|dial|dtmf|postal|conf_|xfer|override|search/i.test(k) && v && v !== "0" && v.length >= 3 && /\d/.test(v)) campos.__codigo = v;
     });
-    // Cta_Cte mostrado como texto (sin casilla)
+    // Cta_Cte mostrado como texto (sin casilla) y código de verificación escrito en pantalla
     try{
-      const m = ((doc.body && doc.body.innerText) || "").match(/(?:^|[^a-z_])cta[\s_.-]*cte\.?\s*:?\s*(\d[\d .-]{0,24})/i);
+      const txt = (doc.body && doc.body.innerText) || "";
+      const m = txt.match(/(?:^|[^a-z_])cta[\s_.-]*cte\.?\s*:?\s*(\d[\d .-]{0,24})/i);
       if(m && m[1].replace(/\D/g, "") && !campos.__ctatexto) campos.__ctatexto = m[1].replace(/\D/g, "");
+      const c = txt.match(/c[oó]d(?:igo|\.)?\s*(?:de\s*)?(?:validaci[oó]n|verificaci[oó]n|operaci[oó]n|venta)\s*[:#]?\s*([A-Z0-9-]*\d[A-Z0-9-]*)/i);
+      if(c && !campos.__codigo && c[1].replace(/-/g, "").length >= 4) campos.__codigo = c[1];
     }catch(e){}
     // Marcos del mismo sitio (la pestaña FORM es uno)
     doc.querySelectorAll("iframe, frame").forEach(function(f){
@@ -46,7 +57,8 @@
     const lead = campos.lead_id || "";
     if(!lead) return;
     const clave = [lead, campos.nombres || campos.first_name || "", campos.rut || campos.vendor_lead_code || "",
-                   campos.fono1 || campos.phone_number || "", campos.email || "", campos.comuna || campos.province || "",
+                   campos.fono1 || campos.phone_number || "", campos.email || "", campos.__emails || "", campos.__codigo || "", campos.__ctatexto || "",
+                   campos.comuna || campos.province || "",
                    campos.fec_nac1 || "", campos.fec_nac2 || "", campos.fec_nac3 || ""].join("|");
     if(clave === ultimo) return;
     // Esperar a que el lead tenga al menos nombre o RUT (el FORM carga después)

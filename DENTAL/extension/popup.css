@@ -109,14 +109,7 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 .uf{display:flex;position:sticky;top:0;z-index:3;align-items:center;gap:7px;background:#123a6d;color:#fff;padding:7px 10px}
 .uf-t{font-size:10px;letter-spacing:.09em;font-weight:700;opacity:.8}
 .uf-v{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
-.uf-f{font-size:10.5px;opacity:.8;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Columna de la barra: UF arriba y, con cliente, su edad grande abajo */
-.uf-col{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1px}
-.uf-fila{display:flex;align-items:baseline;gap:7px;min-width:0}
-.uf-edad{white-space:nowrap;font-size:11px;font-weight:600;line-height:1.1;color:#fff}
-.uf-edad b{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.uf-edad .uf-edad-t{font-size:9.5px;letter-spacing:.08em;opacity:.8;margin-right:3px;font-weight:700}
-.uf.con-edad .uf-v{font-size:13px}
+.uf-f{font-size:10.5px;opacity:.8;flex:1}
 .uf-ver{font-size:9px;opacity:.6}
 .uf button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
   border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:13px;line-height:1}
@@ -568,6 +561,12 @@ body.ext .cliente{
 .cliente .go-estado{flex-basis:100%;font-size:10.5px;color:var(--m-cli-acento,#123a6d);font-weight:700}
 /* RUT sin puntos con botón para copiarlo */
 .cliente .cli-rut{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
+/* Edad y cuenta corriente, grandes y a la mano */
+.cliente .cli-dest{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;margin:1px 0 2px}
+.cliente .cli-dest > span{white-space:nowrap;font-size:11px;font-weight:600;color:var(--ink)}
+.cliente .cli-dest i{font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.07em;color:var(--muted);margin-right:3px}
+.cliente .cli-dest b{font-size:17px;font-weight:800;color:var(--m-cli-acento,#123a6d);font-variant-numeric:tabular-nums}
+.cliente .cli-dest .btn-copiar{margin-left:3px;vertical-align:2px}
 .cliente .cli-rut-num{color:var(--m-cli-acento,#123a6d);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em;user-select:all}
 .btn-copiar{font:inherit;font-size:11px;line-height:1;padding:3px 6px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:rgba(255,255,255,.7);cursor:pointer}
 .btn-copiar:hover{background:#fff}

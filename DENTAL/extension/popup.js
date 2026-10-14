@@ -1177,7 +1177,8 @@ function reiniciar(){
   calcular();
 }
 
-document.getElementById("ufReload").addEventListener("click", cargarUF);
+// ↻ actualiza la UF y vuelve a leer al cliente en Vicidial (ej. el correo recién escrito)
+document.getElementById("ufReload").addEventListener("click", function(){ cargarUF(); firmaVicidial = ""; sincronizarVicidial(); });
 document.getElementById("ufManual").addEventListener("input", function(){
   const v = parseFloat(this.value.replace(/\./g, "").replace(",", "."));
   if(v > 0){
@@ -1395,7 +1396,8 @@ function personalizar(h){
     h = h.split("<em>[XXX]</em>").join(em(cta));
     h = h.split("<em>[N.º medio de pago]</em>").join(em("terminada en " + cta));
   }
-  if(cliente.rut) h = h.split("<em>[RUT del cliente o ID de venta]</em>").join(em(cliente.rut));
+  const codOp = codigoOperacion();
+  if(codOp) h = h.split("<em>[RUT del cliente o ID de venta]</em>").join(em(codOp));
 
   // Validación de datos: junto a cada ítem, lo que trae Vicidial
   const domicilio = [nombrePropio(cliente.direccion), nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean).join(", ");
@@ -1409,40 +1411,68 @@ function personalizar(h){
   return h;
 }
 
+// Lectura de la pantalla de Vicidial (se inyecta en la pestaña; no usa nada de
+// afuera). Recorre la página y sus marcos del mismo sitio (la pestaña FORM es
+// uno): el primer valor de cada campo, más
+//   __emails  todos los correos VÁLIDOS que haya (el escrito a mano primero),
+//   __codigo  el código de verificación / validación de la operación,
+//   __ctatexto Cta_Cte cuando se muestra como texto y no como casilla.
+function lecturaVicidial(){
+  const campos = {}, emails = [];
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const CODIGO = /valid|verif|cod(igo)?[\s_.-]*(de[\s_.-]*)?(op|oper|venta|val|verif)|id[\s_.-]*venta|folio|n[\s_.ºo-]*operaci/i;
+  const NO_CODIGO = /phone_code|dial|dtmf|postal|conf_|xfer|override|search/i;
+  const CODIGO_TXT = /c[oó]d(?:igo|\.)?\s*(?:de\s*)?(?:validaci[oó]n|verificaci[oó]n|operaci[oó]n|venta)\s*[:#]?\s*([A-Z0-9-]*\d[A-Z0-9-]*)/i;
+  function leer(doc, prof){
+    if(!doc || prof > 4) return;
+    doc.querySelectorAll("input, select, textarea").forEach(function(e){
+      const k = String(e.name || e.id || "").toLowerCase();
+      if(!k || e.type === "password" || e.type === "button" || e.type === "submit") return;
+      const v = String(e.value || "").trim();
+      if(v && !campos[k]) campos[k] = v;
+      if(/mail|correo/.test(k) && EMAIL.test(v) && emails.indexOf(v.toLowerCase()) < 0) emails.push(v.toLowerCase());
+      if(!campos.__codigo && CODIGO.test(k) && !NO_CODIGO.test(k) && v && v !== "0" && v.length >= 3 && /\d/.test(v)) campos.__codigo = v;
+    });
+    let txt = "";
+    try{ txt = (doc.body && doc.body.innerText) || ""; }catch(e){}
+    if(!campos.__ctatexto){
+      const m = txt.match(/(?:^|[^a-z_])cta[\s_.-]*cte\.?\s*:?\s*(\d[\d .-]{0,24})/i);
+      if(m && m[1].replace(/\D/g, "")) campos.__ctatexto = m[1].replace(/\D/g, "");
+    }
+    if(!campos.__codigo){
+      const m = txt.match(CODIGO_TXT);
+      if(m && m[1].replace(/-/g, "").length >= 4) campos.__codigo = m[1];
+    }
+    doc.querySelectorAll("iframe, frame").forEach(function(f){
+      let d = null;
+      try{ d = f.contentDocument; }catch(e){}
+      if(d) leer(d, prof + 1);
+    });
+  }
+  leer(document, 0);
+  if(emails.length) campos.__emails = emails.join("|");
+  return {campos: campos, agente: typeof LOGfullname === "string" ? LOGfullname : ""};
+}
 async function leerVicidial(){
   if(ESWEB) return null;
   try{
     const tabs = await chrome.tabs.query({url: VICIDIAL});
     if(!tabs.length) return null;
     tabs.sort(function(a, b){ return (b.lastAccessed || 0) - (a.lastAccessed || 0); });
-    // Se leen todos los marcos: la pantalla principal (lead_id, campos
-    // estándar, nombre del ejecutivo) y la pestaña FORM, que es un marco
-    // aparte con los campos de la campaña (RUT, DV, Nombres, Apellido_Pat…).
-    const r = await chrome.scripting.executeScript({
-      target: {tabId: tabs[0].id, allFrames: true},
-      world: "MAIN",
-      func: function(){
-        const campos = {};
-        document.querySelectorAll("input, select, textarea").forEach(function(e){
-          const k = String(e.name || e.id || "").toLowerCase();
-          if(!k || e.type === "password" || e.type === "button" || e.type === "submit") return;
-          const v = String(e.value || "").trim();
-          if(v && !campos[k]) campos[k] = v;
-        });
-        // Cta_Cte a veces se muestra como texto (campo de sólo lectura), sin casilla:
-        // se busca también en lo que se ve ("Cta_Cte   573").
-        try{
-          const m = ((document.body && document.body.innerText) || "").match(/(?:^|[^a-z_])cta[\s_.-]*cte\.?\s*:?\s*(\d[\d .-]{0,24})/i);
-          if(m && m[1].replace(/\D/g, "")) campos.__ctatexto = m[1].replace(/\D/g, "");
-        }catch(e){}
-        return {campos: campos, agente: typeof LOGfullname === "string" ? LOGfullname : ""};
-      }
-    });
-    // Se juntan los marcos; lo de la pestaña FORM manda sobre lo estándar
+    // La pantalla principal lee también sus marcos (la pestaña FORM). Si algo
+    // falla, se prueba marco por marco.
+    let r = null;
+    try{ r = await chrome.scripting.executeScript({target: {tabId: tabs[0].id, frameIds: [0]}, world: "MAIN", func: lecturaVicidial}); }catch(e){}
+    if(!r || !r[0] || !r[0].result){
+      r = await chrome.scripting.executeScript({target: {tabId: tabs[0].id, allFrames: true}, world: "MAIN", func: lecturaVicidial});
+    }
     const f = {}; let agente = "";
     (r || []).forEach(function(x){
       if(!x || !x.result) return;
-      Object.keys(x.result.campos).forEach(function(k){ if(!f[k]) f[k] = x.result.campos[k]; });
+      Object.keys(x.result.campos).forEach(function(k){
+        if(k === "__emails" && f[k]) f[k] += "|" + x.result.campos[k];
+        else if(!f[k]) f[k] = x.result.campos[k];
+      });
       if(x.result.agente) agente = x.result.agente;
     });
     const c = clienteDesdeCampos(f, agente);
@@ -1450,30 +1480,29 @@ async function leerVicidial(){
   }catch(e){ return null; }
 }
 
-// Edad del cliente en la barra de título: de su fecha de nacimiento (Vicidial)
-// a hoy, en años, meses y días.
-function pintarEdad(){
-  const caja = document.getElementById("edadCli");
-  if(!caja) return;
+// Edad del cliente (de su fecha de nacimiento en Vicidial a hoy): años, meses y días.
+function edadCliente(){
   const nac = cliente && cliente.fechaNac ? leerFecha(cliente.fechaNac) : null;
-  caja.parentNode.parentNode.classList.toggle("con-edad", !!nac);
-  if(!nac){ caja.hidden = true; caja.innerHTML = ""; return; }
+  if(!nac) return "";
   const e = edad(nac, hoy());
   const parte = function(n, uno, varios){ return "<b>" + n + "</b> " + (n === 1 ? uno : varios); };
-  caja.innerHTML = '<span class="uf-edad-t">EDAD</span>' + parte(e.y, "año", "años") + " " + parte(e.m, "mes", "meses") + " " + parte(e.d, "día", "días");
-  caja.title = "Nació el " + cliente.fechaNac + " · hoy " + fmt(hoy()).split("-").join("/");
-  caja.hidden = false;
+  return '<span title="Nació el ' + escCli(cliente.fechaNac) + " · hoy " + fmt(hoy()).split("-").join("/") + '"><i>EDAD</i>' +
+         parte(e.y, "año", "años") + " " + parte(e.m, "mes", "meses") + " " + parte(e.d, "día", "días") + "</span>";
+}
+// Código de operación que se le dicta al cliente: el código de verificación de
+// Vicidial si viene; si no, el RUT sin puntos ni guion (ej. 127806330).
+function codigoOperacion(){
+  if(cliente && cliente.codigo) return cliente.codigo;
+  return String((cliente && cliente.rut) || "").toUpperCase().replace(/[^0-9K]/g, "");
 }
 function pintarCliente(){
-  pintarEdad();
   const el = document.getElementById("cliente");
   // Escribiendo el nombre de un botón o eligiendo su atajo: no se repinta (se perdería lo escrito)
   const foco = document.activeElement;
   if(foco && el.contains(foco) && /^(INPUT|SELECT)$/.test(foco.tagName)) return;
   if(!cliente || !(cliente.nombre || cliente.apellido)){ el.hidden = true; el.innerHTML = ""; return; }
   const nombre = (nombrePropio(cliente.nombre) + " " + nombrePropio(cliente.apellido)).trim();
-  const datos = [digitosCta(cliente.cta) ? "Cta. Cte. " + digitosCta(cliente.cta) : "",
-                 [cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
+  const datos = [[cliente.fono, cliente.fono2].filter(Boolean).join(" / "),
                  cliente.email ? cliente.email.toLowerCase() : "", nombrePropio(cliente.comuna || cliente.ciudad)].filter(Boolean);
   // RUT sin puntos y con guion (como lo piden GO y el multicotizador), con botón para copiarlo
   const rut = rutSinPuntos(cliente.rut);
@@ -1481,6 +1510,13 @@ function pintarCliente(){
     (rut ? '<span class="cli-rut">RUT <span class="cli-rut-num">' + escCli(rut) + '</span>' +
            '<button type="button" class="btn-copiar" data-copiar="' + escCli(rut) + '" title="Copiar el RUT ' + escCli(rut) + '">📋</button></span>' : "") +
     datos.map(function(d){ return "<span>" + escCli(d) + "</span>"; }).join("");
+  // Edad, cuenta corriente y código de operación: grandes, para tenerlos a la mano
+  const cta = digitosCta(cliente.cta);
+  const dest = [edadCliente(),
+    cta ? '<span title="Últimos dígitos de la cuenta corriente (Cta_Cte de Vicidial)"><i>CTA. CTE.</i><b>' + escCli(cta) + "</b></span>" : "",
+    cliente.codigo ? '<span title="Código de verificación de la operación (Vicidial)"><i>CÓD. OPERACIÓN</i><b>' + escCli(cliente.codigo) + "</b>" +
+      '<button type="button" class="btn-copiar" data-copiar="' + escCli(cliente.codigo) + '" title="Copiar el código">📋</button></span>' : ""].filter(Boolean);
+  if(dest.length) h += '<div class="cli-dest">' + dest.join("") + "</div>";
   if(cliente.cargas && cliente.cargas.length){
     h += '<div class="cli-linea"><i>Cargas en Vicidial:</i> ' + cliente.cargas.map(function(c, i){
       const quien = [nombrePropio(c.nombre), c.parentesco ? "(" + nombrePropio(c.parentesco) + ")" : ""].filter(Boolean).join(" ");
@@ -1663,9 +1699,15 @@ if(!ESWEB){
   refrescarFlujosGo(); setInterval(refrescarFlujosGo, 4000);
 }
 
+let firmaVicidial = "";
 async function sincronizarVicidial(){
   const c = await leerVicidial();
   if(!c) return;
+  // Se relee cada pocos segundos (ej. el correo escrito a mano en Vicidial):
+  // si nada cambió, no se repinta nada.
+  const firma = JSON.stringify(c);
+  if(firma === firmaVicidial) return;
+  firmaVicidial = firma;
   const previo = await new Promise(function(res){ almacen.leer("lead", res); });
   const nuevaLlamada = c.lead && previo && previo.id && previo.id !== c.lead;
   if(nuevaLlamada) reiniciar();
@@ -1917,6 +1959,9 @@ almacen.leer("uf", function(u){
     // Si se abrió apenas cayó la llamada, los datos del FORM pueden llegar un
     // poco después: se vuelve a leer Vicidial unas veces en los primeros segundos.
     [1500, 3500, 6500, 10000].forEach(function(ms){ setTimeout(sincronizarVicidial, ms); });
+    // Y luego cada 3 s mientras esté abierto: lo que se escriba en Vicidial
+    // (correo, teléfono…) aparece solo, sin volver a abrir el cotizador.
+    if(!ESWEB) setInterval(sincronizarVicidial, 3000);
   });
   // Que la vigilancia de llamadas esté conectada (para abrirse sola la próxima vez)
   if(!ESWEB){ try{ chrome.runtime.sendMessage({tipo: "conectarCaptura"}, function(){ void chrome.runtime.lastError; }); }catch(e){} }
