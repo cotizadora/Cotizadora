@@ -1450,7 +1450,22 @@ async function leerVicidial(){
   }catch(e){ return null; }
 }
 
+// Edad del cliente en la barra de título: de su fecha de nacimiento (Vicidial)
+// a hoy, en años, meses y días.
+function pintarEdad(){
+  const caja = document.getElementById("edadCli");
+  if(!caja) return;
+  const nac = cliente && cliente.fechaNac ? leerFecha(cliente.fechaNac) : null;
+  caja.parentNode.parentNode.classList.toggle("con-edad", !!nac);
+  if(!nac){ caja.hidden = true; caja.innerHTML = ""; return; }
+  const e = edad(nac, hoy());
+  const parte = function(n, uno, varios){ return "<b>" + n + "</b> " + (n === 1 ? uno : varios); };
+  caja.innerHTML = '<span class="uf-edad-t">EDAD</span>' + parte(e.y, "año", "años") + " " + parte(e.m, "mes", "meses") + " " + parte(e.d, "día", "días");
+  caja.title = "Nació el " + cliente.fechaNac + " · hoy " + fmt(hoy()).split("-").join("/");
+  caja.hidden = false;
+}
 function pintarCliente(){
+  pintarEdad();
   const el = document.getElementById("cliente");
   // Escribiendo el nombre de un botón o eligiendo su atajo: no se repinta (se perdería lo escrito)
   const foco = document.activeElement;

@@ -111,7 +111,14 @@ tr.veta .nomplan{cursor:not-allowed; border-bottom-color:transparent}
 .uf{display:flex;position:sticky;top:0;z-index:3;align-items:center;gap:7px;background:#123a6d;color:#fff;padding:7px 10px}
 .uf-t{font-size:10px;letter-spacing:.09em;font-weight:700;opacity:.8}
 .uf-v{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
-.uf-f{font-size:10.5px;opacity:.8;flex:1}
+.uf-f{font-size:10.5px;opacity:.8;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Columna de la barra: UF arriba y, con cliente, su edad grande abajo */
+.uf-col{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1px}
+.uf-fila{display:flex;align-items:baseline;gap:7px;min-width:0}
+.uf-edad{white-space:nowrap;font-size:11px;font-weight:600;line-height:1.1;color:#fff}
+.uf-edad b{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.uf-edad .uf-edad-t{font-size:9.5px;letter-spacing:.08em;opacity:.8;margin-right:3px;font-weight:700}
+.uf.con-edad .uf-v{font-size:13px}
 .uf-ver{font-size:9px;opacity:.6}
 .uf button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
   border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:13px;line-height:1}
@@ -641,9 +648,14 @@ body{ padding-block: 14px; padding-inline: 16px; }
 
   <div class="izq">
     <div class="uf">
-      <span class="uf-t">UF</span>
-      <span class="uf-v" id="ufVal">—</span>
-      <span class="uf-f" id="ufFecha"></span>
+      <div class="uf-col">
+        <div class="uf-fila">
+          <span class="uf-t">UF</span>
+          <span class="uf-v" id="ufVal">—</span>
+          <span class="uf-f" id="ufFecha"></span>
+        </div>
+        <div class="uf-edad" id="edadCli" hidden></div>
+      </div>
       <span class="uf-ver" id="verExt"></span>
       <button id="verHistorial" type="button" title="Historial de clientes (planilla)">&#128202;</button>
       <button id="ufReload" type="button" title="Actualizar UF">&#8635;</button>
@@ -2961,7 +2973,22 @@ async function leerVicidial(){
   }catch(e){ return null; }
 }
 
+// Edad del cliente en la barra de título: de su fecha de nacimiento (Vicidial)
+// a hoy, en años, meses y días.
+function pintarEdad(){
+  const caja = document.getElementById("edadCli");
+  if(!caja) return;
+  const nac = cliente && cliente.fechaNac ? leerFecha(cliente.fechaNac) : null;
+  caja.parentNode.parentNode.classList.toggle("con-edad", !!nac);
+  if(!nac){ caja.hidden = true; caja.innerHTML = ""; return; }
+  const e = edad(nac, hoy());
+  const parte = function(n, uno, varios){ return "<b>" + n + "</b> " + (n === 1 ? uno : varios); };
+  caja.innerHTML = '<span class="uf-edad-t">EDAD</span>' + parte(e.y, "año", "años") + " " + parte(e.m, "mes", "meses") + " " + parte(e.d, "día", "días");
+  caja.title = "Nació el " + cliente.fechaNac + " · hoy " + fmt(hoy()).split("-").join("/");
+  caja.hidden = false;
+}
 function pintarCliente(){
+  pintarEdad();
   const el = document.getElementById("cliente");
   // Escribiendo el nombre de un botón o eligiendo su atajo: no se repinta (se perdería lo escrito)
   const foco = document.activeElement;
