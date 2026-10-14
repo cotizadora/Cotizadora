@@ -3007,10 +3007,12 @@ function edadCliente(){
          parte(e.y, "año", "años") + " " + parte(e.m, "mes", "meses") + " " + parte(e.d, "día", "días") + "</span>";
 }
 // Código de operación que se le dicta al cliente: el código de verificación de
-// Vicidial si viene; si no, el RUT sin puntos ni guion (ej. 127806330).
+// Vicidial (Cod_Validacion) si viene; si no, el RUT SIN dígito verificador
+// (12.780.633-0 → 12780633).
 function codigoOperacion(){
   if(cliente && cliente.codigo) return cliente.codigo;
-  return String((cliente && cliente.rut) || "").toUpperCase().replace(/[^0-9K]/g, "");
+  const rut = String((cliente && cliente.rut) || "").toUpperCase();
+  return (rut.indexOf("-") >= 0 ? rut.split("-")[0] : rut).replace(/\D/g, "");
 }
 function pintarCliente(){
   const el = document.getElementById("cliente");
@@ -3031,8 +3033,9 @@ function pintarCliente(){
   const cta = digitosCta(cliente.cta);
   const dest = [edadCliente(),
     cta ? '<span title="Últimos dígitos de la cuenta corriente (Cta_Cte de Vicidial)"><i>CTA. CTE.</i><b>' + escCli(cta) + "</b></span>" : "",
-    cliente.codigo ? '<span title="Código de verificación de la operación (Vicidial)"><i>CÓD. OPERACIÓN</i><b>' + escCli(cliente.codigo) + "</b>" +
-      '<button type="button" class="btn-copiar" data-copiar="' + escCli(cliente.codigo) + '" title="Copiar el código">📋</button></span>' : ""].filter(Boolean);
+    codigoOperacion() ? '<span title="' + (cliente.codigo ? "Código de verificación de la operación (Vicidial)" : "Sin código en Vicidial: el RUT sin dígito verificador") +
+      '"><i>CÓD. OPERACIÓN</i><b>' + escCli(codigoOperacion()) + "</b>" +
+      '<button type="button" class="btn-copiar" data-copiar="' + escCli(codigoOperacion()) + '" title="Copiar el código">📋</button></span>' : ""].filter(Boolean);
   if(dest.length) h += '<div class="cli-dest">' + dest.join("") + "</div>";
   if(cliente.cargas && cliente.cargas.length){
     h += '<div class="cli-linea"><i>Cargas en Vicidial:</i> ' + cliente.cargas.map(function(c, i){
