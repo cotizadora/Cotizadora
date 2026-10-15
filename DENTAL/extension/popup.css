@@ -567,6 +567,12 @@ body.ext .cliente{
 .cliente .cli-dest i{font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.07em;color:var(--muted);margin-right:3px}
 .cliente .cli-dest b{font-size:17px;font-weight:800;color:var(--m-cli-acento,#123a6d);font-variant-numeric:tabular-nums}
 .cliente .cli-dest .btn-copiar{margin-left:3px;vertical-align:2px}
+.cliente .cli-dest em{font-style:normal;font-size:10.5px;font-weight:800;white-space:normal;align-self:center}
+.cliente .cli-dest .edad-ok{color:#0f6e45}
+.cliente .cli-dest .edad-no{color:#b42318;flex-basis:100%}
+@media (prefers-color-scheme:dark){ .cliente .cli-dest .edad-ok{color:#6fd3a0} .cliente .cli-dest .edad-no{color:#ff8a80} }
+/* Parentesco de cada carga (cambia el rango de edad) */
+#hijos .fila select.tipo{flex:none;font:inherit;font-size:11px;padding:4px 3px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);max-width:76px}
 .cliente .cli-rut-num{color:var(--m-cli-acento,#123a6d);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em;user-select:all}
 .btn-copiar{font:inherit;font-size:11px;line-height:1;padding:3px 6px;border-radius:6px;border:1px solid var(--m-cli-borde,#9db8de);background:rgba(255,255,255,.7);cursor:pointer}
 .btn-copiar:hover{background:#fff}

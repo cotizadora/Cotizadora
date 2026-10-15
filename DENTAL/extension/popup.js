@@ -13,12 +13,23 @@ const PLANES = [
 const MAX_CARGAS = 3;
 const EDAD_NINOS = 14;
 
-/* Aqui NO se calcula la edad del titular: no cambia el plan ni el precio.
-   Lo unico que importa es la carga contra el corte de 14 anos.
-   Las reglas de titular y conyuge estan documentadas en ../PRODUCTO.md. */
+/* Rango de edades para contratar (tabla de Bci, también en ../PRODUCTO.md):
+     titular y cónyuge / unión civil / conviviente con hijos en común:
+       ingreso desde 18 años hasta 69 años y 364 días; permanencia 70 años y 364 días
+     hijos del titular o del cónyuge / unión civil:
+       ingreso desde 14 días hasta 23 años y 0 días; permanencia 24 años y 0 días
+   La edad del titular no cambia el plan ni el precio, pero si está fuera de
+   rango no puede contratar (se avisa en la tarjeta del cliente). */
+const ADULTO = {min:{a:18,d:0, txt:"18 años"}, ing:{a:69,d:364, txt:"69 años y 364 días"}, per:{a:70,d:364, txt:"70 años y 364 días"}};
 const REGLAS = {
-  hijo: {min:{a:0, d:14, txt:"14 días"}, ing:{a:23,d:0, txt:"23 años y 0 días"}, per:{a:24,d:0, txt:"24 años y 0 días"}}
+  hijo: {min:{a:0, d:14, txt:"14 días"}, ing:{a:23,d:0, txt:"23 años y 0 días"}, per:{a:24,d:0, txt:"24 años y 0 días"}},
+  conyuge: ADULTO,
+  titular: ADULTO
 };
+// Parentesco escrito en Vicidial → tipo de carga
+function tipoDeParentesco(p){
+  return /c[oó]nyug|espos|marido|mujer|pareja|uni[oó]n|conviv/i.test(String(p || "")) ? "conyuge" : "hijo";
+}
 
 /* ---------- fechas ---------- */
 function hoy(){ const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
@@ -201,7 +212,7 @@ let restaurando = false;
 function guardarEstado(){
   if(restaurando) return;
   const cargas = [].map.call(document.querySelectorAll("#hijos .fila"), function(f){
-    return { edad: f.querySelector(".edad").value, fecha: f.querySelector(".fecha").value };
+    return { edad: f.querySelector(".edad").value, fecha: f.querySelector(".fecha").value, tipo: f.querySelector(".tipo").value };
   });
   const comuna = document.getElementById("comuna").value;
   const hayAlgo = nCargas > 0 || envio !== "linea" || planElegido !== PLAN_POR_DEFECTO || guionAbierto !== GUION_POR_DEFECTO ||
@@ -257,6 +268,7 @@ function restaurarEstado(cb){
       const c = (e.cargas || [])[k] || {};
       caja.querySelector(".edad").value  = c.edad  || "";
       caja.querySelector(".fecha").value = c.fecha || "";
+      caja.querySelector(".tipo").value = c.tipo === "conyuge" ? "conyuge" : "hijo";
     }
     pintarBloqueCargas();
 
@@ -279,9 +291,21 @@ function restaurarEstado(cb){
    bordes (recién nacido, 23 años), donde hay que pedir la fecha. */
 let nCargas = 0;
 
-function veredictoPorFecha(nac, ref){
-  const ev = evaluar(nac, ref, "hijo");
+function veredictoPorFecha(nac, ref, tipo){
   const e  = edadTxt(nac, ref);
+  if(tipo === "conyuge"){
+    const ec = evaluar(nac, ref, "conyuge");
+    if(ec.estado === "menor")
+      return {clase:"no", chip:"bad", corto:e+" · aún no",
+              texto:"Cónyuge: aún no puede ingresar, la edad mínima es 18 años. Podrá desde el "+fmt(hito(nac, ADULTO.min))+".",
+              menor14:false, bloquea:true};
+    if(ec.estado === "fuera")
+      return {clase:"no", chip:"bad", corto:e+" · fuera",
+              texto:"Cónyuge: no puede ingresar, "+ec.motivo+".", menor14:false, bloquea:true};
+    return {clase:"si", chip:"ok", corto:e+" · califica",
+            texto:"Cónyuge: entra (ingreso de 18 años a 69 años y 364 días).", menor14:false, bloquea:false};
+  }
+  const ev = evaluar(nac, ref, "hijo");
   if(ev.estado === "menor")
     return {clase:"no", chip:"bad", corto:e+" · aún no",
             texto:"Aún no puede ingresar: la edad mínima es 14 días. Podrá desde el "+fmt(hito(nac, REGLAS.hijo.min))+".",
@@ -296,8 +320,18 @@ function veredictoPorFecha(nac, ref){
           texto:"Entra en Urgencias, en Full y en Full Niños.", menor14:false, bloquea:false};
 }
 
-function veredictoPorEdad(a){
+function veredictoPorEdad(a, tipo){
   if(a < 0 || a > 120) return null;
+  if(tipo === "conyuge"){
+    if(a < 18)
+      return {clase:"no", chip:"bad", corto:a+" años · menor de 18",
+              texto:"Cónyuge: la edad mínima de ingreso es 18 años.", menor14:false, bloquea:true, aprox:true};
+    if(a <= 69)
+      return {clase:"si", chip:"ok", corto:a+" años · califica",
+              texto:"Cónyuge: entra (ingreso de 18 años a 69 años y 364 días).", menor14:false, bloquea:false, aprox:true};
+    return {clase:"no", chip:"bad", corto:a+" años · fuera",
+            texto:"Cónyuge: no puede ingresar, el tope de ingreso es 69 años y 364 días.", menor14:false, bloquea:true, aprox:true};
+  }
   if(a === 0)
     return {clase:"pide", chip:"warn", corto:"menos de 1 año",
             texto:"Escribe la fecha de nacimiento: la edad mínima de ingreso son 14 días.",
@@ -326,6 +360,8 @@ function filaHijo(silencioso){
   const caja = document.createElement("div");
   caja.innerHTML =
     '<div class="fila">'+
+      '<select class="tipo" title="Parentesco de la carga (cambia el rango de edad)">'+
+        '<option value="hijo">Hijo/a</option><option value="conyuge">Cónyuge</option></select>'+
       '<span class="edadbox">'+
         '<input type="text" class="edad" inputmode="numeric" placeholder="edad" maxlength="3">'+
         '<span class="spin">'+
@@ -361,6 +397,7 @@ function filaHijo(silencioso){
     calcular(); guardarEstado();
   });
   fe.addEventListener("input", function(){ autoFecha(this); calcular(); guardarEstado(); });
+  caja.querySelector(".tipo").addEventListener("change", function(){ calcular(); guardarEstado(); });
   if(!silencioso){ ed.focus(); calcular(); guardarEstado(); }
   return caja;
 }
@@ -403,6 +440,7 @@ function calcular(){
     const fe  = f.querySelector(".fecha");
     const chip = f.querySelector(".chip");
     const ver  = f.parentNode.querySelector(".veredicto");
+    const tipo = f.querySelector(".tipo").value;
 
     const nac = leerFecha(fe.value);
     fe.classList.toggle("mal", fe.value.length===10 && !nac);
@@ -410,7 +448,7 @@ function calcular(){
     let v = null;
     if(nac){
       // Con fecha, la edad se deriva y se bloquea para que no se pisen
-      v = veredictoPorFecha(nac, ref);
+      v = veredictoPorFecha(nac, ref, tipo);
       ed.value = edad(nac, ref).y;
       ed.readOnly = true;
       ed.title = "Calculada desde la fecha. Borra la fecha para escribirla a mano.";
@@ -419,7 +457,7 @@ function calcular(){
       ed.readOnly = false;
       ed.title = "";
       if(ed.value !== ""){
-        v = veredictoPorEdad(parseInt(ed.value, 10));
+        v = veredictoPorEdad(parseInt(ed.value, 10), tipo);
         ed.classList.toggle("mal", v === null);
       }else{
         ed.classList.remove("mal");
@@ -1486,8 +1524,15 @@ function edadCliente(){
   if(!nac) return "";
   const e = edad(nac, hoy());
   const parte = function(n, uno, varios){ return "<b>" + n + "</b> " + (n === 1 ? uno : varios); };
+  // ¿Puede contratar? Titular: de 18 años a 69 años y 364 días
+  const ev = evaluar(nac, hoy(), "titular");
+  const rango = ev.estado === "ok"
+    ? '<em class="edad-ok" title="Rango de ingreso del titular: 18 años a 69 años y 364 días">✓ en edad de contratar</em>'
+    : '<em class="edad-no">✗ No puede contratar: ' + escCli(ev.estado === "menor"
+        ? "es menor de 18 años (los cumple el " + fmt(hito(nac, ADULTO.min)).split("-").join("/") + ")"
+        : "supera la edad máxima de ingreso, 69 años y 364 días (cumplió 70 el " + fmt(hito(nac, {a:70, d:0})).split("-").join("/") + ")") + "</em>";
   return '<span title="Nació el ' + escCli(cliente.fechaNac) + " · hoy " + fmt(hoy()).split("-").join("/") + '"><i>EDAD</i>' +
-         parte(e.y, "año", "años") + " " + parte(e.m, "mes", "meses") + " " + parte(e.d, "día", "días") + "</span>";
+         parte(e.y, "año", "años") + " " + parte(e.m, "mes", "meses") + " " + parte(e.d, "día", "días") + "</span>" + rango;
 }
 // Código de operación que se le dicta al cliente: el código de verificación de
 // Vicidial (Cod_Validacion) si viene; si no, el RUT SIN dígito verificador
@@ -1727,6 +1772,7 @@ async function sincronizarVicidial(){
       const caja = filaHijo(true);
       caja.querySelector(".fecha").value = c.cargas[k].fecha || "";
       caja.querySelector(".edad").value = "";
+      caja.querySelector(".tipo").value = tipoDeParentesco(c.cargas[k].parentesco);
     }
     pintarBloqueCargas();
     calcular();
