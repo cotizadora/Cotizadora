@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.4.1';
+  const VCA_VERSION = '1.4.2';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -912,7 +912,7 @@
         const j = inicioSegunPantalla(steps, i);
         if (j > i) { i = j - 1; continue; }
       }
-      const tag = '  paso ' + (i + 1) + '/' + steps.length;
+      const tag = '  paso ' + (i + 1) + '/' + steps.length + (corrida && corrida.inicio ? ' [' + ((Date.now() - corrida.inicio) / 1000).toFixed(1) + ' s]' : '');
       // Usuario / clave de un atajo compartido: los de quien lo ejecuta.
       if (IS_CRM && st.kind === 'input' && st.credencial && !st.value) {
         const r = await pasoCredencial(st, steps, i, s, tag);
@@ -925,6 +925,20 @@
         }
         await sleep(esperaEntre(st, steps[i + 1], s));
         continue;
+      }
+      // La clave grabada ya se escribió, pero el campo quedó vacío (el
+      // autocompletado de Chrome llegó después y la borró): se escribe otra vez
+      // en vez de esperar a la persona.
+      if (IS_CRM && (st.kind || 'click') === 'click' && claveVacia()) {
+        for (let j = i - 1; j >= 0 && j >= i - 4; j--) {
+          const pj = steps[j];
+          if (pj && pj.kind === 'input' && pj.secreto && pj.value && (!pj.sitio || pj.sitio === MI_SITIO)) {
+            log(tag + ': la clave quedó vacía (autocompletado de Chrome): la escribo de nuevo');
+            await ejecutarPaso(pj, s, tag);
+            await sleep(150);
+            break;
+          }
+        }
       }
       // Botón de entrar con la clave vacía: espera a que la persona inicie sesión.
       if (IS_CRM && (st.kind || 'click') === 'click' && claveVacia()) {

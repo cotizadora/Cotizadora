@@ -301,16 +301,24 @@
     try { chrome.runtime.sendMessage({ type: 'abrirUrl', url: String(ev.detail || '') }); } catch (e) {}
   });
   // Al cargar la página: ¿quedó un atajo a medias que sigue aquí?
+  // Se pregunta apenas la página está armada (DOMContentLoaded), sin esperar a
+  // que terminen de bajar imágenes y scripts ('load'): en GO eso tardaba varios
+  // segundos con el login ya a la vista. El motor igual espera a que aparezca
+  // cada campo. Si en ese momento no había nada, se pregunta otra vez al 'load'.
+  let pendienteEntregado = false;
   function preguntarPendiente() {
+    if (pendienteEntregado) return;
     try {
       chrome.runtime.sendMessage({ type: 'pendienteTomar', sitio: siteKey(location.hostname) }, (r) => {
-        if (chrome.runtime.lastError || !r || !r.data) return;
+        if (chrome.runtime.lastError || !r || !r.data || pendienteEntregado) return;
+        pendienteEntregado = true;
         try { document.dispatchEvent(new CustomEvent('vca:cmd', { detail: { type: 'continuar', data: r.data } })); } catch (e) {}
       });
     } catch (e) {}
   }
-  if (document.readyState === 'complete') setTimeout(preguntarPendiente, 300);
-  else window.addEventListener('load', () => setTimeout(preguntarPendiente, 300), { once: true });
+  if (document.readyState !== 'loading') setTimeout(preguntarPendiente, 50);
+  else document.addEventListener('DOMContentLoaded', () => setTimeout(preguntarPendiente, 50), { once: true });
+  if (document.readyState !== 'complete') window.addEventListener('load', () => setTimeout(preguntarPendiente, 200), { once: true });
 
   chrome.runtime.onMessage.addListener((msg, sender, reply) => {
     try {

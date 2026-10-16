@@ -1,6 +1,6 @@
-ShortCut-Vicidial-GO 1.4.1
+ShortCut-Vicidial-GO 1.4.2
 ==========================
-La versión instalada aparece siempre en el título del panel (⚡ ... v1.4.1).
+La versión instalada aparece siempre en el título del panel (⚡ ... v1.4.2).
 Graba una vez y repite con un clic:
   - VICIDIAL: pausas con su código (Baño, Break, Colación...), volver a
     disponible y disposiciones de la llamada.
@@ -78,7 +78,10 @@ GRABAR EN GO (desde la 1.1.1)
 - Por ahora un atajo no sigue después de un cambio de página (ej. al pulsar
   "Ingresar"): graba el ingreso y el resto como atajos separados.
 
-LOGIN DE GO MÁS RÁPIDO (desde la 1.4.1)
+LOGIN DE GO MÁS RÁPIDO (1.4.1 y 1.4.2)
+- 1.4.2: empieza a escribir el usuario apenas aparece el login, sin esperar a
+  que GO termine de bajar imágenes y scripts. Si Chrome borra la clave al
+  autocompletar, la vuelve a escribir sola.
 - Después de escribir el usuario o la clave ya no espera lo que tardaste al
   grabar: aprieta «Ingresar» al instante (antes podía tardar varios segundos).
 - Para actualizar sólo esta extensión: Documentos\DENTAL\ACTUALIZAR-SHORTCUT.bat

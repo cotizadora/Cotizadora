@@ -354,7 +354,7 @@ async function ejecutarFlujo(id, forzarLogin, limpiar) {
     try { win = ref ? await chrome.windows.get(ref.windowId) : await chrome.windows.getLastFocused({ windowTypes: ['normal'] }); } catch (e) {}
     const nueva = await chrome.tabs.create(Object.assign({ url: 'about:blank', active: true },
       win && win.type === 'normal' ? { windowId: win.id } : {}, ref && win && win.id === ref.windowId ? { index: ref.index } : {}));
-    for (const t of viejas) await soltarSalida(t.id);
+    await Promise.all(viejas.map((t) => soltarSalida(t.id)));   // todas a la vez
     try { if (viejas.length) await chrome.tabs.remove(viejas.map((t) => t.id)); } catch (e) {}
     await area.set({ [PEND]: { data: { label: f.label, steps: steps, desde: 0, sitio: 'panel', t: Date.now(), vence: Date.now() + 3 * 60 * 1000 }, tab: null, sitio: 'panel', t: Date.now() } });
     try { await chrome.tabs.update(nueva.id, { url: url }); } catch (e) {}
