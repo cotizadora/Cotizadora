@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.4.0';
+  const VCA_VERSION = '1.4.1';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -730,6 +730,12 @@
   // Espera entre pasos: la que usaste al grabar (un poco menos), para que una
   // página alcance a cambiar antes del siguiente "Siguiente".
   function esperaEntre(a, b, s) {
+    // Después de escribir en un campo (usuario, clave, RUT) o elegir en un menú
+    // no cambia la pantalla: se sigue casi de inmediato (antes se esperaba hasta
+    // 2,5 s, lo que tardó la persona en escribir al grabar, y el login se
+    // demoraba en apretar «Ingresar»).
+    if (a && (a.kind === 'input' || a.kind === 'check')) return 120;
+    if (a && a.kind === 'select') return 250;
     if (!IS_CRM || !a || !b || !a.t || !b.t) return s.stepGapMs;
     return Math.max(s.stepGapMs, Math.min(2500, Math.round((b.t - a.t) * 0.4)));
   }
