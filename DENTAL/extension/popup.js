@@ -598,7 +598,8 @@ const GUION = [
     'en caso de dolor, inflamación y sangrado, por ejemplo: <strong>extracciones simples</strong>; '+
     '<strong>trepanación</strong>, que es la primera parte del tratamiento de conducto, entre otros; '+
     '<strong>colocación de cemento o tapadura temporal</strong>; y <strong>urgencia protésica</strong>, '+
-    'que es la recementación de corona, puentes, incrustaciones y la reparación en el sillón de otro tipo de prótesis.</p>'; }},
+    'que es la recementación de corona, puentes, incrustaciones y la reparación en el sillón de otro tipo de prótesis.</p>'+
+    '<p><span class="calidad">Y en el caso de urgencia dental, usted puede comenzar a utilizarlo en 48 horas hábiles</span>.</p>'; }},
 
   {t:"Prevención", p:["basico","full","ninos"], html:function(d){ return ''+
     // Como en el script oficial: una sola frase (no viñetas). "+" se dice "más".
@@ -608,8 +609,7 @@ const GUION = [
     'entre los dientes.</p>'+
     '<p>Los odontólogos, don <em>[nombre]</em>, recomiendan realizar una limpieza al menos 1 vez al año, y usted la tendría '+
     '<span class="calidad">sin costo con nosotros dentro de 30 días, al igual que el resto de los tratamientos</span>.</p>'+
-    '<p><span class="calidad">Y en el caso de urgencia dental, usted puede comenzar a utilizarlo en 48 horas hábiles</span>.</p>'+
-    '<p class="nota calidad-nota">Calidad (rechazo 13-10): carencia = <b>48 horas hábiles para URGENCIAS</b> y <b>30 días para el RESTO</b> de los tratamientos (prevención incluida).</p>'; }},
+    ''; }},
 
   {t:"Tratamientos con copago · sólo Full y Full + Niños", p:["full","ninos"], html:function(d){ return ''+
     '<p>Importante indicar, don <em>[nombre]</em>, que para los tratamientos más complejos y que suelen ser los más costosos '+
@@ -636,8 +636,7 @@ const GUION = [
           '<li>Tratamientos de conducto adicionales</li>'
         : '')+
     '</ul>'+
-    '<p class="nota calidad-nota">Calidad (rechazo 13-10): no se mencionó el descuento de hasta 65%. Se dice en todos los planes' +
-    (planElegido === "basico" ? '; las tapaduras y conductos adicionales sólo en Full.' : '.') + '</p>'; }},
+    ''; }},
 
   {t:"Programa de Salud y Bienestar", p:["basico","full","ninos"], html:function(d){ return ''+
     '<p>Y de manera adicional le quiero contar que con este seguro podrá acceder sin costo al '+
@@ -661,8 +660,7 @@ const GUION = [
     '<p>Lo mejor es que no trabajamos con reembolso, así que puede olvidarse de comprar bonos y los papeleos.</p>'+
     '<p>Es muy simple: <span class="calidad">usted agenda la primera hora llamando al 227501096</span>, en cualquiera de las clínicas '+
     'de la red Uno Salud, en donde le aplicarán todos los descuentos y valores que le he mencionado automáticamente '+
-    'en su presupuesto.</p>'+
-    '<p class="nota calidad-nota">Calidad (rechazo 13-10): no se dijo este párrafo. Léelo completo, con el 227501096.</p>'; }},
+    'en su presupuesto.</p>'; }},
 
   {t:"Requisitos", p:["basico","full","ninos"], html:function(d){ return ''+
     '<p>Usted, don <em>[nombre]</em>, cumple con los requisitos ya que es mayor de 18 años y menor de 70 años.</p>'+
