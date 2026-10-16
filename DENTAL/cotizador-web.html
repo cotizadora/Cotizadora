@@ -610,6 +610,31 @@ body.ext .cliente{
   .calidad-nota{color:#ffb070 !important}
 }
 
+/* Script: Salud y Bienestar (verde) y Muerte accidental (morado), cada uno en su
+   recuadro de color, para ubicarlos de un vistazo. */
+.gs.bienestar,.gs.muerte{padding:6px 9px 3px;border-radius:0 8px 8px 0}
+.gs.bienestar{border-left:5px solid #0f8a5f;background:#e3f5ec}
+.gs.muerte{border-left:5px solid #6b3fa0;background:#efe7fa}
+.gs.bienestar h4{color:#0b6b49}
+.gs.muerte h4{color:#55308a}
+.gs.bienestar h4::before{content:"💚 "}
+.gs.muerte h4::before{content:"🛡️ "}
+body.ext .guion[data-contraste="normal"] .gs.bienestar{background:#e3f5ec;border:1px solid #9fd8bd;border-left:5px solid #0f8a5f;border-radius:10px}
+body.ext .guion[data-contraste="normal"] .gs.muerte{background:#efe7fa;border:1px solid #c9b3ea;border-left:5px solid #6b3fa0;border-radius:10px}
+body.ext .guion[data-contraste="normal"] .gs.bienestar h4{color:#0b6b49}
+body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
+@media (prefers-color-scheme:dark){
+  .gs.bienestar,body.ext .guion[data-contraste="normal"] .gs.bienestar{background:#12352a;border-color:#2c7a5c}
+  .gs.muerte,body.ext .guion[data-contraste="normal"] .gs.muerte{background:#2c1f40;border-color:#7a58b0}
+  .gs.bienestar h4,body.ext .guion[data-contraste="normal"] .gs.bienestar h4{color:#7fe0b4}
+  .gs.muerte h4,body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#cdb4f5}
+}
+/* En los otros contrastes de lectura: fondo del modo y sólo la franja de color */
+.guion:not([data-contraste="normal"]) .gs.bienestar,
+.guion:not([data-contraste="normal"]) .gs.muerte{background:transparent}
+.guion:not([data-contraste="normal"]) .gs.bienestar h4,
+.guion:not([data-contraste="normal"]) .gs.muerte h4{color:var(--g-ink)}
+
 /* ============ versión web ============ */
 :root{ color-scheme: light }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ color-scheme: dark } }
@@ -2181,7 +2206,7 @@ const GUION = [
     '</ul>'+
     ''; }},
 
-  {t:"Programa de Salud y Bienestar", p:["basico","full","ninos"], html:function(d){ return ''+
+  {t:"Programa de Salud y Bienestar", p:["basico","full","ninos"], clase:"bienestar", html:function(d){ return ''+
     '<p>Y de manera adicional le quiero contar que con este seguro podrá acceder sin costo al '+
     '<strong>Programa de Salud y Bienestar de Bci</strong>, el cual cuenta con 13 programas de salud, tales como:</p>'+
     '<ul>'+
@@ -2192,7 +2217,7 @@ const GUION = [
     '<p>Para acceder debe descargar la aplicación de <strong>Care Assistance</strong> y seguir las instrucciones que recibirá '+
     'en el correo de bienvenida.</p>'; }},
 
-  {t:"Muerte accidental", p:["basico","full","ninos"], html:function(d){ return ''+
+  {t:"Muerte accidental", p:["basico","full","ninos"], clase:"muerte", html:function(d){ return ''+
     '<p>Bueno, finalmente y complementando las asistencias indicadas, don <em>[nombre]</em>, existe una protección frente a '+
     'accidentes personales que usted pueda sufrir y terminen en fallecimiento (sólo titular), entregando una indemnización '+
     'a sus herederos legales de <span class="dato">50 UF</span>' + (d.ap ? ', <span class="dato">' + d.ap + '</span> aprox' : '') + '.</p>'+

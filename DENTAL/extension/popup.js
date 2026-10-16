@@ -646,7 +646,7 @@ const GUION = [
     '</ul>'+
     ''; }},
 
-  {t:"Programa de Salud y Bienestar", p:["basico","full","ninos"], html:function(d){ return ''+
+  {t:"Programa de Salud y Bienestar", p:["basico","full","ninos"], clase:"bienestar", html:function(d){ return ''+
     '<p>Y de manera adicional le quiero contar que con este seguro podrá acceder sin costo al '+
     '<strong>Programa de Salud y Bienestar de Bci</strong>, el cual cuenta con 13 programas de salud, tales como:</p>'+
     '<ul>'+
@@ -657,7 +657,7 @@ const GUION = [
     '<p>Para acceder debe descargar la aplicación de <strong>Care Assistance</strong> y seguir las instrucciones que recibirá '+
     'en el correo de bienvenida.</p>'; }},
 
-  {t:"Muerte accidental", p:["basico","full","ninos"], html:function(d){ return ''+
+  {t:"Muerte accidental", p:["basico","full","ninos"], clase:"muerte", html:function(d){ return ''+
     '<p>Bueno, finalmente y complementando las asistencias indicadas, don <em>[nombre]</em>, existe una protección frente a '+
     'accidentes personales que usted pueda sufrir y terminen en fallecimiento (sólo titular), entregando una indemnización '+
     'a sus herederos legales de <span class="dato">50 UF</span>' + (d.ap ? ', <span class="dato">' + d.ap + '</span> aprox' : '') + '.</p>'+

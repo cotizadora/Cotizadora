@@ -608,3 +608,28 @@ body.ext .cliente{
   .calidad-nota{color:#ffb070 !important}
 }
 
+/* Script: Salud y Bienestar (verde) y Muerte accidental (morado), cada uno en su
+   recuadro de color, para ubicarlos de un vistazo. */
+.gs.bienestar,.gs.muerte{padding:6px 9px 3px;border-radius:0 8px 8px 0}
+.gs.bienestar{border-left:5px solid #0f8a5f;background:#e3f5ec}
+.gs.muerte{border-left:5px solid #6b3fa0;background:#efe7fa}
+.gs.bienestar h4{color:#0b6b49}
+.gs.muerte h4{color:#55308a}
+.gs.bienestar h4::before{content:"💚 "}
+.gs.muerte h4::before{content:"🛡️ "}
+body.ext .guion[data-contraste="normal"] .gs.bienestar{background:#e3f5ec;border:1px solid #9fd8bd;border-left:5px solid #0f8a5f;border-radius:10px}
+body.ext .guion[data-contraste="normal"] .gs.muerte{background:#efe7fa;border:1px solid #c9b3ea;border-left:5px solid #6b3fa0;border-radius:10px}
+body.ext .guion[data-contraste="normal"] .gs.bienestar h4{color:#0b6b49}
+body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
+@media (prefers-color-scheme:dark){
+  .gs.bienestar,body.ext .guion[data-contraste="normal"] .gs.bienestar{background:#12352a;border-color:#2c7a5c}
+  .gs.muerte,body.ext .guion[data-contraste="normal"] .gs.muerte{background:#2c1f40;border-color:#7a58b0}
+  .gs.bienestar h4,body.ext .guion[data-contraste="normal"] .gs.bienestar h4{color:#7fe0b4}
+  .gs.muerte h4,body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#cdb4f5}
+}
+/* En los otros contrastes de lectura: fondo del modo y sólo la franja de color */
+.guion:not([data-contraste="normal"]) .gs.bienestar,
+.guion:not([data-contraste="normal"]) .gs.muerte{background:transparent}
+.guion:not([data-contraste="normal"]) .gs.bienestar h4,
+.guion:not([data-contraste="normal"]) .gs.muerte h4{color:var(--g-ink)}
+
