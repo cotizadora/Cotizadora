@@ -595,3 +595,16 @@ body.ext .cliente{
 .go-edit-fila .go-edit-nota{grid-column:2 / -1;color:var(--muted);font-size:10px}
 .go-edit-limpiar{flex-basis:100%;display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer}
 .go-edit-limpiar input{margin:0}
+
+/* Frases que Calidad rechazó por no decirlas o decirlas mal: negrita y parpadeo
+   del fondo (el texto siempre se lee), para no olvidarlas. */
+.calidad{font-weight:800;color:#5a1200;background:#fff1a8;border-radius:4px;padding:0 3px;
+  box-shadow:0 0 0 2px #f0b400;animation:parpadeoCalidad 1.1s steps(1,end) infinite}
+.calidad::before{content:"⚠ ";font-weight:800}
+@keyframes parpadeoCalidad{50%{background:#ffc93d;box-shadow:0 0 0 2px #d64500}}
+.calidad-nota{color:#a33a00 !important;font-weight:700}
+@media (prefers-color-scheme:dark){
+  .calidad{color:#2b0a00;background:#ffe27a}
+  .calidad-nota{color:#ffb070 !important}
+}
+

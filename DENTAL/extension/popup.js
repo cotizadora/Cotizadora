@@ -611,8 +611,9 @@ const GUION = [
           'y el sarro acumulados entre los dientes</li>'+
     '</ul>'+
     '<p>Los odontólogos, don <em>[nombre]</em>, recomiendan realizar una limpieza al menos 1 vez al año, y usted la tendría '+
-    'sin costo con nosotros dentro de 30 días, al igual que el resto de los tratamientos.</p>'+
-    '<p>Y en el caso de urgencia dental, usted puede comenzar a utilizarlo en <strong>48 horas hábiles</strong>.</p>'; }},
+    '<span class="calidad">sin costo con nosotros dentro de 30 días, al igual que el resto de los tratamientos</span>.</p>'+
+    '<p><span class="calidad">Y en el caso de urgencia dental, usted puede comenzar a utilizarlo en 48 horas hábiles</span>.</p>'+
+    '<p class="nota calidad-nota">Calidad (rechazo 13-10): carencia = <b>48 horas hábiles para URGENCIAS</b> y <b>30 días para el RESTO</b> de los tratamientos (prevención incluida).</p>'; }},
 
   {t:"Tratamientos con copago · sólo Full y Full + Niños", p:["full","ninos"], html:function(d){ return ''+
     '<p>Importante indicar, don <em>[nombre]</em>, que para los tratamientos más complejos y que suelen ser los más costosos '+
@@ -623,16 +624,24 @@ const GUION = [
           '($45.000 es el valor actual en otras clínicas)</li>'+
       '<li><strong>2 tratamientos de conducto</strong> en muelas, premolares o dientes anteriores al año, con un costo de '+
           '$12.000 cada uno ($150.000 a $300.000 aprox. es el valor referencial en otras clínicas)</li>'+
-    '</ul>'+
-    '<p>Contará además con <strong>hasta un 65% de descuento</strong> en precio promedio de mercado para los siguientes '+
+    '</ul>'; }},
+
+  // El 65% va en TODOS los planes (el script oficial sólo marca "SOLO LEER EN PLAN
+  // FULL" en las dos últimas viñetas). Calidad lo rechazó el 13-10 por no decirlo.
+  {t:"Descuento de hasta 65%", p:["basico","full","ninos"], html:function(d){ return ''+
+    '<p><span class="calidad">Contará además con hasta un 65% de descuento</span> en precio promedio de mercado para los siguientes '+
     'tratamientos más frecuentes de odontología general:</p>'+
     '<ul>'+
       '<li>Extracciones de las muelas del juicio</li>'+
       '<li>Planos de relajación para el bruxismo</li>'+
       '<li>Cambio de tapadura de amalgama a resina (cambio estético)</li>'+
-      '<li>Tapaduras de resina adicionales</li>'+
-      '<li>Tratamientos de conducto adicionales</li>'+
-    '</ul>'; }},
+      (planElegido !== "basico"
+        ? '<li>Tapaduras de resina adicionales</li>'+
+          '<li>Tratamientos de conducto adicionales</li>'
+        : '')+
+    '</ul>'+
+    '<p class="nota calidad-nota">Calidad (rechazo 13-10): no se mencionó el descuento de hasta 65%. Se dice en todos los planes' +
+    (planElegido === "basico" ? '; las tapaduras y conductos adicionales sólo en Full.' : '.') + '</p>'; }},
 
   {t:"Programa de Salud y Bienestar", p:["basico","full","ninos"], html:function(d){ return ''+
     '<p>Y de manera adicional le quiero contar que con este seguro podrá acceder sin costo al '+
@@ -654,9 +663,10 @@ const GUION = [
 
   {t:"Sin reembolsos", p:["basico","full","ninos"], html:function(d){ return ''+
     '<p>Lo mejor es que no trabajamos con reembolso, así que puede olvidarse de comprar bonos y los papeleos.</p>'+
-    '<p>Es muy simple: usted agenda la primera hora llamando al <strong>227501096</strong>, en cualquiera de las clínicas '+
+    '<p>Es muy simple: <span class="calidad">usted agenda la primera hora llamando al 227501096</span>, en cualquiera de las clínicas '+
     'de la red Uno Salud, en donde le aplicarán todos los descuentos y valores que le he mencionado automáticamente '+
-    'en su presupuesto.</p>'; }},
+    'en su presupuesto.</p>'+
+    '<p class="nota calidad-nota">Calidad (rechazo 13-10): no se dijo este párrafo. Léelo completo, con el 227501096.</p>'; }},
 
   {t:"Requisitos", p:["basico","full","ninos"], html:function(d){ return ''+
     '<p>Usted, don <em>[nombre]</em>, cumple con los requisitos ya que es mayor de 18 años y menor de 70 años.</p>'+
