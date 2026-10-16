@@ -592,24 +592,20 @@ const GUION = [
     'que son más de 80 clínicas a lo largo de todo Chile.</p>'; }},
 
   {t:"Urgencias dentales", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Tendrá los siguientes tratamientos de <strong>urgencias dentales, sin costo (a costo 0)</strong>, '+
-    'en caso de dolor, inflamación y sangrado, por ejemplo:</p>'+
-    '<ul>'+
-      '<li>Extracciones simples</li>'+
-      '<li>Trepanación, que es la primera parte del tratamiento de conducto (entre otros)</li>'+
-      '<li>Colocación de cemento o tapadura temporal</li>'+
-      '<li>Urgencia protésica: recementación de corona, puentes, incrustaciones y reparación en el sillón de otro tipo de prótesis</li>'+
-    '</ul>'; }},
+    // Mismas palabras del script oficial, en frases para decir de corrido al
+    // teléfono (en viñetas se leía entrecortado). "(a costo 0)" → "a costo cero".
+    '<p>Tendrá los siguientes tratamientos de <strong>urgencias dentales, sin costo, a costo cero</strong>, '+
+    'en caso de dolor, inflamación y sangrado, por ejemplo: <strong>extracciones simples</strong>; '+
+    '<strong>trepanación</strong>, que es la primera parte del tratamiento de conducto, entre otros; '+
+    '<strong>colocación de cemento o tapadura temporal</strong>; y <strong>urgencia protésica</strong>, '+
+    'que es la recementación de corona, puentes, incrustaciones y la reparación en el sillón de otro tipo de prótesis.</p>'; }},
 
   {t:"Prevención", p:["basico","full","ninos"], html:function(d){ return ''+
-    '<p>Lo mejor es que además le cubrimos tratamientos de prevención como:</p>'+
-    '<ul>'+
-      '<li>Evaluación y diagnóstico</li>'+
-      '<li>Radiografías pieza a pieza</li>'+
-      '<li>Extracciones simples</li>'+
-      '<li>Una limpieza profunda (profilaxis + remoción de cálculos supragingivales), para remover la placa bacteriana '+
-          'y el sarro acumulados entre los dientes</li>'+
-    '</ul>'+
+    // Como en el script oficial: una sola frase (no viñetas). "+" se dice "más".
+    '<p>Lo mejor es que además le cubrimos tratamientos de prevención como: <strong>evaluación y diagnóstico</strong>, '+
+    '<strong>radiografías pieza a pieza</strong>, <strong>extracciones simples</strong> y <strong>una limpieza profunda</strong>, '+
+    'que es profilaxis más remoción de cálculos supragingivales, para remover la placa bacteriana y el sarro acumulados '+
+    'entre los dientes.</p>'+
     '<p>Los odontólogos, don <em>[nombre]</em>, recomiendan realizar una limpieza al menos 1 vez al año, y usted la tendría '+
     '<span class="calidad">sin costo con nosotros dentro de 30 días, al igual que el resto de los tratamientos</span>.</p>'+
     '<p><span class="calidad">Y en el caso de urgencia dental, usted puede comenzar a utilizarlo en 48 horas hábiles</span>.</p>'+
