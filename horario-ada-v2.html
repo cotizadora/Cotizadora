@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Horario de Ada</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#f4f6fa;color:#141b2d;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:1.45;padding-bottom:40px}
+a{text-decoration:none}
+header{background:#1d4ed8;color:#fff;padding:20px 18px 18px;text-align:center}
+header h1{margin:0;font-size:24px}
+header p{margin:6px 0 0;font-size:15px;color:#cfe0ff}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px}
+.resumen{background:#fff;border:2px solid #1d4ed8;border-radius:16px;padding:16px;margin-top:16px;text-align:center}
+.resumen .big{font-size:30px;font-weight:800;color:#1d4ed8;letter-spacing:1px}
+.resumen p{margin:6px 0 0;font-size:16px;color:#48536b}
+.caja{background:#fff;border-radius:16px;padding:16px;margin-top:14px;border:2px solid #d7e1f5}
+.caja h2{margin:0 0 4px;font-size:19px;color:#1d4ed8}
+.caja .ayuda{margin:0 0 12px;font-size:14.5px;color:#48536b}
+.alerta{background:#fff7e6;border:2px solid #f59e0b;border-radius:14px;padding:13px;font-size:15px;margin-top:14px}
+.alerta b{color:#b45309}
+.btn{display:flex;align-items:center;gap:12px;width:100%;border:none;border-radius:13px;padding:14px;margin-bottom:9px;font-family:inherit;font-size:17px;font-weight:700;cursor:pointer;text-align:left;color:#fff}
+.btn small{display:block;font-weight:500;font-size:13.5px;opacity:.92;margin-top:2px}
+.btn .ico{font-size:21px;flex:none}
+.azul{background:#1d4ed8}
+.verde{background:#16a34a}
+.rojo{background:#e11d48}
+.gris{background:#fff;color:#1d4ed8;border:2px solid #1d4ed8}
+.nota{font-size:13.5px;color:#7a869f;margin-top:8px}
+.sos{background:#fff;border:2px solid #e11d48;border-radius:16px;padding:16px;margin-top:14px}
+.sos h2{margin:0 0 6px;font-size:19px;color:#e11d48}
+.sos p{margin:0;font-size:16px;color:#48536b}
+.sos ul{margin:10px 0 0;padding-left:20px;font-size:17px}
+h2.dia{margin:26px 0 10px;font-size:20px;color:#1d4ed8;border-bottom:3px solid #d7e1f5;padding-bottom:6px}
+h2.dia span{float:right;font-size:15px;color:#7a869f;font-weight:500}
+.fila{display:flex;align-items:center;gap:14px;background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(20,27,45,.08);cursor:pointer}
+.fila .hora{font-size:26px;font-weight:800;min-width:82px;font-variant-numeric:tabular-nums;color:#141b2d}
+.fila .meds{flex:1;font-size:17px;font-weight:600}
+.fila .meds small{display:block;font-weight:500;font-size:14px;color:#7a869f;margin-top:2px}
+.fila .tic{width:32px;height:32px;border-radius:9px;border:2px solid #cdd6e8;flex:none;display:grid;place-items:center;font-size:19px;color:#16a34a}
+.fila.ok{background:#eefaf2;box-shadow:none}
+.fila.ok .hora,.fila.ok .meds{color:#8a97ae;text-decoration:line-through}
+.fila.ok .tic{border-color:#16a34a}
+.fin{background:#fff7e6;border:2px dashed #f59e0b;border-radius:14px;padding:14px;margin-top:10px;font-size:16px}
+.cuidados{background:#fff;border-radius:16px;padding:16px;margin-top:26px}
+.cuidados h2{margin:0 0 10px;font-size:19px;color:#1d4ed8}
+.cuidados li{margin-bottom:8px;font-size:16px}
+#reset{display:block;width:100%;margin-top:16px;padding:12px;border:1px solid #cdd6e8;background:#fff;color:#7a869f;border-radius:12px;font-size:15px;font-family:inherit;cursor:pointer}
+footer{text-align:center;font-size:13px;color:#7a869f;margin-top:22px;padding:0 20px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Horario de Ada</h1>
+  <p>Dos muelas del juicio &middot; lunes 19 de octubre</p>
+</header>
+
+<div class="wrap">
+
+  <div class="resumen">
+    <div class="big">09:00 &nbsp;y&nbsp; 21:00</div>
+    <p>Esas son las dos horas fijas de todos los d&iacute;as.<br>Primera toma <b>hoy a las 21:00</b>. Nada de madrugada.</p>
+  </div>
+
+  <div class="caja">
+    <h2>1. Avisos en Google Calendar</h2>
+    <p class="ayuda">Esta es la forma que funciona siempre. Toca el bot&oacute;n, se abre Google Calendar con el evento listo y solo hay que guardar. Quedan los 7 avisos repetidos.</p>
+
+    <a class="btn azul" id="cal21">
+      <span class="ico">&#128197;</span>
+      <span>Avisos de las 21:00<small>Pastillas de la noche, 7 d&iacute;as</small></span>
+    </a>
+
+    <a class="btn azul" id="cal09">
+      <span class="ico">&#128197;</span>
+      <span>Avisos de las 09:00<small>Pastillas de la ma&ntilde;ana, 7 d&iacute;as</small></span>
+    </a>
+
+    <button class="btn gris" id="btnIcs">
+      <span class="ico">&#11015;</span>
+      <span>Descargar archivo .ics<small>Por si prefiere importarlo al calendario</small></span>
+    </button>
+  </div>
+
+  <div class="caja">
+    <h2>2. Alarmas del reloj</h2>
+    <p class="ayuda">Estas suenan fuerte aunque el celular est&eacute; en silencio. Toca el bot&oacute;n, se abre el reloj con la hora puesta y solo hay que marcar <b>repetir todos los d&iacute;as</b> y guardar.</p>
+
+    <a class="btn verde" href="intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=21;i.android.intent.extra.alarm.MINUTES=0;B.android.intent.extra.alarm.VIBRATE=true;S.android.intent.extra.alarm.MESSAGE=Pastillas%20Optamox%20y%20Celecoxib;end">
+      <span class="ico">&#9200;</span>
+      <span>Alarma 21:00<small>Pastillas de la noche</small></span>
+    </a>
+
+    <a class="btn verde" href="intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=9;i.android.intent.extra.alarm.MINUTES=0;B.android.intent.extra.alarm.VIBRATE=true;S.android.intent.extra.alarm.MESSAGE=Pastillas%20Optamox%20y%20Celecoxib;end">
+      <span class="ico">&#9200;</span>
+      <span>Alarma 09:00<small>Pastillas de la ma&ntilde;ana</small></span>
+    </a>
+
+    <a class="btn rojo" href="intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=16;i.android.intent.extra.alarm.MINUTES=0;B.android.intent.extra.alarm.VIBRATE=true;S.android.intent.extra.alarm.MESSAGE=Ketanor%20si%20duele;end">
+      <span class="ico">&#9200;</span>
+      <span>Alarma 16:00<small>Ketanor, solo si duele</small></span>
+    </a>
+
+    <div class="alerta" id="avisoArchivo" style="display:none">
+      <b>Si estos botones verdes no hacen nada:</b> es porque el archivo se abri&oacute; desde la descarga o desde el visor de WhatsApp, y Android no deja que un archivo guardado abra el reloj. Dos soluciones: usar los avisos de calendario de arriba, o crear las alarmas a mano en el reloj, a las <b>09:00 y 21:00</b>, marcando repetir todos los d&iacute;as.
+    </div>
+    <p class="nota" id="notaPc" style="display:none">Los botones verdes funcionan solo en el celular Android.</p>
+  </div>
+
+  <div class="sos">
+    <h2>Ketanor, solo si duele</h2>
+    <p>La primera hoy a las 16:00. Despu&eacute;s, una cada 4 horas <b>solo si el dolor es fuerte</b>. Son 4 tabletas en total y no hay que despertarse para tomarla.</p>
+    <ul>
+      <li>16:00</li>
+      <li>20:00</li>
+      <li>00:00</li>
+      <li>04:00</li>
+    </ul>
+  </div>
+
+  <h2 class="dia">Hoy, lunes 19 <span>d&iacute;a 1</span></h2>
+  <div class="fila" data-id="d19-21"><div class="hora">21:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+
+  <h2 class="dia">Martes 20 <span>d&iacute;a 2</span></h2>
+  <div class="fila" data-id="d20-09"><div class="hora">09:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+  <div class="fila" data-id="d20-21"><div class="hora">21:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+
+  <h2 class="dia">Mi&eacute;rcoles 21 <span>d&iacute;a 3</span></h2>
+  <div class="fila" data-id="d21-09"><div class="hora">09:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+  <div class="fila" data-id="d21-21"><div class="hora">21:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+
+  <h2 class="dia">Jueves 22 <span>d&iacute;a 4</span></h2>
+  <div class="fila" data-id="d22-09"><div class="hora">09:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+  <div class="fila" data-id="d22-21"><div class="hora">21:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+
+  <h2 class="dia">Viernes 23 <span>d&iacute;a 5</span></h2>
+  <div class="fila" data-id="d23-09"><div class="hora">09:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+  <div class="fila" data-id="d23-21"><div class="hora">21:00</div><div class="meds">Optamox + Celecoxib<small>1 comprimido de cada uno</small></div><div class="tic"></div></div>
+
+  <h2 class="dia">S&aacute;bado 24 <span>d&iacute;a 6</span></h2>
+  <div class="fila" data-id="d24-09"><div class="hora">09:00</div><div class="meds">Optamox + Celecoxib<small>&uacute;ltimo Celecoxib</small></div><div class="tic"></div></div>
+  <div class="fila" data-id="d24-21"><div class="hora">21:00</div><div class="meds">Solo Optamox<small>1 comprimido</small></div><div class="tic"></div></div>
+  <div class="fin">El Celecoxib se termina aqu&iacute;. Desde ahora queda solo el antibi&oacute;tico.</div>
+
+  <h2 class="dia">Domingo 25 <span>d&iacute;a 7</span></h2>
+  <div class="fila" data-id="d25-09"><div class="hora">09:00</div><div class="meds">Solo Optamox<small>1 comprimido</small></div><div class="tic"></div></div>
+  <div class="fila" data-id="d25-21"><div class="hora">21:00</div><div class="meds">Solo Optamox<small>1 comprimido</small></div><div class="tic"></div></div>
+
+  <h2 class="dia">Lunes 26 <span>d&iacute;a 8</span></h2>
+  <div class="fila" data-id="d26-09"><div class="hora">09:00</div><div class="meds">Solo Optamox<small>&uacute;ltimo comprimido</small></div><div class="tic"></div></div>
+  <div class="fin">Tratamiento terminado. Son 14 comprimidos de Optamox y 10 de Celecoxib, justo lo recetado. Aqu&iacute; ya se pueden borrar las alarmas.</div>
+
+  <div class="cuidados">
+    <h2>Mientras tanto</h2>
+    <ul>
+      <li>Hielo por fuera de la cara, 10 minutos y descanso, unas 5 veces al d&iacute;a por 3 d&iacute;as.</li>
+      <li>Dormir semi sentada, con la cabeza en alto.</li>
+      <li>Comida blanda y fr&iacute;a. Nada caliente.</li>
+      <li>No fumar, nada de alcohol ni bebidas con gas.</li>
+      <li>No soplar, no silbar, no abrir mucho la boca.</li>
+      <li>Cepillarse con cepillo suave, esquivando la zona operada, y usar el enjuague indicado.</li>
+      <li>Entre el d&iacute;a 7 y el 10 puede aparecer hinchaz&oacute;n o dolor. Si algo se pone feo, llamar al tratante o ir a urgencias.</li>
+    </ul>
+  </div>
+
+  <button id="reset">Borrar las marcas</button>
+
+  <footer>
+    Horario armado a partir de la receta del Dr. Felipe Gonz&aacute;lez L&oacute;pez, IntegraM&eacute;dica Dental.<br>
+    Servicio al cliente 600 390 7000
+  </footer>
+</div>
+
+<script>
+(function(){
+
+  /* marcar tomas */
+  var KEY='horario-ada-v2';
+  var hechas={};
+  try{ hechas=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  function pintar(f){
+    var id=f.getAttribute('data-id');
+    if(hechas[id]){ f.classList.add('ok'); f.querySelector('.tic').innerHTML='&#10003;'; }
+    else{ f.classList.remove('ok'); f.querySelector('.tic').innerHTML=''; }
+  }
+  var filas=document.querySelectorAll('.fila'), i;
+  for(i=0;i<filas.length;i++){
+    (function(f){
+      pintar(f);
+      f.addEventListener('click',function(){
+        var id=f.getAttribute('data-id');
+        hechas[id]=!hechas[id];
+        try{ localStorage.setItem(KEY,JSON.stringify(hechas)); }catch(e){}
+        pintar(f);
+      });
+    })(filas[i]);
+  }
+  document.getElementById('reset').addEventListener('click',function(){
+    hechas={};
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    for(var k=0;k<filas.length;k++) pintar(filas[k]);
+  });
+
+  /* enlaces de Google Calendar */
+  function linkCal(texto, inicio, fin, detalle){
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE'+
+           '&text='+encodeURIComponent(texto)+
+           '&dates='+inicio+'/'+fin+
+           '&ctz=America/Santiago'+
+           '&recur='+encodeURIComponent('RRULE:FREQ=DAILY;COUNT=7')+
+           '&details='+encodeURIComponent(detalle);
+  }
+  var a21=document.getElementById('cal21');
+  var a09=document.getElementById('cal09');
+  a21.href=linkCal('Pastillas 21:00 (Optamox y Celecoxib)','20261019T210000','20261019T211000','Un comprimido de cada uno. Desde el domingo 25 queda solo Optamox.');
+  a09.href=linkCal('Pastillas 09:00 (Optamox y Celecoxib)','20261020T090000','20261020T091000','Un comprimido de cada uno. El Celecoxib termina el sabado 24.');
+  a21.setAttribute('target','_blank');
+  a09.setAttribute('target','_blank');
+
+  /* archivo .ics */
+  document.getElementById('btnIcs').addEventListener('click',function(){
+    var ics=[
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Horario Ada//ES','CALSCALE:GREGORIAN',
+      'BEGIN:VEVENT','UID:ada-noche@horario','DTSTAMP:20261019T180000Z',
+      'DTSTART:20261019T210000','DURATION:PT10M','RRULE:FREQ=DAILY;COUNT=7',
+      'SUMMARY:Pastillas 21:00 (Optamox y Celecoxib)',
+      'DESCRIPTION:Un comprimido de cada uno.',
+      'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Hora de las pastillas','END:VALARM',
+      'END:VEVENT',
+      'BEGIN:VEVENT','UID:ada-manana@horario','DTSTAMP:20261019T180000Z',
+      'DTSTART:20261020T090000','DURATION:PT10M','RRULE:FREQ=DAILY;COUNT=7',
+      'SUMMARY:Pastillas 09:00 (Optamox y Celecoxib)',
+      'DESCRIPTION:Un comprimido de cada uno.',
+      'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Hora de las pastillas','END:VALARM',
+      'END:VEVENT','END:VCALENDAR'
+    ].join('\r\n');
+    try{
+      var blob=new Blob([ics],{type:'text/calendar'});
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='pastillas-ada.ics';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }catch(e){
+      alert('No se pudo generar el archivo. Crea los avisos a mano: 09:00 y 21:00 todos los dias.');
+    }
+  });
+
+  /* avisos segun donde se abrio el archivo */
+  var esAndroid=/Android/i.test(navigator.userAgent);
+  if(!esAndroid){
+    document.getElementById('notaPc').style.display='block';
+  }else if(location.protocol==='file:'||location.protocol==='content:'){
+    document.getElementById('avisoArchivo').style.display='block';
+  }
+
+})();
+</script>
+</body>
+</html>
