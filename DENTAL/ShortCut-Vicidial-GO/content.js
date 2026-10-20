@@ -38,7 +38,7 @@
   // Versión del motor: debe coincidir con manifest.json. La pantalla de control
   // la compara con la de la extensión para avisar si la página sigue con un
   // motor viejo (pasa al actualizar sin recargar Vicidial).
-  const VCA_VERSION = '1.4.2';
+  const VCA_VERSION = '1.4.3';
 
   // Vicidial y las páginas de Bci Seguros (GO, multicotizador…)
   const SITIO_RE = /vicidial\.recaall\.simtastic\.cl|(^|[.\/])bciseguros\.cl(?=$|[\/:])/i;
@@ -849,7 +849,7 @@
       try { el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter' })); } catch (e) {}
       try { el.dispatchEvent(new Event('blur')); el.dispatchEvent(new FocusEvent('focusout', { bubbles: true })); } catch (e) {}
       credEvento('vca:cred-intento');
-      log(tag + ' -> tu ' + que + ' guardado' + (st.secreto ? ' (oculta)' : ''));
+      log(tag + ' -> tu ' + que + (st.secreto ? ' guardada (oculta)' : ' guardado'));
       return true;
     }
     // La persona lo escribe (primera vez en este computador, o lo guardado no sirvió).
@@ -886,7 +886,7 @@
     if (st.secreto || !steps.slice(i + 1).some(p => p.credencial && !p.value)) {
       try { const a = document.getElementById('vca-aviso-login'); if (a) a.remove(); } catch (e) {}
     }
-    log(tag + ': tu ' + que + ' quedó guardado en este computador');
+    log(tag + ': tu ' + que + (st.secreto ? ' quedó guardada' : ' quedó guardado') + ' en este computador');
     if (corrida) corrida.hasta = Math.max(corrida.hasta, Date.now() + 30000);   // la espera no gasta el plazo del atajo
     return true;
   }

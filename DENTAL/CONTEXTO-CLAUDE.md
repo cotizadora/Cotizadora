@@ -60,7 +60,7 @@ Qué hace:
 
 **Pendiente:** confirmar que la UF carga en el PC del trabajo. Antes se quedaba en "actualizando…". Si falla, mandar captura del motivo para saber si la red de Bci bloquea esos sitios y buscar otra fuente.
 
-## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.4.2
+## 2. ShortCut-Vicidial-GO (extensión aparte) — v1.4.3
 
 - **En mi PC:** `Documentos\DENTAL\ShortCut-Vicidial-GO`. Se carga en Chrome con "Cargar descomprimida".
 - **En el repositorio:** `DENTAL/ShortCut-Vicidial-GO/`
@@ -93,6 +93,7 @@ Qué hace:
 - **v1.4.0 (atajos compartidos, credenciales de cada persona):** ⚙️ "📦 Atajos para compañeras" descarga `default-config.json` con todos los atajos de los respaldos `vcaSitio:*` pasados por `sinCredenciales` (pasos input del login o `secreto` → `value:''`, `credencial:'usuario'|'clave'`), más `publicado` y `autor` (`vcaInstalacion`). Exportar también los quita. `background.aplicarCompartidos()` (install/update/startup): si `publicado` > `vcaCompartidoT` y `autor` ≠ esta instalación, inserta/actualiza esos atajos (por id o nombre) en `vcaSitio:<sitio>` con `statesT` nuevo; la página los toma al abrir. Un atajo local con el mismo id y sin la marca `compartido` (el original del autor) nunca se reemplaza. Motor: paso `credencial` sin valor → pide a bridge `vcaCred[sitio][campo]` (oculto con `ocultarClave`); si no hay o fallaron (`vcaCredIntento` anterior a la ejecución y < 5 min, sin `vca:cred-ok` = no se pasó del login), aviso "🔑 Escribe TU usuario y TU clave…", espera hasta 3 min, guarda al cambiar/salir y sigue. Recuadro "🔑 Mi usuario y clave de GO" en el panel (`#credBox`): guarda `vcaCred['go.bciseguros.cl'] = {usuario, clave}` ocultos (`v1:` XOR, misma llave), se abre solo con aviso "· falta" si hay atajos de GO con `credencial` y no hay datos; 🗑 Borrar. Probado con 2 perfiles: GO recibe el usuario de la compañera, nunca el del autor. **Falta el default-config.json real de Eduardo** (lo genera él con 📦).
 - **v1.4.1 (login más rápido):** `esperaEntre` esperaba el 40 % de la pausa grabada (hasta 2,5 s) también después de escribir en un campo; en el login eso era lo que tardó la persona en escribir la clave al grabar. Ahora después de un paso `input`/`check` se sigue a los 120 ms y tras un `select` a los 250 ms; la espera proporcional queda sólo después de clics. Medido: login con grabación lenta 5,2 s → 0,6 s. **ACTUALIZAR-SHORTCUT.bat** baja sólo `DENTAL/ShortCut-Vicidial-GO/*` (atajos y claves no se pierden: están en chrome.storage).
 - **v1.4.2 (login aún más rápido):** el puente preguntaba por el atajo pendiente recién en `load` (+300 ms): en GO eso espera imágenes y scripts con el login ya a la vista. Ahora pregunta en `DOMContentLoaded` (+50 ms) y otra vez en `load` sólo si no había nada (`pendienteEntregado`). Si la clave grabada quedó vacía al llegar a «Ingresar» (autocompletado de Chrome), se reescribe en vez de esperar a la persona. Cierre de pestañas con `soltarSalida` en paralelo. Registro con segundos desde el inicio ("paso 3/10 [0.4 s]"). Medido con GO pesado (imagen de 6 s): botón 1 → panel 6,7 s → 0,5 s.
+- **PC de la casa (v1.4.3):** `DENTAL/shortcut-casa-con-login.zip` = ShortCut con `default-config.json` que trae sólo **LOGUEO GO** armado a mano desde la página real guardada del login (`/login`: usuario `#form-1`, clave `#form-41`, «Ingresar» `#btnSearch`), con `credencial` usuario/clave (se llenan desde el recuadro 🔑). Probado sobre esa página: entra en 0,3 s. Los menús (☰ → Nueva Oportunidad → Ejecutivo/Convenio → RUT → Crear → multicotizador) NO se armaron: en las páginas guardadas el menú y las listas están cerrados; hay que grabarlos o traer el ⬇ Exportar del trabajo. No va en el default-config general (en el PC del trabajo reemplazaría por nombre su LOGUEO GO).
 - **📋 Copiar registro** (en ⚙️ Configuración): copia el registro para mandárselo a Claude si algo falla.
 
 Problemas que se arreglaron:
@@ -102,7 +103,7 @@ Problemas que se arreglaron:
 - **Botones-imagen de Vicidial:** son imágenes sin texto. Ahora se reconocen por su acción (onclick), para que nunca se apriete otro botón por error.
 
 **Pendiente:**
-1. Instalar ShortCut v1.4.2 y Cotizador v3.3.0 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
+1. Instalar ShortCut v1.4.3 y Cotizador v3.3.0 con INSTALAR.bat, grabar "LOGUEO GO" y "EVALUAR MEDIO DE PAGO" (escribiendo la clave en el login) y usarlos desde los botones 1 y 2 del cotizador.
 2. **Borrar los atajos de tipificación antiguos** ("NO LE INTERESA\*\*\*", "no le interesa\*\*\*\*", BUZÓN si es del formulario) y grabarlos de nuevo. Los antiguos no tienen los menús.
 3. Al grabar, el contador debe subir con cada menú. Al final el atajo debe decir 6 pasos (5 sin "Colgar").
 4. Probarlo en una llamada real con ▶.
