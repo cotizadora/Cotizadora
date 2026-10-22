@@ -1172,7 +1172,7 @@ function bloqueRed(red, comuna, r){
       (ESWEB ? '' : ' <button type="button" class="link-carga" data-diag="' + red + '">copiar diagnóstico</button>') + '</p>';
   }else if(!lista.length){
     let motivo;
-    if(red === "unosalud" && r.sinPagina) motivo = "Uno Salud no tiene sucursales en esta comuna.";
+    if(red === "unosalud" && r.sinPagina) motivo = "Uno Salud Dental no tiene clínicas en esta comuna.";
     else if(red === "edental" && !r.total) motivo = "No encontré el listado de clínicas en el sitio de i-dental.";
     else if(red === "edental") motivo = "e-Dental no tiene otras clínicas en esta comuna.";
     else motivo = "No encontré sucursales en la página de esta comuna.";
@@ -1202,24 +1202,24 @@ function pintarResultados(e){
     const donde = !rn ? "" : " (Región " + (/^Metropolitana/.test(rn) ? "" : /^(Maule|Biobío)/.test(rn) ? "del " : "de ") +
                   rn.replace(/^Libertador General Bernardo /, "") + ")";
     caja.innerHTML = '<p class="clin-vacio">En <strong>' + esc(e.sinRed.nombre) + '</strong>' + esc(donde) +
-      ' no hay clínicas de Uno Salud ni de e-Dental.' +
+      ' no hay clínicas de Uno Salud Dental ni de e-Dental.' +
       (e.nada ? ' Tampoco hay en su región.'
               : ' Arriba están las comunas más cercanas que sí tienen' + (e.mismaProvincia ? ' (primero las de su misma provincia)' : ', en su región') + '.') + '</p>';
     return;
   }
   if(e.sinElegir){
     caja.innerHTML = e.nada
-      ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas con clínicas de Uno Salud o e-Dental. Revisa cómo se escribe.</p>'
+      ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas con clínicas de Uno Salud Dental o e-Dental. Revisa cómo se escribe.</p>'
       : '';
     return;
   }
   const nU = (e.uno && e.uno.lista || []).length, nE = (e.ede && e.ede.lista || []).length;
   caja.innerHTML = '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong>' +
-    (e.integrada ? ': <b>' + nU + '</b> Uno Salud · <b>' + nE + '</b> e-Dental · <b>' + (nU + nE) + '</b> en total' : '') + '</p>' +
+    (e.integrada ? ': <b>' + nU + '</b> Uno Salud Dental · <b>' + nE + '</b> e-Dental · <b>' + (nU + nE) + '</b> en total' : '') + '</p>' +
     bloqueRed("unosalud", e.comuna, e.uno) +
     bloqueRed("edental", e.comuna, e.ede) +
     (e.integrada
-      ? '<p class="capturado">Red integrada al cotizador (listado de e-Dental, octubre 2026): <b>' + e.integrada.uno + '</b> Uno Salud y <b>' +
+      ? '<p class="capturado">Red integrada al cotizador (listado de e-Dental, octubre 2026): <b>' + e.integrada.uno + '</b> Uno Salud Dental y <b>' +
         e.integrada.ede + '</b> e-Dental, <b>' + e.integrada.total + '</b> clínicas en ' + e.integrada.comunas + ' comunas.</p>'
       : e.mapeo
       ? '<p class="capturado">Del mapeo del ' + fmt(new Date(e.mapeo.generado)) + ' (' + e.mapeo.resumen.comunas + ' comunas). ' +

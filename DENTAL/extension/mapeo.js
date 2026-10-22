@@ -30,7 +30,7 @@ async function hacerMapeo(){
       const r = await clinicasUnoSalud(com, true);
       paginas.push({slug: com.slug, nombre: com.nombre, lista: r.lista || [], error: r.error || "", sinPagina: !!r.sinPagina});
       hechas++;
-      progreso(hechas, total, "Uno Salud · " + com.nombre + " · " +
+      progreso(hechas, total, "Uno Salud Dental · " + com.nombre + " · " +
                (r.error ? "sin respuesta" : (r.lista || []).length + " sucursales") + "  (" + hechas + " de " + indice.length + ")");
       await pausa(250);
     }
@@ -68,7 +68,7 @@ function mostrar(){
     cifra(r.comunas, "comunas con sucursales") +
     cifra(r.conAmbas, "con las dos redes") +
     cifra(r.sucursalesUno, "sucursales Uno Salud") +
-    cifra(r.sucursalesEde, "sucursales i-dental");
+    cifra(r.sucursalesEde, "clínicas e-Dental");
 
   const av = [];
   if(mapeo.sinIndice){

@@ -32,7 +32,7 @@ const almacen = {
    ============================================================ */
 const RED = {
   unosalud: {
-    nombre: "Uno Salud",
+    nombre: "Uno Salud Dental",
     sitio: "https://www.unosalud.cl/region-comuna/",
     indices: ["https://www.unosalud.cl/region-comuna/", "https://www.unosalud.cl/clinicas/"],
     comuna: function(slug){ return "https://www.unosalud.cl/region-comuna/" + slug + "/"; }
@@ -975,10 +975,10 @@ function leerMapeo(){
 function mapeoCSV(m){
   const filas = [["red", "comuna", "sucursal", "direccion", "telefono", "horario", "fuente"]];
   m.comunas.forEach(function(c){
-    c.uno.forEach(function(s){ filas.push(["Uno Salud", c.nombre, s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
-    c.ede.forEach(function(s){ filas.push(["i-dental", c.nombre, s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
+    c.uno.forEach(function(s){ filas.push(["Uno Salud Dental", c.nombre, s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
+    c.ede.forEach(function(s){ filas.push(["e-Dental", c.nombre, s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
   });
-  (m.sinComuna || []).forEach(function(s){ filas.push(["i-dental", "", s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
+  (m.sinComuna || []).forEach(function(s){ filas.push(["e-Dental", "", s.nombre, s.direccion, s.telefono, s.horario, s.url]); });
   // Punto y coma y BOM: así lo abre bien Excel en español, con tildes
   return "﻿" + filas.map(function(f){
     return f.map(function(v){ v = String(v || ""); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(";");
