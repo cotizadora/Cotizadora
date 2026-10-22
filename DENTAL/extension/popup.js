@@ -971,6 +971,22 @@ function expandirAbrev(q){
 }
 function elegirComuna(q, candidatos){
   const q2 = expandirAbrev(q);
+  // 1) Nombre exacto (sin tildes ni mayúsculas, o una forma conocida): ésa.
+  const real = comunaReal(q) || comunaReal(q2);
+  const exacta = candidatos.find(function(x){ const n = norm(x.nombre); return n === norm(q) || n === norm(q2) || (real && n === norm(real.nombre)); });
+  if(exacta) return {comuna: exacta, sugerencias: []};
+  // 2) Es una comuna real pero sin sucursales: NO se cambia por otra de nombre
+  //    parecido (Talca ≠ Talcahuano, Los Andes ≠ Los Ángeles, Rengo ≠ Renca).
+  //    Se ofrecen las de su misma provincia y, después, las de su región.
+  if(real){
+    const conDatos = candidatos.map(function(x){ return {x: x, r: comunaReal(x.nombre)}; }).filter(function(c){ return c.r; });
+    const misma = function(campo){ return conDatos.filter(function(c){ return c.r[campo] === real[campo]; }).map(function(c){ return c.x; })
+                                          .sort(function(a, b){ return a.nombre.localeCompare(b.nombre, "es"); }); };
+    const prov = misma("provincia"), reg = misma("region").filter(function(x){ return prov.indexOf(x) < 0; });
+    return {comuna: null, sinRed: real, sugerencias: prov.concat(reg).slice(0, 8), mismaProvincia: prov.length};
+  }
+  // 3) Lo escrito no es una comuna completa (va escribiendo, o con un error):
+  //    búsqueda tolerante como antes.
   function pt(n){
     const a = puntaje(q, n), b = q2 !== norm(q) ? puntaje(q2, n) : null;
     return a === null ? b : (b === null ? a : Math.min(a, b));
@@ -1017,7 +1033,7 @@ async function buscarComunaAdentro(q, elegida){
     const r = elegida ? {comuna: m.comunas.find(function(c){ return norm(c.nombre) === norm(elegida.nombre); }), sugerencias: []}
                       : elegirComuna(q, m.comunas);
     mostrarEleccion(r);
-    if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length}); return; }
+    if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length, sinRed: r.sinRed, mismaProvincia: r.mismaProvincia}); return; }
     const c = r.comuna;
     pintarResultados({
       comuna: c.nombre, mapeo: m,
@@ -1067,7 +1083,7 @@ async function buscarComunaAdentro(q, elegida){
     r = elegir(agrupar());
   }
   mostrarEleccion(r);
-  if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length}); return; }
+  if(!r.comuna){ pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length, sinRed: r.sinRed, mismaProvincia: r.mismaProvincia}); return; }
 
   const c = r.comuna;
   const uno = c.slug ? await clinicasUnoSalud(c) : {lista: [], url: RED.unosalud.sitio, error: "", sinPagina: true};
@@ -1084,13 +1100,13 @@ async function buscarComunaAdentro(q, elegida){
 function mostrarEleccion(r){
   const elegida = r.comuna;
   pintarSugerencias(elegida ? r.sugerencias.filter(function(s){ return norm(s.nombre) !== norm(elegida.nombre); }).slice(0, 4)
-                            : r.sugerencias, !!elegida);
+                            : r.sugerencias, !!elegida, r.sinRed ? "Cercanas con sucursal:" : "");
 }
 
-function pintarSugerencias(lista, hayElegida){
+function pintarSugerencias(lista, hayElegida, titulo){
   const c = document.getElementById("sugComunas");
   if(!lista.length){ c.innerHTML = ""; return; }
-  c.innerHTML = '<span class="sug-t">' + (hayElegida ? "¿O era…?" : "¿Cuál comuna?") + '</span>' +
+  c.innerHTML = '<span class="sug-t">' + (titulo || (hayElegida ? "¿O era…?" : "¿Cuál comuna?")) + '</span>' +
     lista.map(function(x){
       return '<button type="button" class="sug" data-slug="' + esc(x.slug) + '" data-nombre="' + esc(x.nombre) + '">' + esc(x.nombre) + '</button>';
     }).join("");
@@ -1162,6 +1178,16 @@ function pintarResultados(e){
   if(e.cargando){
     caja.innerHTML = '<p class="clin-vacio">Buscando sucursales en ' + esc(e.comuna) + '…' +
       (e.ede ? ' Leyendo el listado de i-dental: la primera vez tarda unos segundos.' : '') + '</p>';
+    return;
+  }
+  if(e.sinElegir && e.sinRed){
+    const rn = e.sinRed.regionNombre || "";
+    const donde = !rn ? "" : " (Región " + (/^Metropolitana/.test(rn) ? "" : /^(Maule|Biobío)/.test(rn) ? "del " : "de ") +
+                  rn.replace(/^Libertador General Bernardo /, "") + ")";
+    caja.innerHTML = '<p class="clin-vacio">En <strong>' + esc(e.sinRed.nombre) + '</strong>' + esc(donde) +
+      ' no hay sucursales de Uno Salud ni de i-dental.' +
+      (e.nada ? ' Tampoco hay en su región.'
+              : ' Arriba están las comunas más cercanas que sí tienen' + (e.mismaProvincia ? ' (primero las de su misma provincia)' : ', en su región') + '.') + '</p>';
     return;
   }
   if(e.sinElegir){
