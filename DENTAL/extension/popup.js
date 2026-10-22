@@ -953,6 +953,19 @@ function moverPaso(delta){
 
 /* ---------- búsqueda y resultados ---------- */
 let busquedaId = 0, temporizador = null;
+// Comuna del cliente en línea (de Vicidial): queda fija arriba del buscador,
+// con un botón para volver a ella después de mirar comunas cercanas.
+var comunaCliente = "";
+function pintarComunaCliente(actual){
+  const caja = document.getElementById("clinCliente");
+  if(!caja) return;
+  if(!comunaCliente){ caja.innerHTML = ""; return; }
+  const misma = !actual || norm(actual) === norm(comunaCliente);
+  caja.innerHTML = '<div class="clin-cliente' + (misma ? '' : ' otra') + '">' +
+    '<span class="clin-cliente-t">📍 Comuna del cliente</span> <b>' + esc(comunaCliente) + '</b>' +
+    (misma ? '<span class="clin-cliente-ok">✓ es la que estás viendo</span>'
+           : '<button type="button" class="clin-volver" data-volver="1">↺ Volver a ' + esc(comunaCliente) + '</button>') + '</div>';
+}
 
 function alEscribirComuna(){
   clearTimeout(temporizador);
@@ -1114,8 +1127,17 @@ async function buscarComunaAdentro(q, elegida){
   pintarResultados({comuna: c.nombre, uno: uno, ede: edeDe(c2)});
 }
 
+// Las comunas cercanas a una sin clínicas siguen a la vista mientras se mira
+// una de ellas (para pasar de una a otra sin volver a buscar).
+var cercanasDe = null;
 function mostrarEleccion(r){
   const elegida = r.comuna;
+  if(r.sinRed) cercanasDe = {nombre: r.sinRed.nombre, lista: r.sugerencias.slice()};
+  if(elegida && cercanasDe && cercanasDe.lista.some(function(x){ return norm(x.nombre) === norm(elegida.nombre); })){
+    pintarSugerencias(cercanasDe.lista.filter(function(x){ return norm(x.nombre) !== norm(elegida.nombre); }), false,
+                      "Otras cercanas a " + cercanasDe.nombre + ":");
+    return;
+  }
   pintarSugerencias(elegida ? r.sugerencias.filter(function(s){ return norm(s.nombre) !== norm(elegida.nombre); }).slice(0, 4)
                             : r.sugerencias, !!elegida, r.sinRed ? "Cercanas con sucursal:" : "");
 }
@@ -1123,6 +1145,7 @@ function mostrarEleccion(r){
 function pintarSugerencias(lista, hayElegida, titulo){
   const c = document.getElementById("sugComunas");
   if(!lista.length){ c.innerHTML = ""; return; }
+  c.className = titulo ? "cercanas" : "";
   c.innerHTML = '<span class="sug-t">' + (titulo || (hayElegida ? "¿O era…?" : "¿Cuál comuna?")) + '</span>' +
     lista.map(function(x){
       return '<button type="button" class="sug" data-slug="' + esc(x.slug) + '" data-nombre="' + esc(x.nombre) + '">' + esc(x.nombre) + '</button>';
@@ -1160,7 +1183,7 @@ function bloqueRed(red, comuna, r){
   else if(lista.length) estado = lista.length + (lista.length === 1 ? " sucursal" : " sucursales");
   else if(red === "edental" && !r.total) estado = "sin listado";
   else estado = "ninguna en " + esc(comuna);
-  let h = '<div class="redblq"><div class="redcab">' +
+  let h = '<div class="redblq ' + red + '"><div class="redcab">' +
     '<span class="red ' + red + '">' + nom + '</span>' +
     '<span class="redn">' + estado + '</span>' +
     '<a class="fuente" href="' + esc(red === "unosalud" && r.url ? r.url : RED[red].sitio) + '" target="_blank" rel="noopener">ver en el sitio &#8599;</a>' +
@@ -1184,14 +1207,15 @@ function bloqueRed(red, comuna, r){
       h += '<p class="clin-vacio">El sitio no dice la comuna de alguna de estas clínicas: aparece bajo el título <strong>' +
            esc(comuna) + '</strong>. Confirma la dirección antes de dársela al cliente.</p>';
     }
-    h += lista.map(tarjetaHTML).join("");
+    h += '<ol class="clin-lista">' + lista.map(function(c){ return '<li>' + tarjetaHTML(c) + '</li>'; }).join("") + '</ol>';
   }
   return h + '</div>';
 }
 
 function pintarResultados(e){
   const caja = document.getElementById("clinRes");
-  if(!e){ caja.innerHTML = ""; return; }
+  if(!e){ caja.innerHTML = ""; pintarComunaCliente(""); return; }
+  pintarComunaCliente(e.sinRed ? e.sinRed.nombre : e.comuna);
   if(e.cargando){
     caja.innerHTML = '<p class="clin-vacio">Buscando sucursales en ' + esc(e.comuna) + '…' +
       (e.ede ? ' Leyendo el listado de i-dental: la primera vez tarda unos segundos.' : '') + '</p>';
@@ -1201,10 +1225,10 @@ function pintarResultados(e){
     const rn = e.sinRed.regionNombre || "";
     const donde = !rn ? "" : " (Región " + (/^Metropolitana/.test(rn) ? "" : /^(Maule|Biobío)/.test(rn) ? "del " : "de ") +
                   rn.replace(/^Libertador General Bernardo /, "") + ")";
-    caja.innerHTML = '<p class="clin-vacio">En <strong>' + esc(e.sinRed.nombre) + '</strong>' + esc(donde) +
+    caja.innerHTML = '<p class="clin-vacio clin-sinred">En <strong>' + esc(e.sinRed.nombre) + '</strong>' + esc(donde) +
       ' no hay clínicas de Uno Salud Dental ni de e-Dental.' +
       (e.nada ? ' Tampoco hay en su región.'
-              : ' Arriba están las comunas más cercanas que sí tienen' + (e.mismaProvincia ? ' (primero las de su misma provincia)' : ', en su región') + '.') + '</p>';
+              : ' Toca una de las comunas cercanas de arriba' + (e.mismaProvincia ? ' (primero las de su misma provincia)' : ', de su región') + '.') + '</p>';
     return;
   }
   if(e.sinElegir){
@@ -1214,8 +1238,12 @@ function pintarResultados(e){
     return;
   }
   const nU = (e.uno && e.uno.lista || []).length, nE = (e.ede && e.ede.lista || []).length;
-  caja.innerHTML = '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong>' +
-    (e.integrada ? ': <b>' + nU + '</b> Uno Salud Dental · <b>' + nE + '</b> e-Dental · <b>' + (nU + nE) + '</b> en total' : '') + '</p>' +
+  caja.innerHTML = (e.integrada
+      ? '<div class="clin-resumen"><div class="clin-resumen-c">Clínicas en <strong>' + esc(e.comuna) + '</strong></div>' +
+        '<div class="clin-resumen-n"><span class="cr unosalud"><b>' + nU + '</b> Uno Salud Dental</span>' +
+        '<span class="cr edental"><b>' + nE + '</b> e-Dental</span>' +
+        '<span class="cr total"><b>' + (nU + nE) + '</b> en total</span></div></div>'
+      : '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong></p>') +
     bloqueRed("unosalud", e.comuna, e.uno) +
     bloqueRed("edental", e.comuna, e.ede) +
     (e.integrada
@@ -1315,6 +1343,12 @@ document.getElementById("abrirClin").addEventListener("click", function(){
 document.getElementById("comuna").addEventListener("input", function(){ alEscribirComuna(); guardarEstado(); });
 document.getElementById("comuna").addEventListener("keydown", function(e){
   if(e.key === "Enter"){ e.preventDefault(); clearTimeout(temporizador); if(norm(this.value).length >= 3) buscarComuna(this.value); }
+});
+document.getElementById("clinCliente").addEventListener("click", function(e){
+  if(!e.target.closest("[data-volver]") || !comunaCliente) return;
+  document.getElementById("comuna").value = comunaCliente;
+  guardarEstado();
+  buscarComuna(comunaCliente);
 });
 document.getElementById("sugComunas").addEventListener("click", function(e){
   const b = e.target.closest("button.sug");
@@ -1839,6 +1873,7 @@ async function sincronizarVicidial(){
     guardarEstado();
   }
   const comCli = nombrePropio(c.comuna || c.ciudad);
+  if(comCli) comunaCliente = comCli;
   if(c.lead) almacen.escribir("lead", {id: c.lead, t: Date.now(),
     aplicado: !!(yaAplicadas || c.cargas.length), comuna: !!(yaComuna || comCli)});
   cliente = c;

@@ -633,3 +633,61 @@ body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
 .guion:not([data-contraste="normal"]) .gs.bienestar h4,
 .guion:not([data-contraste="normal"]) .gs.muerte h4{color:var(--g-ink)}
 
+/* ---------- Buscador de sucursales: módulos claros ---------- */
+/* Comuna del cliente, fija arriba; con botón para volver a ella */
+.clin-cliente{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:7px;padding:6px 9px;border-radius:9px;
+  background:#e8f0fb;border:1px solid #b9cdea;font-size:11.5px;color:var(--ink)}
+.clin-cliente b{font-size:13px;color:#123a6d}
+.clin-cliente-t{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#4a6285}
+.clin-cliente-ok{font-size:10.5px;font-weight:700;color:var(--ok)}
+.clin-cliente.otra{background:#fff4e0;border-color:#f0c27a}
+.clin-volver{margin-left:auto;font:inherit;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid #123a6d;background:#123a6d;color:#fff}
+.clin-volver:hover{filter:brightness(1.12)}
+/* Comunas cercanas: en su propio recuadro */
+#sugComunas.cercanas{padding:6px 8px;border-radius:9px;background:var(--soft);border:1px dashed var(--line)}
+#sugComunas.cercanas .sug-t{font-weight:800;color:var(--ink)}
+.clin-sinred{margin-top:6px;padding:8px 10px;border-radius:9px;background:var(--badbg);color:var(--ink)}
+/* Resumen grande de la comuna */
+.clin-resumen{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.clin-resumen-c{font-size:12px;color:var(--muted)}
+.clin-resumen-c strong{font-size:16px;color:var(--ink)}
+.clin-resumen-n{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.cr{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid transparent}
+.cr b{font-size:14px;margin-right:2px}
+.cr.unosalud{background:#e1f3f1;color:#0b6b62;border-color:#9fd6cf}
+.cr.edental{background:#fff1df;color:#9a4b00;border-color:#f3c48b}
+.cr.total{background:var(--soft);color:var(--ink);border-color:var(--line)}
+/* Cada cadena es un módulo con su color */
+.redblq{margin-top:9px;padding:0 0 6px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.redblq .redcab{margin:0;padding:6px 9px;gap:8px}
+.redblq.unosalud{border-color:#9fd6cf;background:#f1faf9}
+.redblq.unosalud .redcab{background:#0b7a6f;color:#fff}
+.redblq.edental{border-color:#f3c48b;background:#fff8ef}
+.redblq.edental .redcab{background:#c45f00;color:#fff}
+.redblq .redcab .red{background:rgba(255,255,255,.95);font-size:10px;padding:2px 8px}
+.redblq.unosalud .redcab .red{color:#0b6b62}
+.redblq.edental .redcab .red{color:#9a4b00}
+.redblq .redcab .redn{color:#fff;font-size:12px}
+.redblq .redcab .fuente{color:#fff;opacity:.92}
+.redblq .clin-vacio{padding:6px 10px}
+.clin-lista{margin:6px 8px 0;padding:0 0 0 20px;font-size:11px;font-weight:800}
+.clin-lista li{margin-bottom:5px}
+.redblq.unosalud .clin-lista li::marker{color:#0b7a6f}
+.redblq.edental .clin-lista li::marker{color:#c45f00}
+.clin-lista .clin{font-weight:400;background:var(--bg);border-left:3px solid transparent;border-radius:0 7px 7px 0;padding:5px 8px}
+.redblq.unosalud .clin-lista .clin{border-left-color:#0b7a6f}
+.redblq.edental .clin-lista .clin{border-left-color:#c45f00}
+.clin-lista .clin-n{font-size:12.5px}
+.clin-lista .clin-d{font-size:11px}
+@media (prefers-color-scheme:dark){
+  .clin-cliente{background:#16243a;border-color:#2c4a75}
+  .clin-cliente b{color:#9cc3ff}
+  .clin-cliente-t{color:#8fa7c9}
+  .clin-cliente.otra{background:#2e2414;border-color:#7a5a24}
+  .redblq.unosalud{background:#0f2523;border-color:#235e57}
+  .redblq.edental{background:#2a1d10;border-color:#7a4f1e}
+  .cr.unosalud{background:#0f2523;color:#7fd8cc;border-color:#235e57}
+  .cr.edental{background:#2a1d10;color:#f5b46b;border-color:#7a4f1e}
+}
+
