@@ -1,0 +1,416 @@
+<title>Portafolio Eduardo Pérez</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: taller de herramientas — cabecera con cifras reales, filtro por área y fichas de proyecto en grilla */
+:root {
+  --bg: #f2f4f3;
+  --surface: #ffffff;
+  --ink: #14211f;
+  --muted: #5b6a67;
+  --line: #d9dfdd;
+  --accent: #0d6b5f;
+  --accent-soft: #dcefeb;
+  --signal: #b9770e;
+  --signal-soft: #fbefd9;
+  --live: #1d7a3a;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1615; --surface: #172120; --ink: #e6eeec; --muted: #9aaba7; --line: #2a3735;
+    --accent: #4fc2ad; --accent-soft: #163a34; --signal: #e9b04f; --signal-soft: #3a2c12; --live: #5ccf7d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1615; --surface: #172120; --ink: #e6eeec; --muted: #9aaba7; --line: #2a3735;
+  --accent: #4fc2ad; --accent-soft: #163a34; --signal: #e9b04f; --signal-soft: #3a2c12; --live: #5ccf7d;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+}
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 48px 72px;
+  display: grid; gap: 40px;
+}
+header { display: grid; gap: 20px; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--accent);
+}
+h1 {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(40px, 7vw, 76px); line-height: .98; letter-spacing: -.02em;
+  margin: 0; text-wrap: balance; max-width: 15ch;
+}
+h1 em { font-style: normal; color: var(--accent); }
+.lede { max-width: 62ch; color: var(--muted); font-size: 18px; margin: 0; }
+.lede strong { color: var(--ink); font-weight: 600; }
+
+.stats {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.stat { padding: 18px 16px 18px 0; display: grid; gap: 2px; }
+.stat + .stat { padding-left: 16px; border-left: 1px solid var(--line); }
+.stat b {
+  font-family: var(--font-display); font-weight: 700; font-size: 36px;
+  font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+.stat span { color: var(--muted); font-size: 14px; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters button {
+  font: 500 14px var(--font-body); color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; padding: 7px 14px; cursor: pointer;
+}
+.filters button:hover { border-color: var(--accent); }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.filters button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.filters .n { font-family: var(--font-mono); font-size: 12px; opacity: .7; margin-left: 4px; }
+
+section.area { display: grid; gap: 16px; }
+.area-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.area-head h2 {
+  font-family: var(--font-display); font-weight: 700; font-size: 26px;
+  margin: 0; letter-spacing: -.01em;
+}
+.area-head p { margin: 0; color: var(--muted); font-size: 15px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 22px; display: grid; gap: 12px; align-content: start; min-width: 0;
+}
+.card.feature { grid-column: span 2; }
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.status {
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .04em;
+  padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+}
+.status.live { color: var(--live); background: color-mix(in srgb, var(--live) 12%, transparent); }
+.status.live::before { content: "● "; }
+.status.internal { color: var(--signal); background: var(--signal-soft); }
+.status.download { color: var(--accent); background: var(--accent-soft); }
+.client { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.card h3 {
+  font-family: var(--font-display); font-weight: 700; font-size: 23px;
+  line-height: 1.15; margin: 0; text-wrap: balance;
+}
+.card .what { margin: 0; color: var(--ink); }
+.card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 15px; display: grid; gap: 4px; }
+.card ul li::marker { color: var(--accent); }
+.stack { display: flex; flex-wrap: wrap; gap: 6px; }
+.stack span {
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px;
+}
+.card a.go {
+  justify-self: start; font-weight: 600; font-size: 15px; color: var(--accent);
+  text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 1px;
+  overflow-wrap: anywhere;
+}
+.card a.go:hover { color: var(--ink); }
+.card .nolink { font-size: 14px; color: var(--muted); }
+
+footer {
+  border-top: 1px solid var(--line); padding-top: 20px;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
+  color: var(--muted); font-size: 14px;
+}
+footer .mono { font-family: var(--font-mono); font-size: 12px; }
+
+@media (max-width: 760px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat:nth-child(3) { padding-left: 0; border-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .card.feature { grid-column: auto; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card { transition: border-color .15s ease, transform .15s ease; }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Portafolio · Apps y herramientas · 2026</div>
+    <h1>Software hecho para <em>vender, atender y crear</em></h1>
+    <p class="lede">Apps web, extensiones y herramientas que diseñé y construí con IA, la mayoría para resolver un problema real de trabajo: <strong>cotizar más rápido, ordenar leads, publicar inventario y comunicar mejor</strong>. Varias están en uso diario por equipos comerciales.</p>
+    <div class="stats" aria-label="Resumen">
+      <div class="stat"><b id="s-total">17</b><span>proyectos</span></div>
+      <div class="stat"><b id="s-live">13</b><span>publicados en línea</span></div>
+      <div class="stat"><b>14</b><span>repositorios en GitHub</span></div>
+      <div class="stat"><b>~9.800</b><span>líneas en CotizadorGo!</span></div>
+    </div>
+  </header>
+
+  <nav class="filters" id="filters" aria-label="Filtrar por área"></nav>
+
+  <main id="areas" style="display:grid;gap:44px"></main>
+
+  <footer>
+    <span>Creado por Eduardo Pérez</span>
+    <span class="mono">GitHub · cotizadora</span>
+  </footer>
+</div>
+
+<script>
+const AREAS = [
+  { id: "ventas", name: "Ventas B2B y call center", note: "Herramientas para el equipo comercial de Equifax / Infobusiness" },
+  { id: "inmo", name: "Inmobiliaria y SaaS", note: "Productos con usuarios, inventario y reservas" },
+  { id: "marketing", name: "Marketing y captación", note: "Piezas que convierten: afiches, menús, QR y WhatsApp" },
+  { id: "creativo", name: "Creativos y educativos", note: "Música, cuentos, juegos" }
+];
+
+const PROJECTS = [
+  {
+    area: "ventas", feature: true, status: "live", client: "Equifax Chile · Infobusiness",
+    name: "CotizadorGo!",
+    what: "Estación de cotización para los productos Equifax. Arma la cotización, calcula en UF y pesos, y deja listo el correo para el cliente.",
+    points: [
+      "13 productos cotizables: Reporte Interactivo, Mora Control, Portfolio Monitor, Malla Societaria, Partner Check, Data Finder y más",
+      "Conversor UF/CLP con la UF del día, tramos por volumen y descuentos con IVA correcto",
+      "Historial, respaldos automáticos, importación de bases, limpieza de duplicados y recordatorios",
+      "Biblioteca comercial con llamadas evaluadas por una rúbrica de 9 criterios (objeciones, valor, cierre)",
+      "Centro de descargas con fichas PDF de producto y tutoriales en video"
+    ],
+    stack: ["HTML/CSS/JS", "un solo archivo", "GitHub Pages"],
+    url: "https://cotizadora.github.io/Cotizadora/"
+  },
+  {
+    area: "ventas", status: "download", client: "Equipo de ventas",
+    name: "CRM Extractor Pro + ShortCut-VocalCRM",
+    what: "Extensión para Chrome y Edge que toma los datos del CRM y los pasa a la cotizadora, y graba atajos que llenan formularios del CRM en un clic.",
+    points: [
+      "14 atajos de equipo (por ejemplo \"NO CONTACTO\") con configuración compartida",
+      "Instalador con link estable a la última versión",
+      "Versión 1.2 con panel de control y marcador"
+    ],
+    stack: ["Chrome Extension MV3", "JavaScript"],
+    url: "https://github.com/cotizadora/extractor-crm"
+  },
+  {
+    area: "ventas", status: "download", client: "Call center",
+    name: "MuteReal",
+    what: "Programa de Windows que muestra si el micrófono está realmente silenciado, para no dejar al cliente escuchando la oficina.",
+    points: [
+      "Lee el estado del micrófono directo del sistema de audio de Windows",
+      "Arranca solo con el equipo; pesa 25 KB",
+      "Botón de soporte que abre WhatsApp con el problema ya escrito"
+    ],
+    stack: ["Windows .exe", "Core Audio API"]
+  },
+  {
+    area: "ventas", status: "live", client: "Equipo de ventas",
+    name: "Correos de Bienvenida",
+    what: "Generador de correos de bienvenida y plantillas para nuevos clientes, con el formato y la firma del ejecutivo.",
+    points: [
+      "Plantillas listas para copiar en Outlook",
+      "Se usa junto a la cotizadora en el flujo de cierre"
+    ],
+    stack: ["HTML/JS"],
+    url: "https://cotizadora.github.io/Cotizadora/bienvenidas/"
+  },
+  {
+    area: "ventas", status: "internal", client: "Equifax Chile",
+    name: "Colección de fichas de producto",
+    what: "Fichas institucionales en PDF para presentar productos al cliente, todas con la misma plantilla y tono.",
+    points: [
+      "Mora Control, Partner Check, Portfolio Monitor y bundle Mora Control + Reporte Interactivo",
+      "Formulario de clientes y tutorial de firma en video",
+      "Generadas por código (A4, 8 páginas) para mantener la coherencia visual"
+    ],
+    stack: ["HTML → PDF", "WeasyPrint"]
+  },
+  {
+    area: "inmo", feature: true, status: "live", client: "Confianza Inmobiliaria",
+    name: "App de ejecutivos de arriendo",
+    what: "App instalable donde cada ejecutivo filtra el inventario de Assetplan y publica propiedades en Facebook y WhatsApp en segundos.",
+    points: [
+      "Filtros por comuna, precio, dormitorios (incluye estudio, loft y dúplex), sin aval, terraza, descuentos y fecha de inicio",
+      "Generador de posts para Facebook y texto para WhatsApp con copia en un toque",
+      "Firma personal de cada ejecutivo y centro de tutoriales integrado",
+      "Funciona sin conexión; cada ejecutivo carga su propio CSV desde Assetplan",
+      "Primera versión hecha con React + FastAPI; luego simplificada a una PWA de un archivo"
+    ],
+    stack: ["PWA", "HTML/CSS/JS", "Service Worker", "React + FastAPI (v1)"],
+    url: "https://cotizadora.github.io/confianza-app/"
+  },
+  {
+    area: "inmo", status: "live", client: "Producto propio (SaaS)",
+    name: "Agendamientos",
+    what: "Plataforma de reservas que se arrienda mensualmente a gimnasios, salones y cualquier negocio que trabaje con horas.",
+    points: [
+      "Multi-negocio: cada uno con su página, su marca y sus clientes",
+      "4 tipos de usuario: super admin, dueño, profesor y cliente",
+      "Calendario semanal por especialidad, reserva en un clic, acceso de clientes por aprobación",
+      "Cobros manuales, correos automáticos e instalable como app"
+    ],
+    stack: ["Next.js", "TypeScript", "Supabase", "Tailwind", "Vercel"],
+    url: "https://agendamientos-rosy.vercel.app"
+  },
+  {
+    area: "marketing", status: "live", client: "IPLACEX",
+    name: "Captación de postulantes en terreno",
+    what: "Experiencia para ferias de admisión: el postulante escanea un QR, juega y queda registrado como lead.",
+    points: [
+      "Flujo QR → formulario → ruleta 10×10 → número de concurso → WhatsApp",
+      "Cada lead llega solo al registro central",
+      "Panel privado de gestión, generador de QR y afiche A4 para imprimir"
+    ],
+    stack: ["HTML/JS", "Registro central", "QR"],
+    url: "https://cotizadora.github.io/iplacex-admision/"
+  },
+  {
+    area: "marketing", status: "live", client: "Carritos Kimbo",
+    name: "Menú y afiche de Carritos Kimbo",
+    what: "Carta digital editable para un carro de comida y afiche animado de reinauguración.",
+    points: [
+      "Menú que el dueño edita desde el celular, instalable como app",
+      "Vista previa al compartir por WhatsApp con el logo",
+      "Afiche \"¡Volvimos!\" con ilustración propia por capas, animación a 60 fps, música y descarga en video",
+      "Flyer A5 listo para imprenta (PDF y PNG a 300 DPI)"
+    ],
+    stack: ["PWA", "Canvas", "Video"],
+    url: "https://cotizadora.github.io/Cotizadora/kimbo/editor.html"
+  },
+  {
+    area: "marketing", status: "live", client: "Plan Urgencia Dental",
+    name: "Afiche Urgencia Dental",
+    what: "Cada vendedor escribe su nombre y celular y obtiene su afiche con un QR a su WhatsApp.",
+    points: [
+      "Formatos para Instagram, Facebook y TikTok",
+      "QR generado al momento, sin diseñador",
+      "Instalable como app"
+    ],
+    stack: ["PWA", "Canvas", "QR"],
+    url: "https://cotizadora.github.io/Cotizadora/afiche/"
+  },
+  {
+    area: "marketing", status: "internal", client: "Sindicato · Claro Empresas",
+    name: "Propuesta de portabilidad",
+    what: "Presentación web y PDF para llevar un sindicato desde Movistar a planes Empresas de Claro.",
+    points: [
+      "Comparación con la situación actual",
+      "Tres planes Empresas y equipos con pie $0"
+    ],
+    stack: ["HTML", "PDF"]
+  },
+  {
+    area: "creativo", feature: true, status: "live", client: "Banda Mala Difusión",
+    name: "Montador Mala Difusión",
+    what: "Editor para que la banda arme portadas, posts, historias y videos para todas sus redes sin saber diseño.",
+    points: [
+      "6 diseños y 14 formatos con zonas seguras por plataforma",
+      "Mover, escalar, girar, capas, filtros, deshacer y rehacer",
+      "Animaciones de cámara, parallax y transiciones entre integrantes",
+      "Exporta PNG hasta 4× y video MP4 real (H.264) desde el navegador",
+      "Además, el sitio web de la banda con estética rockabilly de los 50"
+    ],
+    stack: ["Canvas", "WebCodecs", "FFmpeg.wasm"],
+    url: "https://cotizadora.github.io/Cotizadora/mala-difusion/"
+  },
+  {
+    area: "creativo", status: "live", client: "Tu Cuento Mágico",
+    name: "El Canto Secreto de Pip",
+    what: "Cuento infantil ilustrado con narración, música y hojas que se dan vuelta como un libro.",
+    points: [
+      "Modo automático: el cuento avanza solo al terminar cada narración",
+      "Pausa general y repetir lámina"
+    ],
+    stack: ["HTML/CSS/JS", "Audio"],
+    url: "https://tucuentomagico.github.io/pip/"
+  },
+  {
+    area: "creativo", status: "live", client: "Juego",
+    name: "Tío René Invaders",
+    what: "Juego arcade estilo Space Invaders protagonizado por el Tío René.",
+    points: [
+      "54 frases de fondo, arranque con un solo gesto",
+      "Instalable y con puntaje para compartir"
+    ],
+    stack: ["Canvas", "PWA"],
+    url: "https://portafolio-creativo.github.io/tio-rene-invaders/"
+  },
+  {
+    area: "creativo", status: "live", client: "Educativo",
+    name: "Vertebrados e Invertebrados con Antonela",
+    what: "Juego para niños que enseña a clasificar animales, con bienvenida hablada y láminas.",
+    points: ["Voz que guía al niño desde el inicio"],
+    stack: ["HTML/JS", "Voz"],
+    url: "https://cotizadora.github.io/shortcut/juego/"
+  },
+  {
+    area: "creativo", status: "live", client: "Para Sofía Valentina",
+    name: "Tómbola Bingo 75",
+    what: "Tómbola digital para cantar bingo: bolas que se mezclan, sonido real y cada número dicho en voz alta.",
+    points: ["Instalable y funciona sin conexión"],
+    stack: ["PWA", "Voz"],
+    url: "https://cotizadora.github.io/Cotizadora/bingo/"
+  },
+  {
+    area: "ventas", status: "internal", client: "Equipo de ventas",
+    name: "Sonidos y jingle del equipo",
+    what: "Efectos de sonido para la cotizadora (correo enviado, WhatsApp enviado, Outlook creado) y la canción \"La Cumbia del DICOM\".",
+    points: ["Hacen visible cada acción completada en la herramienta"],
+    stack: ["Audio"]
+  }
+];
+
+const STATUS = { live: "En línea", internal: "Uso interno", download: "Descargable" };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const host = u => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+document.getElementById("s-total").textContent = PROJECTS.length;
+document.getElementById("s-live").textContent = PROJECTS.filter(p => p.status === "live").length;
+
+function card(p) {
+  const link = p.url
+    ? `<a class="go" href="${esc(p.url)}" target="_blank" rel="noopener">${p.status === "download" ? "Ver en GitHub" : "Abrir"} · ${esc(host(p.url))}</a>`
+    : `<span class="nolink">Disponible para mostrar en reunión</span>`;
+  return `<article class="card${p.feature ? " feature" : ""}">
+    <div class="card-top"><span class="client">${esc(p.client)}</span><span class="status ${p.status}">${STATUS[p.status]}</span></div>
+    <h3>${esc(p.name)}</h3>
+    <p class="what">${esc(p.what)}</p>
+    <ul>${p.points.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    <div class="stack">${p.stack.map(x => `<span>${esc(x)}</span>`).join("")}</div>
+    ${link}
+  </article>`;
+}
+
+function render(filter) {
+  document.getElementById("areas").innerHTML = AREAS
+    .filter(a => filter === "all" || a.id === filter)
+    .map(a => {
+      const items = PROJECTS.filter(p => p.area === a.id);
+      return `<section class="area" id="${a.id}">
+        <div class="area-head"><h2>${esc(a.name)}</h2><p>${esc(a.note)}</p></div>
+        <div class="grid">${items.map(card).join("")}</div>
+      </section>`;
+    }).join("");
+  document.querySelectorAll("#filters button").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === filter));
+}
+
+document.getElementById("filters").innerHTML =
+  `<button type="button" data-f="all">Todo<span class="n">${PROJECTS.length}</span></button>` +
+  AREAS.map(a => `<button type="button" data-f="${a.id}">${esc(a.name)}<span class="n">${PROJECTS.filter(p => p.area === a.id).length}</span></button>`).join("");
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (b) render(b.dataset.f);
+});
+
+const start = AREAS.some(a => a.id === location.hash.slice(1)) ? location.hash.slice(1) : "all";
+render(start);
+</script>
