@@ -727,6 +727,49 @@ body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
 .logo-red{display:block;height:24px;width:auto;flex:none;background:#fff;border-radius:6px;padding:2px 5px;box-sizing:content-box;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
 .logo-red.unosalud{padding:0;background:none;box-shadow:none}
 
+/* 3.4.6: módulos con más contraste y sucursales en cápsula.
+   Cabecera oscura con el color de la marca, cuerpo teñido y cada sucursal
+   como una cápsula blanca con su número en un círculo. */
+.redblq.unosalud,.redblq.edental{border:0;border-radius:12px;padding:0 0 7px;box-shadow:0 1px 3px rgba(0,30,60,.18)}
+.redblq.unosalud{background:#dcecf8}
+.redblq.edental{background:#d3f1ef}
+.redblq.unosalud .redcab{background:#14507e;color:#fff;border-bottom:3px solid #a9d529;padding:6px 10px}
+.redblq.edental .redcab{background:#001d2c;color:#fff;border-bottom:3px solid #21c6be;padding:6px 10px}
+.redblq .redcab .redn{color:#fff;font-size:12.5px;font-weight:800}
+.redblq.unosalud .redcab .fuente,.redblq.edental .redcab .fuente{margin-left:auto;color:#fff;font-size:10.5px;font-weight:700;
+  padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35)}
+.redblq .redcab .fuente:hover{background:rgba(255,255,255,.28);text-decoration:none}
+.redblq .logo-red,.redblq .logo-red.unosalud{background:#fff;padding:2px 6px;border-radius:999px;height:20px}
+.redblq.unosalud .clin-vacio,.redblq.edental .clin-vacio{color:#2b3b4c}
+.redblq.unosalud .clin-vacio strong,.redblq.edental .clin-vacio strong{color:#0d1b2a}
+
+.redblq .clin-lista{list-style:none;margin:7px 8px 0;padding:0;counter-reset:suc}
+.redblq .clin-lista li{counter-increment:suc;margin-bottom:4px}
+.redblq.unosalud .clin-lista .clin,.redblq.edental .clin-lista .clin{display:grid;grid-template-columns:20px 1fr;column-gap:8px;align-items:center;
+  margin:0;padding:3px 14px 3px 4px;border:0;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(0,30,60,.14)}
+.redblq .clin-lista .clin::before{content:counter(suc);grid-row:1 / span 3;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+.redblq.unosalud .clin-lista .clin::before{background:#14507e}
+.redblq.edental .clin-lista .clin::before{background:#0e8f88}
+.redblq .clin-lista .clin > *{grid-column:2;min-width:0}
+.redblq .clin-lista .clin-n{font-size:11.5px;font-weight:800;letter-spacing:.01em;color:#0d1b2a;line-height:1.15;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.redblq .clin-lista .clin-d{font-size:10.5px;color:#4a5a6a;line-height:1.15;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.redblq .clin-lista .clin-m{margin-top:1px}
+@media (prefers-color-scheme:dark){
+  .redblq.unosalud{background:#0d2234}
+  .redblq.edental{background:#0a2a2a}
+  .redblq.unosalud .redcab{background:#14507e}
+  .redblq.edental .redcab{background:#001d2c}
+  .redblq.unosalud .clin-lista .clin,.redblq.edental .clin-lista .clin{background:#1b2b3b;box-shadow:none}
+  .redblq .clin-lista .clin-n{color:#eef4fa}
+  .redblq .clin-lista .clin-d{color:#a9b8c8}
+  .redblq.edental .clin-lista .clin::before{background:#21c6be;color:#001d2c}
+  .redblq.unosalud .clin-lista .clin::before{background:#49a6df;color:#06263d}
+  .redblq.unosalud .clin-vacio,.redblq.edental .clin-vacio{color:#c9d6e2}
+  .redblq.unosalud .clin-vacio strong,.redblq.edental .clin-vacio strong{color:#fff}
+}
+
 /* ============ versión web ============ */
 :root{ color-scheme: light }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ color-scheme: dark } }
