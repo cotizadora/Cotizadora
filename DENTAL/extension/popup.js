@@ -1024,6 +1024,23 @@ try{
 
 async function buscarComunaAdentro(q, elegida){
   const id = ++busquedaId;
+  // 0. Red integrada al cotizador (listado de e-Dental, con las Uno Salud):
+  //    respuesta al instante, sin leer los sitios. Cuántas hay de cada cadena.
+  if(typeof RED_DENTAL !== "undefined" && RED_DENTAL.length){
+    const cands = redDentalPorComuna();
+    const r = elegida ? {comuna: cands.find(function(c){ return norm(c.nombre) === norm(elegida.nombre); }) || null, sugerencias: []}
+                      : elegirComuna(q, cands);
+    mostrarEleccion(r);
+    if(!r.comuna){
+      pintarResultados({sinElegir: true, comuna: q, nada: !r.sugerencias.length, sinRed: r.sinRed, mismaProvincia: r.mismaProvincia});
+      return;
+    }
+    const c = r.comuna;
+    pintarResultados({comuna: c.nombre, integrada: totalesRedDental(),
+      uno: {lista: c.uno, url: RED.unosalud.sitio, error: "", sinPagina: !c.uno.length},
+      ede: {lista: c.ede, error: "", total: totalesRedDental().ede}});
+    return;
+  }
   pintarResultados({cargando: true, comuna: q});
 
   // 1. Con mapeo guardado, la respuesta es inmediata y no se consulta nada
@@ -1157,7 +1174,7 @@ function bloqueRed(red, comuna, r){
     let motivo;
     if(red === "unosalud" && r.sinPagina) motivo = "Uno Salud no tiene sucursales en esta comuna.";
     else if(red === "edental" && !r.total) motivo = "No encontré el listado de clínicas en el sitio de i-dental.";
-    else if(red === "edental") motivo = "i-dental no tiene sucursales en esta comuna.";
+    else if(red === "edental") motivo = "e-Dental no tiene otras clínicas en esta comuna.";
     else motivo = "No encontré sucursales en la página de esta comuna.";
     h += '<p class="clin-vacio">' + motivo +
          (red === "unosalud" && r.sinPagina || red === "edental" && r.total ? '' :
@@ -1185,21 +1202,26 @@ function pintarResultados(e){
     const donde = !rn ? "" : " (Región " + (/^Metropolitana/.test(rn) ? "" : /^(Maule|Biobío)/.test(rn) ? "del " : "de ") +
                   rn.replace(/^Libertador General Bernardo /, "") + ")";
     caja.innerHTML = '<p class="clin-vacio">En <strong>' + esc(e.sinRed.nombre) + '</strong>' + esc(donde) +
-      ' no hay sucursales de Uno Salud ni de i-dental.' +
+      ' no hay clínicas de Uno Salud ni de e-Dental.' +
       (e.nada ? ' Tampoco hay en su región.'
               : ' Arriba están las comunas más cercanas que sí tienen' + (e.mismaProvincia ? ' (primero las de su misma provincia)' : ', en su región') + '.') + '</p>';
     return;
   }
   if(e.sinElegir){
     caja.innerHTML = e.nada
-      ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas con sucursales de Uno Salud o i-dental. Revisa cómo se escribe.</p>'
+      ? '<p class="clin-vacio">No encuentro <strong>' + esc(e.comuna) + '</strong> entre las comunas con clínicas de Uno Salud o e-Dental. Revisa cómo se escribe.</p>'
       : '';
     return;
   }
-  caja.innerHTML = '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong></p>' +
+  const nU = (e.uno && e.uno.lista || []).length, nE = (e.ede && e.ede.lista || []).length;
+  caja.innerHTML = '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong>' +
+    (e.integrada ? ': <b>' + nU + '</b> Uno Salud · <b>' + nE + '</b> e-Dental · <b>' + (nU + nE) + '</b> en total' : '') + '</p>' +
     bloqueRed("unosalud", e.comuna, e.uno) +
     bloqueRed("edental", e.comuna, e.ede) +
-    (e.mapeo
+    (e.integrada
+      ? '<p class="capturado">Red integrada al cotizador (listado de e-Dental, octubre 2026): <b>' + e.integrada.uno + '</b> Uno Salud y <b>' +
+        e.integrada.ede + '</b> e-Dental, <b>' + e.integrada.total + '</b> clínicas en ' + e.integrada.comunas + ' comunas.</p>'
+      : e.mapeo
       ? '<p class="capturado">Del mapeo del ' + fmt(new Date(e.mapeo.generado)) + ' (' + e.mapeo.resumen.comunas + ' comunas). ' +
         '<button type="button" class="link-carga" data-abrir-mapeo="1">ver mapeo completo</button></p>'
       : '<p class="capturado">Leído en este momento de unosalud.cl y e-dentalsys.com. ' +
