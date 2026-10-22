@@ -960,11 +960,11 @@ function pintarComunaCliente(actual){
   const caja = document.getElementById("clinCliente");
   if(!caja) return;
   if(!comunaCliente){ caja.innerHTML = ""; return; }
-  const misma = !actual || norm(actual) === norm(comunaCliente);
-  caja.innerHTML = '<div class="clin-cliente' + (misma ? '' : ' otra') + '">' +
-    '<span class="clin-cliente-t">📍 Comuna del cliente</span> <b>' + esc(comunaCliente) + '</b>' +
-    (misma ? '<span class="clin-cliente-ok">✓ es la que estás viendo</span>'
-           : '<button type="button" class="clin-volver" data-volver="1">↺ Volver a ' + esc(comunaCliente) + '</button>') + '</div>';
+  // Mirando la comuna del cliente no se muestra nada (ya está escrita arriba);
+  // mirando otra, una sola línea para volver.
+  if(!actual || norm(actual) === norm(comunaCliente)){ caja.innerHTML = ""; return; }
+  caja.innerHTML = '<div class="clin-cliente otra"><span>📍 Cliente: <b>' + esc(comunaCliente) + '</b></span>' +
+    '<button type="button" class="clin-volver" data-volver="1">↺ Volver a ' + esc(comunaCliente) + '</button></div>';
 }
 
 function alEscribirComuna(){
@@ -1238,12 +1238,7 @@ function pintarResultados(e){
     return;
   }
   const nU = (e.uno && e.uno.lista || []).length, nE = (e.ede && e.ede.lista || []).length;
-  caja.innerHTML = (e.integrada
-      ? '<div class="clin-resumen"><div class="clin-resumen-c">Clínicas en <strong>' + esc(e.comuna) + '</strong></div>' +
-        '<div class="clin-resumen-n"><span class="cr unosalud"><b>' + nU + '</b> Uno Salud Dental</span>' +
-        '<span class="cr edental"><b>' + nE + '</b> e-Dental</span>' +
-        '<span class="cr total"><b>' + (nU + nE) + '</b> en total</span></div></div>'
-      : '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong></p>') +
+  caja.innerHTML = (e.integrada ? '' : '<p class="clin-titulo">Sucursales en <strong>' + esc(e.comuna) + '</strong></p>') +
     bloqueRed("unosalud", e.comuna, e.uno) +
     bloqueRed("edental", e.comuna, e.ede) +
     (e.integrada

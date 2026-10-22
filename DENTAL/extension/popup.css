@@ -635,13 +635,13 @@ body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
 
 /* ---------- Buscador de sucursales: módulos claros ---------- */
 /* Comuna del cliente, fija arriba; con botón para volver a ella */
-.clin-cliente{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:7px;padding:6px 9px;border-radius:9px;
+.clin-cliente{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;margin-top:6px;padding:3px 4px 3px 9px;border-radius:999px;
   background:#e8f0fb;border:1px solid #b9cdea;font-size:11.5px;color:var(--ink)}
 .clin-cliente b{font-size:13px;color:#123a6d}
 .clin-cliente-t{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#4a6285}
 .clin-cliente-ok{font-size:10.5px;font-weight:700;color:var(--ok)}
 .clin-cliente.otra{background:#fff4e0;border-color:#f0c27a}
-.clin-volver{margin-left:auto;font:inherit;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;cursor:pointer;
+.clin-volver{margin-left:auto;flex:none;font:inherit;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;cursor:pointer;
   border:1px solid #123a6d;background:#123a6d;color:#fff}
 .clin-volver:hover{filter:brightness(1.12)}
 /* Comunas cercanas: en su propio recuadro */
@@ -659,7 +659,7 @@ body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
 .cr.edental{background:#fff1df;color:#9a4b00;border-color:#f3c48b}
 .cr.total{background:var(--soft);color:var(--ink);border-color:var(--line)}
 /* Cada cadena es un módulo con su color */
-.redblq{margin-top:9px;padding:0 0 6px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.redblq{margin-top:7px;padding:0 0 6px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
 .redblq .redcab{margin:0;padding:6px 9px;gap:8px}
 .redblq.unosalud{border-color:#9fd6cf;background:#f1faf9}
 .redblq.unosalud .redcab{background:#0b7a6f;color:#fff}
