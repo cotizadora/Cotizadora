@@ -1164,6 +1164,12 @@ function tarjetaHTML(c){
   '</div>';
 }
 
+// Nombre de la cadena con los colores de su logo
+function insigniaRed(red){
+  return red === "unosalud"
+    ? '<span class="red unosalud marca"><b class="m1">Uno Salud</b><b class="m2">Dental</b></span>'
+    : '<span class="red edental marca"><b class="m1">e-Dental</b></span>';
+}
 function bloqueRed(red, comuna, r){
   const nom = RED[red].nombre;
   const lista = r.lista || [];
@@ -1184,7 +1190,7 @@ function bloqueRed(red, comuna, r){
   else if(red === "edental" && !r.total) estado = "sin listado";
   else estado = "ninguna en " + esc(comuna);
   let h = '<div class="redblq ' + red + '"><div class="redcab">' +
-    '<span class="red ' + red + '">' + nom + '</span>' +
+    insigniaRed(red) +
     '<span class="redn">' + estado + '</span>' +
     '<a class="fuente" href="' + esc(red === "unosalud" && r.url ? r.url : RED[red].sitio) + '" target="_blank" rel="noopener">ver en el sitio &#8599;</a>' +
     '</div>';

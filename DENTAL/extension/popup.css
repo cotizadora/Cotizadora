@@ -655,8 +655,8 @@ body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
 .clin-resumen-n{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
 .cr{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid transparent}
 .cr b{font-size:14px;margin-right:2px}
-.cr.unosalud{background:#e1f3f1;color:#0b6b62;border-color:#9fd6cf}
-.cr.edental{background:#fff1df;color:#9a4b00;border-color:#f3c48b}
+.cr.unosalud{background:#eaf5fc;color:#1d6fa3;border-color:#a9d4ef}
+.cr.edental{background:#e3f8f7;color:#001d2c;border-color:#8fe0db}
 .cr.total{background:var(--soft);color:var(--ink);border-color:var(--line)}
 /* Cada cadena es un módulo con su color */
 .redblq{margin-top:7px;padding:0 0 6px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
@@ -689,5 +689,34 @@ body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
   .redblq.edental{background:#2a1d10;border-color:#7a4f1e}
   .cr.unosalud{background:#0f2523;color:#7fd8cc;border-color:#235e57}
   .cr.edental{background:#2a1d10;color:#f5b46b;border-color:#7a4f1e}
+}
+
+/* Colores de cada cadena, tomados de sus logos:
+   Uno Salud Dental = azul #49A6DF + verde lima #A9D529 · e-Dental = turquesa #21C6BE + azul marino #001D2C */
+.red.marca{display:inline-flex;padding:0;overflow:hidden;border-radius:6px;text-transform:none;letter-spacing:0;font-size:11px}
+.red.marca b{padding:2px 7px;font-weight:800}
+.red.unosalud.marca .m1{background:#49a6df;color:#fff}
+.red.unosalud.marca .m2{background:#a9d529;color:#fff}
+.red.edental.marca{background:#21c6be}
+.red.edental.marca .m1{color:#001d2c}
+.redblq.unosalud{border-color:#a9d4ef;background:#f3f9fd}
+.redblq.unosalud .redcab{background:#eaf5fc;color:#0d2a40;border-bottom:3px solid #a9d529}
+.redblq.edental{border-color:#8fe0db;background:#f1fbfa}
+.redblq.edental .redcab{background:#e3f8f7;color:#001d2c;border-bottom:3px solid #21c6be}
+.redblq .redcab .redn{color:inherit}
+.redblq .redcab .fuente{color:#1d6fa3;opacity:1}
+.redblq.edental .redcab .fuente{color:#00796f}
+.redblq .redcab .red.marca{background:none}
+.redblq.edental .redcab .red.marca{background:#21c6be}
+.redblq.unosalud .clin-lista li::marker{color:#2f8fca}
+.redblq.edental .clin-lista li::marker{color:#0aa79f}
+.redblq.unosalud .clin-lista .clin{border-left-color:#49a6df}
+.redblq.edental .clin-lista .clin{border-left-color:#21c6be}
+@media (prefers-color-scheme:dark){
+  .redblq.unosalud{background:#0f2231;border-color:#2b5f85}
+  .redblq.unosalud .redcab{background:#14324a;color:#e6f2fb}
+  .redblq.edental{background:#0b2626;border-color:#1f6e6a}
+  .redblq.edental .redcab{background:#103636;color:#e2fbf9}
+  .redblq .redcab .fuente,.redblq.edental .redcab .fuente{color:#9fd3f5}
 }
 
