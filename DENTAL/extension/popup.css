@@ -720,3 +720,7 @@ body.ext .guion[data-contraste="normal"] .gs.muerte h4{color:#55308a}
   .redblq .redcab .fuente,.redblq.edental .redcab .fuente{color:#9fd3f5}
 }
 
+
+/* 3.4.5: logos oficiales en la cabecera de cada cadena */
+.logo-red{display:block;height:24px;width:auto;flex:none;background:#fff;border-radius:6px;padding:2px 5px;box-sizing:content-box;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+.logo-red.unosalud{padding:0;background:none;box-shadow:none}

@@ -1164,23 +1164,21 @@ function tarjetaHTML(c){
   '</div>';
 }
 
-// Nombre de la cadena con los colores de su logo
+// Logo oficial de la cadena (texto alternativo con el nombre)
 function insigniaRed(red){
-  return red === "unosalud"
-    ? '<span class="red unosalud marca"><b class="m1">Uno Salud</b><b class="m2">Dental</b></span>'
-    : '<span class="red edental marca"><b class="m1">e-Dental</b></span>';
+  return '<img class="logo-red ' + red + '" src="' + LOGO_RED[red] + '" alt="' + esc(RED[red].nombre) + '" title="' + esc(RED[red].nombre) + '">';
 }
 function bloqueRed(red, comuna, r){
   const nom = RED[red].nombre;
   const lista = r.lista || [];
   let estado;
   if(r.cargando){
-    return '<div class="redblq"><div class="redcab"><span class="red ' + red + '">' + nom + '</span>' +
+    return '<div class="redblq ' + red + '"><div class="redcab">' + insigniaRed(red) +
       '<span class="redn">leyendo…</span></div>' +
       '<p class="clin-vacio">Leyendo el listado de ' + nom + '. La primera vez tarda unos segundos: se abre y se cierra sola una pestaña de fondo. Después queda guardado una semana.</p></div>';
   }
   if(r.pendiente){
-    return '<div class="redblq"><div class="redcab"><span class="red ' + red + '">' + nom + '</span>' +
+    return '<div class="redblq ' + red + '"><div class="redcab">' + insigniaRed(red) +
       '<span class="redn">cargando aparte…</span>' +
       '<a class="fuente" href="' + esc(RED[red].sitio) + '" target="_blank" rel="noopener">ver en el sitio &#8599;</a></div>' +
       '<p class="clin-vacio">El listado de ' + nom + ' se está cargando aparte (unos segundos, una sola vez por semana). Aparece aquí solo, sin volver a buscar.</p></div>';
