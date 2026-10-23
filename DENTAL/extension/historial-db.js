@@ -19,6 +19,7 @@
      cotizacion:{plan,compos,uf,clp,envio,edades,cuando} | null,
      estado, agenda:{fecha,hora,estadoAnterior} | null,
      observacion, fav, eliminado, editados:{campo:true},
+     vicidial:{comentarios, veces, previa:{ultima,volver,agente,comentario}},
      historial:[{ts,accion,quien,cambios}] }
    ============================================================ */
 
@@ -85,6 +86,10 @@ function clienteDesdeCampos(f, agente){
     seguros: val("seguros_actuales"),
     mesSinCosto: val("mes_sin_costo"),
     agente: agente || "",
+    // Comentarios del lead, intentos de Vicidial y el recuadro de agendamiento previo
+    comentarios: val("comments"),
+    veces: val("called_count"),
+    previa: val("__cb_ultima") ? {ultima: val("__cb_ultima"), volver: val("__cb_volver"), agente: val("__cb_agente"), comentario: val("__cb_coment")} : null,
     cargas: []
   };
   c.info = [["Ciclo de vida", c.ciclo], ["Propensión", c.propension], ["Seguros actuales", c.seguros], ["Mes sin costo", c.mesSinCosto]]
@@ -232,11 +237,19 @@ const HDB = (function(){
       if(c.cargas && c.cargas.length && !reg.editados.cargas) reg.cargas = c.cargas;
       const ultima = reg.llamadas[reg.llamadas.length - 1] || 0;
       if(existente && ahora - ultima > NUEVA_LLAMADA) reg.llamadas.push(ahora);
+      // Comentarios y llamada anterior de Vicidial: se guardan para seguir
+      // viéndolos aunque en Vicidial se cierre el recuadro (nunca se borran con vacío)
+      const vc = Object.assign({}, reg.vicidial || {});
+      if(c.comentarios) vc.comentarios = c.comentarios;
+      if(c.veces) vc.veces = c.veces;
+      if(c.previa) vc.previa = c.previa;
+      const cambioVici = JSON.stringify(vc) !== JSON.stringify(reg.vicidial || {});
+      reg.vicidial = vc;
       if(!existente){
         anotar(reg, "registrado", {}, ejecutivo);
       }else{
         const cambios = diff(antes, reg);
-        if(!Object.keys(cambios).length && reg.llamadas.length === antes.llamadas.length) return existente;
+        if(!Object.keys(cambios).length && reg.llamadas.length === antes.llamadas.length && !cambioVici) return existente;
         if(Object.keys(cambios).length) anotar(reg, "actualizado desde Vicidial", cambios, ejecutivo);
       }
       reg.actualizado = ahora;

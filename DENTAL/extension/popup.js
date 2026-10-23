@@ -1574,6 +1574,17 @@ function lecturaVicidial(){
       const m = txt.match(CODIGO_TXT);
       if(m && m[1].replace(/-/g, "").length >= 4) campos.__codigo = m[1];
     }
+    // Recuadro "Informacion de Agendamientos Previos" (misma regla que vicidial-captura.js)
+    try{
+      const cb = doc.getElementById("CBcommentsBox");
+      if(cb && !campos.__cb_ultima && doc.defaultView.getComputedStyle(cb).visibility !== "hidden"){
+        const t = function(id){ const e = doc.getElementById(id); return e ? String(e.textContent || "").replace(/\s+/g, " ").replace(/^[^:]*:\s*/, "").trim() : ""; };
+        if(t("CBcommentsBoxA")){
+          campos.__cb_ultima = t("CBcommentsBoxA"); campos.__cb_volver = t("CBcommentsBoxB");
+          campos.__cb_agente = t("CBcommentsBoxC"); campos.__cb_coment = t("CBcommentsBoxD");
+        }
+      }
+    }catch(e){}
     doc.querySelectorAll("iframe, frame").forEach(function(f){
       let d = null;
       try{ d = f.contentDocument; }catch(e){}
@@ -1635,6 +1646,58 @@ function codigoOperacion(){
   const rut = String((cliente && cliente.rut) || "").toUpperCase();
   return (rut.indexOf("-") >= 0 ? rut.split("-")[0] : rut).replace(/\D/g, "");
 }
+// Fecha de Vicidial "2026-10-02 11:38:55" → Date
+function fechaHoraVici(t){
+  const m = String(t || "").match(/(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+  return m ? new Date(+m[1], m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0)) : null;
+}
+function fechaHoraTexto(d){
+  return fmt(d).split("-").join("/") + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+function haceCuanto(d){
+  const a = new Date(d.getFullYear(), d.getMonth(), d.getDate()), h = hoy();
+  const n = Math.round((new Date(h.getFullYear(), h.getMonth(), h.getDate()) - a) / 864e5);
+  return n <= 0 ? "hoy" : n === 1 ? "ayer" : "hace " + n + " días";
+}
+// Comentarios del lead y llamada anterior: lo que muestra Vicidial ahora y, si
+// ya se cerró el recuadro de Vicidial, lo que quedó guardado en el Historial.
+// "Última llamada" es la más reciente entre el agendamiento de Vicidial y la
+// llamada anterior que recuerda el Historial de la extensión.
+function bloqueComentarios(){
+  const reg = registroActual && (!cliente.lead || registroActual.lead === cliente.lead) ? registroActual : null;
+  const vc = (reg && reg.vicidial) || {};
+  const previa = cliente.previa || vc.previa || null;
+  const coment = cliente.comentarios || vc.comentarios || "";
+  const veces = cliente.veces || vc.veces || "";
+  const vici = previa && fechaHoraVici(previa.ultima);
+  const ll = reg && Array.isArray(reg.llamadas) ? reg.llamadas.slice().sort() : [];
+  const hist = ll.length >= 2 ? new Date(ll[ll.length - 2]) : null;
+  const vuelta = previa && fechaHoraVici(previa.volver);
+  const detVici = [vuelta ? "agendada para el " + fechaHoraTexto(vuelta) : "", previa && previa.agente ? "agente " + previa.agente : ""].filter(Boolean).join(" · ");
+  const lineas = [];
+  const grande = function(d, origen){
+    return '<div class="cc-ult"><i>ÚLTIMA LLAMADA</i><b>' + escCli(fechaHoraTexto(d)) + "</b><em>" + haceCuanto(d) + "</em>" +
+           '<span class="cc-org">' + origen + "</span></div>";
+  };
+  if(vici && (!hist || vici >= hist)){
+    lineas.push(grande(vici, "según Vicidial"));
+    if(detVici) lineas.push('<div class="cc-det">' + escCli(detVici) + "</div>");
+    if(hist) lineas.push('<div class="cc-det"><i>En tu historial:</i> ' + escCli(fechaHoraTexto(hist)) + " (" + haceCuanto(hist) + ")</div>");
+  }else if(hist){
+    lineas.push(grande(hist, "según tu historial"));
+    if(vici) lineas.push('<div class="cc-det"><i>Agendamiento en Vicidial:</i> ' + escCli(fechaHoraTexto(vici)) + " (" + haceCuanto(vici) + ")" +
+                         (detVici ? " · " + escCli(detVici) : "") + "</div>");
+  }
+  const cuenta = [ll.length >= 2 ? "Te ha caído " + ll.length + " veces" : reg && !vici ? "Primera vez que te cae este cliente" : "",
+                  veces ? "Vicidial: " + veces + (veces === "1" ? " intento" : " intentos") : ""].filter(Boolean);
+  if(cuenta.length) lineas.push('<div class="cc-det">' + escCli(cuenta.join(" · ")) + "</div>");
+  const textos = [previa && previa.comentario, coment].map(function(t){ return String(t || "").trim(); })
+    .filter(function(t, i, a){ return t && a.indexOf(t) === i; });
+  if(textos.length){
+    lineas.push('<div class="cc-txt"><i>💬 COMENTARIOS</i>' + textos.map(function(t){ return "<p>" + escCli(t) + "</p>"; }).join("") + "</div>");
+  }
+  return lineas.length ? '<div class="cli-coment' + (textos.length ? " con-texto" : "") + '">' + lineas.join("") + "</div>" : "";
+}
 function pintarCliente(){
   const el = document.getElementById("cliente");
   // Escribiendo el nombre de un botón o eligiendo su atajo: no se repinta (se perdería lo escrito)
@@ -1658,6 +1721,7 @@ function pintarCliente(){
       '"><i>CÓD. OPERACIÓN</i><b>' + escCli(codigoOperacion()) + "</b>" +
       '<button type="button" class="btn-copiar" data-copiar="' + escCli(codigoOperacion()) + '" title="Copiar el código">📋</button></span>' : ""].filter(Boolean);
   if(dest.length) h += '<div class="cli-dest">' + dest.join("") + "</div>";
+  h += bloqueComentarios();
   if(cliente.cargas && cliente.cargas.length){
     h += '<div class="cli-linea"><i>Cargas en Vicidial:</i> ' + cliente.cargas.map(function(c, i){
       const quien = [nombrePropio(c.nombre), c.parentesco ? "(" + nombrePropio(c.parentesco) + ")" : ""].filter(Boolean).join(" ");
@@ -1906,6 +1970,7 @@ function registrarEnHistorial(c){
   if(!hayHistorial()) return;
   HDB.capturar(c, {ejecutivo: c.agente || ""}).then(function(r){
     registroActual = r;
+    pintarCliente();
     pintarTipificacion();
     registrarCotizacion();
   }).catch(function(){});
@@ -1966,7 +2031,7 @@ document.getElementById("verHistorial").addEventListener("click", function(){
 // Si se tipifica desde la planilla, se refleja aquí
 if(hayHistorial()) HDB.alCambiar(function(m){
   if(registroActual && (!m.id || m.id === registroActual.id)){
-    HDB.obtener(registroActual.id).then(function(r){ if(r){ registroActual = r; pintarTipificacion(); } });
+    HDB.obtener(registroActual.id).then(function(r){ if(r){ registroActual = r; pintarCliente(); pintarTipificacion(); } });
   }
 });
 

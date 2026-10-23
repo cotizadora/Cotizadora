@@ -40,6 +40,19 @@
       const c = txt.match(/c[oó]d(?:igo|\.)?\s*(?:de\s*)?(?:validaci[oó]n|verificaci[oó]n|operaci[oó]n|venta)\s*[:#]?\s*([A-Z0-9-]*\d[A-Z0-9-]*)/i);
       if(c && !campos.__codigo && c[1].replace(/-/g, "").length >= 4) campos.__codigo = c[1];
     }catch(e){}
+    // Recuadro amarillo "Informacion de Agendamientos Previos" (última llamada,
+    // llamar de vuelta, agente y comentarios): sólo si está a la vista. Vicidial
+    // lo borra al apretar "cerrar", así que queda guardado en el Historial.
+    try{
+      const cb = doc.getElementById("CBcommentsBox");
+      if(cb && !campos.__cb_ultima && doc.defaultView.getComputedStyle(cb).visibility !== "hidden"){
+        const t = function(id){ const e = doc.getElementById(id); return e ? String(e.textContent || "").replace(/\s+/g, " ").replace(/^[^:]*:\s*/, "").trim() : ""; };
+        if(t("CBcommentsBoxA")){
+          campos.__cb_ultima = t("CBcommentsBoxA"); campos.__cb_volver = t("CBcommentsBoxB");
+          campos.__cb_agente = t("CBcommentsBoxC"); campos.__cb_coment = t("CBcommentsBoxD");
+        }
+      }
+    }catch(e){}
     // Marcos del mismo sitio (la pestaña FORM es uno)
     doc.querySelectorAll("iframe, frame").forEach(function(f){
       try{ leerCampos(f.contentDocument, campos); }catch(e){}
@@ -58,7 +71,8 @@
     if(!lead) return;
     const clave = [lead, campos.nombres || campos.first_name || "", campos.rut || campos.vendor_lead_code || "",
                    campos.fono1 || campos.phone_number || "", campos.email || "", campos.__emails || "", campos.__codigo || "", campos.__ctatexto || "",
-                   campos.comuna || campos.province || "",
+                   campos.comuna || campos.province || "", campos.comments || "", campos.called_count || "",
+                   campos.__cb_ultima || "", campos.__cb_coment || "",
                    campos.fec_nac1 || "", campos.fec_nac2 || "", campos.fec_nac3 || ""].join("|");
     if(clave === ultimo) return;
     // Esperar a que el lead tenga al menos nombre o RUT (el FORM carga después)
