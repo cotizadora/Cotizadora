@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Despertador</string>
+    <string name="app_version">Versión 1.0</string>
+    <string name="developed_by">Desarrollado por Eduardo Pérez</string>
+
+    <string name="sound_amanecer">Amanecer</string>
+    <string name="sound_campanas">Campanas</string>
+    <string name="sound_pulso">Pulso</string>
+    <string name="sound_marimba">Marimba</string>
+    <string name="sound_radar">Radar</string>
+
+    <string name="ch_ringing">Alarma sonando</string>
+    <string name="ch_ringing_desc">Se muestra mientras una alarma está sonando</string>
+    <string name="ch_info">Avisos de alarma</string>
+    <string name="ch_info_desc">Alarmas pospuestas o que no llegaron a sonar</string>
+    <string name="alarm_title_fmt">Alarma · %1$s</string>
+    <string name="test_alarm_title">Alarma de prueba</string>
+    <string name="ringing_text">Está sonando. Desliza para detenerla o pospónla.</string>
+    <string name="snooze_n_min">Posponer %1$d min</string>
+    <string name="stop">Detener</string>
+    <string name="snoozed_title">Alarma pospuesta</string>
+    <string name="snoozed_text">Volverá a sonar a las %1$s</string>
+    <string name="missed_title">Alarma perdida</string>
+    <string name="missed_text">La alarma de las %1$s no pudo sonar (teléfono apagado o hora modificada).</string>
+
+    <!-- Principal -->
+    <string name="alarms_section">Alarmas</string>
+    <string name="no_alarms">Aún no tienes alarmas.\nToca + para crear la primera.</string>
+    <string name="next_alarm">Próxima alarma</string>
+    <string name="no_next_alarm">Sin alarmas activas</string>
+    <string name="status_ok">Programada y verificada en el sistema</string>
+    <string name="status_bad">No quedó programada en el sistema</string>
+    <string name="add_alarm">Añadir alarma</string>
+    <string name="settings">Fiabilidad y ajustes</string>
+    <string name="delete">Eliminar</string>
+    <string name="delete_title">¿Eliminar esta alarma?</string>
+    <string name="delete_msg">Se borrará la alarma de las %1$s.</string>
+    <string name="cancel">Cancelar</string>
+    <string name="ok">Entendido</string>
+    <string name="snooze_short">Pospone %1$d min</string>
+    <string name="banner_problem">Hay ajustes que pueden impedir que suene alguna alarma. Toca para revisarlos.</string>
+    <string name="row_not_scheduled">No programada: revisa los permisos</string>
+
+    <!-- Edición -->
+    <string name="new_alarm">Nueva alarma</string>
+    <string name="edit_alarm">Editar alarma</string>
+    <string name="repeat">Repetir</string>
+    <string name="once_hint">Suena una sola vez, en la próxima ocasión.</string>
+    <string name="sound">Sonido</string>
+    <string name="volume">Volumen de la alarma</string>
+    <string name="volume_hint">También puedes ajustar el volumen general de alarmas con las teclas de volumen.</string>
+    <string name="vibration">Vibración</string>
+    <string name="snooze_label">Tiempo de posposición</string>
+    <string name="save">Guardar</string>
+    <string name="will_ring">Sonará %1$s (%2$s)</string>
+    <string name="saved_and_scheduled">Alarma guardada. Sonará %1$s (%2$s).</string>
+    <string name="saved_disabled">Alarma guardada, pero desactivada.</string>
+    <string name="activated">Alarma activada: sonará %1$s (%2$s).</string>
+    <string name="deactivated">Alarma desactivada.</string>
+    <string name="schedule_failed">No se pudo programar la alarma en el sistema: %1$s</string>
+    <string name="min_n">%1$d min</string>
+
+    <!-- Permisos -->
+    <string name="perm_exact_title">Permiso de alarmas exactas</string>
+    <string name="perm_exact_msg">Para que la alarma suene a la hora exacta, Android necesita que permitas «Alarmas y recordatorios» a Despertador. Se abrirá la pantalla de ajustes; activa el permiso y vuelve. La alarma queda desactivada hasta entonces.</string>
+    <string name="perm_notif_title">Permiso de notificaciones</string>
+    <string name="perm_notif_msg">Despertador muestra la pantalla de alarma y los botones Posponer/Detener mediante una notificación. Sin este permiso la alarma sonaría, pero podrías no ver la pantalla en el teléfono bloqueado.</string>
+    <string name="continue_action">Continuar</string>
+    <string name="open_settings">Abrir ajustes</string>
+    <string name="not_now">Ahora no</string>
+
+    <!-- Alarma sonando -->
+    <string name="ring_alarm">Alarma</string>
+    <string name="slide_to_stop">Desliza para detener</string>
+    <string name="ring_test">Alarma de prueba</string>
+
+    <!-- Fiabilidad -->
+    <string name="rel_title">Fiabilidad y ajustes</string>
+    <string name="rel_intro">Comprobaciones reales del estado de tu teléfono. Corrige lo que aparezca en rojo o naranja para que las alarmas suenen siempre.</string>
+    <string name="rel_scheduled">Alarmas registradas en el sistema</string>
+    <string name="rel_scheduled_ok">%1$d de %2$d activas, todas registradas</string>
+    <string name="rel_scheduled_bad">Solo %1$d de %2$d activas están registradas</string>
+    <string name="rel_exact">Alarmas exactas</string>
+    <string name="rel_exact_ok">Permitido</string>
+    <string name="rel_exact_bad">Sin permiso: las alarmas no pueden programarse</string>
+    <string name="rel_notif">Notificaciones</string>
+    <string name="rel_notif_ok">Permitidas</string>
+    <string name="rel_notif_bad">Bloqueadas: podrías no ver la pantalla de alarma</string>
+    <string name="rel_fullscreen">Mostrar sobre la pantalla de bloqueo</string>
+    <string name="rel_fullscreen_ok">Permitido</string>
+    <string name="rel_fullscreen_bad">No permitido: la alarma sonaría sin abrir la pantalla</string>
+    <string name="rel_battery">Optimización de batería</string>
+    <string name="rel_battery_ok">Despertador está excluido (máxima fiabilidad)</string>
+    <string name="rel_battery_bad">Recomendado: excluir a Despertador de la optimización</string>
+    <string name="rel_volume">Volumen de alarmas del teléfono</string>
+    <string name="rel_volume_ok">Nivel %1$d de %2$d</string>
+    <string name="rel_volume_bad">Silenciado: se subirá automáticamente al sonar, pero conviene ajustarlo</string>
+    <string name="rel_fix">Corregir</string>
+    <string name="rel_resync">Volver a registrar todas las alarmas</string>
+    <string name="rel_resync_done">Alarmas registradas de nuevo en el sistema.</string>
+    <string name="rel_test">Probar alarma (suena en 10 s)</string>
+    <string name="rel_test_hint">Cierra la app o bloquea el teléfono para comprobar que suena igualmente.</string>
+    <string name="rel_test_set">Alarma de prueba programada para dentro de 10 segundos.</string>
+    <string name="rel_oem_title">Fabricantes con ahorro agresivo</string>
+    <string name="rel_oem_text">En algunos teléfonos (Xiaomi, Huawei, Oppo, Vivo, Samsung…) conviene permitir también el «inicio automático» y la ejecución en segundo plano de Despertador en los ajustes de batería del fabricante.</string>
+    <string name="rel_limits_title">Limitaciones</string>
+    <string name="rel_limits_text">Ninguna aplicación puede garantizar que una alarma suene si el teléfono está apagado o sin batería, si un permiso esencial está denegado o si el fabricante mata la app. Despertador usa las alarmas del reloj de Android, la vía más fiable disponible, y te avisa de todo lo que detecta.</string>
+    <string name="about_title">Acerca de</string>
+</resources>
