@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Figuras literarias 3 · Transcripción de estudio</title>
+<style>
+:root{
+  --bg:#f5f6fa;--panel:#ffffff;--ink:#1c2233;--muted:#5b6478;--line:#dde1ec;
+  --brand:#2f4fd0;--brand-ink:#ffffff;--brand-soft:#e6ebff;
+  --hit:#ffe36e;--hit-ink:#1c2233;--hit-cur:#ff9f43;
+  --voz:#2f4fd0;--pant:#0e8a6a;--pant-bg:#e3f6ef;--dud:#b3541e;--dud-bg:#fff0e3;
+  --sel:#eef2ff;--read:#dff7e8;
+  --shadow:0 2px 10px rgba(20,30,70,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1320;--panel:#181d2e;--ink:#eef0f7;--muted:#a3abc2;--line:#2b3250;
+    --brand:#7c97ff;--brand-ink:#0b1030;--brand-soft:#242c4d;
+    --hit:#7a6500;--hit-ink:#fff6cc;--hit-cur:#c76a12;
+    --voz:#9db1ff;--pant:#52d4ae;--pant-bg:#123329;--dud:#ffb27d;--dud-bg:#3a2415;
+    --sel:#222a4a;--read:#17402b;--shadow:0 2px 10px rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;-webkit-text-size-adjust:100%}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+
+/* Encabezado fijo */
+header.top{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow);padding:10px max(14px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left))}
+.top-in{max-width:980px;margin:0 auto}
+.top h1{margin:0 0 6px;font-size:1.05rem;line-height:1.25;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.top h1 small{font-weight:400;color:var(--muted);font-size:.8rem}
+.searchrow{display:flex;gap:8px;align-items:center}
+.searchbox{flex:1;display:flex;align-items:center;gap:6px;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:0 8px;min-width:0}
+.searchbox:focus-within{border-color:var(--brand)}
+.searchbox input{flex:1;border:0;background:transparent;padding:11px 4px;min-width:0;outline:none;font-size:1rem}
+.searchbox .ic{opacity:.6}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;font-size:.92rem;line-height:1.1;min-height:40px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--brand-soft)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.icon{padding:8px 10px}
+.searchmeta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:6px;font-size:.85rem;color:var(--muted)}
+.searchmeta .grow{flex:1}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.note-small{font-size:.78rem;color:var(--muted)}
+
+main{max-width:980px;margin:0 auto;padding:12px max(14px,env(safe-area-inset-right)) 140px max(14px,env(safe-area-inset-left))}
+
+/* Paneles plegables */
+details.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;box-shadow:var(--shadow)}
+details.panel>summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:600;display:flex;align-items:center;gap:8px;min-height:48px}
+details.panel>summary::-webkit-details-marker{display:none}
+details.panel>summary::before{content:"▸";transition:transform .15s;color:var(--brand)}
+details.panel[open]>summary::before{transform:rotate(90deg)}
+details.panel .body{padding:2px 14px 14px;border-top:1px solid var(--line)}
+.body p{margin:.5em 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.85rem;color:var(--muted);margin:8px 0}
+.tag{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.75rem;font-weight:600}
+.tag.voz{background:var(--brand-soft);color:var(--voz)}
+.tag.pant{background:var(--pant-bg);color:var(--pant)}
+.tag.dud{background:var(--dud-bg);color:var(--dud)}
+
+/* Voz sintética */
+.tts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.tts-grid label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.tts-grid select,.tts-grid input[type=range]{width:100%;min-height:40px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px}
+.aviso{background:var(--dud-bg);border-left:4px solid var(--dud);padding:8px 12px;border-radius:8px;font-size:.88rem;margin:8px 0}
+.aviso.info{background:var(--brand-soft);border-color:var(--brand)}
+
+/* Video local */
+#videoWrap{display:none;position:sticky;top:var(--hh,120px);z-index:15;background:#000;border-radius:12px;margin:10px 0;overflow:hidden}
+#videoWrap video{width:100%;max-height:42vh;display:block;background:#000}
+.videobar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.videobar input[type=file]{max-width:100%}
+
+/* Índice temático */
+.topic{border-top:1px solid var(--line);padding:10px 0}
+.topic:first-child{border-top:0}
+.topic-h{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.topic-h b{font-size:1rem}
+.kind{font-size:.72rem;border-radius:6px;padding:1px 7px;border:1px solid var(--line);color:var(--muted)}
+.kind.exp{border-color:var(--pant);color:var(--pant)}
+.kind.inf{border-color:var(--dud);color:var(--dud)}
+.topic .desc{color:var(--muted);font-size:.9rem;margin:2px 0 6px}
+.hits{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 10px;font-size:.85rem;min-height:34px}
+.chip:hover,.chip.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.sub{margin-left:14px;border-left:3px solid var(--line);padding-left:10px;margin-top:6px}
+
+/* Transcripción */
+.sec-title{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:18px 0 8px}
+.sec-title h2{margin:0;font-size:1.15rem}
+ol#tr{list-style:none;margin:0;padding:0}
+.seg{position:relative;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--voz);border-radius:12px;padding:10px 12px;margin:8px 0;cursor:pointer;scroll-margin-top:var(--hh,150px)}
+.seg:hover{border-color:var(--brand)}
+.seg.pant{border-left-color:var(--pant);background:var(--pant-bg)}
+.seg.dud{border-left-color:var(--dud);background:var(--dud-bg);border-style:dashed;border-left-style:solid}
+.seg.sel{background:var(--sel);box-shadow:0 0 0 2px var(--brand)}
+.seg.pant.sel,.seg.dud.sel{box-shadow:0 0 0 2px var(--brand)}
+.seg.reading{background:var(--read);box-shadow:0 0 0 3px #22a05a}
+.ts{font:600 .82rem/1.2 ui-monospace,SFMono-Regular,Consolas,Menlo,monospace;color:var(--brand);background:var(--brand-soft);border-radius:8px;padding:5px 8px;align-self:start;text-align:center;white-space:nowrap}
+.ts small{display:block;font-weight:400;color:var(--muted);margin-top:2px;font-size:.7rem}
+.seg .txt{font-size:1.04rem;word-wrap:break-word;overflow-wrap:anywhere}
+.seg .meta{font-size:.76rem;color:var(--muted);margin-top:3px}
+.seg .acts{grid-column:1/-1;display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding-top:8px;border-top:1px dashed var(--line)}
+.seg.sel .acts{display:flex}
+mark{background:var(--hit);color:var(--hit-ink);border-radius:3px;padding:0 1px}
+mark.cur{background:var(--hit-cur);color:#000;outline:2px solid var(--hit-cur)}
+.vacio{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:16px;margin:10px 0}
+.vacio ul{margin:6px 0 0;padding-left:20px}
+.sug{display:inline-block;margin:3px 4px 0 0;background:var(--brand-soft);color:var(--brand);border:0;border-radius:999px;padding:5px 12px}
+#results{margin:10px 0}
+.res{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;cursor:pointer}
+.res.cur{border-color:var(--hit-cur);box-shadow:0 0 0 2px var(--hit-cur)}
+.res .rh{display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted);margin-bottom:3px}
+.res .ctx{font-size:.85rem;color:var(--muted);margin-top:4px}
+.res .score{margin-left:auto}
+
+/* Barra de lectura flotante */
+#readbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--panel);border-top:1px solid var(--line);box-shadow:0 -2px 12px rgba(0,0,0,.15);padding:8px max(12px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));display:none}
+#readbar.on{display:block}
+.rb-in{max-width:980px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#rbtext{flex:1 1 220px;font-size:.85rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#1c2233;color:#fff;padding:9px 16px;border-radius:999px;font-size:.9rem;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;max-width:92vw;text-align:center}
+#toast.on{opacity:1}
+.fin{color:var(--muted);font-size:.85rem;text-align:center;margin:20px 0}
+@media (max-width:560px){
+  body{font-size:16px}
+  .seg{grid-template-columns:1fr}
+  .ts{justify-self:start}
+  .btn{padding:8px 10px;font-size:.88rem}
+  .top h1{font-size:.95rem;margin-bottom:4px}
+  header.top{padding-top:6px;padding-bottom:6px}
+  .tools{flex-wrap:nowrap;overflow-x:auto;margin-top:6px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  .tools .btn{flex:0 0 auto;min-height:36px;padding:6px 10px}
+  .searchmeta{margin-top:4px;font-size:.78rem}
+  .searchmeta .note-small{display:none}
+  .searchbox input{padding:8px 4px}
+}
+</style>
+</head>
+<body>
+<header class="top" id="top">
+ <div class="top-in">
+  <h1><span>📚 Figuras literarias 3</span><small id="subt"></small></h1>
+  <div class="searchrow">
+   <div class="searchbox">
+    <span class="ic" aria-hidden="true">🔎</span>
+    <input id="q" type="search" placeholder="Buscar en la transcripción (tolera tildes y errores)" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Buscar en la transcripción">
+   </div>
+   <button class="btn icon" id="prevHit" title="Resultado anterior" aria-label="Resultado anterior" disabled>▲</button>
+   <button class="btn icon" id="nextHit" title="Resultado siguiente" aria-label="Resultado siguiente" disabled>▼</button>
+  </div>
+  <div class="searchmeta">
+   <span id="hitcount">Escribe una palabra o frase (búsqueda de texto aproximado, sin IA).</span>
+   <span class="grow"></span>
+   <span class="note-small">Búsqueda por texto aproximado (sin IA ni significado).</span>
+  </div>
+  <div class="tools">
+   <button class="btn" id="btnIndex">🗂️ Índice temático</button>
+   <button class="btn" id="btnVoice">🔊 Lectura en voz alta</button>
+   <button class="btn" id="btnVideo">🎞️ Video</button>
+   <button class="btn" id="btnInfo">ℹ️ Acerca de</button>
+  </div>
+ </div>
+</header>
+
+<main>
+ <details class="panel" id="pInfo">
+  <summary>ℹ️ Acerca de esta transcripción</summary>
+  <div class="body" id="infoBody"></div>
+ </details>
+
+ <details class="panel" id="pIndex">
+  <summary>🗂️ Índice temático (plegable)</summary>
+  <div class="body" id="indexBody"></div>
+ </details>
+
+ <details class="panel" id="pVoice">
+  <summary>🔊 Lectura en voz alta</summary>
+  <div class="body">
+   <div class="aviso" id="ttsAviso">Es una <b>voz sintética de tu dispositivo</b>; no es la voz del video ni de las personas que hablan.</div>
+   <div class="tts-grid">
+    <label>Voz
+     <select id="voiceSel" aria-label="Elegir voz"></select>
+    </label>
+    <label>Velocidad: <b id="rateVal">1.0×</b>
+     <input id="rate" type="range" min="0.6" max="1.6" step="0.1" value="1" aria-label="Velocidad de lectura">
+    </label>
+   </div>
+   <div class="tools">
+    <button class="btn primary" id="readOne">▶ Leer la frase elegida</button>
+    <button class="btn primary" id="readAll">▶▶ Leer desde la frase elegida</button>
+    <button class="btn" id="pauseBtn" disabled>⏸ Pausar</button>
+    <button class="btn" id="stopBtn" disabled>⏹ Detener</button>
+   </div>
+   <p class="note-small">Elige primero una frase tocándola. Si no eliges ninguna, se lee desde el principio. Se leen todas las frases en orden; los textos de pantalla y los fragmentos poco claros se leen con su aviso.</p>
+  </div>
+ </details>
+
+ <details class="panel" id="pVideo">
+  <summary>🎞️ Asociar con el video (opcional)</summary>
+  <div class="body">
+   <p>Este archivo <b>contiene solo la transcripción</b>, no el video. Si tienes el video original en este aparato, puedes elegirlo aquí. Se abre solo en tu dispositivo (no se sube a ningún lado) y así puedes saltar al segundo de cada frase.</p>
+   <div class="videobar">
+    <input type="file" id="vfile" accept="video/*,.mov,.mp4,.m4v,.webm" aria-label="Elegir el archivo de video">
+    <button class="btn" id="vclear" disabled>Quitar video</button>
+   </div>
+   <p class="note-small" id="vnote">Video esperado: <b>FIGURAS LITERARIAS 3.mov</b>. Algunos navegadores no reproducen archivos .mov con este códec (HEVC); si el video no se ve o no suena, la transcripción sigue funcionando igual.</p>
+  </div>
+ </details>
+
+ <div class="legend">
+  <span><span class="tag voz">Voz</span> lo que se dice</span>
+  <span><span class="tag pant">En pantalla</span> texto visto en el video (no se dice)</span>
+  <span><span class="tag dud">Poco claro</span> revisar a mano</span>
+  <span class="note-small">Marcas: «≈» estimada por Whisper · «✓» coincide con el inicio de voz del audio.</span>
+ </div>
+
+ <div id="videoWrap"><video id="vid" controls playsinline preload="metadata"></video></div>
+
+ <div id="results"></div>
+
+ <div class="sec-title">
+  <h2>Transcripción completa <small class="note-small" id="segcount"></small></h2>
+  <span class="note-small">Toca una frase para elegirla.</span>
+ </div>
+ <ol id="tr"></ol>
+ <p class="fin">— Fin de la transcripción —</p>
+</main>
+
+<div id="readbar" role="region" aria-label="Control de lectura">
+ <div class="rb-in">
+  <button class="btn icon" id="rbPrev" aria-label="Frase anterior">⏮</button>
+  <button class="btn icon" id="rbPause" aria-label="Pausar o reanudar">⏸</button>
+  <button class="btn icon" id="rbStop" aria-label="Detener">⏹</button>
+  <button class="btn icon" id="rbNext" aria-label="Frase siguiente">⏭</button>
+  <span id="rbtext"></span>
+ </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script id="datos" type="application/json">{"id": "figuras-literarias-3", "titulo": "Figuras literarias 3", "archivo_video": "FIGURAS LITERARIAS 3.mov", "salida": "FIGURAS LITERARIAS 3.html", "duracion": 220.96, "segmentos": [{"t0": 0.0, "t1": 9.0, "txt": "Ahora yo le traje otro, le traje aquí un regalito, que es un poema de los cenas, ya.", "tipo": "dudoso", "nota": "«cenas» probablemente es el nombre de un pueblo originario (quizá «onas»); sin confirmar", "alt": "Ahora yo le traje otro, le traje aquí un regalito, que es un poema de los onas, ya.", "i": 0, "ok": true}, {"t0": 13.0, "t1": 21.0, "txt": "Te vamos leyendo todos juntos, acuerdas de que va a decamar, lo hacemos arreglando las comas y no tan rápido.", "tipo": "dudoso", "nota": "«acuerdas de que va a decamar» y «arreglando las comas» poco claros", "alt": "", "i": 1, "ok": false}, {"t0": 21.0, "t1": 34.0, "txt": "En tierra del fuego, caminaron los cenas, eran fuertes exclendorosos como el conto de la cordillera, rápidos y ligueros como el viento del terrausombrero.", "tipo": "dudoso", "nota": "verso del poema; «exclendorosos», «conto», «terrausombrero» mal reconocidos; «cenas» probablemente es el nombre de un pueblo originario (quizá «onas»); sin confirmar", "alt": "En tierra del fuego, caminaron los onas, eran fuertes esplendorosos como el cóndor de la cordillera, rápidos y ligueros como el viento del terrausombrero.", "i": 2, "ok": true}, {"t0": 34.0, "t1": 42.0, "txt": "Hoy en mi tierra del fuego, ya no camina los cenas, la ninguna los busca y no los encuentra.", "tipo": "dudoso", "nota": "verso del poema; poco claro; «cenas» probablemente es el nombre de un pueblo originario (quizá «onas»); sin confirmar", "alt": "", "i": 3, "ok": false}, {"t0": 42.0, "t1": 49.0, "txt": "El estompe de la venta y le pregunta a las tres de ellas, ¿qué pasa con ellos?", "tipo": "dudoso", "nota": "verso del poema; «estompe de la venta» y el resto poco claros", "alt": "", "i": 4, "ok": false}, {"t0": 49.0, "t1": 59.0, "txt": "En este mar de mi niebla, de los ojos de los cenas, cayeron cenas las tristezas, las cenas los busca y no los encuentra.", "tipo": "dudoso", "nota": "verso del poema; poco claro; «cenas» probablemente es el nombre de un pueblo originario (quizá «onas»); sin confirmar", "alt": "", "i": 5, "ok": true}, {"t0": 59.0, "t1": 63.0, "txt": "¿Será ese esfuerzo con el sol de mi cabela?", "tipo": "dudoso", "nota": "verso del poema; poco claro", "alt": "", "i": 6, "ok": false}, {"t0": 63.0, "t1": 70.0, "txt": "Ya, miren que viendo ese poema que hablas desde nuestro pueblo, que estamos reclombando esa unidad que nos cierra, ¿cierto?", "tipo": "dudoso", "nota": "«reclombando esa unidad que nos cierra» poco claro", "alt": "", "i": 7, "ok": false}, {"t0": 70.0, "t1": 75.0, "txt": "Miren, y fíjense los dos primeros versos destacados.", "tipo": "voz", "i": 8, "nota": "", "alt": "", "ok": true}, {"t0": 88.0, "t1": 90.0, "txt": "¿Quién lo puede leer?", "tipo": "voz", "i": 9, "nota": "", "alt": "", "ok": false}, {"t0": 92.0, "t1": 94.0, "txt": "Ya, señorita, ¿verdad?", "tipo": "voz", "i": 10, "nota": "", "alt": "", "ok": false}, {"t0": 94.0, "t1": 100.0, "txt": "Eran fuertes y exclendorosos como el conto de la cordillera.", "tipo": "dudoso", "nota": "verso del poema leído por una alumna; «exclendorosos» y «conto» mal reconocidos", "alt": "Eran fuertes y esplendorosos como el cóndor de la cordillera.", "i": 11, "ok": true}, {"t0": 100.0, "t1": 104.0, "txt": "Eran fuertes y exclendorosos como el conto de la cordillera.", "tipo": "dudoso", "nota": "repite la frase anterior; «exclendorosos» y «conto» mal reconocidos (probable repetición de la profesora; revisar)", "alt": "Eran fuertes y esplendorosos como el cóndor de la cordillera.", "i": 12, "ok": true}, {"t0": 104.0, "t1": 106.0, "txt": "¿Qué figura estaría utilizando allí?", "tipo": "voz", "i": 13, "nota": "", "alt": "", "ok": false}, {"t0": 106.0, "t1": 108.0, "txt": "A ver, Karola, comparación.", "tipo": "voz", "nota": "respuesta de una alumna (nombre poco claro)", "i": 14, "alt": "", "ok": false}, {"t0": 108.0, "t1": 110.0, "txt": "Comparación, veamos si es comparación.", "tipo": "voz", "i": 15, "nota": "", "alt": "", "ok": false}, {"t0": 120.0, "t1": 125.0, "txt": "Vamos a ver, vamos a ver si es comparación, ¿verdad?", "tipo": "dudoso", "nota": "poco sonido de voz en este tramo; posible repetición automática de Whisper; poco sonido de voz detectado en este tramo (podría ser un error o una repetición)", "alt": "", "i": 16, "ok": true}, {"t0": 130.0, "t1": 132.0, "txt": "Comparación, veamos si es comparación.", "tipo": "dudoso", "nota": "repite la frase de más arriba; posible repetición automática de Whisper", "alt": "", "i": 17, "ok": true}, {"t0": 132.0, "t1": 139.0, "txt": "Dice, \"Estatleja relación de similitud entre personas animales son comparados\".", "tipo": "dudoso", "nota": "«Estatleja» mal reconocido; definición de comparación sin confirmar", "alt": "", "i": 18, "ok": true}, {"t0": 139.0, "t1": 143.0, "txt": "Os sugiero de cosas que tengan características parecidas, las comparas.", "tipo": "dudoso", "nota": "«Os sugiero de cosas» poco claro", "alt": "", "i": 19, "ok": true}, {"t0": 143.0, "t1": 145.0, "txt": "Vamos a ver.", "tipo": "voz", "i": 20, "nota": "", "alt": "", "ok": false}, {"t0": 145.0, "t1": 148.0, "txt": "De los siguientes versos destacados.", "tipo": "voz", "i": 21, "nota": "", "alt": "", "ok": false}, {"t0": 148.0, "t1": 153.0, "txt": "Valentina, la luna lo puse y no lo se encuentra.", "tipo": "dudoso", "nota": "verso leído; «la luna lo puse y no lo se encuentra» poco claro", "alt": "", "i": 22, "ok": true}, {"t0": 153.0, "t1": 156.0, "txt": "¿Qué figura estará el presente?", "tipo": "voz", "i": 23, "nota": "", "alt": "", "ok": true}, {"t0": 161.0, "t1": 162.0, "txt": "La personificación.", "tipo": "voz", "nota": "posible respuesta del curso (deducido por el contexto)", "i": 24, "alt": "", "ok": false}, {"t0": 162.0, "t1": 164.0, "txt": "¿La personificación?", "tipo": "voz", "i": 25, "nota": "", "alt": "", "ok": true}, {"t0": 164.0, "t1": 166.0, "txt": "¿Qué es usted, Matarera, que lo que dice su compañera?", "tipo": "dudoso", "nota": "«¿Qué es usted, Matarera…?» poco claro", "alt": "", "i": 26, "ok": true}, {"t0": 166.0, "t1": 168.0, "txt": "¿Está lo correcto?", "tipo": "voz", "i": 27, "nota": "", "alt": "", "ok": true}, {"t0": 168.0, "t1": 170.0, "txt": "¿Usted, Karina, que sí? ¿Por qué Karina y que sí?", "tipo": "dudoso", "nota": "frase poco clara", "alt": "", "i": 28, "ok": true}, {"t0": 170.0, "t1": 174.0, "txt": "Porque se hace muy bien luna, algo que no hace.", "tipo": "dudoso", "nota": "respuesta de una alumna; «Porque se hace muy bien luna» poco claro", "alt": "", "i": 29, "ok": true}, {"t0": 174.0, "t1": 177.0, "txt": "Muy bien, ¿cierto? Muy bien, Valentina, Matarera.", "tipo": "voz", "i": 30, "nota": "", "alt": "", "ok": false}, {"t0": 177.0, "t1": 182.0, "txt": "Porque a la luna le trae una característica que ella no puede realizar,", "tipo": "voz", "i": 31, "nota": "", "alt": "", "ok": true}, {"t0": 182.0, "t1": 187.0, "txt": "que es una característica que solamente lo podemos hacer los humanos, ¿cierto?", "tipo": "voz", "i": 32, "nota": "", "alt": "", "ok": false}, {"t0": 187.0, "t1": 189.0, "txt": "La luna nos anda buscando a nadie.", "tipo": "dudoso", "nota": "verso leído; «nos anda buscando a nadie» poco claro", "alt": "", "i": 33, "ok": false}, {"t0": 189.0, "t1": 192.0, "txt": "Y en estos poemas miren,", "tipo": "voz", "i": 34, "nota": "", "alt": "", "ok": false}, {"t0": 192.0, "t1": 199.0, "txt": "\"De los ojos de los cenas cayeron perlas de tristeza\".", "tipo": "voz", "nota": "verso del poema (cita)", "i": 35, "alt": "", "ok": true}, {"t0": 199.0, "t1": 203.0, "txt": "¿Ya? Aquí encontramos nosotros Lame Záfora.", "tipo": "dudoso", "nota": "«Lame Záfora» suena a «la metáfora»", "alt": "¿Ya? Aquí encontramos nosotros la metáfora.", "i": 36, "ok": false}, {"t0": 203.0, "t1": 206.0, "txt": "¿Cierto? Que supone o sobre entiende la comparación", "tipo": "voz", "i": 37, "nota": "", "alt": "", "ok": true}, {"t0": 206.0, "t1": 214.0, "txt": "para simplemente reemplazar el significado de una cosa por el de otra semejante, ¿cierto?", "tipo": "voz", "i": 38, "nota": "", "alt": "", "ok": true}, {"t0": 214.0, "t1": 217.0, "txt": "Buscan que tengan características similares", "tipo": "voz", "i": 39, "nota": "", "alt": "", "ok": true}, {"t0": 217.0, "t1": 221.0, "txt": "y reemplazan ese elemento por otra.", "tipo": "voz", "i": 40, "nota": "", "alt": "", "ok": true}], "temas": [{"tema": "Poema sobre los antiguos habitantes de Tierra del Fuego", "explicito": true, "frases": [0, 1, 2, 3, 4, 5, 6], "nota": "La profesora trae un poema («de los cenas», probablemente «onas»; sin confirmar) y lo leen juntos. Los versos están marcados como poco claros.", "subtemas": [{"tema": "Cómo leerlo (juntos, sin apuro, con las comas)", "explicito": true, "frases": [1], "subtemas": []}]}, {"tema": "Analizar los versos destacados", "explicito": true, "frases": [7, 8, 9, 10], "nota": "Se mira qué figura literaria usan los primeros versos destacados.", "subtemas": []}, {"tema": "Comparación", "explicito": true, "frases": [11, 12, 13, 14, 15, 16, 17, 18, 19], "nota": "Verso: «fuertes y esplendorosos como el cóndor de la cordillera» (lectura probable).", "subtemas": [{"tema": "Qué es una comparación (relación de similitud)", "explicito": true, "frases": [18, 19], "nota": "Definición poco clara: revisar en el video.", "subtemas": []}]}, {"tema": "Personificación", "explicito": true, "frases": [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33], "nota": "Una alumna explica por qué un verso sobre la luna es personificación: se le da una característica humana.", "subtemas": [{"tema": "Por qué es personificación (característica humana)", "explicito": true, "frases": [29, 30, 31, 32, 33], "subtemas": []}]}, {"tema": "Metáfora", "explicito": true, "frases": [34, 35, 36, 37, 38, 39, 40], "nota": "La palabra quedó mal reconocida («Lame Záfora»). Verso: «de los ojos de los cenas cayeron perlas de tristeza».", "subtemas": [{"tema": "Qué es una metáfora (reemplazar una cosa por otra semejante)", "explicito": true, "frases": [37, 38, 39, 40], "subtemas": []}]}], "sugerencias": ["comparación", "personificación", "metáfora", "poema", "luna", "versos", "cóndor", "cordillera", "lágrimas", "tristeza"], "info_html": "<p><b>Qué es esto.<\/b> Transcripción de estudio del video <b>FIGURAS LITERARIAS 3.mov<\/b>, una clase grabada en una sala (profesora y curso). Este archivo <b>contiene solo texto<\/b>, no el video. Funciona sin internet, sin cuenta y sin instalar nada.<\/p><p><b>Cómo se hizo.<\/b> El audio se limpió con filtros y se pasó por Whisper (modelo «small», un programa de reconocimiento de voz que corre en el computador). Después se revisó el texto buscando frases dudosas. <b>No es una transcripción perfecta:<\/b> la grabación tiene ruido de sala, voces de niños lejanas y la profesora a veces se aleja de la grabadora.<\/p><p><b>Marcas de tiempo.<\/b> Whisper entrega tiempos con precisión de <b>cerca de 1 segundo<\/b> (a veces más error). «≈» = tiempo estimado. «✓» = el inicio de la frase coincide (a menos de 0,35 s) con un comienzo de voz detectado en el audio. Ninguna marca fue ajustada a mano.<\/p><p><b>Poco claro.<\/b> Las frases en naranja (<span class='tag dud'>Poco claro<\/span>) tienen palabras que Whisper probablemente entendió mal. Se muestra lo que reconoció tal cual; si el contexto sugiere otra lectura, aparece como «Posible lectura» y <b>no está confirmada<\/b>. Conviene revisarlas escuchando el video.<\/p><p><b>Quién habla.<\/b> No se distinguen personas. En algunas frases cortas se anota «posible respuesta del curso», deducido solo por el contexto de la pregunta anterior.<\/p><p><b>Texto en pantalla.<\/b> No se alcanza a leer ningún texto en las imágenes: el pizarrón/proyector sale muy brillante. En algunos cuadros se ve el cartel de la sala, cortado, y la marca de la cámara «12BIT» (no se dicen en el video).<\/p><p><b>Omisiones.<\/b> Se revisó el nivel de sonido del audio: los tramos sin texto son casi puro silencio (menos del 3 % con voz). Aun así, voces muy bajas de niños pueden haberse perdido.<\/p><p><b>Búsqueda.<\/b> Es una búsqueda <b>de texto aproximado<\/b> (ignora tildes y mayúsculas, tolera errores de ortografía). <b>No usa inteligencia artificial ni entiende significados<\/b>: busca palabras parecidas a las que escribes.<\/p><p><b>Lectura en voz alta.<\/b> La hace tu aparato con su voz sintética; no es la voz del video.<\/p><details style=\"margin-top:8px\"><summary><b>Fragmentos que conviene revisar a mano (20)<\/b><\/summary><ul style=\"padding-left:18px\"><li><button class=\"chip goto\" data-k=\"0\">00:00:00<\/button> Ahora yo le traje otro, le traje aquí un regalito, que es un poema de los cenas,…<\/li><li><button class=\"chip goto\" data-k=\"1\">00:00:13<\/button> Te vamos leyendo todos juntos, acuerdas de que va a decamar, lo hacemos arreglan…<\/li><li><button class=\"chip goto\" data-k=\"2\">00:00:21<\/button> En tierra del fuego, caminaron los cenas, eran fuertes exclendorosos como el con…<\/li><li><button class=\"chip goto\" data-k=\"3\">00:00:34<\/button> Hoy en mi tierra del fuego, ya no camina los cenas, la ninguna los busca y no lo…<\/li><li><button class=\"chip goto\" data-k=\"4\">00:00:42<\/button> El estompe de la venta y le pregunta a las tres de ellas, ¿qué pasa con ellos?<\/li><li><button class=\"chip goto\" data-k=\"5\">00:00:49<\/button> En este mar de mi niebla, de los ojos de los cenas, cayeron cenas las tristezas,…<\/li><li><button class=\"chip goto\" data-k=\"6\">00:00:59<\/button> ¿Será ese esfuerzo con el sol de mi cabela?<\/li><li><button class=\"chip goto\" data-k=\"7\">00:01:03<\/button> Ya, miren que viendo ese poema que hablas desde nuestro pueblo, que estamos recl…<\/li><li><button class=\"chip goto\" data-k=\"11\">00:01:34<\/button> Eran fuertes y exclendorosos como el conto de la cordillera.<\/li><li><button class=\"chip goto\" data-k=\"12\">00:01:40<\/button> Eran fuertes y exclendorosos como el conto de la cordillera.<\/li><li><button class=\"chip goto\" data-k=\"16\">00:02:00<\/button> Vamos a ver, vamos a ver si es comparación, ¿verdad?<\/li><li><button class=\"chip goto\" data-k=\"17\">00:02:10<\/button> Comparación, veamos si es comparación.<\/li><li><button class=\"chip goto\" data-k=\"18\">00:02:12<\/button> Dice, &quot;Estatleja relación de similitud entre personas animales son comparados&quot;.<\/li><li><button class=\"chip goto\" data-k=\"19\">00:02:19<\/button> Os sugiero de cosas que tengan características parecidas, las comparas.<\/li><li><button class=\"chip goto\" data-k=\"22\">00:02:28<\/button> Valentina, la luna lo puse y no lo se encuentra.<\/li><li><button class=\"chip goto\" data-k=\"26\">00:02:44<\/button> ¿Qué es usted, Matarera, que lo que dice su compañera?<\/li><li><button class=\"chip goto\" data-k=\"28\">00:02:48<\/button> ¿Usted, Karina, que sí? ¿Por qué Karina y que sí?<\/li><li><button class=\"chip goto\" data-k=\"29\">00:02:50<\/button> Porque se hace muy bien luna, algo que no hace.<\/li><li><button class=\"chip goto\" data-k=\"33\">00:03:07<\/button> La luna nos anda buscando a nadie.<\/li><li><button class=\"chip goto\" data-k=\"36\">00:03:19<\/button> ¿Ya? Aquí encontramos nosotros Lame Záfora.<\/li><\/ul><\/details><p class=\"note-small\">Marcas «✓»: 23 de 41 frases tienen su inicio a menos de 0,35 s de un comienzo de voz detectado en el audio. Las demás («≈») son las que entregó Whisper, que puede errar por 1 segundo o más.<\/p>", "duracion_txt": "03:41 de video"}</script>
+<script>
+(function(){
+"use strict";
+var D = JSON.parse(document.getElementById('datos').textContent);
+var S = D.segmentos;           // [{i,t0,t1,txt,tipo,ok,conf}]
+var $ = function(id){return document.getElementById(id);};
+
+/* ---------- utilidades ---------- */
+function norm(s){
+  return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/ñ/g,'n').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+function fmt(t){
+  if(t==null||isNaN(t)) return '--:--:--.---';
+  var ms=Math.round(t*1000), h=Math.floor(ms/3600000); ms-=h*3600000;
+  var m=Math.floor(ms/60000); ms-=m*60000; var s=Math.floor(ms/1000); ms-=s*1000;
+  var p=function(n,l){return String(n).padStart(l,'0');};
+  return p(h,2)+':'+p(m,2)+':'+p(s,2)+'.'+p(ms,3);
+}
+function fmtShort(t){var f=fmt(t);return f.slice(0,8);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var toastT;
+function toast(m){var e=$('toast');e.textContent=m;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('on');},1900);}
+function lev(a,b,max){ // Damerau-Levenshtein con tope
+  if(a===b) return 0;
+  var la=a.length, lb=b.length;
+  if(Math.abs(la-lb)>max) return max+1;
+  var d=[], i, j;
+  for(i=0;i<=la;i++){d[i]=[i];}
+  for(j=0;j<=lb;j++){d[0][j]=j;}
+  for(i=1;i<=la;i++){
+    for(j=1;j<=lb;j++){
+      var c=a.charCodeAt(i-1)===b.charCodeAt(j-1)?0:1;
+      var v=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+c);
+      if(i>1&&j>1&&a.charCodeAt(i-1)===b.charCodeAt(j-2)&&a.charCodeAt(i-2)===b.charCodeAt(j-1)) v=Math.min(v,d[i-2][j-2]+1);
+      d[i][j]=v;
+    }
+  }
+  return d[la][lb];
+}
+
+/* ---------- datos preparados ---------- */
+S.forEach(function(s){
+  s.n=norm(s.txt);
+  s.w=s.n?s.n.split(' '):[];
+  s.na=norm(s.alt||'');
+  s.wa=s.na?s.na.split(' '):[];
+});
+function tipoCls(t){return t==='pantalla'?'pant':(t==='dudoso'?'dud':'');}
+function tipoNom(t){return t==='pantalla'?'En pantalla':(t==='dudoso'?'Poco claro':'Voz');}
+
+/* ---------- pintar transcripción ---------- */
+var tr=$('tr'), els=[];
+function tsHtml(s){
+  var mk=s.ok?'✓':'≈';
+  var h='<span class="ts">'+mk+' '+fmtShort(s.t0)+'<small>'+fmt(s.t0).slice(8)+(s.t1!=null?' → '+fmtShort(s.t1):'')+'</small></span>';
+  return h;
+}
+function render(){
+  var frag=document.createDocumentFragment();
+  S.forEach(function(s,k){
+    var li=document.createElement('li');
+    li.className='seg '+tipoCls(s.tipo);
+    li.id='s'+k; li.tabIndex=0; li.dataset.k=k;
+    li.setAttribute('role','button');
+    li.setAttribute('aria-label','Frase '+(k+1)+' a las '+fmtShort(s.t0));
+    li.innerHTML=tsHtml(s)+'<div><div class="txt"></div><div class="meta"><span class="tag '+(s.tipo==='pantalla'?'pant':(s.tipo==='dudoso'?'dud':'voz'))+'">'+tipoNom(s.tipo)+'</span> · frase '+(k+1)+' de '+S.length+(s.nota?' · '+esc(s.nota):'')+(s.alt?'<br><b>Posible lectura (sin confirmar):</b> «'+esc(s.alt)+'»':'')+'</div></div>'+
+     '<div class="acts">'+
+     '<button class="btn" data-a="copy">📋 Copiar frase</button>'+
+     '<button class="btn" data-a="copyts">📋 Copiar con marca</button>'+
+     '<button class="btn" data-a="listen">🔊 Escuchar</button>'+
+     '<button class="btn" data-a="prev">◀ Anterior</button>'+
+     '<button class="btn" data-a="next">Siguiente ▶</button>'+
+     '<button class="btn" data-a="seek">🎞️ Ir al video</button>'+
+     '</div>';
+    li.querySelector('.txt').textContent=s.txt;
+    els.push(li); frag.appendChild(li);
+  });
+  tr.appendChild(frag);
+  $('segcount').textContent='('+S.length+' frases)';
+}
+render();
+
+/* ---------- selección y acciones ---------- */
+var sel=-1;
+function select(k,scroll){
+  if(k<0||k>=S.length) return;
+  if(sel>=0) els[sel].classList.remove('sel');
+  sel=k; els[k].classList.add('sel');
+  if(scroll) els[k].scrollIntoView({block:'center',behavior:'smooth'});
+  if(vidOn) {try{ $('vid').currentTime=S[k].t0; }catch(e){}}
+}
+function copyText(t,msg){
+  function ok(){toast(msg);}
+  function fb(){
+    var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');ok();}catch(e){toast('No se pudo copiar');}
+    document.body.removeChild(ta);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext){
+    navigator.clipboard.writeText(t).then(ok,fb);
+  } else fb();
+}
+tr.addEventListener('click',function(e){
+  var li=e.target.closest('.seg'); if(!li) return;
+  var k=+li.dataset.k;
+  var b=e.target.closest('button[data-a]');
+  if(!b){ if(sel===k && !window.getSelection().toString()) {/* mantener */} select(k,false); return; }
+  select(k,false);
+  var a=b.dataset.a;
+  if(a==='copy') copyText(S[k].txt,'Frase copiada');
+  else if(a==='copyts') copyText('['+fmt(S[k].t0)+(S[k].t1!=null?' → '+fmt(S[k].t1):'')+'] '+S[k].txt,'Frase con marca de tiempo copiada');
+  else if(a==='listen'){ speakOne(k); }
+  else if(a==='prev'){ select(k-1,true); }
+  else if(a==='next'){ select(k+1,true); }
+  else if(a==='seek'){ seekVideo(k); }
+});
+tr.addEventListener('keydown',function(e){
+  var li=e.target.closest('.seg'); if(!li||e.target!==li) return;
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();select(+li.dataset.k,false);}
+  else if(e.key==='ArrowDown'){e.preventDefault();select(+li.dataset.k+1,true);els[sel]&&els[sel].focus();}
+  else if(e.key==='ArrowUp'){e.preventDefault();select(+li.dataset.k-1,true);els[sel]&&els[sel].focus();}
+});
+
+/* ---------- búsqueda aproximada ---------- */
+var hits=[], curHit=-1, lastQ='';
+function tolerance(len){return len<=3?0:(len<=5?1:(len<=8?2:3));}
+function wordMatch(qw,w){
+  // devuelve puntaje 0 (no) .. 1 (exacto)
+  if(w===qw) return 1;
+  if(qw.length>=3 && w.indexOf(qw)===0) return 0.92;
+  if(qw.length>=4 && w.indexOf(qw)>=0) return 0.8;
+  var t=tolerance(qw.length);
+  if(t>0){
+    var d=lev(qw,w,t);
+    if(d<=t) return 0.75-0.1*d;
+    if(qw.length>=5 && w.length>qw.length){ // prefijo con error
+      var d2=lev(qw,w.slice(0,qw.length),t);
+      if(d2<=t) return 0.6-0.05*d2;
+    }
+  }
+  return 0;
+}
+function searchSeg(qn,qws,s){
+  if(!s.n) return null;
+  var pos=s.n.indexOf(qn);
+  if(pos>=0 && qn.length>=2) return {score:1,ranges:[[pos,pos+qn.length]]};
+  // palabra por palabra
+  var total=0, ranges=[], idx=0, starts=[];
+  var p=0; s.w.forEach(function(w){starts.push(p);p+=w.length+1;});
+  for(var a=0;a<qws.length;a++){
+    var best=0, bi=-1;
+    for(var b=0;b<s.w.length;b++){
+      var sc=wordMatch(qws[a],s.w[b]);
+      if(sc>best){best=sc;bi=b;}
+    }
+    if(best===0) return null; // todas las palabras deben aparecer
+    total+=best; ranges.push([starts[bi],starts[bi]+s.w[bi].length]);
+  }
+  return {score:total/qws.length*0.95,ranges:ranges};
+}
+// Mapa de posiciones del texto normalizado al original (para resaltar sobre el texto real)
+function buildMap(txt){
+  // devuelve {n:normalizado,map:[índice original por carácter normalizado]}
+  var out='', map=[], prevSpace=true;
+  for(var i=0;i<txt.length;i++){
+    var ch=txt[i].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    for(var j=0;j<ch.length;j++){
+      var c=ch[j];
+      if(!/[a-z0-9]/.test(c)){ if(!prevSpace){out+=' ';map.push(i);prevSpace=true;} }
+      else {out+=c;map.push(i);prevSpace=false;}
+    }
+  }
+  if(out.endsWith(' ')){out=out.slice(0,-1);map.pop();}
+  return {n:out,map:map};
+}
+function paint(k,ranges,curIdx){
+  var s=S[k], txtEl=els[k].querySelector('.txt');
+  if(!ranges||!ranges.length){txtEl.textContent=s.txt;return;}
+  var bm=buildMap(s.txt);
+  // si la normalización difiere, reconstruir rangos por coincidencia
+  var rs=[];
+  ranges.forEach(function(r){
+    var a=bm.map[r[0]], b=bm.map[Math.min(r[1]-1,bm.map.length-1)];
+    if(a!=null&&b!=null) rs.push([a,b+1]);
+  });
+  rs.sort(function(x,y){return x[0]-y[0];});
+  var merged=[];
+  rs.forEach(function(r){var l=merged[merged.length-1]; if(l&&r[0]<=l[1]) l[1]=Math.max(l[1],r[1]); else merged.push(r.slice());});
+  var html='',pos=0;
+  merged.forEach(function(r,i){
+    html+=esc(s.txt.slice(pos,r[0]))+'<mark'+(curIdx?' class="cur"':'')+'>'+esc(s.txt.slice(r[0],r[1]))+'</mark>';
+    pos=r[1];
+  });
+  html+=esc(s.txt.slice(pos));
+  txtEl.innerHTML=html;
+}
+function clearMarks(){for(var k=0;k<S.length;k++){ if(els[k].querySelector('mark')) els[k].querySelector('.txt').textContent=S[k].txt; }}
+var SUG=D.sugerencias||[];
+function runSearch(){
+  var q=$('q').value; var qn=norm(q); lastQ=qn;
+  clearMarks(); hits=[]; curHit=-1; $('results').innerHTML='';
+  $('prevHit').disabled=$('nextHit').disabled=true;
+  if(!qn){$('hitcount').textContent='Escribe una palabra o frase (búsqueda de texto aproximado, sin IA).';return;}
+  var qws=qn.split(' ');
+  for(var k=0;k<S.length;k++){
+    var r=searchSeg(qn,qws,S[k]);
+    if(r) hits.push({k:k,score:r.score,ranges:r.ranges});
+    else if(S[k].na){
+      var r2=searchSeg(qn,qws,{n:S[k].na,w:S[k].wa});
+      if(r2) hits.push({k:k,score:r2.score*0.9,ranges:[],viaAlt:true});
+    }
+  }
+  if(!hits.length){
+    $('hitcount').textContent='Sin resultados para «'+q.trim()+'».';
+    var h='<div class="vacio"><b>No encontré «'+esc(q.trim())+'».</b><ul><li>Prueba con una sola palabra o con menos letras.</li><li>No importan las tildes ni las mayúsculas.</li><li>Recuerda que solo busco texto parecido, no significados.</li></ul>';
+    if(SUG.length){h+='<p style="margin:10px 0 2px">Prueba con:</p>';SUG.slice(0,10).forEach(function(w){h+='<button class="sug" data-q="'+esc(w)+'">'+esc(w)+'</button>';});}
+    $('results').innerHTML=h+'</div>'; return;
+  }
+  hits.forEach(function(h){paint(h.k,h.ranges,false);});
+  // lista de resultados cronológica con contexto
+  var html='';
+  hits.forEach(function(h,i){
+    var s=S[h.k], pv=S[h.k-1], nx=S[h.k+1];
+    html+='<div class="res" data-i="'+i+'"><div class="rh"><b>'+fmtShort(s.t0)+'</b><span>'+(s.ok?'✓':'≈')+' frase '+(h.k+1)+'</span><span class="tag '+(s.tipo==='pantalla'?'pant':(s.tipo==='dudoso'?'dud':'voz'))+'">'+tipoNom(s.tipo)+'</span><span class="score">'+(h.viaAlt?'en la posible lectura':(h.score>=1?'exacta':'aproximada'))+'</span></div>'+
+      '<div class="rtxt" data-k="'+h.k+'"></div>'+
+      '<div class="ctx">'+(pv?'… '+esc(pv.txt.slice(-90)):'')+(nx?'<br>'+esc(nx.txt.slice(0,90))+' …':'')+'</div></div>';
+  });
+  $('results').innerHTML=html;
+  $('results').querySelectorAll('.rtxt').forEach(function(e,i){
+    var h=hits[i]; e.textContent=S[h.k].txt;
+  });
+  $('prevHit').disabled=$('nextHit').disabled=false;
+  gotoHit(0);
+}
+function gotoHit(i){
+  if(!hits.length) return;
+  if(curHit>=0){ paint(hits[curHit].k,hits[curHit].ranges,false); var oc=$('results').querySelector('.res.cur'); if(oc) oc.classList.remove('cur'); }
+  curHit=(i+hits.length)%hits.length;
+  var h=hits[curHit]; paint(h.k,h.ranges,true);
+  var rc=$('results').querySelectorAll('.res')[curHit]; if(rc) rc.classList.add('cur');
+  $('hitcount').textContent='Resultado '+(curHit+1)+' de '+hits.length+' · '+fmtShort(S[h.k].t0);
+  select(h.k,true);
+}
+var qT;
+$('q').addEventListener('input',function(){clearTimeout(qT);qT=setTimeout(runSearch,160);});
+$('q').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault(); if(!hits.length) runSearch(); else gotoHit(curHit+(e.shiftKey?-1:1));}
+  if(e.key==='Escape'){$('q').value='';runSearch();}
+});
+$('nextHit').addEventListener('click',function(){gotoHit(curHit+1);});
+$('prevHit').addEventListener('click',function(){gotoHit(curHit-1);});
+$('results').addEventListener('click',function(e){
+  var sg=e.target.closest('.sug'); if(sg){$('q').value=sg.dataset.q;runSearch();return;}
+  var r=e.target.closest('.res'); if(r) gotoHit(+r.dataset.i);
+});
+
+/* ---------- índice temático ---------- */
+(function(){
+  var T=D.temas||[], h='';
+  function chips(ids){
+    var o='<div class="hits">';
+    ids.forEach(function(k,i){o+='<button class="chip" data-k="'+k+'" title="Frase '+(k+1)+'">'+(i===0?'⏵ ':'')+fmtShort(S[k].t0)+'</button>';});
+    return o+'</div>';
+  }
+  function topic(t,isSub){
+    var o='<div class="'+(isSub?'sub':'topic')+'" data-ids="'+t.frases.join(',')+'"><div class="topic-h"><b>'+esc(t.tema)+'</b><span class="kind '+(t.explicito?'exp':'inf')+'">'+(t.explicito?'concepto dicho en el video':'agrupación inferida')+'</span></div>';
+    if(t.nota) o+='<div class="desc">'+esc(t.nota)+'</div>';
+    o+=chips(t.frases);
+    (t.subtemas||[]).forEach(function(st){o+=topic(st,true);});
+    return o+'</div>';
+  }
+  h+='<p class="note-small">Generado a partir del texto transcrito. «Concepto dicho en el video» = la palabra o el nombre aparece en la transcripción. «Agrupación inferida» = una forma de ordenar las frases hecha para estudiar; el video no la nombra así. El primer botón salta a la primera frase relevante; los demás recorren el resto.</p>';
+  if(!T.length) h+='<p>No hay temas identificados.</p>';
+  T.forEach(function(t){h+=topic(t,false);});
+  $('indexBody').innerHTML=h;
+  $('indexBody').addEventListener('click',function(e){
+    var c=e.target.closest('.chip'); if(!c) return;
+    $('indexBody').querySelectorAll('.chip.on').forEach(function(x){x.classList.remove('on');});
+    c.classList.add('on');
+    select(+c.dataset.k,true);
+  });
+})();
+
+/* ---------- información ---------- */
+$('infoBody').innerHTML=D.info_html;
+$('infoBody').addEventListener('click',function(e){var b=e.target.closest('.goto');if(b) select(+b.dataset.k,true);});
+$('subt').textContent=D.duracion_txt+' · '+S.length+' frases';
+
+/* ---------- video local ---------- */
+var vidOn=false, vurl=null;
+function seekVideo(k){
+  if(!vidOn){toast('Primero elige el video en «Video»');$('pVideo').open=true;$('pVideo').scrollIntoView({behavior:'smooth'});return;}
+  var v=$('vid'); try{v.currentTime=S[k].t0; v.play&&v.play().catch(function(){});}catch(e){}
+}
+$('vfile').addEventListener('change',function(){
+  var f=this.files&&this.files[0]; if(!f) return;
+  if(vurl) URL.revokeObjectURL(vurl);
+  vurl=URL.createObjectURL(f);
+  var v=$('vid'); v.src=vurl; $('videoWrap').style.display='block'; vidOn=true; $('vclear').disabled=false;
+  $('vnote').innerHTML='Video cargado en este aparato: <b>'+esc(f.name)+'</b>. Si no se ve, el navegador no soporta ese formato; la transcripción sigue igual.';
+  if(sel>=0) v.currentTime=S[sel].t0;
+  setHH();
+});
+$('vclear').addEventListener('click',function(){
+  var v=$('vid'); v.pause(); v.removeAttribute('src'); v.load();
+  if(vurl) URL.revokeObjectURL(vurl); vurl=null; vidOn=false;
+  $('videoWrap').style.display='none'; $('vclear').disabled=true; $('vfile').value='';
+});
+$('vid').addEventListener('timeupdate',function(){
+  if(!vidOn||tts.reading) return;
+  var t=this.currentTime, k=-1;
+  for(var i=0;i<S.length;i++){ if(S[i].t0<=t+0.05) k=i; else break; }
+  if(k>=0&&k!==sel&&!this.paused){ if(sel>=0) els[sel].classList.remove('sel'); sel=k; els[k].classList.add('sel'); els[k].scrollIntoView({block:'center',behavior:'smooth'}); }
+});
+
+/* ---------- lectura en voz alta ---------- */
+var hasTTS=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window);
+var tts={reading:false,paused:false,idx:-1,all:false,token:0};
+var voices=[];
+function loadVoices(){
+  if(!hasTTS) return;
+  voices=speechSynthesis.getVoices()||[];
+  var sel_=$('voiceSel'), cur=sel_.value;
+  function rank(v){
+    var l=(v.lang||'').toLowerCase().replace('_','-');
+    if(l==='es-cl') return 0;
+    if(/^es-(mx|ar|co|pe|ve|uy|ec|bo|py|cr|pa|gt|hn|ni|sv|do|pr|419|us|cu)/.test(l)) return 1;
+    if(l.indexOf('es')===0) return 2;
+    return 9;
+  }
+  var list=voices.map(function(v,i){return {v:v,i:i,r:rank(v)};}).sort(function(a,b){return a.r-b.r||a.v.name.localeCompare(b.v.name);});
+  var sp=list.filter(function(x){return x.r<9;});
+  $('ttsAviso').innerHTML='Es una <b>voz sintética de tu dispositivo</b>; no es la voz del video ni de las personas que hablan.';
+  if(!sp.length){
+    $('ttsAviso').innerHTML='Es una <b>voz sintética de tu dispositivo</b>; no es la voz del video. <br><b>Ojo:</b> este aparato no muestra voces en español; se usará la voz predeterminada del sistema y puede sonar rara.';
+  }
+  var use=sp.length?sp:list;
+  sel_.innerHTML='';
+  use.forEach(function(x){var o=document.createElement('option');o.value=x.i;o.textContent=x.v.name+' ('+x.v.lang+')'+(x.r===0?' · Chile':(x.r===1?' · Latinoamérica':''));sel_.appendChild(o);});
+  if(!use.length){var o=document.createElement('option');o.textContent='Voz predeterminada';o.value='-1';sel_.appendChild(o);}
+  if(cur&&Array.prototype.some.call(sel_.options,function(o){return o.value===cur;})) sel_.value=cur;
+  try{var sv=localStorage.getItem('voz_'+D.id); if(sv&&Array.prototype.some.call(sel_.options,function(o){return o.value===sv;})) sel_.value=sv;}catch(e){}
+}
+if(hasTTS){
+  loadVoices();
+  if(speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=loadVoices;
+  setTimeout(loadVoices,800);
+} else {
+  $('ttsAviso').innerHTML='<b>Este navegador no tiene lectura en voz alta.</b> Todo lo demás (búsqueda, copiar, índice) sigue funcionando. Prueba abrir el archivo en Chrome o Edge.';
+  ['readOne','readAll','pauseBtn','stopBtn','voiceSel','rate'].forEach(function(i){$(i).disabled=true;});
+}
+$('rate').addEventListener('input',function(){$('rateVal').textContent=parseFloat(this.value).toFixed(1)+'×';});
+$('voiceSel').addEventListener('change',function(){try{localStorage.setItem('voz_'+D.id,this.value);}catch(e){}});
+function spokenText(s){
+  if(s.tipo==='pantalla') return 'Texto en pantalla: '+s.txt;
+  if(s.tipo==='dudoso') return 'Fragmento poco claro: '+s.txt;
+  return s.txt;
+}
+function setReadUI(on){
+  $('readbar').classList.toggle('on',on);
+  $('pauseBtn').disabled=$('stopBtn').disabled=!on;
+  $('pauseBtn').textContent='⏸ Pausar'; $('rbPause').textContent='⏸';
+  document.body.style.paddingBottom=on?'70px':'';
+}
+function markReading(k){
+  var o=tr.querySelector('.seg.reading'); if(o) o.classList.remove('reading');
+  if(k>=0){ els[k].classList.add('reading'); els[k].scrollIntoView({block:'center',behavior:'smooth'}); $('rbtext').textContent=fmtShort(S[k].t0)+' · '+S[k].txt; }
+}
+function speakIdx(k,all){
+  if(!hasTTS){toast('Este navegador no tiene lectura en voz alta');return;}
+  speechSynthesis.cancel();
+  var my=++tts.token;
+  tts.reading=true; tts.paused=false; tts.idx=k; tts.all=all;
+  setReadUI(true); markReading(k); select(k,false);
+  var u=new SpeechSynthesisUtterance(spokenText(S[k]));
+  var vi=parseInt($('voiceSel').value,10);
+  if(!isNaN(vi)&&vi>=0&&voices[vi]){u.voice=voices[vi];u.lang=voices[vi].lang;} else u.lang='es-CL';
+  u.rate=parseFloat($('rate').value)||1;
+  u.onend=function(){
+    if(my!==tts.token) return;
+    if(all&&k+1<S.length) speakIdx(k+1,true); else stopTTS();
+  };
+  u.onerror=function(e){ if(my!==tts.token) return; if(e&&(e.error==='canceled'||e.error==='interrupted')) return; toast('No se pudo leer en voz alta'); stopTTS(); };
+  // Chrome/Android a veces queda pegado si se llama justo después de cancel()
+  setTimeout(function(){ if(my===tts.token) speechSynthesis.speak(u); },60);
+}
+function speakOne(k){speakIdx(k,false);}
+function stopTTS(){
+  tts.token++; tts.reading=false; tts.paused=false;
+  if(hasTTS) speechSynthesis.cancel();
+  setReadUI(false); markReading(-1);
+}
+function togglePause(){
+  if(!tts.reading||!hasTTS) return;
+  if(tts.paused){speechSynthesis.resume();tts.paused=false;$('pauseBtn').textContent='⏸ Pausar';$('rbPause').textContent='⏸';}
+  else{speechSynthesis.pause();tts.paused=true;$('pauseBtn').textContent='▶ Reanudar';$('rbPause').textContent='▶';}
+}
+$('readOne').addEventListener('click',function(){speakOne(sel>=0?sel:0);});
+$('readAll').addEventListener('click',function(){speakIdx(sel>=0?sel:0,true);});
+$('pauseBtn').addEventListener('click',togglePause);
+$('rbPause').addEventListener('click',togglePause);
+$('stopBtn').addEventListener('click',stopTTS);
+$('rbStop').addEventListener('click',stopTTS);
+$('rbPrev').addEventListener('click',function(){if(tts.idx>0) speakIdx(tts.idx-1,tts.all);});
+$('rbNext').addEventListener('click',function(){if(tts.idx<S.length-1) speakIdx(tts.idx+1,tts.all);});
+window.addEventListener('beforeunload',function(){if(hasTTS) speechSynthesis.cancel();});
+
+/* ---------- botones del encabezado ---------- */
+function openPanel(id){var p=$(id);p.open=!p.open;if(p.open) setTimeout(function(){p.scrollIntoView({behavior:'smooth',block:'start'});},50);}
+$('btnIndex').addEventListener('click',function(){openPanel('pIndex');});
+$('btnVoice').addEventListener('click',function(){openPanel('pVoice');});
+$('btnVideo').addEventListener('click',function(){openPanel('pVideo');});
+$('btnInfo').addEventListener('click',function(){openPanel('pInfo');});
+function setHH(){var h=$('top').offsetHeight;document.documentElement.style.setProperty('--hh',(h+8)+'px');}
+window.addEventListener('resize',setHH); setHH(); setTimeout(setHH,300);
+
+/* expone para pruebas */
+window.__app={S:S,runSearch:runSearch,select:select,speakIdx:speakIdx,norm:norm,lev:lev,searchSeg:searchSeg,hitsRef:function(){return hits;},tts:tts};
+})();
+</script>
+</body>
+</html>
