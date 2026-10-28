@@ -1,0 +1,42 @@
+/* La pestaña de mapeo usa los mismos colores del popup (popup.css) */
+body{ padding-block:24px; padding-inline:16px }
+.mp{ max-width:860px; margin:0 auto; display:flex; flex-direction:column; gap:16px }
+.mp-cab h1{ font-size:20px; margin:0 0 6px; letter-spacing:-.01em }
+.mp-cab p{ margin:0; font-size:13px; line-height:1.5; color:var(--muted); max-width:68ch }
+.mp-cab strong{ color:var(--ink) }
+.mp-accion{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+.btn-prim{ padding:9px 16px; border-radius:8px; border:1px solid var(--brand2); background:var(--brand2);
+  color:#fff; font:inherit; font-size:13.5px; font-weight:700; cursor:pointer }
+.btn-prim:disabled{ opacity:.55; cursor:progress }
+.mp-nota{ font-size:12px; color:var(--muted); margin:0 }
+.mp-prog{ display:flex; flex-direction:column; gap:6px }
+.barra{ height:8px; border-radius:99px; background:var(--soft); border:1px solid var(--line); overflow:hidden }
+.barra span{ display:block; height:100%; width:0; background:var(--brand2); transition:width .2s }
+.cifras{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px }
+.cifra{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--soft) }
+.cifra b{ display:block; font-size:22px; font-variant-numeric:tabular-nums; line-height:1.1 }
+.cifra span{ font-size:11px; color:var(--muted) }
+.mp-aviso{ padding:9px 11px; border-radius:8px; font-size:12px; line-height:1.45; border-left:3px solid var(--warn);
+  background:var(--warnbg); margin:0 0 6px }
+.mp-aviso.mal{ border-color:var(--bad); background:var(--badbg) }
+.mp-aviso button{ margin-left:6px }
+.mp-bajar{ display:flex; gap:8px; flex-wrap:wrap }
+.mp-bajar button, .mp-aviso button{ padding:7px 12px; border-radius:8px; border:1px solid var(--line);
+  background:var(--bg); color:var(--ink); font:inherit; font-size:12.5px; cursor:pointer }
+.mp-bajar button:hover{ border-color:var(--brand2) }
+.mp-filtro{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+.mp-filtro input[type=text]{ flex:1 1 220px; padding:8px 10px; border:1px solid var(--line); border-radius:8px;
+  background:var(--soft); color:var(--ink); font:inherit }
+.mp-solo{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); text-transform:none; letter-spacing:0; margin:0 }
+.mp-tabla-env{ overflow-x:auto; border:1px solid var(--line); border-radius:10px }
+.mp-tabla{ width:100%; margin:0; border-collapse:collapse; font-size:13px }
+.mp-tabla th{ position:sticky; top:0; background:var(--soft); padding:8px 10px }
+.mp-tabla td{ padding:7px 10px; vertical-align:top }
+.mp-tabla tr.com{ cursor:pointer }
+.mp-tabla tr.com:hover td{ background:var(--soft) }
+.mp-tabla tr.com td:first-child{ font-weight:700 }
+.mp-tabla .cero{ color:var(--muted) }
+.mp-tabla tr.det td{ background:var(--soft); padding:4px 10px 10px }
+.det-red{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:8px 0 3px }
+.det-suc{ font-size:12px; line-height:1.4; margin:0 0 4px }
+.det-suc span{ color:var(--muted) }

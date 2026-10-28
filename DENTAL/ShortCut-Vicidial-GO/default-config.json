@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "_comment": "Config de fábrica de ShortCut-Vicidial-GO: sin atajos. Se graban en Vicidial y en GO Bci; para repartir una config a otros ejecutivos, exporta la tuya desde el panel y pégala aquí en \"states\".",
+  "states": [],
+  "settings": {}
+}
